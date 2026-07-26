@@ -56,6 +56,20 @@
   --d-tap: 150ms;
   --d-sheet: 250ms;
   --d-screen: 400ms;
+
+  /*
+   * The app's own viewport. On a real phone this is the browser viewport and the
+   * insets come from the hardware. Inside the desktop device frame both are
+   * overridden to the iPhone 16's fixed numbers, so a screen laid out against
+   * `min-h-app` fills the simulated display rather than the browser window.
+   */
+  --app-h: 100dvh;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+@utility min-h-app {
+  min-height: var(--app-h);
 }
 
 @theme inline {
@@ -127,5 +141,82 @@ body {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/*
+ * ---------------------------------------------------------------------------
+ * Device frame
+ *
+ * Baymax is a phone app, so on anything wider than a phone the screens are put
+ * inside an iPhone 16 shell rather than stretched across a desktop window. The
+ * numbers are the real device: 393x852pt display, 59pt top inset, 34pt bottom.
+ *
+ * The toggle is a media query, not JavaScript, because a JS check on viewport
+ * width renders differently on the server and the client and would hydrate
+ * mismatched. `display: contents` means the pass-through case adds no boxes at
+ * all — on a real phone the markup below behaves as if the frame were absent.
+ * ---------------------------------------------------------------------------
+ */
+.device-stage,
+.device-body,
+.device-screen {
+  display: contents;
+}
+
+.device-chrome {
+  display: none;
+}
+
+@media (min-width: 480px) {
+  .device-stage {
+    display: flex;
+    min-height: 100dvh;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background:
+      radial-gradient(circle at 50% 0%, var(--brand-100), transparent 60%),
+      var(--surface-tint);
+  }
+
+  .device-body {
+    display: block;
+    position: relative;
+    flex: none;
+    padding: 12px;
+    border-radius: 68px;
+    /* Natural Titanium: a warm grey band, lighter along the top edge. */
+    background: linear-gradient(150deg, #d9d5cf, #8e8a84 45%, #cfcbc4);
+    box-shadow:
+      0 2px 3px rgba(255, 255, 255, 0.5) inset,
+      0 40px 80px -20px rgba(15, 16, 48, 0.45);
+  }
+
+  .device-screen {
+    display: block;
+    position: relative;
+    width: 393px;
+    height: 852px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    border-radius: 56px;
+    background: var(--canvas);
+    /* The simulated display is the app's viewport, insets and all. */
+    --app-h: 852px;
+    --safe-top: 59px;
+    --safe-bottom: 34px;
+  }
+
+  /* A desktop scrollbar inside the display would break the illusion. */
+  .device-screen {
+    scrollbar-width: none;
+  }
+  .device-screen::-webkit-scrollbar {
+    display: none;
+  }
+
+  .device-chrome {
+    display: block;
   }
 }

@@ -25,7 +25,7 @@ export default function SplashPage() {
     // The artwork is cut from the frames and carries their pale lavender wash,
     // so the splash is light too — on a deep violet field it reads as a pasted
     // rectangle rather than a character.
-    <main className="grid min-h-dvh place-items-center bg-canvas px-8 text-center">
+    <main className="grid min-h-app place-items-center bg-canvas px-8 text-center">
       <div>
         <Image
           src="/illustrations/carousel-1.png"

@@ -1,16 +1,16 @@
 /*
- * Baymax is a mobile app. The frames map to a 390x844 CSS viewport; the cap is
- * 430 so current iPhones (16 at 393, 16 Pro Max at 430) fill edge to edge
- * rather than sitting letterboxed in a 390px column. The layout is
- * padding-based, so it absorbs the extra width without any frame measurement
- * drifting. Past 430 it centres — full-bleed desktop is a design we do not have.
+ * The onboarding column. Framing and centring belong to the device frame now,
+ * so this owns only what the screens themselves cannot: filling the app
+ * viewport, and holding content clear of the status bar and the home indicator.
+ *
+ * The insets live here rather than on each screen's header because two of the
+ * six roll their own header, and one of them was rendering underneath the
+ * Dynamic Island. A single owner cannot be forgotten by the next screen added.
  */
 export default function OnboardingLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-dvh justify-center bg-brand-50/40">
-      <div className="relative flex min-h-dvh w-full max-w-[430px] flex-col bg-canvas shadow-e2">
-        {children}
-      </div>
+    <div className="flex min-h-app flex-col bg-canvas pb-[var(--safe-bottom)] pt-[var(--safe-top)]">
+      {children}
     </div>
   );
 }

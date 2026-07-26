@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Fraunces, Inter } from "next/font/google";
 
+import { DeviceFrame } from "@/components/device-frame";
+
 import "./globals.css";
 
 /*
@@ -38,7 +40,9 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${display.variable} ${editorial.variable} h-full`}>
-      <body className="min-h-full antialiased">{children}</body>
+      <body className="min-h-full antialiased">
+        <DeviceFrame>{children}</DeviceFrame>
+      </body>
     </html>
   );
 }

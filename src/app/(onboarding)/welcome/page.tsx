@@ -25,7 +25,7 @@ export default function WelcomePage() {
   }
 
   return (
-    <div className="flex min-h-dvh flex-col">
+    <div className="flex flex-1 flex-col">
       <header className="flex items-center gap-3 px-5 pb-1 pt-3">
         {index > 0 ? (
           <button

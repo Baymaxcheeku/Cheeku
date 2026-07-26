@@ -189,6 +189,18 @@ sentence that contains the idiom. Covered by an explicit test.
 - `design/crop_illustrations.py` — reproducible extraction of the nine
   illustrations out of the mockup frames, replacing untracked ad-hoc Pillow
   calls.
+- `src/components/device-frame.tsx` — on anything wider than a phone the app is
+  put inside an iPhone 16 shell (393×852pt, 59pt top inset, 34pt bottom) rather
+  than stretched across the window. Desktop is a review surface, not a target,
+  and reviewers should see the app at the size it will be used. The toggle is a
+  media query, not JavaScript: a viewport check in JS renders differently on the
+  server and the client and hydrates mismatched. Below 480px every box in the
+  frame is `display: contents`, so on a real phone it costs nothing.
+- Safe-area insets are now real. `--safe-top` / `--safe-bottom` come from
+  `env(safe-area-inset-*)` on device and are overridden to the iPhone's numbers
+  inside the frame; the onboarding layout is their single owner. Screens size
+  against `min-h-app` rather than `dvh`, so they fill the simulated display
+  instead of the browser window.
 
 **Verified**
 

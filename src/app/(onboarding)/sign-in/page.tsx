@@ -40,7 +40,7 @@ export default function SignInPage() {
   }
 
   return (
-    <div className="flex min-h-dvh flex-col">
+    <div className="flex flex-1 flex-col">
       <OnboardingHeader step={3} back="/welcome" action={{ label: "Help", href: "/help" }} />
 
       {/* The art is absolutely positioned, so the text needs its own gutter. */}

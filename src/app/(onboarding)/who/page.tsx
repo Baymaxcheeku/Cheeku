@@ -51,7 +51,7 @@ export default function WhoPage() {
   }
 
   return (
-    <div className="flex min-h-dvh flex-col">
+    <div className="flex flex-1 flex-col">
       <OnboardingHeader step={4} back="/sign-in" action={{ label: "Skip", href: "/profile" }} />
 
       <form onSubmit={submit} className="flex flex-1 flex-col px-5 pb-6">
