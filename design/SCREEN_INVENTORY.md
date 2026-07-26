@@ -158,8 +158,9 @@ recurring visual element, not a one-off.
 
 ## Conflicts
 
-Ordered by how much they change the build. Items 1–3 need a decision before the
-phase they touch.
+Ordered by how much they change the build. Items 1–3 were escalated and **ruled
+on by Athar on 2026-07-26**; the rulings are recorded inline below and are
+settled — do not re-litigate them.
 
 ### 1 · Emergency escalation is not a hard interrupt · **blocks Phase 2/5**
 
@@ -174,11 +175,13 @@ The frames show a **3-step guided flow** ("Step 2 of 3", "Step 3 of 3") that:
 - offers a conversation-summary share, video-call and "notify family" options
 - uses **green** reassurance cards ("You're not alone", "Help is on the way")
 
-This is the one conflict I will not silently resolve. The spec's version is a
-safety control; the design's version is a support flow. They are different
-products. **Which behaviour ships?** A defensible merge: keep the design's
-3-step support flow, but gate it behind a hard non-dismissible Tier-1 interrupt
-for the escalate-tier lexicon, and use 112 *and* 108.
+The spec's version is a safety control; the design's version is a support flow.
+They are different products.
+
+> **RULING — hybrid.** A Tier-1 detection renders a non-dismissible full-screen
+> interrupt for 3s with no nav and no AI content, offering **both 112 and 108**.
+> Dismissing it hands off into the design's 3-step support flow. The safety
+> guarantee is preserved; the designed screens are all still used.
 
 ### 2 · Semantic colour is used non-semantically · **blocks Phase 4/6**
 
@@ -191,16 +194,20 @@ this in two places:
 - **Paywall/billing** uses mint-green cards for auto-renewal disclosure and
   compliance badges; success states are indigo, not green.
 
-Recommendation: keep the rule, but introduce a **separate, visually distinct
-confidence scale** (neutral/greys + an amber "needs review" only) so a colour
-never means two things. Needs your call.
+> **RULING — separate confidence scale.** Health severity keeps green/amber/red.
+> Extraction confidence uses a visually distinct treatment: neutral greys plus a
+> single amber "needs review" state. A colour never carries two meanings.
 
 ### 3 · Authentication is email/password, not phone OTP · **blocks Phase 3**
 
 The build spec mandates phone OTP as the primary path. The frame shows
 `Sign in` / `Create account` tabs over **email + password**, with Google, Apple
 and Phone(OTP) as three secondary buttons. This changes the Supabase Auth setup
-and the DPDP consent capture point. Which is primary?
+and the DPDP consent capture point.
+
+> **RULING — the frames win.** Email + password is primary, with Google, Apple
+> and Phone(OTP) secondary. The DPDP consent checkbox lives on the
+> `Create account` tab, unticked by default.
 
 ### 4 · Design-system values that were simply wrong
 

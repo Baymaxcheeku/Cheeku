@@ -25,7 +25,7 @@ const eslintConfig = [
   {
     // The service-role key bypasses RLS. Client bundles must never reach for it.
     files: ["src/**/*.{ts,tsx}"],
-    ignores: ["src/lib/env.ts", "src/app/api/**"],
+    ignores: ["src/lib/env.ts", "src/app/api/**", "src/**/*.test.{ts,tsx}"],
     rules: {
       "no-restricted-properties": [
         "error",
@@ -37,6 +37,12 @@ const eslintConfig = [
         },
       ],
     },
+  },
+  {
+    // A test asserting on a shape it just created should fail loudly on a wrong
+    // assumption, not be forced to narrow it away.
+    files: ["src/**/*.test.{ts,tsx}", "e2e/**/*.ts"],
+    rules: { "@typescript-eslint/no-non-null-assertion": "off" },
   },
 ];
 

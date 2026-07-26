@@ -1,4 +1,6 @@
 allowBuilds:
+  # Bundler binary used by tsx/vitest.
+  esbuild: true
   # Native image pipeline used by next/image.
   sharp: true
   # Native module resolver used by eslint-config-next.

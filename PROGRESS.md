@@ -54,7 +54,98 @@ Running log so work can resume cleanly across sessions.
 § Conflicts. The three that matter: emergency-screen behaviour (safety), the
 double meaning of semantic colour, and email/password vs phone OTP auth.
 
-## Phase 2 — Safety + data model · not started
+**Rulings received (2026-07-26)** — recorded inline in
+`design/SCREEN_INVENTORY.md`: hybrid emergency flow (hard gate → support flow,
+offering both 112 and 108), a separate non-semantic confidence scale, and
+email/password as the primary auth path.
 
-Next up: `lib/safety/` (lexicon, detector, frozen 150/150 test suite), then
-migrations with RLS in the same file per table, then seed fixtures.
+## Phase 2 — Safety + data model · complete
+
+**Built — the safety gate**
+
+- `src/lib/safety/lexicon.yaml` — human-readable source of truth. 11 escalate
+  rules (chest pain, cardiac arrest, stroke, breathing, anaphylaxis, heavy
+  bleeding, unconscious, seizure, pregnancy red flags, self-harm, overdose) and
+  5 tier-2 rules (prolonged fever, infant fever, dehydration, double dose,
+  allergic reaction). English plus Hindi/Hinglish patterns throughout.
+- `scripts/build-lexicon.ts` (`pnpm safety:build`) compiles it to
+  `lexicon.generated.ts`, so `detect()` stays pure, synchronous and
+  dependency-free. Every pattern is compiled at build time — a broken regex
+  fails the build instead of silently never matching.
+- `src/lib/safety/detect.ts` — `detect()` and `normalise()`. Normalisation
+  handles NFKD, diacritics, curly quotes, character elongation and Hinglish
+  spelling variants (`nhi`/`nahin` → `nahi`, `sine`/`chaati` → `seene`, …).
+  `matched` returns a rule id only, never user text, so nothing PII-bearing can
+  reach a log.
+- Frozen suite: 150 must-fire phrases, 159 must-not-fire lookalikes, 16 tests.
+
+**Two real defects the suite caught, both now fixed**
+
+1. `cardiac-arrest` had `unless: father|mother|grandfather|grandmother`, intended
+   to suppress family history. It also suppressed *"my father is having a heart
+   attack right now"* — the single most likely real call the rule will ever see.
+   Replaced with past-tense and educational-context exclusions only.
+2. Several Hinglish patterns could never match. They were written against raw
+   text (`seene mein dard`) but matching runs *after* normalisation, which folds
+   `mein` → `me`. Patterns now target the normalised form, with a comment saying
+   so.
+
+**One behaviour change to the control, made deliberately**
+
+`unless` was evaluated against the whole message, so an idiom anywhere could
+silence a real symptom elsewhere — *"my back hurts when i laugh. separately, I
+have chest pain"* returned `clear`. `detect()` now splits on sentence and
+clause boundaries and classifies each segment, so suppression is scoped to the
+sentence that contains the idiom. Covered by an explicit test.
+
+**Built — data model**
+
+- Five migrations in `supabase/migrations/`, RLS enabled and policied in the
+  same file as every table. Nine tables: families, profiles, documents,
+  entities, timeline_events, conversations, messages, consent_log,
+  subscriptions. Indexes per spec §5.
+- Deliberately *not* client-writable: `consent_log` has no update/delete policy
+  (an editable consent record is not evidence), `messages` has no update policy
+  (the transcript is a safety audit trail), `subscriptions` has neither (a client
+  that can write its own tier can grant itself a free plan).
+- `profiles` enforces the 6-per-family cap and one-primary-per-family in the
+  database, not just the UI.
+- Storage bucket `documents` is private, capped at 10MB, mime-allowlisted, with
+  object policies scoped to a `<user_id>/…` key prefix.
+
+**Built — tests and fixtures**
+
+- `src/lib/db/rls.test.ts` — static audit of the migrations. Asserts every table
+  enables RLS, every policy references `auth.uid()`, no `using (true)` anywhere,
+  and the append-only tables stay append-only. Runs with no infrastructure.
+- `src/lib/db/profile-isolation.test.ts` — the runtime proof: seeds two users,
+  asserts every query path for one returns zero rows belonging to the other,
+  including cross-user read, write, update, delete and signed-URL attempts.
+- `src/lib/ai/mock/fixtures/family.ts` — the demo family (Athar, Ananya at 24
+  weeks, Amma with T2D), with fixed ids so a mock citation always resolves to a
+  real row. `family.test.ts` guards demo coverage: a `needs_review` document, a
+  `high` lab flag, and three HbA1c readings spanning 18 months.
+- `pnpm seed` / `pnpm seed:reset`. The script refuses to run against a
+  non-local project unless `SEED_ALLOW_REMOTE=1` is set.
+
+**Verified**
+
+- `pnpm test` — 64 passed, 18 skipped (the isolation suite).
+- `pnpm typecheck`, `pnpm lint`, `pnpm build` all clean.
+- Seed guard confirmed: refuses the placeholder project by default.
+
+**Skipped, and why**
+
+- **The profile-isolation test has never actually run.** It is skipped because
+  no Supabase project exists. The static audit proves the policies are *written*;
+  only this proves they *work*. This is the largest outstanding risk in the
+  build and must be run — and added to CI — the moment credentials arrive.
+- `pnpm seed` likewise unrun for the same reason.
+- Rate limiting on auth and AI endpoints (spec §3.2) deferred to Phase 3/5,
+  when those endpoints exist.
+
+## Phase 3 — Auth + onboarding (A1–A6) · not started
+
+Email/password primary per the ruling, with Google, Apple and Phone(OTP)
+secondary. DPDP consent checkbox on the Create account tab, unticked by default,
+written to `consent_log` with version and timestamp.
