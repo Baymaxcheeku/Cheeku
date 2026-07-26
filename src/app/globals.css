@@ -1,0 +1,131 @@
+@import "tailwindcss";
+
+/*
+ * Baymax design tokens.
+ *
+ * Values below were SAMPLED from ./design/screens via design/sample_tokens.py,
+ * not copied from the written spec. Where the spec and the frames disagreed the
+ * frames won (see design/SCREEN_INVENTORY.md § "Conflicts").
+ */
+:root {
+  /* Brand — identity and navigation ONLY. Never used to signal health status. */
+  --brand-950: #0a0a3c;
+  --brand-900: #14136b;
+  --brand-800: #2a1eba;
+  --brand-700: #3b2bc9;
+  --brand-600: #4a2ade;
+  --brand-500: #5b4ef0;
+  --brand-400: #8a82f5;
+  --brand-300: #aeaeea;
+  --brand-200: #c6c6f6;
+  --brand-100: #dcdafb;
+  --brand-50: #f1f0fe;
+
+  /* Surfaces — cool near-white, not the warm off-white the written spec assumed. */
+  --canvas: #fafafe;
+  --surface: #ffffff;
+  --surface-tint: #f6f6fe;
+  --ink-900: #0f1030;
+  --ink-700: #3a3b57;
+  --ink-500: #6b6c8a;
+  --ink-300: #9696ae;
+  --line: #e8e8f4;
+
+  /*
+   * Semantic — HEALTH MEANING ONLY, never decorative.
+   * A reviewer must never see red and wonder whether it is a button.
+   */
+  --safe: #23af5f;
+  --safe-bg: #e7f7ee;
+  --caution: #ffaf23;
+  --caution-bg: #fff4e0;
+  --danger: #ea2a36;
+  --danger-strong: #e10a1e;
+  --danger-bg: #fef1f3;
+
+  /* Geometry */
+  --r-card: 20px;
+  --r-tile: 16px;
+  --r-sheet: 28px;
+  --r-pill: 999px;
+  --e1: 0 2px 12px rgba(15, 16, 48, 0.06);
+  --e2: 0 8px 28px rgba(15, 16, 48, 0.12);
+
+  /* Motion */
+  --ease-settle: cubic-bezier(0.22, 1, 0.36, 1);
+  --d-tap: 150ms;
+  --d-sheet: 250ms;
+  --d-screen: 400ms;
+}
+
+@theme inline {
+  --color-brand-950: var(--brand-950);
+  --color-brand-900: var(--brand-900);
+  --color-brand-800: var(--brand-800);
+  --color-brand-700: var(--brand-700);
+  --color-brand-600: var(--brand-600);
+  --color-brand-500: var(--brand-500);
+  --color-brand-400: var(--brand-400);
+  --color-brand-300: var(--brand-300);
+  --color-brand-200: var(--brand-200);
+  --color-brand-100: var(--brand-100);
+  --color-brand-50: var(--brand-50);
+
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-surface-tint: var(--surface-tint);
+  --color-ink-900: var(--ink-900);
+  --color-ink-700: var(--ink-700);
+  --color-ink-500: var(--ink-500);
+  --color-ink-300: var(--ink-300);
+  --color-line: var(--line);
+
+  --color-safe: var(--safe);
+  --color-safe-bg: var(--safe-bg);
+  --color-caution: var(--caution);
+  --color-caution-bg: var(--caution-bg);
+  --color-danger: var(--danger);
+  --color-danger-strong: var(--danger-strong);
+  --color-danger-bg: var(--danger-bg);
+
+  --radius-card: var(--r-card);
+  --radius-tile: var(--r-tile);
+  --radius-sheet: var(--r-sheet);
+  --radius-pill: var(--r-pill);
+
+  --shadow-e1: var(--e1);
+  --shadow-e2: var(--e2);
+
+  --font-sans: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+  --font-editorial: var(--font-editorial), ui-serif, Georgia, serif;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--canvas);
+  color: var(--ink-900);
+  font-family: var(--font-sans);
+  /* Lab values, dates and prices must never shift width as they update. */
+  font-variant-numeric: tabular-nums;
+}
+
+/* Every interactive element must be reachable and visible to keyboard users. */
+:focus-visible {
+  outline: 2px solid var(--brand-600);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

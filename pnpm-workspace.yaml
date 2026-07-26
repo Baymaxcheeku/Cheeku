@@ -1,0 +1,5 @@
+allowBuilds:
+  # Native image pipeline used by next/image.
+  sharp: true
+  # Native module resolver used by eslint-config-next.
+  unrs-resolver: true
