@@ -24,6 +24,12 @@ export const clientEnv: ClientEnv = clientSchema.parse({
   NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
 });
 
+/**
+ * The one sanctioned NODE_ENV read. Next inlines it at build time so it is safe
+ * in either bundle, but it lives here so nothing else needs `process.env`.
+ */
+export const IS_PRODUCTION = process.env.NODE_ENV === "production";
+
 const serverSchema = z.object({
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
 });

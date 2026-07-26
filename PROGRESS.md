@@ -144,8 +144,97 @@ sentence that contains the idiom. Covered by an explicit test.
 - Rate limiting on auth and AI endpoints (spec §3.2) deferred to Phase 3/5,
   when those endpoints exist.
 
-## Phase 3 — Auth + onboarding (A1–A6) · not started
+## Phase 3 — Auth + onboarding (A1–A6) · complete
 
-Email/password primary per the ruling, with Google, Apple and Phone(OTP)
-secondary. DPDP consent checkbox on the Create account tab, unticked by default,
-written to `consent_log` with version and timestamp.
+**Built — the six screens**
+
+- **A1 splash** (`src/app/page.tsx`). No frame was supplied, so it is assembled
+  from the carousel's own vocabulary rather than invented. It hands off on a
+  1.4s timer *and* carries a real focusable link — a splash that only advances
+  on a timer strands anyone whose timer never fires.
+- **A2 welcome** (`(onboarding)/welcome`) — four-panel carousel, swipeable, with
+  dots and a Skip.
+- **A3 sign-in** (`(onboarding)/sign-in`) — tabbed Sign in / Create account.
+  Email/password primary per the ruling. The form is keyed on the tab so it
+  remounts on switch: a password typed on one tab can never be submitted to the
+  other action. Errors clear on switch too, since an error naming the other
+  form's fields would point at controls that are no longer on screen.
+- **A4 who** (`(onboarding)/who`) — Just me / My family, radio inputs kept
+  `sr-only` inside styled labels so the cards stay keyboard- and
+  screen-reader-navigable.
+- **A5 profile** (`(onboarding)/profile`) — every field except the name is
+  genuinely optional. This is health data; collecting it because a form has room
+  is the opposite of data minimisation.
+- **A6 first upload** (`(onboarding)/first-upload`) — skipping is a first-class
+  outcome, not a consolation. A nag screen at the end of onboarding costs more
+  accounts than one extra document is worth.
+
+**Built — the plumbing**
+
+- `src/lib/auth/schemas.ts` — Zod schemas shared verbatim by the client form and
+  the Server Action, so the two can't drift. DPDP consent is `z.literal(true)`,
+  which makes an unticked box a *parse* failure rather than a check someone can
+  forget to write.
+- `src/lib/auth/actions.ts` — Server Actions returning a discriminated
+  `ActionResult` union, consumed through `useTransition`. Consent is written to
+  `consent_log` using the exported `CONSENT_VERSION`, so the logged version can
+  never drift from the schema that enforced it.
+- `src/lib/auth/dev-session.ts` — a cookie-backed stand-in so onboarding is
+  walkable with no Supabase project. Quarantined behind `import "server-only"`
+  and an `assertDevOnly()` that reads `IS_PRODUCTION`; it cannot reach a
+  production bundle.
+- `src/components/ui/` (`button`, `card`, `field`) and
+  `src/components/onboarding/chrome` (`OnboardingHeader`, `Headline`,
+  `ReassuranceStrip`) — built from the measured tokens, no ad-hoc hex.
+- `design/crop_illustrations.py` — reproducible extraction of the nine
+  illustrations out of the mockup frames, replacing untracked ad-hoc Pillow
+  calls.
+
+**Verified**
+
+- `pnpm typecheck`, `pnpm lint`, `pnpm test` (64 passed / 18 skipped) and
+  `pnpm build` (11 routes, all static) clean.
+- All six screens plus the `/home` stub walked in a live preview at the iPhone 16
+  viewport (393×852).
+- **The DPDP gate was proved server-side, not just in the UI.** Submitting
+  Create account with the box unticked returns *"Please accept the privacy terms
+  to continue"* and stays on `/sign-in`.
+
+**Four things worth recording**
+
+1. *A false alarm that was my test harness, not the code.* The consent gate first
+   appeared not to block. The cause was the probe submitting the form in the same
+   tick as the tab click, before React flushed state — so `tab` was still
+   `"sign-in"` and `signIn` ran, which the dev stand-in accepts for any
+   credentials. A unit test on the schema, and a re-run with a wait, both
+   confirmed the gate.
+2. *Illustration crops had the phone bezel baked in.* Three auto-detection
+   approaches all failed — the frames sit on a light page, so an edge scan finds
+   the page; a centre-row scan is split by dark artwork. The lit screen is now a
+   measured, asserted constant with the rejected alternatives written down in the
+   script.
+3. *Hero art overlapped the headlines on A3/A5/A6*, worst on A6 where "first
+   health record" ran underneath Baymax. Fixed by giving the positioned container
+   a `pr-` gutter rather than capping each paragraph's width.
+4. *The shell was letterboxed on iPhone 16.* The `max-w` was 390; current iPhones
+   are 393 and 430. Raised to 430 — the layout is padding-based, so it absorbs
+   the extra width without any frame measurement drifting.
+
+**Deliberate divergences**
+
+- **The upload button and the three social providers are visibly disabled**, each
+  with a `title` saying why. The upload pipeline is Phase 4 and no OAuth provider
+  is configured. A control that silently does nothing is a worse first impression
+  than one that admits it is not ready.
+- **10MB upload cap, not the frame's 25MB.** The storage bucket is capped at 10MB
+  at the database layer; the copy matches the constraint that is actually
+  enforced. Recorded in `design/SCREEN_INVENTORY.md`.
+
+**Skipped, and why**
+
+- Rate limiting on the auth endpoints — deferred with the rest of it until real
+  Supabase auth replaces the dev stand-in.
+- Password reset (`/forgot-password`) is linked but not built; it needs a live
+  mailer.
+
+## Phase 4 — Memory core (D1–D3, C1–C2) · not started

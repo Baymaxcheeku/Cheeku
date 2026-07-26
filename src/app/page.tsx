@@ -1,65 +1,49 @@
-const brand = [
-  ["brand-950", "#0A0A3C"],
-  ["brand-900", "#14136B"],
-  ["brand-800", "#2A1EBA"],
-  ["brand-700", "#3B2BC9"],
-  ["brand-600", "#4A2ADE"],
-  ["brand-500", "#5B4EF0"],
-  ["brand-400", "#8A82F5"],
-  ["brand-300", "#AEAEEA"],
-  ["brand-200", "#C6C6F6"],
-  ["brand-100", "#DCDAFB"],
-  ["brand-50", "#F1F0FE"],
-] as const;
+"use client";
 
-const semantic = [
-  ["safe", "#23AF5F", "Good / in range"],
-  ["caution", "#FFAF23", "Borderline / needs review"],
-  ["danger", "#EA2A36", "Out of range / emergency"],
-] as const;
+import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 /**
- * Phase 1 token proof. Replaced by the A1 splash screen in Phase 3.
+ * A1 — splash. No frame was supplied for this screen, so it is built from the
+ * carousel's own vocabulary rather than invented.
+ *
+ * It hands off automatically, but the link is real and focusable: a splash that
+ * only advances on a timer strands anyone whose timer never fires.
  */
-export default function TokenProofPage() {
+export default function SplashPage() {
+  const router = useRouter();
+
+  useEffect(() => {
+    router.prefetch("/welcome");
+    const timer = setTimeout(() => router.replace("/welcome"), 1400);
+    return () => clearTimeout(timer);
+  }, [router]);
+
   return (
-    <main className="mx-auto max-w-[390px] px-5 py-10">
-      <h1 className="text-3xl font-bold tracking-tight">Baymax</h1>
-      <p className="text-ink-500 mt-1 text-sm">
-        Phase 1 foundation. Tokens sampled from the design frames.
-      </p>
-
-      <h2 className="mt-8 text-lg font-semibold">Brand</h2>
-      <div className="rounded-card shadow-e1 mt-3 overflow-hidden">
-        {brand.map(([name, hex]) => (
-          <div key={name} className="bg-surface flex items-center gap-3 px-4 py-2">
-            <span className="border-line size-8 rounded-lg border" style={{ background: hex }} />
-            <span className="text-sm font-medium">{name}</span>
-            <span className="text-ink-300 ml-auto text-xs">{hex}</span>
-          </div>
-        ))}
+    // The artwork is cut from the frames and carries their pale lavender wash,
+    // so the splash is light too — on a deep violet field it reads as a pasted
+    // rectangle rather than a character.
+    <main className="grid min-h-dvh place-items-center bg-canvas px-8 text-center">
+      <div>
+        <Image
+          src="/illustrations/carousel-1.png"
+          alt=""
+          width={200}
+          height={200}
+          priority
+          className="mx-auto h-[180px] w-auto object-contain"
+        />
+        <h1 className="mt-4 text-[30px] font-bold tracking-[-0.02em] text-ink-900">Baymax</h1>
+        <p className="mt-1.5 text-[14px] text-ink-500">Your family&apos;s health companion</p>
+        <Link
+          href="/welcome"
+          className="mt-6 inline-block text-[13px] font-medium text-brand-600 underline underline-offset-4"
+        >
+          Continue
+        </Link>
       </div>
-
-      <h2 className="mt-8 text-lg font-semibold">Semantic — health meaning only</h2>
-      <div className="mt-3 space-y-2">
-        {semantic.map(([name, hex, meaning]) => (
-          <div key={name} className="rounded-tile bg-surface shadow-e1 flex items-center gap-3 p-3">
-            <span className="size-8 rounded-lg" style={{ background: hex }} />
-            <div>
-              <p className="text-sm font-medium">{name}</p>
-              <p className="text-ink-500 text-xs">{meaning}</p>
-            </div>
-            <span className="text-ink-300 ml-auto text-xs">{hex}</span>
-          </div>
-        ))}
-      </div>
-
-      <button
-        type="button"
-        className="rounded-pill bg-brand-700 mt-8 h-14 w-full text-base font-semibold text-white"
-      >
-        Let&apos;s get started
-      </button>
     </main>
   );
 }
