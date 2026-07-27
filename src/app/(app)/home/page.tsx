@@ -5,6 +5,7 @@ import { Bell, CalendarDays, ChevronRight, FileText, HeartPulse, ShieldCheck } f
 import { FamilySwitcher } from "@/components/app/family-switcher";
 import { HomeAskBox } from "@/components/app/home-ask-box";
 import { RecordRow } from "@/components/records/chrome";
+import { cn } from "@/lib/cn";
 import { activeProfile, familyProfiles } from "@/lib/profiles/context";
 import { formatEventDate } from "@/lib/records/grouping";
 import { listProfileRecords, statsFrom } from "@/lib/records/queries";
@@ -53,11 +54,6 @@ export default async function HomePage() {
   const recent = records.slice(0, 3);
   const newest = records[0];
 
-  // "2 new this week" in the frame counts uploads, not test dates — a report
-  // from March added yesterday is still new to the user.
-  const weekAgo = Date.now() - 7 * 86_400_000;
-  const addedThisWeek = records.filter((r) => new Date(r.createdAt).getTime() >= weekAgo).length;
-
   return (
     <div className="flex flex-1 flex-col pb-4">
       <header className="flex items-start gap-3 px-5 pt-3">
@@ -99,39 +95,47 @@ export default async function HomePage() {
         }
       />
 
-      <section className="mt-5 px-5">
+      {/*
+       * Three pills rather than three cards.
+       *
+       * As tiles this section spent ~100px of a 852pt screen restating numbers
+       * the insight card above has already acted on, and pushed Ask Baymax —
+       * the actual daily loop — below the fold. The counts are still worth
+       * having at a glance; they were just never worth a card each.
+       *
+       * The sub-lines ("2 new this week", "Review lab result") are dropped with
+       * them: the insight card is the one place that should be telling anyone
+       * what to do about a flagged result, and saying it twice on one screen
+       * made neither instance feel like the real one.
+       */}
+      <section className="mt-4 px-5">
         <div className="flex items-baseline justify-between">
-          <h2 className="text-[19px] font-bold text-ink-900">Health Summary</h2>
+          <h2 className="text-[17px] font-bold text-ink-900">Health Summary</h2>
           <Link href="/records" className="flex items-center text-[13px] font-semibold text-brand-600">
             View all
             <ChevronRight size={15} aria-hidden />
           </Link>
         </div>
 
-        <ul className="mt-2 grid grid-cols-3 gap-2">
-          <SummaryTile
+        <ul className="mt-2 flex gap-2">
+          <SummaryPill
             icon={FileText}
             tint="bg-brand-50 text-brand-600"
             value={stats.total}
             label="Documents"
-            note={addedThisWeek > 0 ? `${addedThisWeek} new this week` : "In your records"}
-            noteClass={addedThisWeek > 0 ? "text-brand-600" : undefined}
           />
-          <SummaryTile
+          <SummaryPill
             icon={ShieldCheck}
             tint="bg-safe-bg text-safe"
             value={stats.normal}
-            label="Safe for you"
-            note={stats.normal > 0 ? "All clear" : "None yet"}
-            noteClass={stats.normal > 0 ? "text-safe-text" : undefined}
+            label="In range"
           />
-          <SummaryTile
+          <SummaryPill
             icon={HeartPulse}
             tint="bg-danger-bg text-danger"
             value={needsReview}
-            label="Needs review"
-            note={needsReview > 0 ? "Review lab result" : "Nothing flagged"}
-            noteClass={needsReview > 0 ? "text-danger-text" : undefined}
+            label="To review"
+            emphasise={needsReview > 0}
           />
         </ul>
       </section>
@@ -245,29 +249,40 @@ function InsightCard({
   );
 }
 
-function SummaryTile({
+/*
+ * `flex-1` with `min-w-0` so the three share the row evenly and a longer label
+ * shrinks rather than pushing its neighbours off the edge.
+ */
+function SummaryPill({
   icon: Icon,
   tint,
   value,
   label,
-  note,
-  noteClass,
+  emphasise = false,
 }: {
   icon: typeof FileText;
   tint: string;
   value: number;
   label: string;
-  note: string;
-  noteClass?: string;
+  /** Draws a border when there is something here worth acting on. */
+  emphasise?: boolean;
 }) {
   return (
-    <li className="rounded-card bg-surface p-3 shadow-e1">
-      <span className={`grid h-9 w-9 place-items-center rounded-tile ${tint}`}>
-        <Icon size={17} aria-hidden />
+    <li
+      className={cn(
+        "flex min-w-0 flex-1 items-center gap-1.5 rounded-pill bg-surface py-1.5 pl-1.5 pr-2 shadow-e1",
+        emphasise && "ring-1 ring-danger/25",
+      )}
+    >
+      <span className={cn("grid h-7 w-7 shrink-0 place-items-center rounded-pill", tint)}>
+        <Icon size={14} aria-hidden />
       </span>
-      <p className="mt-2 text-[22px] font-bold leading-none text-ink-900">{value}</p>
-      <p className="mt-1 text-[12px] font-medium text-ink-700">{label}</p>
-      <p className={`mt-0.5 text-[10px] leading-tight ${noteClass ?? "text-ink-300"}`}>{note}</p>
+      <span className="min-w-0">
+        <span className="block text-[15px] font-bold leading-none text-ink-900">{value}</span>
+        <span className="mt-0.5 block truncate text-[10px] leading-tight text-ink-500">
+          {label}
+        </span>
+      </span>
     </li>
   );
 }
