@@ -62,6 +62,27 @@ export function IllustrationDefs() {
           <stop offset="1" stopColor="#f4553f" />
         </linearGradient>
 
+        {/*
+         * The emergency palette. Used ONLY on the safety escalation, where red
+         * is carrying its real meaning — everywhere else in the app these hues
+         * would be a decorative use of a semantic colour, which the token rules
+         * forbid.
+         */}
+        <linearGradient id="bx-alert" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#ff5566" />
+          <stop offset="1" stopColor="#e10a1e" />
+        </linearGradient>
+
+        <linearGradient id="bx-field-alert" x1="0" y1="0" x2="0.9" y2="1">
+          <stop offset="0" stopColor="#ffd0d6" />
+          <stop offset="1" stopColor="#ffa7b3" />
+        </linearGradient>
+
+        <linearGradient id="bx-field-safe" x1="0" y1="0" x2="0.9" y2="1">
+          <stop offset="0" stopColor="#c9f0d9" />
+          <stop offset="1" stopColor="#8fdcb0" />
+        </linearGradient>
+
         <linearGradient id="bx-paper" x1="0" y1="0" x2="0.7" y2="1">
           <stop offset="0" stopColor="#ffffff" />
           <stop offset="1" stopColor="#eceafb" />

@@ -155,6 +155,92 @@ export function HeroScene({ className }: ArtProps) {
   );
 }
 
+/**
+ * The mascot with a status badge, for the safety escalation.
+ *
+ * `alert` raises a hand and carries a warning triangle; `care` holds a phone
+ * beside a medical cross; `done` is the same figure with a green tick. The
+ * field behind turns pink for the first two and green for the last, which is
+ * the one place in this app where the semantic palette is allowed to be
+ * decorative — because on that screen it is not decoration.
+ */
+export function MascotAlert({
+  badge,
+  className,
+}: ArtProps & { badge: "alert" | "care" | "done" }) {
+  const field = badge === "done" ? "url(#bx-field-safe)" : "url(#bx-field-alert)";
+
+  return (
+    <svg viewBox="0 0 210 160" className={cn("h-auto w-full", className)} role="presentation" aria-hidden>
+      <path
+        d="M 54 34 q 42 -28 92 -12 q 50 16 54 56 q 4 38 -44 50 q -60 14 -100 -6 q -40 -20 -28 -54 q 10 -24 26 -34 z"
+        fill={field}
+        opacity="0.55"
+      />
+      <Sparkle x={40} y={44} size={7} opacity={0.55} fill={badge === "done" ? "#4fd08a" : "#ff8a97"} />
+      <Sparkle x={186} y={116} size={6} opacity={0.5} fill={badge === "done" ? "#4fd08a" : "#ff8a97"} />
+
+      <g filter="url(#bx-lift)">
+        <g transform="translate(20 14) scale(0.74)">
+          {/* Raised hand — the gesture reads as "stop" without any text. */}
+          {badge !== "care" ? (
+            <g>
+              <path d="M 14 92 q -26 6 -32 30 q -4 18 12 22 q 16 4 24 -12 z" fill="url(#bx-shell-shade)" />
+              <path d="M -14 96 q -8 -18 -2 -28 q 5 -8 10 2 l 6 14 z" fill="url(#bx-shell-shade)" />
+            </g>
+          ) : null}
+
+          <path d="M 80 62 c 44 0 62 30 62 62 c 0 34 -26 52 -62 52 c -36 0 -62 -18 -62 -52 c 0 -32 18 -62 62 -62 z" fill="url(#bx-shell)" />
+          <circle cx="80" cy="128" r="13" fill="none" stroke="#dcdcec" strokeWidth="2.4" />
+          <ellipse cx="80" cy="52" rx="52" ry="40" fill="url(#bx-shell)" />
+          <Face cx={80} cy={52} />
+
+          {/* A phone, for the step that is about making a call. */}
+          {badge === "care" ? (
+            <g>
+              <rect x="112" y="104" width="34" height="52" rx="8" fill="url(#bx-alert)" transform="rotate(-8 129 130)" />
+              <path
+                d="M 124 118 l 5 -3 l 5 7 l -4 3 c 2 5 5 8 10 10 l 3 -4 l 7 5 l -3 5 c -10 2 -22 -10 -23 -23 z"
+                fill="#fff"
+                transform="rotate(-8 129 130)"
+              />
+              <path d="M 100 118 q 18 -10 30 -4 q 6 4 0 10 q -14 -4 -28 2 z" fill="url(#bx-shell-shade)" />
+            </g>
+          ) : null}
+        </g>
+      </g>
+
+      {/* The badge, lifted clear of the figure. */}
+      <g filter="url(#bx-lift-sm)">
+        {badge === "alert" ? (
+          <>
+            <path d="M 158 26 a 11 11 0 0 1 18 0 l 28 47 a 11 11 0 0 1 -9 16 h -56 a 11 11 0 0 1 -9 -16 z" fill="url(#bx-alert)" />
+            <path d="M 167 47 v 17" stroke="#fff" strokeWidth="6" strokeLinecap="round" />
+            <circle cx="167" cy="76" r="3.6" fill="#fff" />
+          </>
+        ) : badge === "care" ? (
+          <>
+            <circle cx="170" cy="50" r="29" fill="url(#bx-alert)" />
+            <path d="M 170 36 v 28 M 156 50 h 28" stroke="#fff" strokeWidth="6.5" strokeLinecap="round" />
+          </>
+        ) : (
+          <>
+            <circle cx="170" cy="50" r="29" fill="url(#bx-safe)" />
+            <path
+              d="M 158 50 l 9 9 l 16 -17"
+              stroke="#fff"
+              strokeWidth="6"
+              fill="none"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </>
+        )}
+      </g>
+    </svg>
+  );
+}
+
 /** A compact mascot bust. For the Ask panel and the auth header. */
 export function MascotBust({ className }: ArtProps) {
   return (
