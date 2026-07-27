@@ -218,6 +218,17 @@ body {
     overscroll-behavior: contain;
     border-radius: 56px;
     background: var(--canvas);
+    /*
+     * Makes the simulated display a containing block for `position: fixed`
+     * descendants. Without it a bottom sheet or a full-screen interrupt — both
+     * of which are legitimately fixed to the viewport on a phone — resolves
+     * against the desktop browser window instead and spills out of the shell.
+     *
+     * `transform` is the mechanism; the value is a no-op chosen for that side
+     * effect alone. Below 480px this whole block does not apply and fixed
+     * positioning works against the real viewport, as it should.
+     */
+    transform: translateZ(0);
     /* The simulated display is the app's viewport, insets and all. */
     --app-h: 852px;
     --safe-top: 59px;

@@ -3,6 +3,7 @@ import "server-only";
 import { cookies } from "next/headers";
 
 import { createServerSupabase } from "@/lib/supabase/server";
+import { generatedAvatar } from "./avatar";
 
 /*
  * Which family member the app is currently showing.
@@ -28,6 +29,11 @@ export type ActiveProfile = {
   relationship: string | null;
   isPrimary: boolean;
   avatarRing: string | null;
+  dob: string | null;
+  sex: string | null;
+  /** Generated from the id, or the custom picture once one is uploaded. */
+  avatar: string;
+  avatarBackground: string;
 };
 
 /**
@@ -38,19 +44,26 @@ export async function familyProfiles(): Promise<ActiveProfile[]> {
   const supabase = await createServerSupabase();
   const { data, error } = await supabase
     .from("profiles")
-    .select("id, name, relationship, is_primary, avatar_ring")
+    .select("id, name, relationship, is_primary, avatar_ring, dob, sex")
     .order("is_primary", { ascending: false })
     .order("created_at", { ascending: true });
 
   if (error) throw new Error(`familyProfiles: ${error.message}`);
 
-  return (data ?? []).map((p) => ({
-    id: p.id as string,
-    name: p.name as string,
-    relationship: p.relationship as string | null,
-    isPrimary: Boolean(p.is_primary),
-    avatarRing: p.avatar_ring as string | null,
-  }));
+  return (data ?? []).map((p, i) => {
+    const generated = generatedAvatar(p.id as string, i);
+    return {
+      id: p.id as string,
+      name: p.name as string,
+      relationship: p.relationship as string | null,
+      isPrimary: Boolean(p.is_primary),
+      avatarRing: p.avatar_ring as string | null,
+      dob: p.dob as string | null,
+      sex: p.sex as string | null,
+      avatar: generated.dataUri,
+      avatarBackground: generated.background,
+    };
+  });
 }
 
 /**

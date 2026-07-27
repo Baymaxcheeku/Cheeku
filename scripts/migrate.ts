@@ -82,16 +82,76 @@ async function main() {
     console.log("reset  · dropped existing app objects (database was empty)\n");
   }
 
+  /*
+   * A ledger, so this is re-runnable.
+   *
+   * Without it every run replayed migration 0001 and died on "families already
+   * exists" — which meant adding a seventh migration could not be applied at
+   * all without resetting the database. Recorded inside each migration's own
+   * transaction, so a rolled-back migration is not remembered as applied.
+   */
+  await client.query(`
+    create table if not exists schema_migrations (
+      filename text primary key,
+      applied_at timestamptz not null default now()
+    )
+  `);
+  /*
+   * Adopting a database that predates the ledger.
+   *
+   * The first five migrations were applied before this table existed, so an
+   * empty ledger next to a populated schema means "already migrated, just not
+   * recorded" — not "fresh database". Marking a migration as applied is only
+   * safe when the thing it creates is demonstrably there, so each candidate is
+   * checked against a table it is known to create.
+   */
+  const BASELINE: ReadonlyArray<[string, string]> = [
+    ["0001_families_and_profiles.sql", "profiles"],
+    ["0002_documents_and_entities.sql", "timeline_events"],
+    ["0003_conversations_and_messages.sql", "messages"],
+    ["0004_consent_and_subscriptions.sql", "subscriptions"],
+  ];
+
+  for (const [filename, table] of BASELINE) {
+    await client.query(
+      `insert into schema_migrations (filename)
+       select $1
+       where to_regclass($2) is not null
+         and not exists (select 1 from schema_migrations where filename = $1)`,
+      [filename, `public.${table}`],
+    );
+  }
+  // 0005 creates a storage bucket rather than a table, so it is keyed off that.
+  await client.query(
+    `insert into schema_migrations (filename)
+     select '0005_storage.sql'
+     where exists (select 1 from storage.buckets where id = 'documents')
+       and not exists (select 1 from schema_migrations where filename = '0005_storage.sql')`,
+  );
+
+  const { rows: appliedRows } = await client.query<{ filename: string }>(
+    "select filename from schema_migrations",
+  );
+  const applied = new Set(appliedRows.map((r) => r.filename));
+
   const files = readdirSync(MIGRATIONS_DIR)
     .filter((f) => f.endsWith(".sql"))
     .sort();
 
+  let ran = 0;
   for (const file of files) {
+    if (applied.has(file)) {
+      console.log(`  --   ${file} (already applied)`);
+      continue;
+    }
+
     const sql = readFileSync(join(MIGRATIONS_DIR, file), "utf8");
     try {
       await client.query("begin");
       await client.query(sql);
+      await client.query("insert into schema_migrations (filename) values ($1)", [file]);
       await client.query("commit");
+      ran += 1;
       console.log(`  ok   ${file}`);
     } catch (error) {
       await client.query("rollback");
@@ -117,7 +177,11 @@ async function main() {
   }
 
   await client.end();
-  console.log(`\n${files.length} migrations applied.`);
+  console.log(
+    ran === 0
+      ? `\nAlready up to date (${files.length} migrations).`
+      : `\n${ran} migration${ran === 1 ? "" : "s"} applied, ${files.length} total.`,
+  );
 }
 
 main().catch((error) => {

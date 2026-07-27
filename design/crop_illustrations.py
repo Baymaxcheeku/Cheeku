@@ -8,7 +8,10 @@ are fractions of the lit screen instead, so the bezel cannot leak in.
     .designvenv/bin/python design/crop_illustrations.py
 """
 
+from __future__ import annotations
+
 from pathlib import Path
+from typing import Optional, Tuple
 
 from PIL import Image
 
@@ -28,15 +31,46 @@ FRAME_SIZE = (853, 1844)
 SCREEN = (31, 23, 823, 1822)
 
 
-def crop(frame: str, out: str, l: float, t: float, r: float, b: float) -> None:
-    """Crop by fractions of the lit screen — (0,0) top-left, (1,1) bottom-right."""
+def crop(
+    frame: str,
+    out: str,
+    l: float,
+    t: float,
+    r: float,
+    b: float,
+    patch: Optional[Tuple[int, int, int, int]] = None,
+) -> None:
+    """Crop by fractions of the lit screen — (0,0) top-left, (1,1) bottom-right.
+
+    `patch` is a box in the CROPPED image's own pixels that gets painted over by
+    smearing the pixel immediately to its left across each row.
+
+    It exists for the Home reminder card, whose close button is drawn over the
+    artwork's corner. No rectangular crop can drop the button without also
+    cutting the calendar in half. The button sits on the card's plain
+    background rather than on the blob, so copying the neighbouring pixel
+    leftwards reproduces that background exactly — including any gradient —
+    without needing to know what colour it is.
+    """
     image = Image.open(FRAMES / frame)
     assert image.size == FRAME_SIZE, f"{frame} is {image.size}, not the {FRAME_SIZE} mockup"
     x0, y0, x1, y1 = SCREEN
     w, h = x1 - x0, y1 - y0
     box = (round(x0 + w * l), round(y0 + h * t), round(x0 + w * r), round(y0 + h * b))
-    image.crop(box).save(OUT / out)
-    print(f"{out:24} {box}")
+    cropped = image.crop(box).convert("RGB")
+
+    if patch:
+        px = cropped.load()
+        pl, pt, pr, pb = patch
+        # Clamped, so a patch box written to run to the edge cannot overrun it.
+        pr, pb = min(pr, cropped.width), min(pb, cropped.height)
+        for yy in range(pt, pb):
+            source = px[max(pl - 1, 0), yy]
+            for xx in range(pl, pr):
+                px[xx, yy] = source
+
+    cropped.save(OUT / out)
+    print(f"{out:24} {box}{'  patched' if patch else ''}")
 
 
 CROPS = [
@@ -51,9 +85,23 @@ CROPS = [
     ("B onboarding flow screen upload first document hook 4.png", "upload-hero.png", 0.58, 0.108, 0.985, 0.252),
     # Home (B1): the reminder card's bell-and-calendar, and the Baymax bust that
     # sits inside the Ask Baymax panel.
-    # Top edge starts below the card's own close button, which sits in the same
-    # corner and would otherwise be baked into the artwork.
-    ("C Home screen 1.png", "home-reminder.png", 0.50, 0.352, 0.94, 0.505),
+    #
+    # The blob's own bounds are x 0.4015-0.9419, y 0.3235-0.4958 of the screen,
+    # measured by scanning for lavender rather than guessed. Cropping below the
+    # close button (as a first attempt did) sliced the top off the bell, so the
+    # full blob is taken and the button is painted out — see `patch`.
+    (
+        "C Home screen 1.png",
+        "home-reminder.png",
+        # Left edge clears the headline: the blob's leftmost point is at 0.4015
+        # but its upper lobe overhangs the end of "thyroid checkup", so cropping
+        # to the blob's own bounds drags the last letters in with it.
+        0.447,
+        0.320,
+        0.945,
+        0.497,
+        (320, 0, 400, 48),  # the close button, in cropped pixels
+    ),
     # Bottom stops above the card's own input field and send button.
     ("C Home screen 1.png", "home-ask.png", 0.615, 0.722, 0.945, 0.826),
 ]
