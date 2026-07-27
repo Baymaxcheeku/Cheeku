@@ -180,7 +180,7 @@ export function ScanFlow({ profiles }: { profiles: readonly { id: string; name: 
 
   return (
     <div className="flex flex-1 flex-col px-5 pb-4 pt-3">
-      <div className="relative pr-[38%]">
+      <div className="relative pr-[42%]">
         <h1 className="text-[24px] font-bold leading-tight tracking-tight text-ink-900">
           Processing your{" "}
           <span className="block text-brand-600">document</span>
@@ -191,10 +191,11 @@ export function ScanFlow({ profiles }: { profiles: readonly { id: string; name: 
         <Image
           src="/illustrations/upload-hero.png"
           alt=""
-          width={321}
-          height={259}
+          quality={92}
+          width={305}
+          height={210}
           priority
-          className="pointer-events-none absolute -right-3 top-0 h-[96px] w-auto object-contain"
+          className="illus-soft pointer-events-none absolute -right-3 top-0 h-[96px] w-auto object-contain"
         />
       </div>
 

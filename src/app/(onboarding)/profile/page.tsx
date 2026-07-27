@@ -60,7 +60,7 @@ export default function ProfilePage() {
 
       <form onSubmit={submit} className="flex flex-1 flex-col px-5">
         {/* The art is absolutely positioned, so the text needs its own gutter. */}
-        <div className="relative pr-[34%]">
+        <div className="relative pr-[38%]">
           <Headline lead="Let's set up your" accent="health profile" />
           <p className="mt-2 text-[13px] leading-relaxed text-ink-500">
             This helps Baymax personalize insights and keep your information more accurate.
@@ -68,10 +68,11 @@ export default function ProfilePage() {
           <Image
             src="/illustrations/profile-hero.png"
             alt=""
-            width={289}
-            height={205}
+            quality={92}
+            width={283}
+            height={182}
             priority
-            className="pointer-events-none absolute right-0 top-0 h-[100px] w-auto object-contain"
+            className="illus-soft pointer-events-none absolute right-0 top-0 h-[100px] w-auto object-contain"
           />
         </div>
 

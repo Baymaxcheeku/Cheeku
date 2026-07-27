@@ -25,13 +25,17 @@ export function HomeAskBox() {
 
   return (
     <section className="relative mx-5 mt-5 overflow-hidden rounded-card bg-gradient-to-br from-brand-100 to-brand-50 p-4">
-      {/* Art sits behind the text, so the heading keeps its own gutter. */}
+      {/* Art sits behind the text, so the heading keeps its own gutter.
+          `illus-soft` fades its edges into the gradient — the crop carries the
+          frame's own near-white backdrop, which would otherwise show as a pale
+          box on a tinted card. */}
       <Image
         src="/illustrations/home-ask.png"
         alt=""
+        quality={92}
         width={261}
-        height={187}
-        className="pointer-events-none absolute -right-2 top-0 h-[104px] w-auto object-contain"
+        height={184}
+        className="illus-soft pointer-events-none absolute -right-1 top-0 h-[92px] w-auto object-contain"
       />
 
       <div className="relative pr-[34%]">

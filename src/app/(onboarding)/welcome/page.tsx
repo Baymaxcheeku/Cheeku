@@ -63,7 +63,8 @@ export default function WelcomePage() {
             fill
             priority={index === 0}
             sizes="390px"
-            className="object-contain object-top"
+            quality={92}
+            className="illus-soft object-contain object-top"
           />
         </div>
 

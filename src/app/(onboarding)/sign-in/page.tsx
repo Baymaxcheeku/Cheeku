@@ -52,10 +52,11 @@ export default function SignInPage() {
         <Image
           src="/illustrations/auth-hero.png"
           alt=""
+          quality={92}
           width={344}
-          height={216}
+          height={197}
           priority
-          className="pointer-events-none absolute right-2 top-1 h-[92px] w-auto object-contain"
+          className="illus-soft pointer-events-none absolute right-2 top-1 h-[92px] w-auto object-contain"
         />
       </div>
 

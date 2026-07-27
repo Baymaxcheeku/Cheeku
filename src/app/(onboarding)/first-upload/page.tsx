@@ -26,7 +26,7 @@ export default function FirstUploadPage() {
       <div className="flex flex-1 flex-col px-5 pb-3">
         {/* The art is absolutely positioned, so the text needs its own gutter or
             the second headline line runs underneath it. */}
-        <div className="relative pr-[34%]">
+        <div className="relative pr-[35%]">
           <Headline lead="Let's add your" accent="first health record" />
           <p className="mt-2 text-[13px] leading-relaxed text-ink-500">
             Upload a document and Baymax will organize it and extract key information for you.
@@ -38,10 +38,11 @@ export default function FirstUploadPage() {
           <Image
             src="/illustrations/upload-hero.png"
             alt=""
-            width={321}
-            height={259}
+            quality={92}
+            width={305}
+            height={210}
             priority
-            className="pointer-events-none absolute -right-3 top-0 h-[96px] w-auto object-contain"
+            className="illus-soft pointer-events-none absolute -right-3 top-0 h-[88px] w-auto object-contain"
           />
         </div>
 

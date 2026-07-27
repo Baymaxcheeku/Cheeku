@@ -42,6 +42,18 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  images: {
+    /*
+     * The illustrations are soft 3D renders on near-white. The default quality
+     * of 75 re-encodes them with visible mush around the character edges, which
+     * on top of the source's own softness is what made them read as placeholder
+     * art. These are a handful of small assets, so the extra bytes are cheap.
+     */
+    qualities: [75, 92],
+    // Widths the app actually renders illustrations at, so the optimiser stops
+    // generating (and picking) sizes far larger or smaller than needed.
+    imageSizes: [96, 128, 180, 256, 320, 384],
+  },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },

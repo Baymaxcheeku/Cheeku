@@ -214,10 +214,11 @@ function InsightCard({
       <Image
         src="/illustrations/home-reminder.png"
         alt=""
-        width={348}
-        height={275}
+        quality={92}
+        width={332}
+        height={313}
         priority
-        className="pointer-events-none absolute -right-4 bottom-0 h-[132px] w-auto object-contain"
+        className="illus-soft pointer-events-none absolute -right-3 bottom-0 h-[128px] w-auto object-contain"
       />
 
       <div className="relative pr-[38%]">

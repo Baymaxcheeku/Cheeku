@@ -30,6 +30,7 @@ export default function SplashPage() {
         <Image
           src="/illustrations/carousel-1.png"
           alt=""
+          quality={92}
           width={200}
           height={200}
           priority
