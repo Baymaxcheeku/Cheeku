@@ -334,12 +334,45 @@ half of the RLS guarantee, and until today only the static half was proven.
    through the UI failed with the generic credentials error, which looked like
    an app bug and was not — the app correctly reported a real `signUp` failure.
    Worth knowing before writing E2E fixtures against reserved TLDs.
-2. **Sign-ups are rate limited to roughly 2/hour.** Email confirmation is on and
-   no custom SMTP is configured, so every sign-up sends through Supabase's
-   built-in mailer, which is throttled hard. `email rate limit exceeded` will
-   block Phase 4 testing and anything resembling real use. Either turn off
-   "Confirm email" for development, or configure SMTP. **Unresolved — needs a
-   dashboard change.**
+2. *Sign-ups were rate limited to roughly 2/hour.* Email confirmation was on
+   with no custom SMTP, so every sign-up went through Supabase's built-in
+   mailer, which throttles hard. The failure surfaced as `429
+   over_email_send_rate_limit` — but the UI reported it as *"That email and
+   password combination didn't work"*, sending people to re-check a password
+   that was always correct. **Resolved:** "Confirm email" is off for
+   development (`mailer_autoconfirm: true`). It must go back on, with real
+   SMTP, before launch.
+
+**Auth failures are no longer all the same message**
+
+That rate-limit incident exposed a real flaw: every Supabase error collapsed to
+the generic credentials message, which made an infrastructure failure look like
+a typo. `authFailureMessage()` now separates the two. Rate limits, rejected
+addresses, disabled sign-up and weak passwords say what they are; wrong-password
+and no-such-account stay deliberately identical, because distinguishing them
+turns the form into an oracle for which emails are registered, and in a health
+app membership alone is sensitive. Unrecognised codes fall through to the
+generic message, so a new Supabase error code cannot become an accidental leak.
+
+`createAccount` also now handles the confirmation-required case explicitly: with
+"Confirm email" on, `signUp` returns a user but no session, and the old code
+sent that person to `/who` — a screen that could not save anything.
+
+**Verified end to end against the live project**
+
+Account created through the UI, not a script: consent unticked was blocked with
+*"Please accept the privacy terms to continue"*; consent ticked created the
+account and advanced through `/who` to `/profile`. The user exists with
+`confirmed=true`, and `consent_log` holds the matching `dpdp_processing` v1.0.0
+row — written in the same request that created the account, so the consent
+record and the account cannot drift apart. Sign-in verified with the seeded
+`demo@baymax.test`.
+
+**Still open on this project**
+
+- **Minimum password length is 6 in Supabase**; the app's Zod schema enforces
+  10. The form is what people meet, but the database would accept 6 if anything
+  ever bypassed it. Worth raising to match.
 
 The generic credentials message is right for production — distinguishing "no
 such account" from "wrong password" turns the form into an oracle for which

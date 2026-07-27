@@ -34,6 +34,35 @@ function fieldErrors(error: ZodError): Record<string, string> {
  */
 const GENERIC_CREDENTIALS_ERROR = "That email and password combination didn't work.";
 
+/*
+ * ...but not every failure is a credentials failure, and reporting the ones
+ * that aren't as "wrong password" sends people to re-type a password that was
+ * always correct. A rate limit or a rejected address says nothing about
+ * whether an account exists, so surfacing those leaks nothing and is the
+ * difference between a fixable problem and a mystery.
+ *
+ * Anything not listed here falls through to the generic message deliberately:
+ * the default has to be the safe one, or a new Supabase error code becomes an
+ * accidental enumeration oracle.
+ */
+function authFailureMessage(error: { code?: string; status?: number }): string {
+  switch (error.code) {
+    case "over_email_send_rate_limit":
+    case "over_request_rate_limit":
+      return "Too many attempts right now. Please wait a few minutes and try again.";
+    case "email_address_invalid":
+      return "That email address wasn't accepted. Try a different one.";
+    case "signup_disabled":
+      return "New accounts are currently disabled.";
+    case "weak_password":
+      return "Please choose a stronger password.";
+    default:
+      return error.status === 429
+        ? "Too many attempts right now. Please wait a few minutes and try again."
+        : GENERIC_CREDENTIALS_ERROR;
+  }
+}
+
 export async function signIn(formData: FormData): Promise<ActionResult> {
   const parsed = signInSchema.safeParse({
     email: formData.get("email"),
@@ -50,7 +79,7 @@ export async function signIn(formData: FormData): Promise<ActionResult> {
 
   const supabase = await createServerSupabase();
   const { error } = await supabase.auth.signInWithPassword(parsed.data);
-  if (error) return { ok: false, message: GENERIC_CREDENTIALS_ERROR };
+  if (error) return { ok: false, message: authFailureMessage(error) };
 
   return { ok: true, redirectTo: "/who" };
 }
@@ -75,7 +104,20 @@ export async function createAccount(formData: FormData): Promise<ActionResult> {
     email: parsed.data.email,
     password: parsed.data.password,
   });
-  if (error) return { ok: false, message: GENERIC_CREDENTIALS_ERROR };
+  if (error) return { ok: false, message: authFailureMessage(error) };
+
+  /*
+   * With "Confirm email" on, signUp returns a user but no session — the account
+   * exists and nothing else can happen until a link is clicked. Sending someone
+   * onward to /who in that state lands them on a screen that cannot save
+   * anything, so say what happened instead.
+   */
+  if (data.user && !data.session) {
+    return {
+      ok: false,
+      message: "Check your email to confirm your account, then sign in.",
+    };
+  }
 
   // DPDP: consent is logged with its version and a timestamp, in the same
   // request that created the account, so the two can never drift apart.
