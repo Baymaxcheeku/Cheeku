@@ -5,6 +5,7 @@ import { FilterBar } from "@/components/records/filter-bar";
 import { EmptyRecords, RecordRow, RecordsHeader, StatsCard } from "@/components/records/chrome";
 import { sinceFromPeriod } from "@/lib/records/filters";
 import { groupByRecency } from "@/lib/records/grouping";
+import { activeProfile } from "@/lib/profiles/context";
 import { listProfiles, listRecords, statsFrom } from "@/lib/records/queries";
 import type { DocType } from "@/lib/records/types";
 
@@ -28,9 +29,19 @@ export default async function RecordsPage({
     return typeof v === "string" && v ? v : undefined;
   };
 
+  /*
+   * The list follows the family member selected on Home unless the reader
+   * explicitly widens it to "All members". Defaulting to everyone would mean
+   * switching to Amma on Home and still seeing Athar's reports here — the
+   * exact cross-member bleed rule 3 exists to prevent.
+   */
+  const requested = one("profileId");
+  const active = await activeProfile();
+  const scopeId = requested === "all" ? undefined : (requested ?? active?.id);
+
   const [records, profiles] = await Promise.all([
     listRecords({
-      profileId: one("profileId"),
+      profileId: scopeId,
       docType: one("docType") as DocType | undefined,
       since: sinceFromPeriod(one("period")),
       sort: one("sort") === "oldest" ? "oldest" : "newest",
@@ -39,13 +50,13 @@ export default async function RecordsPage({
   ]);
 
   const groups = groupByRecency(records);
-  const filtered = Boolean(one("profileId") ?? one("docType") ?? one("period"));
+  const filtered = Boolean(requested ?? one("docType") ?? one("period"));
 
   return (
     <div className="flex flex-1 flex-col pb-4">
       <RecordsHeader title="My Records" subtitle="All your health documents in one place." />
 
-      <FilterBar profiles={profiles} showPeriod={false} />
+      <FilterBar profiles={profiles} showPeriod={false} defaultProfileId={active?.id} />
 
       <StatsCard stats={statsFrom(records)} />
 

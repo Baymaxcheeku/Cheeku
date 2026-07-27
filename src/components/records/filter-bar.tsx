@@ -38,19 +38,30 @@ const PERIODS = [
 export function FilterBar({
   profiles,
   showPeriod = true,
+  defaultProfileId,
 }: {
   profiles: readonly { id: string; name: string }[];
   showPeriod?: boolean;
+  /** The member selected on Home; the list is scoped to them unless widened. */
+  defaultProfileId?: string;
 }) {
   const router = useRouter();
   const params = useSearchParams();
 
   const docType = params.get("docType") ?? "";
-  const profileId = params.get("profileId") ?? "";
+  // No param means "whoever is selected on Home", so the control shows them
+  // rather than claiming the list is unfiltered.
+  const profileId = params.get("profileId") ?? defaultProfileId ?? "";
   const period = params.get("period") ?? "";
   const sort = params.get("sort") ?? "newest";
 
-  const activeCount = [docType, profileId, period].filter(Boolean).length;
+  /*
+   * Scoping to the active member is the app's normal state, not something the
+   * reader chose here, so it does not add to the badge. Only widening to
+   * everyone, or narrowing to a different member, counts as a filter.
+   */
+  const memberIsFilter = profileId !== "" && profileId !== defaultProfileId;
+  const activeCount = [docType, memberIsFilter ? profileId : "", period].filter(Boolean).length;
 
   function apply(next: Partial<Record<string, string>>) {
     const search = new URLSearchParams(params.toString());
@@ -97,12 +108,14 @@ export function FilterBar({
           ]}
         />
 
+        {/* "all" is an explicit value, not the empty default: an absent param
+            means "the member selected on Home", so widening has to be said. */}
         <Select
           label="Family member"
           value={profileId}
           onChange={(v) => apply({ profileId: v })}
           options={[
-            { value: "", label: "All members" },
+            { value: "all", label: "All members" },
             ...profiles.map((p) => ({ value: p.id, label: p.name })),
           ]}
         />
@@ -132,7 +145,9 @@ export function FilterBar({
           count={activeCount}
           summary={[
             docType ? DOC_TYPE_LABEL[docType as DocType] : null,
-            profileId ? profiles.find((p) => p.id === profileId)?.name : null,
+            memberIsFilter
+              ? (profiles.find((p) => p.id === profileId)?.name ?? "All members")
+              : null,
             period ? PERIODS.find((p) => p.value === period)?.label : null,
           ]
             .filter(Boolean)

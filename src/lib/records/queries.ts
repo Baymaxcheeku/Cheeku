@@ -199,6 +199,20 @@ export function statsFrom(records: readonly RecordSummary[]): RecordStats {
   };
 }
 
+/**
+ * Records belonging to one family member.
+ *
+ * Separate from `listRecords` because the caller's intent is different: this is
+ * "show me Amma's records" and must never silently widen. `listRecords` with no
+ * profileId is the deliberate cross-family view used by D1's "All members".
+ */
+export async function listProfileRecords(
+  profileId: string,
+  filters: Omit<RecordFilters, "profileId"> = {},
+): Promise<RecordSummary[]> {
+  return listRecords({ ...filters, profileId });
+}
+
 /** Profiles the signed-in user can see, for the "All members" filter. */
 export async function listProfiles(): Promise<{ id: string; name: string }[]> {
   const supabase = await createServerSupabase();

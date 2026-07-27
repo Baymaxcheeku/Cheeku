@@ -49,6 +49,13 @@ CROPS = [
     ("B onboarding flow screen usage selection 2.png", "who-family.png", 0.03, 0.540, 0.33, 0.690),
     ("B onboarding flow screen profile creation 3.png", "profile-hero.png", 0.62, 0.108, 0.985, 0.222),
     ("B onboarding flow screen upload first document hook 4.png", "upload-hero.png", 0.58, 0.108, 0.985, 0.252),
+    # Home (B1): the reminder card's bell-and-calendar, and the Baymax bust that
+    # sits inside the Ask Baymax panel.
+    # Top edge starts below the card's own close button, which sits in the same
+    # corner and would otherwise be baked into the artwork.
+    ("C Home screen 1.png", "home-reminder.png", 0.50, 0.352, 0.94, 0.505),
+    # Bottom stops above the card's own input field and send button.
+    ("C Home screen 1.png", "home-ask.png", 0.615, 0.722, 0.945, 0.826),
 ]
 
 if __name__ == "__main__":
