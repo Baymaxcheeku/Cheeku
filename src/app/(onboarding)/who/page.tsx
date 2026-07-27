@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { ArrowRight, ShieldCheck, Users, type LucideIcon } from "lucide-react";
 
-import { Dots, Headline, OnboardingHeader, ReassuranceStrip } from "@/components/onboarding/chrome";
+import { Headline, OnboardingHeader, ReassuranceStrip } from "@/components/onboarding/chrome";
 import { Button } from "@/components/ui/button";
 import { chooseAudience } from "@/lib/auth/actions";
 import { cn } from "@/lib/cn";
@@ -52,7 +52,7 @@ export default function WhoPage() {
 
   return (
     <div className="flex flex-1 flex-col">
-      <OnboardingHeader step={4} back="/sign-in" action={{ label: "Skip", href: "/profile" }} />
+      <OnboardingHeader back="/sign-in" action={{ label: "Skip", href: "/profile" }} />
 
       <form onSubmit={submit} className="flex flex-1 flex-col px-5 pb-6">
         <Headline lead="Who is" accent="this for?" />
@@ -124,7 +124,6 @@ export default function WhoPage() {
             {pending ? "One moment…" : "Continue"}
             <ArrowRight size={18} aria-hidden />
           </Button>
-          <Dots current={3} total={4} />
         </div>
       </form>
     </div>

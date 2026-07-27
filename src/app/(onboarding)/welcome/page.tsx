@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-import { Dots, Headline, ReassuranceStrip, StepChips } from "@/components/onboarding/chrome";
+import { Dots, Headline, ReassuranceStrip } from "@/components/onboarding/chrome";
 import { Button } from "@/components/ui/button";
 import { PANELS } from "./panels";
 
@@ -26,7 +26,7 @@ export default function WelcomePage() {
 
   return (
     <div className="flex flex-1 flex-col">
-      <header className="flex items-center gap-3 px-5 pb-1 pt-3">
+      <header className="flex h-11 items-center gap-3 px-5">
         {index > 0 ? (
           <button
             type="button"
@@ -37,7 +37,6 @@ export default function WelcomePage() {
             <ChevronLeft size={20} />
           </button>
         ) : null}
-        <StepChips current={index + 1} total={PANELS.length} />
         <Link
           href="/sign-in"
           className="ml-auto text-[15px] font-medium text-brand-500 hover:text-brand-700"
@@ -46,13 +45,18 @@ export default function WelcomePage() {
         </Link>
       </header>
 
-      <div className="flex flex-1 flex-col px-5 pb-5">
-        <div className="pt-3">
+      <div className="flex flex-1 flex-col px-5 pb-3">
+        <div className="pt-2">
           <Headline lead={panel.lead} accent={panel.accent} />
-          <p className="mt-3 text-[14px] leading-relaxed text-ink-500">{panel.body}</p>
+          <p className="mt-2 text-[14px] leading-relaxed text-ink-500">{panel.body}</p>
         </div>
 
-        <div className="relative mt-4 min-h-[180px] flex-1">
+        {/*
+         * `flex-1` with a low floor rather than a tall fixed box: panels 1 and 2
+         * are mostly art and let it grow, panels 3 and 4 carry a chip grid or a
+         * feature list and need it to give way so the CTA stays above the fold.
+         */}
+        <div className="relative mt-3 min-h-[100px] flex-1">
           <Image
             src={panel.illustration}
             alt=""
@@ -64,7 +68,7 @@ export default function WelcomePage() {
         </div>
 
         {panel.chips ? (
-          <ul className="mt-4 grid grid-cols-4 gap-2">
+          <ul className="mt-3 grid grid-cols-4 gap-2">
             {panel.chips.map(({ icon: Icon, label }) => (
               <li
                 key={label}
@@ -78,7 +82,7 @@ export default function WelcomePage() {
         ) : null}
 
         {panel.features ? (
-          <ul className="mt-4 space-y-2">
+          <ul className="mt-3 space-y-2">
             {panel.features.map(({ icon: Icon, title, body }) => (
               <li
                 key={title}
@@ -97,7 +101,7 @@ export default function WelcomePage() {
           </ul>
         ) : null}
 
-        <div className="mt-5 space-y-4">
+        <div className="mt-4 space-y-3">
           {index > 0 ? <ReassuranceStrip /> : null}
           <Dots current={index} total={PANELS.length} />
           <Button onClick={next} className="w-full">

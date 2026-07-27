@@ -201,6 +201,24 @@ sentence that contains the idiom. Covered by an explicit test.
   inside the frame; the onboarding layout is their single owner. Screens size
   against `min-h-app` rather than `dvh`, so they fill the simulated display
   instead of the browser window.
+- **The A1–A4 step chips are gone and every CTA now sits above the fold.** The
+  chips cost a fixed band at the top of five screens to say something the
+  screens already said, and they were the difference between a reachable button
+  and a scroll on most of the flow. `StepChips` is deleted and `OnboardingHeader`
+  no longer takes a `step`. Measured at the iPhone 16 display size,
+  `/welcome` (all four panels), `/sign-in` (both tabs), `/who` and
+  `/first-upload` now overflow by exactly 0px.
+
+**A5 is the exception, and it is a different problem**
+
+`/profile` was 616px over — ten form fields cannot share one fold at any
+spacing, so tightening it was never going to work. It got a **pinned CTA**
+instead: the bar is `sticky bottom-0` inside the scrolling screen. Every field
+on it is optional, which means submitting early is the *common* action, and a
+button parked below the fold is exactly the action that hides. The bar pads
+itself with `calc(var(--safe-bottom) + 0.75rem)` — `sticky` pins to the
+scrollport, so it does not inherit the layout's home-indicator inset and would
+otherwise sit on top of the indicator.
 
 **Verified**
 
@@ -241,6 +259,21 @@ sentence that contains the idiom. Covered by an explicit test.
 - **10MB upload cap, not the frame's 25MB.** The storage bucket is capped at 10MB
   at the database layer; the copy matches the constraint that is actually
   enforced. Recorded in `design/SCREEN_INVENTORY.md`.
+
+Three further cuts were made to win back the fold. Each removed something the
+frames draw, so each is recorded here rather than left as a silent edit:
+
+- **A6's three alternate tiles lost their caption lines.** "Take a photo",
+  "Email to Baymax" and "Import from device" keep their titles. All three are
+  Phase 4 placeholders, and spending ~30px of a single fold on descriptions for
+  controls that do nothing pushed the real CTA off screen.
+- **A3 lost its closing "New to Baymax? Create account" line.** The tablist at
+  the top of the sheet is on screen at the same moment and does exactly that
+  job. It was a second control for one action, and it was the one costing the
+  primary CTA its place above the fold.
+- **A4 lost its `Dots current={3} total={4}`.** A4 is not a carousel; the dots
+  were hardcoded and indicated nothing that could change. With the step chips
+  gone they were the last vestige of a progress metaphor the flow does not use.
 
 **Skipped, and why**
 

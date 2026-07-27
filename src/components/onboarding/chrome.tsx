@@ -3,46 +3,15 @@ import { ChevronLeft, Lock } from "lucide-react";
 
 import { cn } from "@/lib/cn";
 
-/**
- * The step chips that run across the top of every onboarding frame. Steps
- * already passed render as outlined pills, the current one as a filled circle.
- */
-export function StepChips({ current, total = 6 }: { current: number; total?: number }) {
-  return (
-    <div className="flex items-center gap-1.5" aria-label={`Step ${current} of ${total}`}>
-      {Array.from({ length: current }, (_, i) => {
-        const step = i + 1;
-        const isCurrent = step === current;
-        return (
-          <span
-            key={step}
-            aria-current={isCurrent ? "step" : undefined}
-            className={cn(
-              "grid h-7 w-7 place-items-center rounded-pill text-[11px] font-semibold",
-              isCurrent
-                ? "bg-brand-600 text-white"
-                : "border border-brand-200 bg-surface text-brand-500",
-            )}
-          >
-            A{step}
-          </span>
-        );
-      })}
-    </div>
-  );
-}
-
 export function OnboardingHeader({
-  step,
   back,
   action,
 }: {
-  step: number;
   back?: string;
   action?: { label: string; href: string };
 }) {
   return (
-    <header className="flex items-center gap-3 px-5 pb-2 pt-3">
+    <header className="flex h-11 items-center gap-3 px-5">
       {back ? (
         <Link
           href={back}
@@ -52,7 +21,6 @@ export function OnboardingHeader({
           <ChevronLeft size={20} />
         </Link>
       ) : null}
-      <StepChips current={step} />
       {action ? (
         <Link
           href={action.href}

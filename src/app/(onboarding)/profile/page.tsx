@@ -56,9 +56,9 @@ export default function ProfilePage() {
 
   return (
     <div className="flex flex-1 flex-col">
-      <OnboardingHeader step={5} back="/who" action={{ label: "Skip", href: "/first-upload" }} />
+      <OnboardingHeader back="/who" action={{ label: "Skip", href: "/first-upload" }} />
 
-      <form onSubmit={submit} className="flex flex-1 flex-col px-5 pb-6">
+      <form onSubmit={submit} className="flex flex-1 flex-col px-5">
         {/* The art is absolutely positioned, so the text needs its own gutter. */}
         <div className="relative pr-[34%]">
           <Headline lead="Let's set up your" accent="health profile" />
@@ -202,10 +202,19 @@ export default function ProfilePage() {
           </p>
         ) : null}
 
-        <div className="mt-5 space-y-4">
+        <div className="mt-4">
           <ReassuranceStrip>
             Your data is encrypted and stored securely. Only you and your family can access it.
           </ReassuranceStrip>
+        </div>
+
+        {/*
+         * Pinned rather than sitting at the end of the form. Ten fields cannot
+         * fit one fold at any spacing, and every one of them is optional — so
+         * the most common action here is to submit early, and that is exactly
+         * the action a button parked below the fold hides.
+         */}
+        <div className="sticky bottom-0 -mx-5 mt-4 border-t border-line bg-canvas px-5 pb-[calc(var(--safe-bottom)+0.75rem)] pt-3">
           <Button type="submit" className="w-full" disabled={pending}>
             {pending ? "Saving…" : "Continue"}
             <ArrowRight size={18} aria-hidden />

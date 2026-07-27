@@ -41,10 +41,10 @@ export default function SignInPage() {
 
   return (
     <div className="flex flex-1 flex-col">
-      <OnboardingHeader step={3} back="/welcome" action={{ label: "Help", href: "/help" }} />
+      <OnboardingHeader back="/welcome" action={{ label: "Help", href: "/help" }} />
 
       {/* The art is absolutely positioned, so the text needs its own gutter. */}
-      <div className="relative px-5 pb-2 pr-[42%]">
+      <div className="relative px-5 pb-1 pr-[38%]">
         <Headline lead="Welcome" accent="to Baymax" />
         <p className="mt-2 text-[13px] leading-relaxed text-ink-500">
           Your family&apos;s health, protected and organized in one secure place.
@@ -55,11 +55,11 @@ export default function SignInPage() {
           width={344}
           height={216}
           priority
-          className="pointer-events-none absolute right-2 top-1 h-[104px] w-auto object-contain"
+          className="pointer-events-none absolute right-2 top-1 h-[92px] w-auto object-contain"
         />
       </div>
 
-      <div className="mt-3 flex flex-1 flex-col rounded-t-sheet bg-surface px-5 pb-6 pt-1 shadow-e2">
+      <div className="mt-2 flex flex-1 flex-col rounded-t-sheet bg-surface px-5 pb-4 pt-1 shadow-e2">
         <div role="tablist" aria-label="Account" className="flex border-b border-line">
           {(
             [
@@ -156,7 +156,7 @@ export default function SignInPage() {
           </Button>
         </form>
 
-        <div className="my-5 flex items-center gap-3">
+        <div className="my-4 flex items-center gap-3">
           <span className="h-px flex-1 bg-line" />
           <span className="text-[12px] text-ink-300">or continue with</span>
           <span className="h-px flex-1 bg-line" />
@@ -187,20 +187,15 @@ export default function SignInPage() {
           ))}
         </ul>
 
-        <p className="mt-5 flex items-center justify-center gap-2 text-[12px] text-ink-500">
+        {/*
+         * The frames also close this sheet with a "New to Baymax? Create
+         * account" line. The tablist at the top is on screen at the same time
+         * and does exactly that, so the line was a second control for the same
+         * job — and the one costing the primary CTA its place above the fold.
+         */}
+        <p className="mt-4 flex items-center justify-center gap-2 text-[12px] text-ink-500">
           <ShieldCheck size={14} className="text-brand-400" aria-hidden />
           Bank-level encryption. Your data is private and secure.
-        </p>
-
-        <p className="mt-4 text-center text-[13px] text-ink-500">
-          {tab === "sign-in" ? "New to Baymax? " : "Already have an account? "}
-          <button
-            type="button"
-            onClick={() => switchTo(tab === "sign-in" ? "create" : "sign-in")}
-            className="font-semibold text-brand-600"
-          >
-            {tab === "sign-in" ? "Create account" : "Sign in"}
-          </button>
         </p>
       </div>
     </div>
