@@ -43,6 +43,19 @@
   --danger-strong: #e10a1e;
   --danger-bg: #fef1f3;
 
+  /*
+   * Text weights of the three semantic hues, for label-on-tint pills.
+   *
+   * The sampled dot colours are for fills and icons — as text on their own
+   * tinted backgrounds none of them clear 4.5:1 (safe 2.57, caution 1.69,
+   * danger 3.91). These are the same hues darkened until they do. A status word
+   * that a reader cannot make out is worse than no status word, and severity is
+   * exactly the thing on these screens that must stay legible.
+   */
+  --safe-text: #0f7538; /* 5.23:1 on --safe-bg */
+  --caution-text: #8f5400; /* 5.61:1 on --caution-bg */
+  --danger-text: #c00a1c; /* 5.78:1 on --danger-bg */
+
   /* Geometry */
   --r-card: 20px;
   --r-tile: 16px;
@@ -96,11 +109,14 @@
 
   --color-safe: var(--safe);
   --color-safe-bg: var(--safe-bg);
+  --color-safe-text: var(--safe-text);
   --color-caution: var(--caution);
   --color-caution-bg: var(--caution-bg);
+  --color-caution-text: var(--caution-text);
   --color-danger: var(--danger);
   --color-danger-strong: var(--danger-strong);
   --color-danger-bg: var(--danger-bg);
+  --color-danger-text: var(--danger-text);
 
   --radius-card: var(--r-card);
   --radius-tile: var(--r-tile);

@@ -387,4 +387,88 @@ does mask these cases in development; a server-side log of the real reason
 - `DATABASE_URL` is local tooling only, read by `scripts/migrate.ts` and never
   by the app.
 
-## Phase 4 — Memory core (D1–D3, C1–C2) · not started
+## Phase 4 — Memory core (D1–D3, C1–C2) · complete
+
+**Built — the five screens**
+
+- **Shared app shell** (`src/app/(app)/layout.tsx` + `components/app/tab-bar.tsx`).
+  Home / Documents / `+` FAB / Ask Baymax / Profile, per the frames. The FAB is
+  a link, not an onClick — the app's main write action must work before
+  hydration. Tabs match by section (`/records/[id]` keeps Documents lit).
+- **D1 records list** (`(app)/records`) — filter chips (all four fit the 393pt
+  fold, measured), stats card counting the *filtered* set, recency grouping
+  (Today / Yesterday / This week / This month / Earlier), severity pills,
+  empty states for both "no records" and "nothing matches".
+- **D2 record detail** (`(app)/records/[id]`) — file card, health-status gauge
+  (SVG, decorative, the words carry the meaning), key highlights with printed
+  ranges, the grounded insight card, structured/original toggle with a 60s
+  signed URL and the raw text, and action tiles (Ask Baymax links ahead to
+  Phase 5; Track changes and Share are disabled with a reason, as in Phase 3).
+- **D3 timeline** (`(app)/timeline`) — month sections with counts, severity
+  dots on the rail, day/month date column. Undated records are omitted here
+  (a timeline row is a claim about *when*) but kept in D1 under "Earlier".
+- **C1 scan** (`(app)/scan`) — profile picker, file/camera input (no `capture`
+  attr, so the OS offers both), five-step progress that never runs ahead of the
+  actual request (`settleStep` caps the display), percentage ring from real
+  step progress.
+- **C2 review** (`(app)/scan/review`) — per-field confidence, editable rows,
+  amber "Check this" on fields under 0.7, pinned Re-scan / Confirm & Save.
+
+**Built — the pipeline**
+
+- `lib/records/{types,queries,grouping,filters,insight}.ts` — the data layer.
+  Every query runs on the request-scoped client; none takes a user_id (RLS
+  decides), and `getRecord` returns "not yours" as "not found".
+- `lib/upload/strip-exif.ts` — canvas round-trip strips EXIF (GPS of the house
+  the photo was taken in) **client-side**, so it never crosses the network. The
+  filename is replaced too ("Ananya_CBC_Fortis.jpg" is PII in a path). HEIC and
+  PDF pass through untouched — a botched rewrite is worse than metadata.
+- `lib/records/upload.ts` — object keys are server-generated
+  `<user>/<profile>/<uuid>.<ext>` (the storage policies match on segment 1, so
+  a client-supplied name would be a client-supplied authorisation decision).
+  MIME and size re-checked server-side. A failed insert removes the uploaded
+  object rather than orphaning a medical record in the bucket.
+- `lib/ai/mock/extract.ts` — deterministic mock extraction (seeded on
+  name+size: same file, same answer, reproducible bug reports). Confidence
+  routing is real: any field under 0.7 files the document as `needs_review`.
+  Entities are written only at *confirm* time — a misread number must not
+  start trending before a human has seen it.
+- The insight card (`lib/records/insight.ts`) is rule-bearing prose: it names
+  out-of-range values, defers to a doctor, and stops. Its tests assert a
+  forbidden-vocabulary list (diagnose/prescribe/dose/"you have"/condition
+  names) and that it never emits a number of its own. The regex guard caught
+  my own first draft ("if you have questions"), which is the system working.
+
+**The colour ruling, applied**
+
+Extraction confidence renders in neutral grey with one amber "Check this" —
+never the green/amber/red that means health severity elsewhere. The severity
+text colours also had to be darkened to clear WCAG AA on their tinted pills
+(sampled dot hues: safe 2.57:1, caution 1.69:1 — illegible); `--safe-text`
+`--caution-text` `--danger-text` are the same hues at ≥5.2:1.
+
+**Verified end to end**
+
+Upload → processing → review → Confirm & Save → the document appears in D1,
+D2 (3 entities with flags, severity high-risk, insight naming Haemoglobin and
+MCV), and D3's July section — confirmed in the UI *and* by querying documents,
+entities, timeline_events and the storage object (signed URL minted) directly.
+Gate: typecheck, lint, **105 tests** (was 82), build clean.
+
+**Recorded while building**
+
+1. *`node:crypto` leaked into the client bundle.* C2 imported the extraction
+   types from the extractor module; one runtime value (`LOW_CONFIDENCE`) was
+   enough to drag `node:crypto` into webpack's client graph and fail the build.
+   The contract now lives in `extract-types.ts` with zero dependencies.
+2. *The frames' notification bell shows a hard-coded "3".* Shipped without the
+   badge — there is no notifications feature to count, and a fake unread count
+   is a lie in red.
+3. *Search covers facility and doctor only* — the display title lives inside
+   the extraction jsonb and matching it needs a functional index that does not
+   exist yet. An honestly narrow search over one that silently misses.
+4. *D2's frame copy "Consider lifestyle adjustments…" was not reproduced* — it
+   is advice the record does not support; the insight card states what is
+   out of range and defers to a doctor instead.
+
+## Phase 5 — Companion (E1–E2, F1, B1–B2) · not started
