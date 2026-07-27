@@ -112,8 +112,14 @@ export default async function RecordDetailPage({ params }: { params: Promise<{ i
       {/* -------------------------------------------------------- status --- */}
       <section className="mt-3 rounded-card bg-surface p-4 shadow-e1">
         <h2 className="text-[15px] font-semibold text-ink-900">Overall health status</h2>
-        <div className="mt-2 flex items-center gap-3">
-          <div className="min-w-0 flex-1">
+        {/*
+         * A fixed 132pt gauge column rather than letting the gauge and its
+         * legend size themselves. Sized by content, the legend's three labels
+         * claimed most of the card and forced the status word — the one thing
+         * on this card that must be read at a glance — to wrap onto two lines.
+         */}
+        <div className="mt-2 flex items-stretch gap-3">
+          <div className="min-w-0 flex-1 self-center">
             <p className="flex items-center gap-2">
               <span
                 className={cn(
@@ -132,7 +138,7 @@ export default async function RecordDetailPage({ params }: { params: Promise<{ i
               {SEVERITY_BLURB[record.severity]}
             </p>
           </div>
-          <div className="shrink-0 border-l border-line pl-3">
+          <div className="flex w-[132px] shrink-0 flex-col items-center justify-center border-l border-line pl-3">
             <HealthGauge severity={record.severity} />
             <GaugeLegend severity={record.severity} />
           </div>
