@@ -4,7 +4,8 @@ export type Panel = {
   lead: string;
   accent: string;
   body: string;
-  illustration: string;
+  /** Key into SCENES in the welcome page. Vector art, not a bitmap. */
+  scene: "hero" | "privacy" | "insights" | "family";
   cta: string;
   features?: { icon: LucideIcon; title: string; body: string }[];
   chips?: { icon: LucideIcon; label: string }[];
@@ -19,14 +20,14 @@ export const PANELS: readonly Panel[] = [
     lead: "Meet Baymax,",
     accent: "your family's health companion",
     body: "One safe place for all your health records, smarter insights, and answers that put your family first.",
-    illustration: "/illustrations/carousel-1.png",
+    scene: "hero",
     cta: "Let's get started",
   },
   {
     lead: "All your health records,",
     accent: "in one secure home",
     body: "Upload, store, and organize reports, scans, prescriptions and more. Baymax keeps everything safe and easy to find.",
-    illustration: "/illustrations/carousel-2.png",
+    scene: "privacy",
     cta: "Next",
     chips: [
       { icon: Zap, label: "Lab Reports" },
@@ -39,7 +40,7 @@ export const PANELS: readonly Panel[] = [
     lead: "Get answers,",
     accent: "anytime with Ask Baymax",
     body: "Your AI assistant that understands your reports, medicines, and history — and explains them in simple, trustworthy ways.",
-    illustration: "/illustrations/carousel-3.png",
+    scene: "insights",
     cta: "Next",
     features: [
       {
@@ -63,7 +64,7 @@ export const PANELS: readonly Panel[] = [
     lead: "Built for your family,",
     accent: "designed for trust",
     body: "Add your loved ones, set permissions, and feel confident that their health is always in safe hands.",
-    illustration: "/illustrations/carousel-4.png",
+    scene: "family",
     cta: "Let's get started",
     features: [
       {

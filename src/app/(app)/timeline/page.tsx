@@ -113,7 +113,7 @@ function TimelineRow({ record }: { record: RecordSummary }) {
         // `min-w-0` on the flex child itself, not only on the text span inside
         // it: without it a flex item's floor is its content width, so a long
         // report title pushes the severity pill off the right edge.
-        className="mb-2 flex min-w-0 flex-1 items-center gap-2 rounded-card bg-surface p-2.5 shadow-e1 transition-colors hover:bg-brand-50/40"
+        className="tappable mb-2 flex min-w-0 flex-1 items-center gap-2 rounded-card bg-surface p-2.5 shadow-e1 hover:bg-brand-50/40 active:scale-[0.99] active:bg-brand-50/60"
       >
         <FileChip mimeType={record.mimeType} compact />
         <span className="min-w-0 flex-1">

@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -17,6 +16,7 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { UploadScene } from "@/components/illustrations";
 import { cn } from "@/lib/cn";
 import { uploadDocument } from "@/lib/records/upload";
 import { stripImageMetadata } from "@/lib/upload/strip-exif";
@@ -188,15 +188,7 @@ export function ScanFlow({ profiles }: { profiles: readonly { id: string; name: 
         <p className="mt-2 text-[13px] leading-relaxed text-ink-500">
           Baymax is securely reading your document and extracting key information.
         </p>
-        <Image
-          src="/illustrations/upload-hero.png"
-          alt=""
-          quality={92}
-          width={305}
-          height={210}
-          priority
-          className="illus-soft pointer-events-none absolute -right-3 top-0 h-[96px] w-auto object-contain"
-        />
+        <UploadScene className="pointer-events-none absolute -right-2 top-0 w-[132px]" />
       </div>
 
       <div className="mt-5 rounded-card bg-surface p-5 text-center shadow-e1">

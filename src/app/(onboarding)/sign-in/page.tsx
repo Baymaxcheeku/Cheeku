@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { Apple, Lock, Mail, Phone, ShieldCheck } from "lucide-react";
@@ -9,6 +8,7 @@ import { Headline, OnboardingHeader } from "@/components/onboarding/chrome";
 import { Button } from "@/components/ui/button";
 import { Field, PasswordField } from "@/components/ui/field";
 import { createAccount, signIn } from "@/lib/auth/actions";
+import { MascotBust } from "@/components/illustrations";
 import { cn } from "@/lib/cn";
 import type { ActionResult } from "@/lib/auth/schemas";
 
@@ -49,15 +49,7 @@ export default function SignInPage() {
         <p className="mt-2 text-[13px] leading-relaxed text-ink-500">
           Your family&apos;s health, protected and organized in one secure place.
         </p>
-        <Image
-          src="/illustrations/auth-hero.png"
-          alt=""
-          quality={92}
-          width={344}
-          height={197}
-          priority
-          className="illus-soft pointer-events-none absolute right-2 top-1 h-[92px] w-auto object-contain"
-        />
+        <MascotBust className="pointer-events-none absolute -right-3 top-0 w-[140px]" />
       </div>
 
       <div className="mt-2 flex flex-1 flex-col rounded-t-sheet bg-surface px-5 pb-4 pt-1 shadow-e2">

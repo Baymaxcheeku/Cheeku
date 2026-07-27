@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { HeroScene } from "@/components/illustrations";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -27,15 +27,7 @@ export default function SplashPage() {
     // rectangle rather than a character.
     <main className="grid min-h-app place-items-center bg-canvas px-8 text-center">
       <div>
-        <Image
-          src="/illustrations/carousel-1.png"
-          alt=""
-          quality={92}
-          width={200}
-          height={200}
-          priority
-          className="mx-auto h-[180px] w-auto object-contain"
-        />
+        <HeroScene className="mx-auto w-[250px]" />
         <h1 className="mt-4 text-[30px] font-bold tracking-[-0.02em] text-ink-900">Baymax</h1>
         <p className="mt-1.5 text-[14px] text-ink-500">Your family&apos;s health companion</p>
         <Link

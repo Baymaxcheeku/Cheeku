@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Fraunces, Inter } from "next/font/google";
 
 import { DeviceFrame } from "@/components/device-frame";
+import { IllustrationDefs } from "@/components/illustrations/defs";
 
 import "./globals.css";
 
@@ -41,6 +42,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`${display.variable} ${editorial.variable} h-full`}>
       <body className="min-h-full antialiased">
+        {/* Gradients and filters the illustrations reference by id. Rendered
+            once here so the artwork itself can stay a server component. */}
+        <IllustrationDefs />
         <DeviceFrame>{children}</DeviceFrame>
       </body>
     </html>

@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import {
@@ -16,6 +15,7 @@ import {
   Weight,
 } from "lucide-react";
 
+import { MascotBust } from "@/components/illustrations";
 import { Headline, OnboardingHeader, ReassuranceStrip } from "@/components/onboarding/chrome";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -65,15 +65,7 @@ export default function ProfilePage() {
           <p className="mt-2 text-[13px] leading-relaxed text-ink-500">
             This helps Baymax personalize insights and keep your information more accurate.
           </p>
-          <Image
-            src="/illustrations/profile-hero.png"
-            alt=""
-            quality={92}
-            width={283}
-            height={182}
-            priority
-            className="illus-soft pointer-events-none absolute right-0 top-0 h-[100px] w-auto object-contain"
-          />
+          <MascotBust className="pointer-events-none absolute -right-2 top-0 w-[132px]" />
         </div>
 
         <Card className="mt-5 p-4">

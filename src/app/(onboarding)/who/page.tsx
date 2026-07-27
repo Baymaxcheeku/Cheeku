@@ -1,10 +1,10 @@
 "use client";
 
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { ArrowRight, ShieldCheck, Users, type LucideIcon } from "lucide-react";
 
+import { FamilyScene, PersonScene } from "@/components/illustrations";
 import { Headline, OnboardingHeader, ReassuranceStrip } from "@/components/onboarding/chrome";
 import { Button } from "@/components/ui/button";
 import { chooseAudience } from "@/lib/auth/actions";
@@ -17,21 +17,21 @@ const OPTIONS: readonly {
   title: string;
   body: string;
   badge: { icon: LucideIcon; label: string };
-  illustration: string;
+  Scene: typeof PersonScene;
 }[] = [
   {
     value: "me",
     title: "It's for me",
     body: "Manage and track my own health records.",
     badge: { icon: ShieldCheck, label: "Private. Secure. Just for you" },
-    illustration: "/illustrations/who-me.png",
+    Scene: PersonScene,
   },
   {
     value: "family",
     title: "It's for my family",
     body: "Manage health for my loved ones.",
     badge: { icon: Users, label: "Add and manage family members easily" },
-    illustration: "/illustrations/who-family.png",
+    Scene: FamilyScene,
   },
 ];
 
@@ -85,13 +85,7 @@ export default function WhoPage() {
                   onChange={() => setAudience(option.value)}
                   className="sr-only"
                 />
-                <Image
-                  src={option.illustration}
-                  alt=""
-                  width={96}
-                  height={96}
-                  className="h-[92px] w-[84px] shrink-0 object-contain"
-                />
+                <option.Scene className="h-[92px] w-[84px] shrink-0" />
                 <span className="min-w-0 flex-1">
                   <span className="flex items-center gap-2">
                     <span className="text-[15px] font-semibold text-ink-900">{option.title}</span>

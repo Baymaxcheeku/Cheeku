@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -8,7 +7,16 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import { Dots, Headline, ReassuranceStrip } from "@/components/onboarding/chrome";
 import { Button } from "@/components/ui/button";
+import { FamilyScene, HeroScene, InsightsScene, PrivacyScene } from "@/components/illustrations";
 import { PANELS } from "./panels";
+
+/* One scene per panel. Drawn, so they stay sharp and carry no backdrop. */
+const SCENES = {
+  hero: HeroScene,
+  privacy: PrivacyScene,
+  insights: InsightsScene,
+  family: FamilyScene,
+} as const;
 
 /** A2 — value carousel. Four panels, skippable, before any account exists. */
 export default function WelcomePage() {
@@ -18,6 +26,7 @@ export default function WelcomePage() {
   const isLast = index === PANELS.length - 1;
 
   if (!panel) return null;
+  const Scene = SCENES[panel.scene];
 
   function next() {
     if (isLast) router.push("/sign-in");
@@ -56,16 +65,8 @@ export default function WelcomePage() {
          * are mostly art and let it grow, panels 3 and 4 carry a chip grid or a
          * feature list and need it to give way so the CTA stays above the fold.
          */}
-        <div className="relative mt-3 min-h-[100px] flex-1">
-          <Image
-            src={panel.illustration}
-            alt=""
-            fill
-            priority={index === 0}
-            sizes="390px"
-            quality={92}
-            className="illus-soft object-contain object-top"
-          />
+        <div className="mt-3 flex min-h-[100px] flex-1 items-center justify-center">
+          <Scene className="max-h-full w-full max-w-[320px] object-contain" />
         </div>
 
         {panel.chips ? (

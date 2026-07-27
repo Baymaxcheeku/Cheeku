@@ -1,10 +1,10 @@
-import Image from "next/image";
 import Link from "next/link";
 import { Bell, CalendarDays, ChevronRight, FileText, HeartPulse, ShieldCheck } from "lucide-react";
 
 import { FamilySwitcher } from "@/components/app/family-switcher";
 import { HomeAskBox } from "@/components/app/home-ask-box";
 import { RecordRow } from "@/components/records/chrome";
+import { ReminderScene } from "@/components/illustrations";
 import { cn } from "@/lib/cn";
 import { activeProfile, familyProfiles } from "@/lib/profiles/context";
 import { formatEventDate } from "@/lib/records/grouping";
@@ -211,15 +211,7 @@ function InsightCard({
 
   return (
     <section className="relative mx-5 mt-4 overflow-hidden rounded-card bg-surface p-4 shadow-e1">
-      <Image
-        src="/illustrations/home-reminder.png"
-        alt=""
-        quality={92}
-        width={332}
-        height={313}
-        priority
-        className="illus-soft pointer-events-none absolute -right-3 bottom-0 h-[128px] w-auto object-contain"
-      />
+      <ReminderScene className="pointer-events-none absolute -right-3 bottom-0 w-[136px]" />
 
       <div className="relative pr-[38%]">
         <p className="text-[11px] font-bold uppercase tracking-wide text-brand-600">

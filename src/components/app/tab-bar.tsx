@@ -58,7 +58,7 @@ export function TabBar() {
                   href={tab.href}
                   aria-current={active ? "page" : undefined}
                   className={cn(
-                    "flex h-full flex-col items-center gap-1 rounded-tile px-1 pb-1.5 pt-1 text-[10px] font-medium transition-colors",
+                    "tappable flex h-full flex-col items-center gap-1 rounded-tile px-1 pb-1.5 pt-1 text-[10px] font-medium active:scale-95",
                     active ? "text-brand-600" : "text-ink-500 hover:text-ink-700",
                   )}
                 >
@@ -84,7 +84,7 @@ function FabSlot() {
       <Link
         href="/scan"
         aria-label="Add a document"
-        className="-mt-6 grid h-14 w-14 place-items-center rounded-pill bg-brand-600 text-surface shadow-e2 transition-colors hover:bg-brand-700"
+        className="tappable -mt-6 grid h-14 w-14 place-items-center rounded-pill bg-brand-600 text-surface shadow-e2 hover:bg-brand-700 active:scale-90"
       >
         <Plus size={26} strokeWidth={2.5} aria-hidden />
       </Link>

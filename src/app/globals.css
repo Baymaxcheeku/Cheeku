@@ -86,34 +86,83 @@
 }
 
 /*
- * Dissolves an illustration's rectangle into whatever is behind it.
+ * ---------------------------------------------------------------------------
+ * Motion
  *
- * The art is cropped from the mockup frames and carries their near-white
- * backdrop. It cannot be keyed out — the backdrop is (246,244,252) and Baymax's
- * own body is (252,251,253), so any tolerance that clears one erases the other.
- * Fading the outer edge in CSS is background-agnostic instead: it works the
- * same over a white card and over the brand gradient, and it can never bite
- * into the subject because it only touches the outermost few percent.
+ * Two rules govern everything here.
  *
- * Two masks intersected — one per axis — so all four edges fade rather than
- * just the corners.
+ * A transition must never delay the thing it decorates. Every duration below is
+ * under 300ms and nothing blocks interaction, because on a screen someone opens
+ * to check a lab result, a flourish that costs them a beat is a cost with no
+ * return.
+ *
+ * And it must never move what someone is about to touch. Screens fade and rise
+ * a few pixels; they do not slide in from the edge, because a button that is
+ * still travelling when a thumb arrives is a mis-tap.
+ *
+ * The reduced-motion block further down collapses all of this to ~0ms.
+ * ---------------------------------------------------------------------------
  */
-@utility illus-soft {
-  /*
-   * The fade is narrow — 4% — and deliberately so. At 9% it was wide enough to
-   * dissolve the subject on the smaller heroes, where the character already
-   * sits close to the crop edge, and Baymax came out as a ghost. This is only
-   * meant to soften the cut line, not to vignette the artwork.
-   */
-  -webkit-mask-image:
-    linear-gradient(to right, transparent 0%, #000 4%, #000 96%, transparent 100%),
-    linear-gradient(to bottom, transparent 0%, #000 4%, #000 96%, transparent 100%);
-  -webkit-mask-composite: source-in;
-  mask-image:
-    linear-gradient(to right, transparent 0%, #000 4%, #000 96%, transparent 100%),
-    linear-gradient(to bottom, transparent 0%, #000 4%, #000 96%, transparent 100%);
-  mask-composite: intersect;
+@keyframes screen-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
+
+@keyframes sheet-rise {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@keyframes scrim-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Applied by app/template.tsx, which React remounts on every navigation. */
+@utility screen-enter {
+  animation: screen-enter 260ms var(--ease-settle) both;
+}
+
+@utility sheet-rise {
+  animation: sheet-rise var(--d-sheet) var(--ease-settle) both;
+}
+
+@utility scrim-in {
+  animation: scrim-in var(--d-sheet) ease-out both;
+}
+
+/*
+ * Press feedback on anything tappable.
+ *
+ * `active:` rather than `:hover`, because the primary target is a touchscreen
+ * where hover does not exist. The scale is small — a control that visibly
+ * shrinks under a thumb reads as flimsy — and `touch-action: manipulation`
+ * removes the 300ms double-tap-zoom delay that otherwise makes every tap in the
+ * app feel a beat slow.
+ */
+@utility tappable {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform var(--d-tap) var(--ease-settle),
+    background-color var(--d-tap) ease,
+    opacity var(--d-tap) ease;
+}
+
 
 @theme inline {
   --color-brand-950: var(--brand-950);

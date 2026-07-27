@@ -39,7 +39,13 @@ export function Button({
     <Comp
       className={cn(
         "inline-flex items-center justify-center gap-2 rounded-pill font-semibold",
-        "transition-[filter,background-color] duration-150 ease-[var(--ease-settle)]",
+        "tappable",
+        /*
+         * 0.97, not 0.9. The press needs to be felt rather than watched — a
+         * primary CTA that visibly shrinks under a thumb reads as flimsy, and
+         * this one is often the last thing tapped before medical data is saved.
+         */
+        "active:scale-[0.97]",
         "disabled:pointer-events-none disabled:opacity-50",
         VARIANTS[variant],
         SIZES[size],

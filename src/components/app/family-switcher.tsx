@@ -142,7 +142,7 @@ export function FamilySwitcher({
               aria-checked={false}
               disabled={pending}
               onClick={() => choose(profile.id)}
-              className="flex shrink-0 flex-col items-center gap-1.5 px-1 py-1"
+              className="tappable flex shrink-0 flex-col items-center gap-1.5 px-1 py-1 active:scale-95"
             >
               <Avatar profile={profile} index={i} size={48} />
               <span className="max-w-[64px] truncate text-[11px] text-ink-500">{profile.name}</span>
@@ -156,7 +156,7 @@ export function FamilySwitcher({
         <button
           type="button"
           onClick={() => setSheetOpen(true)}
-          className="flex shrink-0 flex-col items-center gap-1.5 px-1 py-1"
+          className="tappable flex shrink-0 flex-col items-center gap-1.5 px-1 py-1 active:scale-95"
         >
           <span className="grid h-12 w-12 place-items-center rounded-pill border border-line bg-surface text-ink-500">
             <Users size={18} aria-hidden />
@@ -207,7 +207,7 @@ export function FamilySwitcherSheet({
         type="button"
         aria-label="Close"
         onClick={onClose}
-        className="absolute inset-0 bg-ink-900/35"
+        className="scrim-in absolute inset-0 bg-ink-900/35"
       />
 
       <div
@@ -215,7 +215,7 @@ export function FamilySwitcherSheet({
         aria-modal
         aria-label="Switch family member"
         className={cn(
-          "relative max-h-[86%] overflow-y-auto rounded-t-sheet bg-canvas px-5 pb-[calc(var(--safe-bottom)+1rem)] pt-3 shadow-e2",
+          "sheet-rise relative max-h-[86%] overflow-y-auto rounded-t-sheet bg-canvas px-5 pb-[calc(var(--safe-bottom)+1rem)] pt-3 shadow-e2",
           pending && "opacity-70",
         )}
       >

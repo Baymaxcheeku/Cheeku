@@ -1,8 +1,9 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { Camera, FolderUp, Mail, ShieldCheck, Sparkles, Upload } from "lucide-react";
+
+import { UploadScene } from "@/components/illustrations";
 
 import { Headline, OnboardingHeader } from "@/components/onboarding/chrome";
 import { Button } from "@/components/ui/button";
@@ -35,15 +36,7 @@ export default function FirstUploadPage() {
             <ShieldCheck size={12} aria-hidden />
             Secure · Private · Encrypted
           </p>
-          <Image
-            src="/illustrations/upload-hero.png"
-            alt=""
-            quality={92}
-            width={305}
-            height={210}
-            priority
-            className="illus-soft pointer-events-none absolute -right-3 top-0 h-[88px] w-auto object-contain"
-          />
+          <UploadScene className="pointer-events-none absolute -right-2 top-0 w-[128px]" />
         </div>
 
         <div className="mt-4 rounded-card border-2 border-dashed border-brand-200 bg-brand-50/50 px-5 py-4 text-center">

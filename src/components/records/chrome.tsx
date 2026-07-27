@@ -143,7 +143,7 @@ export function RecordRow({ record }: { record: RecordSummary }) {
     <li>
       <Link
         href={`/records/${record.id}`}
-        className="flex items-center gap-3 rounded-card bg-surface p-3 shadow-e1 transition-colors hover:bg-brand-50/40"
+        className="tappable flex items-center gap-3 rounded-card bg-surface p-3 shadow-e1 hover:bg-brand-50/40 active:scale-[0.99] active:bg-brand-50/60"
       >
         <FileChip mimeType={record.mimeType} />
 
