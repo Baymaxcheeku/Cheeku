@@ -282,4 +282,76 @@ frames draw, so each is recorded here rather than left as a silent edit:
 - Password reset (`/forgot-password`) is linked but not built; it needs a live
   mailer.
 
+## Supabase — connected · 2026-07-27
+
+The project is live: `mhriweqqtokdgyemvzuq`, region ap-southeast-2. All five
+migrations applied, the suite runs against it, and the seed data is in.
+
+**A migration runner, because the SQL Editor was not good enough**
+
+Pasting the migrations into the dashboard SQL Editor left the schema **half
+applied** — `families`, `profiles`, `documents` and `entities` existed,
+`timeline_events` onward did not. The editor reports only the first error and
+says nothing about how far a multi-statement paste got, so the failure was
+invisible until the tables were counted directly.
+
+`scripts/migrate.ts` (`pnpm db:migrate`, `pnpm db:reset`) replaces that. Each
+file runs in its own transaction, so a failure rolls that file back rather than
+leaving debris, and the error is reported with the file *and the line*, resolved
+from the Postgres character offset. `--reset` refuses to run if any table holds
+rows — a reset script that can quietly destroy real data is a liability, and
+this one will be pointed at a database with records in it eventually.
+
+**The isolation test had never actually run — and could not have**
+
+`profile-isolation.test.ts` reported "skipped, no project configured" for two
+phases. That was misleading: vitest does not load `.env.local`, so the variables
+it checks for were never going to be set, project or no project. It would have
+sat skipped forever while looking like it was merely waiting.
+
+Fixed in `vitest.config.ts` with `env: loadEnv("development", …)`. The mode is
+deliberately not `"test"` — Vite skips `.env.local` entirely in test mode, which
+would have silently reproduced the exact bug the line exists to fix.
+
+It now runs, against the real database, and **passes**: 18 assertions proving
+user A's every query path returns zero rows belonging to user B. The suite went
+from 64 passed / 18 skipped to **82 passed / 0 skipped**. This is the runtime
+half of the RLS guarantee, and until today only the static half was proven.
+
+**Verified against the live project**
+
+- 9 tables, all present. Seed: 1 family, 3 profiles, 9 documents, 20 entities,
+  7 timeline events, 1 consent record, 1 subscription.
+- Anonymous reads of `profiles` and `documents` return `[]` — RLS enforcing.
+- Storage bucket `documents`: `public=false`, 10MB cap, MIME allow-list of
+  jpeg/png/heic/pdf. Matches the app-layer validator.
+- The app switched itself to real Supabase auth on configuration
+  (`isSupabaseConfigured()`); the dev stand-in is no longer in the path.
+
+**Two findings from the live sign-up path**
+
+1. *Supabase rejects `@example.test` addresses outright.* An end-to-end attempt
+   through the UI failed with the generic credentials error, which looked like
+   an app bug and was not — the app correctly reported a real `signUp` failure.
+   Worth knowing before writing E2E fixtures against reserved TLDs.
+2. **Sign-ups are rate limited to roughly 2/hour.** Email confirmation is on and
+   no custom SMTP is configured, so every sign-up sends through Supabase's
+   built-in mailer, which is throttled hard. `email rate limit exceeded` will
+   block Phase 4 testing and anything resembling real use. Either turn off
+   "Confirm email" for development, or configure SMTP. **Unresolved — needs a
+   dashboard change.**
+
+The generic credentials message is right for production — distinguishing "no
+such account" from "wrong password" turns the form into an oracle for which
+emails are registered, and in a health app membership alone is sensitive. But it
+does mask these cases in development; a server-side log of the real reason
+(no PII) would be worth adding.
+
+**Deferred**
+
+- Rotate the secret key and the database password: both passed through a chat
+  transcript during setup.
+- `DATABASE_URL` is local tooling only, read by `scripts/migrate.ts` and never
+  by the app.
+
 ## Phase 4 — Memory core (D1–D3, C1–C2) · not started
