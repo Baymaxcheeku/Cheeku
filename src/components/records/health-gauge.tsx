@@ -16,10 +16,17 @@ const CX = 60;
 const CY = 60;
 const STROKE = 13;
 
-/** Point on the gauge circle at `deg`, measured from the left of the arc. */
-function point(deg: number) {
+/*
+ * The needle stops short of the arc's inner edge. Drawn to the same radius it
+ * crosses INTO the colour band, which reads as a rendering glitch rather than a
+ * pointer — the tip should aim at the band, not pierce it.
+ */
+const NEEDLE_R = R - STROKE / 2 - 6;
+
+/** Point at `deg` (measured from the left of the arc) and radius `r`. */
+function point(deg: number, r: number = R) {
   const rad = (Math.PI * (180 - deg)) / 180;
-  return { x: CX + R * Math.cos(rad), y: CY - R * Math.sin(rad) };
+  return { x: CX + r * Math.cos(rad), y: CY - r * Math.sin(rad) };
 }
 
 function arc(fromDeg: number, toDeg: number) {
@@ -41,7 +48,7 @@ const NEEDLE_DEG: Record<Severity, number> = {
 
 export function HealthGauge({ severity }: { severity: Severity }) {
   const deg = NEEDLE_DEG[severity];
-  const tip = point(deg);
+  const tip = point(deg, NEEDLE_R);
 
   return (
     <svg viewBox="0 0 120 72" className="h-[72px] w-[120px]" role="presentation" aria-hidden>
