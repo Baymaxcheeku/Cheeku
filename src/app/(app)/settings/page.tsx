@@ -1,16 +1,21 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import {
+  Bell,
   ChevronRight,
-  FileText,
+  CircleHelp,
   Globe,
+  HeartPulse,
   Info,
-  LifeBuoy,
-  Lock,
   ShieldCheck,
   UserCog,
 } from "lucide-react";
 
+import { AccountData } from "@/components/account/account-data";
+import { PlanCard } from "@/components/billing/plan-card";
 import { ProfileHeader } from "@/components/app/profile-header";
+import { MascotBust } from "@/components/illustrations";
+import { getEntitlement } from "@/lib/billing/quota";
 import { activeProfile, familyProfiles } from "@/lib/profiles/context";
 import { listProfileRecords, statsFrom } from "@/lib/records/queries";
 
@@ -19,72 +24,95 @@ export const dynamic = "force-dynamic";
 /**
  * I1 — profile and settings.
  *
- * Built here in Phase 5 rather than Phase 6 because the Profile tab existed in
- * the tab bar with nothing behind it, and the family switcher belongs on it:
- * the switcher was only reachable from Home, which made "whose profile am I
- * looking at" a question you could only answer by navigating away.
- *
- * The rows below are the real V1 settings surface. Export and delete land in
- * Phase 6 with working implementations — they are the two that must never be
- * decorative, so they say so rather than pretending.
+ * The two rows that matter most here are export and delete. DPDP gives people a
+ * right to their data and a right to have it erased; drawing those buttons and
+ * wiring them to nothing would be a promise the app is breaking. Both do the
+ * real thing — see lib/account/actions.ts.
  */
 export default async function SettingsPage() {
-  const [profiles, profile] = await Promise.all([familyProfiles(), activeProfile()]);
+  const [profiles, profile, entitlement] = await Promise.all([
+    familyProfiles(),
+    activeProfile(),
+    getEntitlement(),
+  ]);
 
-  if (!profile) {
-    return (
-      <main className="flex flex-1 flex-col justify-center px-5 py-10 text-center">
-        <h1 className="text-[22px] font-bold text-ink-900">No profile yet</h1>
-        <Link href="/profile" className="mt-4 text-[15px] font-semibold text-brand-600">
-          Create one
-        </Link>
-      </main>
-    );
-  }
+  if (!profile) redirect("/profile");
 
   const records = await listProfileRecords(profile.id);
   const stats = statsFrom(records);
 
   return (
     <div className="flex flex-1 flex-col pb-4">
-      <header className="px-5 pt-3">
-        <h1 className="text-[28px] font-bold leading-tight tracking-tight text-ink-900">Profile</h1>
-        <p className="mt-1 text-[14px] text-ink-500">Manage your family and your data.</p>
+      <header className="relative overflow-hidden px-5 pt-3">
+        <div className="relative pr-[34%]">
+          <h1 className="text-[28px] font-bold leading-tight tracking-tight text-ink-900">
+            Profile
+          </h1>
+          <p className="mt-1 text-[14px] leading-snug text-ink-500">
+            Manage your account and app settings.
+          </p>
+        </div>
+        <MascotBust className="pointer-events-none absolute -right-3 -top-2 w-[128px]" />
       </header>
 
-      <ProfileHeader profile={profile} profiles={profiles} recordCount={stats.total} />
+      <ProfileHeader
+        profile={profile}
+        profiles={profiles}
+        recordCount={stats.total}
+        tier={entitlement.tier}
+      />
+
+      <PlanCard entitlement={entitlement} />
 
       <nav className="mt-5 px-5">
-        <h2 className="text-[13px] font-semibold uppercase tracking-wide text-ink-300">
-          Your data
-        </h2>
-        <ul className="mt-2 overflow-hidden rounded-card bg-surface shadow-e1">
-          <Row icon={FileText} title="Your records" body={`${stats.total} documents`} href="/records" />
+        <ul className="overflow-hidden rounded-card bg-surface shadow-e1">
           <Row
-            icon={ShieldCheck}
-            title="Privacy and security"
-            body="How your data is protected"
-            soon="The privacy centre arrives with the account phase"
+            icon={UserCog}
+            title="Personal information"
+            body="Update your personal details"
+            href="/profile"
           />
           <Row
-            icon={Lock}
-            title="Export or delete everything"
-            body="Take your data out, or remove it"
-            soon="Export and delete are built in the account phase — they will work, not just appear"
+            icon={HeartPulse}
+            title="Health profile"
+            body="Manage your health summary"
+            href="/profile"
+          />
+          <Row
+            icon={ShieldCheck}
+            title="Security & privacy"
+            body="How your data is protected"
+            soon="The privacy centre arrives in a later phase"
+          />
+          <Row
+            icon={Bell}
+            title="Notifications"
+            body="Manage alerts and reminders"
+            soon="Notifications are not part of V1"
+          />
+          <Row
+            icon={Globe}
+            title="Language"
+            body="English"
+            soon="More languages arrive later"
           />
         </ul>
 
-        <h2 className="mt-5 text-[13px] font-semibold uppercase tracking-wide text-ink-300">App</h2>
-        <ul className="mt-2 overflow-hidden rounded-card bg-surface shadow-e1">
-          <Row icon={UserCog} title="Edit profile" body="Name, date of birth, health details" href="/profile" />
-          <Row icon={Globe} title="Language" body="English" soon="More languages arrive later" />
-          <Row icon={LifeBuoy} title="Help and support" body="Get in touch" soon="Coming soon" />
-          <Row icon={Info} title="About Baymax" body="Version 0.5 · V1 build" soon="Coming soon" />
+        <ul className="mt-3 overflow-hidden rounded-card bg-surface shadow-e1">
+          <Row
+            icon={CircleHelp}
+            title="Help & support"
+            body="Get help and view resources"
+            soon="Support arrives with the account phase"
+          />
+          <Row icon={Info} title="About Baymax" body="Version 0.6 · V1 build" soon="Coming soon" />
         </ul>
       </nav>
 
-      <p className="mx-5 mt-5 flex items-start gap-2 rounded-card bg-brand-50 px-3.5 py-3 text-[12px] leading-snug text-ink-500">
-        <ShieldCheck size={15} className="mt-0.5 shrink-0 text-brand-500" aria-hidden />
+      <AccountData />
+
+      <p className="mx-5 mt-4 flex items-start gap-2 rounded-card bg-brand-50 px-4 py-3.5 text-[12px] leading-snug text-ink-500">
+        <ShieldCheck size={16} className="mt-px shrink-0 text-brand-500" aria-hidden />
         <span>
           Baymax never sells your data and never shares it outside your family. It gives helpful
           information, not medical advice.
@@ -101,7 +129,7 @@ function Row({
   href,
   soon,
 }: {
-  icon: typeof FileText;
+  icon: typeof Bell;
   title: string;
   body: string;
   href?: string;
@@ -123,11 +151,11 @@ function Row({
   return (
     <li className="border-b border-line last:border-b-0">
       {href ? (
-        <Link href={href} className="flex items-center gap-3 p-3">
+        <Link href={href} className="tappable flex items-center gap-3 p-3 active:scale-[0.99]">
           {inner}
         </Link>
       ) : (
-        <div title={soon} aria-disabled className="flex items-center gap-3 p-3 opacity-55">
+        <div title={soon} className="flex items-center gap-3 p-3 opacity-55">
           {inner}
         </div>
       )}

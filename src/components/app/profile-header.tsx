@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Users } from "lucide-react";
 
 import { FamilySwitcherSheet } from "./family-switcher";
+import { planFor, type Tier } from "@/lib/billing/plans";
 import type { ActiveProfile } from "@/lib/profiles/context";
 
 /**
@@ -19,10 +20,12 @@ export function ProfileHeader({
   profile,
   profiles,
   recordCount,
+  tier,
 }: {
   profile: ActiveProfile;
   profiles: readonly ActiveProfile[];
   recordCount: number;
+  tier: Tier;
 }) {
   const [open, setOpen] = useState(false);
 
@@ -44,6 +47,9 @@ export function ProfileHeader({
               {profile.isPrimary ? "Your own profile" : (profile.relationship ?? "Family member")} ·{" "}
               {recordCount} record{recordCount === 1 ? "" : "s"}
             </p>
+            <span className="mt-1.5 inline-block rounded-pill bg-brand-50 px-2.5 py-1 text-[11px] font-semibold text-brand-700">
+              {planFor(tier).name}
+            </span>
           </div>
         </div>
 
