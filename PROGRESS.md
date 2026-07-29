@@ -471,4 +471,186 @@ Gate: typecheck, lint, **105 tests** (was 82), build clean.
    is advice the record does not support; the insight card states what is
    out of range and defers to a doctor instead.
 
-## Phase 5 — Companion (E1–E2, F1, B1–B2) · not started
+## Phase 5 — Companion (B1–B2, E1–E2) · complete
+
+**Built**
+
+- **B1 home** — greeting, the family switcher row, one insight, the Health
+  Summary pills and the Ask Baymax panel. Everything is scoped to the active
+  member: switching to Amma changes the greeting, the counts, the insight and
+  the recent records together, or the screen is lying about whose health it is
+  showing.
+- **B2 family switcher** — the inline row and the full sheet, shared by Home and
+  the Profile tab. The active member lives in an httpOnly cookie so server
+  components can scope their queries by it, and is re-validated against the
+  caller's own profiles on every read: a client-supplied profile id must never
+  be trusted to name a row.
+- **E1/E2 Ask Baymax** — grounded answers with citations that open the cited
+  record, suggestion chips, and the safety gate in front of every send.
+- **G1 safety escalation** — the frames' three steps, behind a hard gate.
+
+**The safety gate**
+
+It runs client-side, as the first statement in `send()`. Rule 2 wants
+deterministic and under 200ms, and a network round trip promises neither. There
+is exactly one send path, because a second way to reach the model would be a
+second place to forget the gate.
+
+Which rule fired decides what is offered. A self-harm disclosure routes to
+Tele-MANAS (14416) and KIRAN, **not** an ambulance — offering one there reads as
+a threat of forced hospitalisation and is a known reason people stop talking. An
+overdose routes to 112/108 first with the mental health line appended, because
+swallowing poison needs the body treated within minutes whatever the intent.
+Nine tests pin the routing, one of which asserts the rule ids still exist in the
+generated lexicon, so renaming a rule fails loudly rather than misrouting a
+crisis.
+
+Escalated questions are written to the transcript with `safety_status =
+'escalated'` and no assistant reply. A safety audit that cannot see what was
+said is not an audit; `messages` is append-only for this reason.
+
+**The biggest divergence in the project so far**
+
+The two Ask Baymax frames contain answer text that breaks product rule 1
+outright:
+
+> *"During pregnancy, Hb levels below 11 g/dL may indicate mild anemia"* — a
+> diagnosis.
+> *"Vitamin D3 supplement: 2000–4000 IU daily for 8–12 weeks"* — a dosage.
+> *"It's common and treatable with proper nutrition and iron supplements"* —
+> treatment advice.
+
+Rule 1 is "never diagnoses, never prescribes, never gives dosages", and the
+standing ruling is design fidelity **except** where it costs the safety
+guarantee. So the frames' layout, bubbles, chips, composer and numbered
+"Sources & citations" block are reproduced exactly; the answer content is not.
+
+The engine states what the documents say, reports the direction of a change
+between two readings, and defers interpretation. When nothing matches it says so
+— `grounded: false` — rather than reaching for general knowledge, which is the
+point at which a health app starts being confidently wrong. Ten tests exist to
+stop the frames' copy being reintroduced.
+
+The frames also cite journal papers (Endocrine Society, NEJM). Citations here
+point at the reader's own documents instead, per the spec's flow and because a
+citation the reader cannot open is decoration.
+
+**Also deliberate**
+
+- Step 3 of the escalation marks "Notified your emergency contacts" as
+  *Completed* in the frame. Nothing is sent — there is no contact list in V1 —
+  and telling someone their family has been alerted when it has not could stop
+  them calling anyone themselves. It reports only what actually happened.
+- The home insight card keeps the frame's shape but not its content. The frame
+  shows an appointment reminder; scheduling does not exist, and inventing a due
+  date for a medical test is a fabricated clinical prompt.
+- Avatar rings use six non-semantic hues. The frames' rings are green/orange/
+  purple, but those three mean health severity here, and a green ring around a
+  face reads as a verdict on that person.
+
+**Dropped from V1**
+
+- **F1 pre-consult brief.** Cut deliberately, not deferred by accident.
+
+**Fixed along the way**
+
+1. *Sheets escaped the phone shell.* `position: fixed` resolves against the
+   browser viewport; `.device-screen` now establishes a containing block via
+   `transform`. This would have hit the emergency interrupt too.
+2. *The migration runner had no ledger*, so every run replayed 0001 and died on
+   "families already exists" — a seventh migration could not be applied at all.
+   It now records each file inside its own transaction and adopts a pre-ledger
+   database by checking the objects exist.
+3. *A multi-row insert broke every chat message.* PostgREST builds one column
+   list from the union of the rows and sends NULL for any key a row is missing,
+   so omitting `citations` on the user row violated NOT NULL rather than falling
+   back to the column default.
+
+## Phase 6 — Monetisation and account (H1–H2, I1) · complete
+
+**Quota**
+
+Entitlement is decided server-side from the database, on the way in to the
+action being gated. A limit enforced in the UI is a limit enforced for people
+who do not open dev tools. The check and the increment are one operation:
+reading, deciding and then incrementing separately leaves a window where two
+requests both see the last remaining chat.
+
+`subscriptions` has no update policy by design, so tier and counter writes go
+through a service-role client. Every call there is keyed on a `family_id`
+derived from `requireUser()` — RLS is not there to catch a mistake in that file.
+
+**The paywall keeps the question**
+
+Hitting the wall mid-thought and being made to retype after paying is what turns
+a paywall into a toll booth. The question is held, shown back under "Your
+question is saved", auto-sent on activation, and returned to the composer if the
+sheet is closed instead. Verified end to end.
+
+**No payment credentials are collected**
+
+The frames draw a UPI-and-card chooser and that is drawn, but choosing a method
+is as far as it goes. Authorisation belongs in the provider's own sheet, where
+it is their PCI scope. The copy says so, and stays true when a real provider is
+wired in. `activateTier` is the only thing that moves a family onto a plan, so a
+real webhook calls that and nothing else changes.
+
+**Export and delete are real**
+
+DPDP gives people a right to their data and a right to have it erased; drawing
+those buttons and wiring them to nothing is a promise the app is breaking.
+
+Export reads through the **anon** client so RLS decides what comes back — using
+the service key there would work and would be wrong, because the one place a bug
+hands over another family's records is the place that hands data out. Verified:
+3 profiles, 10 documents, 12 messages.
+
+Delete removes storage objects **before** rows. The object keys live on the
+document rows; deleting rows first orphans every file in the bucket with no way
+left to find them — the user is told their data is gone while their medical
+documents stay on disk forever. A storage failure aborts before any row is
+touched. Verified on a throwaway account: every row cascaded, the file was gone,
+no orphan. `consent_log` survives deliberately — it is the record that consent
+was given and withdrawn, and carries no health data.
+
+**Two frame conflicts, flagged rather than silently resolved**
+
+1. *The free chat limit is 5, not the spec's 3.* The chat frame says "Free users
+   can have 5 chats with Baymax"; frames win.
+2. *The prices are ₹99 Solo and ₹249 Family.* The profile screen, both paywall
+   screens and the paywall filenames all agree. The chat-limit frame's ₹499 /
+   ₹899 / ₹29-a-day is the outlier and was not used.
+
+**Not built**
+
+- **C3 camera verdict.** Not started.
+- Real payment provider, by design.
+
+## Phase 7 — Hardening · in progress
+
+**Done**
+
+- **Loading, error, not-found and offline states.** An unhandled throw used to
+  show Next's default page — a bare stack trace on white, on a screen that was
+  showing medical records a moment earlier. The error text is never rendered:
+  a database error can carry column names and row fragments. Verified against a
+  production build with a deliberately incriminating message; it appears nowhere
+  in the HTML. Dev *does* inline it, which is Next's overlay rather than a
+  production leak, but is worth knowing before anyone screenshots a dev error.
+- **Security sweep.** Every app table has RLS with real policies and no
+  `using(true)`. No `console.*` in `src`. No `getPublicUrl` anywhere — signed
+  URLs only, 60s. All six security headers verified live. Service-key usage
+  audited: two files, both server-only, both scoped by `requireUser()`.
+- **`schema_migrations` shipped without RLS** — it is created by the migration
+  runner rather than a migration, so it never went through the "no table ships
+  without policies" rule. Only filenames, but exposed via PostgREST to anyone
+  with the publishable key. Migration 0007 makes it deny-all; verified.
+
+**Still open**
+
+- Playwright E2E on the four core flows.
+- Lighthouse pass.
+- Rate limiting on auth and AI endpoints. Quota covers free-tier AI cost; paid
+  tiers and the auth endpoints are still unbounded, and a durable store is
+  needed to do this properly.
+- `README.md`, `SECURITY.md`, `PRIVACY_NOTES.md`.
