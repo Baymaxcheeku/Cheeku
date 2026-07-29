@@ -1,3 +1,4 @@
+import { OfflineBanner } from "@/components/app/screen-states";
 import { TabBar } from "@/components/app/tab-bar";
 
 /*
@@ -15,6 +16,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-app flex-col bg-canvas pt-[var(--safe-top)]">
       {children}
+      {/* Above the tab bar, not replacing the screen: cached records stay
+          readable offline, and blanking them removes the one thing the app can
+          still usefully do. */}
+      <OfflineBanner />
       <TabBar />
     </div>
   );
