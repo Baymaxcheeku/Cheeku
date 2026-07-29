@@ -55,7 +55,7 @@ export default async function HomePage() {
   const newest = records[0];
 
   return (
-    <div className="flex flex-1 flex-col pb-4">
+    <div className="stagger flex flex-1 flex-col pb-4">
       <header className="flex items-start gap-3 px-5 pt-3">
         <div className="min-w-0 flex-1">
           <p className="text-[20px] leading-tight text-ink-900">{greeting()},</p>

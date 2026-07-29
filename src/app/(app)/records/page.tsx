@@ -53,7 +53,7 @@ export default async function RecordsPage({
   const filtered = Boolean(requested ?? one("docType") ?? one("period"));
 
   return (
-    <div className="flex flex-1 flex-col pb-4">
+    <div className="stagger flex flex-1 flex-col pb-4">
       <RecordsHeader title="My Records" subtitle="All your health documents in one place." />
 
       <FilterBar profiles={profiles} showPeriod={false} defaultProfileId={active?.id} />

@@ -42,7 +42,7 @@ export default async function SettingsPage() {
   const stats = statsFrom(records);
 
   return (
-    <div className="flex flex-1 flex-col pb-4">
+    <div className="stagger flex flex-1 flex-col pb-4">
       <header className="relative overflow-hidden px-5 pt-3">
         <div className="relative pr-[34%]">
           <h1 className="text-[28px] font-bold leading-tight tracking-tight text-ink-900">

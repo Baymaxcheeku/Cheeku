@@ -42,7 +42,7 @@ export default async function TimelinePage({
   const filtered = Boolean(one("profileId") ?? one("docType") ?? one("period"));
 
   return (
-    <div className="flex flex-1 flex-col pb-4">
+    <div className="stagger flex flex-1 flex-col pb-4">
       <RecordsHeader
         title="Timeline"
         subtitle="View your health records over time."

@@ -67,37 +67,47 @@ function Sparkle({
   );
 }
 
-/** The mascot: head, body, arms. Shared by every scene that needs the character. */
+/**
+ * The mascot, shaded for volume.
+ *
+ * Each form gets the same four layers, in this order: the radial base, an
+ * ambient-occlusion overlay that sinks the rim, a blurred specular highlight
+ * inside the silhouette, and — where it meets the ground — a contact shadow.
+ * The flat version of this looked like clip art, and the difference is entirely
+ * these layers rather than the outline.
+ */
 function Mascot({ x = 0, y = 0, s = 1 }: { x?: number; y?: number; s?: number }) {
   return (
     <g transform={`translate(${x} ${y}) scale(${s})`}>
-      {/* Far arm, behind the body and a shade darker so it reads as depth. */}
-      <path
-        d="M 22 96 q -30 10 -34 40 q -2 20 16 24 q 18 3 26 -14 z"
-        fill="url(#bx-shell-shade)"
-      />
-      <path
-        d="M 138 96 q 30 10 34 40 q 2 20 -16 24 q -18 3 -26 -14 z"
-        fill="url(#bx-shell-shade)"
-      />
+      {/* Contact shadow first, so everything else sits on top of it. */}
+      <ellipse cx="80" cy="180" rx="62" ry="13" fill="url(#bx-ground)" />
 
-      {/* Body: a soft, wide capsule. */}
+      {/* Arms, behind and a stop darker so they read as further away. */}
+      <path d="M 24 98 q -32 12 -36 44 q -2 21 17 25 q 19 3 27 -15 z" fill="url(#bx-shell-shade)" />
+      <path d="M 136 98 q 32 12 36 44 q 2 21 -17 25 q -19 3 -27 -15 z" fill="url(#bx-shell-shade)" />
+
+      {/* Body. */}
       <path
         d="M 80 62 c 44 0 62 30 62 62 c 0 34 -26 52 -62 52 c -36 0 -62 -18 -62 -52 c 0 -32 18 -62 62 -62 z"
         fill="url(#bx-shell)"
       />
-
-      {/* The care indicator on the chest — a circle with a soft cross. */}
-      <circle cx="80" cy="128" r="15" fill="none" stroke="#d8d8ea" strokeWidth="2.6" />
       <path
-        d="M 80 121 v 14 M 73 128 h 14"
-        stroke="#c9c9e0"
-        strokeWidth="2.6"
-        strokeLinecap="round"
+        d="M 80 62 c 44 0 62 30 62 62 c 0 34 -26 52 -62 52 c -36 0 -62 -18 -62 -52 c 0 -32 18 -62 62 -62 z"
+        fill="url(#bx-ao)"
       />
+      <ellipse cx="52" cy="104" rx="22" ry="30" fill="url(#bx-spec)" filter="url(#bx-blur)" opacity="0.6" />
 
-      {/* Head: wider than tall, sitting slightly over the body. */}
+      {/* Where the head overlaps the body — the shadow that makes it sit ON. */}
+      <ellipse cx="80" cy="86" rx="46" ry="14" fill="#2a2a5c" opacity="0.09" filter="url(#bx-blur)" />
+
+      {/* The care indicator. */}
+      <circle cx="80" cy="132" r="14" fill="none" stroke="#cfcfe4" strokeWidth="2.4" />
+      <path d="M 80 125 v 14 M 73 132 h 14" stroke="#c2c2da" strokeWidth="2.4" strokeLinecap="round" />
+
+      {/* Head. */}
       <ellipse cx="80" cy="52" rx="52" ry="40" fill="url(#bx-shell)" />
+      <ellipse cx="80" cy="52" rx="52" ry="40" fill="url(#bx-ao)" />
+      <ellipse cx="58" cy="34" rx="20" ry="13" fill="url(#bx-spec)" filter="url(#bx-blur)" />
       <Face cx={80} cy={52} />
     </g>
   );
@@ -190,9 +200,15 @@ export function MascotAlert({
             </g>
           ) : null}
 
+          <ellipse cx="80" cy="176" rx="60" ry="12" fill="url(#bx-ground)" />
           <path d="M 80 62 c 44 0 62 30 62 62 c 0 34 -26 52 -62 52 c -36 0 -62 -18 -62 -52 c 0 -32 18 -62 62 -62 z" fill="url(#bx-shell)" />
-          <circle cx="80" cy="128" r="13" fill="none" stroke="#dcdcec" strokeWidth="2.4" />
+          <path d="M 80 62 c 44 0 62 30 62 62 c 0 34 -26 52 -62 52 c -36 0 -62 -18 -62 -52 c 0 -32 18 -62 62 -62 z" fill="url(#bx-ao)" />
+          <ellipse cx="52" cy="104" rx="21" ry="29" fill="url(#bx-spec)" filter="url(#bx-blur)" opacity="0.6" />
+          <circle cx="80" cy="128" r="13" fill="none" stroke="#d2d2e6" strokeWidth="2.4" />
+          <ellipse cx="80" cy="86" rx="46" ry="13" fill="#2a2a5c" opacity="0.09" filter="url(#bx-blur)" />
           <ellipse cx="80" cy="52" rx="52" ry="40" fill="url(#bx-shell)" />
+          <ellipse cx="80" cy="52" rx="52" ry="40" fill="url(#bx-ao)" />
+          <ellipse cx="58" cy="34" rx="20" ry="13" fill="url(#bx-spec)" filter="url(#bx-blur)" />
           <Face cx={80} cy={52} />
 
           {/* A phone, for the step that is about making a call. */}
@@ -256,8 +272,14 @@ export function MascotBust({ className }: ArtProps) {
 
       <g filter="url(#bx-lift)">
         <g transform="translate(20 26) scale(0.72)">
+          <ellipse cx="80" cy="176" rx="60" ry="12" fill="url(#bx-ground)" />
           <path d="M 80 62 c 44 0 62 30 62 62 c 0 34 -26 52 -62 52 c -36 0 -62 -18 -62 -52 c 0 -32 18 -62 62 -62 z" fill="url(#bx-shell)" />
+          <path d="M 80 62 c 44 0 62 30 62 62 c 0 34 -26 52 -62 52 c -36 0 -62 -18 -62 -52 c 0 -32 18 -62 62 -62 z" fill="url(#bx-ao)" />
+          <ellipse cx="52" cy="104" rx="21" ry="29" fill="url(#bx-spec)" filter="url(#bx-blur)" opacity="0.6" />
+          <ellipse cx="80" cy="86" rx="46" ry="13" fill="#2a2a5c" opacity="0.09" filter="url(#bx-blur)" />
           <ellipse cx="80" cy="52" rx="52" ry="40" fill="url(#bx-shell)" />
+          <ellipse cx="80" cy="52" rx="52" ry="40" fill="url(#bx-ao)" />
+          <ellipse cx="58" cy="34" rx="20" ry="13" fill="url(#bx-spec)" filter="url(#bx-blur)" />
           <Face cx={80} cy={52} />
         </g>
       </g>
@@ -280,8 +302,14 @@ export function UploadScene({ className }: ArtProps) {
 
       <g filter="url(#bx-lift)">
         <g transform="translate(38 22) scale(0.68)">
+          <ellipse cx="80" cy="176" rx="60" ry="12" fill="url(#bx-ground)" />
           <path d="M 80 62 c 44 0 62 30 62 62 c 0 34 -26 52 -62 52 c -36 0 -62 -18 -62 -52 c 0 -32 18 -62 62 -62 z" fill="url(#bx-shell)" />
+          <path d="M 80 62 c 44 0 62 30 62 62 c 0 34 -26 52 -62 52 c -36 0 -62 -18 -62 -52 c 0 -32 18 -62 62 -62 z" fill="url(#bx-ao)" />
+          <ellipse cx="52" cy="104" rx="21" ry="29" fill="url(#bx-spec)" filter="url(#bx-blur)" opacity="0.6" />
+          <ellipse cx="80" cy="86" rx="46" ry="13" fill="#2a2a5c" opacity="0.09" filter="url(#bx-blur)" />
           <ellipse cx="80" cy="52" rx="52" ry="40" fill="url(#bx-shell)" />
+          <ellipse cx="80" cy="52" rx="52" ry="40" fill="url(#bx-ao)" />
+          <ellipse cx="58" cy="34" rx="20" ry="13" fill="url(#bx-spec)" filter="url(#bx-blur)" />
           <Face cx={80} cy={52} />
         </g>
       </g>
@@ -321,19 +349,16 @@ export function ReminderScene({ className }: ArtProps) {
         opacity="0.34"
       />
 
+      {/* Bell: crown, body, clapper — three explicit pieces. Describing the
+          whole silhouette in one clever curve rendered as a blob. */}
       <g filter="url(#bx-lift)">
-        {/*
-         * The bell is drawn as three explicit pieces — crown loop, body, clapper
-         * — rather than one clever path. The first attempt tried to describe the
-         * whole silhouette in a single curve and rendered as a blob.
-         */}
+        <ellipse cx="92" cy="148" rx="52" ry="11" fill="url(#bx-ground)" />
         <path
           d="M 82 40 a 9 9 0 0 1 18 0 a 9 9 0 0 1 -18 0 z"
           fill="none"
-          stroke="url(#bx-field)"
+          stroke="url(#bx-purple)"
           strokeWidth="7"
         />
-        {/* Body: straight-ish shoulders, flaring to a wide skirt, flat rim. */}
         <path
           d="M 91 48
              c -22 0 -34 18 -36 44
@@ -343,15 +368,31 @@ export function ReminderScene({ className }: ArtProps) {
              a 4 4 0 0 0 3 -7
              c -7 -6 -11.4 -16 -13 -34
              c -2 -26 -14 -44 -36 -44 z"
-          fill="url(#bx-field)"
+          fill="url(#bx-purple)"
         />
-        <path d="M 78 133 a 13 13 0 0 0 26 0 z" fill="url(#bx-field)" />
+        {/* Rim darkening, then the sheen down the lit side. */}
+        <path
+          d="M 91 48
+             c -22 0 -34 18 -36 44
+             c -1.6 18 -6 28 -13 34
+             a 4 4 0 0 0 3 7
+             h 92
+             a 4 4 0 0 0 3 -7
+             c -7 -6 -11.4 -16 -13 -34
+             c -2 -26 -14 -44 -36 -44 z"
+          fill="url(#bx-ao)"
+        />
+        <ellipse cx="70" cy="82" rx="11" ry="26" fill="url(#bx-spec)" filter="url(#bx-blur)" opacity="0.75" />
+        <path d="M 78 133 a 13 13 0 0 0 26 0 z" fill="url(#bx-purple)" />
+        <path d="M 78 133 a 13 13 0 0 0 26 0 z" fill="url(#bx-ao)" />
       </g>
 
       {/* Calendar, overlapping the bell's lower right. */}
       <g filter="url(#bx-lift-sm)">
         <rect x="116" y="86" width="68" height="64" rx="13" fill="url(#bx-card)" />
-        <path d="M 116 99 a 13 13 0 0 1 13 -13 h 42 a 13 13 0 0 1 13 13 v 4 h -68 z" fill="#ded9fb" />
+        <rect x="116" y="86" width="68" height="64" rx="13" fill="url(#bx-ao)" />
+        <path d="M 116 99 a 13 13 0 0 1 13 -13 h 42 a 13 13 0 0 1 13 13 v 4 h -68 z" fill="url(#bx-purple)" opacity="0.55" />
+        <ellipse cx="134" cy="112" rx="10" ry="14" fill="url(#bx-spec)" filter="url(#bx-blur-sm)" opacity="0.7" />
         <rect x="130" y="78" width="7" height="17" rx="3.5" fill="#9d94ee" />
         <rect x="163" y="78" width="7" height="17" rx="3.5" fill="#9d94ee" />
         <text

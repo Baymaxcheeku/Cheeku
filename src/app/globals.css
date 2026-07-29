@@ -106,7 +106,27 @@
 @keyframes screen-enter {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(10px) scale(0.994);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/*
+ * The staggered rise, applied to a screen's own sections.
+ *
+ * A screen that fades in as one flat plane reads as a page load. Letting the
+ * blocks arrive a few tens of milliseconds apart reads as the screen
+ * assembling, which is what makes a native app feel considered. The offsets are
+ * small — the last one lands at 150ms, so nothing is ever waiting on the
+ * animation to become tappable.
+ */
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
   }
   to {
     opacity: 1;
@@ -134,7 +154,36 @@
 
 /* Applied by app/template.tsx, which React remounts on every navigation. */
 @utility screen-enter {
-  animation: screen-enter 260ms var(--ease-settle) both;
+  animation: screen-enter 280ms var(--ease-settle) both;
+}
+
+/*
+ * Children of a `stagger` container rise in sequence. Capped at six, after
+ * which everything shares the last delay — a list of thirty rows must not take
+ * a second and a half to finish arriving.
+ */
+@utility stagger {
+  & > * {
+    animation: rise-in 320ms var(--ease-settle) both;
+  }
+  & > *:nth-child(1) {
+    animation-delay: 0ms;
+  }
+  & > *:nth-child(2) {
+    animation-delay: 40ms;
+  }
+  & > *:nth-child(3) {
+    animation-delay: 80ms;
+  }
+  & > *:nth-child(4) {
+    animation-delay: 110ms;
+  }
+  & > *:nth-child(5) {
+    animation-delay: 135ms;
+  }
+  & > *:nth-child(n + 6) {
+    animation-delay: 150ms;
+  }
 }
 
 @utility sheet-rise {
