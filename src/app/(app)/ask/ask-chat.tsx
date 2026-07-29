@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { ArrowUp, FileText, Loader2, ShieldCheck, Sparkles, TriangleAlert } from "lucide-react";
 
+import { Paywall } from "@/components/billing/paywall";
 import { MascotBust } from "@/components/illustrations";
 import { EmergencyEscalation } from "@/components/safety/emergency-escalation";
 import { cn } from "@/lib/cn";
@@ -41,6 +42,14 @@ export function AskChat({
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [draft, setDraft] = useState("");
   const [escalation, setEscalation] = useState<SafetyResult | null>(null);
+  /*
+   * The question that hit the quota wall. Held here rather than cleared, so it
+   * can be sent the moment the plan activates — losing what someone typed and
+   * making them retype it after paying is what turns a paywall into a toll
+   * booth. `sendRef` lets the paywall's callback reach the current `send`
+   * without making `send` a dependency of its own definition.
+   */
+  const [blockedQuestion, setBlockedQuestion] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
 
@@ -78,6 +87,11 @@ export function AskChat({
     start(async () => {
       const result = await askBaymax(text, conversationId, status);
       if (!result.ok) {
+        if (result.quota) {
+          // Not an error — hold the question and offer the plan.
+          setBlockedQuestion(text);
+          return;
+        }
         setError(result.message);
         setDraft(text);
         return;
@@ -267,6 +281,22 @@ export function AskChat({
       {escalation ? (
         <EmergencyEscalation result={escalation} onDismiss={() => setEscalation(null)} />
       ) : null}
+
+      <Paywall
+        open={blockedQuestion !== null}
+        pendingQuestion={blockedQuestion ?? undefined}
+        onClose={() => {
+          // Closing without paying returns the question to the composer rather
+          // than discarding it.
+          if (blockedQuestion) setDraft(blockedQuestion);
+          setBlockedQuestion(null);
+        }}
+        onActivated={() => {
+          const question = blockedQuestion;
+          setBlockedQuestion(null);
+          if (question) send(question);
+        }}
+      />
     </div>
   );
 }

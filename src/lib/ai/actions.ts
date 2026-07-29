@@ -1,6 +1,7 @@
 "use server";
 
 import { answerQuestion, type Citation, type GroundingRecord } from "@/lib/ai/mock/answer";
+import { consumeChat } from "@/lib/billing/quota";
 import { activeProfile } from "@/lib/profiles/context";
 import { listProfileRecords } from "@/lib/records/queries";
 import { createServerSupabase, requireUser } from "@/lib/supabase/server";
@@ -32,7 +33,14 @@ export type ChatTurn = {
 
 export type AskResult =
   | { ok: true; conversationId: string; user: ChatTurn; assistant: ChatTurn }
-  | { ok: false; message: string };
+  /*
+   * `quota` is separate from a plain failure because the client does something
+   * entirely different with it: it holds the question and opens the paywall,
+   * rather than showing an error. Collapsing the two would mean parsing a
+   * message string to decide, which is how the pending question gets lost.
+   */
+  | { ok: false; quota: true; message: string }
+  | { ok: false; quota?: false; message: string };
 
 export async function askBaymax(
   question: string,
@@ -49,6 +57,22 @@ export async function askBaymax(
   const supabase = await createServerSupabase();
   const profile = await activeProfile();
   if (!profile) return { ok: false, message: "Set up a profile before asking." };
+
+  /*
+   * The quota gate, on the way in. Entitlement is decided here from the
+   * database, not from anything the client sent — a limit enforced in the UI is
+   * a limit enforced for people who do not open dev tools.
+   *
+   * It sits after the profile check and before any work, so a refused chat
+   * costs nothing and is never written to the transcript.
+   */
+  if (!(await consumeChat())) {
+    return {
+      ok: false,
+      quota: true,
+      message: "You've used your free chats for this month.",
+    };
+  }
 
   /*
    * Grounding is scoped to the ACTIVE PROFILE, not the account. This is rule 3
