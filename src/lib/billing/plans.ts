@@ -14,11 +14,19 @@
  *    Two frames plus the filenames agree, one does not, so ₹99 and ₹249 are
  *    used and the outlier is flagged rather than silently averaged.
  *
+ *    RESOLVED FURTHER, 2026-07-30: Athar asked for the chooser to offer "all
+ *    three — daily, 99rs and 249". So the ₹29/day plan from the outlier frame
+ *    is adopted (it is a real product idea, and the only part of that frame
+ *    that wasn't a price conflict), while its ₹499/₹899 pricing stays rejected.
+ *
  * Prices are held in paise. Storing ₹99 as a float and multiplying it by
  * anything is how billing bugs start.
  */
 
 export type Tier = "free" | "micro" | "solo" | "family";
+
+/** How long a Daily pass lasts once bought. */
+export const DAILY_PASS_HOURS = 24;
 
 export type Plan = {
   tier: Tier;
@@ -35,7 +43,29 @@ export type Plan = {
 
 export const FREE_CHAT_LIMIT = 5;
 
-export const PLANS: Record<Exclude<Tier, "free" | "micro">, Plan> = {
+export const PLANS: Record<Exclude<Tier, "free">, Plan> = {
+  /*
+   * The Daily pass. Priced per day rather than per month, which is why
+   * `period` is load-bearing rather than decorative — every price line in the
+   * UI reads "₹X / {period}" off this.
+   *
+   * It exists for the case the monthly plans handle badly: someone with one
+   * report they want explained tonight, who should not have to think about a
+   * subscription to get it.
+   */
+  micro: {
+    tier: "micro",
+    name: "Daily Pass",
+    tagline: "Flexible, for short-term needs",
+    priceInPaise: 2_900,
+    period: "day",
+    seats: 1,
+    features: [
+      `Unlimited Ask Baymax for ${DAILY_PASS_HOURS} hours`,
+      "Health insights from your records",
+      "No subscription, no renewal",
+    ],
+  },
   solo: {
     tier: "solo",
     name: "Solo Plan",
@@ -87,12 +117,40 @@ export function formatPrice(paise: number): string {
 }
 
 export function planFor(tier: Tier): Plan {
+  if (tier === "micro") return PLANS.micro;
   if (tier === "solo") return PLANS.solo;
   if (tier === "family") return PLANS.family;
   return FREE_PLAN;
 }
 
-/** Paid tiers have no chat ceiling. */
+/**
+ * Paid tiers have no chat ceiling.
+ *
+ * `micro` is included, but a Daily pass also has to still be *within* its 24
+ * hours — that check lives in quota.ts, which is the only place that can see
+ * `expires_at`. This function answers "does this tier have a ceiling", not "is
+ * this subscription currently valid"; conflating the two would hand an expired
+ * pass unlimited chats.
+ */
 export function isUnlimited(tier: Tier): boolean {
-  return tier === "solo" || tier === "family";
+  return tier === "micro" || tier === "solo" || tier === "family";
+}
+
+/** The chooser's order: most popular first, cheapest commitment last. */
+export const PLAN_ORDER: readonly Plan[] = [PLANS.family, PLANS.solo, PLANS.micro];
+
+/**
+ * How many family members a tier covers.
+ *
+ * Free and Daily are single-profile: the one made at onboarding. Adding members
+ * is the thing the Family plan is actually for, so it is what the upsell on the
+ * Profile screen and the add-member sheet both gate on.
+ */
+export function seatsFor(tier: Tier): number {
+  return planFor(tier).seats;
+}
+
+/** Only the Family plan can hold more than one person. */
+export function allowsFamily(tier: Tier): boolean {
+  return tier === "family";
 }

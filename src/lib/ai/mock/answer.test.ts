@@ -53,7 +53,9 @@ const FORBIDDEN: [RegExp, string][] = [
   [/\banemia|anaemia\b/i, "names a condition"],
   [/\bdiabet/i, "names a condition"],
   [/\bdeficien/i, "names a condition"],
-  [/\bdiagnos/i, "diagnoses"],
+  [/\bdiagnos(e|ed|es|ing|is)\b/i, "diagnoses"], // Targets the ACT of diagnosing, not the letters: facility
+  // names legitimately contain "Diagnostics" and are echoed verbatim from the
+  // reader's own document, which is not Baymax making a claim.
   [/\bprescrib/i, "prescribes"],
   [/\b\d+\s*(iu|mg|mcg|ml)\b/i, "gives a dosage"],
   [/\bsupplement/i, "recommends a treatment"],
@@ -84,11 +86,70 @@ describe("answerQuestion — grounding", () => {
     expect(answer.paragraphs.join(" ")).toContain("no records saved");
   });
 
-  it("refuses to answer from general knowledge, and says why", () => {
+  it("is silent for a question with no matching record and no general topic", () => {
     const answer = answerQuestion("what is a normal cholesterol level", [record()]);
     expect(answer.grounded).toBe(false);
-    // The important half: it explains the limit rather than hedging.
-    expect(answer.paragraphs.join(" ")).toMatch(/do not use general medical knowledge/i);
+    expect(answer.kind).toBe("silent");
+    assertSafe(answer.paragraphs.join(" "));
+  });
+
+  it("answers a general topic question that isn't grounded in any record", () => {
+    const answer = answerQuestion("is running safe during pregnancy", [record()]);
+    expect(answer.grounded).toBe(false);
+    expect(answer.kind).toBe("general");
+    expect(answer.citations).toEqual([]);
+    assertSafe(answer.paragraphs.join(" "));
+  });
+
+  it("folds in the reader's own declared conditions on a general answer, without inventing one", () => {
+    const withCondition = answerQuestion("is running safe during pregnancy", [record()], [
+      "Pregnancy — 24 weeks",
+    ]);
+    const without = answerQuestion("is running safe during pregnancy", [record()], []);
+    expect(withCondition.paragraphs.join(" ")).toMatch(/health profile/i);
+    expect(without.paragraphs.join(" ")).not.toMatch(/health profile/i);
+    assertSafe(withCondition.paragraphs.join(" "));
+  });
+
+  it("answers the chat's own starter chips from the records rather than going silent", () => {
+    // All three starters are overview-shaped and used to fall through to
+    // silence, which made the first tap in the product a dead end.
+    for (const starter of [
+      "What do my recent reports say?",
+      "Has anything changed since last time?",
+      "What is in my records?",
+    ]) {
+      const answer = answerQuestion(starter, [record()]);
+      expect(answer.kind, `"${starter}" should be grounded`).toBe("grounded");
+      expect(answer.citations.length).toBeGreaterThan(0);
+      assertSafe(answer.paragraphs.join(" "));
+    }
+  });
+
+  it("reports what the report itself flagged, without interpreting it", () => {
+    const answer = answerQuestion("what do my recent reports say", [record()]);
+    const text = answer.paragraphs.join(" ");
+    expect(text).toContain("Complete blood count");
+    expect(text).toMatch(/outside its printed range/);
+    assertSafe(text);
+  });
+
+  it("still goes silent on an overview question when there are no records", () => {
+    const answer = answerQuestion("what is in my records", []);
+    expect(answer.kind).toBe("silent");
+  });
+
+  it("prefers a specific value over an overview when the question names one", () => {
+    // "latest" would match the overview patterns, but haemoglobin is nameable.
+    const answer = answerQuestion("what is my latest haemoglobin", [record()]);
+    expect(answer.kind).toBe("grounded");
+    expect(answer.paragraphs.join(" ")).toContain("10.4 g/dL");
+  });
+
+  it("prefers a grounded record match over a general topic when both could apply", () => {
+    const hb = record({ entities: [entity({ name: "Haemoglobin", canonicalName: "haemoglobin" })] });
+    const answer = answerQuestion("how is my haemoglobin", [hb]);
+    expect(answer.kind).toBe("grounded");
   });
 
   it("answers from the record and cites it", () => {

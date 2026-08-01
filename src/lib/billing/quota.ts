@@ -2,7 +2,7 @@ import "server-only";
 
 import { createAdminSupabase } from "@/lib/supabase/admin";
 import { createServerSupabase, requireUser } from "@/lib/supabase/server";
-import { FREE_CHAT_LIMIT, isUnlimited, type Tier } from "./plans";
+import { DAILY_PASS_HOURS, FREE_CHAT_LIMIT, isUnlimited, type Tier } from "./plans";
 
 /*
  * Entitlement.
@@ -26,7 +26,21 @@ export type Entitlement = {
   limit: number | null;
   canChat: boolean;
   periodStart: string;
+  /** ISO expiry of an active Daily pass; null for every other tier. */
+  expiresAt: string | null;
 };
+
+/**
+ * An `expires_at` in the past means a Daily pass has run out, so the row's tier
+ * no longer entitles anything. Kept in one function because both the read path
+ * and the write path have to agree — if `getEntitlement` said expired and
+ * `consumeChat` disagreed, the paywall and the gate would fight.
+ */
+function passElapsed(tier: Tier, expiresAt: string | null | undefined): boolean {
+  if (tier !== "micro") return false;
+  if (!expiresAt) return true; // A micro row with no expiry is malformed; fail closed.
+  return new Date(expiresAt).getTime() <= Date.now();
+}
 
 /** The signed-in user's family. Everything on a plan hangs off this. */
 async function familyIdFor(userId: string): Promise<string | null> {
@@ -56,19 +70,29 @@ export async function getEntitlement(): Promise<Entitlement> {
     limit: FREE_CHAT_LIMIT,
     canChat: true,
     periodStart: currentPeriodStart(),
+    expiresAt: null,
   };
   if (!familyId) return free;
 
   const supabase = await createServerSupabase();
   const { data } = await supabase
     .from("subscriptions")
-    .select("tier, chats_used_this_month, period_start")
+    .select("tier, chats_used_this_month, period_start, expires_at")
     .eq("family_id", familyId)
     .maybeSingle();
 
   if (!data) return free;
 
-  const tier = data.tier as Tier;
+  const storedTier = data.tier as Tier;
+  const expiresAt = data.expires_at as string | null;
+
+  /*
+   * An elapsed Daily pass reports as free, including its used-chat count, so
+   * the paywall shows the free allowance rather than an expired plan the reader
+   * can't act on. The row is left alone — see the note on `rolledOver` below;
+   * the same reasoning applies to not rewriting billing state during a read.
+   */
+  const tier = passElapsed(storedTier, expiresAt) ? "free" : storedTier;
   const period = String(data.period_start);
 
   /*
@@ -89,6 +113,7 @@ export async function getEntitlement(): Promise<Entitlement> {
       limit: null,
       canChat: true,
       periodStart: currentPeriodStart(),
+      expiresAt: tier === "micro" ? expiresAt : null,
     };
   }
 
@@ -99,6 +124,7 @@ export async function getEntitlement(): Promise<Entitlement> {
     limit: FREE_CHAT_LIMIT,
     canChat: used < FREE_CHAT_LIMIT,
     periodStart: currentPeriodStart(),
+    expiresAt: null,
   };
 }
 
@@ -118,7 +144,7 @@ export async function consumeChat(): Promise<boolean> {
   const admin = createAdminSupabase();
   const { data } = await admin
     .from("subscriptions")
-    .select("tier, chats_used_this_month, period_start")
+    .select("tier, chats_used_this_month, period_start, expires_at")
     .eq("family_id", familyId)
     .maybeSingle();
 
@@ -133,7 +159,12 @@ export async function consumeChat(): Promise<boolean> {
     return true;
   }
 
-  if (isUnlimited(data.tier as Tier)) return true;
+  const storedTier = data.tier as Tier;
+  // Same expiry rule as the read path, or an elapsed Daily pass would keep
+  // handing out unlimited chats indefinitely.
+  const tier = passElapsed(storedTier, data.expires_at as string | null) ? "free" : storedTier;
+
+  if (isUnlimited(tier)) return true;
 
   const period = currentPeriodStart();
   const rolledOver = String(data.period_start) < period;
@@ -161,6 +192,17 @@ export async function activateTier(tier: Exclude<Tier, "free">): Promise<boolean
   const familyId = await familyIdFor(user.id);
   if (!familyId) return false;
 
+  /*
+   * Only the Daily pass carries an expiry. Every other tier sets it back to
+   * null explicitly rather than leaving whatever was there — upgrading from an
+   * expired Daily pass to Family must not inherit its dead expiry, which would
+   * make the new subscription read as already over.
+   */
+  const expiresAt =
+    tier === "micro"
+      ? new Date(Date.now() + DAILY_PASS_HOURS * 60 * 60 * 1000).toISOString()
+      : null;
+
   const admin = createAdminSupabase();
   const { error } = await admin
     .from("subscriptions")
@@ -170,6 +212,7 @@ export async function activateTier(tier: Exclude<Tier, "free">): Promise<boolean
         tier,
         chats_used_this_month: 0,
         period_start: currentPeriodStart(),
+        expires_at: expiresAt,
       },
       { onConflict: "family_id" },
     );
@@ -186,7 +229,7 @@ export async function cancelSubscription(): Promise<boolean> {
   const admin = createAdminSupabase();
   const { error } = await admin
     .from("subscriptions")
-    .update({ tier: "free" })
+    .update({ tier: "free", expires_at: null })
     .eq("family_id", familyId);
 
   return !error;

@@ -22,7 +22,7 @@ const ALTERNATES = [
 export default function FirstUploadPage() {
   return (
     <div className="flex flex-1 flex-col">
-      <OnboardingHeader back="/profile" action={{ label: "Skip", href: "/home" }} />
+      <OnboardingHeader back="/profile" action={{ label: "Skip", href: "/plan" }} />
 
       <div className="flex flex-1 flex-col px-5 pb-3">
         {/* The art is absolutely positioned, so the text needs its own gutter or
@@ -83,7 +83,7 @@ export default function FirstUploadPage() {
 
         <div className="mt-auto pt-4">
           <Button asChild className="w-full">
-            <Link href="/home">I&apos;ll upload later</Link>
+            <Link href="/plan">I&apos;ll upload later</Link>
           </Button>
           <p className="mt-1.5 text-center text-[12px] text-ink-300">
             You can add documents anytime from the app.

@@ -2,9 +2,9 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
-import { ArrowRight, ShieldCheck, Users, type LucideIcon } from "lucide-react";
+import { ArrowRight, Check, ShieldCheck, Users, type LucideIcon } from "lucide-react";
 
-import { Headline, OnboardingHeader, ReassuranceStrip } from "@/components/onboarding/chrome";
+import { Dots, Headline, OnboardingHeader, ReassuranceStrip } from "@/components/onboarding/chrome";
 import { Button } from "@/components/ui/button";
 import { chooseAudience } from "@/lib/auth/actions";
 import { cn } from "@/lib/cn";
@@ -66,11 +66,18 @@ export function WhoForm({ solo, family }: { solo: React.ReactNode; family: React
           Choose an option to personalize your experience. You can add more members later.
         </p>
 
-        <fieldset
-          className="mt-5 flex-1 space-y-3"
-          // The legend repeats the headline for anyone who reaches the group
-          // without having read the visual heading above it.
-        >
+        {/*
+         * The radio moves out of the text column and into the card's own top
+         * right corner. Inside the text column it was competing with the title
+         * for the same baseline via `ml-auto`, which is why the two cards never
+         * lined up with each other — the marker's position depended on how long
+         * the title happened to be.
+         *
+         * The art sits in a fixed-width column for the same reason: the solo
+         * portrait and the three-face cluster are different widths, so letting
+         * them size themselves left the two titles starting at different x.
+         */}
+        <fieldset className="mt-5 flex-1 space-y-3">
           <legend className="sr-only">Who is this for?</legend>
           {OPTIONS.map((option) => {
             const selected = audience === option.value;
@@ -79,8 +86,10 @@ export function WhoForm({ solo, family }: { solo: React.ReactNode; family: React
               <label
                 key={option.value}
                 className={cn(
-                  "flex cursor-pointer items-center gap-3 rounded-card border-2 bg-surface p-3 transition-colors duration-150",
-                  selected ? "border-brand-500 bg-brand-50/60" : "border-line",
+                  "tappable relative flex cursor-pointer items-start gap-3.5 rounded-card border-2 p-3.5 pr-11",
+                  selected
+                    ? "border-brand-500 bg-brand-50/60 shadow-e1"
+                    : "border-line bg-surface hover:border-brand-200",
                 )}
               >
                 <input
@@ -91,25 +100,35 @@ export function WhoForm({ solo, family }: { solo: React.ReactNode; family: React
                   onChange={() => setAudience(option.value)}
                   className="sr-only"
                 />
-                {option.art === "solo" ? solo : family}
-                <span className="min-w-0 flex-1">
-                  <span className="flex items-center gap-2">
-                    <span className="text-[15px] font-semibold text-ink-900">{option.title}</span>
-                    <span
-                      className={cn(
-                        "ml-auto grid h-5 w-5 shrink-0 place-items-center rounded-pill border-2",
-                        selected ? "border-brand-600" : "border-brand-200",
-                      )}
-                      aria-hidden
-                    >
-                      {selected ? <span className="h-2.5 w-2.5 rounded-pill bg-brand-600" /> : null}
-                    </span>
+
+                <span
+                  className={cn(
+                    "absolute right-3.5 top-3.5 grid h-[22px] w-[22px] shrink-0 place-items-center rounded-pill border-2 transition-colors",
+                    selected ? "border-brand-600 bg-brand-600" : "border-brand-200 bg-surface",
+                  )}
+                  aria-hidden
+                >
+                  {selected ? <Check size={13} className="text-white" strokeWidth={3} /> : null}
+                </span>
+
+                <span className="grid w-[92px] shrink-0 place-items-center">
+                  {option.art === "solo" ? solo : family}
+                </span>
+
+                <span className="min-w-0 flex-1 pt-0.5">
+                  <span className="block text-[15.5px] font-bold leading-tight text-ink-900">
+                    {option.title}
                   </span>
-                  <span className="mt-1 block text-[12px] leading-snug text-ink-500">
+                  <span className="mt-1 block text-[12.5px] leading-snug text-ink-500">
                     {option.body}
                   </span>
-                  <span className="mt-2 flex items-center gap-1.5 rounded-pill bg-brand-50 px-2.5 py-1.5 text-[11px] font-medium text-brand-700">
-                    <Badge size={12} aria-hidden />
+                  <span
+                    className={cn(
+                      "mt-2.5 flex items-center gap-1.5 rounded-pill px-2.5 py-1.5 text-[11px] font-medium transition-colors",
+                      selected ? "bg-surface text-brand-700" : "bg-brand-50 text-brand-700",
+                    )}
+                  >
+                    <Badge size={12} className="shrink-0" aria-hidden />
                     {option.badge.label}
                   </span>
                 </span>
@@ -124,6 +143,7 @@ export function WhoForm({ solo, family }: { solo: React.ReactNode; family: React
             {pending ? "One moment…" : "Continue"}
             <ArrowRight size={18} aria-hidden />
           </Button>
+          <Dots current={2} total={5} />
         </div>
       </form>
     </div>

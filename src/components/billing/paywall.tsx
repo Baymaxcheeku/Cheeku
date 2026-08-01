@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import {
   ArrowLeft,
+  CalendarClock,
   Check,
   CheckCircle2,
   CreditCard,
@@ -16,9 +17,18 @@ import {
 } from "lucide-react";
 
 import { MascotBust } from "@/components/illustrations";
+import { Sheet } from "@/components/ui/sheet";
 import { cn } from "@/lib/cn";
 import { subscribe } from "@/lib/billing/actions";
-import { formatPrice, FREE_CHAT_LIMIT, PLANS, type Plan, type Tier } from "@/lib/billing/plans";
+import {
+  DAILY_PASS_HOURS,
+  formatPrice,
+  FREE_CHAT_LIMIT,
+  PLANS,
+  PLAN_ORDER,
+  type Plan,
+  type Tier,
+} from "@/lib/billing/plans";
 
 /*
  * H1 / H2 — the paywall and the checkout sheet.
@@ -39,6 +49,36 @@ import { formatPrice, FREE_CHAT_LIMIT, PLANS, type Plan, type Tier } from "@/lib
 
 type Stage = "plans" | "checkout" | "done";
 
+/**
+ * Why the sheet opened. Only changes the heading and the eyebrow — the plans
+ * offered are always all three, because a reader who came here to add a family
+ * member may well decide a Daily pass is what they actually want.
+ */
+export type Reason = "quota" | "upgrade" | "family" | "onboarding";
+
+const REASON_COPY: Record<Reason, { eyebrow: string; title: string; body: string }> = {
+  quota: {
+    eyebrow: "Free limit reached",
+    title: "You've used your free chats",
+    body: `Free includes ${FREE_CHAT_LIMIT} chats a month. Pick a plan to keep the conversation going.`,
+  },
+  upgrade: {
+    eyebrow: "Upgrade",
+    title: "Unlock everything in Baymax",
+    body: `Free includes ${FREE_CHAT_LIMIT} chats a month. Pick a plan to keep the conversation going.`,
+  },
+  family: {
+    eyebrow: "Family access",
+    title: "Add your loved ones",
+    body: "The Family plan covers up to 4 members with shared records and insights.",
+  },
+  onboarding: {
+    eyebrow: "You chose family",
+    title: "Set up family access",
+    body: "Family access needs a plan. You can also start free with just your own profile.",
+  },
+};
+
 export function Paywall({
   open,
   onClose,
@@ -51,7 +91,7 @@ export function Paywall({
   onActivated: (tier: Tier) => void;
   /** Shown back to the reader so they can see it was not lost. */
   pendingQuestion?: string;
-  reason?: "quota" | "upgrade";
+  reason?: Reason;
 }) {
   const [stage, setStage] = useState<Stage>("plans");
   const [selected, setSelected] = useState<Plan>(PLANS.family);
@@ -74,52 +114,36 @@ export function Paywall({
   }
 
   return (
-    <div className="fixed inset-0 z-40 flex flex-col justify-end">
-      <button
-        type="button"
-        aria-label="Close"
-        onClick={onClose}
-        className="scrim-in absolute inset-0 bg-ink-900/40"
-      />
-
-      <div
-        role="dialog"
-        aria-modal
-        aria-label="Choose a plan"
-        className="sheet-rise relative max-h-[92%] overflow-y-auto rounded-t-sheet bg-canvas pb-[calc(var(--safe-bottom)+1rem)] pt-3"
-      >
-        <span className="mx-auto block h-1 w-10 rounded-pill bg-line" aria-hidden />
-
-        {stage === "plans" ? (
-          <PlanChooser
-            reason={reason}
-            pendingQuestion={pendingQuestion}
-            selected={selected}
-            onSelect={(plan) => {
-              setSelected(plan);
-              setStage("checkout");
-            }}
-            onClose={onClose}
-          />
-        ) : stage === "checkout" ? (
-          <Checkout
-            plan={selected}
-            method={method}
-            setMethod={setMethod}
-            pending={pending}
-            error={error}
-            onBack={() => setStage("plans")}
-            onPay={pay}
-          />
-        ) : (
-          <Success
-            plan={selected}
-            pendingQuestion={pendingQuestion}
-            onDone={() => onActivated(selected.tier)}
-          />
-        )}
-      </div>
-    </div>
+    <Sheet onClose={onClose} label="Choose a plan">
+      {stage === "plans" ? (
+        <PlanChooser
+          reason={reason}
+          pendingQuestion={pendingQuestion}
+          selected={selected}
+          onSelect={(plan) => {
+            setSelected(plan);
+            setStage("checkout");
+          }}
+          onClose={onClose}
+        />
+      ) : stage === "checkout" ? (
+        <Checkout
+          plan={selected}
+          method={method}
+          setMethod={setMethod}
+          pending={pending}
+          error={error}
+          onBack={() => setStage("plans")}
+          onPay={pay}
+        />
+      ) : (
+        <Success
+          plan={selected}
+          pendingQuestion={pendingQuestion}
+          onDone={() => onActivated(selected.tier)}
+        />
+      )}
+    </Sheet>
   );
 }
 
@@ -132,28 +156,26 @@ function PlanChooser({
   onSelect,
   onClose,
 }: {
-  reason: "quota" | "upgrade";
+  reason: Reason;
   pendingQuestion?: string;
   selected: Plan;
   onSelect: (plan: Plan) => void;
   onClose: () => void;
 }) {
+  const copy = REASON_COPY[reason];
+
   return (
     <div className="px-5">
       <div className="flex items-start gap-3">
         <div className="relative min-w-0 flex-1 pr-[26%]">
           <span className="inline-flex items-center gap-1.5 rounded-pill bg-brand-50 px-2.5 py-1 text-[11px] font-semibold text-brand-700">
             <Lock size={12} aria-hidden />
-            {reason === "quota" ? "Free limit reached" : "Upgrade"}
+            {copy.eyebrow}
           </span>
           <h2 className="mt-2 text-[22px] font-bold leading-tight tracking-tight text-ink-900">
-            {reason === "quota"
-              ? "You've used your free chats"
-              : "Unlock everything in Baymax"}
+            {copy.title}
           </h2>
-          <p className="mt-1.5 text-[13px] leading-snug text-ink-500">
-            Free includes {FREE_CHAT_LIMIT} chats a month. Subscribe to keep the conversation going.
-          </p>
+          <p className="mt-1.5 text-[13px] leading-snug text-ink-500">{copy.body}</p>
           <MascotBust className="pointer-events-none absolute -right-4 -top-2 w-[112px]" />
         </div>
         <button
@@ -179,72 +201,21 @@ function PlanChooser({
         </p>
       ) : null}
 
+      {/*
+       * All three plans, always — Family, Solo, then the Daily pass. Three cards
+       * only fit in a sheet if the two secondary ones stay compact, so features
+       * are listed in full on the highlighted plan and collapsed to a single
+       * line on the others. Hiding the Daily pass behind a "more options" tap
+       * would bury the cheapest way to say yes.
+       */}
       <ul className="mt-4 space-y-2.5">
-        {[PLANS.family, PLANS.solo].map((plan) => (
+        {PLAN_ORDER.map((plan) => (
           <li key={plan.tier}>
-            <button
-              type="button"
-              onClick={() => onSelect(plan)}
-              aria-pressed={selected.tier === plan.tier}
-              className={cn(
-                "tappable w-full rounded-card border-2 bg-surface p-4 text-left shadow-e1 active:scale-[0.99]",
-                plan.highlight ? "border-brand-500" : "border-line",
-              )}
-            >
-              <div className="flex items-start gap-3">
-                <span
-                  className={cn(
-                    "grid h-11 w-11 shrink-0 place-items-center rounded-tile",
-                    plan.tier === "family" ? "bg-brand-50 text-brand-600" : "bg-safe-bg text-safe",
-                  )}
-                >
-                  {plan.tier === "family" ? (
-                    <Users size={20} aria-hidden />
-                  ) : (
-                    <Sparkles size={20} aria-hidden />
-                  )}
-                </span>
-
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[17px] font-bold text-ink-900">{plan.name}</span>
-                    {plan.highlight ? (
-                      <span className="rounded-pill bg-brand-600 px-2 py-0.5 text-[10px] font-bold text-white">
-                        {plan.highlight}
-                      </span>
-                    ) : null}
-                  </div>
-                  <p className="mt-0.5 text-[12px] text-ink-500">{plan.tagline}</p>
-                </div>
-
-                <div className="shrink-0 text-right">
-                  <p className="text-[20px] font-bold leading-none text-ink-900">
-                    {formatPrice(plan.priceInPaise)}
-                  </p>
-                  <p className="mt-0.5 text-[11px] text-ink-500">/{plan.period}</p>
-                </div>
-              </div>
-
-              <ul className="mt-3 space-y-1.5">
-                {plan.features.map((feature) => (
-                  <li key={feature} className="flex items-start gap-2 text-[12px] text-ink-700">
-                    <Check size={14} className="mt-px shrink-0 text-safe" aria-hidden />
-                    {feature}
-                  </li>
-                ))}
-              </ul>
-
-              <span
-                className={cn(
-                  "mt-3 flex h-11 items-center justify-center rounded-pill text-[14px] font-semibold",
-                  plan.highlight
-                    ? "bg-gradient-to-b from-brand-600 to-brand-800 text-white"
-                    : "border border-brand-200 bg-brand-50 text-brand-700",
-                )}
-              >
-                Choose {plan.name}
-              </span>
-            </button>
+            <PlanOption
+              plan={plan}
+              selected={selected.tier === plan.tier}
+              onSelect={() => onSelect(plan)}
+            />
           </li>
         ))}
       </ul>
@@ -254,6 +225,100 @@ function PlanChooser({
         Cancel anytime. Your health, your way.
       </p>
     </div>
+  );
+}
+
+const PLAN_ICON: Record<string, typeof Users> = {
+  family: Users,
+  solo: Sparkles,
+  micro: CalendarClock,
+};
+
+function PlanOption({
+  plan,
+  selected,
+  onSelect,
+}: {
+  plan: Plan;
+  selected: boolean;
+  onSelect: () => void;
+}) {
+  const Icon = PLAN_ICON[plan.tier] ?? Sparkles;
+  const featured = Boolean(plan.highlight);
+
+  return (
+    <button
+      type="button"
+      onClick={onSelect}
+      aria-pressed={selected}
+      className={cn(
+        "tappable w-full rounded-card border-2 bg-surface p-3.5 text-left shadow-e1 active:scale-[0.99]",
+        featured ? "border-brand-500" : selected ? "border-brand-300" : "border-line",
+      )}
+    >
+      <div className="flex items-start gap-3">
+        <span
+          className={cn(
+            "grid h-11 w-11 shrink-0 place-items-center rounded-tile",
+            plan.tier === "family"
+              ? "bg-brand-50 text-brand-600"
+              : plan.tier === "solo"
+                ? "bg-safe-bg text-safe"
+                : "bg-caution-bg text-caution-text",
+          )}
+        >
+          <Icon size={20} aria-hidden />
+        </span>
+
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+            <span className="text-[16px] font-bold text-ink-900">{plan.name}</span>
+            {plan.highlight ? (
+              <span className="rounded-pill bg-brand-600 px-2 py-0.5 text-[10px] font-bold text-white">
+                {plan.highlight}
+              </span>
+            ) : null}
+          </div>
+          <p className="mt-0.5 text-[12px] leading-snug text-ink-500">{plan.tagline}</p>
+        </div>
+
+        <div className="shrink-0 text-right">
+          <p className="text-[19px] font-bold leading-none text-ink-900">
+            {formatPrice(plan.priceInPaise)}
+          </p>
+          <p className="mt-0.5 text-[11px] text-ink-500">/{plan.period}</p>
+        </div>
+      </div>
+
+      {featured ? (
+        <ul className="mt-3 space-y-1.5">
+          {plan.features.map((feature) => (
+            <li key={feature} className="flex items-start gap-2 text-[12px] text-ink-700">
+              <Check size={14} className="mt-px shrink-0 text-safe" aria-hidden />
+              {feature}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="mt-2.5 flex items-start gap-2 text-[11.5px] leading-snug text-ink-500">
+          <Check size={13} className="mt-px shrink-0 text-safe" aria-hidden />
+          {plan.tier === "micro"
+            ? `Unlimited chats for ${DAILY_PASS_HOURS} hours · no renewal`
+            : plan.features.slice(0, 2).join(" · ")}
+        </p>
+      )}
+
+      <span
+        className={cn(
+          "mt-3 flex h-11 items-center justify-center rounded-pill text-[14px] font-semibold",
+          featured
+            ? "bg-gradient-to-b from-brand-600 to-brand-800 text-white"
+            : "border border-brand-200 bg-brand-50 text-brand-700",
+        )}
+      >
+        Choose {plan.name}
+      </span>
+    </button>
   );
 }
 
@@ -279,6 +344,8 @@ function Checkout({
   onBack: () => void;
   onPay: () => void;
 }) {
+  const isDaily = plan.tier === "micro";
+
   return (
     <div className="px-5">
       <div className="flex items-center gap-3">
@@ -303,7 +370,10 @@ function Checkout({
       <section className="mt-4 rounded-card bg-brand-50 p-4">
         <div className="flex items-start gap-3">
           <span className="grid h-11 w-11 shrink-0 place-items-center rounded-tile bg-surface text-brand-600">
-            {plan.tier === "family" ? <Users size={20} aria-hidden /> : <Sparkles size={20} aria-hidden />}
+            {(() => {
+              const Icon = PLAN_ICON[plan.tier] ?? Sparkles;
+              return <Icon size={20} aria-hidden />;
+            })()}
           </span>
           <div className="min-w-0 flex-1">
             <p className="text-[17px] font-bold text-ink-900">{plan.name}</p>
@@ -313,13 +383,22 @@ function Checkout({
               </span>
               <span className="text-[13px] text-ink-500"> / {plan.period}</span>
             </p>
-            <p className="mt-0.5 text-[11px] text-ink-500">Billed monthly · Cancel anytime</p>
+            {/* The Daily pass is a one-off, so promising a renewal — or a
+                cancellation — would both be wrong. */}
+            <p className="mt-0.5 text-[11px] text-ink-500">
+              {isDaily
+                ? `One-time · expires after ${DAILY_PASS_HOURS} hours`
+                : "Billed monthly · Cancel anytime"}
+            </p>
           </div>
         </div>
 
         <ul className="mt-3 grid grid-cols-2 gap-2 border-t border-brand-200/60 pt-3">
           {[
-            { icon: InfinityIcon, label: "Unlimited Ask Baymax" },
+            {
+              icon: InfinityIcon,
+              label: isDaily ? `Unlimited for ${DAILY_PASS_HOURS}h` : "Unlimited Ask Baymax",
+            },
             { icon: Zap, label: "Health insights" },
             { icon: ShieldCheck, label: "Unlimited storage" },
             { icon: Users, label: `${plan.seats} member${plan.seats === 1 ? "" : "s"}` },
@@ -336,7 +415,9 @@ function Checkout({
 
       <p className="mt-3 flex items-start gap-2 rounded-card bg-safe-bg px-3.5 py-3 text-[12px] leading-snug text-safe-text">
         <ShieldCheck size={15} className="mt-px shrink-0" aria-hidden />
-        {formatPrice(plan.priceInPaise)} will be charged every month on the date you subscribe.
+        {isDaily
+          ? `${formatPrice(plan.priceInPaise)} charged once. Nothing renews — the pass simply ends after ${DAILY_PASS_HOURS} hours.`
+          : `${formatPrice(plan.priceInPaise)} will be charged every month on the date you subscribe.`}
       </p>
 
       <h3 className="mt-4 text-[14px] font-semibold text-ink-900">Choose payment method</h3>
@@ -489,8 +570,10 @@ function Success({
         </span>
         <h2 className="mt-3 text-[24px] font-bold tracking-tight text-ink-900">You&apos;re all set</h2>
         <p className="mx-auto mt-1.5 max-w-[280px] text-[13px] leading-snug text-ink-500">
-          {plan.name} is active. {formatPrice(plan.priceInPaise)} a month, cancel anytime from your
-          profile.
+          {plan.name} is active.{" "}
+          {plan.tier === "micro"
+            ? `Unlimited chats for the next ${DAILY_PASS_HOURS} hours.`
+            : `${formatPrice(plan.priceInPaise)} a month, cancel anytime from your profile.`}
         </p>
       </div>
 

@@ -6,6 +6,7 @@ import { HomeAskBox } from "@/components/app/home-ask-box";
 import { RecordRow } from "@/components/records/chrome";
 import { ReminderScene } from "@/components/illustrations";
 import { cn } from "@/lib/cn";
+import { getEntitlement } from "@/lib/billing/quota";
 import { activeProfile, familyProfiles } from "@/lib/profiles/context";
 import { formatEventDate } from "@/lib/records/grouping";
 import { listProfileRecords, statsFrom } from "@/lib/records/queries";
@@ -29,7 +30,11 @@ function greeting(): string {
  * the user something untrue about whose health they are looking at.
  */
 export default async function HomePage() {
-  const [profiles, profile] = await Promise.all([familyProfiles(), activeProfile()]);
+  const [profiles, profile, entitlement] = await Promise.all([
+    familyProfiles(),
+    activeProfile(),
+    getEntitlement(),
+  ]);
 
   if (!profile) {
     return (
@@ -76,7 +81,7 @@ export default async function HomePage() {
       </header>
 
       <div className="mt-4">
-        <FamilySwitcher profiles={profiles} activeId={profile.id} />
+        <FamilySwitcher profiles={profiles} activeId={profile.id} tier={entitlement.tier} />
       </div>
 
       <InsightCard

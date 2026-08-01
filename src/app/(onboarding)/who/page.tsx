@@ -8,8 +8,12 @@ import { WhoForm } from "./who-form";
 export default function WhoPage() {
   return (
     <WhoForm
-      solo={<AvatarSolo className="h-[68px] w-[68px]" />}
-      family={<AvatarFamily className="h-[68px] w-[88px]" />}
+      // Both fit the form's fixed 92px art column, so the two cards' titles
+      // start at the same x. The family cluster is wider than it is tall
+      // because three overlapped faces are; its height matches the solo
+      // portrait so the two cards stay the same height too.
+      solo={<AvatarSolo className="h-[72px] w-[72px]" />}
+      family={<AvatarFamily className="h-[72px] w-[92px]" />}
     />
   );
 }

@@ -16,7 +16,18 @@ export function DeviceFrame({ children }: { children: React.ReactNode }) {
   return (
     <div className="device-stage">
       <div className="device-body">
-        <div className="device-screen">{children}</div>
+        {/*
+         * Two elements, not one. `.device-screen` is the fixed 393x852 display
+         * and does not scroll; `.device-scroll` inside it does. That split is
+         * what makes bottom sheets work: `.device-screen` is the containing
+         * block for `position: fixed` (globals.css gives it a transform), and a
+         * fixed child only stays put if that containing block is not itself the
+         * thing scrolling. When the two were the same element, every sheet
+         * scrolled away with the page behind it.
+         */}
+        <div className="device-screen">
+          <div className="device-scroll">{children}</div>
+        </div>
 
         {/*
          * The chrome sits outside the scrolling display, so it stays put while

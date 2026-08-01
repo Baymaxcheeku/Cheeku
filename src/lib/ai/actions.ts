@@ -1,12 +1,16 @@
 "use server";
 
 import { answerQuestion, type Citation, type GroundingRecord } from "@/lib/ai/mock/answer";
+import { assessProduct, findScenario, type ProductAssessment } from "@/lib/ai/mock/scenarios";
 import { consumeChat } from "@/lib/billing/quota";
 import { activeProfile } from "@/lib/profiles/context";
 import { listProfileRecords } from "@/lib/records/queries";
 import { createServerSupabase, requireUser } from "@/lib/supabase/server";
 import type { EntityFlag, RecordEntity } from "@/lib/records/types";
 import type { SafetyStatus } from "@/lib/safety/detect";
+
+/** Attachment shown on a user's chat bubble — the demo product-photo scenarios only. */
+export type ChatAttachment = { kind: "product"; scenarioId: string; title: string; thumbnail: string };
 
 /*
  * The chat's write path.
@@ -28,7 +32,11 @@ export type ChatTurn = {
   content: string;
   citations: Citation[];
   grounded: boolean;
+  /** How the reply was produced — decides how the UI frames it. Assistant turns only. */
+  kind?: "grounded" | "general" | "silent" | "product";
   followUps: string[];
+  attachment?: ChatAttachment;
+  assessment?: ProductAssessment;
 };
 
 export type AskResult =
@@ -81,7 +89,10 @@ export async function askBaymax(
    * is the exact leak the isolation boundary exists to prevent.
    */
   const summaries = await listProfileRecords(profile.id);
-  const records = await withEntities(supabase, summaries);
+  const [records, conditions] = await Promise.all([
+    withEntities(supabase, summaries),
+    profileConditions(supabase, profile.id, user.id),
+  ]);
 
   let convo = conversationId;
   if (!convo) {
@@ -99,7 +110,7 @@ export async function askBaymax(
     convo = data.id as string;
   }
 
-  const answer = answerQuestion(trimmed, records);
+  const answer = answerQuestion(trimmed, records, conditions);
 
   /*
    * Both messages are inserted in one call so a transcript can never end up
@@ -161,7 +172,123 @@ export async function askBaymax(
       content: assistantRow.content as string,
       citations: answer.citations,
       grounded: answer.grounded,
+      kind: answer.kind,
       followUps: answer.followUps,
+    },
+  };
+}
+
+/**
+ * The product-safety demo path — a photo scenario picked from `ProductPicker`
+ * rather than an arbitrary upload (see scenarios.ts for why). Gated by the
+ * same quota as a text question: it is Ask Baymax, not a separate feature.
+ *
+ * `scenarioId` is validated against the fixed, server-side list before
+ * anything is written — it never trusts the client to have sent a real one.
+ */
+export async function askAboutProduct(
+  scenarioId: string,
+  conversationId: string | null,
+  safetyStatus: Exclude<SafetyStatus, "escalate">,
+): Promise<AskResult> {
+  const scenario = findScenario(scenarioId);
+  if (!scenario) return { ok: false, message: "That item isn't available in this demo." };
+
+  const user = await requireUser();
+  const supabase = await createServerSupabase();
+  const profile = await activeProfile();
+  if (!profile) return { ok: false, message: "Set up a profile before asking." };
+
+  if (!(await consumeChat())) {
+    return { ok: false, quota: true, message: "You've used your free chats for this month." };
+  }
+
+  const conditions = await profileConditions(supabase, profile.id, user.id);
+  const assessment = assessProduct(scenarioId, conditions);
+  if (!assessment) return { ok: false, message: "That item isn't available in this demo." };
+
+  let convo = conversationId;
+  if (!convo) {
+    const { data, error } = await supabase
+      .from("conversations")
+      .insert({ profile_id: profile.id, user_id: user.id, title: scenario.title })
+      .select("id")
+      .single();
+    if (error || !data) return { ok: false, message: "Could not start the conversation." };
+    convo = data.id as string;
+  }
+
+  const attachment: ChatAttachment = {
+    kind: "product",
+    scenarioId: scenario.id,
+    title: scenario.title,
+    thumbnail: scenario.thumbnail,
+  };
+
+  // A flat-text mirror of the card, so history, export and the messages
+  // table's `content` column (not null) all carry something readable even
+  // where the structured `product_assessment` isn't rendered.
+  const summary = [
+    `${scenario.title}: ${assessment.verdict === "safe" ? "Safe" : assessment.verdict === "caution" ? "Use with care" : "Avoid"}.`,
+    assessment.verdictNote,
+    assessment.disclaimer,
+  ].join(" ");
+
+  const { data: rows, error } = await supabase
+    .from("messages")
+    .insert([
+      {
+        conversation_id: convo,
+        user_id: user.id,
+        role: "user",
+        content: scenario.sampleQuestion,
+        citations: [],
+        safety_status: safetyStatus,
+        attachment,
+      },
+      {
+        conversation_id: convo,
+        user_id: user.id,
+        role: "assistant",
+        content: summary,
+        citations: [],
+        safety_status: safetyStatus,
+        product_assessment: assessment,
+      },
+    ])
+    .select("id, role, content");
+
+  if (error || !rows || rows.length < 2) {
+    return { ok: false, message: "Could not save the conversation." };
+  }
+
+  const userRow = rows.find((r) => r.role === "user");
+  const assistantRow = rows.find((r) => r.role === "assistant");
+  if (!userRow || !assistantRow) {
+    return { ok: false, message: "Could not save the conversation." };
+  }
+
+  return {
+    ok: true,
+    conversationId: convo,
+    user: {
+      id: userRow.id as string,
+      role: "user",
+      content: scenario.sampleQuestion,
+      citations: [],
+      grounded: true,
+      followUps: [],
+      attachment,
+    },
+    assistant: {
+      id: assistantRow.id as string,
+      role: "assistant",
+      content: summary,
+      citations: [],
+      grounded: false,
+      kind: "product",
+      followUps: ["Ask something else"],
+      assessment,
     },
   };
 }
@@ -203,6 +330,25 @@ export async function recordEscalation(
   });
 
   return { ok: true, conversationId: convo };
+}
+
+/**
+ * The active profile's own declared conditions (Health profile), scoped to
+ * both the profile id and the caller — never another family member's, per
+ * rule 3, and never a row RLS wouldn't already have returned.
+ */
+async function profileConditions(
+  supabase: Awaited<ReturnType<typeof createServerSupabase>>,
+  profileId: string,
+  userId: string,
+): Promise<string[]> {
+  const { data } = await supabase
+    .from("profiles")
+    .select("conditions")
+    .eq("id", profileId)
+    .eq("user_id", userId)
+    .maybeSingle();
+  return (data?.conditions as string[] | null) ?? [];
 }
 
 /** Attaches each document's entities, which is what the engine reads. */

@@ -13,9 +13,12 @@ import {
 
 import { AccountData } from "@/components/account/account-data";
 import { PlanCard } from "@/components/billing/plan-card";
+import { FamilySection } from "@/components/app/family-section";
+import { LogoutButton } from "@/components/app/logout-button";
 import { ProfileHeader } from "@/components/app/profile-header";
 import { MascotBust } from "@/components/illustrations";
 import { getEntitlement } from "@/lib/billing/quota";
+import { castFaces } from "@/lib/profiles/avatar";
 import { activeProfile, familyProfiles } from "@/lib/profiles/context";
 import { listProfileRecords, statsFrom } from "@/lib/records/queries";
 
@@ -62,6 +65,18 @@ export default async function SettingsPage() {
         tier={entitlement.tier}
       />
 
+      {/*
+       * The Family block sits directly under the plan, because on free and solo
+       * it IS a plan pitch — and because someone looking for "where are my
+       * people" should find it before the settings list, not after it.
+       */}
+      <FamilySection
+        profiles={profiles}
+        activeId={profile.id}
+        tier={entitlement.tier}
+        lockedFaces={castFaces(4)}
+      />
+
       <PlanCard entitlement={entitlement} />
 
       <nav className="mt-5 px-5">
@@ -70,31 +85,31 @@ export default async function SettingsPage() {
             icon={UserCog}
             title="Personal information"
             body="Update your personal details"
-            href="/profile"
+            href="/settings/personal"
           />
           <Row
             icon={HeartPulse}
             title="Health profile"
             body="Manage your health summary"
-            href="/profile"
+            href="/settings/health"
           />
           <Row
             icon={ShieldCheck}
             title="Security & privacy"
-            body="How your data is protected"
-            soon="The privacy centre arrives in a later phase"
+            body="Manage privacy, data and permissions"
+            href="/settings/security"
           />
           <Row
             icon={Bell}
             title="Notifications"
             body="Manage alerts and reminders"
-            soon="Notifications are not part of V1"
+            href="/settings/notifications"
           />
           <Row
             icon={Globe}
             title="Language"
             body="English"
-            soon="More languages arrive later"
+            href="/settings/language"
           />
         </ul>
 
@@ -103,13 +118,24 @@ export default async function SettingsPage() {
             icon={CircleHelp}
             title="Help & support"
             body="Get help and view resources"
-            soon="Support arrives with the account phase"
+            href="/settings/help"
           />
-          <Row icon={Info} title="About Baymax" body="Version 0.6 · V1 build" soon="Coming soon" />
+          <Row
+            icon={Info}
+            title="About Baymax"
+            body="App version and information"
+            href="/settings/about"
+          />
         </ul>
       </nav>
 
       <AccountData />
+
+      <section className="mx-5 mt-4">
+        <ul className="overflow-hidden rounded-card bg-surface shadow-e1">
+          <LogoutButton />
+        </ul>
+      </section>
 
       <p className="mx-5 mt-4 flex items-start gap-2 rounded-card bg-brand-50 px-4 py-3.5 text-[12px] leading-snug text-ink-500">
         <ShieldCheck size={16} className="mt-px shrink-0 text-brand-500" aria-hidden />
@@ -127,38 +153,24 @@ function Row({
   title,
   body,
   href,
-  soon,
 }: {
   icon: typeof Bell;
   title: string;
   body: string;
-  href?: string;
-  soon?: string;
+  href: string;
 }) {
-  const inner = (
-    <>
-      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-tile bg-brand-50 text-brand-600">
-        <Icon size={18} aria-hidden />
-      </span>
-      <span className="min-w-0 flex-1">
-        <span className="block text-[14px] font-semibold text-ink-900">{title}</span>
-        <span className="block truncate text-[12px] text-ink-500">{body}</span>
-      </span>
-      <ChevronRight size={18} className="shrink-0 text-ink-300" aria-hidden />
-    </>
-  );
-
   return (
     <li className="border-b border-line last:border-b-0">
-      {href ? (
-        <Link href={href} className="tappable flex items-center gap-3 p-3 active:scale-[0.99]">
-          {inner}
-        </Link>
-      ) : (
-        <div title={soon} className="flex items-center gap-3 p-3 opacity-55">
-          {inner}
-        </div>
-      )}
+      <Link href={href} className="tappable flex items-center gap-3 p-3 active:scale-[0.99]">
+        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-tile bg-brand-50 text-brand-600">
+          <Icon size={18} aria-hidden />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block text-[14px] font-semibold text-ink-900">{title}</span>
+          <span className="block truncate text-[12px] text-ink-500">{body}</span>
+        </span>
+        <ChevronRight size={18} className="shrink-0 text-ink-300" aria-hidden />
+      </Link>
     </li>
   );
 }

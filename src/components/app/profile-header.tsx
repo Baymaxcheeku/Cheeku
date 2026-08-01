@@ -67,6 +67,7 @@ export function ProfileHeader({
         <FamilySwitcherSheet
           profiles={profiles}
           activeId={profile.id}
+          tier={tier}
           onClose={() => setOpen(false)}
         />
       ) : null}

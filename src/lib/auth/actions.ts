@@ -1,6 +1,7 @@
 "use server";
 
 import { createServerSupabase } from "@/lib/supabase/server";
+import { setAudience } from "./audience";
 import { isDevAuthActive, isSupabaseConfigured, writeDevSession } from "./dev-session";
 import {
   audienceSchema,
@@ -138,6 +139,10 @@ export async function chooseAudience(formData: FormData): Promise<ActionResult> 
   if (!parsed.success) return { ok: false, message: "Choose an option to continue." };
 
   if (isDevAuthActive()) await writeDevSession({ audience: parsed.data.audience });
+
+  // Remembered so the end of onboarding knows whether to offer family access.
+  // It is a routing hint only — see lib/auth/audience.ts.
+  await setAudience(parsed.data.audience);
 
   return { ok: true, redirectTo: "/profile" };
 }

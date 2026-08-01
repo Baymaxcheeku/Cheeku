@@ -1,7 +1,5 @@
-import { createAvatar } from "@dicebear/core";
-import { micah } from "@dicebear/collection";
-
 import { cn } from "@/lib/cn";
+import { castFaces, faceDataUri } from "@/lib/profiles/avatar";
 
 /*
  * Real faces for the "Who is this for?" choice.
@@ -16,24 +14,13 @@ import { cn } from "@/lib/cn";
  * visibly different people.
  */
 
-function face(seed: string, background: string, size = 96): string {
-  const svg = createAvatar(micah, {
-    seed,
-    size,
-    scale: 88,
-    radius: 50,
-    backgroundColor: [background],
-  }).toString();
-  return `data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`;
-}
-
 /** One face, for "It's for me". */
 export function AvatarSolo({ className }: { className?: string }) {
   return (
     <div className={cn("relative shrink-0", className)}>
       {/* eslint-disable-next-line @next/next/no-img-element -- inline data URI */}
       <img
-        src={face("baymax-solo-portrait", "d1d4f9")}
+        src={faceDataUri("baymax-solo-portrait", "d1d4f9")}
         alt=""
         className="h-full w-full rounded-pill object-cover shadow-e1 ring-2 ring-white"
       />
@@ -61,11 +48,9 @@ export function AvatarSolo({ className }: { className?: string }) {
  * choices on this screen.
  */
 export function AvatarFamily({ className }: { className?: string }) {
-  const members = [
-    { seed: "baymax-family-a", bg: "ffd5dc" },
-    { seed: "baymax-family-b", bg: "c0aede" },
-    { seed: "baymax-family-c", bg: "b6e3f4" },
-  ];
+  // The same illustrated cast used by FamilyScene and the locked Family slots,
+  // so the "family" depicted in onboarding is the one depicted everywhere else.
+  const faces = castFaces(3);
 
   /*
    * Explicit pixel sizes, not percentages. Percentages plus negative margins
@@ -75,13 +60,20 @@ export function AvatarFamily({ className }: { className?: string }) {
   return (
     <div className={cn("relative shrink-0", className)}>
       <div className="flex h-full items-center">
-        {members.map((m, i) => (
+        {faces.map((src, i) => (
+          /*
+           * Keyed on index, not a slice of the data URI: every generated SVG
+           * closes with the same tags, so their base64 TAILS are identical —
+           * `src.slice(-24)` produced three equal keys and React warned about
+           * duplicates. The cast is a fixed-length, fixed-order array, so index
+           * is stable here.
+           */
           /* eslint-disable-next-line @next/next/no-img-element -- inline data URI */
           <img
-            key={m.seed}
-            src={face(m.seed, m.bg)}
+            key={i}
+            src={src}
             alt=""
-            style={{ zIndex: members.length - i }}
+            style={{ zIndex: faces.length - i }}
             className={cn(
               "rounded-pill object-cover shadow-e1 ring-2 ring-white",
               i === 0 ? "h-12 w-12" : "-ml-5 h-10 w-10",

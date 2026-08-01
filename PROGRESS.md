@@ -535,6 +535,53 @@ The frames also cite journal papers (Endocrine Society, NEJM). Citations here
 point at the reader's own documents instead, per the spec's flow and because a
 citation the reader cannot open is decoration.
 
+**Rule 4 revisited, 2026-07-29 — "grounded or silent" became "grounded, then general, then silent"**
+
+Athar asked for Ask Baymax to answer both ways: from the reader's own records
+when it can, and from general knowledge when it can't, rather than going silent
+on anything not in a document. That is a real change to rule 4 as shipped
+above — not a bug fix, a product decision — so it is recorded here rather than
+folded silently into the original entry.
+
+Rule 1 did not move. `src/lib/ai/mock/knowledge.ts` adds a small set of
+hand-authored, keyword-matched general topics (exercise in pregnancy, common
+lab-value thresholds, vitamin D, herbal sleep aids) written in the same
+pamphlet register as everywhere else — population-level information, always
+closed out with "your doctor can tell you what this means for you", never a
+condition name or a number with a unit attached to the reader. `answer.kind`
+(`"grounded" | "general" | "silent"`) tells the UI which happened, because each
+deserves different framing — the old blanket "outside what it can see" warning
+was rewritten to only fire when kind is truly silent. 24 tests across
+`answer.test.ts` and a new `knowledge.test.ts` run the same product-rule check
+against every topic, not just a couple of probe questions.
+
+**Alongside it, a new capability: product-safety scenarios.** The same
+conversation asked for photo-based product/food safety checks — general
+assessment plus a personalized note when it overlaps with the reader's own
+Health profile. There is no vision model wired into this app, so this does not
+pretend to recognise an arbitrary photo: `src/lib/ai/mock/scenarios.ts` ships
+five fixed, hand-written demo products (a lotion, a peanut protein bar, a
+mineral sunscreen, an herbal sleep tea, an energy drink) chosen from a picker
+sheet behind the composer's camera button, honestly framed in the UI as a demo
+rather than disguised as general upload.
+
+A verdict here is about the *product*, not a diagnosis of the reader — "avoid
+during pregnancy" is consumer information printed on ingredient labels
+everywhere, not a clinical judgement. Personalization only ever matches against
+conditions the reader already declared on their own Health profile (built the
+same day — see Phase 6 note below); it never infers an allergy or condition
+that wasn't typed in. Verified live: the peanut protein bar returns "Safe" with
+no personal note for a profile with no declared allergy, and escalates to
+"Avoid" with a "For you —" note the moment "Peanut allergy" is saved to that
+profile's Health profile and the same scenario is asked again. 20 tests in
+`scenarios.test.ts` check every scenario against the same forbidden-language
+list, plus the escalation and no-escalation paths explicitly.
+
+Messages gained two new nullable columns for this — `attachment` (the demo
+photo shown on the user's bubble) and `product_assessment` (the structured
+card) — migration `0009`. Both paths still go through the same quota gate as a
+text question; a product check is Ask Baymax, not a separate free feature.
+
 **Also deliberate**
 
 - Step 3 of the escalation marks "Notified your emergency contacts" as
@@ -613,6 +660,34 @@ touched. Verified on a throwaway account: every row cascaded, the file was gone,
 no orphan. `consent_log` survives deliberately — it is the record that consent
 was given and withdrawn, and carries no health data.
 
+**I1 grew into the full Profile section** — personal information, health
+profile, security & privacy, notifications, language and help & support are now
+real screens under `/settings/*`, matching the H/I/J frames, plus a logout flow.
+
+- **Personal information & Health profile** edit the active profile's real
+  columns. Fixed a genuine bug on the way: onboarding (A5) collected height,
+  weight and blood group and silently discarded them — `saveProfile` never
+  wrote them. Migration `0008` adds the columns; both screens now read and
+  write them for real.
+- **Notifications** persists nine toggles, grouped, to a new
+  `families.notification_prefs` jsonb column — merge-patched per toggle so a
+  stale client write can't blank out preferences it never rendered.
+- **Security & privacy** is real content plus a working change-password flow.
+  Changing a password re-authenticates with the current one first —
+  `auth.updateUser` alone will change a password for anyone holding a live
+  session, which is not the same thing as consent to change the credential.
+- **Language and Help & support** are honest rather than decorative: English
+  only with every other language shown as a real roadmap rather than hidden,
+  and every "Report" / "Contact" tile opens the reader's own mail app rather
+  than a form that goes nowhere.
+- **Logout** clears the Supabase session (or the dev stand-in) and the active-
+  profile cookie together — leaving the profile cookie set would hand the next
+  signed-in session someone else's family member selection. Confirmed with a
+  sheet, since it sits one row above "Delete all my data".
+- Verified end to end in-browser: every row navigates, every form saves and
+  survives a reload, notification toggles persist and revert on failure, and a
+  full logout → sign-in cycle leaves all saved data intact.
+
 **Two frame conflicts, flagged rather than silently resolved**
 
 1. *The free chat limit is 5, not the spec's 3.* The chat frame says "Free users
@@ -625,6 +700,193 @@ was given and withdrawn, and carries no health data.
 
 - **C3 camera verdict.** Not started.
 - Real payment provider, by design.
+
+## Illustration rebuild — 2026-07-30
+
+Athar called out the mascot specifically: a "weird egg shape" around it, and the
+bell on Home looking wrong. Both were real bugs, not taste — three of them,
+found by reading the SVG paths rather than re-tuning gradients again.
+
+**The mascot had no arms.** The old arm paths ran to x = -12 in a viewBox
+starting at 0, so the browser clipped them entirely. It was never drawn without
+arms on purpose — the geometry just put them outside the canvas. It rendered as
+two stacked ellipses, which is why it read as a snowman no matter how the
+shading changed.
+
+**The "egg shape" was `bx-field`** — an amorphous blob path with a hard,
+solid-filled edge sitting behind every mascot instance. A shape with a visible
+boundary is a second object to the eye, which is exactly the complaint.
+Replaced with `bx-glow`, a radial gradient that fades to full transparency —
+there is no edge left to find, so it reads as light in the air rather than a
+shape.
+
+**White was falling off to neutral grey**, which is what a *photograph of a
+grey object* looks like, not a white object in a lavender room. Real materials
+pick up the colour of their surroundings in shadow. `bx-shell`'s falloff now
+runs white → warm-white → lavender-grey, and a `bx-bounce` gradient brightens
+the lower edge of every form the way light reflected off the ground would.
+This one change carried more of the "is this actually 3D" perception than the
+AO/specular layering from the previous pass.
+
+Fixing the arms properly surfaced further anatomy problems once they were
+actually visible: the legs were round-capped strokes narrow enough that only
+the cap showed below the torso, which read as claws — rewritten as wide
+ellipse feet. The arms tucked in close enough to merge with the torso outline
+— pushed further out so there's daylight between limb and body, and given
+mitten hands so a limb visibly ends in something. The bust's raised arm was
+anchored beside the head and looped back up next to it, reading as a teapot
+handle — re-anchored at the shoulder, below the head, swinging outward before
+it rises.
+
+**One source of geometry.** `MascotHead`, `MascotBody` and `Mascot` are now the
+only places the character's curves exist; four scenes used to paste their own
+copy inline, which is how the character drifted between screens in the first
+place — a fix to one instance would not have reached the other three.
+
+**The bell**, called out by name, is rebuilt as one silhouette (crown, dome,
+skirt in a single path) rather than a dome shape overlapping a separate skirt
+shape — two adjoining fills always show a seam where their anti-aliased edges
+meet, and at 100px that seam was most of what read as "blob". A distinct lip
+band (the bell's metal thickness) and a clapper were added; without the lip a
+purple dome is just a purple dome, not a bell.
+
+`HeroScene`, `UploadScene`, `PrivacyScene` and `InsightsScene` moved onto the
+same `bx-glow` backdrop and the same bounce-light treatment. The welcome
+carousel's art was also capped at 320px inside a screen with ~700px of vertical
+room for it — enlarged to fill the space rather than float in the middle of it.
+
+**A real bug found while verifying, not shading**: `AvatarFamily` keyed its
+`<img>` list on the last 24 characters of each generated avatar's base64 data
+URI. Every generated SVG closes with the same tags, so the tails were
+identical — React logged a duplicate-key warning on `/who` and the family
+switcher. Keyed on array index instead; the cast is fixed-length and
+fixed-order, so index is stable.
+
+172 tests pass (unchanged — this was all illustration, not logic), typecheck/
+lint/production build clean.
+
+## Design review pass — 2026-07-30
+
+Athar reviewed the build against the frames and raised six things, plus a
+follow-up on avatars. All are done; the notable findings are below.
+
+**The bug behind "the switcher tray is not working"**
+
+The tray was rendering, but almost entirely *behind* the page. `stagger` puts an
+`animation` on every direct child of a screen, and an element with a filling
+animation on opacity/transform gets its own stacking context — so the sheet's
+`z-40` only ever competed inside the one section that owned it. Against its
+siblings the browser fell back to paint order, and the switcher is the second
+section on both Home and Profile, so all six sections below it drew over the
+top. The logout sheet looked fine purely because it happens to be last.
+
+Fixing it properly needed two changes:
+
+1. **A `Sheet` primitive that portals** into `.device-screen` — not
+   `document.body`, because inside the desktop frame a `fixed` sheet must resolve
+   against the simulated 393x852 display or it spills out of the phone. Below
+   480px that element is `display: contents`, so the same portal resolves
+   against the real viewport, which is correct on a device. Every sheet now uses
+   it (switcher, add-member, paywall, product picker, logout) and gets Escape-to-
+   close for free.
+2. **Splitting the device frame.** `.device-screen` was both the transformed
+   containing block *and* the scroll container, and a `fixed` child of a
+   scrolling containing block scrolls with it — so sheets slid off once the page
+   was scrolled. `.device-screen` is now a non-scrolling clip box; a new
+   `.device-scroll` inside it does the scrolling. This was a latent bug in the
+   frame, not something the portal introduced.
+
+**Onboarding**
+
+A4's two cards never lined up because the radio sat inside the text column with
+`ml-auto` — its position depended on the title's length — and the two art
+clusters sized themselves, so the titles started at different x. The radio is
+now absolutely positioned in the card corner and the art sits in a fixed 92px
+column. Step dots added.
+
+A new **A6 plan step** (`/plan`) closes the gap Athar identified: family access
+is genuinely gated on the Family plan, so choosing "it's for my family" and then
+landing on Home meant discovering you cannot add anyone. It asks at the point the
+choice was made, and is **skippable** — "choose family" is not consent to be
+charged, and the skip is a real button rather than a faint link. The choice rides
+in a 24h cookie (`lib/auth/audience.ts`) that is explicitly a routing hint, not a
+fact about the account; what the account can do is always the subscription tier.
+
+**Three plans, and the Daily pass**
+
+The `micro` tier had been in the schema since 0004 and wired to nothing. It is
+now the ₹29/day pass Athar asked to include, which resolved the old frame
+conflict cleanly: the outlier frame's *product idea* is adopted, its ₹499/₹899
+pricing still rejected.
+
+A pass that lasts a day needs an expiry, so `subscriptions.expires_at` was added
+(0010). The trap here is that `isUnlimited(tier)` is true for `micro`, so an
+elapsed pass would have granted unlimited chats forever — the expiry check lives
+in one function that **both** the read path and `consumeChat` call, because if
+those two disagreed the paywall and the gate would fight. `activateTier` also
+nulls the expiry explicitly for the monthly tiers, or upgrading from a dead pass
+would inherit its dead date.
+
+**The chat wall is now in the chat**
+
+Per the frame, hitting the limit renders a card in the transcript rather than
+only a modal, and the tray opens on all three plans. The card is deliberately
+*sticky*: dismissing the tray used to leave a composer that looked functional but
+refused every send. It clears only when a plan activates. The product-photo path
+was also opening a dead red error telling people to go find the Profile tab;
+it now opens the same tray.
+
+**Family section, and add-member**
+
+The Profile screen gained the H-Solo frame's Family block: blurred locked slots
+and a plan pitch on free/solo, real members and a working "Add member" on
+Family. Two calls worth recording — the locked faces are **generated
+placeholders**, because blurring a real member's avatar to sell a plan means
+using their data as bait; and the reader's own profile is never locked, because
+they already have it.
+
+`addFamilyMember` gates on the entitlement read from the database, not on
+anything the sheet sent — the form is only drawn for family tier, but "only
+drawn for" is not a limit for anyone who can post a form. The database's own
+6-profile trigger stays the backstop.
+
+**One avatar system**
+
+Athar's follow-up: the "who is this for" art was grey figure silhouettes while
+every profile row used generated faces — two visual species of person in one
+app. `lib/profiles/avatar.ts` is now the single renderer (`faceDataUri`), with a
+fixed illustrated `castFaces()` for art that depicts nobody in particular. The
+onboarding cluster had its own duplicate `createAvatar` call, which is exactly
+how the two drifted; it is gone.
+
+**Help & Support writes real tickets**
+
+The frame's "Report an issue" button went nowhere. It now files to a new
+`support_tickets` table (0010) and shows the reference back. The table holds **no
+health data** — a category, a title, the user's own words, and the app version;
+support staff diagnosing a crash have no business reading lab values.
+
+Tickets hang off `user_id`, not `family_id`, so account deletion did **not**
+cascade to them. That would have left someone's own words behind after they
+asked for everything to go, so `deleteAccountData` removes them explicitly and
+`exportAccount` includes them.
+
+**A first-tap bug found while verifying**
+
+All three of the chat's starter chips ("What do my recent reports say?", …) are
+overview-shaped, and the engine only matched measurement *names* — so the first
+thing most people tap came back "I could not find anything" with their records
+sitting right there. Added an overview intent that answers from the documents
+themselves (what exists, when, from where, what the report flagged) with
+citations, checked before the general-knowledge fallback but after the entity
+matcher, so "how is my haemoglobin" still gets the specific value.
+
+The product-rule guard also had a false positive worth fixing rather than
+papering over: `/\bdiagnos/i` matched "Vijaya **Diagnos**tics", a lab's name
+echoed verbatim from the user's own document. It now targets the act
+(`diagnose|diagnosed|diagnosis|diagnosing`), not the letters.
+
+172 tests pass, production build clean.
 
 ## Phase 7 — Hardening · in progress
 

@@ -32,13 +32,17 @@ const BACKGROUNDS = ["d1d4f9", "ffd5dc", "c0aede", "b6e3f4", "ffdfbf", "d7f0e0"]
 
 export type GeneratedAvatar = { dataUri: string; background: string };
 
-export function generatedAvatar(profileId: string, index: number): GeneratedAvatar {
-  // `as const` makes the modulo index provably in range, so this needs no
-  // fallback and no assertion — noUncheckedIndexedAccess is satisfied.
-  const background = BACKGROUNDS[index % BACKGROUNDS.length] as (typeof BACKGROUNDS)[number];
-
+/**
+ * THE avatar renderer. Every face in the app comes through here.
+ *
+ * It is exported so nothing else re-implements `createAvatar` with its own
+ * style or sizing — that happened once (the onboarding cluster had its own
+ * copy) and the two drifted, which is exactly how an app ends up with two
+ * different-looking sets of people in it.
+ */
+export function faceDataUri(seed: string, background: string): string {
   const svg = createAvatar(micah, {
-    seed: profileId,
+    seed,
     size: 96,
     scale: 88,
     radius: 50,
@@ -50,8 +54,43 @@ export function generatedAvatar(profileId: string, index: number): GeneratedAvat
    * and `<`, which have to be percent-encoded, and getting that subtly wrong
    * fails silently as a broken image in exactly one browser.
    */
-  return {
-    dataUri: `data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`,
-    background: `#${background}`,
-  };
+  return `data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`;
+}
+
+export function generatedAvatar(profileId: string, index: number): GeneratedAvatar {
+  // `as const` makes the modulo index provably in range, so this needs no
+  // fallback and no assertion — noUncheckedIndexedAccess is satisfied.
+  const background = BACKGROUNDS[index % BACKGROUNDS.length] as (typeof BACKGROUNDS)[number];
+
+  return { dataUri: faceDataUri(profileId, background), background: `#${background}` };
+}
+
+/*
+ * Faces that stand for nobody.
+ *
+ * Used where the app needs to *depict* a family rather than show one: the
+ * onboarding illustration, the value carousel, and the locked slots in the
+ * Family upsell. They must come from the same generator as real profiles or the
+ * app ends up with two visual species of person in it — which is the bug this
+ * whole module now exists to prevent.
+ *
+ * Fixed seeds, so the illustrated family is the same people on every screen and
+ * every render. And deliberately NOT anyone's real avatar: blurring a genuine
+ * member's face to advertise a plan would mean using their data as bait.
+ */
+const CAST = [
+  { seed: "baymax-cast-parent-a", background: "d1d4f9" },
+  { seed: "baymax-cast-parent-b", background: "ffd5dc" },
+  { seed: "baymax-cast-child", background: "b6e3f4" },
+  { seed: "baymax-cast-elder", background: "d7f0e0" },
+  { seed: "baymax-cast-teen", background: "ffdfbf" },
+  { seed: "baymax-cast-partner", background: "c0aede" },
+] as const;
+
+/** `count` stand-in faces, in a stable order. */
+export function castFaces(count: number): string[] {
+  return Array.from({ length: Math.min(count, CAST.length) }, (_, i) => {
+    const member = CAST[i % CAST.length] as (typeof CAST)[number];
+    return faceDataUri(member.seed, member.background);
+  });
 }

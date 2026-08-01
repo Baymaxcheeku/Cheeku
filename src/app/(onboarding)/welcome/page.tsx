@@ -65,8 +65,13 @@ export default function WelcomePage() {
          * are mostly art and let it grow, panels 3 and 4 carry a chip grid or a
          * feature list and need it to give way so the CTA stays above the fold.
          */}
-        <div className="mt-3 flex min-h-[100px] flex-1 items-center justify-center">
-          <Scene className="max-h-full w-full max-w-[320px] object-contain" />
+        {/*
+         * The art is allowed to run nearly full-bleed. Capped at 320px it sat
+         * marooned in the middle of a 852pt screen on the two art-only panels —
+         * the panel read as unfinished rather than spacious.
+         */}
+        <div className="mt-2 flex min-h-[100px] flex-1 items-center justify-center">
+          <Scene className="h-full max-h-[340px] w-full max-w-[420px] object-contain" />
         </div>
 
         {panel.chips ? (

@@ -1,11 +1,15 @@
 "use client";
 
+import Link from "next/link";
 import { useState, useTransition } from "react";
 import { Check, ChevronRight, Plus, ShieldCheck, Users, X } from "lucide-react";
 
+import { AddMemberSheet } from "@/components/app/add-member-sheet";
+import { Sheet } from "@/components/ui/sheet";
 import { cn } from "@/lib/cn";
 import { switchProfile } from "@/lib/profiles/actions";
 import type { ActiveProfile } from "@/lib/profiles/context";
+import type { Tier } from "@/lib/billing/plans";
 
 /*
  * B2 — the family switcher, as the inline row on Home and as the full sheet.
@@ -80,9 +84,11 @@ function Avatar({
 export function FamilySwitcher({
   profiles,
   activeId,
+  tier = "free",
 }: {
   profiles: readonly ActiveProfile[];
   activeId: string;
+  tier?: Tier;
 }) {
   const [pending, start] = useTransition();
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -169,6 +175,7 @@ export function FamilySwitcher({
         <FamilySwitcherSheet
           profiles={profiles}
           activeId={activeId}
+          tier={tier}
           onClose={() => setSheetOpen(false)}
         />
       ) : null}
@@ -187,41 +194,39 @@ export function FamilySwitcherSheet({
   profiles,
   activeId,
   onClose,
+  tier = "free",
 }: {
   profiles: readonly ActiveProfile[];
   activeId: string;
   onClose: () => void;
+  /** Decides whether adding a member is available or an upsell. */
+  tier?: Tier;
 }) {
   const [pending, start] = useTransition();
+  const [addOpen, setAddOpen] = useState(false);
 
   function onChoose(id: string) {
     onClose();
     if (id !== activeId) start(() => void switchProfile(id));
   }
 
-  return (
-    <div className="fixed inset-0 z-40 flex flex-col justify-end">
-      {/* The scrim closes the sheet, and is a button so it is reachable without
-          a pointer rather than being a div that only responds to clicks. */}
-      <button
-        type="button"
-        aria-label="Close"
-        onClick={onClose}
-        className="scrim-in absolute inset-0 bg-ink-900/35"
+  // The add-member form replaces this sheet rather than stacking on top of it:
+  // two sheets deep, the back gesture stops meaning anything predictable.
+  if (addOpen) {
+    return (
+      <AddMemberSheet
+        tier={tier}
+        memberCount={profiles.length}
+        onClose={onClose}
+        onBack={() => setAddOpen(false)}
       />
+    );
+  }
 
-      <div
-        role="dialog"
-        aria-modal
-        aria-label="Switch family member"
-        className={cn(
-          "sheet-rise relative max-h-[86%] overflow-y-auto rounded-t-sheet bg-canvas px-5 pb-[calc(var(--safe-bottom)+1rem)] pt-3 shadow-e2",
-          pending && "opacity-70",
-        )}
-      >
-        <span className="mx-auto block h-1 w-10 rounded-pill bg-line" aria-hidden />
-
-        <div className="mt-3 flex items-start gap-3">
+  return (
+    <Sheet onClose={onClose} label="Switch family member" className={cn("px-5", pending && "opacity-70")}>
+      <div className="mt-2">
+        <div className="flex items-start gap-3">
           <div className="min-w-0 flex-1">
             <h2 className="text-[20px] font-bold text-ink-900">Switch family member</h2>
             <p className="mt-0.5 text-[13px] text-ink-500">
@@ -285,23 +290,23 @@ export function FamilySwitcherSheet({
         </ul>
 
         {/*
-         * Both rows in the frame need features that do not exist yet: a combined
-         * family view, and profile creation beyond the one made at onboarding.
-         * They are shown disabled with a reason rather than linked to a dead
-         * end — the same call made for the social sign-in buttons in Phase 3.
+         * "All members" opens the records list unscoped, which is the honest
+         * version of the frame's "see everyone in one place" — it is a real
+         * screen that already exists, rather than a new one invented for a row.
          */}
         <div className="mt-3 space-y-2">
           <SheetAction
             icon={Users}
             title="View all members"
-            body="See everyone in one place"
-            soon="A combined family view arrives in a later phase"
+            body="See every member's records together"
+            href="/records?profileId=all"
+            onNavigate={onClose}
           />
           <SheetAction
             icon={Plus}
             title="Add family member"
             body="Add a new member to manage their health"
-            soon="Adding members arrives with the account phase"
+            onClick={() => setAddOpen(true)}
           />
         </div>
 
@@ -313,7 +318,7 @@ export function FamilySwitcherSheet({
           </span>
         </p>
       </div>
-    </div>
+    </Sheet>
   );
 }
 
@@ -321,19 +326,19 @@ function SheetAction({
   icon: Icon,
   title,
   body,
-  soon,
+  href,
+  onClick,
+  onNavigate,
 }: {
   icon: typeof Users;
   title: string;
   body: string;
-  soon: string;
+  href?: string;
+  onClick?: () => void;
+  onNavigate?: () => void;
 }) {
-  return (
-    <div
-      title={soon}
-      aria-disabled
-      className="flex items-center gap-3 rounded-card bg-surface p-3 opacity-55 shadow-e1"
-    >
+  const inner = (
+    <>
       <span className="grid h-10 w-10 shrink-0 place-items-center rounded-tile bg-brand-50 text-brand-600">
         <Icon size={18} aria-hidden />
       </span>
@@ -342,6 +347,22 @@ function SheetAction({
         <span className="block truncate text-[12px] text-ink-500">{body}</span>
       </span>
       <ChevronRight size={18} className="shrink-0 text-ink-300" aria-hidden />
-    </div>
+    </>
+  );
+
+  const shell = "tappable flex w-full items-center gap-3 rounded-card bg-surface p-3 text-left shadow-e1 active:scale-[0.99]";
+
+  if (href) {
+    return (
+      <Link href={href} onClick={onNavigate} className={shell}>
+        {inner}
+      </Link>
+    );
+  }
+
+  return (
+    <button type="button" onClick={onClick} className={shell}>
+      {inner}
+    </button>
   );
 }

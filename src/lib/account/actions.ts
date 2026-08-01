@@ -25,6 +25,7 @@ export type ExportBundle = {
   messages: unknown[];
   consentLog: unknown[];
   subscription: unknown;
+  supportTickets: unknown[];
 };
 
 /**
@@ -45,8 +46,17 @@ export async function exportAccount(): Promise<
   const user = await requireUser();
   const supabase = await createServerSupabase();
 
-  const [profiles, documents, entities, timeline, conversations, messages, consent, subscription] =
-    await Promise.all([
+  const [
+    profiles,
+    documents,
+    entities,
+    timeline,
+    conversations,
+    messages,
+    consent,
+    subscription,
+    tickets,
+  ] = await Promise.all([
       supabase.from("profiles").select("*"),
       supabase.from("documents").select("*"),
       supabase.from("entities").select("*"),
@@ -55,11 +65,19 @@ export async function exportAccount(): Promise<
       supabase.from("messages").select("*"),
       supabase.from("consent_log").select("*"),
       supabase.from("subscriptions").select("*").maybeSingle(),
+      supabase.from("support_tickets").select("*"),
     ]);
 
-  const failure = [profiles, documents, entities, timeline, conversations, messages, consent].find(
-    (r) => r.error,
-  );
+  const failure = [
+    profiles,
+    documents,
+    entities,
+    timeline,
+    conversations,
+    messages,
+    consent,
+    tickets,
+  ].find((r) => r.error);
   if (failure?.error) return { ok: false, message: "Could not read your data. Please try again." };
 
   return {
@@ -75,6 +93,7 @@ export async function exportAccount(): Promise<
       messages: messages.data ?? [],
       consentLog: consent.data ?? [],
       subscription: subscription.data ?? null,
+      supportTickets: tickets.data ?? [],
     },
   };
 }
@@ -139,6 +158,23 @@ export async function deleteAccountData(confirmation: string): Promise<DeleteRes
   const { error: familyError } = await admin.from("families").delete().eq("owner_id", user.id);
   if (familyError) {
     return { ok: false, message: "Files were removed but records could not be. Please try again." };
+  }
+
+  /*
+   * Support tickets hang off `user_id`, NOT `family_id`, so deleting the family
+   * does not cascade to them — they have to be removed explicitly. Missing this
+   * would leave the user's own words behind after they asked for everything to
+   * go, which is precisely what the erasure right forbids.
+   */
+  const { error: ticketError } = await admin
+    .from("support_tickets")
+    .delete()
+    .eq("user_id", user.id);
+  if (ticketError) {
+    return {
+      ok: false,
+      message: "Your records were removed but support messages could not be. Please contact support.",
+    };
   }
 
   // consent_log hangs off the user, not the family, and is kept deliberately:

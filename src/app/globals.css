@@ -304,7 +304,8 @@ body {
  */
 .device-stage,
 .device-body,
-.device-screen {
+.device-screen,
+.device-scroll {
   display: contents;
 }
 
@@ -337,13 +338,16 @@ body {
       0 40px 80px -20px rgba(15, 16, 48, 0.45);
   }
 
+  /*
+   * The display itself: a fixed-size, NON-scrolling box. It clips its contents
+   * to the rounded corners and acts as the app's viewport.
+   */
   .device-screen {
     display: block;
     position: relative;
     width: 393px;
     height: 852px;
-    overflow-y: auto;
-    overscroll-behavior: contain;
+    overflow: hidden;
     border-radius: 56px;
     background: var(--canvas);
     /*
@@ -355,6 +359,12 @@ body {
      * `transform` is the mechanism; the value is a no-op chosen for that side
      * effect alone. Below 480px this whole block does not apply and fixed
      * positioning works against the real viewport, as it should.
+     *
+     * Critically, this element must NOT be the scroll container. A `fixed`
+     * child is positioned against its containing block's padding box, but if
+     * that containing block is also what scrolls, the child scrolls with it —
+     * so sheets slid off with the page. The scrolling lives on `.device-scroll`
+     * below for exactly that reason.
      */
     transform: translateZ(0);
     /* The simulated display is the app's viewport, insets and all. */
@@ -363,11 +373,16 @@ body {
     --safe-bottom: 34px;
   }
 
-  /* A desktop scrollbar inside the display would break the illusion. */
-  .device-screen {
+  /* The scrolling column inside the display. */
+  .device-scroll {
+    display: block;
+    height: 100%;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    /* A desktop scrollbar inside the display would break the illusion. */
     scrollbar-width: none;
   }
-  .device-screen::-webkit-scrollbar {
+  .device-scroll::-webkit-scrollbar {
     display: none;
   }
 
