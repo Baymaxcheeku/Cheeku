@@ -2,14 +2,15 @@
 
 import Link from "next/link";
 import { useState, useTransition } from "react";
-import { Check, ChevronRight, Plus, ShieldCheck, Users, X } from "lucide-react";
+import { Check, ChevronRight, Crown, Lock, Plus, ShieldCheck, Users, X } from "lucide-react";
 
 import { AddMemberSheet } from "@/components/app/add-member-sheet";
+import { Paywall } from "@/components/billing/paywall";
 import { Sheet } from "@/components/ui/sheet";
 import { cn } from "@/lib/cn";
 import { switchProfile } from "@/lib/profiles/actions";
 import type { ActiveProfile } from "@/lib/profiles/context";
-import type { Tier } from "@/lib/billing/plans";
+import { allowsFamily, type Tier } from "@/lib/billing/plans";
 
 /*
  * B2 — the family switcher, as the inline row on Home and as the full sheet.
@@ -85,13 +86,25 @@ export function FamilySwitcher({
   profiles,
   activeId,
   tier = "free",
+  lockedCount = 0,
 }: {
+  /**
+   * Only the profiles the current plan can actually open — see
+   * `selectableProfiles`. Passing the full roster here would draw faces that
+   * the server action then refuses to switch to, which reads as a broken
+   * control rather than a locked feature.
+   */
   profiles: readonly ActiveProfile[];
   activeId: string;
   tier?: Tier;
+  /** Profiles that exist on the account but are behind the plan. */
+  lockedCount?: number;
 }) {
   const [pending, start] = useTransition();
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [paywallOpen, setPaywallOpen] = useState(false);
+
+  const canSwitch = allowsFamily(tier);
 
   if (profiles.length === 0) return null;
 
@@ -156,18 +169,51 @@ export function FamilySwitcher({
           );
         })}
 
+        {/*
+         * Members this plan does not reach, drawn as padlocks rather than
+         * omitted.
+         *
+         * Silently dropping them would tell a downgraded subscriber their
+         * mother's records are gone. They are not — they are untouched and one
+         * upgrade away — so the row says "locked", which is true, instead of
+         * "absent", which is not.
+         */}
+        {!canSwitch && lockedCount > 0
+          ? Array.from({ length: Math.min(lockedCount, 3) }, (_, i) => (
+              <button
+                key={`locked-${i}`}
+                type="button"
+                onClick={() => setPaywallOpen(true)}
+                aria-label="Family members are part of the Family plan"
+                className="tappable flex shrink-0 flex-col items-center gap-1.5 px-1 py-1 active:scale-95"
+              >
+                <span className="grid h-12 w-12 place-items-center rounded-pill border border-dashed border-line bg-surface-tint text-ink-300">
+                  <Lock size={16} aria-hidden />
+                </span>
+                <span className="text-[11px] text-ink-300">Locked</span>
+              </button>
+            ))
+          : null}
+
         {/* "All" opens the sheet rather than being a view of its own: a combined
             family view is the one place one person's results could appear under
             another's name, so it is not a thing you can land on by accident. */}
         <button
           type="button"
-          onClick={() => setSheetOpen(true)}
+          onClick={() => (canSwitch ? setSheetOpen(true) : setPaywallOpen(true))}
           className="tappable flex shrink-0 flex-col items-center gap-1.5 px-1 py-1 active:scale-95"
         >
-          <span className="grid h-12 w-12 place-items-center rounded-pill border border-line bg-surface text-ink-500">
-            <Users size={18} aria-hidden />
+          <span
+            className={cn(
+              "grid h-12 w-12 place-items-center rounded-pill border bg-surface",
+              canSwitch ? "border-line text-ink-500" : "border-brand-200 text-brand-600",
+            )}
+          >
+            {canSwitch ? <Users size={18} aria-hidden /> : <Crown size={17} aria-hidden />}
           </span>
-          <span className="text-[11px] text-ink-500">All</span>
+          <span className={cn("text-[11px]", canSwitch ? "text-ink-500" : "text-brand-600")}>
+            {canSwitch ? "All" : "Upgrade"}
+          </span>
         </button>
       </div>
 
@@ -179,6 +225,13 @@ export function FamilySwitcher({
           onClose={() => setSheetOpen(false)}
         />
       ) : null}
+
+      <Paywall
+        open={paywallOpen}
+        reason="family"
+        onClose={() => setPaywallOpen(false)}
+        onActivated={() => setPaywallOpen(false)}
+      />
     </>
   );
 }

@@ -1,13 +1,14 @@
 import Link from "next/link";
-import { Bell, CalendarDays, ChevronRight, FileText, HeartPulse, ShieldCheck } from "lucide-react";
+import { CalendarDays, ChevronRight, FileText, HeartPulse, ShieldCheck } from "lucide-react";
 
 import { FamilySwitcher } from "@/components/app/family-switcher";
 import { HomeAskBox } from "@/components/app/home-ask-box";
+import { NotificationsBell } from "@/components/app/notifications-bell";
 import { RecordRow } from "@/components/records/chrome";
-import { ReminderScene } from "@/components/illustrations";
 import { cn } from "@/lib/cn";
 import { getEntitlement } from "@/lib/billing/quota";
-import { activeProfile, familyProfiles } from "@/lib/profiles/context";
+import { deriveNotifications } from "@/lib/notifications/derive";
+import { activeProfile, profileAccess } from "@/lib/profiles/context";
 import { formatEventDate } from "@/lib/records/grouping";
 import { listProfileRecords, statsFrom } from "@/lib/records/queries";
 
@@ -30,8 +31,8 @@ function greeting(): string {
  * the user something untrue about whose health they are looking at.
  */
 export default async function HomePage() {
-  const [profiles, profile, entitlement] = await Promise.all([
-    familyProfiles(),
+  const [access, profile, entitlement] = await Promise.all([
+    profileAccess(),
     activeProfile(),
     getEntitlement(),
   ]);
@@ -68,24 +69,29 @@ export default async function HomePage() {
             <span className="truncate">{profile.name}</span>
             <span aria-hidden>👋</span>
           </h1>
-          <p className="mt-1 text-[14px] text-ink-500">Here&apos;s your health at a glance.</p>
+          <p className="mt-1 text-[14px] text-ink-500">
+            Clarity and calm, for every health question.
+          </p>
         </div>
-        {/* No badge — see the note in records/chrome.tsx. There is nothing to count. */}
-        <button
-          type="button"
-          aria-label="Notifications"
-          className="grid h-10 w-10 shrink-0 place-items-center rounded-pill bg-surface text-ink-500 shadow-e1"
-        >
-          <Bell size={19} aria-hidden />
-        </button>
+        <NotificationsBell notifications={deriveNotifications(records)} />
       </header>
 
-      <div className="mt-4">
-        <FamilySwitcher profiles={profiles} activeId={profile.id} tier={entitlement.tier} />
-      </div>
+      <section className="mt-5">
+        <h2 className="px-5 text-[12px] font-bold uppercase tracking-wide text-ink-300">Family</h2>
+        <div className="mt-1.5">
+          {/* Only what the plan can open, plus a count of what it cannot —
+              the switcher draws padlocks for the rest rather than faces it
+              would refuse to switch to. */}
+          <FamilySwitcher
+            profiles={access.selectable}
+            activeId={profile.id}
+            tier={entitlement.tier}
+            lockedCount={access.lockedCount}
+          />
+        </div>
+      </section>
 
       <InsightCard
-        name={profile.name}
         total={stats.total}
         needsReview={needsReview}
         topRecordId={records.find((r) => r.severity !== "normal")?.id}
@@ -101,67 +107,68 @@ export default async function HomePage() {
       />
 
       {/*
-       * Three pills rather than three cards.
-       *
-       * As tiles this section spent ~100px of a 852pt screen restating numbers
-       * the insight card above has already acted on, and pushed Ask Baymax —
-       * the actual daily loop — below the fold. The counts are still worth
-       * having at a glance; they were just never worth a card each.
-       *
-       * The sub-lines ("2 new this week", "Review lab result") are dropped with
-       * them: the insight card is the one place that should be telling anyone
-       * what to do about a flagged result, and saying it twice on one screen
-       * made neither instance feel like the real one.
+       * Ask Baymax moved above Health Summary and given the mascot's own
+       * breathing room: for the anxious or pregnant user this card is the
+       * reason they opened the app, not a footnote below a stats row.
        */}
-      <section className="mt-4 px-5">
+      <HomeAskBox />
+
+      {/*
+       * One section, not two. The old layout said "2 records to review"
+       * three times on one screen — the insight card above, an alert banner
+       * here, and a "To review" tile right beside it — which trains the eye
+       * to skim past the second and third repeat of anything. This keeps the
+       * count exactly once, as a tile among its peers, and lets the record
+       * list that follows do the explaining. One header, one "View all":
+       * the stats and the records they describe are one story, not two.
+       */}
+      <section className="mt-5 px-5">
         <div className="flex items-baseline justify-between">
           <h2 className="text-[17px] font-bold text-ink-900">Health Summary</h2>
-          <Link href="/records" className="flex items-center text-[13px] font-semibold text-brand-600">
+          <Link
+            href="/records"
+            className="tappable flex items-center text-[13px] font-semibold text-brand-600 active:opacity-60"
+          >
             View all
             <ChevronRight size={15} aria-hidden />
           </Link>
         </div>
 
-        <ul className="mt-2 flex gap-2">
-          <SummaryPill
+        <ul className="mt-2.5 grid grid-cols-3 gap-2">
+          <SummaryTile
             icon={FileText}
             tint="bg-brand-50 text-brand-600"
             value={stats.total}
             label="Documents"
           />
-          <SummaryPill
+          <SummaryTile
             icon={ShieldCheck}
             tint="bg-safe-bg text-safe"
             value={stats.normal}
             label="In range"
           />
-          <SummaryPill
+          <SummaryTile
             icon={HeartPulse}
             tint="bg-danger-bg text-danger"
             value={needsReview}
             label="To review"
-            emphasise={needsReview > 0}
+            alert={needsReview > 0}
           />
         </ul>
-      </section>
 
-      <HomeAskBox />
-
-      {recent.length > 0 ? (
-        <section className="mt-5 px-5">
-          <div className="flex items-baseline justify-between">
-            <h2 className="text-[17px] font-bold text-ink-900">Recent records</h2>
-            <Link href="/records" className="text-[13px] font-semibold text-brand-600">
-              See all
-            </Link>
+        {recent.length > 0 ? (
+          <div className="mt-3 overflow-hidden rounded-card bg-surface shadow-e1">
+            <p className="px-3.5 pt-3 text-[11px] font-bold uppercase tracking-wide text-ink-300">
+              Recent
+            </p>
+            <ul className="mt-1 divide-y divide-line">
+              {recent.map((record) => (
+                <RecordRow key={record.id} record={record} variant="flush" />
+              ))}
+            </ul>
           </div>
-          <ul className="mt-2 space-y-2">
-            {recent.map((record) => (
-              <RecordRow key={record.id} record={record} />
-            ))}
-          </ul>
-        </section>
-      ) : null}
+        ) : null}
+      </section>
     </div>
   );
 }
@@ -177,13 +184,11 @@ export default async function HomePage() {
  * with what the records genuinely say.
  */
 function InsightCard({
-  name,
   total,
   needsReview,
   topRecordId,
   latest,
 }: {
-  name: string;
   total: number;
   needsReview: number;
   topRecordId?: string;
@@ -194,93 +199,107 @@ function InsightCard({
       ? {
           eyebrow: "Get started",
           title: "Add your first record",
-          body: "Upload a report and Baymax will organise it for you.",
-          cta: { label: "Add a document", href: "/scan" },
+          meta: "Upload a report and Baymax will organise it for you.",
+          href: "/scan",
+          icon: FileText,
+          tint: "bg-brand-50 text-brand-600",
         }
       : needsReview === 0
         ? {
             eyebrow: "All clear",
             title: "Everything is in range",
-            body: `Every measured value across ${name}'s ${total} record${total === 1 ? "" : "s"} sits inside its printed range.`,
-            cta: { label: "View records", href: "/records" },
+            meta: `${total} record${total === 1 ? "" : "s"} reviewed`,
+            href: "/records",
+            icon: ShieldCheck,
+            tint: "bg-safe-bg text-safe",
           }
         : {
             eyebrow: "Worth a look",
             title: `${needsReview} record${needsReview === 1 ? "" : "s"} to review`,
-            body: "Baymax does not interpret results — your doctor can.",
-            cta: {
-              label: "Open the record",
-              href: topRecordId ? `/records/${topRecordId}` : "/records",
-            },
+            meta: latest ? `${latest.date}${latest.facility ? ` · ${latest.facility}` : ""}` : undefined,
+            href: topRecordId ? `/records/${topRecordId}` : "/records",
+            icon: HeartPulse,
+            tint: "bg-danger-bg text-danger",
           };
 
+  /*
+   * A single tappable row rather than a card with its own headline, body and
+   * button: this is a pointer to something else on the app, not a
+   * destination in itself, and the earlier full-height version competed with
+   * Ask Baymax for the first thing someone's eye landed on.
+   */
   return (
-    <section className="relative mx-5 mt-4 overflow-hidden rounded-card bg-surface p-4 shadow-e1">
-      <ReminderScene className="pointer-events-none absolute -right-3 bottom-0 w-[136px]" />
-
-      <div className="relative pr-[38%]">
-        <p className="text-[11px] font-bold uppercase tracking-wide text-brand-600">
-          {content.eyebrow}
-        </p>
-        <h2 className="mt-1 text-[20px] font-bold leading-tight text-ink-900">{content.title}</h2>
-
-        {latest ? (
-          <p className="mt-2 flex items-center gap-1.5 text-[13px] font-medium text-ink-700">
-            <CalendarDays size={14} className="shrink-0 text-brand-500" aria-hidden />
-            {latest.date}
-          </p>
+    <Link
+      href={content.href}
+      className="tappable mx-5 mt-3 flex items-center gap-3 rounded-tile bg-surface px-3.5 py-3 shadow-e1 active:scale-[0.99]"
+    >
+      <span className={cn("grid h-10 w-10 shrink-0 place-items-center rounded-pill", content.tint)}>
+        <content.icon size={18} aria-hidden />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="flex items-center gap-1.5">
+          <span className="text-[10px] font-bold uppercase tracking-wide text-ink-300">
+            {content.eyebrow}
+          </span>
+        </span>
+        <span className="block truncate text-[14px] font-bold leading-tight text-ink-900">
+          {content.title}
+        </span>
+        {content.meta ? (
+          <span className="mt-0.5 flex items-center gap-1 truncate text-[11.5px] text-ink-500">
+            <CalendarDays size={11} className="shrink-0" aria-hidden />
+            {content.meta}
+          </span>
         ) : null}
-        {latest?.facility ? (
-          <p className="mt-0.5 truncate text-[12px] text-ink-500">{latest.facility}</p>
-        ) : (
-          <p className="mt-1.5 text-[12px] leading-snug text-ink-500">{content.body}</p>
-        )}
-
-        <Link
-          href={content.cta.href}
-          className="mt-3 inline-flex h-11 items-center rounded-tile bg-brand-700 px-5 text-[14px] font-semibold text-surface"
-        >
-          {content.cta.label}
-        </Link>
-      </div>
-    </section>
+      </span>
+      <ChevronRight size={17} className="shrink-0 text-ink-300" aria-hidden />
+    </Link>
   );
 }
 
 /*
- * `flex-1` with `min-w-0` so the three share the row evenly and a longer label
- * shrinks rather than pushing its neighbours off the edge.
+ * Card-shaped rather than a pill: once the flagged row above is the thing
+ * carrying urgency, these two or three tiles are purely routine counts and
+ * read better with room to breathe than squeezed into a chip.
  */
-function SummaryPill({
+function SummaryTile({
   icon: Icon,
   tint,
   value,
   label,
-  emphasise = false,
+  alert = false,
 }: {
   icon: typeof FileText;
   tint: string;
   value: number;
   label: string;
-  /** Draws a border when there is something here worth acting on. */
-  emphasise?: boolean;
+  /** The one tile allowed to carry urgency — a ring, not a repeated banner. */
+  alert?: boolean;
 }) {
   return (
-    <li
-      className={cn(
-        "flex min-w-0 flex-1 items-center gap-1.5 rounded-pill bg-surface py-1.5 pl-1.5 pr-2 shadow-e1",
-        emphasise && "ring-1 ring-danger/25",
-      )}
-    >
-      <span className={cn("grid h-7 w-7 shrink-0 place-items-center rounded-pill", tint)}>
-        <Icon size={14} aria-hidden />
-      </span>
-      <span className="min-w-0">
-        <span className="block text-[15px] font-bold leading-none text-ink-900">{value}</span>
-        <span className="mt-0.5 block truncate text-[10px] leading-tight text-ink-500">
-          {label}
+    <li>
+      <Link
+        href="/records"
+        className={cn(
+          "tappable flex min-w-0 flex-col items-start gap-2 rounded-card bg-surface p-3 shadow-e1 active:scale-[0.98]",
+          alert && "ring-1 ring-danger/25",
+        )}
+      >
+        <span className={cn("grid h-9 w-9 shrink-0 place-items-center rounded-tile", tint)}>
+          <Icon size={16} aria-hidden />
         </span>
-      </span>
+        <span className="min-w-0">
+          <span
+            className={cn(
+              "block text-[19px] font-bold leading-none",
+              alert ? "text-danger-text" : "text-ink-900",
+            )}
+          >
+            {value}
+          </span>
+          <span className="mt-1 block truncate text-[11px] leading-tight text-ink-500">{label}</span>
+        </span>
+      </Link>
     </li>
   );
 }

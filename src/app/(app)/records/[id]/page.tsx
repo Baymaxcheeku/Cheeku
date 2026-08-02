@@ -18,6 +18,7 @@ import { OriginalToggle } from "@/components/records/original-toggle";
 import { cn } from "@/lib/cn";
 import { formatEventDate } from "@/lib/records/grouping";
 import { buildInsight, flaggedEntities, formatValue } from "@/lib/records/insight";
+import { selectableProfiles } from "@/lib/profiles/context";
 import { getRecord, signedDocumentUrl } from "@/lib/records/queries";
 import {
   FLAG_LABEL,
@@ -56,6 +57,19 @@ export default async function RecordDetailPage({ params }: { params: Promise<{ i
   // RLS returns another user's row as "not found", so this covers both a bad id
   // and an id belonging to someone else. The caller cannot tell them apart.
   if (!record) notFound();
+
+  /*
+   * RLS scopes this to the ACCOUNT; the plan scopes it to a person.
+   *
+   * The family shares one user_id, so a locked member's document is a perfectly
+   * valid row for this caller and the query above returns it happily. Without
+   * this, a direct link — from a bookmark kept after a downgrade, or simply a
+   * guessed id — would render a member's full lab report on a plan that no
+   * longer covers them. `notFound` rather than an upsell: which documents exist
+   * for whom is itself the thing being gated.
+   */
+  const allowed = await selectableProfiles();
+  if (!allowed.some((p) => p.id === record.profileId)) notFound();
 
   const insight = buildInsight(record);
   const measured = record.entities.filter((e) => e.kind === "lab_value" || e.kind === "vital");

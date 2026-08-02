@@ -46,6 +46,34 @@ export function ReassuranceStrip({ children }: { children?: React.ReactNode }) {
   );
 }
 
+/**
+ * The step bar across the top of the welcome carousel.
+ *
+ * Segments rather than dots, and at the very top of the screen rather than
+ * above the button: a reader deciding whether to keep going wants to know how
+ * much is left *before* they invest in reading the panel, not after. Each
+ * segment fills rather than switching on, so moving forward reads as progress
+ * being made rather than a light changing.
+ */
+export function StepBar({ current, total }: { current: number; total: number }) {
+  return (
+    <div className="relative flex items-center gap-1.5 px-5 pt-2" aria-hidden>
+      {Array.from({ length: total }, (_, i) => (
+        /* White track, not brand-100: the panels behind this are brand-100
+           skies, and a tinted track on a tinted sky disappeared entirely. */
+        <span key={i} className="h-1 flex-1 overflow-hidden rounded-pill bg-white/70">
+          <span
+            className={cn(
+              "block h-full rounded-pill bg-brand-600 transition-[width] duration-500 ease-[var(--ease-settle)]",
+              i <= current ? "w-full" : "w-0",
+            )}
+          />
+        </span>
+      ))}
+    </div>
+  );
+}
+
 export function Dots({ current, total }: { current: number; total: number }) {
   return (
     <div className="flex items-center justify-center gap-1.5" aria-hidden>

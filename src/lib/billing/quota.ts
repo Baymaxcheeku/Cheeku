@@ -1,5 +1,7 @@
 import "server-only";
 
+import { cache } from "react";
+
 import { createAdminSupabase } from "@/lib/supabase/admin";
 import { createServerSupabase, requireUser } from "@/lib/supabase/server";
 import { DAILY_PASS_HOURS, FREE_CHAT_LIMIT, isUnlimited, type Tier } from "./plans";
@@ -59,7 +61,16 @@ function currentPeriodStart(): string {
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01`;
 }
 
-export async function getEntitlement(): Promise<Entitlement> {
+/*
+ * Deduped per request with React's `cache`.
+ *
+ * Profile scoping now asks for the tier too (see selectableProfiles), so a
+ * single render can reach this three or four times — page, layout and the
+ * active-profile lookup. Without deduping that is three round trips to answer
+ * one question that cannot change mid-render. The cache is per-request, so a
+ * mutation followed by revalidation still reads fresh.
+ */
+export const getEntitlement = cache(async function getEntitlement(): Promise<Entitlement> {
   const user = await requireUser();
   const familyId = await familyIdFor(user.id);
 
@@ -126,7 +137,7 @@ export async function getEntitlement(): Promise<Entitlement> {
     periodStart: currentPeriodStart(),
     expiresAt: null,
   };
-}
+});
 
 /**
  * Records one chat against the quota. Returns false when the caller is over it.

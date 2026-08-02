@@ -2,14 +2,18 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState, useTransition } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import {
+  Activity,
   ArrowUp,
   Camera,
   FileText,
+  History,
   Loader2,
   Lock,
   ShieldCheck,
   Sparkles,
+  Stethoscope,
   TriangleAlert,
 } from "lucide-react";
 
@@ -45,16 +49,19 @@ import { detect, type SafetyResult } from "@/lib/safety/detect";
  */
 
 const STARTERS = [
-  "What do my recent reports say?",
-  "Has anything changed since last time?",
-  "Is running safe during pregnancy?",
-];
+  { text: "What do my recent reports say?", icon: FileText },
+  { text: "Has anything changed since last time?", icon: History },
+  { text: "Is running safe during pregnancy?", icon: Activity },
+] as const;
 
 export function AskChat({
   initialQuestion,
+  autoOpenPicker = false,
   profileName,
 }: {
   initialQuestion?: string;
+  /** Set when Home's camera button sent someone here to photograph something. */
+  autoOpenPicker?: boolean;
   profileName: string;
 }) {
   const [turns, setTurns] = useState<ChatTurn[]>([]);
@@ -88,6 +95,12 @@ export function AskChat({
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [turns, pending]);
+
+  // Runs once: a later re-render (e.g. closing the picker) must not reopen it.
+  useEffect(() => {
+    if (autoOpenPicker) setPickerOpen(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function send(question: string) {
     const text = question.trim();
@@ -174,38 +187,45 @@ export function AskChat({
 
   return (
     <div className="flex flex-1 flex-col">
-      <header className="relative overflow-hidden px-5 pt-3">
+      <header className="relative overflow-hidden bg-gradient-to-br from-brand-100 via-brand-50 to-brand-100 px-5 pb-5 pt-3">
+        <div
+          aria-hidden
+          className="glow-pulse pointer-events-none absolute -right-8 -top-8 h-44 w-44 rounded-pill bg-brand-300/50 blur-2xl"
+        />
         <div className="relative pr-[34%]">
           <h1 className="flex items-center gap-1.5 text-[26px] font-bold leading-tight tracking-tight text-ink-900">
             Ask Baymax
-            <Sparkles size={18} className="text-brand-500" aria-hidden />
+            <Stethoscope size={18} className="text-brand-500" aria-hidden />
           </h1>
-          <p className="mt-0.5 text-[13px] text-ink-500">
+          <p className="mt-0.5 text-[13px] text-ink-700">
             {profileName}&apos;s records, plus general health topics
           </p>
         </div>
-        <MascotBust className="pointer-events-none absolute -right-2 -top-1 w-[124px]" />
-      </header>
+        <MascotBust className="pointer-events-none absolute -right-3 -top-1 w-[136px]" />
 
-      <p className="mx-5 mt-3 flex items-center gap-2.5 rounded-card bg-surface px-3.5 py-2.5 shadow-e1">
-        <ShieldCheck size={16} className="shrink-0 text-brand-500" aria-hidden />
-        <span className="text-[12px] leading-snug text-ink-500">
-          <strong className="font-semibold text-ink-900">Private &amp; secure.</strong> Your health
-          data is never shared.
-        </span>
-      </p>
+        <p className="relative mt-4 flex items-center gap-2.5 rounded-pill bg-surface px-3.5 py-2.5 shadow-e1">
+          <ShieldCheck size={16} className="shrink-0 text-brand-500" aria-hidden />
+          <span className="text-[12px] leading-snug text-ink-500">
+            <strong className="font-semibold text-ink-900">Private &amp; secure.</strong> Your health
+            data is never shared.
+          </span>
+        </p>
+      </header>
 
       <div className="flex-1 px-5 py-4">
         {turns.length === 0 && !pending ? (
-          <ul className="space-y-2">
-            {STARTERS.map((s) => (
-              <li key={s}>
+          <ul className="grid grid-cols-1 gap-2">
+            {STARTERS.map(({ text, icon: Icon }) => (
+              <li key={text}>
                 <button
                   type="button"
-                  onClick={() => send(s)}
-                  className="tappable w-full rounded-card border border-line bg-surface px-4 py-3 text-left text-[14px] text-ink-700 active:scale-[0.99]"
+                  onClick={() => send(text)}
+                  className="tappable flex w-full items-center gap-3 rounded-card border border-line bg-surface px-4 py-3 text-left shadow-e1 active:scale-[0.99]"
                 >
-                  {s}
+                  <span className="grid h-9 w-9 shrink-0 place-items-center rounded-pill bg-brand-50 text-brand-600">
+                    <Icon size={16} aria-hidden />
+                  </span>
+                  <span className="text-[14px] font-medium text-ink-700">{text}</span>
                 </button>
               </li>
             ))}
@@ -213,9 +233,16 @@ export function AskChat({
         ) : null}
 
         <ul className="space-y-3">
+          <AnimatePresence initial={false}>
           {turns.map((turn) =>
             turn.role === "user" ? (
-              <li key={turn.id} className="flex justify-end">
+              <motion.li
+                key={turn.id}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                className="flex justify-end"
+              >
                 <div className="max-w-[80%] space-y-1.5">
                   {turn.attachment ? (
                     <div className="ml-auto w-fit rounded-card rounded-br-md bg-brand-50 p-1.5">
@@ -231,11 +258,17 @@ export function AskChat({
                     {turn.content}
                   </p>
                 </div>
-              </li>
+              </motion.li>
             ) : (
-              <li key={turn.id} className="flex gap-2">
+              <motion.li
+                key={turn.id}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                className="flex gap-2"
+              >
                 <span className="mt-1 grid h-7 w-7 shrink-0 place-items-center rounded-pill bg-brand-50">
-                  <Sparkles size={14} className="text-brand-600" aria-hidden />
+                  <Stethoscope size={14} className="text-brand-600" aria-hidden />
                 </span>
                 <div className="min-w-0 flex-1 rounded-card rounded-bl-md bg-surface p-3.5 shadow-e1">
                   {turn.assessment ? (
@@ -311,21 +344,28 @@ export function AskChat({
                     </ul>
                   ) : null}
                 </div>
-              </li>
+              </motion.li>
             ),
           )}
 
           {pending ? (
-            <li className="flex gap-2">
+            <motion.li
+              key="pending"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              className="flex gap-2"
+            >
               <span className="mt-1 grid h-7 w-7 shrink-0 place-items-center rounded-pill bg-brand-50">
-                <Sparkles size={14} className="text-brand-600" aria-hidden />
+                <Stethoscope size={14} className="text-brand-600" aria-hidden />
               </span>
               <p className="flex items-center gap-2 rounded-card rounded-bl-md bg-surface px-4 py-3 text-[13px] text-ink-500 shadow-e1">
                 <Loader2 size={14} className="animate-spin text-brand-500" aria-hidden />
                 Thinking…
               </p>
-            </li>
+            </motion.li>
           ) : null}
+          </AnimatePresence>
 
           {/*
            * The wall, in the transcript rather than only in a modal. A sheet
@@ -358,7 +398,7 @@ export function AskChat({
             e.preventDefault();
             send(draft);
           }}
-          className="flex items-center gap-2 rounded-pill border border-line bg-surface p-1.5 pl-4"
+          className="flex items-center gap-2 rounded-pill bg-surface p-1.5 pl-4 shadow-e1 ring-1 ring-transparent transition-shadow focus-within:ring-brand-300"
         >
           <input
             value={draft}

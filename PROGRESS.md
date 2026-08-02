@@ -701,6 +701,88 @@ real screens under `/settings/*`, matching the H/I/J frames, plus a logout flow.
 - **C3 camera verdict.** Not started.
 - Real payment provider, by design.
 
+## New mascot: Sprout — 2026-08-01
+
+Athar: *"I don't want the robot mascot... the current mascot is very poor and is
+affecting the overall vibe."* Plus context that matters more than it looks:
+**the app will not ship as "Baymax"**. The name is a placeholder, so the mascot
+is the one asset that has to survive the rename — it cannot be a nod to a film
+character.
+
+**The robot is gone.** Its head, torso, mitten hands and two-dot face are
+deleted, not deprecated, so nothing can accidentally compose them again.
+
+**What replaced it.** `illustrations/sprout.tsx` — an original character: one
+continuous pear-shaped body with no separate head, a stem, a small leaf, and a
+**heart-shaped leaf** that folds health and growth into a single glyph. A
+seedling because the robot read as clinical hardware, and "a machine that reads
+your medical records" is the worst possible framing for a screen a pregnant
+woman opens at 2am. A seedling says the opposite: something small you tend,
+that grows with you.
+
+**On the reference.** Athar attached three "Bloom Buddy" SVGs. Those are a
+commercial character set, so none of it was copied — the *language* was studied
+(blob silhouette, high close-set eyes with highlights, flipper arms, flat vector
+with soft shading) and every path here is authored. Shipping someone's licensed
+character as the identity of a product about to be renamed and raised on would
+be the expensive kind of shortcut.
+
+**Kept in the brand violet, not the reference's green,** for a reason beyond
+taste: green/amber/red carry health status everywhere in this app, and a green
+character sitting beside a green "Normal" pill puts decoration and diagnosis in
+the same colour.
+
+Geometry is single-sourced — `SproutBody`, `SproutFace`, `SproutArms` — because
+the last mascot drifted between screens once each surface drew its own copy.
+Verified at 260px, 148px, 92px and 34px on both white and brand surfaces; it
+still reads as a face at 34px. Two defects caught on the contact sheet: the
+heart was clipped by the bust viewBox, and panel 1's two tilted cards crossed
+the character at chest height and buried the face — panel 1 now uses panel 4's
+composition (subject centred and clear, one badge, one pill).
+
+All nine `MascotBust` call sites picked it up unchanged.
+
+## Plan-scoped profile access — 2026-08-01
+
+Athar spotted it from a screenshot: the account was on Solo, yet Home still
+offered Ananya and Amma in the family switcher. The switcher was rendering
+`familyProfiles()` — everything the account owns — with no reference to what
+the plan covers.
+
+The UI was the symptom. **Ownership was being treated as entitlement**
+everywhere, and RLS could not catch it because a family shares one `user_id`:
+every locked member's row is a perfectly valid row for that caller. Five ways
+past the plan existed, four of them reachable without touching the UI at all:
+
+1. `switchProfile()` — a public server action that validated ownership only.
+   Posting a locked member's id rescoped the whole session to them, including
+   the records handed to Ask Baymax as grounding.
+2. `activeProfile()` — resolved the cookie against every profile, so a
+   downgraded subscriber kept landing on whoever they last selected.
+3. `/records?profileId=<locked id>` and `?profileId=all` — scoped the list
+   past the plan, the second one merging every member into one page.
+4. `/records/<id>` — a direct link to a locked member's document rendered it
+   in full. Ananya's 20-week anomaly scan was reachable on a Solo plan.
+5. `uploadDocument()` — filed documents against a profile the reader could no
+   longer open, stranding them.
+
+**Fixed** with one server-side rule rather than five checks. `selectableProfiles()`
+slices the roster by `seatsFor(tier)` — the same seat count the paywall
+advertises, so there is no second parallel rule to drift. `activeProfile()`,
+`switchProfile()`, the records list, the record detail, the upload action and
+every picker now derive from it. `getEntitlement()` is wrapped in React `cache`
+so the extra tier lookup costs no additional round trips.
+
+Locked members are **not deleted and not hidden from the account** — the data is
+the reader's and upgrading restores it immediately. They render as padlocks
+that open the paywall, because telling a downgraded subscriber their mother's
+records are *gone* would be false; they are unreachable, which is what a plan
+can honestly gate.
+
+Verified by fetching each vector directly rather than by clicking: `?profileId=all`
+returns no other member's name, `/records/<Ananya's scan>` returns not-found while
+Athar's own record still opens, and `/scan` offers one profile.
+
 ## Illustration rebuild — 2026-07-30
 
 Athar called out the mascot specifically: a "weird egg shape" around it, and the

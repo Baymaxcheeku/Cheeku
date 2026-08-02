@@ -3,6 +3,7 @@
 import { randomUUID } from "node:crypto";
 
 import { extractFromFile, routeFor } from "@/lib/ai/mock/extract";
+import { selectableProfiles } from "@/lib/profiles/context";
 import { createServerSupabase, requireUser } from "@/lib/supabase/server";
 
 /*
@@ -71,6 +72,21 @@ export async function uploadDocument(formData: FormData): Promise<UploadResult> 
     .eq("id", profileId)
     .maybeSingle();
   if (!profile) return { ok: false, message: "That family member could not be found." };
+
+  /*
+   * And confirm the PLAN reaches them. Ownership is not entitlement: a
+   * downgraded account still owns every profile it ever created, and this is a
+   * public endpoint, so without this check a Solo subscriber could post a
+   * locked member's id and file documents into a profile the app will not let
+   * them open again until they upgrade.
+   */
+  const allowed = await selectableProfiles();
+  if (!allowed.some((p) => p.id === profileId)) {
+    return {
+      ok: false,
+      message: "That family member is part of the Family plan. Upgrade to add records for them.",
+    };
+  }
 
   const path = `${user.id}/${profileId}/${randomUUID()}.${ext}`;
 

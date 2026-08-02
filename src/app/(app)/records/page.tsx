@@ -1,12 +1,9 @@
-import Link from "next/link";
-import { CalendarRange } from "lucide-react";
-
 import { FilterBar } from "@/components/records/filter-bar";
-import { EmptyRecords, RecordRow, RecordsHeader, StatsCard } from "@/components/records/chrome";
+import { RecordsHeader, StatsCard } from "@/components/records/chrome";
+import { RecordsView } from "@/components/records/records-view";
 import { sinceFromPeriod } from "@/lib/records/filters";
-import { groupByRecency } from "@/lib/records/grouping";
-import { activeProfile } from "@/lib/profiles/context";
-import { listProfiles, listRecords, statsFrom } from "@/lib/records/queries";
+import { activeProfile, selectableProfiles } from "@/lib/profiles/context";
+import { listRecords, statsFrom } from "@/lib/records/queries";
 import type { DocType } from "@/lib/records/types";
 
 export const dynamic = "force-dynamic";
@@ -36,52 +33,55 @@ export default async function RecordsPage({
    * exact cross-member bleed rule 3 exists to prevent.
    */
   const requested = one("profileId");
-  const active = await activeProfile();
-  const scopeId = requested === "all" ? undefined : (requested ?? active?.id);
+  const [active, allowed] = await Promise.all([activeProfile(), selectableProfiles()]);
 
-  const [records, profiles] = await Promise.all([
-    listRecords({
-      profileId: scopeId,
-      docType: one("docType") as DocType | undefined,
-      since: sinceFromPeriod(one("period")),
-      sort: one("sort") === "oldest" ? "oldest" : "newest",
-    }),
-    listProfiles(),
-  ]);
+  /*
+   * The member filter is a URL parameter, so it is caller-supplied and gets the
+   * same treatment as the switcher cookie.
+   *
+   * Two ways past the plan existed here. `?profileId=<locked id>` scoped the
+   * list straight to a member the plan cannot open — RLS permits it, because
+   * the family shares one account, so nothing below this line would have
+   * objected. And `?profileId=all` dropped the scope entirely, which on a Solo
+   * plan means every member's reports in one list under one heading. Both now
+   * fall back to the active profile rather than erroring: a hand-edited or
+   * stale link should quietly show the reader their own records.
+   */
+  const canSeeEveryone = allowed.length > 1;
+  const requestedIsAllowed = requested === "all"
+    ? canSeeEveryone
+    : allowed.some((p) => p.id === requested);
+  const effective = requestedIsAllowed ? requested : undefined;
+  const scopeId = effective === "all" ? undefined : (effective ?? active?.id);
 
-  const groups = groupByRecency(records);
-  const filtered = Boolean(requested ?? one("docType") ?? one("period"));
+  const records = await listRecords({
+    profileId: scopeId,
+    docType: one("docType") as DocType | undefined,
+    since: sinceFromPeriod(one("period")),
+    sort: one("sort") === "oldest" ? "oldest" : "newest",
+  });
+
+  const filtered = Boolean(effective ?? one("docType") ?? one("period"));
+  const initialView = one("view") === "timeline" ? "timeline" : "list";
 
   return (
     <div className="stagger flex flex-1 flex-col pb-4">
       <RecordsHeader title="My Records" subtitle="All your health documents in one place." />
 
-      <FilterBar profiles={profiles} showPeriod={false} defaultProfileId={active?.id} />
+      <FilterBar
+        profiles={allowed}
+        defaultProfileId={active?.id}
+        allowAllMembers={canSeeEveryone}
+      />
 
       <StatsCard stats={statsFrom(records)} />
 
-      <Link
-        href="/timeline"
-        className="mx-5 mt-3 flex items-center gap-2 rounded-card border border-line bg-surface px-4 py-3 text-[13px] font-semibold text-brand-600 shadow-e1"
-      >
-        <CalendarRange size={16} aria-hidden />
-        View as timeline
-      </Link>
-
-      {groups.length === 0 ? (
-        <EmptyRecords filtered={filtered} />
-      ) : (
-        groups.map((group) => (
-          <section key={group.key} className="mt-5 px-5">
-            <h2 className="text-[15px] font-semibold text-ink-900">{group.label}</h2>
-            <ul className="mt-2 space-y-2">
-              {group.records.map((record) => (
-                <RecordRow key={record.id} record={record} />
-              ))}
-            </ul>
-          </section>
-        ))
-      )}
+      {/* Keyed on the server-resolved view: a soft navigation (e.g. the
+          /timeline redirect) changes this prop without unmounting the page,
+          and a plain `useState(initialView)` would then keep showing
+          whichever tab was already selected instead of honouring the link
+          that was just followed. */}
+      <RecordsView key={initialView} records={records} filtered={filtered} initialView={initialView} />
     </div>
   );
 }

@@ -212,6 +212,43 @@
     opacity var(--d-tap) ease;
 }
 
+/*
+ * A slow breathing glow behind the mascot on the Ask Baymax card — signals
+ * "listening, alive" without ever demanding attention. 3.6s so it reads as
+ * ambient, not a loading state; reduced-motion collapses it like everything
+ * else above.
+ */
+@keyframes glow-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(0.96);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.04);
+  }
+}
+
+@utility glow-pulse {
+  animation: glow-pulse 3.6s ease-in-out infinite;
+}
+
+/* A single soft light sweep across the Ask Baymax input on first paint —
+   invites the tap without looping forever and becoming wallpaper. */
+@keyframes sheen-once {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(220%);
+  }
+}
+
+@utility sheen-once {
+  animation: sheen-once 1.8s var(--ease-settle) 900ms both;
+}
+
 
 @theme inline {
   --color-brand-950: var(--brand-950);

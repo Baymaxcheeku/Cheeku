@@ -21,17 +21,30 @@ export function LogoutButton() {
 
   return (
     <>
+      {/*
+       * Neutral, not red.
+       *
+       * This row sits directly under "Delete all my data". Drawing both in the
+       * danger palette put a reversible action and an irreversible one at the
+       * same alarm level, which spends the warning colour on the one that does
+       * not need it and quietly weakens it on the one that does. Signing out is
+       * still confirmed below — it just no longer *looks* destructive.
+       */}
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="tappable flex w-full items-center gap-3 p-3 text-left active:scale-[0.99]"
+        className="tappable flex w-full items-center gap-3.5 px-3.5 py-3 text-left active:bg-brand-50"
       >
-        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-tile bg-danger-bg text-danger">
-          <LogOut size={18} aria-hidden />
+        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-tile bg-canvas text-ink-500">
+          <LogOut size={17} aria-hidden />
         </span>
         <span className="min-w-0 flex-1">
-          <span className="block text-[14px] font-semibold text-danger-text">Log out</span>
-          <span className="block text-[12px] text-ink-500">Sign out of your Baymax account</span>
+          <span className="block text-[14.5px] font-semibold leading-tight text-ink-900">
+            Log out
+          </span>
+          <span className="mt-0.5 block text-[11.5px] text-ink-500">
+            Sign out of your Baymax account
+          </span>
         </span>
       </button>
 
@@ -43,7 +56,7 @@ export function LogoutButton() {
         >
           <div>
             <div className="mt-3 text-center">
-              <span className="mx-auto grid h-12 w-12 place-items-center rounded-pill bg-danger-bg text-danger">
+              <span className="mx-auto grid h-12 w-12 place-items-center rounded-pill bg-brand-50 text-brand-600">
                 <LogOut size={20} aria-hidden />
               </span>
               <h2 className="mt-3 text-[18px] font-bold text-ink-900">Log out of Baymax?</h2>
@@ -65,7 +78,7 @@ export function LogoutButton() {
                 type="button"
                 onClick={() => start(() => signOutAction())}
                 disabled={pending}
-                className="tappable h-12 flex-1 rounded-pill bg-danger-strong text-[14px] font-semibold text-white active:scale-[0.98] disabled:opacity-60"
+                className="tappable h-12 flex-1 rounded-pill bg-ink-900 text-[14px] font-semibold text-white active:scale-[0.98] disabled:opacity-60"
               >
                 {pending ? "Logging out…" : "Log out"}
               </button>

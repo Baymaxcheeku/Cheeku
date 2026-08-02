@@ -37,13 +37,18 @@ const PERIODS = [
 
 export function FilterBar({
   profiles,
-  showPeriod = true,
   defaultProfileId,
+  allowAllMembers = true,
 }: {
+  /** Only the members this plan can open — see `selectableProfiles`. */
   profiles: readonly { id: string; name: string }[];
-  showPeriod?: boolean;
   /** The member selected on Home; the list is scoped to them unless widened. */
   defaultProfileId?: string;
+  /**
+   * Whether "All members" is offered. False on the one-seat plans, where a
+   * combined list would be a list of one person filed under a plural label.
+   */
+  allowAllMembers?: boolean;
 }) {
   const router = useRouter();
   const params = useSearchParams();
@@ -110,34 +115,36 @@ export function FilterBar({
 
         {/* "all" is an explicit value, not the empty default: an absent param
             means "the member selected on Home", so widening has to be said. */}
-        <Select
-          label="Family member"
-          value={profileId}
-          onChange={(v) => apply({ profileId: v })}
-          options={[
-            { value: "all", label: "All members" },
-            ...profiles.map((p) => ({ value: p.id, label: p.name })),
-          ]}
-        />
-
-        {showPeriod ? (
+        {/* Hidden entirely on a one-seat plan: a member picker listing exactly
+            one member is a control that cannot do anything. */}
+        {profiles.length > 1 || allowAllMembers ? (
           <Select
-            label="Time period"
-            value={period}
-            onChange={(v) => apply({ period: v })}
-            options={PERIODS.map((p) => ({ value: p.value, label: p.label }))}
-          />
-        ) : (
-          <Select
-            label="Sort order"
-            value={sort}
-            onChange={(v) => apply({ sort: v === "newest" ? "" : v })}
+            label="Family member"
+            value={profileId}
+            onChange={(v) => apply({ profileId: v })}
             options={[
-              { value: "newest", label: "Newest first" },
-              { value: "oldest", label: "Oldest first" },
+              ...(allowAllMembers ? [{ value: "all", label: "All members" }] : []),
+              ...profiles.map((p) => ({ value: p.id, label: p.name })),
             ]}
           />
-        )}
+        ) : null}
+
+        <Select
+          label="Time period"
+          value={period}
+          onChange={(v) => apply({ period: v })}
+          options={PERIODS.map((p) => ({ value: p.value, label: p.label }))}
+        />
+
+        <Select
+          label="Sort order"
+          value={sort}
+          onChange={(v) => apply({ sort: v === "newest" ? "" : v })}
+          options={[
+            { value: "newest", label: "Newest first" },
+            { value: "oldest", label: "Oldest first" },
+          ]}
+        />
       </div>
 
       {activeCount > 0 ? (

@@ -59,30 +59,32 @@ export function FamilySection({
 
   return (
     <>
-      <section className="mx-5 mt-4 rounded-card bg-surface p-4 shadow-e1">
-        <div className="flex items-center gap-2">
-          <h2 className="text-[16px] font-bold text-ink-900">Family</h2>
-          {!unlocked ? (
-            <span className="flex items-center gap-1 text-[11.5px] font-medium text-ink-500">
-              <Lock size={11} aria-hidden />
-              Upgrade to access
-            </span>
-          ) : (
-            <span className="text-[11.5px] text-ink-500">
+      <section className="mt-6">
+        {/*
+         * The group label sits outside the card, in the page's own margin, the
+         * way every other group on this screen now does. Inside-the-card
+         * headings made each block look like a page of its own and cost a row
+         * of vertical space each time.
+         */}
+        <div className="flex items-baseline justify-between px-5">
+          <h2 className="text-[12px] font-bold uppercase tracking-wide text-ink-300">Family</h2>
+          {unlocked ? (
+            <span className="text-[11.5px] font-medium text-ink-500">
               {profiles.length} of {seats}
             </span>
+          ) : (
+            /* "Family plan" alone read as a label rather than a state — it was
+               not clear whether it described what the reader had or what they
+               were missing. The padlock says which. */
+            <span className="flex items-center gap-1 text-[11.5px] font-medium text-ink-500">
+              <Lock size={11} aria-hidden />
+              Locked
+            </span>
           )}
-          <button
-            type="button"
-            onClick={() => (unlocked ? setAddOpen(true) : setPaywallOpen(true))}
-            className="tappable ml-auto flex items-center text-[12.5px] font-semibold text-brand-600 active:scale-95"
-          >
-            {unlocked ? "Manage" : "View plans"}
-            <ChevronRight size={15} aria-hidden />
-          </button>
         </div>
 
-        <ul className="mt-3 grid grid-cols-5 gap-2">
+        <div className="mx-5 mt-2 overflow-hidden rounded-card bg-surface shadow-e1">
+        <ul className="grid grid-cols-5 gap-2 p-3">
           {/* The reader's own profile, always real and always unlocked. */}
           {primary ? (
             <li>
@@ -176,29 +178,39 @@ export function FamilySection({
           </li>
         </ul>
 
+        {/*
+         * One row, not a card inside a card. The old version nested a
+         * brand-tinted card with its own icon tile, heading, body and button
+         * inside this card — three container levels deep, and its "View plans"
+         * was the second of two identical CTAs in the same block. This is a
+         * plain row on the same surface, and it is the only upsell here.
+         */}
         {!unlocked ? (
-          <div className="mt-3 flex items-start gap-3 rounded-card bg-brand-50 p-3.5">
-            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-tile bg-surface text-brand-600">
+          <button
+            type="button"
+            onClick={() => setPaywallOpen(true)}
+            className="tappable flex w-full items-center gap-3 border-t border-line p-3.5 text-left active:bg-brand-50"
+          >
+            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-tile bg-brand-50 text-brand-600">
               <UserRoundPlus size={18} aria-hidden />
             </span>
-            <div className="min-w-0 flex-1">
-              <p className="text-[13px] font-bold text-ink-900">
-                Family access is a Family plan feature
-              </p>
-              <p className="mt-0.5 text-[11.5px] leading-snug text-ink-500">
-                Keep records for up to {seatsFor("family")} people, switch between them, and share
-                insights.
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={() => setPaywallOpen(true)}
-              className="tappable shrink-0 self-center rounded-pill border border-brand-200 bg-surface px-3 py-2 text-[12px] font-semibold text-brand-700 active:scale-95"
-            >
-              View plans
-            </button>
-          </div>
+            <span className="min-w-0 flex-1">
+              <span className="block text-[13.5px] font-semibold text-ink-900">
+                Add up to {seatsFor("family")} people
+              </span>
+              <span className="mt-0.5 block text-[11.5px] leading-snug text-ink-500">
+                Switch between them and keep every record separate.
+              </span>
+            </span>
+            <ChevronRight size={17} className="shrink-0 text-ink-300" aria-hidden />
+          </button>
         ) : null}
+        {/*
+         * Nothing follows the grid on the family plan: the "+" tile in the row
+         * above already opens the add sheet, and a second row that opened the
+         * same sheet was the same duplication this pass exists to remove.
+         */}
+        </div>
       </section>
 
       {addOpen ? (

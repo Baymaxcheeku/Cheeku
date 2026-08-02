@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Fragment } from "react";
-import { FolderClosed, House, Plus, Sparkles, User, type LucideIcon } from "lucide-react";
+import { FolderClosed, House, Plus, Stethoscope, User, type LucideIcon } from "lucide-react";
 
 import { cn } from "@/lib/cn";
 
@@ -22,7 +22,7 @@ const TABS: readonly Tab[] = [
     icon: FolderClosed,
     match: (p) => p.startsWith("/records") || p.startsWith("/timeline"),
   },
-  { href: "/ask", label: "Ask Baymax", icon: Sparkles, match: (p) => p.startsWith("/ask") },
+  { href: "/ask", label: "Ask Baymax", icon: Stethoscope, match: (p) => p.startsWith("/ask") },
   { href: "/settings", label: "Profile", icon: User, match: (p) => p.startsWith("/settings") },
 ];
 

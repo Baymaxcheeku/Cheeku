@@ -2,6 +2,13 @@ import { Check, Plus } from "lucide-react";
 
 import { cn } from "@/lib/cn";
 import { castFaces } from "@/lib/profiles/avatar";
+import {
+  SproutArms,
+  SproutBody,
+  SproutFace,
+  SproutFigure,
+  SproutTop,
+} from "./sprout";
 
 /*
  * The app's illustrations, drawn rather than cropped.
@@ -89,113 +96,16 @@ function Sparkle({
 /* ------------------------------------------------------------- the mascot --- */
 
 /*
- * Local coordinate space for every mascot part: 200 wide, 212 tall, feet at
- * y≈198 and the ground at y≈204. Scenes translate/scale this whole box.
+ * The mascot's geometry lives in ./sprout.tsx — one 200x200 box, one set of
+ * parts, composed by every scene here. The old robot's head/body paths and its
+ * two-dot face were deleted with the character itself rather than left behind
+ * for something to accidentally compose.
  */
-
-const HEAD_PATH =
-  "M 100 18 C 144 18 154 36 154 56 C 154 78 133 92 100 92 C 67 92 46 78 46 56 C 46 36 56 18 100 18 Z";
 
 /*
- * Narrower at the shoulders than at the belly. When the body was a symmetric
- * oval it read as the head again at a larger size, which is the definition of a
- * snowman — the taper is what makes the two forms different objects.
+ * The previous mascot's head, torso and mitten hands lived here. They are gone
+ * with the robot itself — see sprout.tsx for the character that replaced it.
  */
-const BODY_PATH =
-  "M 100 84 C 133 84 154 110 156 144 C 158 174 132 192 100 192 C 68 192 42 174 44 144 C 46 110 67 84 100 84 Z";
-
-/** The face: two dots joined by a line. The whole character reads from this. */
-function Face({ cx, cy, scale = 1 }: { cx: number; cy: number; scale?: number }) {
-  const r = 7.5 * scale;
-  const gap = 29 * scale;
-  return (
-    <g>
-      <line
-        x1={cx - gap}
-        y1={cy}
-        x2={cx + gap}
-        y2={cy}
-        stroke="#191a38"
-        strokeWidth={3.6 * scale}
-        strokeLinecap="round"
-      />
-      <circle cx={cx - gap} cy={cy} r={r} fill="#191a38" />
-      <circle cx={cx + gap} cy={cy} r={r} fill="#191a38" />
-    </g>
-  );
-}
-
-/**
- * The head, with its full material stack.
- *
- * Order matters and is the same on every form: base radial → rim occlusion →
- * ground bounce → specular. Reordering these flattens it.
- */
-function MascotHead() {
-  return (
-    <g>
-      <path d={HEAD_PATH} fill="url(#bx-shell)" />
-      <path d={HEAD_PATH} fill="url(#bx-ao)" />
-      <path d={HEAD_PATH} fill="url(#bx-bounce)" opacity="0.45" />
-      <ellipse
-        cx="74"
-        cy="38"
-        rx="20"
-        ry="12"
-        fill="url(#bx-spec)"
-        filter="url(#bx-blur)"
-        opacity="0.95"
-      />
-      <Face cx={100} cy={56} />
-    </g>
-  );
-}
-
-/**
- * The torso.
- *
- * Deliberately unmarked. A debossed chest port was tried and read as a navel —
- * the real character's access port is tiny and under the armour, so at 100px it
- * contributes nothing but a dimple in the middle of the brightest part of the
- * form.
- */
-function MascotBody() {
-  return (
-    <g>
-      <path d={BODY_PATH} fill="url(#bx-shell)" />
-      <path d={BODY_PATH} fill="url(#bx-ao)" />
-      <path d={BODY_PATH} fill="url(#bx-bounce)" opacity="0.85" />
-      <ellipse
-        cx="70"
-        cy="122"
-        rx="17"
-        ry="26"
-        fill="url(#bx-spec)"
-        filter="url(#bx-blur)"
-        opacity="0.6"
-      />
-    </g>
-  );
-}
-
-/** A mitten hand. Wider than the arm, so the limb reads as ending in something. */
-function Hand({ cx, cy }: { cx: number; cy: number }) {
-  return (
-    <g>
-      <ellipse cx={cx} cy={cy} rx="16" ry="15" fill="url(#bx-shell-shade)" />
-      <ellipse cx={cx} cy={cy} rx="16" ry="15" fill="url(#bx-ao)" />
-      <ellipse
-        cx={cx - 5}
-        cy={cy - 5}
-        rx="6"
-        ry="5"
-        fill="url(#bx-spec)"
-        filter="url(#bx-blur-sm)"
-        opacity="0.8"
-      />
-    </g>
-  );
-}
 
 /**
  * The full figure.
@@ -216,105 +126,41 @@ function Mascot({
 }) {
   return (
     <g transform={`translate(${x} ${y}) scale(${s})`}>
-      {/* Ground contact first, so everything sits on top of it. */}
-      <ellipse cx="100" cy="208" rx="72" ry="10" fill="url(#bx-ground)" />
-
-      {/*
-       * Feet are wide ellipses, not round-capped strokes. As strokes they were
-       * narrow enough that only the cap showed below the body, and two dark
-       * points poking out under a white torso read unmistakably as claws.
-       * A foot has to be wider than it is tall or it is a toe.
-       */}
-      <ellipse cx="74" cy="196" rx="22" ry="13" fill="url(#bx-shell-shade)" />
-      <ellipse cx="126" cy="196" rx="22" ry="13" fill="url(#bx-shell-shade)" />
-      <ellipse cx="74" cy="196" rx="22" ry="13" fill="url(#bx-ao)" />
-      <ellipse cx="126" cy="196" rx="22" ry="13" fill="url(#bx-ao)" />
-
-      {/*
-       * Arms sit further out than the torso's widest point so there is daylight
-       * between limb and body. Tucked closer, they merged into the silhouette
-       * and read as lumps rather than arms.
-       */}
-      <g stroke="url(#bx-shell-shade)" strokeWidth="26" strokeLinecap="round" fill="none">
-        <path d="M 64 112 C 40 122 28 144 31 168" />
-        {wave ? (
-          <path d="M 140 106 C 162 94 172 74 172 56" />
-        ) : (
-          <path d="M 136 112 C 160 122 172 144 169 168" />
-        )}
-      </g>
-      {wave ? <Hand cx={172} cy={52} /> : <Hand cx={169} cy={172} />}
-      <Hand cx={31} cy={172} />
-
-      <MascotBody />
-
-      {/* Where the head sits ON the body. Without this the head floats. */}
-      <ellipse
-        cx="100"
-        cy="88"
-        rx="44"
-        ry="12"
-        fill="#312a6b"
-        opacity="0.11"
-        filter="url(#bx-blur)"
-      />
-
-      <MascotHead />
+      <SproutFigure wave={wave} />
     </g>
   );
 }
 
 /**
- * Head, shoulders and a raised hand — the small-format mascot used in card
- * corners across the app.
+ * The mascot at card-corner size — the format used in nine places across the
+ * app, from the Ask Baymax card to the paywall.
  *
- * Composed from the same `MascotHead` as the full figure so the character
- * cannot drift between the two. The body is cropped by the viewBox bottom
- * deliberately: at 90–140px wide a whole figure loses the face, and the face is
- * the only part that carries the character.
+ * Cropped to the top of the same figure rather than drawn separately: a bust
+ * with its own geometry is how the character drifted between screens last
+ * time. The crop is deliberate — at 90–150px wide a whole standing figure
+ * renders the face too small to read, and the face is the entire character.
  */
 export function MascotBust({ className }: ArtProps) {
   return (
-    <svg viewBox="0 0 200 150" className={cn("h-auto w-full", className)} role="presentation" aria-hidden>
-      <Glow cx={100} cy={72} rx={98} ry={72} />
+    <svg
+      /* Starts above y=0: the heart sits at y≈3 and the lift filter blurs
+         past it, so a box starting at 0 sliced the top off the mark. */
+      viewBox="14 -10 172 160"
+      className={cn("h-auto w-full", className)}
+      role="presentation"
+      aria-hidden
+    >
+      <Glow cx={100} cy={78} rx={98} ry={74} />
 
       <Sparkle x={30} y={44} size={7} opacity={0.5} />
-      <Sparkle x={182} y={30} size={5.5} opacity={0.45} />
-      <Sparkle x={188} y={104} size={6.5} opacity={0.35} />
+      <Sparkle x={178} y={34} size={5.5} opacity={0.45} />
+      <Sparkle x={182} y={110} size={6.5} opacity={0.35} />
 
       <g filter="url(#bx-lift)">
-        {/*
-         * The waving arm STARTS AT THE SHOULDER (y 118), below the head's lower
-         * edge at y 92, and swings outward before it rises. Anchored higher and
-         * closer, it looped from the head's side back up beside it and read
-         * unmistakably as a teapot handle.
-         */}
-        <g stroke="url(#bx-shell-shade)" strokeWidth="24" strokeLinecap="round" fill="none">
-          <path d="M 140 122 C 162 116 174 92 175 68" />
-        </g>
-        <Hand cx={175} cy={62} />
-
-        {/* Shoulders, running off the bottom edge. */}
-        <path
-          d="M 100 86 C 133 86 154 110 157 150 L 43 150 C 46 110 67 86 100 86 Z"
-          fill="url(#bx-shell)"
-        />
-        <path
-          d="M 100 86 C 133 86 154 110 157 150 L 43 150 C 46 110 67 86 100 86 Z"
-          fill="url(#bx-ao)"
-        />
-
-        <ellipse
-          cx="100"
-          cy="90"
-          rx="42"
-          ry="12"
-          fill="#312a6b"
-          opacity="0.11"
-          filter="url(#bx-blur)"
-        />
-
-        <MascotHead />
+        <SproutTop />
+        <SproutArms wave />
+        <SproutBody />
+        <SproutFace />
       </g>
     </svg>
   );

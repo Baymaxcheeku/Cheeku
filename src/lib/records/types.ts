@@ -90,6 +90,31 @@ export const DOC_TYPE_LABEL: Record<DocType, string> = {
   other: "Other",
 };
 
+/*
+ * One icon per document type, so the record list reads at a glance the way a
+ * shelf of colour-coded folders does — a lab report and a prescription should
+ * never look like the same grey rectangle with different words on it.
+ */
+export const DOC_TYPE_ICON: Record<DocType, "flask" | "pill" | "clipboard" | "scan" | "receipt" | "syringe" | "file"> = {
+  lab_report: "flask",
+  prescription: "pill",
+  discharge: "clipboard",
+  scan: "scan",
+  bill: "receipt",
+  vaccination: "syringe",
+  other: "file",
+};
+
+export const DOC_TYPE_TINT: Record<DocType, string> = {
+  lab_report: "bg-brand-50 text-brand-600",
+  prescription: "bg-[#fdeee0] text-[#c2650b]",
+  discharge: "bg-[#e6f1fd] text-[#1a6fc2]",
+  scan: "bg-[#f1eafd] text-[#7b3fd4]",
+  bill: "bg-[#eaf6ec] text-[#1f8a45]",
+  vaccination: "bg-[#fdeaf0] text-[#c22a6b]",
+  other: "bg-canvas text-ink-500",
+};
+
 export type DocStatus = "processing" | "needs_review" | "filed";
 
 export type RecordEntity = {

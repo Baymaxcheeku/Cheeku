@@ -76,23 +76,27 @@ export function AccountData() {
   }
 
   return (
-    <section className="mx-5 mt-5">
-      <h2 className="text-[13px] font-semibold uppercase tracking-wide text-ink-300">Your data</h2>
+    <section className="mt-6">
+      {/* Same label treatment as the settings groups above — this is one more
+          group in that list, not a differently-shaped section. */}
+      <h2 className="px-5 text-[12px] font-bold uppercase tracking-wide text-ink-300">Your data</h2>
 
-      <ul className="mt-2 overflow-hidden rounded-card bg-surface shadow-e1">
+      <ul className="mx-5 mt-2 overflow-hidden rounded-card bg-surface shadow-e1">
         <li className="border-b border-line">
           <button
             type="button"
             onClick={download}
             disabled={busy}
-            className="tappable flex w-full items-center gap-3 p-3 text-left active:scale-[0.99] disabled:opacity-60"
+            className="tappable flex w-full items-center gap-3.5 px-3.5 py-3 text-left active:bg-brand-50 disabled:opacity-60"
           >
-            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-tile bg-brand-50 text-brand-600">
-              <Download size={18} aria-hidden />
+            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-tile bg-brand-50 text-brand-600">
+              <Download size={17} aria-hidden />
             </span>
             <span className="min-w-0 flex-1">
-              <span className="block text-[14px] font-semibold text-ink-900">Export my data</span>
-              <span className="block text-[12px] text-ink-500">
+              <span className="block text-[14.5px] font-semibold leading-tight text-ink-900">
+                Export my data
+              </span>
+              <span className="mt-0.5 block text-[11.5px] text-ink-500">
                 Download everything as a JSON file
               </span>
             </span>
@@ -103,16 +107,16 @@ export function AccountData() {
           <button
             type="button"
             onClick={() => setConfirmOpen((v) => !v)}
-            className="tappable flex w-full items-center gap-3 p-3 text-left active:scale-[0.99]"
+            className="tappable flex w-full items-center gap-3.5 px-3.5 py-3 text-left active:bg-danger-bg/60"
           >
-            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-tile bg-danger-bg text-danger">
-              <Trash2 size={18} aria-hidden />
+            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-tile bg-danger-bg text-danger">
+              <Trash2 size={17} aria-hidden />
             </span>
             <span className="min-w-0 flex-1">
-              <span className="block text-[14px] font-semibold text-danger-text">
+              <span className="block text-[14.5px] font-semibold leading-tight text-danger-text">
                 Delete all my data
               </span>
-              <span className="block text-[12px] text-ink-500">
+              <span className="mt-0.5 block text-[11.5px] text-ink-500">
                 Removes every record and file. Cannot be undone.
               </span>
             </span>
@@ -121,7 +125,7 @@ export function AccountData() {
       </ul>
 
       {confirmOpen ? (
-        <div className="mt-2 rounded-card border-2 border-danger/30 bg-danger-bg p-4">
+        <div className="mx-5 mt-2 rounded-card border border-danger/30 bg-danger-bg p-4">
           <p className="flex items-start gap-2 text-[13px] leading-snug text-ink-700">
             <AlertTriangle size={16} className="mt-px shrink-0 text-danger" aria-hidden />
             <span>
@@ -169,12 +173,12 @@ export function AccountData() {
       ) : null}
 
       {message ? (
-        <p role="status" className="mt-2 text-[12px] font-medium text-safe-text">
+        <p role="status" className="mx-5 mt-2 text-[12px] font-medium text-safe-text">
           {message}
         </p>
       ) : null}
       {error ? (
-        <p role="alert" className="mt-2 text-[12px] font-medium text-danger-text">
+        <p role="alert" className="mx-5 mt-2 text-[12px] font-medium text-danger-text">
           {error}
         </p>
       ) : null}

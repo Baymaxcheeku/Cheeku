@@ -1,15 +1,42 @@
 import Link from "next/link";
-import { Bell, ChevronRight, FileText, Flag, Search, ShieldCheck, TriangleAlert } from "lucide-react";
+import {
+  Bell,
+  ChevronRight,
+  ClipboardList,
+  FileText,
+  Flag,
+  FlaskConical,
+  Pill,
+  Receipt,
+  ScanLine,
+  Search,
+  ShieldCheck,
+  Syringe,
+  TriangleAlert,
+} from "lucide-react";
 
 import { cn } from "@/lib/cn";
 import { formatEventDate } from "@/lib/records/grouping";
 import {
+  DOC_TYPE_ICON,
+  DOC_TYPE_TINT,
   fileKind,
   SEVERITY_LABEL,
   SEVERITY_PILL,
+  type DocType,
   type RecordStats,
   type RecordSummary,
 } from "@/lib/records/types";
+
+const DOC_ICON = {
+  flask: FlaskConical,
+  pill: Pill,
+  clipboard: ClipboardList,
+  scan: ScanLine,
+  receipt: Receipt,
+  syringe: Syringe,
+  file: FileText,
+} as const;
 
 /** The title block at the top of D1 and D3, with search and notifications. */
 export function RecordsHeader({
@@ -74,26 +101,29 @@ const STAT_CELLS = [
   { key: "highRisk", label: "High priority", icon: Flag, tint: "bg-danger-bg text-danger" },
 ] as const;
 
-/** The four-up count card shared by D1 and D3. */
+/*
+ * The four-up count card shared by D1 and D3, as four individual badge
+ * tiles rather than one bordered strip. Each stat is a small, complete thing
+ * on its own — an achievement count, almost — and giving each its own
+ * card-and-shadow instead of a shared divider line is what makes the row
+ * read as four facts rather than one wide table.
+ */
 export function StatsCard({ stats }: { stats: RecordStats }) {
   return (
-    <div className="mx-5 mt-4 grid grid-cols-4 rounded-card bg-surface py-3 shadow-e1">
-      {STAT_CELLS.map(({ key, label, icon: Icon, tint }, i) => (
-        <div
+    <ul className="mx-5 mt-4 grid grid-cols-4 gap-1.5">
+      {STAT_CELLS.map(({ key, label, icon: Icon, tint }) => (
+        <li
           key={key}
-          className={cn(
-            "flex flex-col items-center gap-1 px-1",
-            i > 0 && "border-l border-line",
-          )}
+          className="tappable flex flex-col items-center gap-1.5 rounded-tile bg-surface px-1.5 py-2.5 text-center shadow-e1 active:scale-[0.96]"
         >
-          <span className={cn("grid h-8 w-8 place-items-center rounded-pill", tint)}>
-            <Icon size={16} aria-hidden />
+          <span className={cn("grid h-8 w-8 shrink-0 place-items-center rounded-pill", tint)}>
+            <Icon size={15} aria-hidden />
           </span>
-          <span className="text-[22px] font-bold leading-none text-ink-900">{stats[key]}</span>
-          <span className="text-center text-[10px] leading-tight text-ink-500">{label}</span>
-        </div>
+          <span className="text-[18px] font-bold leading-none text-ink-900">{stats[key]}</span>
+          <span className="text-[9.5px] leading-tight text-ink-500">{label}</span>
+        </li>
       ))}
-    </div>
+    </ul>
   );
 }
 
@@ -112,21 +142,43 @@ export function SeverityPill({ severity }: { severity: RecordSummary["severity"]
 }
 
 /**
- * The small PDF/JPG chip on every record row.
+ * The doc-type icon badge on every record row — a lab flask, a pill bottle, a
+ * syringe — colour-coded per {@link DOC_TYPE_TINT}, so the list reads by
+ * category at a glance instead of every row showing the same grey rectangle.
+ * The file format ("PDF"/"JPG") survives as a tiny corner badge, since it is
+ * still worth knowing but is no longer the headline of the chip.
  *
  * `compact` is for the timeline, where the date column and rail already eat
  * ~60pt of the row before the card starts.
  */
-export function FileChip({ mimeType, compact = false }: { mimeType: string; compact?: boolean }) {
+export function FileChip({
+  mimeType,
+  docType = "other",
+  compact = false,
+}: {
+  mimeType: string;
+  docType?: DocType;
+  compact?: boolean;
+}) {
+  const Icon = DOC_ICON[DOC_TYPE_ICON[docType]];
   return (
     <span
       aria-hidden
       className={cn(
-        "grid shrink-0 place-items-center rounded-tile border border-line bg-canvas font-bold text-ink-500",
-        compact ? "h-9 w-8 text-[8px]" : "h-11 w-10 text-[9px]",
+        "relative grid shrink-0 place-items-center rounded-tile",
+        DOC_TYPE_TINT[docType],
+        compact ? "h-9 w-9" : "h-11 w-11",
       )}
     >
-      {fileKind(mimeType)}
+      <Icon size={compact ? 16 : 19} strokeWidth={2.1} aria-hidden />
+      <span
+        className={cn(
+          "absolute -bottom-1 -right-1 rounded-[5px] border border-surface bg-surface px-[3px] font-bold leading-[1.4] text-ink-500 shadow-e1",
+          compact ? "text-[6.5px]" : "text-[7px]",
+        )}
+      >
+        {fileKind(mimeType)}
+      </span>
     </span>
   );
 }
@@ -138,14 +190,31 @@ export function FileChip({ mimeType, compact = false }: { mimeType: string; comp
  * responds at its right edge is the most common way a list like this fails on a
  * phone.
  */
-export function RecordRow({ record }: { record: RecordSummary }) {
+export function RecordRow({
+  record,
+  variant = "card",
+}: {
+  record: RecordSummary;
+  /**
+   * "flush" drops the row's own card, shadow and rounding for use inside a
+   * shared grouped container (see Home's Recent list) — one shadow around a
+   * stack of rows reads as one component, three shadows around three rows
+   * reads as three components glued together.
+   */
+  variant?: "card" | "flush";
+}) {
   return (
     <li>
       <Link
         href={`/records/${record.id}`}
-        className="tappable flex items-center gap-3 rounded-card bg-surface p-3 shadow-e1 hover:bg-brand-50/40 active:scale-[0.99] active:bg-brand-50/60"
+        className={cn(
+          "tappable flex items-center gap-3 active:bg-brand-50/60",
+          variant === "card"
+            ? "rounded-card bg-surface p-3 shadow-e1 hover:bg-brand-50/40 active:scale-[0.99]"
+            : "px-3.5 py-3 hover:bg-brand-50/40 active:scale-[0.99]",
+        )}
       >
-        <FileChip mimeType={record.mimeType} />
+        <FileChip mimeType={record.mimeType} docType={record.docType} />
 
         <span className="min-w-0 flex-1">
           <span className="block truncate text-[15px] font-semibold text-ink-900">

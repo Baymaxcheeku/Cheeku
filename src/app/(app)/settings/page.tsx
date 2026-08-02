@@ -12,14 +12,12 @@ import {
 } from "lucide-react";
 
 import { AccountData } from "@/components/account/account-data";
-import { PlanCard } from "@/components/billing/plan-card";
 import { FamilySection } from "@/components/app/family-section";
 import { LogoutButton } from "@/components/app/logout-button";
-import { ProfileHeader } from "@/components/app/profile-header";
-import { MascotBust } from "@/components/illustrations";
+import { ProfileIdentity } from "@/components/app/profile-identity";
 import { getEntitlement } from "@/lib/billing/quota";
 import { castFaces } from "@/lib/profiles/avatar";
-import { activeProfile, familyProfiles } from "@/lib/profiles/context";
+import { activeProfile, profileAccess } from "@/lib/profiles/context";
 import { listProfileRecords, statsFrom } from "@/lib/records/queries";
 
 export const dynamic = "force-dynamic";
@@ -33,8 +31,8 @@ export const dynamic = "force-dynamic";
  * real thing — see lib/account/actions.ts.
  */
 export default async function SettingsPage() {
-  const [profiles, profile, entitlement] = await Promise.all([
-    familyProfiles(),
+  const [access, profile, entitlement] = await Promise.all([
+    profileAccess(),
     activeProfile(),
     getEntitlement(),
   ]);
@@ -46,105 +44,128 @@ export default async function SettingsPage() {
 
   return (
     <div className="stagger flex flex-1 flex-col pb-4">
-      <header className="relative overflow-hidden px-5 pt-3">
-        <div className="relative pr-[34%]">
-          <h1 className="text-[28px] font-bold leading-tight tracking-tight text-ink-900">
-            Profile
-          </h1>
-          <p className="mt-1 text-[14px] leading-snug text-ink-500">
-            Manage your account and app settings.
-          </p>
-        </div>
-        <MascotBust className="pointer-events-none absolute -right-3 -top-2 w-[128px]" />
-      </header>
-
-      <ProfileHeader
+      {/*
+       * No page title and no mascot above the identity card.
+       *
+       * The old header said "Profile / Manage your account and app settings"
+       * over a decorative mascot, directly above a card showing the reader's
+       * face and name — two portraits stacked, and a subtitle restating what a
+       * settings list self-evidently is. The tab bar already names this screen.
+       * Deleting both gives the first viewport back to the person's own
+       * identity, which is the thing they came here to see or change.
+       */}
+      <ProfileIdentity
         profile={profile}
-        profiles={profiles}
+        /* The switcher sheet may only offer what the plan can open. */
+        profiles={access.selectable}
         recordCount={stats.total}
-        tier={entitlement.tier}
+        entitlement={entitlement}
       />
 
       {/*
-       * The Family block sits directly under the plan, because on free and solo
-       * it IS a plan pitch — and because someone looking for "where are my
-       * people" should find it before the settings list, not after it.
+       * Family before the settings list: someone looking for "where are my
+       * people" should find them before scrolling past seven preference rows.
+       */}
+      {/*
+       * The full roster, not the selectable slice: on the family plan this is
+       * the real list, and on a one-seat plan the component renders the
+       * reader's own profile plus padlocked placeholders. It deliberately
+       * never shows a locked member's real name or face — see its own note.
        */}
       <FamilySection
-        profiles={profiles}
+        profiles={access.all}
         activeId={profile.id}
         tier={entitlement.tier}
         lockedFaces={castFaces(4)}
       />
 
-      <PlanCard entitlement={entitlement} />
+      {/*
+       * Three named groups rather than one list of five and one of two.
+       *
+       * Colour-coding the rows would scan faster still, but green/amber/red
+       * carry health meaning everywhere else in this app and a red icon beside
+       * "Notifications" would read as a warning about the reader's health. So
+       * the grouping does the work the colour is not allowed to: each label
+       * answers "is what I want in here?" before any row is read.
+       */}
+      <Group label="Account">
+        <Row
+          icon={UserCog}
+          title="Personal information"
+          body="Name, date of birth and contact"
+          href="/settings/personal"
+        />
+        <Row
+          icon={HeartPulse}
+          title="Health profile"
+          body="Conditions, allergies and medicines"
+          href="/settings/health"
+        />
+        <Row
+          icon={ShieldCheck}
+          title="Security & privacy"
+          body="Password, privacy and permissions"
+          href="/settings/security"
+        />
+      </Group>
 
-      <nav className="mt-5 px-5">
-        <ul className="overflow-hidden rounded-card bg-surface shadow-e1">
-          <Row
-            icon={UserCog}
-            title="Personal information"
-            body="Update your personal details"
-            href="/settings/personal"
-          />
-          <Row
-            icon={HeartPulse}
-            title="Health profile"
-            body="Manage your health summary"
-            href="/settings/health"
-          />
-          <Row
-            icon={ShieldCheck}
-            title="Security & privacy"
-            body="Manage privacy, data and permissions"
-            href="/settings/security"
-          />
-          <Row
-            icon={Bell}
-            title="Notifications"
-            body="Manage alerts and reminders"
-            href="/settings/notifications"
-          />
-          <Row
-            icon={Globe}
-            title="Language"
-            body="English"
-            href="/settings/language"
-          />
-        </ul>
+      <Group label="Preferences">
+        <Row
+          icon={Bell}
+          title="Notifications"
+          body="Alerts and reminders"
+          href="/settings/notifications"
+        />
+        <Row icon={Globe} title="Language" body="English" href="/settings/language" />
+      </Group>
 
-        <ul className="mt-3 overflow-hidden rounded-card bg-surface shadow-e1">
-          <Row
-            icon={CircleHelp}
-            title="Help & support"
-            body="Get help and view resources"
-            href="/settings/help"
-          />
-          <Row
-            icon={Info}
-            title="About Baymax"
-            body="App version and information"
-            href="/settings/about"
-          />
-        </ul>
-      </nav>
+      <Group label="Support">
+        <Row
+          icon={CircleHelp}
+          title="Help & support"
+          body="Guides, FAQs and reporting an issue"
+          href="/settings/help"
+        />
+        <Row icon={Info} title="About Baymax" body="Version and information" href="/settings/about" />
+      </Group>
 
       <AccountData />
 
-      <section className="mx-5 mt-4">
+      <section className="mx-5 mt-6">
         <ul className="overflow-hidden rounded-card bg-surface shadow-e1">
           <LogoutButton />
         </ul>
       </section>
 
-      <p className="mx-5 mt-4 flex items-start gap-2 rounded-card bg-brand-50 px-4 py-3.5 text-[12px] leading-snug text-ink-500">
-        <ShieldCheck size={16} className="mt-px shrink-0 text-brand-500" aria-hidden />
+      {/*
+       * Plain text in the page margin, not a tinted card. As a card it was the
+       * eighth container in a row of eight and read as another thing to act on;
+       * this is a footnote, and footnotes look like footnotes.
+       */}
+      <p className="mx-5 mt-6 flex items-start gap-2 text-[11.5px] leading-relaxed text-ink-300">
+        <ShieldCheck size={14} className="mt-0.5 shrink-0" aria-hidden />
         <span>
           Baymax never sells your data and never shares it outside your family. It gives helpful
           information, not medical advice.
         </span>
       </p>
     </div>
+  );
+}
+
+/**
+ * A labelled group of rows.
+ *
+ * The label lives in the page margin above the card rather than inside it —
+ * the platform convention for settings, and it lets the card itself be nothing
+ * but rows, so scanning down the list never crosses a heading.
+ */
+function Group({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <nav className="mt-6">
+      <h2 className="px-5 text-[12px] font-bold uppercase tracking-wide text-ink-300">{label}</h2>
+      <ul className="mx-5 mt-2 overflow-hidden rounded-card bg-surface shadow-e1">{children}</ul>
+    </nav>
   );
 }
 
@@ -161,15 +182,20 @@ function Row({
 }) {
   return (
     <li className="border-b border-line last:border-b-0">
-      <Link href={href} className="tappable flex items-center gap-3 p-3 active:scale-[0.99]">
-        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-tile bg-brand-50 text-brand-600">
-          <Icon size={18} aria-hidden />
+      <Link
+        href={href}
+        className="tappable flex items-center gap-3.5 px-3.5 py-3 active:bg-brand-50"
+      >
+        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-tile bg-brand-50 text-brand-600">
+          <Icon size={17} aria-hidden />
         </span>
         <span className="min-w-0 flex-1">
-          <span className="block text-[14px] font-semibold text-ink-900">{title}</span>
-          <span className="block truncate text-[12px] text-ink-500">{body}</span>
+          <span className="block text-[14.5px] font-semibold leading-tight text-ink-900">
+            {title}
+          </span>
+          <span className="mt-0.5 block truncate text-[11.5px] text-ink-500">{body}</span>
         </span>
-        <ChevronRight size={18} className="shrink-0 text-ink-300" aria-hidden />
+        <ChevronRight size={17} className="shrink-0 text-ink-300" aria-hidden />
       </Link>
     </li>
   );

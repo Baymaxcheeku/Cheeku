@@ -126,6 +126,56 @@ export function IllustrationDefs() {
           <stop offset="1" stopColor="#e8e4fe" stopOpacity="0" />
         </radialGradient>
 
+        {/*
+         * THE MASCOT — "Sprout".
+         *
+         * An original character, not the previous white robot. The robot was
+         * borrowed shorthand for "health companion" and it read as clinical
+         * hardware; this product is a memory that grows with a family, so the
+         * character is a seedling: one continuous rounded body, a stem, and a
+         * heart-shaped leaf that folds "health" and "growth" into a single
+         * mark readable at 24px.
+         *
+         * Kept in the BRAND family rather than the reference's greens for two
+         * reasons. It has to sit on violet surfaces all over this app without
+         * clashing, and green/amber/red are reserved for health status here —
+         * a green character beside a green "Normal" pill would put decoration
+         * and diagnosis in the same colour.
+         *
+         * Light stays upper-left, like everything else in this file.
+         */}
+        <radialGradient id="bx-sprout" cx="0.34" cy="0.24" r="0.88" fx="0.28" fy="0.16">
+          <stop offset="0" stopColor="#f4f1ff" />
+          <stop offset="0.34" stopColor="#e7e1fd" />
+          <stop offset="0.66" stopColor="#d3c9f9" />
+          <stop offset="0.88" stopColor="#bcaef3" />
+          <stop offset="1" stopColor="#a394ea" />
+        </radialGradient>
+
+        {/* Limbs and feet: one stop deeper so they separate from the body
+            without needing an outline. */}
+        <radialGradient id="bx-sprout-limb" cx="0.36" cy="0.26" r="0.86">
+          <stop offset="0" stopColor="#e2dbfc" />
+          <stop offset="0.55" stopColor="#c9bcf7" />
+          <stop offset="1" stopColor="#9b8ae6" />
+        </radialGradient>
+
+        <linearGradient id="bx-sprout-foot" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#a99aec" />
+          <stop offset="1" stopColor="#8877dd" />
+        </linearGradient>
+
+        {/* The heart-leaf. A soft blush, deliberately NOT the danger red. */}
+        <linearGradient id="bx-heart" x1="0" y1="0" x2="0.4" y2="1">
+          <stop offset="0" stopColor="#ffc2d4" />
+          <stop offset="1" stopColor="#f2789e" />
+        </linearGradient>
+
+        <linearGradient id="bx-leaf" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#cfc6fb" />
+          <stop offset="1" stopColor="#9f8fe8" />
+        </linearGradient>
+
         {/* Purple objects — the bell, brand badges. Same light direction. */}
         <radialGradient id="bx-purple" cx="0.3" cy="0.2" r="0.9" fx="0.24" fy="0.12">
           <stop offset="0" stopColor="#d5cfff" />
