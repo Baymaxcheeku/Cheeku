@@ -1,0 +1,130 @@
+import { supabase } from "@/lib/supabase/client";
+import { FREE_CHAT_LIMIT, isUnlimited, type Tier } from "./plans";
+
+/*
+ * Entitlement — THE READ PATH ONLY.
+ *
+ * The web module also holds `consumeChat`, `activateTier` and
+ * `cancelSubscription`. Those are deliberately absent here and must stay
+ * absent: every one of them writes with the SERVICE-ROLE KEY, because
+ * `subscriptions` has no update policy by design. Shipping that key in a mobile
+ * bundle would hand every installed copy of the app the ability to grant itself
+ * any tier and reset anyone's quota — the bundle is not a secret, it is a file
+ * on a phone.
+ *
+ * So the writes belong on a server the client cannot impersonate. When chat
+ * lands in Phase 3, `consumeChat` becomes a Supabase Edge Function called with
+ * the user's own JWT; when billing lands in Phase 6, the tier writer becomes a
+ * validated store receipt. Until then, nothing in this app changes a tier.
+ *
+ * The read below is safe on the client because it is RLS-scoped: it can only
+ * see the caller's own family row, and being wrong about it in the client's
+ * favour changes nothing — the gate that matters runs where the write happens.
+ */
+
+export type Entitlement = {
+  tier: Tier;
+  chatsUsed: number;
+  /** null when the tier has no ceiling. */
+  chatsRemaining: number | null;
+  limit: number | null;
+  canChat: boolean;
+  periodStart: string;
+  /** ISO expiry of an active Daily pass; null for every other tier. */
+  expiresAt: string | null;
+};
+
+/**
+ * An `expires_at` in the past means a Daily pass has run out, so the row's tier
+ * no longer entitles anything.
+ */
+function passElapsed(tier: Tier, expiresAt: string | null | undefined): boolean {
+  if (tier !== "micro") return false;
+  if (!expiresAt) return true; // A micro row with no expiry is malformed; fail closed.
+  return new Date(expiresAt).getTime() <= Date.now();
+}
+
+/** Today's period key. Quotas reset on the 1st. */
+function currentPeriodStart(): string {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01`;
+}
+
+function freeEntitlement(): Entitlement {
+  return {
+    tier: "free",
+    chatsUsed: 0,
+    chatsRemaining: FREE_CHAT_LIMIT,
+    limit: FREE_CHAT_LIMIT,
+    canChat: true,
+    periodStart: currentPeriodStart(),
+    expiresAt: null,
+  };
+}
+
+/*
+ * The web version wrapped this in React's `cache()` to dedupe within a single
+ * server render. The equivalent here is react-query's cache, which the screens
+ * own — so this stays a plain function and callers key it as `["entitlement"]`.
+ */
+export async function getEntitlement(): Promise<Entitlement> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return freeEntitlement();
+
+  const { data: family } = await supabase
+    .from("families")
+    .select("id")
+    .eq("owner_id", user.id)
+    .maybeSingle();
+
+  const familyId = (family?.id as string | undefined) ?? null;
+  if (!familyId) return freeEntitlement();
+
+  const { data } = await supabase
+    .from("subscriptions")
+    .select("tier, chats_used_this_month, period_start, expires_at")
+    .eq("family_id", familyId)
+    .maybeSingle();
+
+  if (!data) return freeEntitlement();
+
+  const storedTier = data.tier as Tier;
+  const expiresAt = data.expires_at as string | null;
+
+  /*
+   * An elapsed Daily pass reports as free so the paywall shows the free
+   * allowance rather than an expired plan the reader cannot act on. The row is
+   * left alone: a read that mutates billing state is a read that surprises
+   * someone during an incident.
+   */
+  const tier = passElapsed(storedTier, expiresAt) ? "free" : storedTier;
+
+  // A counter belonging to a month that has ended reads as zero. The reset
+  // itself happens on the next write, wherever that ends up living.
+  const rolledOver = String(data.period_start) < currentPeriodStart();
+  const used = rolledOver ? 0 : Number(data.chats_used_this_month ?? 0);
+
+  if (isUnlimited(tier)) {
+    return {
+      tier,
+      chatsUsed: used,
+      chatsRemaining: null,
+      limit: null,
+      canChat: true,
+      periodStart: currentPeriodStart(),
+      expiresAt: tier === "micro" ? expiresAt : null,
+    };
+  }
+
+  return {
+    tier,
+    chatsUsed: used,
+    chatsRemaining: Math.max(0, FREE_CHAT_LIMIT - used),
+    limit: FREE_CHAT_LIMIT,
+    canChat: used < FREE_CHAT_LIMIT,
+    periodStart: currentPeriodStart(),
+    expiresAt: null,
+  };
+}

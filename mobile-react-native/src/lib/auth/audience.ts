@@ -1,6 +1,4 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as SecureStore from "expo-secure-store";
-import { Platform } from "react-native";
+import { kv } from "@/lib/storage";
 
 /*
  * Which audience the reader picked on A4 ("just me" or "my family").
@@ -18,26 +16,8 @@ import { Platform } from "react-native";
  * no value: it would offer family access to someone who long since decided
  * against it.
  *
- * SecureStore rather than AsyncStorage for consistency with the session, not
- * because "me" or "family" is a secret. It is one small write on a screen that
- * is already waiting on a navigation.
- *
- * The web branch exists only so the app runs in Expo's web preview during
- * development: `expo-secure-store` ships an empty module for web, so every call
- * there is a no-op that would silently lose the answer. Same fallback, and same
- * reason, as the session storage in lib/supabase/client.ts.
+ * Storage mechanics, including why web is different, live in lib/storage.ts.
  */
-
-const store = {
-  get: (key: string) =>
-    Platform.OS === "web" ? AsyncStorage.getItem(key) : SecureStore.getItemAsync(key),
-  set: (key: string, value: string) =>
-    Platform.OS === "web"
-      ? AsyncStorage.setItem(key, value)
-      : SecureStore.setItemAsync(key, value),
-  remove: (key: string) =>
-    Platform.OS === "web" ? AsyncStorage.removeItem(key) : SecureStore.deleteItemAsync(key),
-};
 
 const KEY = "baymax_audience";
 const MAX_AGE_MS = 24 * 60 * 60 * 1000;
@@ -48,11 +28,11 @@ type Stored = { audience: Audience; at: number };
 
 export async function setAudience(audience: Audience): Promise<void> {
   const value: Stored = { audience, at: Date.now() };
-  await store.set(KEY, JSON.stringify(value));
+  await kv.set(KEY, JSON.stringify(value));
 }
 
 export async function readAudience(): Promise<Audience | null> {
-  const raw = await store.get(KEY);
+  const raw = await kv.get(KEY);
   if (!raw) return null;
 
   try {
@@ -69,5 +49,5 @@ export async function readAudience(): Promise<Audience | null> {
 
 /** Called once the plan step has been answered, either way. */
 export async function clearAudience(): Promise<void> {
-  await store.remove(KEY);
+  await kv.remove(KEY);
 }
