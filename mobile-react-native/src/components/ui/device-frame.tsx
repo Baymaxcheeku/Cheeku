@@ -1,4 +1,5 @@
 import { Platform, useWindowDimensions, View } from "react-native";
+import { SafeAreaInsetsContext } from "react-native-safe-area-context";
 
 import { surface } from "@/theme/tokens";
 
@@ -15,6 +16,18 @@ import { surface } from "@/theme/tokens";
  * and a 59pt top inset for the Dynamic Island.
  */
 const SCREEN = { width: 393, height: 852, radius: 62 } as const;
+
+/*
+ * Real iPhone 16 insets, supplied through the context directly.
+ *
+ * Passing `initialMetrics` to SafeAreaProvider is not enough: on web the
+ * provider measures its own DOM node after mount and overwrites them with
+ * zeroes. Every screen then renders its header under the Dynamic Island and
+ * its footer under the home indicator, which is precisely the region the
+ * inset exists to protect. Overriding the context is the only way to make the
+ * preview tell the truth.
+ */
+const IPHONE_16_INSETS = { top: 59, bottom: 34, left: 0, right: 0 } as const;
 
 export function DeviceFrame({ children }: { children: React.ReactNode }) {
   const { width, height } = useWindowDimensions();
@@ -55,7 +68,9 @@ export function DeviceFrame({ children }: { children: React.ReactNode }) {
             backgroundColor: surface.canvas,
           }}
         >
-          {children}
+          <SafeAreaInsetsContext.Provider value={IPHONE_16_INSETS}>
+            {children}
+          </SafeAreaInsetsContext.Provider>
 
           {/*
            * Dynamic Island and home indicator, drawn over the app.

@@ -1,6 +1,6 @@
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   ArrowRight,
@@ -52,7 +52,9 @@ export default function Welcome() {
     <View className="flex-1 bg-canvas" style={{ paddingTop: insets.top }}>
       {/* Step rail. Segments fill rather than switch on, so moving forward
           reads as progress made. */}
-      <View className="flex-row gap-1.5 px-5 pt-2">
+      {/* pt-3, not pt-2: the rail sits directly under the Dynamic Island and
+          needs to clear it optically, not just numerically. */}
+      <View className="flex-row gap-1.5 px-5 pt-3">
         {PANELS.map((_, i) => (
           <View key={i} className="h-1 flex-1 overflow-hidden rounded-pill bg-white">
             <View
@@ -83,21 +85,29 @@ export default function Welcome() {
         </Pressable>
       </View>
 
-      <ScrollView
-        key={index}
-        className="flex-1"
-        contentContainerStyle={{ flexGrow: 1, justifyContent: panel.kind === "journeys" ? "flex-start" : "center" }}
-        showsVerticalScrollIndicator={false}
-      >
+      {/*
+       * The art takes the slack, not the gap above the button.
+       *
+       * With the hero at a fixed height and the group centred, the leftover
+       * space split evenly above and below it: the composition floated and the
+       * CTA read as exiled at the bottom of an empty screen. Giving the hero
+       * `flex-1` with a floor and a ceiling means spare height goes into the
+       * picture, where it looks deliberate, and the copy stays anchored just
+       * above the button where the thumb already is.
+       */}
+      <View key={index} className="flex-1">
+        {/* No max height on the hero: capping it put the leftover space back
+            between the copy and the button, which is the gap this restructure
+            exists to remove. The art centres inside whatever it is given. */}
         {panel.kind !== "journeys" ? (
-          <View className="h-[236px]">
+          <View className="min-h-[210px] flex-1">
             {panel.kind === "meet" ? <HeroMeet /> : null}
             {panel.kind === "memory" ? <HeroMemory /> : null}
             {panel.kind === "family" ? <HeroFamily faces={faces} /> : null}
           </View>
         ) : null}
 
-        <View className="px-5 pt-4">
+        <View className={panel.kind === "journeys" ? "flex-1 px-5 pt-1" : "px-5 pt-5"}>
           <Text className="text-[28px] font-bold leading-[32px] tracking-tight text-ink-900">
             {panel.lead} <Text className="text-brand-600">{panel.accent}</Text>
           </Text>
@@ -107,9 +117,11 @@ export default function Welcome() {
             <JourneyGrid selected={journey} onPick={setJourney} />
           ) : null}
         </View>
-      </ScrollView>
+      </View>
 
-      <View className="gap-3 px-5 pt-3" style={{ paddingBottom: insets.bottom + 12 }}>
+      {/* One consistent footer rhythm on every panel: 20pt above the block,
+          the safe-area inset plus 8 below it. */}
+      <View className="gap-3.5 px-5 pt-5" style={{ paddingBottom: insets.bottom + 8 }}>
         {index > 0 ? (
           <View className="flex-row items-center justify-center gap-2">
             <Lock size={12} color={ink[300]} />
@@ -136,28 +148,48 @@ export default function Welcome() {
   );
 }
 
+/*
+ * HEROES
+ *
+ * All three lay their content out in FLOW and centre it, rather than pinning
+ * pieces to the top and bottom of the box. The box is now flexible — it
+ * absorbs whatever height the screen has spare — and absolutely-positioned
+ * children in a variable-height parent drift: the family faces ended up
+ * hard against the top with a void beneath them, and the pills anchored to
+ * `bottom` disappeared off the composition entirely.
+ */
+
 /** Panel 1. Subject centred and unobstructed, one badge, one pill beneath. */
 function HeroMeet() {
   return (
-    <View className="flex-1 items-center">
-      <Settle delay={0}>
-        <MascotBust size={172} />
-      </Settle>
-
-      <Drift delay={0.22} style={{ position: "absolute", right: 12, top: 12 }}>
-        <View className="flex-row items-center gap-1 rounded-pill bg-surface px-2.5 py-1.5" style={shadow.e2}>
+    <View className="flex-1 items-center justify-center px-5">
+      <Drift delay={0.22} style={{ alignSelf: "flex-end" }}>
+        <View
+          className="flex-row items-center gap-1 rounded-pill bg-surface px-2.5 py-1.5"
+          style={shadow.e2}
+        >
           <FileText size={11} color={brand[700]} />
           <Text className="text-[10px] font-bold text-brand-700">Never forgets</Text>
         </View>
       </Drift>
 
-      <Settle delay={0.3} style={{ position: "absolute", bottom: 8, width: 248 }}>
-        <View className="flex-row items-center gap-2.5 rounded-pill bg-surface px-3.5 py-2.5" style={shadow.e2}>
-          <View className="h-8 w-8 items-center justify-center rounded-pill" style={{ backgroundColor: brand[600] }}>
+      <Settle delay={0} style={{ marginTop: -6 }}>
+        <MascotBust size={196} />
+      </Settle>
+
+      <Settle delay={0.3} style={{ marginTop: 2, width: 268 }}>
+        <View
+          className="flex-row items-center gap-2.5 rounded-pill bg-surface px-3.5 py-2.5"
+          style={shadow.e2}
+        >
+          <View
+            className="h-8 w-8 items-center justify-center rounded-pill"
+            style={{ backgroundColor: brand[600] }}
+          >
             <Stethoscope size={15} color="#fff" />
           </View>
           <Text className="flex-1 text-[11px] leading-[15px] text-ink-700">
-            “Your iron is low. Here&apos;s what changed.”
+            &ldquo;Your iron is low. Here&apos;s what changed.&rdquo;
           </Text>
         </View>
       </Settle>
@@ -168,15 +200,18 @@ function HeroMeet() {
 /**
  * Panel 3 — the memory layer as a chain: a document, the value read out of it,
  * and an answer that cites it back. The third card knows about the first, which
- * is the whole product, so they are drawn connected rather than merely stacked.
+ * is the whole product, so they are drawn overlapping rather than merely listed.
  */
 function HeroMemory() {
   return (
-    <View className="flex-1">
-      <Drift delay={0} style={{ position: "absolute", left: 8, top: 12, width: 168 }}>
+    <View className="flex-1 items-center justify-center px-5">
+      <Drift delay={0} style={{ alignSelf: "flex-start", width: 176 }}>
         <View className="rounded-tile bg-surface p-3" style={shadow.e2}>
           <View className="flex-row items-center gap-2">
-            <View className="h-7 w-7 items-center justify-center rounded-tile" style={{ backgroundColor: "#f3e9fd" }}>
+            <View
+              className="h-7 w-7 items-center justify-center rounded-tile"
+              style={{ backgroundColor: "#f3e9fd" }}
+            >
               <FileText size={13} color="#7b3fd4" />
             </View>
             <Text className="text-[11px] font-bold text-ink-900">Anomaly scan</Text>
@@ -188,8 +223,11 @@ function HeroMemory() {
         </View>
       </Drift>
 
-      <Drift delay={0.12} style={{ position: "absolute", right: 8, top: 86, width: 150 }}>
-        <View className="flex-row items-center gap-2 rounded-tile bg-surface p-2.5" style={shadow.e2}>
+      <Drift delay={0.12} style={{ alignSelf: "flex-end", width: 158, marginTop: -10 }}>
+        <View
+          className="flex-row items-center gap-2 rounded-tile bg-surface p-2.5"
+          style={shadow.e2}
+        >
           <View className="h-7 w-7 items-center justify-center rounded-pill bg-safe-bg">
             <Check size={13} color="#23af5f" strokeWidth={3} />
           </View>
@@ -200,7 +238,7 @@ function HeroMemory() {
         </View>
       </Drift>
 
-      <Settle delay={0.24} style={{ position: "absolute", bottom: 4, alignSelf: "center", width: 210 }}>
+      <Settle delay={0.24} style={{ width: 232, marginTop: -6 }}>
         <View className="rounded-tile p-3" style={[{ backgroundColor: brand[600] }, shadow.e2]}>
           <Text className="text-[11.5px] leading-[15px] text-white">
             Baby&apos;s heart rate was normal at your 20-week scan.
@@ -220,25 +258,31 @@ function HeroMemory() {
 /** Panel 4 — the family, and the promise wrapped around it. */
 function HeroFamily({ faces }: { faces: readonly string[] }) {
   return (
-    <View className="flex-1 items-center">
-      <View className="mt-8 flex-row items-end">
-        {faces.slice(0, 3).map((svg, i) => (
-          <StaggerItem key={i} index={i} style={{ marginLeft: i > 0 ? -20 : 0 }}>
-            <View className="rounded-pill bg-surface" style={[shadow.e2, { borderWidth: 3, borderColor: "#fff", borderRadius: 999 }]}>
-              <CastAvatar svg={svg} size={i === 1 ? 76 : 62} />
-            </View>
-          </StaggerItem>
-        ))}
-      </View>
-
-      <Drift delay={0.3} style={{ position: "absolute", right: 12, top: 12 }}>
+    <View className="flex-1 items-center justify-center px-5">
+      <Drift delay={0.3} style={{ alignSelf: "flex-end" }}>
         <View className="rounded-pill bg-surface px-2.5 py-1.5" style={shadow.e2}>
           <Text className="text-[10px] font-bold text-brand-700">Up to 4 people</Text>
         </View>
       </Drift>
 
-      <Settle delay={0.22} style={{ position: "absolute", bottom: 8, width: 236 }}>
-        <View className="flex-row items-center gap-2.5 rounded-pill bg-surface px-3.5 py-2.5" style={shadow.e2}>
+      <View className="mt-3 flex-row items-end">
+        {faces.slice(0, 3).map((svg, i) => (
+          <StaggerItem key={i} index={i} style={{ marginLeft: i > 0 ? -20 : 0 }}>
+            <View
+              className="rounded-pill bg-surface"
+              style={[shadow.e2, { borderWidth: 3, borderColor: "#fff", borderRadius: 999 }]}
+            >
+              <CastAvatar svg={svg} size={i === 1 ? 84 : 68} />
+            </View>
+          </StaggerItem>
+        ))}
+      </View>
+
+      <Settle delay={0.22} style={{ marginTop: 18, width: 268 }}>
+        <View
+          className="flex-row items-center gap-2.5 rounded-pill bg-surface px-3.5 py-2.5"
+          style={shadow.e2}
+        >
           <View className="h-8 w-8 items-center justify-center rounded-pill bg-brand-50">
             <ShieldCheck size={16} color={brand[600]} />
           </View>
