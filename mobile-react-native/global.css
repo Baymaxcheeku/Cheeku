@@ -1,3 +1,33 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/*
+ * Weight utilities must also swap the FAMILY.
+ *
+ * expo-google-fonts registers each Inter weight as its own family
+ * (Inter_400Regular, Inter_700Bold, ...). React Native cannot synthesise a
+ * bold from a single-weight file, so `font-bold` on its own sets fontWeight:700
+ * against a regular face and renders unchanged. Mapping the utilities here
+ * keeps every screen writing plain Tailwind while the right file is used.
+ */
+@layer base {
+  * {
+    font-family: Inter_400Regular;
+  }
+}
+
+@layer utilities {
+  .font-normal {
+    font-family: Inter_400Regular;
+  }
+  .font-medium {
+    font-family: Inter_500Medium;
+  }
+  .font-semibold {
+    font-family: Inter_600SemiBold;
+  }
+  .font-bold {
+    font-family: Inter_700Bold;
+  }
+}

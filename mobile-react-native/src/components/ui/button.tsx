@@ -1,0 +1,80 @@
+import { ActivityIndicator, Pressable, Text, View } from "react-native";
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
+
+import { useReducedMotion } from "@/components/ui/motion";
+import { brand } from "@/theme/tokens";
+
+/*
+ * The primary action. Ported from the web `Button`.
+ *
+ * `active:scale` on web becomes a shared value here. The dip is small on
+ * purpose: a control that visibly shrinks under a thumb reads as flimsy.
+ */
+export function Button({
+  children,
+  onPress,
+  disabled,
+  loading,
+  variant = "primary",
+}: {
+  children: React.ReactNode;
+  onPress?: () => void;
+  disabled?: boolean;
+  loading?: boolean;
+  variant?: "primary" | "secondary";
+}) {
+  const still = useReducedMotion();
+  const pressed = useSharedValue(0);
+
+  const animated = useAnimatedStyle(() => ({
+    transform: [{ scale: 1 - pressed.value * 0.02 }],
+  }));
+
+  const primary = variant === "primary";
+  const off = disabled || loading;
+
+  return (
+    <Animated.View style={animated}>
+      <Pressable
+        accessibilityRole="button"
+        disabled={off}
+        onPress={onPress}
+        onPressIn={() => {
+          if (!still) pressed.value = withTiming(1, { duration: 90 });
+        }}
+        onPressOut={() => {
+          if (!still) pressed.value = withTiming(0, { duration: 140 });
+        }}
+        style={{
+          height: 52,
+          borderRadius: 999,
+          alignItems: "center",
+          justifyContent: "center",
+          flexDirection: "row",
+          gap: 8,
+          opacity: off ? 0.6 : 1,
+          backgroundColor: primary ? brand[600] : "#ffffff",
+          borderWidth: primary ? 0 : 1,
+          borderColor: "#e8e8f4",
+        }}
+      >
+        {loading ? <ActivityIndicator color={primary ? "#fff" : brand[600]} /> : null}
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+          {typeof children === "string" ? (
+            <Text
+              style={{
+                fontSize: 16,
+                fontWeight: "700",
+                color: primary ? "#ffffff" : "#3a3b57",
+              }}
+            >
+              {children}
+            </Text>
+          ) : (
+            children
+          )}
+        </View>
+      </Pressable>
+    </Animated.View>
+  );
+}

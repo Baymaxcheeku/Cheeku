@@ -12,6 +12,17 @@
  */
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  /*
+   * "class", not the default "media".
+   *
+   * This app is light-only: `app.json` pins `userInterfaceStyle: "light"`
+   * because every screen is composed against the sampled light palette and a
+   * medical record rendered in an unreviewed dark theme is worse than no dark
+   * theme. Leaving NativeWind on "media" makes it follow the OS and then throw
+   * "Cannot manually set color scheme, as dark mode is type 'media'" when
+   * anything pins the scheme. With "class" the dark variants simply never fire.
+   */
+  darkMode: "class",
   content: ["./app/**/*.{js,jsx,ts,tsx}", "./src/**/*.{js,jsx,ts,tsx}"],
   presets: [require("nativewind/preset")],
   theme: {
@@ -61,8 +72,6 @@ module.exports = {
       },
       fontFamily: {
         sans: ["Inter_400Regular"],
-        semibold: ["Inter_600SemiBold"],
-        bold: ["Inter_700Bold"],
       },
     },
   },
