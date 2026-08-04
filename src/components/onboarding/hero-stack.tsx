@@ -83,7 +83,7 @@ export function HeroMeet() {
           <Stethoscope size={15} aria-hidden />
         </span>
         <span className="min-w-0 text-[11px] leading-snug text-ink-700">
-          &ldquo;Your iron is low — here&apos;s what changed.&rdquo;
+          &ldquo;Your iron is low. Here&apos;s what changed.&rdquo;
         </span>
       </motion.div>
     </div>

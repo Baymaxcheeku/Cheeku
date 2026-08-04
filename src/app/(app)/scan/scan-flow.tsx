@@ -59,7 +59,7 @@ const STEPS = [
 
 /** One line of calm reassurance per step — never clinical, never rushed. */
 const STEP_NARRATIVE = [
-  "Nice and safe — nothing leaves your device unprotected.",
+  "Nice and safe. Nothing leaves your device unprotected.",
   "Take a breath, Baymax is doing the careful reading for you.",
   "This is the fiddly part. Baymax has got it from here.",
   "A second look, just to be sure it's right.",

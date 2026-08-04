@@ -220,7 +220,7 @@ export function HelpSupportTools() {
                 <CheckCircle2 size={32} aria-hidden />
               </span>
               <h2 className="mt-3 text-[20px] font-bold tracking-tight text-ink-900">
-                Thanks — we&apos;ve got it
+                Thanks, we&apos;ve got it
               </h2>
               <p className="mx-auto mt-1.5 max-w-[290px] text-[13px] leading-snug text-ink-500">
                 Our team typically replies within {SUPPORT_RESPONSE}, at the email on your account.
@@ -240,7 +240,7 @@ export function HelpSupportTools() {
                 <div className="min-w-0 flex-1">
                   <h2 className="text-[18px] font-bold text-ink-900">Report an issue</h2>
                   <p className="text-[12px] text-ink-500">
-                    No health data is attached — only what you write here.
+                    No health data is attached. Only what you write here.
                   </p>
                 </div>
                 <button

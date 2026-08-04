@@ -47,8 +47,8 @@ function confidenceFor(seed: string, index: number, floor: number, ceiling: numb
 const SAMPLE_TEXT = `LUCID MEDICAL DIAGNOSTICS
 Complete Blood Count (CBC)
 
-Patient      : —
-Collected on : —
+Patient      : -
+Collected on : -
 
 Haemoglobin        10.4 g/dL     (12.0-15.0)
 MCV                78 fL         (80-100)
@@ -74,7 +74,7 @@ export function extractFromFile(fileName: string, fileSize: number): Extraction 
     {
       key: "patientName",
       label: "Patient name",
-      value: "—",
+      value: "-",
       confidence: confidenceFor(seed, 1, ...hi),
     },
     {

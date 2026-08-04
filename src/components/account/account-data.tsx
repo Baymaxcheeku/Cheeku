@@ -54,7 +54,7 @@ export function AccountData() {
         `${result.bundle.documents.length} documents`,
         `${result.bundle.messages.length} messages`,
       ].join(", ");
-      setMessage(`Downloaded — ${counts}.`);
+      setMessage(`Downloaded: ${counts}.`);
     });
   }
 

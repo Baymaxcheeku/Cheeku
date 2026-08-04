@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { motion } from "framer-motion";
 import {
   BellRing,
   CalendarClock,
@@ -15,7 +16,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
-import { cn } from "@/lib/cn";
+import { PressRow, SpringSwitch } from "@/components/ui/motion";
 import { updateNotificationPrefs } from "@/lib/settings/actions";
 import type { NotificationPrefs } from "@/lib/settings/schemas";
 
@@ -130,8 +131,31 @@ export function NotificationToggles({ initial }: { initial: NotificationPrefs })
     });
   }
 
+  const ROWS = GROUPS.flatMap((g) => g.rows);
+  const on = ROWS.filter((r) => prefs[r.key]).length;
+
   return (
     <div className="mt-5 space-y-5 px-5">
+      {/*
+       * A live count of what is on.
+       *
+       * Fourteen switches with no summary means the only way to answer "what am
+       * I actually subscribed to" is to scroll and tally by eye. This answers it
+       * in one line, and it moves when a switch does, so flipping one has a
+       * visible consequence beyond the switch itself.
+       */}
+      <div className="flex items-center justify-between rounded-card bg-surface px-4 py-3 shadow-e1">
+        <span className="text-[12.5px] font-semibold text-ink-900">Notifications on</span>
+        <motion.span
+          key={on}
+          initial={{ scale: 0.7, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ type: "spring", stiffness: 520, damping: 18 }}
+          className="rounded-pill bg-brand-50 px-2.5 py-1 text-[12px] font-bold text-brand-700"
+        >
+          {on} of {ROWS.length}
+        </motion.span>
+      </div>
       {GROUPS.map((group) => (
         <section key={group.title}>
           <div className="flex items-center gap-2.5 px-1">
@@ -146,7 +170,7 @@ export function NotificationToggles({ initial }: { initial: NotificationPrefs })
 
           <ul className="mt-2 overflow-hidden rounded-card bg-surface shadow-e1">
             {group.rows.map((row, i) => (
-              <li key={row.key} className={i > 0 ? "border-t border-line" : undefined}>
+              <PressRow key={row.key} index={i} className={i > 0 ? "border-t border-line" : undefined}>
                 <div className="flex items-center gap-3 p-3">
                   <span className="grid h-9 w-9 shrink-0 place-items-center rounded-tile bg-brand-50 text-brand-500">
                     <row.icon size={15} aria-hidden />
@@ -157,9 +181,13 @@ export function NotificationToggles({ initial }: { initial: NotificationPrefs })
                       {row.body}
                     </span>
                   </span>
-                  <Switch checked={prefs[row.key]} onChange={() => toggle(row.key)} label={row.title} />
+                  <SpringSwitch
+                    checked={prefs[row.key]}
+                    onChange={() => toggle(row.key)}
+                    label={row.title}
+                  />
                 </div>
-              </li>
+              </PressRow>
             ))}
           </ul>
         </section>
@@ -178,36 +206,5 @@ export function NotificationToggles({ initial }: { initial: NotificationPrefs })
         </span>
       </p>
     </div>
-  );
-}
-
-function Switch({
-  checked,
-  onChange,
-  label,
-}: {
-  checked: boolean;
-  onChange: () => void;
-  label: string;
-}) {
-  return (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={checked}
-      aria-label={label}
-      onClick={onChange}
-      className={cn(
-        "tappable relative h-7 w-12 shrink-0 rounded-pill transition-colors",
-        checked ? "bg-brand-600" : "bg-line",
-      )}
-    >
-      <span
-        className={cn(
-          "absolute top-0.5 h-6 w-6 rounded-pill bg-white shadow-e1 transition-transform",
-          checked ? "translate-x-[22px]" : "translate-x-0.5",
-        )}
-      />
-    </button>
   );
 }

@@ -29,6 +29,21 @@ export const metadata: Metadata = {
   description: "The health memory layer for every family.",
   // Medical screens must never be indexed or previewed by third parties.
   robots: { index: false, follow: false },
+  /*
+   * Added so "Add to Home Screen" on iOS launches this standalone — no
+   * address bar, no Safari toolbar, its own icon and app switcher card. The
+   * whole product is designed as a phone app (the desktop device frame exists
+   * only to simulate one), so testing it inside browser chrome misrepresents
+   * every screen's vertical rhythm: the CTA that sits just above the thumb
+   * here is under a toolbar there.
+   */
+  appleWebApp: {
+    capable: true,
+    title: "Baymax",
+    // Matches --canvas, so the status bar area blends into the app.
+    statusBarStyle: "default",
+  },
+  manifest: "/manifest.webmanifest",
 };
 
 export const viewport: Viewport = {

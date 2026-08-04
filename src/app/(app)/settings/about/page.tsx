@@ -2,24 +2,24 @@ import Link from "next/link";
 import {
   Brain,
   Check,
-  CircleHelp,
-  Frown,
   Heart,
   Info,
   Lock,
   MessageCircle,
-  Search,
   ShieldCheck,
   Sliders,
   Sparkles,
   X,
 } from "lucide-react";
 
+import { PopIn, StaggerItem, StaggerList, TapToWiggle } from "@/components/ui/motion";
 import { SettingsHeader } from "@/components/app/settings-header";
-import { AnxietyScene, MemoryScene } from "@/components/illustrations/about-scenes";
+import { JourneyRow, MemoryScene, SpiralScene } from "@/components/illustrations/about-scenes";
 import { MascotBust } from "@/components/illustrations";
 import { APP_VERSION } from "@/lib/app-meta";
 import { FREE_CHAT_LIMIT } from "@/lib/billing/plans";
+import { JOURNEYS } from "@/lib/onboarding/journeys";
+import { castFaces } from "@/lib/profiles/avatar";
 
 export const dynamic = "force-static";
 
@@ -44,13 +44,23 @@ export const dynamic = "force-static";
  *   added. A page that only sells is a page that has overpromised by the end.
  */
 export default function AboutPage() {
+  /*
+   * One face per journey plus one for the spiral scene. Generated here rather
+   * than in the components because the renderer needs `Buffer`, and this page
+   * is static — they are baked at build time, not fetched.
+   */
+  const faces = castFaces(JOURNEYS.length + 1);
+  const spiralFace = faces[JOURNEYS.length] ?? faces[0] ?? "";
+
   return (
     <div className="stagger flex flex-1 flex-col pb-8">
       <SettingsHeader title="About Baymax" eyebrow="Your AI health companion" icon={Info} />
 
       {/* ---------------------------------------------------------- hero --- */}
       <section className="relative mx-5 mt-4 overflow-hidden rounded-card bg-gradient-to-br from-brand-50 via-surface to-brand-50 p-4 ring-1 ring-brand-100">
-        <MascotBust className="pointer-events-none absolute -right-4 -top-4 w-[124px]" />
+        <TapToWiggle className="absolute -right-4 -top-4 w-[124px]">
+          <MascotBust className="w-full" />
+        </TapToWiggle>
         <div className="relative pr-[34%]">
           <h2 className="text-[21px] font-bold leading-[1.15] tracking-tight text-ink-900">
             More than answers.
@@ -64,49 +74,90 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <div className="mt-3 grid grid-cols-2 gap-2 px-5">
-        <Pillar icon={Lock} tint="bg-brand-50 text-brand-600" title="Safe" body="Your data is always protected" />
-        <Pillar icon={Sliders} tint="bg-safe-bg text-safe-text" title="Personalised" body="Built around your family" />
-        <Pillar icon={MessageCircle} tint="bg-caution-bg text-caution-text" title="Grounded" body="Only ever your own records" />
-        <Pillar icon={Sparkles} tint="bg-brand-50 text-brand-600" title="Organised" body="Every report, findable" />
-      </div>
+      {/*
+       * Four traits as one strip, not four cards.
+       *
+       * As a 2x2 card grid this was the page's structure rather than its
+       * content — four same-size boxes of icon-plus-heading-plus-text, which is
+       * the lazy container. It also tinted "Personalised" green and "Grounded"
+       * amber: those are the health-status colours everywhere else in this app,
+       * spent here on words that carry no health meaning at all.
+       */}
+      <ul className="mx-5 mt-3 grid grid-cols-4 gap-1 rounded-card bg-surface px-2 py-3 shadow-e1">
+        {[
+          { icon: Lock, label: "Private" },
+          { icon: Sliders, label: "Personal" },
+          { icon: MessageCircle, label: "Grounded" },
+          { icon: Sparkles, label: "Organised" },
+        ].map(({ icon: Icon, label }, i) => (
+          <PopIn key={label} index={i} className="flex flex-col items-center gap-1.5 text-center">
+            <span className="grid h-9 w-9 place-items-center rounded-pill bg-brand-50 text-brand-600">
+              <Icon size={16} aria-hidden />
+            </span>
+            <span className="text-[10.5px] font-semibold leading-tight text-ink-700">{label}</span>
+          </PopIn>
+        ))}
+      </ul>
 
-      {/* ------------------------------------------------ anxiety spiral --- */}
-      <section className="mx-5 mt-5 overflow-hidden rounded-card bg-surface shadow-e1">
-        <div className="p-4 pb-0">
-          <h2 className="text-[17px] font-bold leading-tight text-ink-900">
-            Tired of the anxiety spiral?
+      {/* ------------------------------------------------------ journeys --- */}
+      {/*
+       * Who it is for, said out loud and early.
+       *
+       * This page previously argued the product's merits without ever naming a
+       * life it fits, so a reader deciding "is this for me" had to infer it. The
+       * list is the same `JOURNEYS` the welcome carousel offers — one source, so
+       * the promise made before signup and the promise repeated here cannot
+       * drift apart. It ends on the open option because the product is a general
+       * companion, not five niches.
+       */}
+      <section className="mt-6">
+        <div className="px-5">
+          <h2 className="text-[17px] font-bold leading-tight tracking-tight text-ink-900">
+            Whatever you&apos;re carrying
             <br />
-            <span className="text-brand-600">You&apos;re not alone.</span>
+            <span className="text-brand-600">right now.</span>
           </h2>
           <p className="mt-1.5 text-[12.5px] leading-snug text-ink-500">
-            Every time something feels off, the same cycle begins — overthinking, searching,
-            worrying.
+            The same memory underneath, shaped around the season you&apos;re in.
           </p>
         </div>
 
-        <AnxietyScene className="mt-2 w-full" />
-
-        <ul className="space-y-2 px-4 pb-4">
-          {[
-            { icon: Search, text: "You search your symptoms online" },
-            { icon: CircleHelp, text: "You get confusing and frightening information" },
-            { icon: Frown, text: "You feel more anxious, not reassured" },
-          ].map(({ icon: Icon, text }) => (
-            <li key={text} className="flex items-center gap-2.5">
-              <span className="grid h-7 w-7 shrink-0 place-items-center rounded-pill bg-brand-50 text-brand-600">
-                <Icon size={14} aria-hidden />
-              </span>
-              <span className="text-[12.5px] leading-snug text-ink-700">{text}</span>
-            </li>
+        <StaggerList className="mx-5 mt-3 overflow-hidden rounded-card bg-surface shadow-e1 [&>*:last-child>div]:border-b-0">
+          {JOURNEYS.map((journey, i) => (
+            <StaggerItem key={journey.id}>
+              <JourneyRow
+                face={faces[i] ?? ""}
+                label={journey.label}
+                problem={journey.problem}
+                tint={journey.tint}
+                icon={journey.icon}
+              />
+            </StaggerItem>
           ))}
-        </ul>
+        </StaggerList>
+      </section>
 
-        <p className="flex items-start gap-2.5 border-t border-line bg-brand-50 px-4 py-3.5">
+      {/* ------------------------------------------------ anxiety spiral --- */}
+      <section className="mx-5 mt-6 overflow-hidden rounded-card bg-gradient-to-b from-brand-50 to-surface shadow-e1">
+        <div className="p-4 pb-1">
+          <h2 className="text-[17px] font-bold leading-tight tracking-tight text-ink-900">
+            2am. Something feels off.
+            <br />
+            <span className="text-brand-600">You start searching.</span>
+          </h2>
+          <p className="mt-1.5 text-[12.5px] leading-snug text-ink-500">
+            Ten tabs later you know less than when you started, and you are more frightened.
+          </p>
+        </div>
+
+        <SpiralScene face={spiralFace} />
+
+        <p className="mt-2 flex items-start gap-2.5 border-t border-line bg-surface px-4 py-3.5">
           <ShieldCheck size={16} className="mt-px shrink-0 text-brand-600" aria-hidden />
           <span className="text-[12.5px] leading-snug text-ink-700">
-            <strong className="font-bold text-brand-700">Let&apos;s break that cycle.</strong> Baymax
-            starts from your own reports, tells you what they say, and never guesses at the rest.
+            <strong className="font-bold text-brand-700">Baymax breaks the loop.</strong> It reads
+            what your own report says, names the document it came from, and leaves what it means to
+            your doctor.
           </span>
         </p>
       </section>
@@ -116,7 +167,7 @@ export default function AboutPage() {
         <MemoryScene className="w-full" />
         <div className="-mt-2 p-4">
           <h2 className="text-[16px] font-bold leading-tight text-ink-900">
-            Baymax remembers everything about your family — so you don&apos;t have to.
+            Baymax remembers everything about your family, so you don&apos;t have to.
           </h2>
           <ul className="mt-3 space-y-2">
             {[
@@ -136,7 +187,7 @@ export default function AboutPage() {
           <p className="mt-3 flex items-start gap-2.5 rounded-tile bg-surface px-3.5 py-3">
             <Brain size={15} className="mt-px shrink-0 text-brand-500" aria-hidden />
             <span className="text-[12px] leading-snug text-ink-500">
-              The more you add, the more it can answer — and every answer points back at the
+              The more you add, the more it can answer, and every answer points back at the
               document it came from.
             </span>
           </p>
@@ -250,7 +301,7 @@ export default function AboutPage() {
             <MessageCircle size={19} aria-hidden />
           </span>
           <p className="min-w-0 flex-1 text-[13px] leading-snug">
-            I&apos;m here to listen and help you keep track — every step of the way. Let&apos;s take
+            I&apos;m here to listen and help you keep track, every step of the way. Let&apos;s take
             better care of you, together.
           </p>
         </div>
@@ -286,28 +337,6 @@ export default function AboutPage() {
           doctor or local emergency services.
         </span>
       </p>
-    </div>
-  );
-}
-
-function Pillar({
-  icon: Icon,
-  tint,
-  title,
-  body,
-}: {
-  icon: typeof Lock;
-  tint: string;
-  title: string;
-  body: string;
-}) {
-  return (
-    <div className="rounded-card bg-surface p-3 shadow-e1">
-      <span className={`grid h-8 w-8 place-items-center rounded-tile ${tint}`}>
-        <Icon size={15} aria-hidden />
-      </span>
-      <span className="mt-1.5 block text-[12.5px] font-bold text-ink-900">{title}</span>
-      <span className="block text-[10.5px] leading-snug text-ink-500">{body}</span>
     </div>
   );
 }

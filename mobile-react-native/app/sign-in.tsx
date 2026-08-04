@@ -112,7 +112,10 @@ export default function SignIn() {
         return;
       }
 
-      router.replace("/");
+      // Onward to A4, matching the web build. Replacing "/" here sent people
+      // back through the splash, which then bounced them to the welcome
+      // carousel they had just finished.
+      router.replace("/who");
     } catch {
       // A throw is a transport failure. Saying "wrong password" to someone with
       // no signal sends them to reset a password that was never the problem.

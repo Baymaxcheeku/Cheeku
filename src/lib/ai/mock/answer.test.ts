@@ -103,7 +103,7 @@ describe("answerQuestion — grounding", () => {
 
   it("folds in the reader's own declared conditions on a general answer, without inventing one", () => {
     const withCondition = answerQuestion("is running safe during pregnancy", [record()], [
-      "Pregnancy — 24 weeks",
+      "Pregnancy, 24 weeks",
     ]);
     const without = answerQuestion("is running safe during pregnancy", [record()], []);
     expect(withCondition.paragraphs.join(" ")).toMatch(/health profile/i);

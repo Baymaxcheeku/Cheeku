@@ -93,7 +93,7 @@ function entityMatches(entity: RecordEntity, terms: Set<string>): boolean {
 
 function formatValue(entity: RecordEntity): string {
   if (entity.value !== null) return `${entity.value}${entity.unit ? ` ${entity.unit}` : ""}`;
-  return entity.valueText ?? "—";
+  return entity.valueText ?? "-";
 }
 
 function shortDate(iso: string | null): string {
@@ -150,10 +150,10 @@ function overviewAnswer(records: readonly GroundingRecord[]): MockAnswer {
     const outside = record.entities.filter((e) => e.flag && e.flag !== "normal").length;
     const note =
       record.entities.length === 0
-        ? " — no measured values were extracted"
+        ? ", with no measured values extracted"
         : outside > 0
-          ? ` — ${outside} value${outside === 1 ? "" : "s"} the report marks outside its printed range`
-          : " — every measured value is inside its printed range";
+          ? `, with ${outside} value${outside === 1 ? "" : "s"} the report marks outside its printed range`
+          : ", and every measured value is inside its printed range";
     paragraphs.push(`${record.title} (${shortDate(record.eventDate)})${where}${note}.`);
   }
 
@@ -258,9 +258,9 @@ export function answerQuestion(
     const range = entity.refRange ? `, against a printed range of ${entity.refRange}` : "";
     const flag =
       entity.flag && entity.flag !== "normal"
-        ? " — the report marks this outside that range"
+        ? ". The report marks this outside that range"
         : entity.flag === "normal"
-          ? " — the report marks this within range"
+          ? ". The report marks this within range"
           : "";
     paragraphs.push(`${entity.name}: ${formatValue(entity)}${range}${flag}.`);
   }
@@ -290,7 +290,7 @@ export function answerQuestion(
   }
 
   paragraphs.push(
-    "I read what your documents say — I do not interpret results or suggest treatment. Your doctor can tell you what these numbers mean for you.",
+    "I read what your documents say. I do not interpret results or suggest treatment. Your doctor can tell you what these numbers mean for you.",
   );
 
   return {

@@ -1,6 +1,7 @@
 import { Check, Globe } from "lucide-react";
 
 import { SettingsHeader } from "@/components/app/settings-header";
+import { PopIn, PressRow } from "@/components/ui/motion";
 
 export const dynamic = "force-static";
 
@@ -41,7 +42,8 @@ export default function LanguagePage() {
         <h2 className="text-[13px] font-semibold uppercase tracking-wide text-ink-300">
           Available now
         </h2>
-        <div className="mt-2 flex items-center gap-3 rounded-card border-2 border-brand-500 bg-brand-50 p-3.5">
+        <ul className="mt-2">
+        <PopIn index={0} className="flex items-center gap-3 rounded-card border-2 border-brand-500 bg-brand-50 p-3.5">
           <span className="grid h-9 w-9 shrink-0 place-items-center rounded-pill bg-surface text-[12px] font-bold text-brand-600">
             EN
           </span>
@@ -52,7 +54,8 @@ export default function LanguagePage() {
           <span className="grid h-6 w-6 shrink-0 place-items-center rounded-pill bg-brand-600 text-surface">
             <Check size={14} aria-hidden />
           </span>
-        </div>
+        </PopIn>
+        </ul>
       </section>
 
       <section className="mt-5 px-5">
@@ -61,7 +64,7 @@ export default function LanguagePage() {
         </h2>
         <ul className="mt-2 overflow-hidden rounded-card bg-surface shadow-e1">
           {COMING_SOON.map(([native, name], i) => (
-            <li key={name} className={i > 0 ? "border-t border-line" : undefined}>
+            <PressRow key={name} index={i} className={i > 0 ? "border-t border-line" : undefined}>
               <div className="flex items-center gap-3 p-3 opacity-70">
                 <span className="grid h-9 w-9 shrink-0 place-items-center rounded-pill bg-brand-50 text-[13px] font-semibold text-brand-600">
                   {native.charAt(0)}
@@ -74,7 +77,7 @@ export default function LanguagePage() {
                   Coming soon
                 </span>
               </div>
-            </li>
+            </PressRow>
           ))}
         </ul>
       </section>

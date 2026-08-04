@@ -39,7 +39,7 @@ describe("general-knowledge topics — the product rules", () => {
       assertSafe(plain.paragraphs.join(" "));
 
       const personalised = answerFromKnowledge(topic, [
-        "Pregnancy — 24 weeks",
+        "Pregnancy, 24 weeks",
         "Type 2 diabetes",
         "Hypertension",
       ]);
@@ -65,6 +65,6 @@ describe("general-knowledge topics — the product rules", () => {
     const topic = KNOWLEDGE_TOPICS.find((t) => t.id === "exercise-pregnancy");
     if (!topic) throw new Error("expected exercise-pregnancy topic to exist");
     expect(topic.personalize?.(["Seasonal allergy"])).toBeNull();
-    expect(topic.personalize?.(["Pregnancy — 24 weeks"])).toMatch(/health profile/i);
+    expect(topic.personalize?.(["Pregnancy, 24 weeks"])).toMatch(/health profile/i);
   });
 });

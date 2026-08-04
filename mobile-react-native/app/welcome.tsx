@@ -15,7 +15,7 @@ import {
 import { CastAvatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { MascotBust } from "@/components/illustrations/sprout";
-import { Drift, PopIn, PressRow, PulseRing, Settle, StaggerItem } from "@/components/ui/motion";
+import { Drift, PopIn, PressRow, Settle, StaggerItem } from "@/components/ui/motion";
 import { PANELS } from "@/lib/onboarding/panels";
 import { JOURNEYS, type JourneyId } from "@/lib/onboarding/journeys";
 import { castFaces } from "@/lib/profiles/avatar";

@@ -85,7 +85,7 @@ export const SEED_PROFILES: readonly SeedProfile[] = [
         doctor: "Dr. R. Kulkarni",
         confidence: 0.94,
         rawText:
-          "COMPREHENSIVE HEALTH CHECK — Haemoglobin 14.8 g/dL (13.0-17.0). " +
+          "COMPREHENSIVE HEALTH CHECK. Haemoglobin 14.8 g/dL (13.0-17.0). " +
           "Total Cholesterol 213 mg/dL (<200). LDL 138 mg/dL (<100). " +
           "HDL 46 mg/dL (>40). Fasting glucose 92 mg/dL (70-100). " +
           "TSH 2.1 uIU/mL (0.4-4.0). Vitamin D 22 ng/mL (30-100).",
@@ -167,7 +167,7 @@ export const SEED_PROFILES: readonly SeedProfile[] = [
     relationship: "spouse",
     avatarRing: "brand-400",
     isPrimary: false,
-    conditions: ["PCOS", "Pregnancy — 24 weeks"],
+    conditions: ["PCOS", "Pregnancy, 24 weeks"],
     medications: [
       { name: "Folic acid", dose: "5 mg", frequency: "once daily" },
       { name: "Iron + folic acid", dose: "100 mg", frequency: "once daily" },
@@ -184,7 +184,7 @@ export const SEED_PROFILES: readonly SeedProfile[] = [
         doctor: "Dr. S. Menon",
         confidence: 0.91,
         rawText:
-          "LEVEL II ULTRASOUND (ANOMALY SCAN) — Single live intrauterine gestation. " +
+          "LEVEL II ULTRASOUND (ANOMALY SCAN). Single live intrauterine gestation. " +
           "Gestational age 20 weeks 2 days by biometry. Cardiac activity present, FHR 148 bpm. " +
           "No gross structural anomaly detected. Placenta anterior, upper segment, grade I. " +
           "Liquor adequate (AFI 14.2 cm). EFW 340 g.",
@@ -221,7 +221,7 @@ export const SEED_PROFILES: readonly SeedProfile[] = [
         doctor: "Dr. S. Menon",
         confidence: 0.88,
         rawText:
-          "COMPLETE BLOOD COUNT — Haemoglobin 10.4 g/dL (12.0-15.0). " +
+          "COMPLETE BLOOD COUNT. Haemoglobin 10.4 g/dL (12.0-15.0). " +
           "RBC 3.9 million/uL. WBC 8,200 /uL (4,000-11,000). " +
           "Platelets 2.4 lakh/uL (1.5-4.1). MCV 78 fL (80-100).",
         entities: [
@@ -305,7 +305,7 @@ export const SEED_PROFILES: readonly SeedProfile[] = [
         eventDate: "2026-06-12",
         facility: "Rainbow Children's Hospital",
         confidence: 0.96,
-        rawText: "Level II Ultrasound (Anomaly Scan) — Rs. 3,200. GST included. Receipt 2026/06/4471.",
+        rawText: "Level II Ultrasound (Anomaly Scan), Rs. 3,200. GST included. Receipt 2026/06/4471.",
         entities: [],
       },
     ],
@@ -349,7 +349,7 @@ export const SEED_PROFILES: readonly SeedProfile[] = [
         docType: "lab_report",
         status: "filed",
         mimeType: "application/pdf",
-        title: "HbA1c — December 2024",
+        title: "HbA1c: December 2024",
         eventDate: "2024-12-15",
         facility: "Lucid Medical Diagnostics",
         doctor: "Dr. P. Reddy",
@@ -374,7 +374,7 @@ export const SEED_PROFILES: readonly SeedProfile[] = [
         docType: "lab_report",
         status: "filed",
         mimeType: "application/pdf",
-        title: "HbA1c — September 2025",
+        title: "HbA1c: September 2025",
         eventDate: "2025-09-08",
         facility: "Lucid Medical Diagnostics",
         doctor: "Dr. P. Reddy",
@@ -412,7 +412,7 @@ export const SEED_PROFILES: readonly SeedProfile[] = [
         docType: "lab_report",
         status: "filed",
         mimeType: "application/pdf",
-        title: "HbA1c — June 2026",
+        title: "HbA1c: June 2026",
         eventDate: "2026-06-30",
         facility: "Lucid Medical Diagnostics",
         doctor: "Dr. P. Reddy",

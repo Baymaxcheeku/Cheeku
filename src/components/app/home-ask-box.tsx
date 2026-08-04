@@ -72,7 +72,7 @@ export function HomeAskBox() {
           <Stethoscope size={17} className="text-brand-500" aria-hidden />
         </h2>
         <p className="mt-1.5 text-[13px] leading-snug text-ink-700">
-          Hi, I&apos;m Baymax — your personalised healthcare companion.
+          Hi, I&apos;m Baymax, your personalised healthcare companion.
         </p>
       </div>
 

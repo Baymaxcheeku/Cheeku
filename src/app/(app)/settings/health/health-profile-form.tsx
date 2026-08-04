@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { Info } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { Meter, SaveFlash } from "@/components/ui/motion";
 import { Field } from "@/components/ui/field";
 import { updateHealthProfile, type SettingsResult } from "@/lib/settings/actions";
 import type { ProfileDetail } from "@/lib/settings/queries";
@@ -33,9 +34,39 @@ export function HealthProfileForm({ profile }: { profile: ProfileDetail }) {
 
   const errors = result?.fieldErrors;
 
+  /*
+   * Completeness, counted from what is actually stored.
+   *
+   * Not a vanity score: every one of these five fields changes what Ask Baymax
+   * can say. A reader who has recorded a pregnancy or a peanut allergy gets a
+   * different, safer answer than one who has not, so showing the gap is the
+   * most useful thing this screen can do. Counted from `profile`, the saved
+   * record, rather than from live input, so it only moves once a save lands.
+   */
+  const filled = [
+    profile.heightCm,
+    profile.weightKg,
+    profile.bloodGroup,
+    profile.conditions.length > 0 ? "y" : null,
+    profile.medications.length > 0 ? "y" : null,
+  ].filter(Boolean).length;
+
   return (
     <form onSubmit={submit} className="mt-4 flex flex-1 flex-col px-5">
       <input type="hidden" name="profileId" value={profile.id} />
+
+      <div className="mb-3">
+        <Meter
+          value={filled}
+          total={5}
+          label="Health profile"
+          hint={
+            filled === 5
+              ? "All set. Ask Baymax can factor every one of these into an answer."
+              : "The more of this Baymax knows, the more careful its answers can be."
+          }
+        />
+      </div>
 
       <p className="flex items-start gap-2 rounded-card bg-brand-50 px-4 py-3 text-[12px] leading-snug text-ink-600">
         <Info size={15} className="mt-px shrink-0 text-brand-500" aria-hidden />
@@ -71,7 +102,7 @@ export function HealthProfileForm({ profile }: { profile: ProfileDetail }) {
             defaultValue={profile.bloodGroup ?? ""}
             className="h-13 w-full rounded-tile border border-line bg-surface px-3 text-[15px] text-ink-900 outline-none focus:border-brand-500"
           >
-            <option value="">—</option>
+            <option value="">Not specified</option>
             {BLOOD_GROUPS.map((g) => (
               <option key={g} value={g}>
                 {g}
@@ -124,15 +155,16 @@ export function HealthProfileForm({ profile }: { profile: ProfileDetail }) {
           {result.message}
         </p>
       ) : null}
-      {saved ? (
-        <p role="status" className="mt-3 text-[13px] font-medium text-safe-text">
-          Saved.
-        </p>
-      ) : null}
+      {/* No "Saved." line: the button itself now confirms, and two
+          confirmations of one save is one too many. `role=status` moves onto
+          the button so screen readers still hear it. */}
 
-      <Button type="submit" disabled={pending} className="sticky bottom-4 mt-6 w-full">
-        {pending ? "Saving…" : "Save changes"}
-      </Button>
+      <SaveFlash show={saved}>
+        <span role="status" className="sr-only">{saved ? "Saved" : ""}</span>
+        <Button type="submit" disabled={pending} className="sticky bottom-4 mt-6 w-full">
+          {pending ? "Saving…" : saved ? "Saved" : "Save changes"}
+        </Button>
+      </SaveFlash>
     </form>
   );
 }

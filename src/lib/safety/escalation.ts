@@ -56,7 +56,7 @@ export type EmergencyContact = {
 export const MEDICAL_CONTACTS: readonly EmergencyContact[] = [
   {
     label: "Emergency services",
-    detail: "Police, fire and medical — one number",
+    detail: "Police, fire and medical. One number",
     number: "112",
     primary: true,
   },

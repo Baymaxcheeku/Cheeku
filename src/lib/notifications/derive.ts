@@ -24,8 +24,8 @@ export function deriveNotifications(records: readonly RecordSummary[]): HomeNoti
       title: record.title,
       body:
         record.severity === "high_risk"
-          ? "Flagged as high priority — worth a look"
-          : "Outside the printed range — worth a look",
+          ? "Flagged as high priority, worth a look"
+          : "Outside the printed range, worth a look",
       href: `/records/${record.id}`,
       time: formatEventDate(record.eventDate),
     }));

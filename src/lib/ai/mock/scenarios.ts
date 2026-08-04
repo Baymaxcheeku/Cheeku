@@ -97,7 +97,7 @@ export const PRODUCT_SCENARIOS: ProductScenario[] = [
       has(conditions, "eczema", "sensitive skin", "dermatitis")
         ? {
             verdict: "caution",
-            note: "Your health profile notes a skin condition — patch test on a small area first, since even mild formulas can vary person to person.",
+            note: "Your health profile notes a skin condition, so patch test on a small area first, since even mild formulas can vary person to person.",
           }
         : null,
   },
@@ -119,7 +119,7 @@ export const PRODUCT_SCENARIOS: ProductScenario[] = [
       { key: "allergen", label: "Peanut allergy", status: "avoid", note: "Contains peanuts directly." },
     ],
     ingredients: [
-      { name: "Peanuts", status: "avoid", note: "Common allergen — present as a main ingredient" },
+      { name: "Peanuts", status: "avoid", note: "Common allergen, present as a main ingredient" },
       { name: "Whey protein isolate", status: "safe", note: "Dairy-derived protein" },
       { name: "Dates", status: "safe", note: "Whole-food sweetener" },
       { name: "Oats", status: "safe", note: "Whole grain, may carry cross-contact traces" },
@@ -129,7 +129,7 @@ export const PRODUCT_SCENARIOS: ProductScenario[] = [
       has(conditions, "peanut allerg", "nut allerg")
         ? {
             verdict: "avoid",
-            note: "Your health profile lists a peanut allergy, and this product contains peanuts directly — worth skipping this one specifically.",
+            note: "Your health profile lists a peanut allergy, and this product contains peanuts directly, so worth skipping this one specifically.",
           }
         : null,
   },
@@ -192,7 +192,7 @@ export const PRODUCT_SCENARIOS: ProductScenario[] = [
       has(conditions, "pregnan")
         ? {
             verdict: "caution",
-            note: "Your health profile notes a pregnancy — worth checking with your doctor before this one specifically, since it contains valerian root.",
+            note: "Your health profile notes a pregnancy. Worth checking with your doctor before this one specifically, since it contains valerian root.",
           }
         : null,
   },
@@ -206,7 +206,7 @@ export const PRODUCT_SCENARIOS: ProductScenario[] = [
       "#C00A1C",
       '<rect x="36" y="18" width="24" height="58" rx="6" fill="#fff"/><rect x="36" y="18" width="24" height="16" rx="6" fill="#ea2a36"/><rect x="42" y="46" width="12" height="4" rx="2" fill="#f7c2c8"/>',
     ),
-    sampleQuestion: "I train in the mornings — is this energy drink okay before a workout?",
+    sampleQuestion: "I train in the mornings. Is this energy drink okay before a workout?",
     verdict: "caution",
     verdictNote: "High-caffeine drinks are usually fine for most adults in moderation, with caution advised during pregnancy or with a heart condition.",
     personas: [
@@ -214,7 +214,7 @@ export const PRODUCT_SCENARIOS: ProductScenario[] = [
       { key: "general", label: "General adult use", status: "caution", note: "Moderation, not daily use." },
     ],
     ingredients: [
-      { name: "Caffeine", status: "caution", note: "A high dose per can — roughly a strong coffee's worth" },
+      { name: "Caffeine", status: "caution", note: "A high dose per can, roughly a strong coffee's worth" },
       { name: "Taurine", status: "safe", note: "Amino acid, commonly used" },
       { name: "B-vitamins", status: "safe", note: "Water-soluble, excess is excreted" },
       { name: "Citric acid", status: "safe", note: "Flavouring" },
@@ -223,12 +223,12 @@ export const PRODUCT_SCENARIOS: ProductScenario[] = [
       has(conditions, "pregnan")
         ? {
             verdict: "avoid",
-            note: "Your health profile notes a pregnancy — caffeine at this level is usually advised against, so this one is worth skipping.",
+            note: "Your health profile notes a pregnancy, and caffeine at this level is usually advised against, so this one is worth skipping.",
           }
         : has(conditions, "hypertension", "blood pressure", "heart")
           ? {
               verdict: "avoid",
-              note: "Your health profile lists a blood pressure or heart-related condition — high-caffeine drinks like this are usually the ones doctors ask about first, so worth checking before use.",
+              note: "Your health profile lists a blood pressure or heart-related condition, and high-caffeine drinks like this are usually the ones doctors ask about first, so worth checking before use.",
             }
           : null,
   },
@@ -273,6 +273,6 @@ export function assessProduct(scenarioId: string, conditions: readonly string[])
     ingredients: scenario.ingredients,
     personalNote: personal?.note ?? null,
     disclaimer:
-      "General product information, not a medical evaluation of you personally. Always patch test new skincare, and check labels yourself — formulas change.",
+      "General product information, not a medical evaluation of you personally. Always patch test new skincare, and check labels yourself, since formulas change.",
   };
 }

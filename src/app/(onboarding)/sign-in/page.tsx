@@ -170,7 +170,7 @@ export default function SignInPage() {
               <button
                 type="button"
                 disabled
-                title="Coming soon — use email and password for now"
+                title="Coming soon. Use email and password for now"
                 className="flex h-11 w-full items-center justify-center gap-1.5 rounded-pill border border-line bg-surface text-[12px] font-medium text-ink-500 disabled:opacity-55"
               >
                 <Icon size={14} aria-hidden />

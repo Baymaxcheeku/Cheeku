@@ -450,7 +450,7 @@ function StepThree({
           <DidRow
             icon={Bell}
             title="Notify emergency contacts"
-            body="Not available yet — please call someone directly"
+            body="Not available yet. Please call someone directly"
           />
         </ul>
       </section>

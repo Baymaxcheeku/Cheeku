@@ -20,7 +20,7 @@ const FAQS = [
   },
   {
     q: "How do I delete my account?",
-    a: "Open Profile → Security & privacy → Manage your data, or scroll to the bottom of your Profile screen. Deleting removes every record, file and message — it cannot be undone.",
+    a: "Open Profile → Security & privacy → Manage your data, or scroll to the bottom of your Profile screen. Deleting removes every record, file and message. It cannot be undone.",
   },
 ] as const;
 

@@ -39,7 +39,7 @@ function assertDevOnly() {
   if (!isDevAuthActive()) {
     throw new Error(
       "The development session stand-in was reached outside development. " +
-        "This would accept an unverified identity — refusing.",
+        "This would accept an unverified identity. Refusing.",
     );
   }
 }

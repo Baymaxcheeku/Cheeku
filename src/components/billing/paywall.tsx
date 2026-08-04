@@ -416,7 +416,7 @@ function Checkout({
       <p className="mt-3 flex items-start gap-2 rounded-card bg-safe-bg px-3.5 py-3 text-[12px] leading-snug text-safe-text">
         <ShieldCheck size={15} className="mt-px shrink-0" aria-hidden />
         {isDaily
-          ? `${formatPrice(plan.priceInPaise)} charged once. Nothing renews — the pass simply ends after ${DAILY_PASS_HOURS} hours.`
+          ? `${formatPrice(plan.priceInPaise)} charged once. Nothing renews. The pass simply ends after ${DAILY_PASS_HOURS} hours.`
           : `${formatPrice(plan.priceInPaise)} will be charged every month on the date you subscribe.`}
       </p>
 
@@ -601,7 +601,7 @@ function Success({
 
       {pendingQuestion ? (
         <p className="mt-2 text-center text-[11px] text-ink-500">
-          Your question is still here — we&apos;ll send it now.
+          Your question is still here. We&apos;ll send it now.
         </p>
       ) : null}
     </div>

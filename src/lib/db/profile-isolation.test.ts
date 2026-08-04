@@ -21,7 +21,7 @@ const configured = Boolean(url && anonKey && serviceKey && !url.includes("placeh
 
 if (!configured) {
   console.warn(
-    "\n[profile-isolation] SKIPPED — no Supabase project configured.\n" +
+    "\n[profile-isolation] SKIPPED. No Supabase project configured.\n" +
       "  This test is the only runtime proof that RLS isolates profiles.\n" +
       "  Set NEXT_PUBLIC_SUPABASE_URL / _ANON_KEY / SUPABASE_SERVICE_ROLE_KEY and rerun.\n",
   );

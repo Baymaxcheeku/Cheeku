@@ -58,7 +58,7 @@ export const supportTicketSchema = z.object({
   body: z
     .string()
     .trim()
-    .min(20, "Please add a little more detail — 20 characters at least")
+    .min(20, "Please add a little more detail: 20 characters at least")
     .max(4000, "That's longer than we can accept"),
 });
 export type SupportTicketInput = z.infer<typeof supportTicketSchema>;

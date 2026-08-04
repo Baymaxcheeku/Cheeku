@@ -125,6 +125,6 @@ describe("formatValue", () => {
   });
 
   it("shows a dash rather than 'null' when the document had neither", () => {
-    expect(formatValue(entity({ value: null, valueText: null }))).toBe("—");
+    expect(formatValue(entity({ value: null, valueText: null }))).toBe("-");
   });
 });

@@ -486,7 +486,7 @@ function LimitCard({
         </h2>
         <p className="mt-1 text-[12.5px] leading-snug text-ink-500">
           Free users get {FREE_CHAT_LIMIT} chats a month. Pick a plan to keep the conversation going
-          — including a ₹29 day pass.
+          including a ₹29 day pass.
         </p>
       </div>
 

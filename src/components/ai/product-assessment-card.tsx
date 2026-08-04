@@ -106,7 +106,7 @@ export function ProductAssessmentCard({ assessment }: { assessment: ProductAsses
 
       {assessment.personalNote ? (
         <p className="flex items-start gap-2 rounded-tile bg-brand-50 px-3 py-2.5 text-[11.5px] leading-snug text-ink-700">
-          <span className="mt-0.5 shrink-0 font-semibold text-brand-700">For you —</span>
+          <span className="mt-0.5 shrink-0 font-semibold text-brand-700">For you:</span>
           {assessment.personalNote}
         </p>
       ) : null}

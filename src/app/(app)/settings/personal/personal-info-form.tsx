@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { Mail } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { Meter, SaveFlash } from "@/components/ui/motion";
 import { Field } from "@/components/ui/field";
 import { updatePersonalInfo, type SettingsResult } from "@/lib/settings/actions";
 import type { ProfileDetail } from "@/lib/settings/queries";
@@ -43,6 +44,9 @@ export function PersonalInfoForm({
 
   const errors = result?.fieldErrors;
 
+  // Counted from the saved record, so it moves on save rather than on keystroke.
+  const filled = [profile.name, profile.dob, profile.sex].filter(Boolean).length;
+
   return (
     <form onSubmit={submit} className="mt-4 flex flex-1 flex-col px-5">
       <div className="flex items-center gap-3 rounded-card bg-surface p-4 shadow-e1">
@@ -65,6 +69,15 @@ export function PersonalInfoForm({
       ) : null}
 
       <input type="hidden" name="profileId" value={profile.id} />
+
+      <div className="mt-3">
+        <Meter
+          value={filled}
+          total={3}
+          label="Profile details"
+          hint="Age and sex let Baymax read a lab's reference range the way your lab intends it."
+        />
+      </div>
 
       <div className="mt-4 space-y-4">
         <Field
@@ -90,7 +103,7 @@ export function PersonalInfoForm({
             {SEXES.map(([value, label]) => (
               <label
                 key={value}
-                className="flex h-12 items-center gap-2 rounded-tile border border-line bg-surface px-3 text-[13px] text-ink-900 has-[:checked]:border-brand-500 has-[:checked]:bg-brand-50"
+                className="tappable flex h-12 items-center gap-2 rounded-tile border border-line bg-surface px-3 text-[13px] text-ink-900 active:scale-[0.97] has-[:checked]:border-brand-500 has-[:checked]:bg-brand-50"
               >
                 <input
                   type="radio"
@@ -121,15 +134,16 @@ export function PersonalInfoForm({
           {result.message}
         </p>
       ) : null}
-      {saved ? (
-        <p role="status" className="mt-3 text-[13px] font-medium text-safe-text">
-          Saved.
-        </p>
-      ) : null}
+      {/* No "Saved." line: the button itself now confirms, and two
+          confirmations of one save is one too many. `role=status` moves onto
+          the button so screen readers still hear it. */}
 
-      <Button type="submit" disabled={pending} className="sticky bottom-4 mt-6 w-full">
-        {pending ? "Saving…" : "Save changes"}
-      </Button>
+      <SaveFlash show={saved}>
+        <span role="status" className="sr-only">{saved ? "Saved" : ""}</span>
+        <Button type="submit" disabled={pending} className="sticky bottom-4 mt-6 w-full">
+          {pending ? "Saving…" : saved ? "Saved" : "Save changes"}
+        </Button>
+      </SaveFlash>
     </form>
   );
 }

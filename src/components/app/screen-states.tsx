@@ -28,7 +28,7 @@ import { MascotBust } from "@/components/illustrations";
 export function ScreenError({
   reset,
   title = "Something went wrong",
-  body = "That didn't load. Your records are safe — this is a problem on our side, not with your data.",
+  body = "That didn't load. Your records are safe. This is a problem on our side, not with your data.",
 }: {
   reset?: () => void;
   title?: string;

@@ -69,7 +69,7 @@ export function buildInsight(record: RecordDetail): Insight {
     headline: `${flagged.length} value${flagged.length === 1 ? "" : "s"} outside the printed range`,
     body:
       `${listNames(flagged)} ${flagged.length === 1 ? "is" : "are"} outside the reference range on this document. ` +
-      `Baymax does not interpret results — bring this to your doctor to discuss what it means.`,
+      `Baymax does not interpret results. Bring this to your doctor to discuss what it means.`,
     flagged: true,
   };
 }
@@ -79,7 +79,7 @@ export function formatValue(entity: RecordEntity): string {
   if (entity.value !== null) {
     return entity.unit ? `${entity.value} ${entity.unit}` : String(entity.value);
   }
-  return entity.valueText ?? "—";
+  return entity.valueText ?? "-";
 }
 
 /** The word shown in the pill beside a value. */

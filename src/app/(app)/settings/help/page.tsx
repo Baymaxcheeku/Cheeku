@@ -2,6 +2,7 @@ import Link from "next/link";
 import { BookOpen, CircleHelp, Clock, Mail, MessageCircle, ShieldCheck } from "lucide-react";
 
 import { SettingsHeader } from "@/components/app/settings-header";
+import { PressRow, TapToWiggle } from "@/components/ui/motion";
 import { MascotBust } from "@/components/illustrations";
 import { SUPPORT_EMAIL, SUPPORT_RESPONSE } from "@/lib/app-meta";
 import { Faqs } from "./faqs";
@@ -24,7 +25,9 @@ export default function HelpPage() {
       <SettingsHeader title="Help & support" eyebrow="We're here to help" icon={CircleHelp} />
 
       <section className="relative mx-5 mt-4 overflow-hidden rounded-card bg-gradient-to-br from-brand-50 via-surface to-brand-50 p-4 ring-1 ring-brand-100">
-        <MascotBust className="pointer-events-none absolute -right-3 -top-3 w-[108px]" />
+        <TapToWiggle className="absolute -right-3 -top-3 w-[108px]">
+          <MascotBust className="w-full" />
+        </TapToWiggle>
         <div className="relative pr-[32%]">
           <h2 className="text-[19px] font-bold leading-tight text-ink-900">
             How can we <span className="text-brand-600">help you</span> today?
@@ -45,7 +48,7 @@ export default function HelpPage() {
           Other ways we can help
         </h2>
         <ul className="mt-2 overflow-hidden rounded-card bg-surface shadow-e1">
-          <li className="border-b border-line">
+          <PressRow index={0} className="border-b border-line">
             <a
               href={`mailto:${SUPPORT_EMAIL}`}
               className="tappable flex w-full items-center gap-3 p-3.5 text-left active:scale-[0.99]"
@@ -58,8 +61,8 @@ export default function HelpPage() {
                 <span className="block truncate text-[12px] text-ink-500">{SUPPORT_EMAIL}</span>
               </span>
             </a>
-          </li>
-          <li className="border-b border-line">
+          </PressRow>
+          <PressRow index={1} className="border-b border-line">
             <Link
               href="/settings/about"
               className="tappable flex w-full items-center gap-3 p-3.5 text-left active:scale-[0.99]"
@@ -76,8 +79,8 @@ export default function HelpPage() {
                 </span>
               </span>
             </Link>
-          </li>
-          <li>
+          </PressRow>
+          <PressRow index={2}>
             <Link
               href="/ask"
               className="tappable flex w-full items-center gap-3 p-3.5 text-left active:scale-[0.99]"
@@ -92,7 +95,7 @@ export default function HelpPage() {
                 </span>
               </span>
             </Link>
-          </li>
+          </PressRow>
         </ul>
       </section>
 
@@ -112,7 +115,7 @@ export default function HelpPage() {
       <p className="mx-5 mt-4 flex items-start gap-2 text-[11px] leading-snug text-ink-500">
         <ShieldCheck size={14} className="mt-px shrink-0 text-ink-300" aria-hidden />
         <span>
-          Support tickets never include your health records — only what you write. Thank you for
+          Support tickets never include your health records. Only what you write. Thank you for
           being part of Baymax.
         </span>
       </p>

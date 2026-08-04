@@ -13,7 +13,7 @@ export default function OnboardingError({ error, reset }: { error: Error; reset:
     <ScreenError
       reset={reset}
       title="Setup hit a snag"
-      body="That step didn't complete. Nothing has been saved incorrectly — try again."
+      body="That step didn't complete. Nothing has been saved incorrectly. Try again."
     />
   );
 }

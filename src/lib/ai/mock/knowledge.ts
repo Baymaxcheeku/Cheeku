@@ -40,16 +40,16 @@ export const KNOWLEDGE_TOPICS: KnowledgeTopic[] = [
     id: "exercise-pregnancy",
     keywords: ["exercise", "workout", "hiit", "running", "jog", "gym", "yoga"],
     paragraphs: [
-      "For most pregnancies, moderate exercise most days of the week is generally considered safe and is commonly recommended — brisk walking, swimming and prenatal yoga are frequently suggested starting points.",
+      "For most pregnancies, moderate exercise most days of the week is generally considered safe and is commonly recommended: brisk walking, swimming and prenatal yoga are frequently suggested starting points.",
       "High-intensity training, contact sports and anything with a real fall risk are usually approached with more caution, especially as pregnancy progresses.",
-      "Every pregnancy is different, so the right level of activity depends on things a general answer cannot see — how the pregnancy is progressing, and any conditions already being monitored. Your doctor is the one who can weigh those.",
+      "Every pregnancy is different, so the right level of activity depends on things a general answer cannot see: how the pregnancy is progressing, and any conditions already being monitored. Your doctor is the one who can weigh those.",
     ],
     personalize: (conditions) => {
       if (has(conditions, "pregnan")) {
-        return "Your health profile already notes a pregnancy — worth raising exercise intensity specifically at your next check-in, rather than assuming general guidance covers it.";
+        return "Your health profile already notes a pregnancy. Worth raising exercise intensity specifically at your next check-in, rather than assuming general guidance covers it.";
       }
       if (has(conditions, "hypertension", "blood pressure")) {
-        return "Your health profile lists a blood pressure condition — that's exactly the kind of thing that changes what's advisable here, so it's worth confirming with your doctor before increasing intensity.";
+        return "Your health profile lists a blood pressure condition, and that's exactly the kind of thing that changes what's advisable here, so it's worth confirming with your doctor before increasing intensity.";
       }
       return null;
     },
@@ -59,9 +59,9 @@ export const KNOWLEDGE_TOPICS: KnowledgeTopic[] = [
     id: "hemoglobin-thresholds",
     keywords: ["hemoglobin", "haemoglobin", "hb", "iron", "anemia", "anaemia"],
     paragraphs: [
-      "Labs commonly print a reference range for haemoglobin, and pregnancy has its own lower range than the general population — a value that would be unremarkable outside pregnancy is often flagged during it.",
+      "Labs commonly print a reference range for haemoglobin, and pregnancy has its own lower range than the general population, so a value that would be unremarkable outside pregnancy is often flagged during it.",
       "Fatigue alongside a lower reading is a common combination worth mentioning to whoever is monitoring the pregnancy, since it's one of several things they may want to look at together.",
-      "This is general information about how labs are read, not a reading of any specific report — if you have the actual report in Baymax, ask about it directly and I'll read the exact number and range that were printed.",
+      "This is general information about how labs are read, not a reading of any specific report. If you have the actual report in Baymax, ask about it directly and I'll read the exact number and range that were printed.",
     ],
     followUps: ["Upload the report", "What foods are iron-rich?"],
   },
@@ -69,7 +69,7 @@ export const KNOWLEDGE_TOPICS: KnowledgeTopic[] = [
     id: "vitamin-d",
     keywords: ["vitamin d", "sunlight", "sun exposure"],
     paragraphs: [
-      "Vitamin D is made in the skin from sunlight and is also found in a small number of foods — fatty fish, egg yolks and fortified milk among them.",
+      "Vitamin D is made in the skin from sunlight and is also found in a small number of foods: fatty fish, egg yolks and fortified milk among them.",
       "Labs generally consider a range of values sufficient, with lower readings flagged for follow-up. What to do about a specific reading is something a doctor decides after seeing the actual report, not something a general answer can responsibly cover.",
     ],
     followUps: ["Upload my report", "What foods have vitamin D?"],
@@ -78,12 +78,12 @@ export const KNOWLEDGE_TOPICS: KnowledgeTopic[] = [
     id: "herbal-sleep",
     keywords: ["herbal tea", "chamomile", "valerian", "sleep aid", "melatonin"],
     paragraphs: [
-      "Herbal ingredients marketed for sleep — chamomile, valerian root and similar — are generally considered mild for most adults, though quality and concentration vary a lot between products.",
-      "Pregnancy, breastfeeding and any existing medication are the situations where 'herbal' stops meaning 'automatically fine' — several common sleep-support herbs are usually advised against or approached with caution in those cases. Your doctor or pharmacist is the one who can say what's fine for you specifically.",
+      "Herbal ingredients marketed for sleep, such as chamomile and valerian root, are generally considered mild for most adults, though quality and concentration vary a lot between products.",
+      "Pregnancy, breastfeeding and any existing medication are the situations where 'herbal' stops meaning 'automatically fine'. Several common sleep-support herbs are usually advised against or approached with caution in those cases. Your doctor or pharmacist is the one who can say what's fine for you specifically.",
     ],
     personalize: (conditions) => {
       if (has(conditions, "pregnan")) {
-        return "Your health profile notes a pregnancy — worth checking with your doctor or pharmacist before trying an herbal sleep product, rather than assuming 'herbal' means it's automatically fine.";
+        return "Your health profile notes a pregnancy. Worth checking with your doctor or pharmacist before trying an herbal sleep product, rather than assuming 'herbal' means it's automatically fine.";
       }
       return null;
     },
