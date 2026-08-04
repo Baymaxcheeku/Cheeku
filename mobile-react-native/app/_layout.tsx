@@ -12,9 +12,11 @@ import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
+import { Platform } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { SafeAreaProvider } from "react-native-safe-area-context";
+import { SafeAreaProvider, type Metrics } from "react-native-safe-area-context";
 
+import { DeviceFrame } from "@/components/ui/device-frame";
 import { surface } from "@/theme/tokens";
 
 /*
@@ -30,6 +32,23 @@ import { surface } from "@/theme/tokens";
  * ever sees is the cheapest possible way to look unfinished.
  */
 void SplashScreen.preventAutoHideAsync();
+
+/*
+ * iPhone 16 metrics, injected on web only.
+ *
+ * Inside the preview frame the browser reports zero insets, so every screen
+ * that reserves room for the status bar or the home indicator renders flush to
+ * the edge and looks wrong in exactly the places that matter. Feeding the real
+ * device numbers makes the preview trustworthy. On device this is undefined and
+ * the provider measures the hardware as usual.
+ */
+const WEB_PREVIEW_METRICS: Metrics | undefined =
+  Platform.OS === "web"
+    ? {
+        frame: { x: 0, y: 0, width: 393, height: 852 },
+        insets: { top: 59, left: 0, right: 0, bottom: 34 },
+      }
+    : undefined;
 
 export default function RootLayout() {
   const [client] = useState(() => new QueryClient());
@@ -49,9 +68,11 @@ export default function RootLayout() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <SafeAreaProvider>
+      <SafeAreaProvider initialMetrics={WEB_PREVIEW_METRICS}>
         <QueryClientProvider client={client}>
           <StatusBar style="dark" />
+          {/* Renders nothing but its children on device. */}
+          <DeviceFrame>
           {/*
            * `headerShown: false` throughout: every screen draws its own header
            * (the settings screens share one, onboarding has a step rail). A
@@ -64,6 +85,7 @@ export default function RootLayout() {
               animation: "slide_from_right",
             }}
           />
+          </DeviceFrame>
         </QueryClientProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>

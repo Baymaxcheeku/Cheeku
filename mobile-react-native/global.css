@@ -31,3 +31,18 @@
     font-family: Inter_700Bold;
   }
 }
+
+/*
+ * Full-height web root.
+ *
+ * React Native Web mounts into a div that is only as tall as its content, so
+ * the preview frame had nothing to centre inside and sat in the top-left with
+ * white below it. Native is unaffected: this file is only ever parsed by the
+ * web bundle.
+ */
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
