@@ -1,0 +1,53 @@
+{
+  "expo": {
+    "name": "Baymax",
+    "slug": "baymax",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "baymax",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#fafafe"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.baymax.app",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Baymax uses the camera so you can photograph a report, prescription or scan and file it against a family member.",
+        "NSPhotoLibraryUsageDescription": "Baymax needs access to your photos so you can upload medical documents you have already saved.",
+        "NSFaceIDUsageDescription": "Baymax can lock your family's medical records behind Face ID."
+      }
+    },
+    "android": {
+      "package": "com.baymax.app",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#4a2ade"
+      },
+      "edgeToEdgeEnabled": true,
+      "permissions": ["CAMERA", "USE_BIOMETRIC", "USE_FINGERPRINT"]
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Baymax needs access to your photos so you can upload medical documents you have already saved.",
+          "cameraPermission": "Baymax uses the camera so you can photograph a report, prescription or scan."
+        }
+      ],
+      [
+        "expo-local-authentication",
+        { "faceIDPermission": "Baymax can lock your family's medical records behind Face ID." }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
