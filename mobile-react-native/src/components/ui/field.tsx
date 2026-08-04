@@ -103,6 +103,7 @@ export function ChipSelect<T extends string>({
               key={option}
               accessibilityRole="radio"
               accessibilityState={{ selected: on }}
+              aria-checked={on}
               accessibilityLabel={optionLabel}
               // Tapping the chosen chip clears it. Every one of these fields is
               // optional, so a reader who taps by accident must have a way back

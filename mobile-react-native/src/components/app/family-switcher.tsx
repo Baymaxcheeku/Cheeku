@@ -88,6 +88,7 @@ export function FamilySwitcher({
               key={profile.id}
               accessibilityRole="radio"
               accessibilityState={{ selected: true }}
+              aria-checked
               className="flex-row items-center gap-2.5 rounded-card bg-brand-50 py-1.5 pl-1.5 pr-4"
             >
               <Face profile={profile} index={i} size={48} />
@@ -112,6 +113,7 @@ export function FamilySwitcher({
             key={profile.id}
             accessibilityRole="radio"
             accessibilityState={{ selected: false }}
+            aria-checked={false}
             accessibilityLabel={`Switch to ${profile.name}`}
             onPress={() => onSelect(profile.id)}
             className="items-center gap-1.5 px-1 py-1"

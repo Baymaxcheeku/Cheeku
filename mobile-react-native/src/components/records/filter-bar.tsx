@@ -252,6 +252,7 @@ function OptionSheet({
                 key={option.value || "none"}
                 accessibilityRole="radio"
                 accessibilityState={{ selected: on }}
+                aria-checked={on}
                 onPress={() => {
                   onSelect(option.value);
                   onClose();

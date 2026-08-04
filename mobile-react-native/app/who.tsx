@@ -98,6 +98,7 @@ export default function Who() {
                 key={option.value}
                 accessibilityRole="radio"
                 accessibilityState={{ selected }}
+                aria-checked={selected}
                 accessibilityLabel={`${option.title}. ${option.body}`}
                 onPress={() => setAudienceChoice(option.value)}
                 className="flex-row items-start gap-3.5 rounded-card p-3.5 pr-11"

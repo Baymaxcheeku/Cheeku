@@ -95,8 +95,30 @@ Screens: `/settings` and its seven sub-screens, paywall, export, delete
 1. **Plan-scoped profile access.** A family shares one `user_id`, so RLS cannot
    separate members. Every read path derives from `selectableProfiles()`.
    Locked members are preserved and shown as padlocks, never deleted.
-2. Export and delete must both work. Stores require in-app account deletion.
-3. Health profile completeness meter counts from the saved record, not live
+
+2. **Move the entitlement-gated WRITES behind an Edge Function.** Carried over
+   from Phase 2, and the one place the port lost a guarantee the web build had.
+
+   On web these were server actions, so the plan check ran somewhere the client
+   could not reach. Here the same checks run on the device:
+
+   - `lib/records/upload.ts` — the `selectableProfiles()` check before filing a
+     document against a member.
+   - `lib/billing/quota.ts` — `consumeChat`, absent entirely for now, needed by
+     Phase 3's chat.
+
+   What still holds without it: storage policies bind the object key's first
+   segment to `auth.uid()`, and RLS bounds every insert to the caller's own
+   account. So the exposure is **paywall evasion within one's own family**, not
+   cross-account access — a modified client could file records against a
+   profile its plan does not cover. Real, bounded, and not a privacy breach.
+
+   The fix is one Edge Function called with the user's own JWT that re-derives
+   the entitlement server-side. Phase 3 needs it for `consumeChat` regardless,
+   so the upload write should move behind the same function rather than growing
+   a second mechanism.
+3. Export and delete must both work. Stores require in-app account deletion.
+4. Health profile completeness meter counts from the saved record, not live
    input.
 
 ## Phase 5 — native capability (3 weeks)
