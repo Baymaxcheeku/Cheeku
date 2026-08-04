@@ -1,0 +1,276 @@
+import { Check, ChevronDown, SlidersHorizontal, X } from "lucide-react-native";
+import { useState } from "react";
+import { Modal, Pressable, ScrollView, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+import { DOC_TYPE_LABEL, type DocType } from "@/lib/records/types";
+import { brand, ink, shadow, surface } from "@/theme/tokens";
+
+/*
+ * FILTER STATE LIVES IN THE SCREEN, not in a URL.
+ *
+ * On web it had to be in the URL so a filtered list survived the back button
+ * from a record detail — the single most common navigation here. Native gets
+ * that property for free: pushing a detail screen leaves this one mounted, so
+ * state survives the pop. Same guarantee, no query string.
+ */
+
+export type Filters = {
+  /** A profile id, "all", or undefined for "whoever is active on Home". */
+  profileId?: string;
+  docType?: DocType;
+  period?: string;
+  sort: "newest" | "oldest";
+};
+
+const DOC_TYPES: readonly DocType[] = [
+  "lab_report",
+  "prescription",
+  "discharge",
+  "scan",
+  "vaccination",
+  "bill",
+  "other",
+];
+
+const PERIODS = [
+  { value: "", label: "All time" },
+  { value: "30", label: "Last 30 days" },
+  { value: "90", label: "Last 3 months" },
+  { value: "365", label: "Last year" },
+] as const;
+
+const SORTS = [
+  { value: "newest", label: "Newest first" },
+  { value: "oldest", label: "Oldest first" },
+] as const;
+
+export function FilterBar({
+  profiles,
+  defaultProfileId,
+  allowAllMembers = true,
+  filters,
+  onChange,
+}: {
+  /** ONLY the members this plan can open — see `selectableProfiles`. */
+  profiles: readonly { id: string; name: string }[];
+  /** The member selected on Home; the list is scoped to them unless widened. */
+  defaultProfileId?: string;
+  /**
+   * Whether "All members" is offered. False on the one-seat plans, where a
+   * combined list would be a list of one person filed under a plural label.
+   */
+  allowAllMembers?: boolean;
+  filters: Filters;
+  onChange: (next: Filters) => void;
+}) {
+  const [sheet, setSheet] = useState<null | "member" | "docType" | "period" | "sort">(null);
+
+  const profileId = filters.profileId ?? defaultProfileId ?? "";
+  const memberLabel =
+    profileId === "all"
+      ? "All members"
+      : (profiles.find((p) => p.id === profileId)?.name ?? "Member");
+
+  /*
+   * Scoping to the active member is the app's normal state, not something the
+   * reader chose here, so it does not count towards the badge. Only widening to
+   * everyone, or narrowing to a different member, is a filter.
+   */
+  const memberIsFilter = profileId !== "" && profileId !== defaultProfileId;
+  const activeCount = [
+    filters.docType,
+    memberIsFilter ? profileId : "",
+    filters.period,
+  ].filter(Boolean).length;
+
+  return (
+    <>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 4, gap: 6 }}
+        className="mt-4 grow-0"
+      >
+        <Chip label={memberLabel} on={memberIsFilter} onPress={() => setSheet("member")} />
+        <Chip
+          label={filters.docType ? DOC_TYPE_LABEL[filters.docType] : "All types"}
+          on={Boolean(filters.docType)}
+          onPress={() => setSheet("docType")}
+        />
+        <Chip
+          label={PERIODS.find((p) => p.value === (filters.period ?? ""))?.label ?? "All time"}
+          on={Boolean(filters.period)}
+          onPress={() => setSheet("period")}
+        />
+        <Chip
+          label={filters.sort === "oldest" ? "Oldest" : "Newest"}
+          on={filters.sort === "oldest"}
+          onPress={() => setSheet("sort")}
+          icon={SlidersHorizontal}
+        />
+        {activeCount > 0 ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Clear filters"
+            onPress={() =>
+              onChange({ profileId: undefined, docType: undefined, period: undefined, sort: filters.sort })
+            }
+            className="flex-row items-center gap-1 rounded-pill bg-brand-600 px-3 py-2"
+          >
+            <X size={13} color="#ffffff" />
+            <Text className="text-[12px] font-semibold text-white">Clear {activeCount}</Text>
+          </Pressable>
+        ) : null}
+      </ScrollView>
+
+      <OptionSheet
+        open={sheet === "member"}
+        title="Family member"
+        onClose={() => setSheet(null)}
+        options={[
+          ...(allowAllMembers ? [{ value: "all", label: "All members" }] : []),
+          ...profiles.map((p) => ({ value: p.id, label: p.name })),
+        ]}
+        value={profileId}
+        onSelect={(value) => onChange({ ...filters, profileId: value })}
+      />
+
+      <OptionSheet
+        open={sheet === "docType"}
+        title="Document type"
+        onClose={() => setSheet(null)}
+        options={[
+          { value: "", label: "All types" },
+          ...DOC_TYPES.map((t) => ({ value: t, label: DOC_TYPE_LABEL[t] })),
+        ]}
+        value={filters.docType ?? ""}
+        onSelect={(value) => onChange({ ...filters, docType: (value || undefined) as DocType | undefined })}
+      />
+
+      <OptionSheet
+        open={sheet === "period"}
+        title="Time period"
+        onClose={() => setSheet(null)}
+        options={PERIODS.map((p) => ({ value: p.value, label: p.label }))}
+        value={filters.period ?? ""}
+        onSelect={(value) => onChange({ ...filters, period: value || undefined })}
+      />
+
+      <OptionSheet
+        open={sheet === "sort"}
+        title="Sort by"
+        onClose={() => setSheet(null)}
+        options={SORTS.map((s) => ({ value: s.value, label: s.label }))}
+        value={filters.sort}
+        onSelect={(value) => onChange({ ...filters, sort: value === "oldest" ? "oldest" : "newest" })}
+      />
+    </>
+  );
+}
+
+function Chip({
+  label,
+  on,
+  onPress,
+  icon: Icon = ChevronDown,
+}: {
+  label: string;
+  on: boolean;
+  onPress: () => void;
+  icon?: typeof ChevronDown;
+}) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      onPress={onPress}
+      className="flex-row items-center gap-1 rounded-pill px-3 py-2"
+      style={{
+        backgroundColor: on ? brand[50] : surface.base,
+        borderWidth: 1,
+        borderColor: on ? brand[200] : surface.line,
+      }}
+    >
+      <Text
+        className="text-[12px] font-medium"
+        numberOfLines={1}
+        style={{ color: on ? brand[700] : ink[500] }}
+      >
+        {label}
+      </Text>
+      <Icon size={13} color={on ? brand[700] : ink[300]} />
+    </Pressable>
+  );
+}
+
+/*
+ * One sheet component for all four controls.
+ *
+ * The frames show a dropdown per chip. A dropdown anchored to a chip inside a
+ * horizontal scroller lands off-screen as soon as the chip has been scrolled,
+ * so on a phone these are sheets — same choice, always fully visible, and a
+ * 44pt row per option instead of a 28pt menu item.
+ */
+function OptionSheet({
+  open,
+  title,
+  options,
+  value,
+  onSelect,
+  onClose,
+}: {
+  open: boolean;
+  title: string;
+  options: readonly { value: string; label: string }[];
+  value: string;
+  onSelect: (value: string) => void;
+  onClose: () => void;
+}) {
+  const insets = useSafeAreaInsets();
+
+  return (
+    <Modal visible={open} transparent animationType="slide" onRequestClose={onClose}>
+      <Pressable
+        accessibilityLabel="Close"
+        onPress={onClose}
+        className="flex-1"
+        style={{ backgroundColor: "rgba(15,16,48,0.35)" }}
+      />
+      <View
+        className="rounded-t-sheet bg-canvas px-5 pt-2"
+        style={{ maxHeight: "70%", paddingBottom: insets.bottom + 16 }}
+      >
+        <View className="h-1 w-10 self-center rounded-pill" style={{ backgroundColor: surface.line }} />
+        <Text className="mt-3 text-[18px] font-bold text-ink-900">{title}</Text>
+
+        <ScrollView className="mt-3 rounded-card bg-surface" style={shadow.e1}>
+          {options.map((option, i) => {
+            const on = option.value === value;
+            return (
+              <Pressable
+                key={option.value || "none"}
+                accessibilityRole="radio"
+                accessibilityState={{ selected: on }}
+                onPress={() => {
+                  onSelect(option.value);
+                  onClose();
+                }}
+                className="flex-row items-center gap-3 px-4 py-3.5"
+                style={i > 0 ? { borderTopWidth: 1, borderTopColor: surface.line } : undefined}
+              >
+                <Text
+                  className="flex-1 text-[15px]"
+                  style={{ color: on ? brand[700] : ink[900], fontWeight: on ? "600" : "400" }}
+                >
+                  {option.label}
+                </Text>
+                {on ? <Check size={17} color={brand[600]} /> : null}
+              </Pressable>
+            );
+          })}
+        </ScrollView>
+      </View>
+    </Modal>
+  );
+}

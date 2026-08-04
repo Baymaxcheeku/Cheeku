@@ -3,14 +3,18 @@ import {
   ChevronRight,
   ClipboardList,
   FileText,
+  Flag,
   FlaskConical,
   Pill,
   Receipt,
   ScanLine,
+  ShieldCheck,
   Syringe,
+  TriangleAlert,
   type LucideIcon,
 } from "lucide-react-native";
 import { Pressable, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { formatEventDate } from "@/lib/records/grouping";
 import {
@@ -18,6 +22,7 @@ import {
   fileKind,
   SEVERITY_LABEL,
   type DocType,
+  type RecordStats,
   type RecordSummary,
   type Severity,
 } from "@/lib/records/types";
@@ -60,6 +65,75 @@ const SEVERITY_TINT: Record<Severity, { bg: string; fg: string }> = {
   borderline: { bg: semantic.cautionBg, fg: semantic.cautionText },
   high_risk: { bg: semantic.dangerBg, fg: semantic.dangerText },
 };
+
+/** The title block at the top of the records screen. */
+export function RecordsHeader({ title, subtitle }: { title: string; subtitle: string }) {
+  const insets = useSafeAreaInsets();
+
+  return (
+    <View className="px-5" style={{ paddingTop: insets.top + 12 }}>
+      <View className="flex-row items-center gap-3">
+        <Text className="flex-1 text-[28px] font-bold leading-tight tracking-tight text-ink-900">
+          {title}
+        </Text>
+        {/*
+         * The frames put a search control and a notification bell here. Search
+         * over records is a Phase 2 tail item and the bell already exists on
+         * Home wired to real data — a second, unwired copy would be a control
+         * that looks identical to a working one and does nothing.
+         */}
+      </View>
+      <Text className="mt-1.5 text-[14px] text-ink-500">{subtitle}</Text>
+    </View>
+  );
+}
+
+const STAT_CELLS = [
+  { key: "total", label: "Total records", icon: FileText, fg: "#4a2ade", bg: "#f1f0fe" },
+  { key: "normal", label: "Normal", icon: ShieldCheck, fg: semantic.safe, bg: semantic.safeBg },
+  {
+    key: "borderline",
+    label: "Needs attention",
+    icon: TriangleAlert,
+    fg: semantic.caution,
+    bg: semantic.cautionBg,
+  },
+  { key: "highRisk", label: "High priority", icon: Flag, fg: semantic.danger, bg: semantic.dangerBg },
+] as const;
+
+/*
+ * The four-up count card, as four individual badge tiles rather than one
+ * bordered strip. Each stat is a small, complete thing on its own — an
+ * achievement count, almost — and giving each its own card and shadow instead
+ * of a shared divider is what makes the row read as four facts rather than one
+ * wide table.
+ *
+ * It counts the FILTERED set, not the whole account. A card that kept saying
+ * "24 records" while the list below showed three would be reporting on
+ * something the reader cannot see.
+ */
+export function StatsCard({ stats }: { stats: RecordStats }) {
+  return (
+    <View className="mx-5 mt-4 flex-row gap-1.5">
+      {STAT_CELLS.map(({ key, label, icon: Icon, fg, bg }) => (
+        <View
+          key={key}
+          className="flex-1 items-center gap-1.5 rounded-tile bg-surface px-1.5 py-2.5"
+          style={shadow.e1}
+        >
+          <View
+            className="h-8 w-8 items-center justify-center rounded-pill"
+            style={{ backgroundColor: bg }}
+          >
+            <Icon size={15} color={fg} />
+          </View>
+          <Text className="text-[18px] font-bold leading-none text-ink-900">{stats[key]}</Text>
+          <Text className="text-center text-[9.5px] leading-tight text-ink-500">{label}</Text>
+        </View>
+      ))}
+    </View>
+  );
+}
 
 /** The severity pill. Health meaning only. */
 export function SeverityPill({ severity }: { severity: Severity }) {

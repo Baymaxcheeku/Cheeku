@@ -29,6 +29,17 @@ const SCREEN = { width: 393, height: 852, radius: 62 } as const;
  */
 const IPHONE_16_INSETS = { top: 59, bottom: 34, left: 0, right: 0 } as const;
 
+/*
+ * KNOWN LIMIT: `Modal` escapes this frame on web.
+ *
+ * React Native's Modal renders into the document root rather than into its
+ * parent, so every sheet in the app (notifications, the record filters) appears
+ * against the full browser viewport instead of inside the phone. Nothing is
+ * wrong with those screens — on device the modal covers the device — but their
+ * proportions cannot be judged here, and a sheet that looks wrong in the
+ * preview is not evidence of a bug. Check sheets on the simulator.
+ */
+
 export function DeviceFrame({ children }: { children: React.ReactNode }) {
   const { width, height } = useWindowDimensions();
 
