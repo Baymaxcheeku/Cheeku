@@ -44,8 +44,10 @@ describe("product scenarios — the product rules", () => {
       expect(scenario.personas.length).toBeGreaterThan(0);
     });
 
-    it(`"${scenario.id}" thumbnail is a self-contained data URI`, () => {
-      expect(scenario.thumbnail).toMatch(/^data:image\/svg\+xml;base64,/);
+    it(`"${scenario.id}" thumbnail is self-contained SVG markup`, () => {
+      // Raw markup, not a data URI: SvgXml takes the string, and `Buffer` —
+      // which the web build used to base64 it — does not exist here.
+      expect(scenario.thumbnail).toMatch(/^<svg /);
     });
   }
 

@@ -1,0 +1,98 @@
+import { Camera, X } from "lucide-react-native";
+import { Modal, Pressable, ScrollView, Text, View } from "react-native";
+import { SvgXml } from "react-native-svg";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+import { PRODUCT_SCENARIOS } from "@/lib/ai/mock/scenarios";
+import { brand, ink, shadow, surface } from "@/theme/tokens";
+
+/**
+ * The product-photo path, as a picker over FIXED scenarios rather than a real
+ * camera.
+ *
+ * This is the honest shape for what exists. There is no model behind it that
+ * can look at an arbitrary jar of cream and tell someone whether it is safe in
+ * pregnancy, and shipping a camera that appears to do that — then answering
+ * from a canned list — would be a lie about a medical judgement. The picker
+ * says "these are the items this demo knows", which is true.
+ *
+ * The camera becomes real when the data scientist's vision model lands. Until
+ * then the sheet names the limit rather than hiding it.
+ */
+export function ProductPicker({
+  open,
+  onClose,
+  onPick,
+}: {
+  open: boolean;
+  onClose: () => void;
+  onPick: (scenarioId: string) => void;
+}) {
+  const insets = useSafeAreaInsets();
+
+  return (
+    <Modal visible={open} transparent animationType="slide" onRequestClose={onClose}>
+      <Pressable
+        accessibilityLabel="Close"
+        onPress={onClose}
+        className="flex-1"
+        style={{ backgroundColor: "rgba(15,16,48,0.35)" }}
+      />
+      <View
+        className="rounded-t-sheet bg-canvas px-5 pt-2"
+        style={{ maxHeight: "78%", paddingBottom: insets.bottom + 16 }}
+      >
+        <View className="h-1 w-10 self-center rounded-pill" style={{ backgroundColor: surface.line }} />
+
+        <View className="mt-3 flex-row items-start gap-3">
+          <View className="h-10 w-10 items-center justify-center rounded-pill bg-brand-50">
+            <Camera size={18} color={brand[600]} />
+          </View>
+          <View className="flex-1">
+            <Text className="text-[18px] font-bold text-ink-900">Ask about a product</Text>
+            <Text className="mt-0.5 text-[12.5px] leading-[18px] text-ink-500">
+              Photo recognition is not live yet. Pick one of these to see how the check works.
+            </Text>
+          </View>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Close"
+            onPress={onClose}
+            hitSlop={8}
+            className="h-9 w-9 items-center justify-center rounded-pill bg-surface"
+            style={shadow.e1}
+          >
+            <X size={17} color={ink[500]} />
+          </Pressable>
+        </View>
+
+        <ScrollView className="mt-4" showsVerticalScrollIndicator={false}>
+          <View className="gap-2">
+            {PRODUCT_SCENARIOS.map((scenario) => (
+              <Pressable
+                key={scenario.id}
+                accessibilityRole="button"
+                accessibilityLabel={`${scenario.title}. ${scenario.subtitle}`}
+                onPress={() => onPick(scenario.id)}
+                className="flex-row items-center gap-3 rounded-card bg-surface p-3"
+                style={shadow.e1}
+              >
+                {/* Raw SVG markup, not a data URI — see the port note in
+                    scenarios.ts, where `Buffer` does not exist. */}
+                <SvgXml xml={scenario.thumbnail} width={44} height={44} />
+                <View className="min-w-0 flex-1">
+                  <Text className="text-[14px] font-semibold text-ink-900" numberOfLines={1}>
+                    {scenario.title}
+                  </Text>
+                  <Text className="text-[12px] text-ink-500" numberOfLines={1}>
+                    {scenario.subtitle}
+                  </Text>
+                </View>
+              </Pressable>
+            ))}
+          </View>
+        </ScrollView>
+      </View>
+    </Modal>
+  );
+}

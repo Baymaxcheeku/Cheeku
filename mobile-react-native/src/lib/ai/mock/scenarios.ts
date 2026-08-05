@@ -59,12 +59,24 @@ function has(conditions: string[], ...needles: string[]): boolean {
   return needles.some((n) => lower.some((c) => c.includes(n)));
 }
 
+/*
+ * PORT NOTE. The web build returned a base64 `data:` URI here, because an
+ * <img src> needs one, and built it with `Buffer`.
+ *
+ * REACT NATIVE HAS NO `Buffer`. This module builds PRODUCT_SCENARIOS at import
+ * time, so the old line did not fail at render — it threw
+ * "ReferenceError: Buffer is not defined" the moment anything imported this
+ * file, taking the whole screen with it.
+ *
+ * Raw SVG markup instead, which is what `react-native-svg`'s SvgXml takes
+ * directly. Same call as `profiles/avatar.ts`, and it skips a base64 round trip
+ * per thumbnail as well.
+ */
 function icon(bg: string, fg: string, shape: string): string {
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96">
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96">
     <rect width="96" height="96" rx="20" fill="${bg}"/>
     ${shape}
   </svg>`;
-  return `data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`;
 }
 
 export const PRODUCT_SCENARIOS: ProductScenario[] = [

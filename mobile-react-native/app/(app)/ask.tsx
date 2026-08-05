@@ -3,6 +3,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import {
   Activity,
   ArrowUp,
+  Camera,
   FileText,
   History,
   Sparkles,
@@ -21,11 +22,20 @@ import {
   TextInput,
   View,
 } from "react-native";
+import { SvgXml } from "react-native-svg";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { ProductAssessmentCard } from "@/components/ai/product-assessment-card";
+import { ProductPicker } from "@/components/ai/product-picker";
 import { MascotBust } from "@/components/illustrations/sprout";
 import { EmergencyEscalation } from "@/components/safety/emergency-escalation";
-import { askBaymax, chatQuota, recordEscalation, type ChatTurn } from "@/lib/ai/chat";
+import {
+  askAboutProduct,
+  askBaymax,
+  chatQuota,
+  recordEscalation,
+  type ChatTurn,
+} from "@/lib/ai/chat";
 import { activeProfile } from "@/lib/profiles/context";
 import { detect, type SafetyResult } from "@/lib/safety/detect";
 import { brand, ink, semantic, shadow, surface } from "@/theme/tokens";
@@ -52,7 +62,7 @@ const STARTERS: readonly { text: string; icon: LucideIcon }[] = [
 export default function Ask() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { q } = useLocalSearchParams<{ q?: string; upload?: string }>();
+  const { q, upload } = useLocalSearchParams<{ q?: string; upload?: string }>();
 
   const [turns, setTurns] = useState<ChatTurn[]>([]);
   const [conversationId, setConversationId] = useState<string | null>(null);
@@ -61,6 +71,7 @@ export default function Ask() {
   const [limitReached, setLimitReached] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+  const [pickerOpen, setPickerOpen] = useState(false);
 
   const scroller = useRef<ScrollView>(null);
   const sentInitial = useRef(false);
@@ -119,6 +130,37 @@ export default function Ask() {
       setPending(false);
     }
   }
+
+  async function sendProduct(scenarioId: string) {
+    setPickerOpen(false);
+    setError(null);
+    setPending(true);
+    try {
+      // "clear" rather than a gate result: the question text is fixed copy
+      // attached to the scenario, not something the reader typed, so there is
+      // no free input to screen. See askAboutProduct.
+      const result = await askAboutProduct(scenarioId, conversationId, "clear");
+      if (!result.ok) {
+        if (result.quota) {
+          setLimitReached(true);
+          return;
+        }
+        setError(result.message);
+        return;
+      }
+      setConversationId(result.conversationId);
+      setTurns((t) => [...t, result.user, result.assistant]);
+    } finally {
+      setPending(false);
+    }
+  }
+
+  // Home's Ask box camera button lands here with ?upload=1. Runs once, so
+  // closing the sheet does not reopen it on the next render.
+  useEffect(() => {
+    if (upload === "1") setPickerOpen(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // A question carried in from Home's Ask box. Runs once: a later re-render
   // must not re-send it.
@@ -268,6 +310,15 @@ export default function Ask() {
           />
           <Pressable
             accessibilityRole="button"
+            accessibilityLabel="Ask about a product"
+            onPress={() => setPickerOpen(true)}
+            className="h-11 w-11 items-center justify-center rounded-pill bg-canvas"
+            style={{ borderWidth: 1, borderColor: surface.line }}
+          >
+            <Camera size={18} color={brand[600]} />
+          </Pressable>
+          <Pressable
+            accessibilityRole="button"
             accessibilityLabel="Send"
             accessibilityState={{ disabled: pending || !draft.trim() }}
             disabled={pending || !draft.trim()}
@@ -280,6 +331,12 @@ export default function Ask() {
         </View>
       </View>
 
+      <ProductPicker
+        open={pickerOpen}
+        onClose={() => setPickerOpen(false)}
+        onPick={(id) => void sendProduct(id)}
+      />
+
       <EmergencyEscalation result={escalation} onClose={() => setEscalation(null)} />
     </KeyboardAvoidingView>
   );
@@ -288,8 +345,24 @@ export default function Ask() {
 function Turn({ turn, onCitation }: { turn: ChatTurn; onCitation: (id: string) => void }) {
   if (turn.role === "user") {
     return (
-      <View className="max-w-[85%] self-end rounded-card bg-brand-600 px-3.5 py-2.5">
-        <Text className="text-[14px] leading-[20px] text-white">{turn.content}</Text>
+      <View className="max-w-[85%] items-end self-end gap-1.5">
+        {turn.attachment ? (
+          <View className="flex-row items-center gap-2 rounded-card bg-surface px-2.5 py-2" style={shadow.e1}>
+            <SvgXml xml={turn.attachment.thumbnail} width={28} height={28} />
+            <Text className="text-[12px] font-medium text-ink-700">{turn.attachment.title}</Text>
+          </View>
+        ) : null}
+        <View className="rounded-card bg-brand-600 px-3.5 py-2.5">
+          <Text className="text-[14px] leading-[20px] text-white">{turn.content}</Text>
+        </View>
+      </View>
+    );
+  }
+
+  if (turn.assessment) {
+    return (
+      <View className="w-full self-start">
+        <ProductAssessmentCard assessment={turn.assessment} />
       </View>
     );
   }

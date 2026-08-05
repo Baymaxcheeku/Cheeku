@@ -1,4 +1,5 @@
 import { answerQuestion, type Citation, type GroundingRecord } from "@/lib/ai/mock/answer";
+import { assessProduct, findScenario, type ProductAssessment } from "@/lib/ai/mock/scenarios";
 import { FREE_CHAT_LIMIT, isUnlimited } from "@/lib/billing/plans";
 import { getEntitlement } from "@/lib/billing/quota";
 import { activeProfile } from "@/lib/profiles/context";
@@ -20,6 +21,9 @@ import type { SafetyStatus } from "@/lib/safety/detect";
  * does get answered, carries its flag into the transcript.
  */
 
+/** Attachment shown on a user's chat bubble — the demo product scenarios only. */
+export type ChatAttachment = { kind: "product"; scenarioId: string; title: string; thumbnail: string };
+
 export type ChatTurn = {
   id: string;
   role: "user" | "assistant";
@@ -27,8 +31,10 @@ export type ChatTurn = {
   citations: Citation[];
   grounded: boolean;
   /** How the reply was produced — decides how the UI frames it. Assistant turns only. */
-  kind?: "grounded" | "general" | "silent";
+  kind?: "grounded" | "general" | "silent" | "product";
   followUps: string[];
+  attachment?: ChatAttachment;
+  assessment?: ProductAssessment;
 };
 
 export type AskResult =
@@ -318,4 +324,134 @@ async function profileConditions(profileId: string): Promise<string[]> {
 
   const conditions = data?.conditions;
   return Array.isArray(conditions) ? (conditions as string[]) : [];
+}
+
+
+/**
+ * The product-safety demo path.
+ *
+ * NO SAFETY GATE RUNS HERE, and that is deliberate rather than an omission:
+ * the question text is not free input, it is fixed copy attached to a scenario
+ * the reader picked from a fixed list. There is no user string to screen.
+ *
+ * `scenarioId` is still validated against that list before anything is written,
+ * because "the client only ever sends one of five values" is an assumption
+ * about a client, not a property of a system.
+ *
+ * Gated by the same quota as a text question: it is Ask Baymax, not a separate
+ * feature with its own allowance.
+ */
+export async function askAboutProduct(
+  scenarioId: string,
+  conversationId: string | null,
+  safetyStatus: Exclude<SafetyStatus, "escalate">,
+): Promise<AskResult> {
+  const scenario = findScenario(scenarioId);
+  if (!scenario) return { ok: false, message: "That item isn't available in this demo." };
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, message: "Your session expired. Please sign in again." };
+
+  const profile = await activeProfile();
+  if (!profile) return { ok: false, message: "Set up a profile before asking." };
+
+  const quota = await chatQuota();
+  if (quota.remaining !== null && quota.remaining <= 0) {
+    return { ok: false, quota: true, message: "You've used your free chats for this month." };
+  }
+
+  const conditions = await profileConditions(profile.id);
+  const assessment = assessProduct(scenarioId, conditions);
+  if (!assessment) return { ok: false, message: "That item isn't available in this demo." };
+
+  let convo = conversationId;
+  if (!convo) {
+    const { data, error } = await supabase
+      .from("conversations")
+      .insert({
+        profile_id: profile.id,
+        user_id: user.id,
+        title: scenario.sampleQuestion.slice(0, 80),
+      })
+      .select("id")
+      .single();
+    if (error || !data) return { ok: false, message: "Could not start the conversation." };
+    convo = data.id as string;
+  }
+
+  /*
+   * The transcript stores the verdict as prose, not the card's structure. A
+   * medical transcript has to stay readable years later without the component
+   * that rendered it, and a JSON blob of persona keys is not that.
+   */
+  const summary = [
+    `${assessment.title} — ${assessment.verdictNote}`,
+    assessment.personalNote ?? "",
+    assessment.disclaimer,
+  ]
+    .filter(Boolean)
+    .join("\n\n");
+
+  const { data: rows, error } = await supabase
+    .from("messages")
+    .insert([
+      {
+        conversation_id: convo,
+        user_id: user.id,
+        role: "user",
+        content: scenario.sampleQuestion,
+        citations: [],
+        safety_status: safetyStatus,
+      },
+      {
+        conversation_id: convo,
+        user_id: user.id,
+        role: "assistant",
+        content: summary,
+        citations: [],
+        safety_status: safetyStatus,
+      },
+    ])
+    .select("id, role, content");
+
+  if (error || !rows || rows.length < 2) {
+    return { ok: false, message: "Could not save the conversation." };
+  }
+
+  const userRow = rows.find((r) => r.role === "user");
+  const assistantRow = rows.find((r) => r.role === "assistant");
+  if (!userRow || !assistantRow) {
+    return { ok: false, message: "Could not save the conversation." };
+  }
+
+  return {
+    ok: true,
+    conversationId: convo,
+    user: {
+      id: userRow.id as string,
+      role: "user",
+      content: scenario.sampleQuestion,
+      citations: [],
+      grounded: true,
+      followUps: [],
+      attachment: {
+        kind: "product",
+        scenarioId: scenario.id,
+        title: scenario.title,
+        thumbnail: scenario.thumbnail,
+      },
+    },
+    assistant: {
+      id: assistantRow.id as string,
+      role: "assistant",
+      content: summary,
+      citations: [],
+      grounded: false,
+      kind: "product",
+      followUps: [],
+      assessment,
+    },
+  };
 }
