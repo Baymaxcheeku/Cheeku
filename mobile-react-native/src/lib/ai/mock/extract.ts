@@ -1,5 +1,3 @@
-import { createHash } from "node:crypto";
-
 import {
   LOW_CONFIDENCE as THRESHOLD,
   type Extraction,
@@ -28,10 +26,36 @@ export type {
 } from "./extract-types";
 export { LOW_CONFIDENCE } from "./extract-types";
 
-/** A stable 0–1 number from a seed, so the same file always scores the same. */
+/**
+ * A stable 0–1 number from a seed, so the same file always scores the same.
+ *
+ * PORT NOTE. The web build used `createHash("sha256")` from `node:crypto`.
+ * React Native has neither that module nor `Buffer.readUInt16BE`, and because
+ * this module is imported by the upload path, the crash was not confined to
+ * the feature — it took the screen down on import:
+ *
+ *   Unable to resolve module node:crypto
+ *
+ * FNV-1a instead: a few lines, synchronous, dependency-free, and deterministic,
+ * which is the only property this actually needs. `expo-crypto` would be the
+ * cryptographic equivalent but its digest is async, and this is called inline
+ * while building a plain object.
+ *
+ * The numbers differ from the web build's for the same file. That is fine and
+ * deliberate: these are mock OCR confidences, and what matters is that one
+ * device scores one file the same way every time, not that two platforms agree
+ * on a fabricated number.
+ */
 function seeded(seed: string, index: number): number {
-  const hash = createHash("sha256").update(`${seed}:${index}`).digest();
-  return (hash.readUInt16BE(0) % 1000) / 1000;
+  const input = `${seed}:${index}`;
+  let hash = 0x811c9dc5;
+  for (let i = 0; i < input.length; i += 1) {
+    hash ^= input.charCodeAt(i);
+    // `Math.imul` keeps the multiply in 32-bit range; a plain `*` overflows
+    // into a float and stops being a hash.
+    hash = Math.imul(hash, 0x01000193) >>> 0;
+  }
+  return (hash % 1000) / 1000;
 }
 
 /*
