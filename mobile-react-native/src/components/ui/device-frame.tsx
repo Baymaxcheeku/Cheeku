@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Platform, useWindowDimensions, View } from "react-native";
 import { SafeAreaInsetsContext } from "react-native-safe-area-context";
 
@@ -30,15 +31,69 @@ const SCREEN = { width: 393, height: 852, radius: 62 } as const;
 const IPHONE_16_INSETS = { top: 59, bottom: 34, left: 0, right: 0 } as const;
 
 /*
- * KNOWN LIMIT: `Modal` escapes this frame on web.
+ * Confines React Native Web's modal portals to the phone rectangle.
  *
- * React Native's Modal renders into the document root rather than into its
- * parent, so every sheet in the app (notifications, the record filters) appears
- * against the full browser viewport instead of inside the phone. Nothing is
- * wrong with those screens — on device the modal covers the device — but their
- * proportions cannot be judged here, and a sheet that looks wrong in the
- * preview is not evidence of a bug. Check sheets on the simulator.
+ * RNW's `Modal` does not render where it is written. It portals into a fresh
+ * div appended to `document.body` and pins it `fixed` over the whole viewport,
+ * outside `#root` — so this frame cannot clip it however it is styled. Every
+ * sheet in the app escaped the phone and covered the browser: the paywall, the
+ * notification panel, the record filters, the delete confirmation.
+ *
+ * THE APP CODE IS CORRECT. On a device, a modal covering the screen is exactly
+ * what should happen, which is why the fix belongs here rather than in any of
+ * those components. The preview was the thing telling the lie.
+ *
+ * Matched as "a body-level div that is not one of ours" rather than by class,
+ * because those class names are RNW's generated atomic CSS and change between
+ * versions. The rect is recomputed on resize, since the frame is centred.
  */
+function useModalsInsideFrame(active: boolean, left: number, top: number) {
+  useEffect(() => {
+    if (Platform.OS !== "web" || typeof document === "undefined") return;
+
+    const ID = "baymax-device-frame-modal-clip";
+    let style = document.getElementById(ID) as HTMLStyleElement | null;
+
+    if (!active) {
+      style?.remove();
+      return;
+    }
+
+    if (!style) {
+      style = document.createElement("style");
+      style.id = ID;
+      document.head.appendChild(style);
+    }
+
+    /*
+     * `transform` is the load-bearing line, not the width and height.
+     *
+     * RNW positions the sheet INSIDE this container as fixed as well, and a
+     * fixed element resolves against the viewport while ignoring every
+     * ancestor — so sizing the container alone shrank it to the phone while
+     * its contents still spanned the browser. A transform makes this element
+     * the containing block for fixed descendants, which is what actually
+     * pulls them inside the frame.
+     *
+     * Keep the CSS free of backticks: it lives in a template literal, and one
+     * in a comment silently ends the string. That cost a bundle error here.
+     */
+    style.textContent = `
+      body > div:not(#root):not(#error-toast) {
+        position: fixed !important;
+        left: ${left}px !important;
+        top: ${top}px !important;
+        width: ${SCREEN.width}px !important;
+        height: ${SCREEN.height}px !important;
+        right: auto !important;
+        bottom: auto !important;
+        border-radius: ${SCREEN.radius}px;
+        overflow: hidden;
+        transform: translateZ(0);
+      }
+    `;
+  }, [active, left, top]);
+}
 
 export function DeviceFrame({ children }: { children: React.ReactNode }) {
   const { width, height } = useWindowDimensions();
@@ -46,6 +101,10 @@ export function DeviceFrame({ children }: { children: React.ReactNode }) {
   // Narrow viewports are already phone-shaped; framing them would shrink the
   // real thing to fit inside a picture of itself.
   const framed = Platform.OS === "web" && width >= 720 && height >= 700;
+
+  // Called before the early return, so the hook order never changes.
+  useModalsInsideFrame(framed, (width - SCREEN.width) / 2, (height - SCREEN.height) / 2);
+
   if (!framed) return <>{children}</>;
 
   return (
