@@ -16,6 +16,7 @@ import { Platform } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider, type Metrics } from "react-native-safe-area-context";
 
+import { AppLock } from "@/components/app/app-lock-gate";
 import { DeviceFrame } from "@/components/ui/device-frame";
 import { surface } from "@/theme/tokens";
 
@@ -74,6 +75,14 @@ export default function RootLayout() {
           {/* Renders nothing but its children on device. */}
           <DeviceFrame>
           {/*
+           * The lock wraps the navigator rather than a screen. What it guards
+           * against is the app being left open on a table, and that happens on
+           * whichever route the reader was last on — gating one means every
+           * other route is the way around it. Passthrough on web, and whenever
+           * the lock is switched off.
+           */}
+          <AppLock>
+          {/*
            * `headerShown: false` throughout: every screen draws its own header
            * (the settings screens share one, onboarding has a step rail). A
            * native header on top of those would be a second title bar.
@@ -85,6 +94,7 @@ export default function RootLayout() {
               animation: "slide_from_right",
             }}
           />
+          </AppLock>
           </DeviceFrame>
         </QueryClientProvider>
       </SafeAreaProvider>
