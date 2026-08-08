@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { FamilyScene } from "@/components/illustrations/scenes";
 import { Dots, Headline, ReassuranceStrip } from "@/components/onboarding/chrome";
+import { Paywall } from "@/components/billing/paywall";
 import { Button } from "@/components/ui/button";
 import { clearAudience, readAudience } from "@/lib/auth/audience";
 import { formatPrice, PLANS } from "@/lib/billing/plans";
@@ -34,7 +35,7 @@ export default function Plan() {
   const insets = useSafeAreaInsets();
 
   const [pending, setPending] = useState(false);
-  const [notice, setNotice] = useState<string | null>(null);
+  const [paywallOpen, setPaywallOpen] = useState(false);
 
   /*
    * The web page did this check on the server before rendering a byte. Here it
@@ -140,23 +141,15 @@ export default function Plan() {
 
         <View className="mt-4 gap-2.5">
           {/*
-           * Checkout is Apple IAP and Play Billing, which land with the store
-           * build. Until then this says so rather than opening a chooser that
-           * cannot take money — and crucially the way past this screen still
-           * works, so nobody is stuck behind an unfinished purchase.
+           * Opens the real chooser. The way past this screen still works
+           * regardless — nobody is stuck behind a purchase, which matters more
+           * here than anywhere else in the app because this is onboarding and
+           * the reader has not seen a single record yet.
            */}
-          <Button
-            onPress={() => setNotice("In-app purchases arrive with the first store build. You can start free now and upgrade from your Profile later.")}
-          >
+          <Button onPress={() => setPaywallOpen(true)}>
             <Text className="text-[16px] font-bold text-white">See plans</Text>
             <ArrowRight size={18} color="#ffffff" />
           </Button>
-
-          {notice ? (
-            <Text accessibilityRole="alert" className="text-center text-[12px] leading-[17px] text-ink-500">
-              {notice}
-            </Text>
-          ) : null}
 
           <Button variant="secondary" onPress={finish} disabled={pending}>
             <Text className="text-[16px] font-bold text-ink-700">
@@ -172,6 +165,19 @@ export default function Plan() {
           <ReassuranceStrip />
           <Dots current={4} total={5} />
         </View>
+
+        <Paywall
+          open={paywallOpen}
+          reason="onboarding"
+          onClose={() => setPaywallOpen(false)}
+          onActivated={() => {
+            setPaywallOpen(false);
+            // Straight on to Home. Sending someone back to a plan chooser they
+            // just bought from is the clearest way to make a purchase feel like
+            // it did not register.
+            router.replace("/home");
+          }}
+        />
       </ScrollView>
     </View>
   );

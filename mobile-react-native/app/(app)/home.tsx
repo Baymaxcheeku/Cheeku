@@ -1,4 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 import { useRouter } from "expo-router";
 import {
   CalendarDays,
@@ -11,6 +12,7 @@ import {
 import { ActivityIndicator, Pressable, RefreshControl, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { Paywall } from "@/components/billing/paywall";
 import { FamilySwitcher } from "@/components/app/family-switcher";
 import { HomeAskBox } from "@/components/app/home-ask-box";
 import { NotificationsBell } from "@/components/app/notifications-bell";
@@ -46,6 +48,7 @@ function greeting(): string {
 export default function Home() {
   const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
+  const [paywallOpen, setPaywallOpen] = useState(false);
 
   const context = useQuery({
     queryKey: ["home-context"],
@@ -160,6 +163,7 @@ export default function Home() {
             tier={data.entitlement.tier}
             lockedCount={access.lockedCount}
             onSelect={onSelectProfile}
+            onUpgrade={() => setPaywallOpen(true)}
           />
         </View>
       </View>
@@ -235,6 +239,19 @@ export default function Home() {
           </View>
         ) : null}
       </View>
+
+      <Paywall
+        open={paywallOpen}
+        reason="family"
+        onClose={() => setPaywallOpen(false)}
+        onActivated={() => {
+          setPaywallOpen(false);
+          // The switcher's locked count and the greeting both derive from the
+          // entitlement, so the whole context is refetched rather than patched.
+          void queryClient.invalidateQueries({ queryKey: ["home-context"] });
+          void queryClient.invalidateQueries({ queryKey: ["entitlement"] });
+        }}
+      />
     </ScrollView>
   );
 }

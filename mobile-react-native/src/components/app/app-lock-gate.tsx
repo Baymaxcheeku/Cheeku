@@ -203,9 +203,14 @@ export function AppLockGate({ children }: { children: React.ReactNode }) {
  * `expo-local-authentication` has no web implementation, so a lock there would
  * render a screen with an Unlock button that can never succeed. The preview is
  * the only place this app runs on web.
+ *
+ * Branching INSIDE the component rather than picking one at module scope
+ * (`const AppLock = isWeb ? PassThrough : AppLockGate`). That version threw
+ * `ReferenceError: AppLock is not defined` under Metro: the const is in its
+ * temporal dead zone while the importing module is still evaluating, and a
+ * function declaration is hoisted where a const is not.
  */
-export const AppLock = Platform.OS === "web" ? PassThrough : AppLockGate;
-
-function PassThrough({ children }: { children: React.ReactNode }) {
-  return <>{children}</>;
+export function AppLock({ children }: { children: React.ReactNode }) {
+  if (Platform.OS === "web") return <>{children}</>;
+  return <AppLockGate>{children}</AppLockGate>;
 }

@@ -36,6 +36,7 @@ import {
   exportAccount,
   shareExport,
 } from "@/lib/account/actions";
+import { Paywall } from "@/components/billing/paywall";
 import { allowsFamily, planFor, seatsFor } from "@/lib/billing/plans";
 import { getEntitlement } from "@/lib/billing/quota";
 import { clearActiveProfile, profileAccess, activeProfile } from "@/lib/profiles/context";
@@ -56,6 +57,7 @@ export default function Settings() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const queryClient = useQueryClient();
+  const [paywallOpen, setPaywallOpen] = useState(false);
 
   const context = useQuery({
     queryKey: ["settings-context"],
@@ -99,6 +101,8 @@ export default function Settings() {
 
   const { profile, entitlement, access, stats } = data;
   const plan = planFor(entitlement.tier);
+  // Family is the top tier; there is nothing to sell above it.
+  const canUpgrade = entitlement.tier !== "family";
 
   return (
     <ScrollView
@@ -129,7 +133,19 @@ export default function Settings() {
           </View>
         </View>
 
-        <View
+        {/*
+         * The plan card is the upgrade entry point for people who came looking
+         * for one, rather than hitting a wall. On the Family plan there is
+         * nothing above it to sell, so it stops being a button and just states
+         * the fact — an "Upgrade" chevron on the top tier is a dead end that
+         * makes the reader wonder what they are missing.
+         */}
+        <Pressable
+          accessibilityRole={canUpgrade ? "button" : "text"}
+          accessibilityLabel={
+            canUpgrade ? `${plan.name}. Opens plans` : `${plan.name}, your current plan`
+          }
+          onPress={canUpgrade ? () => setPaywallOpen(true) : undefined}
           className="mt-3.5 flex-row items-center gap-3 rounded-tile bg-brand-50 p-3"
         >
           <View className="h-9 w-9 items-center justify-center rounded-pill bg-surface">
@@ -143,7 +159,13 @@ export default function Settings() {
                 : `${entitlement.chatsRemaining} of ${entitlement.limit} chats left this month`}
             </Text>
           </View>
-        </View>
+          {canUpgrade ? (
+            <View className="flex-row items-center gap-1">
+              <Text className="text-[12.5px] font-semibold text-brand-600">Upgrade</Text>
+              <ChevronRight size={15} color={brand[600]} />
+            </View>
+          ) : null}
+        </Pressable>
       </View>
 
       {/*
@@ -155,6 +177,7 @@ export default function Settings() {
         activeId={profile.id}
         seats={seatsFor(entitlement.tier)}
         canAdd={allowsFamily(entitlement.tier)}
+        onUpgrade={() => setPaywallOpen(true)}
       />
 
       {/*
@@ -206,6 +229,19 @@ export default function Settings() {
        * eighth container in a row of eight and read as another thing to act on;
        * this is a footnote, and footnotes look like footnotes.
        */}
+      <Paywall
+        open={paywallOpen}
+        reason="upgrade"
+        onClose={() => setPaywallOpen(false)}
+        onActivated={() => {
+          setPaywallOpen(false);
+          // Seats, the locked rows and the chat allowance all read from the
+          // entitlement, so the whole screen is refetched rather than patched.
+          void queryClient.invalidateQueries({ queryKey: ["settings-context"] });
+          void queryClient.invalidateQueries({ queryKey: ["entitlement"] });
+        }}
+      />
+
       <View className="mx-5 mt-6 flex-row items-start gap-2">
         <ShieldCheck size={14} color={ink[300]} style={{ marginTop: 2 }} />
         <Text className="flex-1 text-[11.5px] leading-[17px] text-ink-300">
@@ -230,6 +266,7 @@ function FamilySection({
   activeId,
   seats,
   canAdd,
+  onUpgrade,
 }: {
   profiles: readonly {
     id: string;
@@ -241,6 +278,7 @@ function FamilySection({
   activeId: string;
   seats: number;
   canAdd: boolean;
+  onUpgrade: () => void;
 }) {
   const reachable = profiles.slice(0, seats);
   const lockedCount = Math.max(0, profiles.length - reachable.length);
@@ -278,8 +316,11 @@ function FamilySection({
 
         {lockedCount > 0
           ? Array.from({ length: lockedCount }, (_, i) => (
-              <View
+              <Pressable
                 key={`locked-${i}`}
+                accessibilityRole="button"
+                accessibilityLabel="Locked family member. Opens plans"
+                onPress={onUpgrade}
                 className="flex-row items-center gap-3 px-3.5 py-3"
                 style={{ borderTopWidth: 1, borderTopColor: surface.line }}
               >
@@ -299,7 +340,8 @@ function FamilySection({
                     Part of the Family plan. Their records are safe.
                   </Text>
                 </View>
-              </View>
+                <ChevronRight size={16} color={ink[300]} />
+              </Pressable>
             ))
           : null}
 

@@ -49,6 +49,7 @@ export function FamilySwitcher({
   tier = "free",
   lockedCount = 0,
   onSelect,
+  onUpgrade,
 }: {
   /**
    * ONLY the profiles the current plan can actually open — see
@@ -62,6 +63,8 @@ export function FamilySwitcher({
   /** Profiles that exist on the account but are behind the plan. */
   lockedCount?: number;
   onSelect: (profileId: string) => void;
+  /** Opens the paywall. Both the padlocks and the Family plan chip call it. */
+  onUpgrade?: () => void;
 }) {
   const canSwitch = allowsFamily(tier);
   if (profiles.length === 0) return null;
@@ -135,15 +138,19 @@ export function FamilySwitcher({
        * upgrade away — so the row says "locked", which is true, instead of
        * "absent", which is not.
        *
-       * NOT PRESSABLE YET. The web build opens the paywall from here; the
-       * paywall is Phase 4 and there is no checkout before Phase 6, so these
-       * state the fact and wait rather than leading somewhere unfinished.
+       * Pressable, and they open the paywall — the padlock is the reason
+       * somebody wants to upgrade, so it is the natural place to ask. It is
+       * still never labelled with the real member's name or face: the point of
+       * the lock is that the plan does not reach them, and using their identity
+       * as bait would be selling against their own data.
        */}
       {!canSwitch && lockedCount > 0
         ? Array.from({ length: Math.min(lockedCount, 3) }, (_, i) => (
-            <View
+            <Pressable
               key={`locked-${i}`}
-              accessibilityLabel="Locked. Family members are part of the Family plan"
+              accessibilityRole="button"
+              accessibilityLabel="Locked. Family members are part of the Family plan. Opens plans"
+              onPress={onUpgrade}
               className="items-center gap-1.5 px-1 py-1"
             >
               <View
@@ -153,11 +160,16 @@ export function FamilySwitcher({
                 <Lock size={16} color={ink[300]} />
               </View>
               <Text className="text-[11px] text-ink-300">Locked</Text>
-            </View>
+            </Pressable>
           ))
         : null}
 
-      <View className="items-center gap-1.5 px-1 py-1">
+      <Pressable
+        accessibilityRole={canSwitch ? "text" : "button"}
+        accessibilityLabel={canSwitch ? "All family members" : "Family plan. Opens plans"}
+        onPress={canSwitch ? undefined : onUpgrade}
+        className="items-center gap-1.5 px-1 py-1"
+      >
         <View
           className="h-12 w-12 items-center justify-center rounded-pill bg-surface"
           style={{ borderWidth: 1, borderColor: canSwitch ? surface.line : brand[200] }}
@@ -171,7 +183,7 @@ export function FamilySwitcher({
         <Text className="text-[11px]" style={{ color: canSwitch ? ink[500] : brand[600] }}>
           {canSwitch ? "All" : "Family plan"}
         </Text>
-      </View>
+      </Pressable>
     </ScrollView>
   );
 }

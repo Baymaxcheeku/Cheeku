@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
   Activity,
@@ -27,6 +27,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ProductAssessmentCard } from "@/components/ai/product-assessment-card";
 import { ProductPicker } from "@/components/ai/product-picker";
+import { Paywall } from "@/components/billing/paywall";
 import { MascotBust } from "@/components/illustrations/sprout";
 import { EmergencyEscalation } from "@/components/safety/emergency-escalation";
 import {
@@ -62,13 +63,22 @@ const STARTERS: readonly { text: string; icon: LucideIcon }[] = [
 export default function Ask() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const queryClient = useQueryClient();
   const { q, upload } = useLocalSearchParams<{ q?: string; upload?: string }>();
 
   const [turns, setTurns] = useState<ChatTurn[]>([]);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [draft, setDraft] = useState("");
   const [escalation, setEscalation] = useState<SafetyResult | null>(null);
-  const [limitReached, setLimitReached] = useState(false);
+  /*
+   * The paywall, and the question that triggered it.
+   *
+   * Held rather than discarded: someone hits the limit mid-thought, and making
+   * them retype it after paying is the moment a plan starts feeling like a toll
+   * booth. It goes back in the composer immediately and is sent automatically
+   * once a tier is active.
+   */
+  const [paywallFor, setPaywallFor] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
@@ -114,9 +124,9 @@ export default function Ask() {
       const result = await askBaymax(text, conversationId, verdict.status);
       if (!result.ok) {
         if (result.quota) {
-          // Not an error — the free allowance ran out. The question is put back
-          // in the composer rather than thrown away.
-          setLimitReached(true);
+          // Not an error — the free allowance ran out. The question goes back
+          // in the composer AND is held for the paywall to send on activation.
+          setPaywallFor(text);
           setDraft(text);
           return;
         }
@@ -142,7 +152,8 @@ export default function Ask() {
       const result = await askAboutProduct(scenarioId, conversationId, "clear");
       if (!result.ok) {
         if (result.quota) {
-          setLimitReached(true);
+          // No text to hold: the question is fixed copy on the scenario.
+          setPaywallFor("");
           return;
         }
         setError(result.message);
@@ -263,17 +274,6 @@ export default function Ask() {
             </View>
           )}
 
-          {limitReached ? (
-            <View className="mt-4 rounded-card bg-brand-50 p-4">
-              <Text className="text-[14px] font-bold text-brand-700">
-                You&apos;ve used your free chats this month
-              </Text>
-              <Text className="mt-1 text-[12.5px] leading-[18px] text-ink-700">
-                Your question is still in the box. Plans arrive with the first store build, and your
-                allowance resets on the 1st.
-              </Text>
-            </View>
-          ) : null}
 
           {error ? (
             <Text accessibilityRole="alert" className="mt-3 text-[13px] font-medium text-danger-text">
@@ -338,6 +338,31 @@ export default function Ask() {
       />
 
       <EmergencyEscalation result={escalation} onClose={() => setEscalation(null)} />
+
+      <Paywall
+        open={paywallFor !== null}
+        reason="quota"
+        pendingQuestion={paywallFor || undefined}
+        onClose={() => setPaywallFor(null)}
+        onActivated={() => {
+          const held = paywallFor;
+          setPaywallFor(null);
+          /*
+           * The quota banner reads from the entitlement, so it has to be
+           * refetched before the header can stop saying zero left. Invalidating
+           * rather than patching keeps one source of truth.
+           */
+          void queryClient.invalidateQueries({ queryKey: ["ask-context"] });
+          void queryClient.invalidateQueries({ queryKey: ["entitlement"] });
+          // The promise of the held question: it goes now, without being
+          // retyped. An empty string is the product path, which has nothing to
+          // resend.
+          if (held) {
+            setDraft("");
+            void send(held);
+          }
+        }}
+      />
     </KeyboardAvoidingView>
   );
 }
