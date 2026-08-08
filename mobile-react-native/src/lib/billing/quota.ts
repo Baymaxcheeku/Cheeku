@@ -12,10 +12,12 @@ import { FREE_CHAT_LIMIT, isUnlimited, type Tier } from "./plans";
  * any tier and reset anyone's quota — the bundle is not a secret, it is a file
  * on a phone.
  *
- * So the writes belong on a server the client cannot impersonate. When chat
- * lands in Phase 3, `consumeChat` becomes a Supabase Edge Function called with
- * the user's own JWT; when billing lands in Phase 6, the tier writer becomes a
- * validated store receipt. Until then, nothing in this app changes a tier.
+ * So the writes belong somewhere the client cannot impersonate. `consumeChat`
+ * now lives in the database as `messages_chat_quota_trigger` (migration 0011),
+ * which spends a chat inside the message insert itself — so there is nothing
+ * here to call, and nothing a client can decline to call. When billing lands in
+ * Phase 6 the tier writer becomes a validated store receipt. Until then,
+ * nothing in this app changes a tier.
  *
  * The read below is safe on the client because it is RLS-scoped: it can only
  * see the caller's own family row, and being wrong about it in the client's

@@ -24,15 +24,15 @@ import { supabase } from "@/lib/supabase/client";
  * STILL ENFORCED, because RLS does it:
  *   The `documents` insert can only name a profile the caller owns.
  *
- * NO LONGER ENFORCED, and this is a real regression to close:
- *   The PLAN check below. `selectableProfiles()` runs on the device, so a
- *   modified client could file a document against a profile its plan does not
- *   cover. The blast radius is limited — it is the user's own family, their own
- *   storage, and RLS still bounds it to their account, so this is paywall
- *   evasion rather than a privacy breach. But it is not enforcement, and it
- *   must not be described as such. The fix is the same Edge Function that
- *   Phase 3 needs for `consumeChat`: move this write behind it and have the
- *   function re-derive the entitlement. Tracked in PLAN.md under Phase 4.
+ * ENFORCED SINCE MIGRATION 0011, by the database rather than by this file:
+ *   The PLAN check. `documents_plan_scope_trigger` re-derives the entitlement
+ *   inside every insert and refuses a document filed against a profile the
+ *   plan does not cover, whatever the client sends or skips.
+ *
+ *   The check below is therefore the ERROR MESSAGE, not the gate. It can name
+ *   the plan and offer the upgrade; a trigger can only refuse. Removing it
+ *   would still be safe and still be worse, because the reader would get "the
+ *   document could not be saved" for a situation with an obvious action.
  *
  * └──────────────────────────────────────────────────────────────────────────┘
  */
@@ -83,7 +83,7 @@ export async function uploadDocument(
     .maybeSingle();
   if (!profile) return { ok: false, message: "That family member could not be found." };
 
-  // The plan check. See the header comment for exactly how far this goes.
+  // The plan message. The trigger is the check — see the header comment.
   const allowed = await selectableProfiles();
   if (!allowed.some((p) => p.id === profileId)) {
     return {
@@ -152,6 +152,19 @@ export async function uploadDocument(
      * counts against storage and still contains someone's medical record.
      */
     await supabase.storage.from("documents").remove([path]);
+
+    /*
+     * The trigger can still fire here even though the check above passed: a
+     * plan that lapsed between the two, or a client that skipped the check
+     * entirely. Say the same thing the check would have said rather than
+     * "try again", which invites someone to retry something that cannot work.
+     */
+    if (insertError?.message?.includes("not covered by the current plan")) {
+      return {
+        ok: false,
+        message: "That family member is part of the Family plan. Upgrade to add records for them.",
+      };
+    }
     return { ok: false, message: "The document could not be saved. Please try again." };
   }
 

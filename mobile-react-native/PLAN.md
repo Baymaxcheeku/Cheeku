@@ -96,27 +96,28 @@ Screens: `/settings` and its seven sub-screens, paywall, export, delete
    separate members. Every read path derives from `selectableProfiles()`.
    Locked members are preserved and shown as padlocks, never deleted.
 
-2. **Move the entitlement-gated WRITES behind an Edge Function.** Carried over
-   from Phase 2, and the one place the port lost a guarantee the web build had.
+2. **Entitlement-gated WRITES — done, in the database rather than an Edge
+   Function.** This was the one place the port lost a guarantee the web build
+   had: on web the plan checks ran in server actions the client could not
+   reach, and here they ran on the device.
 
-   On web these were server actions, so the plan check ran somewhere the client
-   could not reach. Here the same checks run on the device:
+   Migration `0011_entitlement_enforcement.sql` closes both as triggers:
 
-   - `lib/records/upload.ts` — the `selectableProfiles()` check before filing a
-     document against a member.
-   - `lib/billing/quota.ts` — `consumeChat`, absent entirely for now, needed by
-     Phase 3's chat.
+   - `documents_plan_scope_trigger` — refuses a document filed against a
+     profile the plan does not cover.
+   - `messages_chat_quota_trigger` — spends one chat per user message, under a
+     row lock. Assistant replies and escalations are free.
 
-   What still holds without it: storage policies bind the object key's first
-   segment to `auth.uid()`, and RLS bounds every insert to the caller's own
-   account. So the exposure is **paywall evasion within one's own family**, not
-   cross-account access — a modified client could file records against a
-   profile its plan does not cover. Real, bounded, and not a privacy breach.
+   A trigger rather than the Edge Function this plan originally called for,
+   because both decisions are already writes to tables the database owns. A
+   function the client chooses to invoke is not a check; a trigger runs on every
+   insert whatever the client does. It is also atomic, which the web
+   `consumeChat` was not — it read, compared, then wrote, so two racing sends
+   both passed the comparison. And there is no second deployment target.
 
-   The fix is one Edge Function called with the user's own JWT that re-derives
-   the entitlement server-side. Phase 3 needs it for `consumeChat` regardless,
-   so the upload write should move behind the same function rather than growing
-   a second mechanism.
+   The client keeps its copy of each check. Those are the error messages now,
+   not the gates: they name the plan and offer the upgrade where a trigger can
+   only refuse.
 3. Export and delete must both work. Stores require in-app account deletion.
 4. Health profile completeness meter counts from the saved record, not live
    input.

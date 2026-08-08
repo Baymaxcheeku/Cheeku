@@ -48,56 +48,50 @@ export type AskResult =
   | { ok: false; quota: true; message: string }
   | { ok: false; quota?: false; message: string };
 
-/** First of the month, matching quota.ts. */
-function periodStart(): string {
-  const now = new Date();
-  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01`;
-}
-
-/**
- * How many chats have been used this period, COUNTED FROM THE TRANSCRIPT.
- *
- * The web build read `subscriptions.chats_used_this_month`, incremented by
- * `consumeChat` with the service key. That key cannot exist in this bundle, so
- * the counter cannot be written here at all.
- *
- * Counting the rows instead is not a workaround, it is a better source: the
- * count is derived from messages that actually exist, under RLS, so a client
- * cannot inflate its own allowance by lying about a number. Deleting rows to
- * win chats back is not possible either — `messages` is append-only by policy.
- *
- * WHAT IS STILL MISSING is the enforcement half. This function decides whether
- * to *offer* the send; nothing stops a modified client from inserting past the
- * limit, because the insert is a plain RLS-permitted write. Closing that needs
- * the Edge Function tracked in PLAN.md under Phase 4 — the same one the upload
- * write should move behind.
- */
-export async function chatsUsedThisPeriod(): Promise<number> {
-  const { count, error } = await supabase
-    .from("messages")
-    .select("id", { count: "exact", head: true })
-    .eq("role", "user")
-    .gte("created_at", `${periodStart()}T00:00:00Z`);
-
-  // Fail OPEN on a read error rather than locking someone out of a paid
-  // feature because a count did not come back.
-  if (error) return 0;
-  return count ?? 0;
-}
-
 export type ChatQuota = { used: number; limit: number | null; remaining: number | null };
 
+/**
+ * What the reader has left this period.
+ *
+ * THIS IS THE DISPLAY COPY OF THE QUOTA, NOT THE ENFORCEMENT.
+ *
+ * The counter it reads is written by `messages_chat_quota_trigger` in migration
+ * 0011, which spends one chat per user message inside the insert itself. So
+ * this is the same number the database will act on, but being wrong about it in
+ * the client's favour changes nothing: the send still fails at the write. The
+ * pre-check in `askBaymax` exists so a refused chat costs no work and never
+ * reaches the transcript, not because it stops anybody.
+ *
+ * An earlier version counted rows in `messages`, because nothing maintained the
+ * counter. That has to stay gone now the trigger is live: the trigger does not
+ * charge for escalations and a row count does, so the two would drift apart by
+ * one every time somebody hit the safety gate — drift in the direction of
+ * billing people for asking about an emergency.
+ */
 export async function chatQuota(): Promise<ChatQuota> {
   const entitlement = await getEntitlement();
   if (isUnlimited(entitlement.tier)) return { used: 0, limit: null, remaining: null };
 
-  const used = await chatsUsedThisPeriod();
   return {
-    used,
+    used: entitlement.chatsUsed,
     limit: FREE_CHAT_LIMIT,
-    remaining: Math.max(0, FREE_CHAT_LIMIT - used),
+    remaining: Math.max(0, FREE_CHAT_LIMIT - entitlement.chatsUsed),
   };
 }
+
+/**
+ * Did this write fail because the allowance ran out?
+ *
+ * The trigger raises `check_violation`, which arrives as an ordinary insert
+ * error. Without this the paywall case renders as "Could not save the
+ * conversation" — an error the reader cannot act on, for the one situation with
+ * an obvious action.
+ */
+function isQuotaRefusal(error: { message?: string } | null | undefined): boolean {
+  return Boolean(error?.message?.includes("free chat allowance exhausted"));
+}
+
+const QUOTA_SPENT = "You've used your free chats for this month.";
 
 export async function askBaymax(
   question: string,
@@ -127,7 +121,7 @@ export async function askBaymax(
     return {
       ok: false,
       quota: true,
-      message: "You've used your free chats for this month.",
+      message: QUOTA_SPENT,
     };
   }
 
@@ -194,6 +188,7 @@ export async function askBaymax(
     ])
     .select("id, role, content, citations");
 
+  if (isQuotaRefusal(error)) return { ok: false, quota: true, message: QUOTA_SPENT };
   if (error || !rows || rows.length < 2) {
     return { ok: false, message: "Could not save the conversation." };
   }
@@ -359,7 +354,7 @@ export async function askAboutProduct(
 
   const quota = await chatQuota();
   if (quota.remaining !== null && quota.remaining <= 0) {
-    return { ok: false, quota: true, message: "You've used your free chats for this month." };
+    return { ok: false, quota: true, message: QUOTA_SPENT };
   }
 
   const conditions = await profileConditions(profile.id);
@@ -416,6 +411,7 @@ export async function askAboutProduct(
     ])
     .select("id, role, content");
 
+  if (isQuotaRefusal(error)) return { ok: false, quota: true, message: QUOTA_SPENT };
   if (error || !rows || rows.length < 2) {
     return { ok: false, message: "Could not save the conversation." };
   }
