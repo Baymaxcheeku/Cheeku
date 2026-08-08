@@ -15,6 +15,42 @@ Read alongside:
 
 ## Status
 
+### Screen inventory
+
+**Keep this table honest, and check it before declaring a phase done.** Phase 4
+was called complete once on the strength of the commit log, which read
+"settings hub with working export and account deletion" — true, and the six
+screens the hub links to were stubs. A phase heading cannot tell you that; this
+can. `stub` means the route renders `ComingLater`, so navigation works and
+nothing lies about having data.
+
+| Screen | State | Web counterpart |
+| --- | --- | --- |
+| `/welcome` `/sign-in` `/who` `/profile` `/first-upload` | done | — |
+| `/plan` | **partial** — chooses nothing, shows a notice | `billing/paywall.tsx` |
+| `/home` `/records` `/records/[id]` `/scan` `/ask` | done | — |
+| `/settings` hub, export, delete | done | — |
+| `/settings/security` | done | `settings/security` (134) |
+| `/settings/personal` | **stub** | `personal-info-form.tsx` (149) |
+| `/settings/health` | **stub** | `health-profile-form.tsx` (170) |
+| `/settings/notifications` | **stub** | `notification-toggles.tsx` (210) |
+| `/settings/language` | **stub** | `settings/language` (91) |
+| `/settings/help` | **stub** | `help` + `report-issue` (395) |
+| `/settings/about` | **stub** | `settings/about` (342) |
+| Paywall | **absent** | `billing/paywall.tsx` (609) |
+| Add a family member | **absent** | — |
+
+Three consequences of the gaps, all of them visible to a reader today:
+
+1. Running out of chats shows an inline grey notice where the web build opens
+   the paywall.
+2. The locked rows in the family switcher are deliberately not pressable,
+   because there is nothing to open.
+3. Phase 4 item 4 — the health completeness meter — counts a form that does not
+   exist.
+
+### Toolchain
+
 **Phase 0 complete.** Scaffold, toolchain, shared logic, design tokens.
 
 | | |
