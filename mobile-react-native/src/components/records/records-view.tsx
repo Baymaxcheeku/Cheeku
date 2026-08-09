@@ -11,7 +11,8 @@ import Animated, {
   withSpring,
 } from "react-native-reanimated";
 
-import { EmptyRecords, FileChip, RecordRow, SeverityPill } from "@/components/records/chrome";
+import { EmptyRecords, FileChip, SeverityPill } from "@/components/records/chrome";
+import { RecordCard } from "@/components/records/record-card";
 import { useReducedMotion } from "@/components/ui/motion";
 import { groupByMonth, groupByRecency, railDate } from "@/lib/records/grouping";
 import { type RecordSummary, type Severity } from "@/lib/records/types";
@@ -72,8 +73,8 @@ export function RecordsView({
             <View key={group.key} className="mt-5 px-5">
               <Text className="text-[15px] font-semibold text-ink-900">{group.label}</Text>
               <View className="mt-2 gap-2">
-                {group.records.map((record) => (
-                  <RecordRow key={record.id} record={record} />
+                {group.records.map((record, i) => (
+                  <RecordCard key={record.id} record={record} index={i} />
                 ))}
               </View>
             </View>

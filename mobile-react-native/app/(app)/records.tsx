@@ -3,12 +3,14 @@ import { useState } from "react";
 import { ActivityIndicator, RefreshControl, ScrollView, Text, View } from "react-native";
 
 import { OfflineBanner } from "@/components/app/offline-banner";
-import { RecordsHeader, StatsCard } from "@/components/records/chrome";
+import { RecordsHeader } from "@/components/records/chrome";
+import { PulseBar } from "@/components/records/pulse-bar";
 import { FilterBar, type Filters } from "@/components/records/filter-bar";
 import { RecordsView } from "@/components/records/records-view";
 import { activeProfile, selectableProfiles } from "@/lib/profiles/context";
 import { sinceFromPeriod } from "@/lib/records/filters";
 import { listRecords, statsFrom } from "@/lib/records/queries";
+import type { Severity } from "@/lib/records/types";
 import { brand } from "@/theme/tokens";
 
 /**
@@ -23,6 +25,16 @@ import { brand } from "@/theme/tokens";
 export default function Records() {
   const queryClient = useQueryClient();
   const [filters, setFilters] = useState<Filters>({ sort: "newest" });
+  /*
+   * Severity is filtered CLIENT-SIDE, unlike the others.
+   *
+   * It is not a column: `severity` is derived from the entities attached to a
+   * document, so there is nothing to put in a `where`. The set is already in
+   * memory and small, and pushing this into the query would mean deriving
+   * severity twice — once to filter and once to display — with two chances to
+   * disagree.
+   */
+  const [severity, setSeverity] = useState<Severity | null>(null);
 
   const context = useQuery({
     queryKey: ["records-context"],
@@ -69,6 +81,9 @@ export default function Records() {
   });
 
   const list = records.data ?? [];
+  // The chips scope the list; the bar above keeps counting the unfiltered set,
+  // so tapping one never makes its own count change under the finger.
+  const shown = severity ? list.filter((r) => r.severity === severity) : list;
   const filtered = Boolean(effective ?? filters.docType ?? filters.period);
 
   return (
@@ -99,7 +114,11 @@ export default function Records() {
         onChange={setFilters}
       />
 
-      <StatsCard stats={statsFrom(list)} />
+      <PulseBar
+        stats={statsFrom(list)}
+        active={severity}
+        onToggle={setSeverity}
+      />
 
       {records.isPending ? (
         <View className="mt-10 items-center">
@@ -116,7 +135,7 @@ export default function Records() {
           </Text>
         </View>
       ) : (
-        <RecordsView records={list} filtered={filtered} />
+        <RecordsView records={shown} filtered={filtered || severity !== null} />
       )}
     </ScrollView>
   );
