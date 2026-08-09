@@ -44,7 +44,13 @@ export function faceSvg(seed: string, background: string): string {
     seed,
     size: 96,
     scale: 88,
-    radius: 50,
+    /*
+     * NO `radius`. DiceBear's radius rounds the BACKGROUND inside a square
+     * viewBox, so the corners come back transparent — and every caller clips
+     * the face to a circle anyway, which let the container's white show
+     * through as crescents around the edge. A full-bleed square background
+     * plus our own circular clip produces a clean disc with nothing behind it.
+     */
     backgroundColor: [background],
   }).toString();
 }

@@ -21,6 +21,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ChipSelect, Field } from "@/components/ui/field";
 import { profileSchema } from "@/lib/auth/schemas";
+import { clearPendingJourney, pendingJourney } from "@/lib/onboarding/journey-store";
 import { supabase } from "@/lib/supabase/client";
 import { brand, surface } from "@/theme/tokens";
 
@@ -152,10 +153,15 @@ export default function Profile() {
         sex: parsed.data.sex || null,
         relationship: "self",
         is_primary: true,
+        // The onboarding pick, moved from local storage to its durable home.
+        // A hint about which articles to surface, never a clinical fact.
+        journey: await pendingJourney(),
         conditions: parsed.data.conditions
           ? parsed.data.conditions.split(",").map((c) => c.trim())
           : [],
       });
+      await clearPendingJourney();
+
       if (profileError) {
         setMessage("We couldn't save that. Try again.");
         return;

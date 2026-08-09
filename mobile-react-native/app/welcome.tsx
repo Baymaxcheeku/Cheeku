@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { MascotBust } from "@/components/illustrations/sprout";
 import { Drift, PopIn, PressRow, Settle, StaggerItem } from "@/components/ui/motion";
 import { PANELS } from "@/lib/onboarding/panels";
+import { rememberJourney } from "@/lib/onboarding/journey-store";
 import { JOURNEYS, type JourneyId } from "@/lib/onboarding/journeys";
 import { castFaces } from "@/lib/profiles/avatar";
 import { brand, ink, shadow, surface } from "@/theme/tokens";
@@ -114,7 +115,21 @@ export default function Welcome() {
           <Text className="mt-2.5 text-[14px] leading-[21px] text-ink-500">{panel.body}</Text>
 
           {panel.kind === "journeys" ? (
-            <JourneyGrid selected={journey} onPick={setJourney} />
+            <JourneyGrid
+              selected={journey}
+              onPick={(picked) => {
+                setJourney(picked);
+                /*
+                 * Written the moment it is tapped, not on Continue. There is no
+                 * profile to write to yet — this is picked before sign-up — so
+                 * it goes to local storage and is transferred onto the profile
+                 * when one is created. Until this landed the answer lived in
+                 * component state and died on the next navigation, so nothing
+                 * downstream could ever read it.
+                 */
+                void rememberJourney(picked);
+              }}
+            />
           ) : null}
         </View>
       </View>

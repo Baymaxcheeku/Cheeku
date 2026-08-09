@@ -17,6 +17,8 @@ import { FamilyTray } from "@/components/app/family-tray";
 import { Paywall } from "@/components/billing/paywall";
 import { FamilySwitcher } from "@/components/app/family-switcher";
 import { OfflineBanner } from "@/components/app/offline-banner";
+import { KnowledgeRail } from "@/components/knowledge/knowledge-rail";
+import { knowledgeFeed } from "@/lib/knowledge/queries";
 import { HomeAskBox } from "@/components/app/home-ask-box";
 import { NotificationsBell } from "@/components/app/notifications-bell";
 import { RecordRow } from "@/components/records/chrome";
@@ -55,6 +57,8 @@ export default function Home() {
   const [paywallOpen, setPaywallOpen] = useState(false);
   const [trayOpen, setTrayOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
+
+  const knowledge = useQuery({ queryKey: ["knowledge-feed"], queryFn: () => knowledgeFeed(3) });
 
   const context = useQuery({
     queryKey: ["home-context"],
@@ -197,6 +201,8 @@ export default function Home() {
        * opened the app, not a footnote below a stats row.
        */}
       <HomeAskBox />
+
+      <KnowledgeRail articles={knowledge.data ?? []} />
 
       {/*
        * ONE section, not two. The old layout said "2 records to review" three
