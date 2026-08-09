@@ -50,6 +50,7 @@ export function FamilySwitcher({
   lockedCount = 0,
   onSelect,
   onUpgrade,
+  onViewAll,
 }: {
   /**
    * ONLY the profiles the current plan can actually open — see
@@ -65,6 +66,8 @@ export function FamilySwitcher({
   onSelect: (profileId: string) => void;
   /** Opens the paywall. Both the padlocks and the Family plan chip call it. */
   onUpgrade?: () => void;
+  /** Opens the full roster. The "All" chip existed with no handler until now. */
+  onViewAll?: () => void;
 }) {
   const canSwitch = allowsFamily(tier);
   if (profiles.length === 0) return null;
@@ -164,10 +167,16 @@ export function FamilySwitcher({
           ))
         : null}
 
+      {/*
+       * The trailing chip. On a Family plan it opens the roster; otherwise it
+       * opens the paywall. It previously rendered as plain text with no
+       * handler on the paid tier, so the one control that looked like "show me
+       * everyone" did nothing at all.
+       */}
       <Pressable
-        accessibilityRole={canSwitch ? "text" : "button"}
-        accessibilityLabel={canSwitch ? "All family members" : "Family plan. Opens plans"}
-        onPress={canSwitch ? undefined : onUpgrade}
+        accessibilityRole="button"
+        accessibilityLabel={canSwitch ? "See all family members" : "Family plan. Opens plans"}
+        onPress={canSwitch ? onViewAll : onUpgrade}
         className="items-center gap-1.5 px-1 py-1"
       >
         <View

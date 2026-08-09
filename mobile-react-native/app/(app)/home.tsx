@@ -12,6 +12,8 @@ import {
 import { ActivityIndicator, Pressable, RefreshControl, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { AddMemberSheet } from "@/components/app/add-member-sheet";
+import { FamilyTray } from "@/components/app/family-tray";
 import { Paywall } from "@/components/billing/paywall";
 import { FamilySwitcher } from "@/components/app/family-switcher";
 import { OfflineBanner } from "@/components/app/offline-banner";
@@ -19,6 +21,7 @@ import { HomeAskBox } from "@/components/app/home-ask-box";
 import { NotificationsBell } from "@/components/app/notifications-bell";
 import { RecordRow } from "@/components/records/chrome";
 import { Button } from "@/components/ui/button";
+import { allowsFamily } from "@/lib/billing/plans";
 import { getEntitlement } from "@/lib/billing/quota";
 import { deriveNotifications } from "@/lib/notifications/derive";
 import { activeProfile, profileAccess, switchProfile } from "@/lib/profiles/context";
@@ -50,6 +53,8 @@ export default function Home() {
   const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
   const [paywallOpen, setPaywallOpen] = useState(false);
+  const [trayOpen, setTrayOpen] = useState(false);
+  const [addOpen, setAddOpen] = useState(false);
 
   const context = useQuery({
     queryKey: ["home-context"],
@@ -167,6 +172,7 @@ export default function Home() {
             lockedCount={access.lockedCount}
             onSelect={onSelectProfile}
             onUpgrade={() => setPaywallOpen(true)}
+            onViewAll={() => setTrayOpen(true)}
           />
         </View>
       </View>
@@ -242,6 +248,28 @@ export default function Home() {
           </View>
         ) : null}
       </View>
+
+      <FamilyTray
+        open={trayOpen}
+        onClose={() => setTrayOpen(false)}
+        profiles={access.selectable}
+        lockedCount={access.lockedCount}
+        activeId={profile.id}
+        canAdd={allowsFamily(data.entitlement.tier)}
+        onSelect={(id) => void onSelectProfile(id)}
+        onAdd={() => setAddOpen(true)}
+        onUpgrade={() => setPaywallOpen(true)}
+      />
+
+      <AddMemberSheet
+        open={addOpen}
+        onClose={() => setAddOpen(false)}
+        onAdded={() => {
+          setAddOpen(false);
+          void queryClient.invalidateQueries();
+        }}
+        onUpgrade={() => setPaywallOpen(true)}
+      />
 
       <Paywall
         open={paywallOpen}
