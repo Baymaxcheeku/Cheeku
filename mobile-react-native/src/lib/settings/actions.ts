@@ -166,18 +166,15 @@ export async function submitSupportTicket(
 /**
  * Adds a family member.
  *
- * THE SEAT CHECK BELOW IS A MESSAGE, NOT A GATE. It runs on the device, so a
- * patched client can skip it — the same limit the paywall work in migration
- * 0011 had to move into the database for uploads and chats.
+ * THE SEAT CHECK BELOW IS THE MESSAGE. The gate is
+ * `profiles_seat_limit_trigger` in migration 0013, which re-derives the
+ * entitlement inside the insert and refuses whatever the client sends. This
+ * copy runs first so the reader gets a sentence naming the plan and offering
+ * the upgrade, where a trigger can only refuse.
  *
- * What still holds without it: migration 0001's trigger caps any family at six
- * profiles, and RLS binds the insert to the caller's own account. So the
- * exposure is a free account creating profiles its plan does not cover, and
- * then finding it cannot open them, because `selectableProfiles()` slices by
- * seats on every read. They would be paying nothing for rows they cannot see.
- *
- * Worth closing with a trigger like the other two, and worth doing when the
- * add-member UI is not brand new. Tracked in PLAN.md under Phase 4.
+ * Two other limits sit underneath, and they fail for different reasons:
+ * migration 0001 caps any family at six profiles whatever the plan, and RLS
+ * binds the insert to the caller's own account.
  */
 export async function addFamilyMember(
   input: AddMemberInput,
@@ -231,6 +228,15 @@ export async function addFamilyMember(
     // exception. Say the limit rather than the database's wording.
     if (error.message.includes("at most 6 profiles")) {
       return { ok: false, message: "A family can hold six profiles. Remove someone first." };
+    }
+    // The seat trigger. Reachable when a plan lapsed between the check above
+    // and this insert, or when the client skipped the check entirely.
+    if (error.message.includes("plan covers")) {
+      return {
+        ok: false,
+        needsUpgrade: true,
+        message: "Your plan has no room for another member.",
+      };
     }
     return { ok: false, message: "We couldn't add that member. Try again." };
   }

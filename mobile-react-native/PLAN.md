@@ -27,27 +27,22 @@ nothing lies about having data.
 | Screen | State | Web counterpart |
 | --- | --- | --- |
 | `/welcome` `/sign-in` `/who` `/profile` `/first-upload` | done | — |
-| `/plan` | **partial** — chooses nothing, shows a notice | `billing/paywall.tsx` |
+| `/plan` | done — opens the real chooser | `billing/paywall.tsx` |
 | `/home` `/records` `/records/[id]` `/scan` `/ask` | done | — |
 | `/settings` hub, export, delete | done | — |
 | `/settings/security` | done | `settings/security` (134) |
-| `/settings/personal` | **stub** | `personal-info-form.tsx` (149) |
-| `/settings/health` | **stub** | `health-profile-form.tsx` (170) |
-| `/settings/notifications` | **stub** | `notification-toggles.tsx` (210) |
-| `/settings/language` | **stub** | `settings/language` (91) |
-| `/settings/help` | **stub** | `help` + `report-issue` (395) |
-| `/settings/about` | **stub** | `settings/about` (342) |
-| Paywall | **absent** | `billing/paywall.tsx` (609) |
-| Add a family member | **absent** | — |
+| `/settings/personal` | done | `personal-info-form.tsx` (149) |
+| `/settings/health` | done | `health-profile-form.tsx` (170) |
+| `/settings/notifications` | done | `notification-toggles.tsx` (210) |
+| `/settings/language` | done | `settings/language` (91) |
+| `/settings/help` | done | `help` + `report-issue` (395) |
+| `/settings/about` | done | `settings/about` (342) |
+| Paywall | done | `billing/paywall.tsx` (609) |
+| Add a family member | done | — |
 
-Three consequences of the gaps, all of them visible to a reader today:
-
-1. Running out of chats shows an inline grey notice where the web build opens
-   the paywall.
-2. The locked rows in the family switcher are deliberately not pressable,
-   because there is nothing to open.
-3. Phase 4 item 4 — the health completeness meter — counts a form that does not
-   exist.
+**Phase 4 is complete.** The three gaps this table was written to catch — a
+grey notice where the paywall belonged, padlocked rows that opened nothing, and
+a completeness meter counting a form that did not exist — are all closed.
 
 ### Toolchain
 
@@ -137,12 +132,18 @@ Screens: `/settings` and its seven sub-screens, paywall, export, delete
    had: on web the plan checks ran in server actions the client could not
    reach, and here they ran on the device.
 
-   Migration `0011_entitlement_enforcement.sql` closes both as triggers:
+   Migrations `0011_entitlement_enforcement.sql` and `0013_profile_seat_limit.sql`
+   close all three as triggers:
 
    - `documents_plan_scope_trigger` — refuses a document filed against a
      profile the plan does not cover.
    - `messages_chat_quota_trigger` — spends one chat per user message, under a
      row lock. Assistant replies and escalations are free.
+   - `profiles_seat_limit_trigger` — refuses a profile beyond the plan's seats.
+     The first profile on an account is always allowed, whatever the plan says:
+     onboarding creates it before any subscription row exists, and an account
+     that cannot create its own profile has no way forward and no way to ask
+     for help.
 
    A trigger rather than the Edge Function this plan originally called for,
    because both decisions are already writes to tables the database owns. A

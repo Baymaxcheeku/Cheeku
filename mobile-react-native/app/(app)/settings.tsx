@@ -14,6 +14,7 @@ import {
   ShieldCheck,
   Trash2,
   UserCog,
+  UserPlus,
   type LucideIcon,
 } from "lucide-react-native";
 import { useState } from "react";
@@ -36,6 +37,7 @@ import {
   exportAccount,
   shareExport,
 } from "@/lib/account/actions";
+import { AddMemberSheet } from "@/components/app/add-member-sheet";
 import { Paywall } from "@/components/billing/paywall";
 import { allowsFamily, planFor, seatsFor } from "@/lib/billing/plans";
 import { getEntitlement } from "@/lib/billing/quota";
@@ -58,6 +60,7 @@ export default function Settings() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [paywallOpen, setPaywallOpen] = useState(false);
+  const [addOpen, setAddOpen] = useState(false);
 
   const context = useQuery({
     queryKey: ["settings-context"],
@@ -178,6 +181,7 @@ export default function Settings() {
         seats={seatsFor(entitlement.tier)}
         canAdd={allowsFamily(entitlement.tier)}
         onUpgrade={() => setPaywallOpen(true)}
+        onAddMember={() => setAddOpen(true)}
       />
 
       {/*
@@ -229,6 +233,18 @@ export default function Settings() {
        * eighth container in a row of eight and read as another thing to act on;
        * this is a footnote, and footnotes look like footnotes.
        */}
+      <AddMemberSheet
+        open={addOpen}
+        onClose={() => setAddOpen(false)}
+        onAdded={() => {
+          setAddOpen(false);
+          // The roster, the seat count and the home switcher all derive from
+          // the profile list, so everything is refetched rather than patched.
+          void queryClient.invalidateQueries();
+        }}
+        onUpgrade={() => setPaywallOpen(true)}
+      />
+
       <Paywall
         open={paywallOpen}
         reason="upgrade"
@@ -267,6 +283,7 @@ function FamilySection({
   seats,
   canAdd,
   onUpgrade,
+  onAddMember,
 }: {
   profiles: readonly {
     id: string;
@@ -279,9 +296,13 @@ function FamilySection({
   seats: number;
   canAdd: boolean;
   onUpgrade: () => void;
+  onAddMember: () => void;
 }) {
   const reachable = profiles.slice(0, seats);
   const lockedCount = Math.max(0, profiles.length - reachable.length);
+  // Clamped: a downgrade leaves more profiles than seats, and "-2 seats free"
+  // is a number nobody should ever be shown.
+  const free = Math.max(0, seats - profiles.length);
   const lockedFaces = castFaces(4);
 
   return (
@@ -345,13 +366,38 @@ function FamilySection({
             ))
           : null}
 
-        {canAdd ? (
-          <View
-            className="px-3.5 py-3"
+        {/*
+         * Shown only while there is room. On a full Family plan this becomes a
+         * plain line rather than a button: an invitation that the database is
+         * going to refuse is worse than no invitation, and there is nothing to
+         * upsell to above Family.
+         */}
+        {canAdd && free > 0 ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Add a family member"
+            onPress={onAddMember}
+            className="flex-row items-center gap-3.5 px-3.5 py-3"
             style={{ borderTopWidth: 1, borderTopColor: surface.line }}
           >
+            <View
+              className="h-10 w-10 items-center justify-center rounded-pill bg-brand-50"
+              style={{ borderWidth: 1, borderStyle: "dashed", borderColor: brand[200] }}
+            >
+              <UserPlus size={17} color={brand[600]} />
+            </View>
+            <View className="min-w-0 flex-1">
+              <Text className="text-[14px] font-semibold text-brand-600">Add a family member</Text>
+              <Text className="text-[11.5px] text-ink-500">
+                {free} of {seats} {seats === 1 ? "seat" : "seats"} free
+              </Text>
+            </View>
+            <ChevronRight size={16} color={ink[300]} />
+          </Pressable>
+        ) : canAdd ? (
+          <View className="px-3.5 py-3" style={{ borderTopWidth: 1, borderTopColor: surface.line }}>
             <Text className="text-[12.5px] text-ink-300">
-              Adding members arrives with the account phase.
+              All {seats} seats on your plan are in use.
             </Text>
           </View>
         ) : null}

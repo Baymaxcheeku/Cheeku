@@ -164,15 +164,36 @@ export async function saveProfile(formData: FormData): Promise<ActionResult> {
   } = await supabase.auth.getUser();
   if (!user) return { ok: false, message: "Your session expired. Please sign in again." };
 
-  const { data: family, error: familyError } = await supabase
+  /*
+   * REUSE the family when this account already has one.
+   *
+   * This used to insert unconditionally, so running onboarding a second time
+   * created a SECOND family for the same owner, and nothing said which was the
+   * account's. `getEntitlement` resolves it with `.maybeSingle()`, which errors
+   * on two rows and falls through to the free entitlement, so a paying account
+   * displayed "Free Plan". Migration 0014 merged the duplicates and added a
+   * unique index; this is the other half of the fix. The mobile build had the
+   * identical bug in `app/profile.tsx`.
+   */
+  const { data: existing } = await supabase
     .from("families")
-    .insert({ owner_id: user.id })
     .select("id")
-    .single();
-  if (familyError || !family) return { ok: false, message: "We couldn't save that. Try again." };
+    .eq("owner_id", user.id)
+    .maybeSingle();
+
+  let familyId = existing?.id as string | undefined;
+  if (!familyId) {
+    const { data: created, error: familyError } = await supabase
+      .from("families")
+      .insert({ owner_id: user.id })
+      .select("id")
+      .single();
+    if (familyError || !created) return { ok: false, message: "We couldn't save that. Try again." };
+    familyId = created.id as string;
+  }
 
   const { error: profileError } = await supabase.from("profiles").insert({
-    family_id: family.id,
+    family_id: familyId,
     user_id: user.id,
     name: parsed.data.fullName,
     dob: parsed.data.dob || null,

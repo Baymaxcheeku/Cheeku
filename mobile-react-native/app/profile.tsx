@@ -110,18 +110,42 @@ export default function Profile() {
         return;
       }
 
-      const { data: family, error: familyError } = await supabase
+      /*
+       * REUSE the family when this account already has one.
+       *
+       * This used to insert unconditionally, so running onboarding a second
+       * time — a reinstall, a back-navigation, a resumed signup — created a
+       * SECOND family for the same owner, and nothing said which was the
+       * account's. `getEntitlement` resolves the family with `.maybeSingle()`,
+       * which errors on two rows and falls through to the free entitlement, so
+       * a paying account displayed "Free Plan" with a 5-chat allowance.
+       *
+       * Migration 0014 merged the duplicates and added a unique index. This is
+       * the other half: the index makes a second family impossible, and this
+       * makes the app stop trying.
+       */
+      const { data: existing } = await supabase
         .from("families")
-        .insert({ owner_id: user.id })
         .select("id")
-        .single();
-      if (familyError || !family) {
-        setMessage("We couldn't save that. Try again.");
-        return;
+        .eq("owner_id", user.id)
+        .maybeSingle();
+
+      let familyId = existing?.id as string | undefined;
+      if (!familyId) {
+        const { data: created, error: familyError } = await supabase
+          .from("families")
+          .insert({ owner_id: user.id })
+          .select("id")
+          .single();
+        if (familyError || !created) {
+          setMessage("We couldn't save that. Try again.");
+          return;
+        }
+        familyId = created.id as string;
       }
 
       const { error: profileError } = await supabase.from("profiles").insert({
-        family_id: family.id,
+        family_id: familyId,
         user_id: user.id,
         name: parsed.data.fullName,
         dob: parsed.data.dob || null,
