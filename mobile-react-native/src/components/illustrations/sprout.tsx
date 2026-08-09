@@ -34,18 +34,29 @@ const BODY =
 function SproutDefs() {
   return (
     <Defs>
+      {/*
+       * The highlight starts at #e6e1fb, not #f4f1ff.
+       *
+       * #f4f1ff is within a hair of brand-50 (#f1f0fe), which is the fill of
+       * the hero card on About, the paywall header and half the panels in the
+       * app. On those the top of the mascot was the same colour as the surface
+       * behind it, so the body dissolved and only the eyes and mouth survived.
+       * The gradient now stays inside a range that reads against both canvas
+       * and brand-50, and the outline below carries the silhouette on anything
+       * lighter still.
+       */}
       <RadialGradient id="shell" cx="0.34" cy="0.24" r="0.88" fx="0.28" fy="0.16">
-        <Stop offset="0" stopColor="#f4f1ff" />
-        <Stop offset="0.34" stopColor="#e7e1fd" />
-        <Stop offset="0.66" stopColor="#d3c9f9" />
-        <Stop offset="0.88" stopColor="#bcaef3" />
-        <Stop offset="1" stopColor="#a394ea" />
+        <Stop offset="0" stopColor="#e6e1fb" />
+        <Stop offset="0.34" stopColor="#d8d0f8" />
+        <Stop offset="0.66" stopColor="#c3b7f4" />
+        <Stop offset="0.88" stopColor="#ac9cee" />
+        <Stop offset="1" stopColor="#9382e4" />
       </RadialGradient>
 
       <RadialGradient id="limb" cx="0.36" cy="0.26" r="0.86">
-        <Stop offset="0" stopColor="#e2dbfc" />
-        <Stop offset="0.55" stopColor="#c9bcf7" />
-        <Stop offset="1" stopColor="#9b8ae6" />
+        <Stop offset="0" stopColor="#d5ccf9" />
+        <Stop offset="0.55" stopColor="#bcadf3" />
+        <Stop offset="1" stopColor="#8f7ce1" />
       </RadialGradient>
 
       <LinearGradient id="foot" x1="0" y1="0" x2="0" y2="1">
@@ -143,6 +154,16 @@ function Body() {
   return (
     <G>
       <Path d={BODY} fill="url(#shell)" />
+      {/*
+       * A soft contour, drawn once over the fill.
+       *
+       * The gradient alone cannot be trusted: this mascot sits on canvas, on
+       * white cards, on brand-50 and on the brand-600 CTA, and no single fill
+       * reads on all four. A low-opacity stroke in the brand's own deep violet
+       * gives the shape an edge everywhere without turning it into a cartoon
+       * outline.
+       */}
+      <Path d={BODY} fill="none" stroke="#6d5cc8" strokeWidth="1.6" opacity="0.28" />
       <Path d={BODY} fill="url(#ao)" />
       <Path d={BODY} fill="url(#bounce)" opacity="0.5" />
       <Ellipse cx="78" cy="72" rx="20" ry="14" fill="#fff" opacity="0.32" transform="rotate(-22 78 72)" />

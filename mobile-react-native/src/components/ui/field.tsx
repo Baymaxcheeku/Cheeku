@@ -38,18 +38,68 @@ export function Field({
         {required ? <Text className="text-brand-600"> *</Text> : null}
       </Text>
 
+      {/*
+       * A multiline field grows; a single-line one is a fixed 52pt row. Using
+       * the fixed height for both squashed every textarea in the app to one
+       * line — `alignItems: center` on a growing box also centres the first
+       * line and leaves the rest below the border.
+       */}
       <View
-        className="flex-row items-center gap-3 rounded-tile bg-surface px-4"
-        style={{ height: 52, borderWidth: 1, borderColor }}
+        className="flex-row gap-3 rounded-tile bg-surface px-4"
+        style={{
+          alignItems: props.multiline ? "flex-start" : "center",
+          ...(props.multiline ? { paddingVertical: 12 } : { height: 52 }),
+          borderWidth: 1,
+          borderColor,
+        }}
       >
-        {Icon ? <Icon size={18} color={brand[400]} /> : null}
+        {Icon ? (
+          <Icon size={18} color={brand[400]} style={props.multiline ? { marginTop: 2 } : undefined} />
+        ) : null}
         <TextInput
           {...props}
           accessibilityLabel={label}
-          onFocus={() => setFocused(true)}
-          onBlur={() => setFocused(false)}
+          /*
+           * Wrapped, not replaced. A caller that passes its own onFocus must
+           * still get one, and the focus border must still move — spreading
+           * props over these afterwards would drop whichever the caller did
+           * not happen to define.
+           */
+          onFocus={(e) => {
+            setFocused(true);
+            props.onFocus?.(e);
+          }}
+          onBlur={(e) => {
+            setFocused(false);
+            props.onBlur?.(e);
+          }}
           placeholderTextColor={ink[300]}
-          style={{ flex: 1, fontSize: 15, color: ink[900], fontFamily: "Inter_400Regular" }}
+          /*
+           * AUTOFILL IS OFF BY DEFAULT, and that is a privacy decision rather
+           * than a styling one. These fields hold height, weight, conditions
+           * and medicine names; letting the browser or the OS keychain
+           * remember them copies medical data into a store this app does not
+           * control and cannot reach from its own delete path.
+           *
+           * `?? "off"` rather than a hard "off": sign-in genuinely wants the
+           * password manager, and passes its own value.
+           */
+          autoComplete={props.autoComplete ?? "off"}
+          autoCorrect={props.autoCorrect ?? false}
+          style={[
+            { flex: 1, fontSize: 15, color: ink[900], fontFamily: "Inter_400Regular" },
+            /*
+             * Web only, and cast because React Native's TextStyle has no
+             * `outlineStyle` — react-native-web passes it through to CSS and
+             * the native renderers ignore it. Without it the browser paints
+             * its own focus ring inside our border, which reads as a second,
+             * misaligned box sitting inside the field.
+             */
+            { outlineStyle: "none" } as never,
+            // The caller's style LAST. It used to come first, so every
+            // `minHeight` passed to a multiline field was silently discarded.
+            props.style,
+          ]}
         />
       </View>
 

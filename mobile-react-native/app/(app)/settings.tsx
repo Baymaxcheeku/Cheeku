@@ -2,6 +2,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import {
   Bell,
+  ChevronDown,
   ChevronRight,
   CircleHelp,
   Crown,
@@ -18,8 +19,10 @@ import {
   type LucideIcon,
 } from "lucide-react-native";
 import { useState } from "react";
+
 import {
   ActivityIndicator,
+  LayoutAnimation,
   Modal,
   Pressable,
   ScrollView,
@@ -320,10 +323,70 @@ function FamilySection({
   const free = Math.max(0, seats - profiles.length);
   const lockedFaces = castFaces(4);
 
+  /*
+   * COLLAPSED BY DEFAULT once there is more than one member.
+   *
+   * At full height this was six rows plus an add row, so a family of four
+   * pushed Account, Preferences and Support entirely below the fold — the
+   * settings screen became a family screen with settings underneath it. The
+   * summary row carries the same facts (who is active, how many people, how
+   * many seats) in one line, and the roster is one tap away.
+   *
+   * A single-member account expands, because a collapsed list of one is a
+   * disclosure triangle hiding nothing.
+   */
+  const [open, setOpen] = useState(profiles.length <= 1);
+  const active = profiles.find((p) => p.id === activeId);
+
   return (
     <View className="mt-6">
       <Text className="px-5 text-[12px] font-bold uppercase tracking-wide text-ink-300">Family</Text>
       <View className="mx-5 mt-2 overflow-hidden rounded-card bg-surface" style={shadow.e1}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityState={{ expanded: open }}
+          accessibilityLabel={`Family. ${profiles.length} ${profiles.length === 1 ? "member" : "members"}. ${open ? "Collapse" : "Expand"}`}
+          onPress={() => {
+            LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+            setOpen((v) => !v);
+          }}
+          className="flex-row items-center gap-3 px-3.5 py-3"
+        >
+          <View className="flex-row">
+            {/* Overlapped faces: the roster at a glance, in one row's height. */}
+            {profiles.slice(0, 3).map((p, i) => (
+              <View
+                key={p.id}
+                className="h-9 w-9 overflow-hidden rounded-pill bg-canvas"
+                style={{
+                  marginLeft: i === 0 ? 0 : -10,
+                  borderWidth: 2,
+                  borderColor: surface.base,
+                }}
+              >
+                <SvgXml xml={p.avatar} width={36} height={36} />
+              </View>
+            ))}
+          </View>
+          <View className="min-w-0 flex-1">
+            <Text className="text-[14px] font-semibold text-ink-900" numberOfLines={1}>
+              {active ? `Viewing ${active.name}` : "Your family"}
+            </Text>
+            <Text className="text-[11.5px] text-ink-500">
+              {profiles.length} of {seats} {seats === 1 ? "seat" : "seats"} used
+              {free > 0 ? `, ${free} free` : ""}
+            </Text>
+          </View>
+          <View style={{ transform: [{ rotate: open ? "180deg" : "0deg" }] }}>
+            <ChevronDown size={18} color={ink[300]} />
+          </View>
+        </Pressable>
+      </View>
+
+      <View
+        className="mx-5 mt-2 overflow-hidden rounded-card bg-surface"
+        style={[shadow.e1, open ? undefined : { height: 0, marginTop: 0, opacity: 0 }]}
+      >
         {reachable.map((p, i) => (
           <View
             key={p.id}
