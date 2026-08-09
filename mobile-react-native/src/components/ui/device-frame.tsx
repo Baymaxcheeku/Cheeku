@@ -75,6 +75,14 @@ function useModalsInsideFrame(active: boolean, left: number, top: number) {
      * the containing block for fixed descendants, which is what actually
      * pulls them inside the frame.
      *
+     * The pointer-events pair is not decoration, it is the difference between
+     * a working app and a dead one. RNW leaves a portal container mounted and
+     * EMPTY after a modal closes. Giving those leftovers a real 393x852 box
+     * and a transform stacked four invisible panels over the whole phone, and
+     * every tap landed on them instead of the UI underneath. So the container
+     * never takes a pointer, its contents do, and a container with nothing in
+     * it is removed from the layout entirely.
+     *
      * Keep the CSS free of backticks: it lives in a template literal, and one
      * in a comment silently ends the string. That cost a bundle error here.
      */
@@ -90,6 +98,13 @@ function useModalsInsideFrame(active: boolean, left: number, top: number) {
         border-radius: ${SCREEN.radius}px;
         overflow: hidden;
         transform: translateZ(0);
+        pointer-events: none;
+      }
+      body > div:not(#root):not(#error-toast) > * {
+        pointer-events: auto;
+      }
+      body > div:not(#root):not(#error-toast):empty {
+        display: none !important;
       }
     `;
   }, [active, left, top]);
