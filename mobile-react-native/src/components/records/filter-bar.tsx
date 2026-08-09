@@ -1,4 +1,12 @@
-import { Check, ChevronDown, SlidersHorizontal, X } from "lucide-react-native";
+import {
+  CalendarRange,
+  Check,
+  ChevronDown,
+  Layers,
+  SlidersHorizontal,
+  Users,
+  X,
+} from "lucide-react-native";
 import { useState } from "react";
 import { Modal, Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -92,16 +100,18 @@ export function FilterBar({
         contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 4, gap: 6 }}
         className="mt-4 grow-0"
       >
-        <Chip label={memberLabel} on={memberIsFilter} onPress={() => setSheet("member")} />
+        <Chip label={memberLabel} on={memberIsFilter} onPress={() => setSheet("member")} icon={Users} />
         <Chip
           label={filters.docType ? DOC_TYPE_LABEL[filters.docType] : "All types"}
           on={Boolean(filters.docType)}
           onPress={() => setSheet("docType")}
+          icon={Layers}
         />
         <Chip
           label={PERIODS.find((p) => p.value === (filters.period ?? ""))?.label ?? "All time"}
           on={Boolean(filters.period)}
           onPress={() => setSheet("period")}
+          icon={CalendarRange}
         />
         <Chip
           label={filters.sort === "oldest" ? "Oldest" : "Newest"}
@@ -116,7 +126,8 @@ export function FilterBar({
             onPress={() =>
               onChange({ profileId: undefined, docType: undefined, period: undefined, sort: filters.sort })
             }
-            className="flex-row items-center gap-1 rounded-pill bg-brand-600 px-3 py-2"
+            className="h-9 flex-row items-center gap-1.5 rounded-pill px-3.5"
+            style={{ backgroundColor: ink[900] }}
           >
             <X size={13} color="#ffffff" />
             <Text className="text-[12px] font-semibold text-white">Clear {activeCount}</Text>
@@ -169,6 +180,19 @@ export function FilterBar({
   );
 }
 
+/**
+ * A filter pill.
+ *
+ * The set previously read as four identical dropdowns — same white, same
+ * border, same chevron — so the one carrying an active filter looked exactly
+ * like the three that were not, and "All members" (a real narrowing) was
+ * indistinguishable from "All time" (no filter at all).
+ *
+ * An active pill is now FILLED, and it carries a small dot rather than a
+ * chevron. Fill is the only difference that survives a glance at arm's length;
+ * a border tint does not. The leading icon names the axis so the row can be
+ * read without opening anything.
+ */
 function Chip({
   label,
   on,
@@ -183,23 +207,31 @@ function Chip({
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={label}
+      accessibilityState={{ selected: on }}
+      accessibilityLabel={on ? `${label}, filter applied` : label}
       onPress={onPress}
-      className="flex-row items-center gap-1 rounded-pill px-3 py-2"
+      className="h-9 flex-row items-center gap-1.5 rounded-pill px-3.5"
       style={{
-        backgroundColor: on ? brand[50] : surface.base,
+        backgroundColor: on ? brand[600] : surface.base,
         borderWidth: 1,
-        borderColor: on ? brand[200] : surface.line,
+        borderColor: on ? brand[600] : surface.line,
       }}
     >
+      <Icon size={13} color={on ? "#ffffff" : ink[300]} />
       <Text
-        className="text-[12px] font-medium"
+        className="text-[12.5px] font-medium"
         numberOfLines={1}
-        style={{ color: on ? brand[700] : ink[500] }}
+        style={{ color: on ? "#ffffff" : ink[700] }}
       >
         {label}
       </Text>
-      <Icon size={13} color={on ? brand[700] : ink[300]} />
+      {on ? (
+        <View
+          style={{ width: 5, height: 5, borderRadius: 999, backgroundColor: "rgba(255,255,255,0.8)" }}
+        />
+      ) : (
+        <ChevronDown size={13} color={ink[300]} />
+      )}
     </Pressable>
   );
 }

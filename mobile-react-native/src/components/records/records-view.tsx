@@ -12,7 +12,7 @@ import Animated, {
 } from "react-native-reanimated";
 
 import { EmptyRecords, FileChip, SeverityPill } from "@/components/records/chrome";
-import { RecordCard } from "@/components/records/record-card";
+import { RecordCard, TYPE_STYLE } from "@/components/records/record-card";
 import { useReducedMotion } from "@/components/ui/motion";
 import { groupByMonth, groupByRecency, railDate } from "@/lib/records/grouping";
 import { type RecordSummary, type Severity } from "@/lib/records/types";
@@ -125,8 +125,8 @@ function ViewToggle({ view, onChange }: { view: View_; onChange: (next: View_) =
   const x = useSharedValue(0);
 
   function measure(event: LayoutChangeEvent) {
-    // 4pt of padding on each side of the track.
-    setHalf((event.nativeEvent.layout.width - 8) / 2);
+    // 3pt of padding on each side of the track.
+    setHalf((event.nativeEvent.layout.width - 6) / 2);
   }
 
   function select(next: View_) {
@@ -143,8 +143,14 @@ function ViewToggle({ view, onChange }: { view: View_; onChange: (next: View_) =
   return (
     <View
       onLayout={measure}
-      className="mx-5 mt-3 flex-row rounded-pill p-1"
-      style={[{ backgroundColor: surface.tint }, shadow.e1]}
+      /*
+       * Slimmer, and no shadow. At 48pt with an elevation it read as a primary
+       * action competing with the record cards below it — but this only
+       * rearranges what is already on screen. A segmented control should be
+       * quiet furniture; the sliding pill is what carries the state.
+       */
+      className="mx-5 mt-3.5 flex-row rounded-pill p-[3px]"
+      style={{ backgroundColor: surface.tint }}
     >
       {half > 0 ? (
         /* Styled by value, not by class. NativeWind does not reliably apply a
@@ -156,9 +162,9 @@ function ViewToggle({ view, onChange }: { view: View_; onChange: (next: View_) =
           style={[
             {
               position: "absolute",
-              top: 4,
-              bottom: 4,
-              left: 4,
+              top: 3,
+              bottom: 3,
+              left: 3,
               borderRadius: 999,
               backgroundColor: brand[600],
             },
@@ -221,6 +227,7 @@ function ViewTab({
 function TimelineRow({ record, isLast }: { record: RecordSummary; isLast: boolean }) {
   const router = useRouter();
   const { day, month } = railDate(record.eventDate ?? "");
+  const typeStyle = TYPE_STYLE[record.docType] ?? TYPE_STYLE.other;
 
   return (
     <View className="flex-row gap-3 px-5">
@@ -247,10 +254,21 @@ function TimelineRow({ record, isLast }: { record: RecordSummary; isLast: boolea
         accessibilityRole="button"
         accessibilityLabel={record.title}
         onPress={() => router.push(`/records/${record.id}`)}
-        className="mb-4 min-w-0 flex-1 flex-row items-center gap-2.5 rounded-card bg-surface p-2.5"
-        style={shadow.e1}
+        className="mb-4 min-w-0 flex-1 flex-row items-center gap-2.5 overflow-hidden rounded-card bg-surface p-2.5"
+        /*
+         * A spine in the document type's own colour, matching the plate on the
+         * list card. The timeline was the one place a prescription and a scan
+         * still looked identical, so switching views changed how the same
+         * records read.
+         */
+        style={[shadow.e1, { borderLeftWidth: 3, borderLeftColor: typeStyle.tint }]}
       >
-        <FileChip mimeType={record.mimeType} docType={record.docType} compact />
+        <View
+          className="h-9 w-9 items-center justify-center rounded-tile"
+          style={{ backgroundColor: typeStyle.wash }}
+        >
+          <typeStyle.icon size={17} color={typeStyle.tint} />
+        </View>
       {/*
        * The title gets the full width of the card and the severity pill drops
        * to the line below it.

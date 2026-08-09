@@ -46,3 +46,46 @@ body,
   height: 100%;
   margin: 0;
 }
+
+/*
+ * Focus rings we own.
+ *
+ * Browsers draw their own focus indicator in the OS accent colour, which is
+ * why a gold ring appeared around pressed pills on a machine with an orange
+ * macOS accent, and why an offset box appeared inside text fields. It is not
+ * in our palette and never will be, because it is not ours.
+ *
+ * NOT simply `outline: none`. Removing the indicator entirely is the most
+ * common accessibility regression on the web: anyone navigating by keyboard
+ * loses all sense of where they are. The UA ring is suppressed on plain
+ * `:focus`, which is what a mouse or a finger triggers, and replaced with a
+ * brand ring on `:focus-visible`, which the browser only matches when the
+ * interaction actually warrants one.
+ *
+ * Web only. React Native never parses this file, and native focus rings are
+ * drawn by the platform.
+ */
+button:focus,
+[role="button"]:focus,
+[role="tab"]:focus,
+[role="radio"]:focus,
+[role="switch"]:focus,
+[role="checkbox"]:focus,
+input:focus,
+textarea:focus,
+[tabindex]:focus {
+  outline: none;
+}
+
+button:focus-visible,
+[role="button"]:focus-visible,
+[role="tab"]:focus-visible,
+[role="radio"]:focus-visible,
+[role="switch"]:focus-visible,
+[role="checkbox"]:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid #5b4ef0;
+  outline-offset: 2px;
+}
