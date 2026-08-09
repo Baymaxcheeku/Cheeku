@@ -6,6 +6,7 @@ import { AppState, type AppStateStatus, Platform, Pressable, Text, View } from "
 
 import { MascotBust } from "@/components/illustrations/sprout";
 import { authenticate, isLockEnabled } from "@/lib/security/app-lock";
+import { clearOfflineCache } from "@/lib/offline/cache";
 import { clearActiveProfile } from "@/lib/profiles/context";
 import { supabase } from "@/lib/supabase/client";
 import { brand, ink, surface } from "@/theme/tokens";
@@ -118,6 +119,7 @@ export function AppLockGate({ children }: { children: React.ReactNode }) {
     await clearActiveProfile();
     await supabase.auth.signOut();
     queryClient.clear();
+    await clearOfflineCache();
     lockedRef.current = false;
     setLocked(false);
     router.replace("/welcome");

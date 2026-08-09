@@ -7,7 +7,8 @@ import {
   Inter_700Bold,
   useFonts,
 } from "@expo-google-fonts/inter";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient } from "@tanstack/react-query";
+import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
@@ -17,6 +18,8 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider, type Metrics } from "react-native-safe-area-context";
 
 import { AppLock } from "@/components/app/app-lock-gate";
+import { persistOptions } from "@/lib/offline/cache";
+import { startOnlineManager } from "@/lib/offline/status";
 import { DeviceFrame } from "@/components/ui/device-frame";
 import { surface } from "@/theme/tokens";
 
@@ -52,7 +55,29 @@ const WEB_PREVIEW_METRICS: Metrics | undefined =
     : undefined;
 
 export default function RootLayout() {
-  const [client] = useState(() => new QueryClient());
+  /*
+   * `gcTime` has to outlive the persisted cache or restoring is pointless:
+   * anything garbage-collected in memory is dropped from the written snapshot
+   * too, so a shorter time here silently shrinks what survives a cold start.
+   */
+  const [client] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            gcTime: 7 * 24 * 60 * 60 * 1000,
+            // Refetch on reconnect rather than on every mount: the point of
+            // the cache is that a screen opens instantly with what it had.
+            refetchOnReconnect: true,
+            retry: 2,
+          },
+        },
+      }),
+  );
+
+  // React Query's default online check is a browser listener that never fires
+  // on a device, so without this the app believes it is online in a tunnel.
+  useEffect(startOnlineManager, []);
   const [loaded, error] = useFonts({
     Inter_400Regular,
     Inter_500Medium,
@@ -70,7 +95,7 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider initialMetrics={WEB_PREVIEW_METRICS}>
-        <QueryClientProvider client={client}>
+        <PersistQueryClientProvider client={client} persistOptions={persistOptions}>
           <StatusBar style="dark" />
           {/* Renders nothing but its children on device. */}
           <DeviceFrame>
@@ -96,7 +121,7 @@ export default function RootLayout() {
           />
           </AppLock>
           </DeviceFrame>
-        </QueryClientProvider>
+        </PersistQueryClientProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );

@@ -14,6 +14,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Paywall } from "@/components/billing/paywall";
 import { FamilySwitcher } from "@/components/app/family-switcher";
+import { OfflineBanner } from "@/components/app/offline-banner";
 import { HomeAskBox } from "@/components/app/home-ask-box";
 import { NotificationsBell } from "@/components/app/notifications-bell";
 import { RecordRow } from "@/components/records/chrome";
@@ -148,6 +149,8 @@ export default function Home() {
         </View>
         <NotificationsBell notifications={deriveNotifications(list)} />
       </View>
+
+      <OfflineBanner updatedAt={context.dataUpdatedAt} />
 
       <View className="mt-5">
         <Text className="px-5 text-[12px] font-bold uppercase tracking-wide text-ink-300">

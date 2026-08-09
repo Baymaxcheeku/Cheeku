@@ -38,6 +38,7 @@ import {
   shareExport,
 } from "@/lib/account/actions";
 import { AddMemberSheet } from "@/components/app/add-member-sheet";
+import { clearOfflineCache } from "@/lib/offline/cache";
 import { Paywall } from "@/components/billing/paywall";
 import { allowsFamily, planFor, seatsFor } from "@/lib/billing/plans";
 import { getEntitlement } from "@/lib/billing/quota";
@@ -82,6 +83,10 @@ export default function Settings() {
     await clearActiveProfile();
     await supabase.auth.signOut();
     queryClient.clear();
+    // The in-memory cache is not the copy that matters. `queryClient.clear()`
+    // empties RAM; the records are also on disk, and a device being signed out
+    // of is a device that may be about to change hands.
+    await clearOfflineCache();
     router.replace("/welcome");
   }
 

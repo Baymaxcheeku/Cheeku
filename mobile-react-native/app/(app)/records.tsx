@@ -2,6 +2,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { ActivityIndicator, RefreshControl, ScrollView, Text, View } from "react-native";
 
+import { OfflineBanner } from "@/components/app/offline-banner";
 import { RecordsHeader, StatsCard } from "@/components/records/chrome";
 import { FilterBar, type Filters } from "@/components/records/filter-bar";
 import { RecordsView } from "@/components/records/records-view";
@@ -87,6 +88,8 @@ export default function Records() {
       }
     >
       <RecordsHeader title="My Records" subtitle="All your health documents in one place." />
+
+      <OfflineBanner updatedAt={records.dataUpdatedAt} />
 
       <FilterBar
         profiles={allowed}
