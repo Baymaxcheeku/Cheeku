@@ -29,7 +29,7 @@ import { getEntitlement } from "@/lib/billing/quota";
 import { deriveNotifications } from "@/lib/notifications/derive";
 import { activeProfile, profileAccess, switchProfile } from "@/lib/profiles/context";
 import { formatEventDate } from "@/lib/records/grouping";
-import { healthOverview, type HealthOverview } from "@/lib/records/overview";
+import { EMPTY_OVERVIEW, useHealthOverview } from "@/lib/records/use-overview";
 import { listProfileRecords, statsFrom } from "@/lib/records/queries";
 import { brand, ink, semantic, shadow, surface } from "@/theme/tokens";
 
@@ -62,13 +62,7 @@ export default function Home() {
 
   const knowledge = useQuery({ queryKey: ["knowledge-feed"], queryFn: () => knowledgeFeed(3) });
 
-  const overview = useQuery({
-    queryKey: ["health-overview"],
-    queryFn: async () => {
-      const active = await activeProfile();
-      return healthOverview(active?.id ?? null);
-    },
-  });
+  const overview = useHealthOverview();
 
   const context = useQuery({
     queryKey: ["home-context"],
@@ -395,20 +389,4 @@ function InsightRow({
 }
 
 
-/*
- * Shown while the overview is still loading. An empty file renders the
- * "add your first report" state, which is the right thing to show for one
- * frame — a spinner where a card will be makes the whole screen jump.
- */
-const EMPTY_OVERVIEW: HealthOverview = {
-  byType: [],
-  totalDocuments: 0,
-  needsReview: 0,
-  dataPoints: 0,
-  flagged: [],
-  medications: [],
-  vaccinations: 0,
-  facilities: [],
-  doctors: [],
-  lastEvent: null,
-};
+

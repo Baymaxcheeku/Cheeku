@@ -1,4 +1,3 @@
-import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import {
   ArrowDownRight,
@@ -15,8 +14,8 @@ import { ActivityIndicator, Pressable, ScrollView, Text, View } from "react-nati
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { TYPE_META } from "@/components/health/health-file";
-import { activeProfile } from "@/lib/profiles/context";
-import { healthOverview, type FlaggedValue } from "@/lib/records/overview";
+import type { FlaggedValue } from "@/lib/records/overview";
+import { useActiveProfileName, useHealthOverview } from "@/lib/records/use-overview";
 import { brand, ink, semantic, shadow, surface } from "@/theme/tokens";
 
 /**
@@ -34,14 +33,12 @@ export default function HealthFileScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
-  const data = useQuery({
-    queryKey: ["health-overview"],
-    queryFn: async () => {
-      const profile = await activeProfile();
-      const overview = await healthOverview(profile?.id ?? null);
-      return { overview, name: profile?.name ?? null };
-    },
-  });
+  /*
+   * The SAME hook Home uses, not a second query under the same key. Two
+   * different shapes on one key is what white-screened this app.
+   */
+  const data = useHealthOverview();
+  const name = useActiveProfileName();
 
   if (data.isPending) {
     return (
@@ -51,7 +48,7 @@ export default function HealthFileScreen() {
     );
   }
 
-  const overview = data.data?.overview;
+  const overview = data.data;
   if (!overview) {
     return (
       <View className="flex-1 items-center justify-center bg-canvas px-10">
@@ -80,7 +77,7 @@ export default function HealthFileScreen() {
       >
         <View className="px-5">
           <Text className="text-[26px] font-semibold leading-[31px] tracking-tight text-ink-900">
-            {data.data?.name ? `${data.data.name}'s health file` : "Health file"}
+            {name.data ? `${name.data}'s health file` : "Health file"}
           </Text>
           <Text className="mt-1.5 text-[13px] leading-[19px] text-ink-500">
             Everything filed, and what the labs measured. Baymax reads it back to you; it does not
