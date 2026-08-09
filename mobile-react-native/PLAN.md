@@ -1,8 +1,14 @@
 # Execution plan — React Native app
 
 The native build of the app that lives in the repo root as a Next.js web app.
-That web app is the specification: every screen, flow and product rule is
-already decided and reviewed there. This is a port, not a redesign.
+
+**THE WEB APP IS NO LONGER A TARGET.** Decided 2026-08-09: Baymax ships
+exclusively as a mobile app on the App Store and Play Store. The Next.js build
+stays as the reference for screens, flows and product rules that were decided
+and reviewed there, and it is not maintained. Do not port mobile work back to
+it, and do not treat a difference between the two as a mobile bug — including
+the tier-2 caution UI, the subscription screen and the family tray, none of
+which exist on web and none of which will.
 
 Read alongside:
 
