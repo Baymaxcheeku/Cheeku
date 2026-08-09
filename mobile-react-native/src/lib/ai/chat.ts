@@ -6,7 +6,7 @@ import { activeProfile } from "@/lib/profiles/context";
 import { listProfileRecords } from "@/lib/records/queries";
 import { supabase } from "@/lib/supabase/client";
 import type { EntityFlag, RecordEntity } from "@/lib/records/types";
-import type { SafetyStatus } from "@/lib/safety/detect";
+import type { SafetyResult, SafetyStatus } from "@/lib/safety/detect";
 
 /*
  * The chat's write path.
@@ -35,6 +35,12 @@ export type ChatTurn = {
   followUps: string[];
   attachment?: ChatAttachment;
   assessment?: ProductAssessment;
+  /*
+   * The gate's verdict for the question this answers. Carried on the turn so a
+   * tier-2 caution stays beside its own answer in the transcript instead of
+   * following whichever message happens to be last.
+   */
+  caution?: SafetyResult;
 };
 
 export type AskResult =

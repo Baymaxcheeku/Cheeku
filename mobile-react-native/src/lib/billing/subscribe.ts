@@ -38,3 +38,24 @@ export async function subscribeDemo(tier: Exclude<Tier, "free">): Promise<Subscr
   if (data !== true) return { ok: false, message: "That did not go through. Please try again." };
   return { ok: true };
 }
+
+/**
+ * Cancels, returning the family to free.
+ *
+ * NOT a demo function, unlike `subscribeDemo`. Cancelling is a right rather
+ * than a purchase — the stores require it in-app, and DPDP expects people to be
+ * able to stop processing they consented to — so `cancel_subscription` survives
+ * real billing and is not behind the demo flag. When a provider lands, this
+ * gains a call to the store's own subscription API beside it; it does not go
+ * away.
+ *
+ * The free chat allowance is deliberately NOT refilled by cancelling. See the
+ * note in migration 0015.
+ */
+export async function cancelSubscription(): Promise<SubscribeResult> {
+  const { data, error } = await supabase.rpc("cancel_subscription");
+  if (error || data !== true) {
+    return { ok: false, message: "We couldn't cancel that. Please try again." };
+  }
+  return { ok: true };
+}

@@ -1,0 +1,110 @@
+import { useState } from "react";
+import { ActivityIndicator, Modal, Pressable, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+import { ink, semantic, surface } from "@/theme/tokens";
+
+/*
+ * The app's own confirmation, replacing `Alert.alert` for anything consequential.
+ *
+ * WHY NOT Alert.alert. React Native Web ships it as `class Alert { static
+ * alert() {} }` — a literal no-op. Every confirmation in this app was therefore
+ * dead in the preview: sign out did nothing, cancel subscription did nothing,
+ * and each looked like a broken button rather than a missing dialog. That alone
+ * only affects the preview, but two more things push this in-app on device too:
+ *
+ *   An OS alert cannot say what these moments need it to say. "Cancel plan?"
+ *   with two buttons is not enough for someone whose real question is whether
+ *   their records are about to be deleted. This has room for the sentence that
+ *   answers it.
+ *
+ *   `Alert.alert`'s destructive button styling is iOS-only, so the most
+ *   dangerous action on Android looked identical to the safe one.
+ *
+ * The confirm button carries the busy state itself, so a slow cancel cannot be
+ * double-tapped into two calls.
+ */
+export function ConfirmSheet({
+  open,
+  title,
+  body,
+  confirmLabel,
+  cancelLabel = "Keep it",
+  destructive = false,
+  onConfirm,
+  onClose,
+}: {
+  open: boolean;
+  title: string;
+  /** Room for the reassurance the OS dialog had nowhere to put. */
+  body: string;
+  confirmLabel: string;
+  cancelLabel?: string;
+  destructive?: boolean;
+  onConfirm: () => void | Promise<void>;
+  onClose: () => void;
+}) {
+  const insets = useSafeAreaInsets();
+  const [busy, setBusy] = useState(false);
+
+  async function run() {
+    setBusy(true);
+    try {
+      await onConfirm();
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <Modal visible={open} transparent animationType="slide" onRequestClose={onClose}>
+      <Pressable
+        accessibilityLabel={cancelLabel}
+        onPress={busy ? undefined : onClose}
+        style={{ flex: 1, backgroundColor: "rgba(15,16,48,0.4)" }}
+      />
+      <View
+        className="rounded-t-sheet bg-canvas px-5 pt-5"
+        style={{ paddingBottom: insets.bottom + 16 }}
+      >
+        <Text className="text-[19px] font-bold text-ink-900">{title}</Text>
+        <Text className="mt-2 text-[13px] leading-[19px] text-ink-700">{body}</Text>
+
+        <View className="mt-5 gap-2">
+          <Pressable
+            accessibilityRole="button"
+            disabled={busy}
+            onPress={() => void run()}
+            className="h-13 items-center justify-center rounded-pill"
+            style={{
+              height: 52,
+              backgroundColor: destructive ? semantic.danger : ink[900],
+              opacity: busy ? 0.6 : 1,
+            }}
+          >
+            {busy ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text className="text-[15.5px] font-bold text-white">{confirmLabel}</Text>
+            )}
+          </Pressable>
+
+          {/*
+           * The safe option is second but full width and clearly a button. On
+           * a sheet the reader is scanning downward, so putting "keep it" last
+           * means the last thing they read before deciding is the way out.
+           */}
+          <Pressable
+            accessibilityRole="button"
+            disabled={busy}
+            onPress={onClose}
+            className="h-13 items-center justify-center rounded-pill bg-surface"
+            style={{ height: 52, borderWidth: 1, borderColor: surface.line }}
+          >
+            <Text className="text-[15px] font-semibold text-ink-700">{cancelLabel}</Text>
+          </Pressable>
+        </View>
+      </View>
+    </Modal>
+  );
+}

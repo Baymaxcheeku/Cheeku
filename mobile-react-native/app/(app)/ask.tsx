@@ -27,6 +27,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ProductAssessmentCard } from "@/components/ai/product-assessment-card";
 import { ProductPicker } from "@/components/ai/product-picker";
+import { CautionNote } from "@/components/safety/caution-note";
+import { shouldCaution } from "@/lib/safety/caution";
 import { Paywall } from "@/components/billing/paywall";
 import { MascotBust } from "@/components/illustrations/sprout";
 import { EmergencyEscalation } from "@/components/safety/emergency-escalation";
@@ -135,7 +137,14 @@ export default function Ask() {
         return;
       }
       setConversationId(result.conversationId);
-      setTurns((t) => [...t, result.user, result.assistant]);
+      /*
+       * The verdict rides along on the assistant turn rather than being held in
+       * screen state. Screen state would show one banner for the whole
+       * conversation and move it to whichever message was last; attaching it
+       * here keeps it beside the answer it belongs to, still there when someone
+       * scrolls back an hour later.
+       */
+      setTurns((t) => [...t, result.user, { ...result.assistant, caution: verdict }]);
     } finally {
       setPending(false);
     }
@@ -393,7 +402,14 @@ function Turn({ turn, onCitation }: { turn: ChatTurn; onCitation: (id: string) =
   }
 
   return (
-    <View className="max-w-[92%] self-start">
+    <View className="max-w-[92%] gap-2 self-start">
+      {/*
+       * ABOVE the answer, not below it. Someone who has just described a
+       * three-day fever should meet "see a doctor today" before they meet an
+       * explanation they might read as reassurance and stop there.
+       */}
+      {turn.caution && shouldCaution(turn.caution) ? <CautionNote result={turn.caution} /> : null}
+
       <View className="rounded-card bg-surface px-3.5 py-3" style={shadow.e1}>
         <Text className="text-[14px] leading-[21px] text-ink-900">{turn.content}</Text>
 

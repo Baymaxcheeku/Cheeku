@@ -20,7 +20,6 @@ import {
 import { useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   Modal,
   Pressable,
   ScrollView,
@@ -38,6 +37,7 @@ import {
   shareExport,
 } from "@/lib/account/actions";
 import { AddMemberSheet } from "@/components/app/add-member-sheet";
+import { ConfirmSheet } from "@/components/ui/confirm-sheet";
 import { clearOfflineCache } from "@/lib/offline/cache";
 import { Paywall } from "@/components/billing/paywall";
 import { allowsFamily, planFor, seatsFor } from "@/lib/billing/plans";
@@ -62,6 +62,7 @@ export default function Settings() {
   const queryClient = useQueryClient();
   const [paywallOpen, setPaywallOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
+  const [signOutOpen, setSignOutOpen] = useState(false);
 
   const context = useQuery({
     queryKey: ["settings-context"],
@@ -149,11 +150,9 @@ export default function Settings() {
          * makes the reader wonder what they are missing.
          */}
         <Pressable
-          accessibilityRole={canUpgrade ? "button" : "text"}
-          accessibilityLabel={
-            canUpgrade ? `${plan.name}. Opens plans` : `${plan.name}, your current plan`
-          }
-          onPress={canUpgrade ? () => setPaywallOpen(true) : undefined}
+          accessibilityRole="button"
+          accessibilityLabel={`${plan.name}. Opens your subscription`}
+          onPress={() => router.push("/settings/subscription")}
           className="mt-3.5 flex-row items-center gap-3 rounded-tile bg-brand-50 p-3"
         >
           <View className="h-9 w-9 items-center justify-center rounded-pill bg-surface">
@@ -167,12 +166,17 @@ export default function Settings() {
                 : `${entitlement.chatsRemaining} of ${entitlement.limit} chats left this month`}
             </Text>
           </View>
-          {canUpgrade ? (
-            <View className="flex-row items-center gap-1">
-              <Text className="text-[12.5px] font-semibold text-brand-600">Upgrade</Text>
-              <ChevronRight size={15} color={brand[600]} />
-            </View>
-          ) : null}
+          {/*
+           * "Manage" on a paid plan, "Upgrade" on free. Both go to the same
+           * screen: someone on Family still needs a way to cancel, and a card
+           * that only ever says Upgrade has nothing to offer them.
+           */}
+          <View className="flex-row items-center gap-1">
+            <Text className="text-[12.5px] font-semibold text-brand-600">
+              {canUpgrade ? "Upgrade" : "Manage"}
+            </Text>
+            <ChevronRight size={15} color={brand[600]} />
+          </View>
         </Pressable>
       </View>
 
@@ -201,6 +205,7 @@ export default function Settings() {
         <Row icon={UserCog} title="Personal information" body="Name, date of birth and contact" href="/settings/personal" />
         <Row icon={HeartPulse} title="Health profile" body="Conditions, allergies and medicines" href="/settings/health" />
         <Row icon={ShieldCheck} title="Security & privacy" body="Password, privacy and permissions" href="/settings/security" />
+        <Row icon={Crown} title="Subscription" body="Your plan, seats and billing" href="/settings/subscription" />
       </Group>
 
       <Group label="Preferences">
@@ -218,12 +223,7 @@ export default function Settings() {
       <View className="mx-5 mt-6 overflow-hidden rounded-card bg-surface" style={shadow.e1}>
         <Pressable
           accessibilityRole="button"
-          onPress={() =>
-            Alert.alert("Sign out?", "Your records stay safe and sync back when you sign in.", [
-              { text: "Cancel", style: "cancel" },
-              { text: "Sign out", style: "destructive", onPress: () => void signOut() },
-            ])
-          }
+          onPress={() => setSignOutOpen(true)}
           className="flex-row items-center gap-3.5 px-3.5 py-3.5"
         >
           <View className="h-9 w-9 items-center justify-center rounded-tile bg-canvas">
@@ -238,6 +238,16 @@ export default function Settings() {
        * eighth container in a row of eight and read as another thing to act on;
        * this is a footnote, and footnotes look like footnotes.
        */}
+      <ConfirmSheet
+        open={signOutOpen}
+        title="Sign out?"
+        body="Your records stay safe on the server and come back the moment you sign in. Anything saved on this device for offline reading is cleared."
+        confirmLabel="Sign out"
+        cancelLabel="Stay signed in"
+        onConfirm={signOut}
+        onClose={() => setSignOutOpen(false)}
+      />
+
       <AddMemberSheet
         open={addOpen}
         onClose={() => setAddOpen(false)}
