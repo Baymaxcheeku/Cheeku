@@ -7,20 +7,21 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { articleBySlug, type ArticleBlock, type ArticleTint } from "@/lib/knowledge/queries";
 import { brand, ink, shadow, surface } from "@/theme/tokens";
 
-const HEADER: Record<ArticleTint, string> = {
-  violet: "#5b4ef0",
-  teal: "#0f9b8e",
-  amber: "#f0a13a",
-  rose: "#f2789e",
-  indigo: "#3f3d9e",
-};
-
-const ON_DARK: Record<ArticleTint, boolean> = {
-  violet: true,
-  teal: true,
-  amber: false,
-  rose: false,
-  indigo: true,
+/*
+ * The same washes as the rail, so opening a panel feels like entering it.
+ *
+ * Deliberately NOT the saturated version this started as. A full-bleed
+ * masthead in deep rose with translucent white body copy was the least legible
+ * surface in the app, and on a light product it read as a different app's
+ * screen. Pale field, ink on light, accent reserved for the one element that
+ * should lead.
+ */
+const TINTS: Record<ArticleTint, { field: string; accent: string; title: string; body: string }> = {
+  violet: { field: "#eeecff", accent: "#4a2ade", title: "#231a52", body: "#5b5580" },
+  teal: { field: "#e4f5f2", accent: "#0e8478", title: "#123f3a", body: "#4a6f69" },
+  amber: { field: "#fdf0dc", accent: "#a9631a", title: "#4a2f0d", body: "#77603f" },
+  rose: { field: "#fdeaf0", accent: "#c4396c", title: "#4d1730", body: "#7d5566" },
+  indigo: { field: "#e9eaf7", accent: "#3835a0", title: "#1d1c4d", body: "#575682" },
 };
 
 /**
@@ -68,10 +69,7 @@ export default function ArticleReader() {
     );
   }
 
-  const headerColor = HEADER[data.tint] ?? HEADER.violet;
-  const onDark = ON_DARK[data.tint] ?? true;
-  const headerInk = onDark ? "#ffffff" : "#2b1a05";
-  const headerSoft = onDark ? "rgba(255,255,255,0.78)" : "rgba(43,26,5,0.68)";
+  const tint = TINTS[data.tint] ?? TINTS.violet;
 
   return (
     <View className="flex-1 bg-canvas">
@@ -81,7 +79,7 @@ export default function ArticleReader() {
       >
         {/* The masthead carries the article's own colour through from the rail,
             so opening one feels like entering the panel rather than leaving it. */}
-        <View style={{ backgroundColor: headerColor, paddingTop: insets.top + 8 }}>
+        <View style={{ backgroundColor: tint.field, paddingTop: insets.top + 8 }}>
           <View className="px-5 pb-6">
             <Pressable
               accessibilityRole="button"
@@ -89,24 +87,26 @@ export default function ArticleReader() {
               onPress={() => (router.canGoBack() ? router.back() : router.replace("/home"))}
               hitSlop={10}
               className="h-9 w-9 items-center justify-center rounded-pill"
-              style={{ backgroundColor: onDark ? "rgba(255,255,255,0.18)" : "rgba(43,26,5,0.1)" }}
+              style={{ backgroundColor: "rgba(255,255,255,0.7)" }}
             >
-              <ChevronLeft size={19} color={headerInk} />
+              <ChevronLeft size={19} color={tint.title} />
             </Pressable>
 
+            {/* Semibold at 26 rather than bold at 27: a headline this long
+                gains nothing from the extra weight and loses the calm. */}
             <Text
-              className="mt-5 text-[27px] font-bold leading-[32px] tracking-tight"
-              style={{ color: headerInk }}
+              className="mt-5 text-[26px] font-semibold leading-[31px]"
+              style={{ color: tint.title, letterSpacing: -0.4 }}
             >
               {data.title}
             </Text>
-            <Text className="mt-2 text-[13.5px] leading-[19px]" style={{ color: headerSoft }}>
+            <Text className="mt-2 text-[13.5px] leading-[20px]" style={{ color: tint.body }}>
               {data.standfirst}
             </Text>
 
             <View className="mt-3.5 flex-row items-center gap-1.5">
-              <Clock3 size={13} color={headerSoft} />
-              <Text className="text-[12px] font-medium" style={{ color: headerSoft }}>
+              <Clock3 size={13} color={tint.body} />
+              <Text className="text-[12px]" style={{ color: tint.body }}>
                 {data.readMinutes} min read
               </Text>
             </View>
@@ -177,7 +177,7 @@ export default function ArticleReader() {
 function Block({ block }: { block: ArticleBlock }) {
   if (block.type === "h") {
     return (
-      <Text className="mb-2 mt-5 text-[18px] font-bold leading-[23px] tracking-tight text-ink-900">
+      <Text className="mb-2 mt-6 text-[17px] font-semibold leading-[23px] text-ink-900">
         {block.text}
       </Text>
     );

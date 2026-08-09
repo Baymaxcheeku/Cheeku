@@ -30,12 +30,32 @@ import { ink } from "@/theme/tokens";
  * about your own results". These five hues are editorial only.
  */
 
-const TINTS: Record<ArticleTint, { from: string; to: string; ink: string; soft: string }> = {
-  violet: { from: "#5b4ef0", to: "#3b2bc9", ink: "#ffffff", soft: "rgba(255,255,255,0.72)" },
-  teal: { from: "#0f9b8e", to: "#0b6c6b", ink: "#ffffff", soft: "rgba(255,255,255,0.75)" },
-  amber: { from: "#f0a13a", to: "#d2761b", ink: "#2b1a05", soft: "rgba(43,26,5,0.62)" },
-  rose: { from: "#f2789e", to: "#d24d7d", ink: "#33101f", soft: "rgba(51,16,31,0.62)" },
-  indigo: { from: "#3f3d9e", to: "#22206b", ink: "#ffffff", soft: "rgba(255,255,255,0.72)" },
+/*
+ * LIGHT TINTS ON A LIGHT APP.
+ *
+ * The first version of this rail used saturated fields — deep violet, deep
+ * teal — with white type on them. Two things were wrong. Against a canvas of
+ * #fafafe and a screen of white cards, a block of dark colour reads as a
+ * foreign object rather than part of the page; and body copy at 12px in
+ * translucent white on a mid-tone is the worst contrast on the screen.
+ *
+ * These are washes: a pale field, a deeper accent for the one element that
+ * needs to lead, and INK-ON-LIGHT for everything readable. Contrast goes up,
+ * the panels sit down into the page, and the accent still carries the
+ * article's identity through to its reader header.
+ *
+ * Still outside the semantic set. Green, amber and red mean health severity
+ * everywhere else in this app.
+ */
+const TINTS: Record<
+  ArticleTint,
+  { field: string; edge: string; accent: string; title: string; body: string }
+> = {
+  violet: { field: "#eeecff", edge: "#dcd8fb", accent: "#4a2ade", title: "#231a52", body: "#5b5580" },
+  teal: { field: "#e4f5f2", edge: "#c9e9e3", accent: "#0e8478", title: "#123f3a", body: "#4a6f69" },
+  amber: { field: "#fdf0dc", edge: "#f7e1bd", accent: "#a9631a", title: "#4a2f0d", body: "#77603f" },
+  rose: { field: "#fdeaf0", edge: "#f8d3de", accent: "#c4396c", title: "#4d1730", body: "#7d5566" },
+  indigo: { field: "#e9eaf7", edge: "#d3d5ee", accent: "#3835a0", title: "#1d1c4d", body: "#575682" },
 };
 
 /** Gutter and gap must match the rail's padding, or the snap lands off-centre. */
@@ -136,20 +156,17 @@ function Panel({
       onPress={onPress}
       style={{
         width,
-        height: 172,
+        height: 168,
         borderRadius: 24,
         overflow: "hidden",
-        backgroundColor: tint.from,
-        // A coloured shadow rather than a grey one: a grey shadow under a
-        // saturated panel reads as dirt on the screen.
-        shadowColor: tint.to,
-        shadowOpacity: 0.3,
-        shadowRadius: 16,
-        shadowOffset: { width: 0, height: 8 },
-        elevation: 4,
+        backgroundColor: tint.field,
+        // A hairline in the tint's own family rather than a shadow. On a pale
+        // panel a drop shadow muddies the edge; a border defines it cleanly.
+        borderWidth: 1,
+        borderColor: tint.edge,
       }}
     >
-      <PanelArt from={tint.from} to={tint.to} width={width} />
+      <PanelArt accent={tint.accent} width={width} />
 
       <View className="flex-1 justify-between p-4">
         <View className="flex-row">
@@ -161,41 +178,52 @@ function Panel({
              */
             <View
               className="rounded-pill px-2.5 py-1"
-              style={{ backgroundColor: "rgba(255,255,255,0.22)" }}
+              style={{ backgroundColor: tint.accent }}
             >
-              <Text className="text-[10.5px] font-bold" style={{ color: tint.ink }}>
-                FOR YOU
+              <Text
+                className="text-[10px] font-semibold text-white"
+                style={{ letterSpacing: 0.6 }}
+              >
+                For you
               </Text>
             </View>
           ) : null}
         </View>
 
         <View>
+          {/*
+           * Semibold, not bold, and tracked in slightly.
+           *
+           * Bold at 20px on a short line shouts without adding hierarchy —
+           * there is nothing here for it to be louder THAN. Weight 600 with
+           * negative tracking reads as considered rather than urgent, which is
+           * the right register for a health explainer.
+           */}
           <Text
-            className="text-[19px] font-bold leading-[23px] tracking-tight"
-            style={{ color: tint.ink }}
+            className="text-[20px] font-semibold leading-[25px]"
+            style={{ color: tint.title, letterSpacing: -0.3 }}
             numberOfLines={2}
           >
             {article.title}
           </Text>
           <Text
-            className="mt-1 text-[12px] leading-[17px]"
-            style={{ color: tint.soft }}
+            className="mt-1.5 text-[12.5px] leading-[18px]"
+            style={{ color: tint.body }}
             numberOfLines={2}
           >
             {article.standfirst}
           </Text>
 
-          <View className="mt-2.5 flex-row items-center gap-1.5">
-            <Clock3 size={12} color={tint.soft} />
-            <Text className="text-[11px] font-medium" style={{ color: tint.soft }}>
+          <View className="mt-3 flex-row items-center gap-1.5">
+            <Clock3 size={12} color={tint.body} />
+            <Text className="text-[11.5px]" style={{ color: tint.body }}>
               {article.readMinutes} min read
             </Text>
             <View className="ml-auto flex-row items-center gap-1">
-              <Text className="text-[11.5px] font-bold" style={{ color: tint.ink }}>
+              <Text className="text-[12px] font-semibold" style={{ color: tint.accent }}>
                 Read
               </Text>
-              <ArrowUpRight size={13} color={tint.ink} />
+              <ArrowUpRight size={14} color={tint.accent} />
             </View>
           </View>
         </View>
@@ -212,29 +240,32 @@ function Panel({
  * radial highlight plus two thin arcs gives the panel depth and a little
  * motion for nothing, and it scales to any article without an asset.
  */
-function PanelArt({ from, to, width }: { from: string; to: string; width: number }) {
+function PanelArt({ accent, width }: { accent: string; width: number }) {
+  const id = accent.slice(1);
   return (
-    <Svg width={width} height={172} style={{ position: "absolute" }}>
+    <Svg width={width} height={168} style={{ position: "absolute" }}>
       <Defs>
-        <RadialGradient id={`glow-${from.slice(1)}`} cx="0.82" cy="0.1" r="0.95">
-          <Stop offset="0" stopColor="#ffffff" stopOpacity="0.34" />
-          <Stop offset="0.55" stopColor={from} stopOpacity="0" />
-          <Stop offset="1" stopColor={to} stopOpacity="0.55" />
+        <RadialGradient id={`bloom-${id}`} cx="0.88" cy="0.08" r="0.9">
+          <Stop offset="0" stopColor={accent} stopOpacity="0.22" />
+          <Stop offset="1" stopColor={accent} stopOpacity="0" />
         </RadialGradient>
       </Defs>
-      <Circle cx={width} cy={0} r={width} fill={`url(#glow-${from.slice(1)})`} />
+      {/* One soft bloom in the corner the type does not occupy, and two thin
+          arcs in the accent. Enough to stop the panel reading as flat colour,
+          quiet enough that 12.5px body copy still wins the contrast. */}
+      <Circle cx={width * 0.96} cy={6} r={width * 0.62} fill={`url(#bloom-${id})`} />
       <Path
-        d={`M${width * 0.55} 172 A ${width * 0.5} ${width * 0.5} 0 0 1 ${width} 24`}
-        stroke="#ffffff"
-        strokeOpacity="0.16"
-        strokeWidth="1.4"
+        d={`M${width * 0.58} 168 A ${width * 0.46} ${width * 0.46} 0 0 1 ${width} 30`}
+        stroke={accent}
+        strokeOpacity="0.14"
+        strokeWidth="1.2"
         fill="none"
       />
       <Path
-        d={`M${width * 0.72} 172 A ${width * 0.36} ${width * 0.36} 0 0 1 ${width} 62`}
-        stroke="#ffffff"
-        strokeOpacity="0.12"
-        strokeWidth="1.4"
+        d={`M${width * 0.76} 168 A ${width * 0.32} ${width * 0.32} 0 0 1 ${width} 70`}
+        stroke={accent}
+        strokeOpacity="0.1"
+        strokeWidth="1.2"
         fill="none"
       />
     </Svg>

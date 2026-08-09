@@ -1,8 +1,8 @@
 import { Check, Lock, UserPlus, X } from "lucide-react-native";
 import { Modal, Pressable, ScrollView, Text, View } from "react-native";
-import { SvgXml } from "react-native-svg";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { Avatar } from "@/components/ui/avatar";
 import { castFaces } from "@/lib/profiles/avatar";
 import type { ActiveProfile } from "@/lib/profiles/context";
 import { brand, ink, shadow, surface } from "@/theme/tokens";
@@ -102,9 +102,11 @@ export function FamilyTray({
                     ...(i > 0 ? { borderTopWidth: 1, borderTopColor: surface.line } : null),
                   }}
                 >
-                  <View className="h-11 w-11 overflow-hidden rounded-pill bg-canvas">
-                    <SvgXml xml={profile.avatar} width={44} height={44} />
-                  </View>
+                  <Avatar
+                    svg={profile.avatar}
+                    background={profile.avatarBackground ?? undefined}
+                    size={44}
+                  />
                   <View className="min-w-0 flex-1">
                     <Text className="text-[14.5px] font-semibold text-ink-900" numberOfLines={1}>
                       {profile.name}
@@ -144,13 +146,11 @@ export function FamilyTray({
                 className="flex-row items-center gap-3 px-3.5 py-3"
                 style={{ borderTopWidth: 1, borderTopColor: surface.line }}
               >
-                <View className="h-11 w-11 items-center justify-center overflow-hidden rounded-pill bg-canvas">
-                  <View style={{ opacity: 0.25 }}>
-                    <SvgXml xml={lockedFaces[i % lockedFaces.length] ?? ""} width={44} height={44} />
+                <View className="h-11 w-11 items-center justify-center">
+                  <View style={{ opacity: 0.25, position: "absolute" }}>
+                    <Avatar svg={lockedFaces[i % lockedFaces.length] ?? ""} size={44} />
                   </View>
-                  <View className="absolute">
-                    <Lock size={15} color={ink[500]} />
-                  </View>
+                  <Lock size={15} color={ink[500]} />
                 </View>
                 <View className="min-w-0 flex-1">
                   <Text className="text-[14.5px] font-semibold text-ink-300">Family member</Text>

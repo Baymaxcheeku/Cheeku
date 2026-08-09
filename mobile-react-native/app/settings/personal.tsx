@@ -2,8 +2,8 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Mail, UserCog } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, Text, View } from "react-native";
-import { SvgXml } from "react-native-svg";
 
+import { Avatar } from "@/components/ui/avatar";
 import { Panel, SaveButton, SettingsScreen } from "@/components/settings/chrome";
 import { ChipSelect, Field } from "@/components/ui/field";
 import { Meter } from "@/components/ui/motion";
@@ -127,9 +127,7 @@ export default function PersonalInfo() {
       <View className="mt-4">
         <Panel>
           <View className="flex-row items-center gap-3">
-            <View className="h-14 w-14 overflow-hidden rounded-pill bg-canvas">
-              <SvgXml xml={context.data?.avatar ?? ""} width={56} height={56} />
-            </View>
+            <Avatar svg={context.data?.avatar ?? ""} size={56} />
             <View className="min-w-0 flex-1">
               <Text className="text-[15px] font-semibold text-ink-900" numberOfLines={1}>
                 {detail.name}

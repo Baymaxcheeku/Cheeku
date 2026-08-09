@@ -30,7 +30,6 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { SvgXml } from "react-native-svg";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import {
@@ -39,13 +38,19 @@ import {
   exportAccount,
   shareExport,
 } from "@/lib/account/actions";
+import { Avatar } from "@/components/ui/avatar";
 import { AddMemberSheet } from "@/components/app/add-member-sheet";
 import { ConfirmSheet } from "@/components/ui/confirm-sheet";
 import { clearOfflineCache } from "@/lib/offline/cache";
 import { Paywall } from "@/components/billing/paywall";
 import { allowsFamily, planFor, seatsFor } from "@/lib/billing/plans";
 import { getEntitlement } from "@/lib/billing/quota";
-import { clearActiveProfile, profileAccess, activeProfile } from "@/lib/profiles/context";
+import {
+  clearActiveProfile,
+  profileAccess,
+  activeProfile,
+  type ActiveProfile,
+} from "@/lib/profiles/context";
 import { castFaces } from "@/lib/profiles/avatar";
 import { listProfileRecords, statsFrom } from "@/lib/records/queries";
 import { supabase } from "@/lib/supabase/client";
@@ -129,9 +134,7 @@ export default function Settings() {
        */}
       <View className="mx-5 rounded-card bg-surface p-4" style={shadow.e1}>
         <View className="flex-row items-center gap-3.5">
-          <View className="h-16 w-16 overflow-hidden rounded-pill bg-canvas">
-            <SvgXml xml={profile.avatar} width={64} height={64} />
-          </View>
+          <Avatar svg={profile.avatar} background={profile.avatarBackground ?? undefined} size={64} />
           <View className="min-w-0 flex-1">
             <Text className="text-[19px] font-bold text-ink-900" numberOfLines={1}>
               {profile.name}
@@ -303,13 +306,7 @@ function FamilySection({
   onUpgrade,
   onAddMember,
 }: {
-  profiles: readonly {
-    id: string;
-    name: string;
-    avatar: string;
-    relationship: string | null;
-    isPrimary: boolean;
-  }[];
+  profiles: readonly ActiveProfile[];
   activeId: string;
   seats: number;
   canAdd: boolean;
@@ -355,16 +352,13 @@ function FamilySection({
           <View className="flex-row">
             {/* Overlapped faces: the roster at a glance, in one row's height. */}
             {profiles.slice(0, 3).map((p, i) => (
-              <View
-                key={p.id}
-                className="h-9 w-9 overflow-hidden rounded-pill bg-canvas"
-                style={{
-                  marginLeft: i === 0 ? 0 : -10,
-                  borderWidth: 2,
-                  borderColor: surface.base,
-                }}
-              >
-                <SvgXml xml={p.avatar} width={36} height={36} />
+              <View key={p.id} style={{ marginLeft: i === 0 ? 0 : -10 }}>
+                <Avatar
+                  svg={p.avatar}
+                  background={p.avatarBackground ?? undefined}
+                  size={36}
+                  ring={surface.base}
+                />
               </View>
             ))}
           </View>
@@ -393,9 +387,7 @@ function FamilySection({
             className="flex-row items-center gap-3 px-3.5 py-3"
             style={i > 0 ? { borderTopWidth: 1, borderTopColor: surface.line } : undefined}
           >
-            <View className="h-10 w-10 overflow-hidden rounded-pill bg-canvas">
-              <SvgXml xml={p.avatar} width={40} height={40} />
-            </View>
+            <Avatar svg={p.avatar} background={p.avatarBackground ?? undefined} size={40} />
             <View className="min-w-0 flex-1">
               <Text className="text-[14px] font-semibold text-ink-900" numberOfLines={1}>
                 {p.name}
@@ -423,15 +415,13 @@ function FamilySection({
                 className="flex-row items-center gap-3 px-3.5 py-3"
                 style={{ borderTopWidth: 1, borderTopColor: surface.line }}
               >
-                <View className="h-10 w-10 items-center justify-center overflow-hidden rounded-pill bg-canvas">
-                  {/* A stand-in face, blurred behind a padlock — never the real
+                <View className="h-10 w-10 items-center justify-center">
+                  {/* A stand-in face behind a padlock — never the real
                       member's. See the note on this component. */}
-                  <View style={{ opacity: 0.25 }}>
-                    <SvgXml xml={lockedFaces[i % lockedFaces.length] ?? ""} width={40} height={40} />
+                  <View style={{ opacity: 0.25, position: "absolute" }}>
+                    <Avatar svg={lockedFaces[i % lockedFaces.length] ?? ""} size={40} />
                   </View>
-                  <View className="absolute">
-                    <Lock size={15} color={ink[500]} />
-                  </View>
+                  <Lock size={15} color={ink[500]} />
                 </View>
                 <View className="min-w-0 flex-1">
                   <Text className="text-[14px] font-semibold text-ink-300">Family member</Text>

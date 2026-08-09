@@ -1,8 +1,8 @@
 import { Crown, Lock, Users } from "lucide-react-native";
 import { Pressable, ScrollView, Text, View } from "react-native";
-import { SvgXml } from "react-native-svg";
 
 import { allowsFamily, type Tier } from "@/lib/billing/plans";
+import { Avatar } from "@/components/ui/avatar";
 import type { ActiveProfile } from "@/lib/profiles/context";
 import { brand, ink, surface } from "@/theme/tokens";
 
@@ -27,19 +27,15 @@ function ringFor(index: number): string {
 }
 
 function Face({ profile, index, size }: { profile: ActiveProfile; index: number; size: number }) {
+  // The ring, the clip and the content-box sizing all live in Avatar. Rolling
+  // a circle by hand here is what squashed every face to 48x44.
   return (
-    <View
-      className="rounded-pill bg-surface"
-      style={{
-        width: size,
-        height: size,
-        borderWidth: 2,
-        borderColor: ringFor(index),
-        overflow: "hidden",
-      }}
-    >
-      <SvgXml xml={profile.avatar} width={size} height={size} />
-    </View>
+    <Avatar
+      svg={profile.avatar}
+      background={profile.avatarBackground ?? undefined}
+      size={size}
+      ring={ringFor(index)}
+    />
   );
 }
 
