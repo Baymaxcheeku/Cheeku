@@ -17,6 +17,7 @@ import { FamilyTray } from "@/components/app/family-tray";
 import { Paywall } from "@/components/billing/paywall";
 import { FamilySwitcher } from "@/components/app/family-switcher";
 import { OfflineBanner } from "@/components/app/offline-banner";
+import { HealthFile } from "@/components/health/health-file";
 import { KnowledgeRail } from "@/components/knowledge/knowledge-rail";
 import { knowledgeFeed } from "@/lib/knowledge/queries";
 import { HomeAskBox } from "@/components/app/home-ask-box";
@@ -28,6 +29,7 @@ import { getEntitlement } from "@/lib/billing/quota";
 import { deriveNotifications } from "@/lib/notifications/derive";
 import { activeProfile, profileAccess, switchProfile } from "@/lib/profiles/context";
 import { formatEventDate } from "@/lib/records/grouping";
+import { healthOverview, type HealthOverview } from "@/lib/records/overview";
 import { listProfileRecords, statsFrom } from "@/lib/records/queries";
 import { brand, ink, semantic, shadow, surface } from "@/theme/tokens";
 
@@ -59,6 +61,14 @@ export default function Home() {
   const [addOpen, setAddOpen] = useState(false);
 
   const knowledge = useQuery({ queryKey: ["knowledge-feed"], queryFn: () => knowledgeFeed(3) });
+
+  const overview = useQuery({
+    queryKey: ["health-overview"],
+    queryFn: async () => {
+      const active = await activeProfile();
+      return healthOverview(active?.id ?? null);
+    },
+  });
 
   const context = useQuery({
     queryKey: ["home-context"],
@@ -123,7 +133,6 @@ export default function Home() {
   const list = records.data ?? [];
   const stats = statsFrom(list);
   const needsReview = stats.borderline + stats.highRisk;
-  const recent = list.slice(0, 3);
   const newest = list[0];
   const access = data.access;
 
@@ -204,56 +213,7 @@ export default function Home() {
 
       <KnowledgeRail articles={knowledge.data ?? []} />
 
-      {/*
-       * ONE section, not two. The old layout said "2 records to review" three
-       * times on one screen — the insight row above, an alert banner here, and
-       * a "To review" tile beside it — which trains the eye to skim past the
-       * second and third repeat of anything. This keeps the count exactly once,
-       * as a tile among its peers, and lets the record list do the explaining.
-       */}
-      <View className="mt-5 px-5">
-        <View className="flex-row items-baseline justify-between">
-          <Text className="text-[17px] font-bold text-ink-900">Health Summary</Text>
-          <ViewAll />
-        </View>
-
-        <View className="mt-2.5 flex-row gap-2">
-          <SummaryTile icon={FileText} tint={brand[600]} bg={brand[50]} value={stats.total} label="Documents" />
-          <SummaryTile
-            icon={ShieldCheck}
-            tint={semantic.safe}
-            bg={semantic.safeBg}
-            value={stats.normal}
-            label="In range"
-          />
-          <SummaryTile
-            icon={HeartPulse}
-            tint={semantic.danger}
-            bg={semantic.dangerBg}
-            value={needsReview}
-            label="To review"
-            alert={needsReview > 0}
-          />
-        </View>
-
-        {recent.length > 0 ? (
-          <View className="mt-3 overflow-hidden rounded-card bg-surface" style={shadow.e1}>
-            <Text className="px-3.5 pt-3 text-[11px] font-bold uppercase tracking-wide text-ink-300">
-              Recent
-            </Text>
-            <View className="mt-1">
-              {recent.map((record, i) => (
-                <View
-                  key={record.id}
-                  style={i > 0 ? { borderTopWidth: 1, borderTopColor: surface.line } : undefined}
-                >
-                  <RecordRow record={record} variant="flush" />
-                </View>
-              ))}
-            </View>
-          </View>
-        ) : null}
-      </View>
+      <HealthFile overview={overview.data ?? EMPTY_OVERVIEW} />
 
       <FamilyTray
         open={trayOpen}
@@ -293,20 +253,6 @@ export default function Home() {
   );
 }
 
-function ViewAll() {
-  const router = useRouter();
-  return (
-    <Pressable
-      accessibilityRole="button"
-      onPress={() => router.push("/records")}
-      hitSlop={8}
-      className="flex-row items-center"
-    >
-      <Text className="text-[13px] font-semibold text-brand-600">View all</Text>
-      <ChevronRight size={15} color={brand[600]} />
-    </Pressable>
-  );
-}
 
 /**
  * The fetch failed. Deliberately says nothing about whether records exist.
@@ -448,54 +394,21 @@ function InsightRow({
   );
 }
 
-/*
- * Card-shaped rather than a pill: once the flagged row above is the thing
- * carrying urgency, these three tiles are purely routine counts and read better
- * with room to breathe than squeezed into a chip.
- */
-function SummaryTile({
-  icon: Icon,
-  tint,
-  bg,
-  value,
-  label,
-  alert = false,
-}: {
-  icon: LucideIcon;
-  tint: string;
-  bg: string;
-  value: number;
-  label: string;
-  /** The one tile allowed to carry urgency — a ring, not a repeated banner. */
-  alert?: boolean;
-}) {
-  const router = useRouter();
 
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={`${value} ${label}`}
-      onPress={() => router.push("/records")}
-      className="flex-1 items-start gap-2 rounded-card bg-surface p-3"
-      style={[shadow.e1, alert ? { borderWidth: 1, borderColor: "rgba(234,42,54,0.25)" } : null]}
-    >
-      <View
-        className="h-9 w-9 items-center justify-center rounded-tile"
-        style={{ backgroundColor: bg }}
-      >
-        <Icon size={16} color={tint} />
-      </View>
-      <View className="min-w-0">
-        <Text
-          className="text-[19px] font-bold leading-none"
-          style={{ color: alert ? semantic.dangerText : ink[900] }}
-        >
-          {value}
-        </Text>
-        <Text className="mt-1 text-[11px] leading-tight text-ink-500" numberOfLines={1}>
-          {label}
-        </Text>
-      </View>
-    </Pressable>
-  );
-}
+/*
+ * Shown while the overview is still loading. An empty file renders the
+ * "add your first report" state, which is the right thing to show for one
+ * frame — a spinner where a card will be makes the whole screen jump.
+ */
+const EMPTY_OVERVIEW: HealthOverview = {
+  byType: [],
+  totalDocuments: 0,
+  needsReview: 0,
+  dataPoints: 0,
+  flagged: [],
+  medications: [],
+  vaccinations: 0,
+  facilities: [],
+  doctors: [],
+  lastEvent: null,
+};
