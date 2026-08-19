@@ -15,29 +15,28 @@ import {
 import { CastAvatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { MascotBust } from "@/components/illustrations/sprout";
-import { Drift, PopIn, PressRow, Settle, StaggerItem } from "@/components/ui/motion";
+import { Drift, Settle, StaggerItem } from "@/components/ui/motion";
 import { PANELS } from "@/lib/onboarding/panels";
-import { rememberJourney } from "@/lib/onboarding/journey-store";
-import { JOURNEYS, type JourneyId } from "@/lib/onboarding/journeys";
 import { castFaces } from "@/lib/profiles/avatar";
 import { brand, ink, shadow, surface } from "@/theme/tokens";
 
 /*
  * A2 — the value carousel, before any account exists.
  *
- * Four panels, each with its OWN composition. Four panels sharing one hero
- * shape with swapped copy is a slideshow, not a story; that was the note that
- * drove the web redesign and it carries over.
+ * Three panels, each with its OWN composition. Panels sharing one hero shape
+ * with swapped copy is a slideshow, not a story; that was the note that drove
+ * the web redesign and it carries over.
  *
- * Panel 2 names the five lives the product is built around instead of listing
- * file types. The choice persists as a personalisation hint only — it is never
- * a clinical fact and nothing downstream may read it as history.
+ * IT ASKS FOR NOTHING. Every screen here is something Baymax offers; the one
+ * screen that used to ask a question — which season of life you are in — now
+ * lives at `/journey`, after the account and profile exist, because before
+ * them there was nowhere to put the answer. A stranger deciding whether to
+ * sign up should not first have to classify their own life.
  */
 export default function Welcome() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const [index, setIndex] = useState(0);
-  const [journey, setJourney] = useState<JourneyId | null>(null);
 
   const panel = PANELS[index];
   if (!panel) return null;
@@ -100,18 +99,16 @@ export default function Welcome() {
         {/* No max height on the hero: capping it put the leftover space back
             between the copy and the button, which is the gap this restructure
             exists to remove. The art centres inside whatever it is given. */}
-        {panel.kind !== "journeys" ? (
-          <View className="min-h-[210px] flex-1">
-            {panel.kind === "meet" ? <HeroMeet /> : null}
-            {panel.kind === "memory" ? <HeroMemory /> : null}
-            {panel.kind === "family" ? <HeroFamily faces={faces} /> : null}
-          </View>
-        ) : null}
+        <View className="min-h-[210px] flex-1">
+          {panel.kind === "meet" ? <HeroMeet /> : null}
+          {panel.kind === "memory" ? <HeroMemory /> : null}
+          {panel.kind === "family" ? <HeroFamily faces={faces} /> : null}
+        </View>
 
-        <View className={panel.kind === "journeys" ? "flex-1 px-5 pt-1" : "px-5 pt-5"}>
+        <View className="px-5 pt-5">
           {/*
-           * The eyebrow. One word, in the panel's own tint, so the four screens
-           * read as chapters of one thing rather than four separate pitches —
+           * The eyebrow. One word, in the panel's own tint, so the screens
+           * read as chapters of one thing rather than separate pitches —
            * and so the headline never has to spend a clause labelling itself.
            */}
           <View
@@ -138,24 +135,6 @@ export default function Welcome() {
             {panel.lead} <Text className="text-brand-600">{panel.accent}</Text>
           </Text>
           <Text className="mt-2.5 text-[14px] leading-[21px] text-ink-500">{panel.body}</Text>
-
-          {panel.kind === "journeys" ? (
-            <JourneyGrid
-              selected={journey}
-              onPick={(picked) => {
-                setJourney(picked);
-                /*
-                 * Written the moment it is tapped, not on Continue. There is no
-                 * profile to write to yet — this is picked before sign-up — so
-                 * it goes to local storage and is transferred onto the profile
-                 * when one is created. Until this landed the answer lived in
-                 * component state and died on the next navigation, so nothing
-                 * downstream could ever read it.
-                 */
-                void rememberJourney(picked);
-              }}
-            />
-          ) : null}
         </View>
       </View>
 
@@ -402,106 +381,16 @@ function HeroFamily({ faces }: { faces: readonly string[] }) {
   );
 }
 
-/**
- * The six journeys, as a picker.
- *
- * Selectable rather than illustrative: letting someone say "this is me" is the
- * moment the product stops being generic. Nothing is required, because a
- * stranger should never have to classify their own life before being allowed to
- * see the app.
- */
-function JourneyGrid({
-  selected,
-  onPick,
-}: {
-  selected: JourneyId | null;
-  onPick: (id: JourneyId) => void;
-}) {
-  return (
-    <View className="mt-4 flex-row flex-wrap" style={{ gap: 8 }}>
-      {JOURNEYS.map((j, i) => {
-        const active = selected === j.id;
-        const Icon = j.icon;
-        return (
-          <PressRow
-            key={j.id}
-            index={i}
-            onPress={() => onPick(j.id)}
-            style={{ width: "48%" }}
-          >
-            <View
-              className="h-full rounded-card p-3"
-              style={[
-                shadow.e1,
-                {
-                  backgroundColor: active ? brand[50] : surface.base,
-                  borderWidth: 1,
-                  borderColor: active ? brand[500] : surface.line,
-                },
-              ]}
-            >
-              <View
-                className="h-9 w-9 items-center justify-center rounded-tile"
-                style={{ backgroundColor: TINT[j.id] ?? brand[50] }}
-              >
-                <Icon size={17} color={TINT_FG[j.id] ?? brand[600]} />
-              </View>
-              <Text className="mt-2 text-[13px] font-bold leading-[16px] text-ink-900">{j.label}</Text>
-              <Text className="mt-1 text-[11px] leading-[14px] text-ink-500">{j.problem}</Text>
-
-              {active ? (
-                <PopIn index={0} style={{ position: "absolute", right: 10, top: 10 }}>
-                  <View
-                    className="h-5 w-5 items-center justify-center rounded-pill"
-                    style={{ backgroundColor: brand[600] }}
-                  >
-                    <Check size={12} color="#fff" strokeWidth={3} />
-                  </View>
-                </PopIn>
-              ) : null}
-            </View>
-          </PressRow>
-        );
-      })}
-    </View>
-  );
-}
-
-/*
- * The journey tints as values. `journeys.ts` carries them as Tailwind class
- * strings for the web build; NativeWind cannot apply an arbitrary class to an
- * SVG icon's `color` prop, so the same palette is mirrored here. Non-semantic
- * on purpose: green, amber and red mean health status everywhere else.
- */
 /*
  * The eyebrow tints, one per chapter.
  *
  * NON-SEMANTIC, like every other category colour in this app: green, amber and
  * red state how a health result reads and are never spent on decoration. These
- * four are borrowed from the journey palette so onboarding and the picker on
- * panel 2 belong to the same world.
+ * are borrowed from the journey palette so the carousel and the picker that now
+ * follows sign-up belong to the same world.
  */
 const EYEBROW: Record<string, { bg: string; fg: string }> = {
   meet: { bg: brand[50], fg: brand[600] },
-  journeys: { bg: "#f3e9fd", fg: "#7b3fd4" },
   memory: { bg: "#e6f1fd", fg: "#1a6fc2" },
   family: { bg: "#fdeaf0", fg: "#c22a6b" },
-};
-
-const TINT: Record<string, string> = {
-  expecting: "#f3e9fd",
-  fertility: "#e6f1fd",
-  caregiver: "#fdeee0",
-  new_parent: "#fdeaf0",
-  optimiser: "#eaf6ec",
-  other: brand[50],
-};
-
-const TINT_FG: Record<string, string> = {
-  expecting: "#7b3fd4",
-  fertility: "#1a6fc2",
-  caregiver: "#c2650b",
-  new_parent: "#c22a6b",
-  optimiser: "#1f8a45",
-  other: brand[600],
 };

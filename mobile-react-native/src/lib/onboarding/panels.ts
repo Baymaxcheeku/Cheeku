@@ -10,9 +10,15 @@
  * ┌─ THE ARC ────────────────────────────────────────────────────────────────┐
  * │                                                                          │
  * │  1. I'm here, and I don't need you to know the words.  (the invitation)  │
- * │  2. Tell me what you're living through.                (the reader)      │
- * │  3. Tell me once — I'll hold it, and give it back.     (the mechanism)   │
- * │  4. And not only for you.                              (the reach)       │
+ * │  2. Tell me once — I'll hold it, and give it back.     (the mechanism)   │
+ * │  3. And not only for you.                              (the reach)       │
+ * │                                                                          │
+ * │ THREE, NOT FOUR. The fourth used to be the journey picker. Asking a      │
+ * │ stranger to classify their own life before an account exists takes an    │
+ * │ answer with nowhere to put it — it went to local storage to wait for a   │
+ * │ profile that might never be created — and puts a survey between them     │
+ * │ and the product. It now lives at `/journey`, one screen after the        │
+ * │ profile is made, where it writes straight to the row it belongs to.      │
  * │                                                                          │
  * │ Each panel's last idea is the next panel's first. The voice is FIRST     │
  * │ PERSON throughout, one character start to finish, because the thing      │
@@ -32,7 +38,7 @@
  * props: each panel is laid out differently on purpose.
  */
 export type Panel = {
-  kind: "meet" | "journeys" | "memory" | "family";
+  kind: "meet" | "memory" | "family";
   /**
    * One word for what the panel is about, above the headline.
    *
@@ -54,14 +60,6 @@ export const PANELS: readonly Panel[] = [
     accent: "you'd never ask out loud",
     body: "At 2am, in your own words, with no appointment and no judgement. I'm Baymax — a health companion for you and the people you look after.",
     cta: "Show me how",
-  },
-  {
-    kind: "journeys",
-    eyebrow: "You",
-    lead: "First, tell me",
-    accent: "what you're living through",
-    body: "So I speak to your life and not a generic one. This is a hint about you, never a diagnosis, and you can change it or skip it entirely.",
-    cta: "Continue",
   },
   {
     kind: "memory",

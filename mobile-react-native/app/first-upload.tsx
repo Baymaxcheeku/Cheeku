@@ -25,7 +25,7 @@ export default function FirstUpload() {
 
   return (
     <View className="flex-1 bg-canvas">
-      <OnboardingHeader back="/profile" action={{ label: "Skip", href: "/plan" }} />
+      <OnboardingHeader back="/journey" action={{ label: "Skip", href: "/plan" }} />
 
       <View className="flex-1 px-5" style={{ paddingBottom: insets.bottom + 12 }}>
         {/* The art is absolutely positioned, so the text needs its own gutter

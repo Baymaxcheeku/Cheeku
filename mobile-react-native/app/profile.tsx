@@ -21,7 +21,6 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ChipSelect, Field } from "@/components/ui/field";
 import { profileSchema } from "@/lib/auth/schemas";
-import { clearPendingJourney, pendingJourney } from "@/lib/onboarding/journey-store";
 import { supabase } from "@/lib/supabase/client";
 import { brand, surface } from "@/theme/tokens";
 
@@ -153,21 +152,17 @@ export default function Profile() {
         sex: parsed.data.sex || null,
         relationship: "self",
         is_primary: true,
-        // The onboarding pick, moved from local storage to its durable home.
-        // A hint about which articles to surface, never a clinical fact.
-        journey: await pendingJourney(),
         conditions: parsed.data.conditions
           ? parsed.data.conditions.split(",").map((c) => c.trim())
           : [],
       });
-      await clearPendingJourney();
 
       if (profileError) {
         setMessage("We couldn't save that. Try again.");
         return;
       }
 
-      router.push("/first-upload");
+      router.push("/journey");
     } catch {
       setMessage("Could not reach Baymax. Check your connection and try again.");
     } finally {
@@ -181,7 +176,7 @@ export default function Profile() {
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <View className="flex-1 bg-canvas">
-        <OnboardingHeader back="/who" action={{ label: "Skip", href: "/first-upload" }} />
+        <OnboardingHeader back="/who" action={{ label: "Skip", href: "/journey" }} />
 
         <ScrollView
           className="flex-1"
