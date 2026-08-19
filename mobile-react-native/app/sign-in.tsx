@@ -25,6 +25,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { MascotBust } from "@/components/illustrations/sprout";
 import { createAccountSchema, signInSchema } from "@/lib/auth/schemas";
+import { resolveLanding } from "@/lib/auth/landing";
 import { supabase } from "@/lib/supabase/client";
 import { brand, ink, shadow, surface } from "@/theme/tokens";
 
@@ -112,10 +113,16 @@ export default function SignIn() {
         return;
       }
 
-      // Onward to A4, matching the web build. Replacing "/" here sent people
-      // back through the splash, which then bounced them to the welcome
-      // carousel they had just finished.
-      router.replace("/who");
+      /*
+       * Where they belong, not where a new account belongs.
+       *
+       * This was a hard-coded "/who", so signing in to an account that already
+       * had a profile and years of records still walked through the whole of
+       * onboarding and asked for a profile that existed. Replacing "/" instead
+       * is not the fix either: that lands on the splash, which used to bounce
+       * to the welcome carousel they had just finished.
+       */
+      router.replace(await resolveLanding());
     } catch {
       // A throw is a transport failure. Saying "wrong password" to someone with
       // no signal sends them to reset a password that was never the problem.
