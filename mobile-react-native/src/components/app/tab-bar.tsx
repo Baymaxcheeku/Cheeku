@@ -15,7 +15,10 @@ import { brand, ink, shadow, surface } from "@/theme/tokens";
 
 const ICONS: Record<string, { icon: LucideIcon; label: string }> = {
   home: { icon: House, label: "Home" },
-  records: { icon: FolderClosed, label: "Documents" },
+  // "Health records", not "Documents". A document is a file; a health record is
+  // what the reader came for, and it is the word the app already uses on the
+  // screen itself and in every answer that cites one.
+  records: { icon: FolderClosed, label: "Health records" },
   ask: { icon: Stethoscope, label: "Ask Baymax" },
   settings: { icon: User, label: "Profile" },
 };
