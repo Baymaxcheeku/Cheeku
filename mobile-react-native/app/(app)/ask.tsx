@@ -3,6 +3,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import {
   Activity,
   ArrowUp,
+  ArrowUpRight,
   BookOpen,
   Camera,
   CalendarCheck,
@@ -12,6 +13,7 @@ import {
   History,
   Pill,
   ScanLine,
+  ShieldCheck,
   Sparkles,
   Stethoscope,
   Syringe,
@@ -113,6 +115,7 @@ export default function Ask() {
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [composerFocused, setComposerFocused] = useState(false);
 
   const scroller = useRef<ScrollView>(null);
   const sentInitial = useRef(false);
@@ -256,13 +259,30 @@ export default function Ask() {
     >
       <View className="flex-1 bg-canvas" style={{ paddingTop: insets.top }}>
         <View className="flex-row items-center gap-2.5 px-5 pb-2 pt-2">
-          <View className="h-9 w-9 items-center justify-center rounded-pill bg-brand-50">
-            <Stethoscope size={18} color={brand[600]} />
+          {/*
+           * The mascot in the header, not a stethoscope.
+           *
+           * This is a conversation with a character the app has already
+           * introduced by name twice — on the carousel and on Home. Swapping in
+           * a clinical glyph at the moment the conversation starts is the point
+           * where a companion turns back into a medical form.
+           *
+           * It sits on a brand-tinted disc for the same reason it does
+           * everywhere else: the mascot's own gradient starts near-white, so on
+           * the plain canvas it washes out to an outline.
+           */}
+          <View className="h-10 w-10 items-center justify-center overflow-hidden rounded-pill bg-brand-100">
+            {/* Nudged down so the disc frames the face rather than the stalk:
+                the bust's viewBox starts above the head to make room for the
+                heart, which at 34px is most of the circle. */}
+            <View style={{ marginTop: 7 }}>
+              <MascotBust size={34} />
+            </View>
           </View>
           <View className="flex-1">
-            <Text className="text-[17px] font-bold text-ink-900">Ask Baymax</Text>
+            <Text className="text-[17px] font-bold text-ink-900">Baymax</Text>
             <Text className="text-[11.5px] text-ink-500">
-              Answers about {context.data.profile.name}&apos;s records
+              Reading {context.data.profile.name}&apos;s records with you
             </Text>
           </View>
           {quota.remaining !== null ? (
@@ -282,17 +302,49 @@ export default function Ask() {
           showsVerticalScrollIndicator={false}
         >
           {empty ? (
-            <View className="flex-1 items-center justify-center py-8">
-              <MascotBust size={132} />
-              <Text className="mt-3 text-center text-[17px] font-bold text-ink-900">
-                Hi, I&apos;m Baymax
-              </Text>
-              <Text className="mt-1.5 max-w-[280px] text-center text-[13px] leading-[19px] text-ink-500">
-                Ask me about {context.data.profile.name}&apos;s reports. I explain what they say. I
-                never diagnose or prescribe.
-              </Text>
+            <View className="flex-1 justify-center py-6">
+              {/*
+               * The mascot needs a ground to stand on.
+               *
+               * Its shell gradient starts at #e6e1fb, which is nearly the
+               * canvas colour — on a plain background only the outline and the
+               * face survived, so the friendliest element on the screen
+               * rendered as a ghost. A brand-tinted disc behind it restores the
+               * character, and it is the same treatment used on Home and About,
+               * which is what "consistent" has to mean here.
+               */}
+              <View className="items-center">
+                <View
+                  className="h-[116px] w-[116px] items-center justify-center overflow-hidden rounded-pill"
+                  style={{ backgroundColor: brand[100] }}
+                >
+                  <View style={{ marginTop: 20 }}>
+                    <MascotBust size={110} />
+                  </View>
+                </View>
+
+                <Text className="mt-3.5 text-center text-[19px] font-bold tracking-tight text-ink-900">
+                  Hi, I&apos;m Baymax
+                </Text>
+                {/*
+                 * The old line spent its second half on two things Baymax will
+                 * not do. The limit belongs on this screen — it just does not
+                 * belong in the greeting, where it makes the first thing the
+                 * companion says about itself a disclaimer. It now sits under
+                 * the starters, where it reads as candour rather than a warning
+                 * label.
+                 */}
+                <Text className="mt-1.5 max-w-[290px] text-center text-[13.5px] leading-[20px] text-ink-500">
+                  Ask me anything about {context.data.profile.name}&apos;s health — a word on a
+                  report, something that has been bothering you, or what to raise at the next
+                  appointment.
+                </Text>
+              </View>
 
               <View className="mt-5 w-full gap-2">
+                <Text className="px-0.5 text-[11px] font-bold uppercase tracking-wide text-ink-300">
+                  Try one of these
+                </Text>
                 {starters.map(({ text, topic }) => {
                   const Icon = TOPIC_ICON[topic] ?? Sparkles;
                   return (
@@ -300,14 +352,27 @@ export default function Ask() {
                     key={text}
                     accessibilityRole="button"
                     onPress={() => void send(text)}
-                    className="flex-row items-center gap-2.5 rounded-card bg-surface px-3.5 py-3"
-                    style={shadow.e1}
+                    className="flex-row items-center gap-3 rounded-card bg-surface px-3 py-3"
+                    style={[shadow.e1, { borderWidth: 1, borderColor: brand[50] }]}
                   >
-                    <Icon size={16} color={brand[500]} />
-                    <Text className="flex-1 text-[13.5px] text-ink-700">{text}</Text>
+                    <View className="h-8 w-8 items-center justify-center rounded-tile bg-brand-50">
+                      <Icon size={15} color={brand[600]} />
+                    </View>
+                    <Text className="min-w-0 flex-1 text-[13.5px] leading-[18px] text-ink-900">
+                      {text}
+                    </Text>
+                    <ArrowUpRight size={14} color={ink[300]} />
                   </Pressable>
                   );
                 })}
+              </View>
+
+              <View className="mt-4 flex-row items-start gap-2 rounded-card bg-brand-50 px-3.5 py-3">
+                <ShieldCheck size={14} color={brand[500]} style={{ marginTop: 1 }} />
+                <Text className="flex-1 text-[11.5px] leading-[16px] text-ink-700">
+                  I answer from your own records and name the one I used. I never diagnose or
+                  prescribe.
+                </Text>
               </View>
             </View>
           ) : (
@@ -331,8 +396,17 @@ export default function Ask() {
           ) : null}
         </ScrollView>
 
+        {/*
+         * The composer as one object, not three.
+         *
+         * Three separate boxes with their own borders made the bar read as a
+         * toolbar. Wrapping the field and both controls in a single rounded
+         * shell — which brightens to brand on focus — makes it read as one
+         * place to talk, and matches the Ask box on Home so the two entry
+         * points feel like the same product.
+         */}
         <View
-          className="flex-row items-end gap-2 px-5 pt-2"
+          className="px-4 pt-2"
           style={{
             paddingBottom: 8,
             borderTopWidth: 1,
@@ -340,31 +414,34 @@ export default function Ask() {
             backgroundColor: surface.base,
           }}
         >
+          <View
+            className="flex-row items-end gap-1.5 rounded-card bg-canvas p-1.5 pl-3.5"
+            style={{ borderWidth: 1, borderColor: composerFocused ? brand[300] : surface.line }}
+          >
           <TextInput
             value={draft}
             onChangeText={setDraft}
+            onFocus={() => setComposerFocused(true)}
+            onBlur={() => setComposerFocused(false)}
             placeholder="Ask anything…"
             placeholderTextColor={ink[300]}
             accessibilityLabel="Ask Baymax a question"
             multiline
-            className="flex-1 rounded-card bg-canvas px-3.5 py-2.5"
+            className="flex-1 py-2"
             style={{
               maxHeight: 120,
               fontSize: 15,
               color: ink[900],
               fontFamily: "Inter_400Regular",
-              borderWidth: 1,
-              borderColor: surface.line,
             }}
           />
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Ask about a product"
             onPress={() => setPickerOpen(true)}
-            className="h-11 w-11 items-center justify-center rounded-pill bg-canvas"
-            style={{ borderWidth: 1, borderColor: surface.line }}
+            className="h-10 w-10 items-center justify-center rounded-pill"
           >
-            <Camera size={18} color={brand[600]} />
+            <Camera size={19} color={brand[600]} />
           </Pressable>
           <Pressable
             accessibilityRole="button"
@@ -372,11 +449,12 @@ export default function Ask() {
             accessibilityState={{ disabled: pending || !draft.trim() }}
             disabled={pending || !draft.trim()}
             onPress={() => void send(draft)}
-            className="h-11 w-11 items-center justify-center rounded-pill bg-brand-600"
-            style={{ opacity: pending || !draft.trim() ? 0.5 : 1 }}
+            className="h-10 w-10 items-center justify-center rounded-pill bg-brand-600"
+            style={{ opacity: pending || !draft.trim() ? 0.4 : 1 }}
           >
             <ArrowUp size={19} color="#ffffff" />
           </Pressable>
+          </View>
         </View>
       </View>
 
@@ -426,7 +504,16 @@ function Turn({ turn, onCitation }: { turn: ChatTurn; onCitation: (id: string) =
             <Text className="text-[12px] font-medium text-ink-700">{turn.attachment.title}</Text>
           </View>
         ) : null}
-        <View className="rounded-card bg-brand-600 px-3.5 py-2.5">
+        {/*
+         * Asymmetric corners. One squared corner on the side a bubble came
+         * from reads as speech; four equal corners read as a card. The user's
+         * squares bottom-right and Baymax's bottom-left, so the two sides of
+         * the conversation lean towards each other.
+         */}
+        <View
+          className="bg-brand-600 px-3.5 py-2.5"
+          style={{ borderRadius: 20, borderBottomRightRadius: 6 }}
+        >
           <Text className="text-[14px] leading-[20px] text-white">{turn.content}</Text>
         </View>
       </View>
@@ -450,7 +537,26 @@ function Turn({ turn, onCitation }: { turn: ChatTurn; onCitation: (id: string) =
        */}
       {turn.caution && shouldCaution(turn.caution) ? <CautionNote result={turn.caution} /> : null}
 
-      <View className="rounded-card bg-surface px-3.5 py-3" style={shadow.e1}>
+      {/*
+       * The face beside the answer.
+       *
+       * Without it an answer is a white card from nobody in particular, which
+       * is exactly the tone this app is trying not to have. The mascot sits on
+       * its brand disc for contrast — its own gradient starts near-white — and
+       * aligns to the first line rather than centring, so a long answer does
+       * not leave it floating in the middle of a paragraph.
+       */}
+      <View className="flex-row items-start gap-2">
+        <View className="h-7 w-7 items-center justify-center overflow-hidden rounded-pill bg-brand-100">
+          <View style={{ marginTop: 5 }}>
+            <MascotBust size={24} />
+          </View>
+        </View>
+
+        <View
+          className="min-w-0 flex-1 bg-surface px-3.5 py-3"
+          style={[shadow.e1, { borderRadius: 20, borderBottomLeftRadius: 6 }]}
+        >
         <Text className="text-[14px] leading-[21px] text-ink-900">{turn.content}</Text>
 
         {/*
@@ -476,6 +582,7 @@ function Turn({ turn, onCitation }: { turn: ChatTurn; onCitation: (id: string) =
             ))}
           </View>
         ) : null}
+        </View>
       </View>
 
       {/*
