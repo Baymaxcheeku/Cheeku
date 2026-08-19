@@ -90,7 +90,18 @@ export default function Journey() {
           <View
             accessibilityRole="radiogroup"
             accessibilityLabel="What are you living through?"
-            className="flex-row flex-wrap"
+            /*
+             * `items-start`, and it is load-bearing on device.
+             *
+             * A wrapped flex row stretches its items to the tallest in the
+             * line by default. On the web that produced six equal tiles; in
+             * Yoga the line's cross size resolved against the centred, flexed
+             * parent, so each item stretched to the FULL height of the screen
+             * — two full-height columns, four tiles pushed off the bottom, and
+             * the headline clipped behind them. It rendered correctly in the
+             * browser for weeks and was broken the first time it ran natively.
+             */
+            className="flex-row flex-wrap items-start"
             style={{ gap: 8 }}
           >
             {JOURNEYS.map((j, i) => {
@@ -110,7 +121,11 @@ export default function Journey() {
                     accessibilityRole="radio"
                     accessibilityState={{ selected: active }}
                     accessibilityLabel={`${j.label}. ${j.problem}`}
-                    className="h-full rounded-card p-3.5"
+                    // No `h-full`: height 100% against an auto-height animated
+                    // wrapper is undefined in Yoga, and it was the other half
+                    // of the stretch. The tiles size to their content, which is
+                    // one line of label and two of description.
+                    className="rounded-card p-3.5"
                     style={[
                       shadow.e1,
                       {
