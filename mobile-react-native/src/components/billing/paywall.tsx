@@ -1,10 +1,13 @@
 import {
   ArrowLeft,
+  ArrowRight,
   CalendarClock,
   Check,
   CheckCircle2,
+  FileText,
   Infinity as InfinityIcon,
   Lock,
+  MessageSquare,
   ShieldCheck,
   Sparkles,
   Users,
@@ -24,12 +27,14 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { MascotBust } from "@/components/illustrations/sprout";
+import { StaggerItem } from "@/components/ui/motion";
 import {
   DAILY_PASS_HOURS,
+  familySavingPercent,
   formatPrice,
   FREE_CHAT_LIMIT,
+  perDayLabel,
   PLANS,
-  PLAN_ORDER,
   type Plan,
   type Tier,
 } from "@/lib/billing/plans";
@@ -200,6 +205,59 @@ export function Paywall({
 
 /* --------------------------------------------------------------- chooser --- */
 
+/*
+ * ┌─ WHAT THIS SCREEN LEARNED, AND WHAT IT REFUSED TO LEARN ─────────────────┐
+ * │                                                                          │
+ * │ TAKEN from the paywalls that convert: one decision then one action       │
+ * │ (segmented plan cards with a single sticky CTA, not a button per card);  │
+ * │ unit pricing beside the real price; a computed saving on the plan we     │
+ * │ actually recommend; a plain "what happens next" timeline; and value      │
+ * │ stated BEFORE price, because a price with nothing above it is a toll.    │
+ * │                                                                          │
+ * │ REFUSED: countdown timers, "one time offer", invented strikethroughs,    │
+ * │ percentages nobody can check, and a decline button written to make the   │
+ * │ reader feel stupid. Those work. They work by pressure, and the thing     │
+ * │ being sold here is access to a person's own medical records at a moment  │
+ * │ they are often already frightened. A paywall that manipulates somebody   │
+ * │ in that state is not a growth tactic, it is the reason health apps get   │
+ * │ distrusted.                                                              │
+ * │                                                                          │
+ * │ The one deliberate persuasion device kept is the pending question, and   │
+ * │ it persuades by being TRUE: your words are still here, nothing was lost. │
+ * │                                                                          │
+ * └──────────────────────────────────────────────────────────────────────────┘
+ */
+
+/*
+ * Left to right by commitment, not by preference.
+ *
+ * `PLAN_ORDER` puts Family first because a vertical list should lead with the
+ * recommendation. A ROW is read as a scale — cheapest to dearest — and a row
+ * that opens on the most expensive option reads as a shop that hid the prices.
+ * The recommendation is still obvious: it is the one selected, badged and
+ * outlined.
+ */
+const ROW_ORDER: readonly Plan[] = [PLANS.micro, PLANS.solo, PLANS.family];
+
+/** What every paid tier unlocks, stated as outcomes rather than SKUs. */
+const UNLOCKS: readonly { icon: LucideIcon; title: string; body: string }[] = [
+  {
+    icon: InfinityIcon,
+    title: "Ask as much as you need",
+    body: "No monthly ceiling, at 2am or in a waiting room",
+  },
+  {
+    icon: FileText,
+    title: "Answers from your own records",
+    body: "Every reply names the document it came from",
+  },
+  {
+    icon: Users,
+    title: "The people you look after",
+    body: "Separate files, switched in a tap",
+  },
+];
+
 function PlanChooser({
   reason,
   pendingQuestion,
@@ -212,11 +270,18 @@ function PlanChooser({
   onClose: () => void;
 }) {
   const copy = REASON_COPY[reason];
+  /*
+   * Family is pre-selected because it is the recommended plan, and a paywall
+   * with nothing selected asks the reader to make two decisions before they
+   * can act. It is a highlight, not a trap: the price and the alternatives sit
+   * in the same row at the same size, and switching costs one tap.
+   */
+  const [selected, setSelected] = useState<Plan>(PLANS.family);
 
   return (
     <View className="px-5">
       <View className="flex-row items-start gap-3">
-        <View className="min-w-0 flex-1 pr-[24%]">
+        <View className="min-w-0 flex-1 pr-[22%]">
           <View className="flex-row">
             <View className="flex-row items-center gap-1.5 rounded-pill bg-brand-50 px-2.5 py-1">
               <Lock size={12} color={brand[700]} />
@@ -227,8 +292,14 @@ function PlanChooser({
             {copy.title}
           </Text>
           <Text className="mt-1.5 text-[13px] leading-[18px] text-ink-500">{copy.body}</Text>
-          <View className="absolute -right-3 -top-2" pointerEvents="none">
-            <MascotBust size={112} />
+          {/* On its brand disc, like every other appearance of the mascot. Its
+              shell gradient starts near-white and dissolves on a pale sheet. */}
+          <View className="absolute -right-2 -top-3" pointerEvents="none">
+            <View className="h-[96px] w-[96px] items-center justify-center overflow-hidden rounded-pill bg-brand-100">
+              <View style={{ marginTop: 16 }}>
+                <MascotBust size={92} />
+              </View>
+            </View>
           </View>
         </View>
         <Pressable
@@ -250,130 +321,231 @@ function PlanChooser({
        */}
       {pendingQuestion ? (
         <View
-          className="mt-3 rounded-card bg-surface p-3"
-          style={{ borderWidth: 1, borderColor: surface.line }}
+          className="mt-3 flex-row items-start gap-2.5 rounded-card bg-surface p-3"
+          style={{ borderWidth: 1, borderColor: brand[100] }}
         >
-          <Text className="text-[11px] font-semibold uppercase tracking-wide text-ink-300">
-            Your question is saved
-          </Text>
-          <Text className="mt-1 text-[12px] italic leading-[17px] text-ink-700" numberOfLines={2}>
-            &ldquo;{pendingQuestion}&rdquo;
-          </Text>
+          <View className="h-7 w-7 items-center justify-center rounded-pill bg-brand-50">
+            <MessageSquare size={13} color={brand[600]} />
+          </View>
+          <View className="min-w-0 flex-1">
+            <Text className="text-[10.5px] font-bold uppercase tracking-wide text-ink-300">
+              Held for you
+            </Text>
+            <Text className="mt-0.5 text-[12px] italic leading-[17px] text-ink-700" numberOfLines={2}>
+              &ldquo;{pendingQuestion}&rdquo;
+            </Text>
+          </View>
         </View>
       ) : null}
 
-      {/*
-       * All three plans, always — Family, Solo, then the Daily pass. Features
-       * are listed in full on the highlighted plan and collapsed to one line on
-       * the others, because three expanded cards do not fit. Hiding the Daily
-       * pass behind a "more options" tap would bury the cheapest way to say yes.
-       */}
-      <View className="mt-4 gap-2.5">
-        {PLAN_ORDER.map((plan) => (
-          <PlanOption key={plan.tier} plan={plan} onSelect={() => onSelect(plan)} />
+      {/* ---------------------------------------------------------- value -- */}
+      {/* Before the price. A number with nothing above it is a toll booth. */}
+      <View className="mt-4 gap-2">
+        {UNLOCKS.map(({ icon: Icon, title, body }, i) => (
+          <StaggerItem key={title} index={i}>
+            <View className="flex-row items-start gap-3">
+              <View className="h-9 w-9 items-center justify-center rounded-tile bg-brand-50">
+                <Icon size={17} color={brand[600]} />
+              </View>
+              <View className="min-w-0 flex-1">
+                <Text className="text-[13.5px] font-semibold leading-[18px] text-ink-900">
+                  {title}
+                </Text>
+                <Text className="mt-0.5 text-[11.5px] leading-[16px] text-ink-500">{body}</Text>
+              </View>
+            </View>
+          </StaggerItem>
         ))}
       </View>
 
-      <View className="mt-3 flex-row items-center justify-center gap-2">
-        <ShieldCheck size={13} color={brand[400]} />
-        <Text className="text-[11px] text-ink-500">Cancel anytime. Your health, your way.</Text>
+      {/* ----------------------------------------------------------- plans -- */}
+      <View className="mt-5 flex-row gap-2">
+        {ROW_ORDER.map((plan) => (
+          <PlanOption
+            key={plan.tier}
+            plan={plan}
+            selected={selected.tier === plan.tier}
+            onSelect={() => setSelected(plan)}
+          />
+        ))}
+      </View>
+
+      {/*
+       * WHAT HAPPENS NEXT, as a timeline.
+       *
+       * Lifted from the trial paywalls, where a three-step "today / reminder /
+       * billing starts" strip converts better than any amount of reassurance
+       * copy — because the thing stopping the tap is not the price, it is not
+       * knowing what the tap does. We have no trial to describe, so this
+       * describes the real thing: what unlocks now, what happens on the
+       * renewal date, and how it ends.
+       */}
+      <NextSteps plan={selected} />
+
+      {/* Sticky-feeling footer: one action, and the ways out beside it. */}
+      <View className="mt-4">
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`Continue with ${selected.name}, ${formatPrice(selected.priceInPaise)} per ${selected.period}`}
+          onPress={() => onSelect(selected)}
+          className="h-[52px] flex-row items-center justify-center gap-2 rounded-pill"
+          style={[shadow.e2, { backgroundColor: brand[600] }]}
+        >
+          <Text className="text-[16px] font-bold text-white">Continue with {selected.name}</Text>
+          <ArrowRight size={17} color="#ffffff" />
+        </Pressable>
+
+        <View className="mt-2.5 flex-row items-center justify-center gap-1.5">
+          <ShieldCheck size={12} color={brand[400]} />
+          <Text className="text-[11px] text-ink-500">
+            {selected.tier === "micro"
+              ? "One payment. Nothing renews."
+              : "Cancel any time, from Settings."}
+          </Text>
+        </View>
+
+        {/*
+         * The decline is a plain, respectful sentence. "I don't want it" and
+         * "No thanks, I'll stay unhealthy" are the same button written to
+         * shame; on a health app that is indefensible.
+         */}
+        <Pressable
+          accessibilityRole="button"
+          onPress={onClose}
+          hitSlop={8}
+          className="mt-1 items-center py-2.5"
+        >
+          <Text className="text-[13px] font-semibold text-ink-500">Maybe later</Text>
+        </Pressable>
       </View>
     </View>
   );
 }
 
-function PlanOption({ plan, onSelect }: { plan: Plan; onSelect: () => void }) {
-  const Icon = PLAN_ICON[plan.tier] ?? Sparkles;
-  const featured = Boolean(plan.highlight);
+/**
+ * One plan in the segmented row.
+ *
+ * Everything a reader compares — name, price, unit price — sits at the same
+ * size in every card. The selected card gains a border, a tint and a tick;
+ * it does not gain a bigger number, because a highlight that changes the
+ * TYPOGRAPHY of a price is designing the comparison rather than presenting it.
+ */
+function PlanOption({
+  plan,
+  selected,
+  onSelect,
+}: {
+  plan: Plan;
+  selected: boolean;
+  onSelect: () => void;
+}) {
+  const perDay = perDayLabel(plan);
+  const saving = plan.tier === "family" ? familySavingPercent() : null;
 
   return (
     <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={`${plan.name}, ${formatPrice(plan.priceInPaise)} per ${plan.period}. ${plan.tagline}`}
+      accessibilityRole="radio"
+      accessibilityState={{ selected }}
+      accessibilityLabel={`${plan.name}, ${formatPrice(plan.priceInPaise)} per ${plan.period}${
+        perDay ? `, about ${perDay}` : ""
+      }${saving ? `, ${saving} percent less than buying separately` : ""}`}
       onPress={onSelect}
-      className="rounded-card bg-surface p-3.5"
-      style={[shadow.e1, { borderWidth: 2, borderColor: featured ? brand[500] : surface.line }]}
+      className="flex-1 overflow-hidden rounded-card bg-surface px-2 pb-3 pt-2.5"
+      style={[
+        selected ? shadow.e2 : shadow.e1,
+        {
+          borderWidth: 2,
+          borderColor: selected ? brand[600] : surface.line,
+          backgroundColor: selected ? brand[50] : surface.base,
+        },
+      ]}
     >
-      <View className="flex-row items-start gap-3">
-        <View
-          className="h-11 w-11 items-center justify-center rounded-tile"
-          style={{
-            backgroundColor:
-              plan.tier === "family"
-                ? brand[50]
-                : plan.tier === "solo"
-                  ? semantic.safeBg
-                  : semantic.cautionBg,
-          }}
-        >
-          <Icon
-            size={20}
-            color={
-              plan.tier === "family"
-                ? brand[600]
-                : plan.tier === "solo"
-                  ? semantic.safe
-                  : semantic.cautionText
-            }
-          />
-        </View>
-
-        <View className="min-w-0 flex-1">
-          <View className="flex-row flex-wrap items-center gap-x-2 gap-y-1">
-            <Text className="text-[16px] font-bold text-ink-900">{plan.name}</Text>
-            {plan.highlight ? (
-              <View className="rounded-pill bg-brand-600 px-2 py-0.5">
-                <Text className="text-[10px] font-bold text-white">{plan.highlight}</Text>
-              </View>
-            ) : null}
-          </View>
-          <Text className="mt-0.5 text-[12px] leading-[16px] text-ink-500">{plan.tagline}</Text>
-        </View>
-
-        <View className="items-end">
-          <Text className="text-[19px] font-bold leading-none text-ink-900">
-            {formatPrice(plan.priceInPaise)}
-          </Text>
-          <Text className="mt-0.5 text-[11px] text-ink-500">/{plan.period}</Text>
-        </View>
-      </View>
-
-      {featured ? (
-        <View className="mt-3 gap-1.5">
-          {plan.features.map((feature) => (
-            <View key={feature} className="flex-row items-start gap-2">
-              <Check size={14} color={semantic.safe} style={{ marginTop: 1 }} />
-              <Text className="flex-1 text-[12px] text-ink-700">{feature}</Text>
-            </View>
-          ))}
+      {saving ? (
+        <View className="mb-1.5 self-center rounded-pill px-2 py-0.5" style={{ backgroundColor: brand[600] }}>
+          <Text className="text-[9px] font-bold text-white">SAVE {saving}%</Text>
         </View>
       ) : (
-        <View className="mt-2.5 flex-row items-start gap-2">
-          <Check size={13} color={semantic.safe} style={{ marginTop: 1 }} />
-          <Text className="flex-1 text-[11.5px] leading-[16px] text-ink-500">
-            {plan.tier === "micro"
-              ? `Unlimited chats for ${DAILY_PASS_HOURS} hours, no renewal`
-              : plan.features.slice(0, 2).join(" · ")}
-          </Text>
-        </View>
+        <View className="mb-1.5 h-[17px]" />
       )}
 
-      <View
-        className="mt-3 h-11 items-center justify-center rounded-pill"
-        style={
-          featured
-            ? { backgroundColor: brand[600] }
-            : { backgroundColor: brand[50], borderWidth: 1, borderColor: brand[200] }
-        }
-      >
-        <Text
-          className="text-[14px] font-semibold"
-          style={{ color: featured ? "#fff" : brand[700] }}
-        >
-          Choose {plan.name}
+      <Text className="text-center text-[12.5px] font-semibold text-ink-900" numberOfLines={1}>
+        {plan.name.replace(" Plan", "").replace(" Pass", "")}
+      </Text>
+
+      <Text className="mt-1.5 text-center text-[19px] font-bold leading-[22px] text-ink-900">
+        {formatPrice(plan.priceInPaise)}
+      </Text>
+      <Text className="text-center text-[10.5px] text-ink-500">per {plan.period}</Text>
+
+      <View className="mt-2 items-center pt-2" style={{ borderTopWidth: 1, borderTopColor: selected ? brand[200] : surface.line }}>
+        <Text className="text-center text-[10.5px] leading-[14px] text-ink-500" numberOfLines={2}>
+          {perDay ?? `${DAILY_PASS_HOURS} hours`}
+        </Text>
+        <Text className="mt-0.5 text-center text-[10.5px] font-semibold" style={{ color: brand[700] }}>
+          {plan.seats > 1 ? `${plan.seats} people` : "1 person"}
         </Text>
       </View>
+
+      {selected ? (
+        <View className="mt-2 items-center">
+          <View className="h-5 w-5 items-center justify-center rounded-pill" style={{ backgroundColor: brand[600] }}>
+            <Check size={12} color="#ffffff" strokeWidth={3} />
+          </View>
+        </View>
+      ) : (
+        <View className="mt-2 items-center">
+          <View className="h-5 w-5 rounded-pill" style={{ borderWidth: 2, borderColor: surface.line }} />
+        </View>
+      )}
     </Pressable>
+  );
+}
+
+/** Today, the renewal, and the exit — in that order, for the selected plan. */
+function NextSteps({ plan }: { plan: Plan }) {
+  const isDaily = plan.tier === "micro";
+
+  const renews = new Date();
+  renews.setMonth(renews.getMonth() + 1);
+  const renewalDate = renews.toLocaleDateString(undefined, {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+
+  const steps: readonly [LucideIcon, string, string][] = isDaily
+    ? [
+        [Zap, "Today", `Everything unlocks for ${DAILY_PASS_HOURS} hours`],
+        [CalendarClock, `After ${DAILY_PASS_HOURS} hours`, "The pass ends on its own"],
+        [ShieldCheck, "Never", "Nothing renews, nothing is charged again"],
+      ]
+    : [
+        [Zap, "Today", `Unlimited chats${plan.seats > 1 ? ` and up to ${plan.seats} members` : ""}`],
+        [CalendarClock, renewalDate, `${formatPrice(plan.priceInPaise)} charged, then monthly`],
+        [ShieldCheck, "Any time", "Cancel from Settings — records are never deleted"],
+      ];
+
+  return (
+    <View className="mt-4 overflow-hidden rounded-card bg-surface" style={shadow.e1}>
+      {steps.map(([Icon, title, body], i) => (
+        <View
+          key={title}
+          className="flex-row items-center gap-3 px-3.5 py-2.5"
+          style={i > 0 ? { borderTopWidth: 1, borderTopColor: surface.line } : undefined}
+        >
+          <View
+            className="h-8 w-8 items-center justify-center rounded-pill"
+            style={{ backgroundColor: i === 0 ? brand[600] : brand[50] }}
+          >
+            <Icon size={15} color={i === 0 ? "#ffffff" : brand[600]} />
+          </View>
+          <View className="min-w-0 flex-1">
+            <Text className="text-[12.5px] font-semibold text-ink-900">{title}</Text>
+            <Text className="mt-0.5 text-[11px] leading-[15px] text-ink-500">{body}</Text>
+          </View>
+        </View>
+      ))}
+    </View>
   );
 }
 

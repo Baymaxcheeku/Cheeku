@@ -154,3 +154,53 @@ export function seatsFor(tier: Tier): number {
 export function allowsFamily(tier: Tier): boolean {
   return tier === "family";
 }
+
+/*
+ * ┌─ UNIT PRICING ───────────────────────────────────────────────────────────┐
+ * │                                                                          │
+ * │ ₹249 a month is a number people compare against other subscriptions.     │
+ * │ ₹8 a day is a number they compare against a cup of tea, and it is the    │
+ * │ same price. Every high-performing paywall in the category prints both,   │
+ * │ and it is not a trick as long as the arithmetic is real and the full     │
+ * │ amount is still the loudest figure on the card — which it is here.       │
+ * │                                                                          │
+ * │ Rounded to whole rupees, and never rounded DOWN to flatter the plan: a   │
+ * │ daily figure that does not multiply back is the kind of small dishonesty │
+ * │ that costs more trust than the sale is worth.                            │
+ * │                                                                          │
+ * └──────────────────────────────────────────────────────────────────────────┘
+ */
+const DAYS_IN_MONTH = 30;
+
+/**
+ * "about ₹8 a day", or null when the plan is already priced per day.
+ *
+ * "about" is load-bearing. ₹99 over 30 days is ₹3.30, which rounds to ₹3, and
+ * a bare "₹3 a day" multiplies back to ₹90 — a plan quietly cheaper than the
+ * price printed directly above it. The hedge costs one word and makes the line
+ * true at any price.
+ */
+export function perDayLabel(plan: Plan): string | null {
+  if (plan.period === "day") return null;
+  const paisePerDay = plan.priceInPaise / DAYS_IN_MONTH;
+  return `about ${formatPrice(paisePerDay)} a day`;
+}
+
+/** "₹62 per person" — only meaningful on a plan that holds several. */
+export function perSeatLabel(plan: Plan): string | null {
+  if (plan.seats < 2) return null;
+  return `${formatPrice(plan.priceInPaise / plan.seats)} per person`;
+}
+
+/**
+ * What the Family plan saves against buying its seats separately.
+ *
+ * Computed, never typed in. A discount figure written by hand is one pricing
+ * change away from being a lie printed on the most persuasive line of the
+ * paywall.
+ */
+export function familySavingPercent(): number {
+  const separately = PLANS.solo.priceInPaise * PLANS.family.seats;
+  const saved = separately - PLANS.family.priceInPaise;
+  return Math.round((saved / separately) * 100);
+}
