@@ -134,6 +134,8 @@ export type RecordSummary = {
   id: string;
   profileId: string;
   profileName: string;
+  /** Chosen face, or null to derive one from `profileId`. */
+  profileAvatarSeed: string | null;
   title: string;
   docType: DocType;
   status: DocStatus;

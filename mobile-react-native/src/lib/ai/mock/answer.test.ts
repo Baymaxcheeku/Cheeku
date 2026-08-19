@@ -34,6 +34,7 @@ function record(over: Partial<GroundingRecord> = {}): GroundingRecord {
     id: "d1",
     profileId: "p1",
     profileName: "Ananya",
+    profileAvatarSeed: null,
     title: "Complete blood count",
     docType: "lab_report",
     status: "filed",

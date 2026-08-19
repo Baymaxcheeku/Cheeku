@@ -30,6 +30,7 @@ function record(entities: RecordEntity[]): RecordDetail {
     id: "d1",
     profileId: "p1",
     profileName: "Ananya Sharma",
+    profileAvatarSeed: null,
     title: "Blood Test Report",
     docType: "lab_report",
     status: "filed",

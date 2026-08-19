@@ -1,13 +1,15 @@
 import { useRouter } from "expo-router";
 import { ArrowRight, Check, ShieldCheck, Users, type LucideIcon } from "lucide-react-native";
-import { useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { useMemo, useState } from "react";
+import { Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AvatarFamily, AvatarSolo } from "@/components/illustrations/avatar-cluster";
+import { Avatar } from "@/components/ui/avatar";
 import { Dots, Headline, OnboardingHeader, ReassuranceStrip } from "@/components/onboarding/chrome";
 import { Button } from "@/components/ui/button";
 import { setAudience, type Audience } from "@/lib/auth/audience";
+import { avatarPicks } from "@/lib/profiles/avatar";
 import { brand, shadow, surface } from "@/theme/tokens";
 
 const OPTIONS: readonly {
@@ -49,13 +51,28 @@ export default function Who() {
   const insets = useSafeAreaInsets();
 
   const [audience, setAudienceChoice] = useState<Audience>("me");
+  const [avatar, setAvatar] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+
+  // Ten SVGs, generated once. Regenerating them on every keystroke of state
+  // elsewhere on the screen would redraw the whole tray for nothing.
+  const picks = useMemo(() => avatarPicks(), []);
+  const chosen = picks.find((p) => p.id === avatar) ?? null;
 
   async function submit() {
     setPending(true);
     try {
       await setAudience(audience);
-      router.push("/profile");
+      /*
+       * The face travels as a route param, not through storage.
+       *
+       * There is no profile to write it to yet — /profile creates that on the
+       * next screen — and a value parked in local storage for a row that may
+       * never exist is the mistake the journey picker was making. As a param
+       * it lands in the insert one screen later, or vanishes with the
+       * navigation if they back out. Nothing to clean up either way.
+       */
+      router.push(avatar ? { pathname: "/profile", params: { avatar } } : "/profile");
     } finally {
       setPending(false);
     }
@@ -126,8 +143,22 @@ export default function Who() {
                 {/* 78pt, not the web build's 92. The badge underneath is the
                     widest thing in the text column and at 92 it wrapped to two
                     ragged lines inside its own pill. */}
+                {/*
+                 * The card shows the face that was picked, not a stand-in.
+                 * Choosing yourself in a tray and then still seeing somebody
+                 * else's portrait on the card above it is the same complaint
+                 * the tray exists to answer, moved eight points up the screen.
+                 */}
                 <View className="w-[78px] items-center justify-center">
-                  {option.art === "solo" ? <AvatarSolo size={64} /> : <AvatarFamily size={64} />}
+                  {option.art === "solo" ? (
+                    chosen ? (
+                      <Avatar svg={chosen.svg} background={chosen.background} size={64} />
+                    ) : (
+                      <AvatarSolo size={64} />
+                    )
+                  ) : (
+                    <AvatarFamily size={64} />
+                  )}
                 </View>
 
                 <View className="min-w-0 flex-1 pt-0.5">
@@ -151,6 +182,68 @@ export default function Who() {
             );
           })}
         </View>
+
+        {/*
+         * The face picker, and only for "me".
+         *
+         * A uuid-derived avatar is a coin toss, so a man setting his own
+         * profile up was being handed a woman's face with no way to change it.
+         * It appears here rather than on the profile form because this is the
+         * screen where the reader has just said the account is theirs — the
+         * question "so which one is you" belongs to that answer.
+         *
+         * NOT SHOWN FOR "family": the faces there stand for several people who
+         * do not exist yet, and picking one of them would be choosing a face
+         * for somebody else.
+         *
+         * NOT A GENDER FIELD. Nothing is labelled, nothing is grouped, and no
+         * pick is stored as anything but a drawing id. `sex` is asked once, as
+         * a health field, on the profile form.
+         */}
+        {audience === "me" ? (
+          <View className="mt-4">
+            <Text className="text-[13px] font-semibold text-ink-900">Pick your face</Text>
+            <Text className="mt-0.5 text-[12px] text-ink-500">
+              Optional, and you can change it later.
+            </Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ gap: 10, paddingVertical: 10, paddingRight: 20 }}
+            >
+              {picks.map((pick) => {
+                const on = avatar === pick.id;
+                return (
+                  <Pressable
+                    key={pick.id}
+                    accessibilityRole="radio"
+                    accessibilityState={{ selected: on }}
+                    // Numbered, because the alternative is describing a
+                    // stranger's face to them in a screen reader.
+                    accessibilityLabel={`Avatar option ${pick.id.slice(1)}`}
+                    // Tapping the chosen one clears it, so a pick made by
+                    // mistake does not have to be replaced by another pick.
+                    onPress={() => setAvatar(on ? null : pick.id)}
+                  >
+                    {/*
+                     * The ring is drawn as a padded disc rather than through
+                     * Avatar's own `ring`, which is a fixed 2pt everywhere in
+                     * the app. At 2pt a selected face and an unselected one
+                     * are nearly the same object; a chosen thing should be
+                     * unmistakable at a glance.
+                     */}
+                    <View
+                      className="rounded-pill p-[3px]"
+                      style={{ backgroundColor: on ? brand[600] : surface.line }}
+                    >
+                      <Avatar svg={pick.svg} background={pick.background} size={54} />
+                    </View>
+                  </Pressable>
+                );
+              })}
+            </ScrollView>
+          </View>
+        ) : null}
 
         <View className="mt-5 gap-4">
           <ReassuranceStrip>

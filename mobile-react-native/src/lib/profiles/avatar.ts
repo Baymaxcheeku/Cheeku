@@ -85,7 +85,63 @@ export function faceSvg(seed: string, background: string, traits: FaceTraits = {
  * at once.
  */
 
+/*
+ * THE PICKER'S CATALOGUE.
+ *
+ * A face derived from a uuid is a coin toss, so a man setting up his own
+ * profile could be handed a woman's face and no way out of it. These are the
+ * faces somebody can choose instead, and each one's traits are pinned rather
+ * than left to the seed for exactly the reason the picker exists.
+ *
+ * WHAT THIS IS NOT. Not a gender question, and never labelled as one. Nothing
+ * here is called "male" or "female", nothing is grouped, and the order is
+ * arbitrary — a person picks the drawing that looks like them and the app
+ * learns nothing from it beyond which PNG-equivalent to draw. `profiles.sex`
+ * is asked once, plainly, on the profile form where it is a health field.
+ *
+ * The id is what gets stored, so a face survives the catalogue being extended.
+ * Reordering this array is safe; renaming an id is not.
+ */
+const PICKS = [
+  { id: "p1", background: "d1d4f9", traits: { hair: ["fonze"], hairColor: ["2c1b18"], baseColor: ["f9c9b6"], facialHairProbability: 0, earringsProbability: 0, glassesProbability: 0 } },
+  { id: "p2", background: "ffd5dc", traits: { hair: ["full"], hairColor: ["2c1b18"], baseColor: ["ac6651"], facialHairProbability: 0, earringsProbability: 100, glassesProbability: 0 } },
+  { id: "p3", background: "b6e3f4", traits: { hair: ["dougFunny"], hairColor: ["000000"], baseColor: ["77311d"], facialHair: ["scruff"], facialHairProbability: 100, earringsProbability: 0, glassesProbability: 0 } },
+  { id: "p4", background: "d7f0e0", traits: { hair: ["pixie"], hairColor: ["6a4e35"], baseColor: ["f9c9b6"], facialHairProbability: 0, earringsProbability: 100, glassesProbability: 0 } },
+  { id: "p5", background: "ffdfbf", traits: { hair: ["turban"], hairColor: ["000000"], baseColor: ["77311d"], facialHair: ["beard"], facialHairProbability: 100, earringsProbability: 0, glassesProbability: 0 } },
+  { id: "p6", background: "c0aede", traits: { hair: ["dannyPhantom"], hairColor: ["ac6651"], baseColor: ["ac6651"], facialHairProbability: 0, earringsProbability: 0, glassesProbability: 100, glasses: ["round"] } },
+  { id: "p7", background: "d1d4f9", traits: { hair: ["mrClean"], hairColor: ["000000"], baseColor: ["ac6651"], facialHair: ["beard"], facialHairProbability: 100, earringsProbability: 0, glassesProbability: 100, glasses: ["square"] } },
+  { id: "p8", background: "ffd5dc", traits: { hair: ["full"], hairColor: ["b0b0b0"], baseColor: ["f9c9b6"], facialHairProbability: 0, earringsProbability: 100, glassesProbability: 0 } },
+  { id: "p9", background: "b6e3f4", traits: { hair: ["fonze"], hairColor: ["f4d150"], baseColor: ["f9c9b6"], facialHairProbability: 0, earringsProbability: 0, glassesProbability: 0 } },
+  { id: "p10", background: "d7f0e0", traits: { hair: ["pixie"], hairColor: ["000000"], baseColor: ["77311d"], facialHairProbability: 0, earringsProbability: 100, glassesProbability: 0 } },
+] as const;
+
+export type AvatarPick = { id: string; svg: string; background: string };
+
+/** Every choosable face, in catalogue order. */
+export function avatarPicks(): AvatarPick[] {
+  return PICKS.map((p) => ({
+    id: p.id,
+    svg: faceSvg(p.id, p.background, p.traits),
+    background: `#${p.background}`,
+  }));
+}
+
 export function generatedAvatar(profileId: string, index: number): GeneratedAvatar {
+  /*
+   * A chosen face wins over a derived one. `seed` here is whatever the caller
+   * had — a stored `avatar_seed` if the person picked, otherwise the profile
+   * id — so every call site gets the right face without knowing which case it
+   * is in. An id that is no longer in the catalogue falls through to the
+   * derived face rather than rendering nothing.
+   */
+  const picked = PICKS.find((p) => p.id === profileId);
+  if (picked) {
+    return {
+      svg: faceSvg(picked.id, picked.background, picked.traits),
+      background: `#${picked.background}`,
+    };
+  }
+
   // `as const` makes the modulo index provably in range, so this needs no
   // fallback and no assertion — noUncheckedIndexedAccess is satisfied.
   const background = BACKGROUNDS[index % BACKGROUNDS.length] as (typeof BACKGROUNDS)[number];

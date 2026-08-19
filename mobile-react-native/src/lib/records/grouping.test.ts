@@ -46,6 +46,7 @@ function rec(id: string, eventDate: string | null): RecordSummary {
     id,
     profileId: "p1",
     profileName: "Ananya Sharma",
+    profileAvatarSeed: null,
     title: "Blood Test Report",
     docType: "lab_report",
     status: "filed",

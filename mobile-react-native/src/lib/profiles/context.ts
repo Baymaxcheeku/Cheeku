@@ -50,14 +50,20 @@ export type ActiveProfile = {
 export async function familyProfiles(): Promise<ActiveProfile[]> {
   const { data, error } = await supabase
     .from("profiles")
-    .select("id, name, relationship, is_primary, avatar_ring, dob, sex")
+    .select("id, name, relationship, is_primary, avatar_ring, avatar_seed, dob, sex")
     .order("is_primary", { ascending: false })
     .order("created_at", { ascending: true });
 
   if (error) throw new Error(`familyProfiles: ${error.message}`);
 
   return (data ?? []).map((p, i) => {
-    const generated = generatedAvatar(p.id as string, i);
+    /*
+     * A chosen face beats a derived one. `avatar_seed` is null for anyone who
+     * never picked — every family member added in a hurry, and every profile
+     * that predates the picker — and those keep deriving from the id exactly
+     * as before.
+     */
+    const generated = generatedAvatar((p.avatar_seed as string | null) ?? (p.id as string), i);
     return {
       id: p.id as string,
       name: p.name as string,

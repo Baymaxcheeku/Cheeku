@@ -73,7 +73,9 @@ export function RecordCard({
   const router = useRouter();
   const style = TYPE_STYLE[record.docType] ?? TYPE_STYLE.other;
   const severity = SEVERITY[record.severity];
-  const face = generatedAvatar(record.profileId, index);
+  // The chosen face when there is one, the derived face when there is not.
+  // Same rule as the switcher, so nobody has two faces across two screens.
+  const face = generatedAvatar(record.profileAvatarSeed ?? record.profileId, index);
 
   return (
     <Pressable

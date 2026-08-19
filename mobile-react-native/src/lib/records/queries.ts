@@ -51,14 +51,30 @@ type DocumentRow = {
   confidence: number | null;
   created_at: string;
   extraction: { title?: string } | null;
-  profiles: { name: string } | { name: string }[] | null;
+  profiles: ProfileJoin | ProfileJoin[] | null;
   entities: { flag: EntityFlag | null }[] | null;
 };
 
-function profileName(row: DocumentRow): string {
+type ProfileJoin = { name: string; avatar_seed: string | null };
+
+function profileJoin(row: DocumentRow): ProfileJoin | null {
   const p = row.profiles;
-  if (!p) return "Unknown";
-  return Array.isArray(p) ? (p[0]?.name ?? "Unknown") : p.name;
+  if (!p) return null;
+  return Array.isArray(p) ? (p[0] ?? null) : p;
+}
+
+function profileName(row: DocumentRow): string {
+  return profileJoin(row)?.name ?? "Unknown";
+}
+
+/*
+ * The face to draw on the card. Null when the person never picked one, which
+ * tells the caller to fall back to deriving it from the profile id — the same
+ * rule the switcher follows, so one person does not have two faces depending
+ * on which screen you are looking at.
+ */
+function profileAvatarSeed(row: DocumentRow): string | null {
+  return profileJoin(row)?.avatar_seed ?? null;
 }
 
 /*
@@ -90,6 +106,7 @@ function toSummary(row: DocumentRow): RecordSummary {
     id: row.id,
     profileId: row.profile_id,
     profileName: profileName(row),
+    profileAvatarSeed: profileAvatarSeed(row),
     title: documentTitle(row),
     docType: row.doc_type,
     status: row.status,
@@ -104,7 +121,7 @@ function toSummary(row: DocumentRow): RecordSummary {
 }
 
 const SUMMARY_SELECT =
-  "id, profile_id, doc_type, status, mime_type, event_date, facility, doctor, confidence, created_at, extraction, profiles(name), entities(flag)";
+  "id, profile_id, doc_type, status, mime_type, event_date, facility, doctor, confidence, created_at, extraction, profiles(name, avatar_seed), entities(flag)";
 
 export async function listRecords(filters: RecordFilters = {}): Promise<RecordSummary[]> {
   let query = supabase.from("documents").select(SUMMARY_SELECT);

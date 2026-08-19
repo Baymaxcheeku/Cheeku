@@ -1,4 +1,4 @@
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import {
   ArrowRight,
   Calendar,
@@ -57,6 +57,12 @@ type BloodGroup = (typeof BLOOD_GROUPS)[number][0];
  * because the client is not the thing that gets to decide a date is a date.
  */
 export default function Profile() {
+  /*
+   * The face chosen on /who, handed over in the navigation rather than parked
+   * in storage. Absent when they skipped the picker or arrived here directly,
+   * in which case the avatar is derived from the profile id as before.
+   */
+  const { avatar } = useLocalSearchParams<{ avatar?: string }>();
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
@@ -152,6 +158,7 @@ export default function Profile() {
         sex: parsed.data.sex || null,
         relationship: "self",
         is_primary: true,
+        avatar_seed: typeof avatar === "string" && avatar ? avatar : null,
         conditions: parsed.data.conditions
           ? parsed.data.conditions.split(",").map((c) => c.trim())
           : [],
