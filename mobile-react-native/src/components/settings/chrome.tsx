@@ -18,6 +18,7 @@ export function SettingsScreen({
   icon: Icon,
   children,
   footer,
+  bare = false,
 }: {
   title: string;
   eyebrow: string;
@@ -25,6 +26,16 @@ export function SettingsScreen({
   children: React.ReactNode;
   /** Pinned below the scroll area, for save buttons that must stay reachable. */
   footer?: React.ReactNode;
+  /**
+   * Suppress the icon-and-title block when the screen opens with its own hero.
+   *
+   * About was rendering two headers in a row — "About Baymax / Your AI health
+   * companion" in this chrome, then a card immediately below saying the same
+   * thing in bigger type. `title` and `eyebrow` are still required because
+   * they are the screen's identity for accessibility and for anything that
+   * later needs to label it; this only stops them being drawn twice.
+   */
+  bare?: boolean;
 }) {
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -48,7 +59,12 @@ export function SettingsScreen({
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        <View className="flex-row items-start gap-3 px-5">
+        <View
+          accessibilityRole="header"
+          accessibilityLabel={`${title}. ${eyebrow}`}
+          className="flex-row items-start gap-3 px-5"
+          style={bare ? { height: 0, opacity: 0, overflow: "hidden" } : undefined}
+        >
           <View className="h-11 w-11 items-center justify-center rounded-tile bg-brand-50">
             <Icon size={20} color={brand[600]} />
           </View>

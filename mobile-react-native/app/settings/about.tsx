@@ -75,44 +75,115 @@ export default function About() {
   const faces = castFaces(JOURNEYS.length);
 
   return (
-    <SettingsScreen title="About Baymax" eyebrow="Your AI health companion" icon={Info}>
+    <SettingsScreen title="About Baymax" eyebrow="Your AI health companion" icon={Info} bare>
       {/* ------------------------------------------------------------ hero */}
+      {/*
+       * ┌─ WHY THE HEADER WAS REBUILT ─────────────────────────────────────┐
+       * │                                                                  │
+       * │ Two headers ran back to back: the settings chrome's "About        │
+       * │ Baymax / Your AI health companion" beside an info glyph, and      │
+       * │ immediately under it a card saying the same thing in larger type. │
+       * │ The reader met the title twice before meeting a single idea.      │
+       * │                                                                  │
+       * │ And the mascot was drawn at -right-3 -top-3 inside an             │
+       * │ overflow-hidden card, so it was clipped on two edges — and its    │
+       * │ shell gradient starts near-white, which on a brand-50 card left   │
+       * │ an outline with a face in it. The friendliest thing on the page   │
+       * │ rendered as a ghost, again.                                      │
+       * │                                                                  │
+       * │ One header now. The mascot sits whole and centred on its own disc │
+       * │ — the treatment used on Home, Ask and the paywall — and the       │
+       * │ screen's name is the small line above the headline rather than a  │
+       * │ heading competing with it.                                        │
+       * │                                                                  │
+       * └──────────────────────────────────────────────────────────────────┘
+       */}
       <View
-        className="mx-5 mt-4 overflow-hidden rounded-card bg-brand-50 p-4"
-        style={{ borderWidth: 1, borderColor: brand[100] }}
+        className="mx-5 items-center overflow-hidden rounded-card px-5 pb-6 pt-7"
+        style={{ backgroundColor: brand[50], borderWidth: 1, borderColor: brand[100] }}
       >
-        <View className="absolute -right-3 -top-3">
-          <TapToWiggle>
-            <MascotBust size={124} />
-          </TapToWiggle>
-        </View>
-        <View className="pr-[32%]">
-          {/*
-           * "It doesn't guess" is the whole positioning in three words, and it
-           * is a claim about MECHANISM rather than quality. Everyone in this
-           * category says accurate, personal, trusted. Almost none of them can
-           * tell you where a given sentence came from.
-           */}
-          <Text className="text-[21px] font-bold leading-[25px] tracking-tight text-ink-900">
-            It doesn&apos;t guess.{"\n"}
-            <Text className="text-brand-600">It reads your records.</Text>
-          </Text>
-          <Text className="mt-2 text-[12.5px] leading-[18px] text-ink-700">
-            Baymax keeps your family&apos;s health documents in one place, remembers what they say,
-            and answers in plain language — naming the record every answer came from.
-          </Text>
-        </View>
+        {/*
+         * A HALO, NOT A DISC.
+         *
+         * The obvious fix for the mascot dissolving into a pale card is to put
+         * it in a filled circle — which is what the header avatars do, and
+         * there it is right. At hero size it is not: the bust includes a
+         * raised waving arm, and a circle clips it, so the one moment the
+         * character is shown at full size is the one where its arm is cut off.
+         *
+         * The halo sits BEHIND and smaller than the mascot. It gives the body
+         * the contrast it needs against brand-50, and the arm and the heart
+         * carry on past it onto the card, whole.
+         */}
+        <TapToWiggle>
+          <View className="items-center justify-center">
+            <View
+              pointerEvents="none"
+              style={{
+                position: "absolute",
+                width: 92,
+                height: 92,
+                borderRadius: 999,
+                backgroundColor: brand[100],
+                marginTop: 10,
+              }}
+            />
+            {/*
+             * The mascot is positioned too, with a zIndex above the halo.
+             *
+             * Without it the halo covered the face: CSS paints positioned
+             * elements above static siblings regardless of source order, so
+             * the "behind" circle rendered in front on web while looking
+             * correct on native. Giving both a stacking context makes the
+             * order mean the same thing in both renderers.
+             */}
+            <View style={{ zIndex: 1 }}>
+              <MascotBust size={124} />
+            </View>
+          </View>
+        </TapToWiggle>
+
+        <Text
+          className="mt-4 text-[11px] font-bold uppercase text-ink-300"
+          style={{ letterSpacing: 1.4 }}
+        >
+          About Baymax
+        </Text>
+
+        {/*
+         * "It doesn't guess" is the whole positioning in three words, and it
+         * is a claim about MECHANISM rather than quality. Everyone in this
+         * category says accurate, personal, trusted. Almost none of them can
+         * tell you where a given sentence came from.
+         */}
+        <Text
+          className="mt-2 text-center text-[24px] font-bold leading-[29px] text-ink-900"
+          style={{ letterSpacing: -0.6 }}
+        >
+          It doesn&apos;t guess.{"\n"}
+          <Text className="text-brand-600">It reads your records.</Text>
+        </Text>
+        <Text className="mt-2.5 max-w-[300px] text-center text-[13px] leading-[19px] text-ink-700">
+          Your family&apos;s health documents in one place, remembered, and read back in plain
+          language — naming the record every answer came from.
+        </Text>
       </View>
 
       {/*
-       * Four traits as one strip, not four cards.
+       * Four traits as one strip, divided by hairlines.
        *
-       * As a 2x2 grid this was the page's structure rather than its content.
+       * As four separate cards this was the page's structure rather than its
+       * content; as one strip with no dividers the labels drifted into each
+       * other. The rules are what make four equal columns read as a set.
+       *
        * The colours are deliberately all brand: green and amber carry health
        * meaning everywhere else in this app, and spending them on words like
        * "Personal" teaches the reader that the palette means nothing.
        */}
-      <View className="mx-5 mt-3 flex-row rounded-card bg-surface px-2 py-3" style={shadow.e1}>
+      <View
+        className="mx-5 mt-3 flex-row overflow-hidden rounded-card bg-surface py-3.5"
+        style={{ borderWidth: 1, borderColor: surface.line }}
+      >
         {(
           [
             [Lock, "Private"],
@@ -122,10 +193,11 @@ export default function About() {
           ] as const
         ).map(([Icon, label], i) => (
           <PopIn key={label} index={i} style={{ flex: 1 }}>
-            <View className="items-center gap-1.5">
-              <View className="h-9 w-9 items-center justify-center rounded-pill bg-brand-50">
-                <Icon size={16} color={brand[600]} />
-              </View>
+            <View
+              className="items-center gap-2 px-1"
+              style={i > 0 ? { borderLeftWidth: 1, borderLeftColor: surface.line } : undefined}
+            >
+              <Icon size={17} color={brand[600]} />
               <Text className="text-[10.5px] font-semibold text-ink-700">{label}</Text>
             </View>
           </PopIn>
