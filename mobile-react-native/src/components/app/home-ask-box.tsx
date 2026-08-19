@@ -1,22 +1,14 @@
+import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { ArrowUp, Camera, Stethoscope } from "lucide-react-native";
 import { useState } from "react";
 import { Pressable, Text, TextInput, View } from "react-native";
 
 import { MascotBust } from "@/components/illustrations/sprout";
+import { promptsFor } from "@/lib/ask/prompts";
+import { profileSignalsFor } from "@/lib/knowledge/queries";
+import { activeProfile } from "@/lib/profiles/context";
 import { brand, ink, shadow } from "@/theme/tokens";
-
-/*
- * Three prompts, not a generic hint list — each names the moment this card
- * actually exists for: a worried result, a product safety check, an unfamiliar
- * medicine. Rotating in real questions did more to sell "this remembers your
- * history" than any copy could.
- */
-const PROMPTS = [
-  "Is this safe during pregnancy?",
-  "What does my last report mean?",
-  "Explain this medicine to me",
-] as const;
 
 /**
  * The Ask Baymax entry on Home.
@@ -34,6 +26,30 @@ export function HomeAskBox() {
   const router = useRouter();
   const [value, setValue] = useState("");
   const [focused, setFocused] = useState(false);
+
+  /*
+   * The chips follow what this reader told us about themselves.
+   *
+   * They were three hardcoded strings led by "Is this safe during pregnancy?",
+   * which is what somebody tracking their general health saw on their own home
+   * screen. Same signals the knowledge rail uses — the journey picked at
+   * onboarding and the conditions typed into the profile — and, as there,
+   * never anything read out of a document.
+   *
+   * The query is keyed on the active profile so switching member re-reads it;
+   * `promptsFor` always returns three, so there is no empty state to design and
+   * no layout shift while it loads.
+   */
+  const signals = useQuery({
+    queryKey: ["ask-prompts"],
+    queryFn: async () => {
+      const profile = await activeProfile();
+      return profileSignalsFor(profile?.id);
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const prompts = promptsFor(signals.data?.journey, signals.data?.conditions ?? []);
 
   function ask(question: string) {
     const trimmed = question.trim();
@@ -56,8 +72,18 @@ export function HomeAskBox() {
           without pulling in expo-linear-gradient for one surface, so it is the
           gradient's mid tone flat — the mascot and the glow are what carried
           the depth anyway. */}
-      <View className="absolute -right-3 -top-1" pointerEvents="none">
-        <MascotBust size={148} />
+      {/*
+       * INSIDE the card, not hanging off it.
+       *
+       * It was at -right-3 -top-1 in a card with `overflow-hidden`, so the
+       * waving arm was sliced down the right edge and the top of the head was
+       * shaved — the mascot appeared here as a fragment while every other
+       * screen shows it whole. A character that is drawn differently on the
+       * one screen it introduces itself on reads as a rendering bug, which is
+       * exactly what it was.
+       */}
+      <View className="absolute right-1 top-2" pointerEvents="none">
+        <MascotBust size={132} />
       </View>
 
       <View className="pr-[36%]">
@@ -106,7 +132,7 @@ export function HomeAskBox() {
       </View>
 
       <View className="mt-3 flex-row flex-wrap gap-1.5">
-        {PROMPTS.map((prompt) => (
+        {prompts.map((prompt) => (
           <Pressable
             key={prompt}
             accessibilityRole="button"

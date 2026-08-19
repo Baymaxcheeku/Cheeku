@@ -139,7 +139,7 @@ export async function articleBySlug(slug: string): Promise<Article | null> {
  * tile they tapped during onboarding — a personalisation hint, never a
  * diagnosis. Neither is inferred from a document.
  */
-async function profileSignalsFor(
+export async function profileSignalsFor(
   profileId: string | undefined,
 ): Promise<{ conditions: string[]; journey: string | null }> {
   if (!profileId) return { conditions: [], journey: null };
