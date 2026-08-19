@@ -109,7 +109,32 @@ export default function Welcome() {
         ) : null}
 
         <View className={panel.kind === "journeys" ? "flex-1 px-5 pt-1" : "px-5 pt-5"}>
-          <Text className="text-[28px] font-bold leading-[32px] tracking-tight text-ink-900">
+          {/*
+           * The eyebrow. One word, in the panel's own tint, so the four screens
+           * read as chapters of one thing rather than four separate pitches —
+           * and so the headline never has to spend a clause labelling itself.
+           */}
+          <View
+            className="mb-2.5 self-start rounded-pill px-2.5 py-1"
+            style={{ backgroundColor: (EYEBROW[panel.kind] ?? EYEBROW.meet)?.bg }}
+          >
+            <Text
+              className="text-[10px] font-bold uppercase"
+              style={{ color: (EYEBROW[panel.kind] ?? EYEBROW.meet)?.fg, letterSpacing: 1.1 }}
+            >
+              {panel.eyebrow}
+            </Text>
+          </View>
+
+          {/*
+           * -0.6 tracking at 28pt. Large type reads loose at the default; the
+           * negative value is size-specific and deliberately not applied to the
+           * body copy below, where it would cost legibility.
+           */}
+          <Text
+            className="text-[28px] font-bold leading-[33px] text-ink-900"
+            style={{ letterSpacing: -0.6 }}
+          >
             {panel.lead} <Text className="text-brand-600">{panel.accent}</Text>
           </Text>
           <Text className="mt-2.5 text-[14px] leading-[21px] text-ink-500">{panel.body}</Text>
@@ -174,25 +199,55 @@ export default function Welcome() {
  * `bottom` disappeared off the composition entirely.
  */
 
-/** Panel 1. Subject centred and unobstructed, one badge, one pill beneath. */
+/*
+ * Panel 1 — the questions, and who is listening.
+ *
+ * WHAT CHANGED AND WHY. The old panel put a badge above the mascot and a single
+ * quoted line beneath it, and the quote was the PRODUCT talking: "Your iron is
+ * low. Here's what changed." Two problems. It is the app claiming a finding
+ * before a reader has uploaded anything, and it sells a feature to somebody who
+ * has not yet been given a reason to care.
+ *
+ * A person arrives here holding a question, not a feature request. So the
+ * questions lead — three real ones, in the reader's own voice, drawn from the
+ * lives the product is built around — and the mascot sits among them as the
+ * thing that will listen. That is the whole pitch of panel 1, made before a
+ * word of the headline is read.
+ *
+ * EVERY QUESTION HERE IS ONE BAYMAX CAN HONESTLY TAKE. Each asks it to read
+ * back, compare or prepare — never to judge a result or name a treatment.
+ * Putting "should I take this?" on this screen would be a promise broken on
+ * the first real conversation.
+ */
+const OPENING_QUESTIONS = [
+  { text: "What did this report actually say?", align: "flex-start" as const, delay: 0 },
+  { text: "What should I ask my doctor tomorrow?", align: "flex-end" as const, delay: 0.34 },
+] as const;
+
 function HeroMeet() {
   return (
     <View className="flex-1 items-center justify-center px-5">
-      <Drift delay={0.22} style={{ alignSelf: "flex-end" }}>
-        <View
-          className="flex-row items-center gap-1 rounded-pill bg-surface px-2.5 py-1.5"
-          style={shadow.e2}
-        >
-          <FileText size={11} color={brand[700]} />
-          <Text className="text-[10px] font-bold text-brand-700">Never forgets</Text>
-        </View>
+      <Drift delay={OPENING_QUESTIONS[0].delay} style={{ alignSelf: OPENING_QUESTIONS[0].align }}>
+        <QuestionChip text={OPENING_QUESTIONS[0].text} />
       </Drift>
 
-      <Settle delay={0} style={{ marginTop: -6 }}>
-        <MascotBust size={196} />
+      {/*
+       * The mascot overlaps the chips slightly rather than sitting in a lane of
+       * its own. A stack of three separated blocks reads as a list; an overlap
+       * reads as one scene, and the scene is "these are being heard".
+       */}
+      {/* -6 above, 0 below. The earlier -10/-10 pulled the second chip up over
+          the mascot's body: an overlap that reads as one scene at the top edge
+          reads as an obstruction when it covers the character. */}
+      <Settle delay={0.08} style={{ marginTop: -6 }}>
+        <MascotBust size={178} />
       </Settle>
 
-      <Settle delay={0.3} style={{ marginTop: 2, width: 268 }}>
+      <Drift delay={OPENING_QUESTIONS[1].delay} style={{ alignSelf: OPENING_QUESTIONS[1].align }}>
+        <QuestionChip text={OPENING_QUESTIONS[1].text} />
+      </Drift>
+
+      <Settle delay={0.46} style={{ marginTop: 10, width: 252 }}>
         <View
           className="flex-row items-center gap-2.5 rounded-pill bg-surface px-3.5 py-2.5"
           style={shadow.e2}
@@ -204,7 +259,8 @@ function HeroMeet() {
             <Stethoscope size={15} color="#fff" />
           </View>
           <Text className="flex-1 text-[11px] leading-[15px] text-ink-700">
-            &ldquo;Your iron is low. Here&apos;s what changed.&rdquo;
+            <Text className="font-bold text-ink-900">No question is too small. </Text>
+            Or too late at night.
           </Text>
         </View>
       </Settle>
@@ -212,56 +268,91 @@ function HeroMeet() {
   );
 }
 
-/**
- * Panel 3 — the memory layer as a chain: a document, the value read out of it,
- * and an answer that cites it back. The third card knows about the first, which
- * is the whole product, so they are drawn overlapping rather than merely listed.
+/** A question in the reader's voice: quoted, unanswered, waiting. */
+function QuestionChip({ text }: { text: string }) {
+  return (
+    <View
+      className="max-w-[250px] rounded-card bg-surface px-3.5 py-2.5"
+      style={shadow.e2}
+    >
+      <Text className="text-[12px] leading-[16px] text-ink-700">&ldquo;{text}&rdquo;</Text>
+    </View>
+  );
+}
+
+/*
+ * Panel 3 — memory, shown as the round trip it actually is.
+ *
+ * The old version stacked three unrelated-looking cards: a document, a heart
+ * rate, an answer. It depicted the PARTS of the memory layer and left the
+ * reader to infer the connection between them, which is the one thing worth
+ * showing.
+ *
+ * So it is drawn as a conversation with a document at the top of it, reading
+ * top to bottom the way the reader's own transcript will: a report goes in,
+ * months pass, a question is asked in ordinary words, and the answer comes
+ * back quoting that exact page. The date on the report and the date in the
+ * answer are the same date on purpose — that is the proof, and it is the
+ * difference between this and a chatbot that sounds confident.
+ *
+ * THE ANSWER READS BACK, IT DOES NOT INTERPRET. "Below the range your lab
+ * printed" is the laboratory's own finding restated. Anything approaching
+ * "you're anaemic" would be this screen promising a diagnosis the app must
+ * never give.
  */
 function HeroMemory() {
   return (
     <View className="flex-1 items-center justify-center px-5">
-      <Drift delay={0} style={{ alignSelf: "flex-start", width: 176 }}>
-        <View className="rounded-tile bg-surface p-3" style={shadow.e2}>
+      <Drift delay={0} style={{ alignSelf: "flex-start", width: 196 }}>
+        <View className="rounded-card bg-surface p-3" style={shadow.e2}>
           <View className="flex-row items-center gap-2">
             <View
-              className="h-7 w-7 items-center justify-center rounded-tile"
+              className="h-8 w-8 items-center justify-center rounded-tile"
               style={{ backgroundColor: "#f3e9fd" }}
             >
-              <FileText size={13} color="#7b3fd4" />
+              <FileText size={14} color="#7b3fd4" />
             </View>
-            <Text className="text-[11px] font-bold text-ink-900">Anomaly scan</Text>
+            <View className="min-w-0 flex-1">
+              <Text className="text-[11.5px] font-semibold text-ink-900">Blood test</Text>
+              <Text className="text-[9.5px] text-ink-300">14 March</Text>
+            </View>
+            <View className="h-5 w-5 items-center justify-center rounded-pill bg-safe-bg">
+              <Check size={11} color="#23af5f" strokeWidth={3} />
+            </View>
           </View>
-          <View className="mt-2 gap-1.5">
+          <View className="mt-2.5 gap-1.5">
             <View className="h-1.5 w-full rounded-pill bg-line" />
             <View className="h-1.5 w-3/4 rounded-pill bg-line" />
           </View>
         </View>
       </Drift>
 
-      <Drift delay={0.12} style={{ alignSelf: "flex-end", width: 158, marginTop: -10 }}>
+      {/* Months later, in ordinary words. The gap is the point of the product. */}
+      <Drift delay={0.16} style={{ alignSelf: "flex-end", marginTop: 12 }}>
         <View
-          className="flex-row items-center gap-2 rounded-tile bg-surface p-2.5"
-          style={shadow.e2}
+          className="max-w-[214px] rounded-card px-3.5 py-2.5"
+          style={{ backgroundColor: surface.tint, borderWidth: 1, borderColor: surface.line }}
         >
-          <View className="h-7 w-7 items-center justify-center rounded-pill bg-safe-bg">
-            <Check size={13} color="#23af5f" strokeWidth={3} />
-          </View>
-          <View>
-            <Text className="text-[11px] font-bold text-ink-900">148 bpm</Text>
-            <Text className="text-[9.5px] text-ink-500">Range 110-160</Text>
-          </View>
+          <Text className="text-[11.5px] leading-[15px] text-ink-700">
+            Was my iron low the last time I checked?
+          </Text>
         </View>
       </Drift>
 
-      <Settle delay={0.24} style={{ width: 232, marginTop: -6 }}>
-        <View className="rounded-tile p-3" style={[{ backgroundColor: brand[600] }, shadow.e2]}>
-          <Text className="text-[11.5px] leading-[15px] text-white">
-            Baby&apos;s heart rate was normal at your 20-week scan.
+      <Settle delay={0.32} style={{ alignSelf: "flex-start", width: 244, marginTop: 12 }}>
+        <View className="rounded-card p-3.5" style={[{ backgroundColor: brand[600] }, shadow.e2]}>
+          <Text className="text-[12px] leading-[17px] text-white">
+            Your ferritin was{" "}
+            <Text className="font-bold text-white">9 ng/mL on 14 March</Text> — below the range your
+            lab printed.
           </Text>
-          <View className="mt-1.5 flex-row items-center gap-1">
-            <FileText size={9} color={brand[200]} />
+          <View
+            className="mt-2.5 flex-row items-center gap-1.5 pt-2.5"
+            style={{ borderTopWidth: 1, borderTopColor: "rgba(255,255,255,0.22)" }}
+          >
+            <FileText size={10} color={brand[200]} />
             <Text className="text-[9.5px] font-bold" style={{ color: brand[200] }}>
-              From your records
+              From your own blood test
             </Text>
           </View>
         </View>
@@ -382,6 +473,21 @@ function JourneyGrid({
  * SVG icon's `color` prop, so the same palette is mirrored here. Non-semantic
  * on purpose: green, amber and red mean health status everywhere else.
  */
+/*
+ * The eyebrow tints, one per chapter.
+ *
+ * NON-SEMANTIC, like every other category colour in this app: green, amber and
+ * red state how a health result reads and are never spent on decoration. These
+ * four are borrowed from the journey palette so onboarding and the picker on
+ * panel 2 belong to the same world.
+ */
+const EYEBROW: Record<string, { bg: string; fg: string }> = {
+  meet: { bg: brand[50], fg: brand[600] },
+  journeys: { bg: "#f3e9fd", fg: "#7b3fd4" },
+  memory: { bg: "#e6f1fd", fg: "#1a6fc2" },
+  family: { bg: "#fdeaf0", fg: "#c22a6b" },
+};
+
 const TINT: Record<string, string> = {
   expecting: "#f3e9fd",
   fertility: "#e6f1fd",

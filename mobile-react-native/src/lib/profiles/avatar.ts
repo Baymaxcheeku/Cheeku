@@ -39,11 +39,33 @@ export type GeneratedAvatar = { svg: string; background: string };
  * copy) and the two drifted, which is exactly how an app ends up with two
  * different-looking sets of people in it.
  */
-export function faceSvg(seed: string, background: string): string {
+/**
+ * Traits, when a face must depict a specific KIND of person.
+ *
+ * Real profiles never pass this — their faces are derived from an id and
+ * nothing else, because choosing features for a person the app has never met
+ * would be the app deciding what they look like. The illustrated cast is the
+ * one place where the choice is ours to make, and it has to be made: left to
+ * the seed alone, three of the six came back as bald men, which is not a
+ * picture of "everyone you look after".
+ */
+export type FaceTraits = {
+  hair?: readonly string[];
+  hairColor?: readonly string[];
+  baseColor?: readonly string[];
+  facialHairProbability?: number;
+  facialHair?: readonly string[];
+  glassesProbability?: number;
+  glasses?: readonly string[];
+  earringsProbability?: number;
+};
+
+export function faceSvg(seed: string, background: string, traits: FaceTraits = {}): string {
   return createAvatar(micah, {
     seed,
     size: 96,
     scale: 88,
+    ...(traits as Record<string, never>),
     /*
      * NO `radius`. DiceBear's radius rounds the BACKGROUND inside a square
      * viewBox, so the corners come back transparent — and every caller clips
@@ -84,19 +106,97 @@ export function generatedAvatar(profileId: string, index: number): GeneratedAvat
  * every render. And deliberately NOT anyone's real avatar: blurring a genuine
  * member's face to advertise a plan would mean using their data as bait.
  */
+/*
+ * Six people, and each one's traits are pinned.
+ *
+ * The order matters: the carousel shows the first three, so those three carry
+ * the diversity on their own — a woman, a man and a girl, across three skin
+ * tones — rather than relying on a viewer scrolling to find themselves. The
+ * app ships worldwide; a row of interchangeable faces tells a reader in Lagos,
+ * São Paulo or Kochi that it was drawn for somebody else.
+ */
 const CAST = [
-  { seed: "baymax-cast-parent-a", background: "d1d4f9" },
-  { seed: "baymax-cast-parent-b", background: "ffd5dc" },
-  { seed: "baymax-cast-child", background: "b6e3f4" },
-  { seed: "baymax-cast-elder", background: "d7f0e0" },
-  { seed: "baymax-cast-teen", background: "ffdfbf" },
-  { seed: "baymax-cast-partner", background: "c0aede" },
+  {
+    seed: "baymax-cast-mother",
+    background: "d1d4f9",
+    traits: {
+      hair: ["full"],
+      hairColor: ["2c1b18"],
+      baseColor: ["ac6651"],
+      facialHairProbability: 0,
+      earringsProbability: 100,
+      glassesProbability: 0,
+    },
+  },
+  {
+    seed: "baymax-cast-father",
+    background: "ffd5dc",
+    traits: {
+      hair: ["fonze"],
+      hairColor: ["000000"],
+      baseColor: ["77311d"],
+      facialHair: ["beard"],
+      facialHairProbability: 100,
+      earringsProbability: 0,
+      glassesProbability: 0,
+    },
+  },
+  {
+    seed: "baymax-cast-daughter",
+    background: "b6e3f4",
+    traits: {
+      hair: ["pixie"],
+      hairColor: ["6a4e35"],
+      baseColor: ["f9c9b6"],
+      facialHairProbability: 0,
+      earringsProbability: 0,
+      glassesProbability: 0,
+    },
+  },
+  {
+    seed: "baymax-cast-grandmother",
+    background: "d7f0e0",
+    traits: {
+      hair: ["dannyPhantom"],
+      hairColor: ["b0b0b0"],
+      baseColor: ["f9c9b6"],
+      facialHairProbability: 0,
+      earringsProbability: 100,
+      glasses: ["round"],
+      glassesProbability: 100,
+    },
+  },
+  {
+    seed: "baymax-cast-son",
+    background: "ffdfbf",
+    traits: {
+      hair: ["dougFunny"],
+      hairColor: ["2c1b18"],
+      baseColor: ["ac6651"],
+      facialHairProbability: 0,
+      earringsProbability: 0,
+      glassesProbability: 0,
+    },
+  },
+  {
+    seed: "baymax-cast-partner",
+    background: "c0aede",
+    traits: {
+      hair: ["turban"],
+      hairColor: ["000000"],
+      baseColor: ["77311d"],
+      facialHair: ["beard"],
+      facialHairProbability: 100,
+      earringsProbability: 0,
+      glassesProbability: 0,
+    },
+  },
 ] as const;
 
 /** `count` stand-in faces, in a stable order. */
 export function castFaces(count: number): string[] {
   return Array.from({ length: Math.min(count, CAST.length) }, (_, i) => {
     const member = CAST[i % CAST.length] as (typeof CAST)[number];
-    return faceSvg(member.seed, member.background);
+    return faceSvg(member.seed, member.background, member.traits);
   });
 }
