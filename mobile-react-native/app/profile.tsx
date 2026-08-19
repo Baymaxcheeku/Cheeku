@@ -150,21 +150,87 @@ export default function Profile() {
         familyId = created.id as string;
       }
 
-      const { error: profileError } = await supabase.from("profiles").insert({
-        family_id: familyId,
-        user_id: user.id,
+      /*
+       * The health snapshot, which used to be collected and thrown away.
+       *
+       * Height, weight and blood group were validated by the schema and then
+       * left out of the insert entirely, so somebody could type 169, 97 and A+
+       * and watch all three vanish. The columns existed the whole time. The
+       * phone number had it worse: there was no column at all until 0020.
+       *
+       * Blanks stay NULL rather than becoming zero. A missing weight and a
+       * weight of nothing are different facts, and only one of them is true.
+       */
+      const fields = {
         name: parsed.data.fullName,
         dob: parsed.data.dob || null,
         sex: parsed.data.sex || null,
-        relationship: "self",
-        is_primary: true,
-        avatar_seed: typeof avatar === "string" && avatar ? avatar : null,
+        phone: parsed.data.phone || null,
+        height_cm: parsed.data.heightCm === "" ? null : parsed.data.heightCm,
+        weight_kg: parsed.data.weightKg === "" ? null : parsed.data.weightKg,
+        blood_group: parsed.data.bloodGroup || null,
         conditions: parsed.data.conditions
-          ? parsed.data.conditions.split(",").map((c) => c.trim())
+          ? parsed.data.conditions
+              .split(",")
+              .map((c) => c.trim())
+              .filter(Boolean)
           : [],
-      });
+      };
+
+      /*
+       * ┌─ WHY THIS IS NOT A PLAIN INSERT ────────────────────────────────────┐
+       * │                                                                     │
+       * │ It was, and reaching this screen a second time failed outright with │
+       * │ "We couldn't save that". Migration 0013 enforces one primary        │
+       * │ profile per family with a unique index, so the second insert raised │
+       * │ 23505 — and the screen reported it as though the DATA were bad,     │
+       * │ which sends people back to edit fields that were perfectly fine.    │
+       * │                                                                     │
+       * │ Arriving here again is not an error: a reinstall, a back            │
+       * │ navigation, a resumed signup, or a second tap on Continue all land  │
+       * │ here with a primary profile already in place. The right behaviour   │
+       * │ is to update it. Same reasoning as the family lookup above, which   │
+       * │ had already been fixed for exactly this reason — the other half of  │
+       * │ that bug was left standing.                                         │
+       * │                                                                     │
+       * └─────────────────────────────────────────────────────────────────────┘
+       *
+       * `avatar_seed` is written only when a face was actually picked, so
+       * coming back through onboarding without touching the tray cannot erase
+       * a face chosen earlier.
+       */
+      const seed = typeof avatar === "string" && avatar ? avatar : null;
+
+      const { data: mine } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("is_primary", true)
+        .maybeSingle();
+
+      const { error: profileError } = mine?.id
+        ? await supabase
+            .from("profiles")
+            .update(seed ? { ...fields, avatar_seed: seed } : fields)
+            .eq("id", mine.id as string)
+        : await supabase.from("profiles").insert({
+            ...fields,
+            family_id: familyId,
+            user_id: user.id,
+            relationship: "self",
+            is_primary: true,
+            avatar_seed: seed,
+          });
 
       if (profileError) {
+        /*
+         * The CODE, never the message. Postgres error text quotes the row it
+         * rejected, and these rows hold health data — a constraint violation
+         * on `conditions` would put somebody's diagnosis into a log. A code is
+         * enough to tell 23505 from 42703, which is precisely what was missing
+         * while this bug was live.
+         */
+        console.warn("profile save failed", profileError.code);
         setMessage("We couldn't save that. Try again.");
         return;
       }

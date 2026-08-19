@@ -45,10 +45,32 @@ export const profileSchema = z.object({
     .optional()
     .or(z.literal("")),
   sex: z.enum(["female", "male", "other", "prefer_not_to_say"]).optional().or(z.literal("")),
+  /*
+   * Phone numbers, for everywhere.
+   *
+   * The old rule was `/^[+]?[\d\s-]{7,18}$/`: a plus, digits, spaces and
+   * hyphens, and a length counted in CHARACTERS. That rejects how much of the
+   * world actually writes a number — "(020) 7946 0958" in the UK, "+1 (415)
+   * 555-0132" in the US, "+49 (0)30 901820" in Germany — and it measured the
+   * formatting rather than the number, so "+44 7700 900 123" (16 characters,
+   * 13 digits) passed while "+44 (0) 7700 900 123" did not, for the same
+   * number.
+   *
+   * It now accepts the punctuation people use and validates the DIGITS: 7 to
+   * 15, the upper bound being E.164's maximum. No country list, because a
+   * health app that cannot store a Kenyan or Brazilian number is not a global
+   * product, and no attempt to guess a country from the prefix, which is how
+   * you end up rejecting somebody's real number with total confidence.
+   */
   phone: z
     .string()
     .trim()
-    .regex(/^[+]?[\d\s-]{7,18}$/, "Enter a valid phone number")
+    .refine((v) => !v || /^[+]?[\d\s().-]+$/.test(v), "Enter a valid phone number")
+    .refine((v) => {
+      if (!v) return true;
+      const digits = v.replace(/\D/g, "").length;
+      return digits >= 7 && digits <= 15;
+    }, "Enter a valid phone number")
     .optional()
     .or(z.literal("")),
   // Data minimisation: the health snapshot is genuinely optional, so blanks are
