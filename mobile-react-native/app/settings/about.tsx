@@ -646,7 +646,7 @@ const FAQ: readonly { q: string; a: string }[] = [
   },
   {
     q: "What does it cost?",
-    a: `Free includes ${FREE_CHAT_LIMIT} chats a month and unlimited storage of your own records. Paid plans raise the chat allowance and add family seats. Your documents are yours either way.`,
+    a: `Free includes ${FREE_CHAT_LIMIT} chats a day and unlimited storage of your own records. Paid plans raise the chat allowance and add family seats. Your documents are yours either way.`,
   },
   {
     q: "What happens to my records if I stop paying?",

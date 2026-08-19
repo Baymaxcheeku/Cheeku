@@ -7,6 +7,13 @@
  *    "Free users can have 5 chats with Baymax". The frames win by the standing
  *    rule, so it is five.
  *
+ *    CHANGED 2026-08-19, by Athar: five a DAY, not a month. Five a month is a
+ *    demonstration that a health companion exists rather than a trial of one —
+ *    a person with a worrying result spends all five in an evening and has no
+ *    reason to return for four weeks. The number itself is unchanged; the
+ *    period is. `enforce_chat_quota` (migration 0022) is the authority and
+ *    duplicates the 5, so the two must be changed together.
+ *
  * 2. THE PRICES. The frames disagree with each other. The profile screen and
  *    both paywall screens say Solo ₹99/month and Family ₹249/month — and the
  *    paywall files are literally named "99:month" and "249:Month". The
@@ -105,7 +112,7 @@ export const FREE_PLAN: Plan = {
   period: "month",
   seats: 1,
   features: [
-    `${FREE_CHAT_LIMIT} Ask Baymax chats a month`,
+    `${FREE_CHAT_LIMIT} Ask Baymax chats a day`,
     "Unlimited document storage",
     "One profile",
   ],

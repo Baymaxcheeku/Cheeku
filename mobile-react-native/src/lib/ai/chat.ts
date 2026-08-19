@@ -97,7 +97,7 @@ function isQuotaRefusal(error: { message?: string } | null | undefined): boolean
   return Boolean(error?.message?.includes("free chat allowance exhausted"));
 }
 
-const QUOTA_SPENT = "You've used your free chats for this month.";
+const QUOTA_SPENT = "You've used today's free chats. They reset tomorrow.";
 
 export async function askBaymax(
   question: string,

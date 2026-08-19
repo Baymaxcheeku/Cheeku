@@ -75,12 +75,12 @@ const REASON_COPY: Record<Reason, { eyebrow: string; title: string; body: string
   quota: {
     eyebrow: "Free limit reached",
     title: "You've used your free chats",
-    body: `Free includes ${FREE_CHAT_LIMIT} chats a month. Pick a plan to keep the conversation going.`,
+    body: `Free gives you ${FREE_CHAT_LIMIT} chats a day. A plan removes the ceiling.`,
   },
   upgrade: {
     eyebrow: "Upgrade",
     title: "Unlock everything in Baymax",
-    body: `Free includes ${FREE_CHAT_LIMIT} chats a month. Pick a plan to keep the conversation going.`,
+    body: `Free gives you ${FREE_CHAT_LIMIT} chats a day. A plan removes the ceiling.`,
   },
   family: {
     eyebrow: "Family access",
@@ -206,56 +206,34 @@ export function Paywall({
 /* --------------------------------------------------------------- chooser --- */
 
 /*
- * ┌─ WHAT THIS SCREEN LEARNED, AND WHAT IT REFUSED TO LEARN ─────────────────┐
+ * ┌─ THE SECOND PASS: MINIMAL, AND WHY THAT IS THE COMMERCIAL CHOICE ────────┐
  * │                                                                          │
- * │ TAKEN from the paywalls that convert: one decision then one action       │
- * │ (segmented plan cards with a single sticky CTA, not a button per card);  │
- * │ unit pricing beside the real price; a computed saving on the plan we     │
- * │ actually recommend; a plain "what happens next" timeline; and value      │
- * │ stated BEFORE price, because a price with nothing above it is a toll.    │
+ * │ The first rebuild took the right STRUCTURE from the reference paywalls   │
+ * │ and the wrong surface: three bordered cards in a row, each with its own  │
+ * │ shadow, badge, divider and radio, sitting under three coloured icon      │
+ * │ tiles and above a fourth bordered card. Every element shouted, so the    │
+ * │ price — the only thing being decided — shouted no louder than the rest.  │
  * │                                                                          │
- * │ REFUSED: countdown timers, "one time offer", invented strikethroughs,    │
- * │ percentages nobody can check, and a decline button written to make the   │
- * │ reader feel stupid. Those work. They work by pressure, and the thing     │
- * │ being sold here is access to a person's own medical records at a moment  │
- * │ they are often already frightened. A paywall that manipulates somebody   │
- * │ in that state is not a growth tactic, it is the reason health apps get   │
- * │ distrusted.                                                              │
+ * │ Premium is not more decoration, it is fewer objects. So: ONE container   │
+ * │ for the plans, hairlines instead of borders between them, no shadows at  │
+ * │ all, no coloured tiles, and colour spent in exactly two places — the     │
+ * │ selected row and the button. Everything else is ink on white.            │
  * │                                                                          │
- * │ The one deliberate persuasion device kept is the pending question, and   │
- * │ it persuades by being TRUE: your words are still here, nothing was lost. │
+ * │ Full-width rows rather than three columns, because a row can hold the    │
+ * │ price and what it buys on one line at a readable size, and a 100pt       │
+ * │ column cannot. Comparison gets easier as the objects get quieter.        │
  * │                                                                          │
  * └──────────────────────────────────────────────────────────────────────────┘
  */
 
-/*
- * Left to right by commitment, not by preference.
- *
- * `PLAN_ORDER` puts Family first because a vertical list should lead with the
- * recommendation. A ROW is read as a scale — cheapest to dearest — and a row
- * that opens on the most expensive option reads as a shop that hid the prices.
- * The recommendation is still obvious: it is the one selected, badged and
- * outlined.
- */
+/** Cheapest first: a list of prices that opens on the dearest reads as a trap. */
 const ROW_ORDER: readonly Plan[] = [PLANS.micro, PLANS.solo, PLANS.family];
 
-/** What every paid tier unlocks, stated as outcomes rather than SKUs. */
-const UNLOCKS: readonly { icon: LucideIcon; title: string; body: string }[] = [
-  {
-    icon: InfinityIcon,
-    title: "Ask as much as you need",
-    body: "No monthly ceiling, at 2am or in a waiting room",
-  },
-  {
-    icon: FileText,
-    title: "Answers from your own records",
-    body: "Every reply names the document it came from",
-  },
-  {
-    icon: Users,
-    title: "The people you look after",
-    body: "Separate files, switched in a tap",
-  },
+/** What every paid tier unlocks, as outcomes. Three, because four is a list. */
+const UNLOCKS: readonly string[] = [
+  "Ask as much as you need, at any hour",
+  "Answers that name the record they came from",
+  "A separate file for everyone you look after",
 ];
 
 function PlanChooser({
@@ -271,151 +249,126 @@ function PlanChooser({
 }) {
   const copy = REASON_COPY[reason];
   /*
-   * Family is pre-selected because it is the recommended plan, and a paywall
-   * with nothing selected asks the reader to make two decisions before they
-   * can act. It is a highlight, not a trap: the price and the alternatives sit
-   * in the same row at the same size, and switching costs one tap.
+   * Family is pre-selected as the recommendation. It is a highlight, not a
+   * trap: every plan sits in the same row at the same size with its price in
+   * the same position, and switching costs one tap.
    */
   const [selected, setSelected] = useState<Plan>(PLANS.family);
 
   return (
-    <View className="px-5">
-      <View className="flex-row items-start gap-3">
-        <View className="min-w-0 flex-1 pr-[22%]">
-          <View className="flex-row">
-            <View className="flex-row items-center gap-1.5 rounded-pill bg-brand-50 px-2.5 py-1">
-              <Lock size={12} color={brand[700]} />
-              <Text className="text-[11px] font-semibold text-brand-700">{copy.eyebrow}</Text>
-            </View>
-          </View>
-          <Text className="mt-2 text-[22px] font-bold leading-[26px] tracking-tight text-ink-900">
+    <View className="px-6">
+      {/* A grabber, and the close control as far from the CTA as it can be. */}
+      <View className="flex-row items-start">
+        <View className="min-w-0 flex-1">
+          <Text className="text-[11px] font-bold uppercase text-ink-300" style={{ letterSpacing: 1.4 }}>
+            {copy.eyebrow}
+          </Text>
+          {/*
+           * 29pt with negative tracking. Large type reads loose at the default,
+           * and the tightening is what separates a headline from a label — it
+           * is the cheapest premium signal in typography and costs no space.
+           */}
+          <Text
+            className="mt-2.5 text-[29px] font-bold leading-[33px] text-ink-900"
+            style={{ letterSpacing: -0.8 }}
+          >
             {copy.title}
           </Text>
-          <Text className="mt-1.5 text-[13px] leading-[18px] text-ink-500">{copy.body}</Text>
-          {/* On its brand disc, like every other appearance of the mascot. Its
-              shell gradient starts near-white and dissolves on a pale sheet. */}
-          <View className="absolute -right-2 -top-3" pointerEvents="none">
-            <View className="h-[96px] w-[96px] items-center justify-center overflow-hidden rounded-pill bg-brand-100">
-              <View style={{ marginTop: 16 }}>
-                <MascotBust size={92} />
-              </View>
-            </View>
-          </View>
+          <Text className="mt-2 text-[13.5px] leading-[19px] text-ink-500">{copy.body}</Text>
         </View>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Close"
           onPress={onClose}
-          hitSlop={8}
-          className="h-9 w-9 items-center justify-center rounded-pill bg-surface"
-          style={shadow.e1}
+          hitSlop={10}
+          className="-mr-1 h-8 w-8 items-center justify-center rounded-pill"
         >
-          <X size={17} color={ink[500]} />
+          <X size={18} color={ink[300]} />
         </Pressable>
       </View>
 
       {/*
-       * Showing the held question back is the entire point of holding it.
-       * Without this the reader has to trust that it survived, and most will
-       * just retype it.
+       * The held question. Kept from the first pass because it is the one
+       * persuasive device here that persuades by being true — your words are
+       * still there — and quietened to a rule and a line of italic.
        */}
       {pendingQuestion ? (
         <View
-          className="mt-3 flex-row items-start gap-2.5 rounded-card bg-surface p-3"
-          style={{ borderWidth: 1, borderColor: brand[100] }}
+          className="mt-5 border-l-2 pl-3"
+          style={{ borderLeftColor: brand[200] }}
         >
-          <View className="h-7 w-7 items-center justify-center rounded-pill bg-brand-50">
-            <MessageSquare size={13} color={brand[600]} />
-          </View>
-          <View className="min-w-0 flex-1">
-            <Text className="text-[10.5px] font-bold uppercase tracking-wide text-ink-300">
-              Held for you
-            </Text>
-            <Text className="mt-0.5 text-[12px] italic leading-[17px] text-ink-700" numberOfLines={2}>
-              &ldquo;{pendingQuestion}&rdquo;
-            </Text>
-          </View>
+          <Text className="text-[10.5px] font-bold uppercase text-ink-300" style={{ letterSpacing: 1 }}>
+            Held for you
+          </Text>
+          <Text className="mt-1 text-[13px] italic leading-[18px] text-ink-700" numberOfLines={2}>
+            &ldquo;{pendingQuestion}&rdquo;
+          </Text>
         </View>
       ) : null}
 
-      {/* ---------------------------------------------------------- value -- */}
-      {/* Before the price. A number with nothing above it is a toll booth. */}
-      <View className="mt-4 gap-2">
-        {UNLOCKS.map(({ icon: Icon, title, body }, i) => (
-          <StaggerItem key={title} index={i}>
-            <View className="flex-row items-start gap-3">
-              <View className="h-9 w-9 items-center justify-center rounded-tile bg-brand-50">
-                <Icon size={17} color={brand[600]} />
-              </View>
-              <View className="min-w-0 flex-1">
-                <Text className="text-[13.5px] font-semibold leading-[18px] text-ink-900">
-                  {title}
-                </Text>
-                <Text className="mt-0.5 text-[11.5px] leading-[16px] text-ink-500">{body}</Text>
-              </View>
+      {/* Value before price. Ticks in ink, not a colour: three green marks
+          would spend the semantic palette on a sales list. */}
+      <View className="mt-6 gap-2.5">
+        {UNLOCKS.map((line, i) => (
+          <StaggerItem key={line} index={i}>
+            <View className="flex-row items-start gap-2.5">
+              <Check size={15} color={brand[600]} strokeWidth={2.5} style={{ marginTop: 1 }} />
+              <Text className="flex-1 text-[13.5px] leading-[19px] text-ink-900">{line}</Text>
             </View>
           </StaggerItem>
         ))}
       </View>
 
       {/* ----------------------------------------------------------- plans -- */}
-      <View className="mt-5 flex-row gap-2">
-        {ROW_ORDER.map((plan) => (
-          <PlanOption
+      {/* One container, hairlines between. Three separate cards is three
+          objects to compare before you compare the prices inside them. */}
+      <View
+        className="mt-6 overflow-hidden rounded-card"
+        style={{ borderWidth: 1, borderColor: surface.line, backgroundColor: surface.base }}
+      >
+        {ROW_ORDER.map((plan, i) => (
+          <PlanRow
             key={plan.tier}
             plan={plan}
             selected={selected.tier === plan.tier}
+            first={i === 0}
             onSelect={() => setSelected(plan)}
           />
         ))}
       </View>
 
-      {/*
-       * WHAT HAPPENS NEXT, as a timeline.
-       *
-       * Lifted from the trial paywalls, where a three-step "today / reminder /
-       * billing starts" strip converts better than any amount of reassurance
-       * copy — because the thing stopping the tap is not the price, it is not
-       * knowing what the tap does. We have no trial to describe, so this
-       * describes the real thing: what unlocks now, what happens on the
-       * renewal date, and how it ends.
-       */}
       <NextSteps plan={selected} />
 
-      {/* Sticky-feeling footer: one action, and the ways out beside it. */}
-      <View className="mt-4">
+      <View className="mt-6">
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={`Continue with ${selected.name}, ${formatPrice(selected.priceInPaise)} per ${selected.period}`}
           onPress={() => onSelect(selected)}
-          className="h-[52px] flex-row items-center justify-center gap-2 rounded-pill"
-          style={[shadow.e2, { backgroundColor: brand[600] }]}
+          className="h-[54px] items-center justify-center rounded-pill"
+          style={{ backgroundColor: brand[600] }}
         >
-          <Text className="text-[16px] font-bold text-white">Continue with {selected.name}</Text>
-          <ArrowRight size={17} color="#ffffff" />
+          <Text className="text-[16px] font-bold text-white">Continue</Text>
         </Pressable>
 
-        <View className="mt-2.5 flex-row items-center justify-center gap-1.5">
-          <ShieldCheck size={12} color={brand[400]} />
-          <Text className="text-[11px] text-ink-500">
-            {selected.tier === "micro"
-              ? "One payment. Nothing renews."
-              : "Cancel any time, from Settings."}
-          </Text>
-        </View>
+        <Text className="mt-3 text-center text-[11.5px] text-ink-300">
+          {selected.tier === "micro"
+            ? `One payment of ${formatPrice(selected.priceInPaise)}. Nothing renews.`
+            : `${formatPrice(selected.priceInPaise)} a ${selected.period}. Cancel any time.`}
+        </Text>
 
         {/*
-         * The decline is a plain, respectful sentence. "I don't want it" and
-         * "No thanks, I'll stay unhealthy" are the same button written to
-         * shame; on a health app that is indefensible.
+         * The decline is a plain sentence at the bottom, in the same weight as
+         * everything else. "I don't want it" and "No thanks, I'll stay
+         * unhealthy" are the same control written to shame; on a health app
+         * that is indefensible, whatever it does to conversion.
          */}
         <Pressable
           accessibilityRole="button"
           onPress={onClose}
-          hitSlop={8}
-          className="mt-1 items-center py-2.5"
+          hitSlop={10}
+          className="mt-2 items-center py-3"
         >
-          <Text className="text-[13px] font-semibold text-ink-500">Maybe later</Text>
+          <Text className="text-[13.5px] font-semibold text-ink-500">Not now</Text>
         </Pressable>
       </View>
     </View>
@@ -423,20 +376,22 @@ function PlanChooser({
 }
 
 /**
- * One plan in the segmented row.
+ * One plan as a full-width row.
  *
- * Everything a reader compares — name, price, unit price — sits at the same
- * size in every card. The selected card gains a border, a tint and a tick;
- * it does not gain a bigger number, because a highlight that changes the
- * TYPOGRAPHY of a price is designing the comparison rather than presenting it.
+ * The price is right-aligned in a fixed position down the column, so the three
+ * numbers line up and the eye can compare them without reading a word. The
+ * recommendation is a small ink label, not a coloured badge: a plan that has
+ * to shout is a plan the reader is being pushed towards.
  */
-function PlanOption({
+function PlanRow({
   plan,
   selected,
+  first,
   onSelect,
 }: {
   plan: Plan;
   selected: boolean;
+  first: boolean;
   onSelect: () => void;
 }) {
   const perDay = perDayLabel(plan);
@@ -447,61 +402,69 @@ function PlanOption({
       accessibilityRole="radio"
       accessibilityState={{ selected }}
       accessibilityLabel={`${plan.name}, ${formatPrice(plan.priceInPaise)} per ${plan.period}${
-        perDay ? `, about ${perDay}` : ""
-      }${saving ? `, ${saving} percent less than buying separately` : ""}`}
+        perDay ? `, ${perDay}` : ""
+      }${saving ? `, ${saving} percent less than separate plans` : ""}`}
       onPress={onSelect}
-      className="flex-1 overflow-hidden rounded-card bg-surface px-2 pb-3 pt-2.5"
-      style={[
-        selected ? shadow.e2 : shadow.e1,
-        {
-          borderWidth: 2,
-          borderColor: selected ? brand[600] : surface.line,
-          backgroundColor: selected ? brand[50] : surface.base,
-        },
-      ]}
+      className="flex-row items-center gap-3 px-4 py-3.5"
+      style={{
+        backgroundColor: selected ? brand[50] : surface.base,
+        ...(first ? null : { borderTopWidth: 1, borderTopColor: surface.line }),
+      }}
     >
-      {saving ? (
-        <View className="mb-1.5 self-center rounded-pill px-2 py-0.5" style={{ backgroundColor: brand[600] }}>
-          <Text className="text-[9px] font-bold text-white">SAVE {saving}%</Text>
+      {/* The radio leads. It is the thing being set, and a control on the left
+          is read before the price on the right rather than after it. */}
+      <View
+        className="h-[22px] w-[22px] items-center justify-center rounded-pill"
+        style={{
+          borderWidth: selected ? 0 : 1.5,
+          borderColor: ink[300],
+          backgroundColor: selected ? brand[600] : "transparent",
+        }}
+      >
+        {selected ? <Check size={13} color="#ffffff" strokeWidth={3} /> : null}
+      </View>
+
+      <View className="min-w-0 flex-1">
+        <View className="flex-row items-center gap-2">
+          <Text className="text-[15px] font-semibold text-ink-900">
+            {plan.name.replace(" Plan", "")}
+          </Text>
+          {saving ? (
+            <Text className="text-[10.5px] font-bold uppercase" style={{ color: brand[600], letterSpacing: 0.6 }}>
+              Save {saving}%
+            </Text>
+          ) : null}
         </View>
-      ) : (
-        <View className="mb-1.5 h-[17px]" />
-      )}
-
-      <Text className="text-center text-[12.5px] font-semibold text-ink-900" numberOfLines={1}>
-        {plan.name.replace(" Plan", "").replace(" Pass", "")}
-      </Text>
-
-      <Text className="mt-1.5 text-center text-[19px] font-bold leading-[22px] text-ink-900">
-        {formatPrice(plan.priceInPaise)}
-      </Text>
-      <Text className="text-center text-[10.5px] text-ink-500">per {plan.period}</Text>
-
-      <View className="mt-2 items-center pt-2" style={{ borderTopWidth: 1, borderTopColor: selected ? brand[200] : surface.line }}>
-        <Text className="text-center text-[10.5px] leading-[14px] text-ink-500" numberOfLines={2}>
-          {perDay ?? `${DAILY_PASS_HOURS} hours`}
-        </Text>
-        <Text className="mt-0.5 text-center text-[10.5px] font-semibold" style={{ color: brand[700] }}>
-          {plan.seats > 1 ? `${plan.seats} people` : "1 person"}
+        <Text className="mt-0.5 text-[11.5px] text-ink-500">
+          {plan.seats > 1 ? `Up to ${plan.seats} people` : "One person"}
+          {perDay ? ` · ${perDay}` : ` · ${DAILY_PASS_HOURS} hours`}
         </Text>
       </View>
 
-      {selected ? (
-        <View className="mt-2 items-center">
-          <View className="h-5 w-5 items-center justify-center rounded-pill" style={{ backgroundColor: brand[600] }}>
-            <Check size={12} color="#ffffff" strokeWidth={3} />
-          </View>
-        </View>
-      ) : (
-        <View className="mt-2 items-center">
-          <View className="h-5 w-5 rounded-pill" style={{ borderWidth: 2, borderColor: surface.line }} />
-        </View>
-      )}
+      <View className="items-end">
+        {/* Tabular figures so ₹29, ₹99 and ₹249 align on the decimal column
+            rather than drifting with the width of each glyph. */}
+        <Text
+          className="text-[17px] font-bold text-ink-900"
+          style={{ fontVariant: ["tabular-nums"] }}
+        >
+          {formatPrice(plan.priceInPaise)}
+        </Text>
+        <Text className="text-[11px] text-ink-300">per {plan.period}</Text>
+      </View>
     </Pressable>
   );
 }
 
-/** Today, the renewal, and the exit — in that order, for the selected plan. */
+/**
+ * What the tap does, in three lines.
+ *
+ * The reference paywalls run this as a vertical timeline with icons and a
+ * connector. That was right for a trial, where three separate future events
+ * genuinely happen. We have two — it unlocks, and it renews or it ends — so it
+ * is three lines of text with a rule above them. A timeline drawn around two
+ * events is decoration pretending to be information.
+ */
 function NextSteps({ plan }: { plan: Plan }) {
   const isDaily = plan.tier === "micro";
 
@@ -509,40 +472,27 @@ function NextSteps({ plan }: { plan: Plan }) {
   renews.setMonth(renews.getMonth() + 1);
   const renewalDate = renews.toLocaleDateString(undefined, {
     day: "numeric",
-    month: "short",
-    year: "numeric",
+    month: "long",
   });
 
-  const steps: readonly [LucideIcon, string, string][] = isDaily
+  const lines: readonly [string, string][] = isDaily
     ? [
-        [Zap, "Today", `Everything unlocks for ${DAILY_PASS_HOURS} hours`],
-        [CalendarClock, `After ${DAILY_PASS_HOURS} hours`, "The pass ends on its own"],
-        [ShieldCheck, "Never", "Nothing renews, nothing is charged again"],
+        ["Today", `Everything unlocks for ${DAILY_PASS_HOURS} hours`],
+        [`In ${DAILY_PASS_HOURS} hours`, "The pass ends by itself"],
+        ["Never", "Nothing renews, nothing is charged again"],
       ]
     : [
-        [Zap, "Today", `Unlimited chats${plan.seats > 1 ? ` and up to ${plan.seats} members` : ""}`],
-        [CalendarClock, renewalDate, `${formatPrice(plan.priceInPaise)} charged, then monthly`],
-        [ShieldCheck, "Any time", "Cancel from Settings — records are never deleted"],
+        ["Today", `No chat limit${plan.seats > 1 ? `, up to ${plan.seats} people` : ""}`],
+        [renewalDate, `${formatPrice(plan.priceInPaise)} again, then monthly`],
+        ["Any time", "Cancel in Settings. Records are never deleted"],
       ];
 
   return (
-    <View className="mt-4 overflow-hidden rounded-card bg-surface" style={shadow.e1}>
-      {steps.map(([Icon, title, body], i) => (
-        <View
-          key={title}
-          className="flex-row items-center gap-3 px-3.5 py-2.5"
-          style={i > 0 ? { borderTopWidth: 1, borderTopColor: surface.line } : undefined}
-        >
-          <View
-            className="h-8 w-8 items-center justify-center rounded-pill"
-            style={{ backgroundColor: i === 0 ? brand[600] : brand[50] }}
-          >
-            <Icon size={15} color={i === 0 ? "#ffffff" : brand[600]} />
-          </View>
-          <View className="min-w-0 flex-1">
-            <Text className="text-[12.5px] font-semibold text-ink-900">{title}</Text>
-            <Text className="mt-0.5 text-[11px] leading-[15px] text-ink-500">{body}</Text>
-          </View>
+    <View className="mt-5 gap-2 pt-4" style={{ borderTopWidth: 1, borderTopColor: surface.line }}>
+      {lines.map(([when, what]) => (
+        <View key={when} className="flex-row items-baseline gap-3">
+          <Text className="w-[84px] text-[12px] font-semibold text-ink-900">{when}</Text>
+          <Text className="min-w-0 flex-1 text-[12px] leading-[17px] text-ink-500">{what}</Text>
         </View>
       ))}
     </View>

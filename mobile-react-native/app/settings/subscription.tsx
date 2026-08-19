@@ -225,7 +225,7 @@ export default function Subscription() {
       <ConfirmSheet
         open={confirmOpen}
         title={isDaily ? "End your Daily pass?" : `Cancel ${plan.name}?`}
-        body={`You'll go back to the free plan: ${FREE_CHAT_LIMIT} chats a month and one profile.\n\nEvery record, document and conversation stays exactly where it is. Locked family members are kept, not deleted.`}
+        body={`You'll go back to the free plan: ${FREE_CHAT_LIMIT} chats a day and one profile.\n\nEvery record, document and conversation stays exactly where it is. Locked family members are kept, not deleted.`}
         confirmLabel={isDaily ? "End pass" : "Cancel plan"}
         cancelLabel="Keep my plan"
         destructive

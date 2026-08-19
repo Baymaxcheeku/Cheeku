@@ -46,10 +46,23 @@ function passElapsed(tier: Tier, expiresAt: string | null | undefined): boolean 
   return new Date(expiresAt).getTime() <= Date.now();
 }
 
-/** Today's period key. Quotas reset on the 1st. */
+/**
+ * Today's period key. The free allowance resets DAILY (migration 0022).
+ *
+ * It was the first of the month. Five chats a month is not a trial of a health
+ * companion — one worrying result burns all five in an evening and the app has
+ * nothing to offer for four weeks. The database is the authority on this; the
+ * two must agree or the client shows a ceiling the trigger does not enforce.
+ *
+ * Built from local date parts rather than toISOString(), which converts to UTC
+ * first and would roll the allowance over at the wrong hour for every reader
+ * east or west of it.
+ */
 function currentPeriodStart(): string {
   const now = new Date();
-  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01`;
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  return `${now.getFullYear()}-${month}-${day}`;
 }
 
 function freeEntitlement(): Entitlement {
@@ -103,7 +116,7 @@ export async function getEntitlement(): Promise<Entitlement> {
    */
   const tier = passElapsed(storedTier, expiresAt) ? "free" : storedTier;
 
-  // A counter belonging to a month that has ended reads as zero. The reset
+  // A counter belonging to a day that has ended reads as zero. The reset
   // itself happens on the next write, wherever that ends up living.
   const rolledOver = String(data.period_start) < currentPeriodStart();
   const used = rolledOver ? 0 : Number(data.chats_used_this_month ?? 0);
