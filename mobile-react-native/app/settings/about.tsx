@@ -2,16 +2,21 @@ import { useRouter } from "expo-router";
 import {
   Brain,
   Check,
+  ChevronDown,
+  FileText,
   Heart,
   Info,
   Lock,
   MessageCircle,
+  Quote,
   ShieldCheck,
   Sliders,
   Sparkles,
+  Users,
   X,
   type LucideIcon,
 } from "lucide-react-native";
+import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import { SvgXml } from "react-native-svg";
 
@@ -19,7 +24,7 @@ import { SettingsScreen } from "@/components/settings/chrome";
 import { MascotBust } from "@/components/illustrations/sprout";
 import { PopIn, StaggerItem, TapToWiggle } from "@/components/ui/motion";
 import { APP_VERSION } from "@/lib/app-meta";
-import { FREE_CHAT_LIMIT } from "@/lib/billing/plans";
+import { FREE_CHAT_LIMIT, PLANS } from "@/lib/billing/plans";
 import { JOURNEYS } from "@/lib/onboarding/journeys";
 import { castFaces } from "@/lib/profiles/avatar";
 import { brand, ink, semantic, shadow, surface } from "@/theme/tokens";
@@ -27,20 +32,37 @@ import { brand, ink, semantic, shadow, surface } from "@/theme/tokens";
 /**
  * About Baymax — the product's own case for itself.
  *
- * A long editorial page rather than a settings row: hero, four traits, who it
- * is for, the 2am spiral, what it remembers, search-versus-Baymax, the privacy
- * trio, what it will never do, and a chat CTA.
+ * ┌─ THE STRATEGY, AND WHY IT IS NOT THE OBVIOUS ONE ────────────────────────┐
+ * │                                                                          │
+ * │ The category's playbook is visible on any competitor's site: lead with a │
+ * │ benchmark score, follow with a user count, then testimonials, then       │
+ * │ features. It works because it borrows authority — a number on an exam, a │
+ * │ crowd, four happy strangers.                                             │
+ * │                                                                          │
+ * │ We cannot run that play honestly. There is no benchmark result, no user  │
+ * │ count worth printing, and no testimonial that was not written by us.     │
+ * │ Inventing any of them is exactly the behaviour this app exists to be the │
+ * │ opposite of, and a reader who later discovers a fabricated stat does not │
+ * │ revise the stat — they revise everything.                                │
+ * │                                                                          │
+ * │ So this page trades BORROWED authority for VERIFIABLE authority. Every   │
+ * │ claim on it can be checked inside the app within a minute: the answer    │
+ * │ that names its source, the record that shows which member it belongs to, │
+ * │ the export button, the delete button, the refusal. That is a stronger    │
+ * │ position than a leaderboard, because it survives being checked.          │
+ * │                                                                          │
+ * └──────────────────────────────────────────────────────────────────────────┘
  *
- * Two departures from the reference frame, both for the same reason as
- * everywhere else in this app:
+ * The order answers the questions a wary reader actually asks, in the order
+ * they ask them: what is it, how does it know, who is it for, why not just
+ * search, what happens to my data, what will it refuse, and then the specific
+ * awkward questions nobody puts on a marketing page.
  *
- *   The frame's pillars promise "insights and next steps you can trust". Baymax
- *   does not give next steps on a health value — that is rule 1 — so the traits
- *   are about organising and finding, which is what it genuinely does.
- *
- *   A "what Baymax will never do" block is added. A page that only sells is a
- *   page that has overpromised by the end, and this one is read by people
- *   deciding whether to trust it with a family's medical history.
+ * TWO RULES THIS PAGE MAY NOT BREAK. It may not promise interpretation — no
+ * "insights", no "what your results mean", because rule 1 says Baymax does not
+ * do that. And it may not end on a sell: a page that only sells has
+ * overpromised by the end, and this one is read by people deciding whether to
+ * trust it with a family's medical history.
  */
 export default function About() {
   const router = useRouter();
@@ -62,13 +84,19 @@ export default function About() {
           </TapToWiggle>
         </View>
         <View className="pr-[32%]">
-          <Text className="text-[21px] font-bold leading-[24px] tracking-tight text-ink-900">
-            More than answers.{"\n"}
-            <Text className="text-brand-600">A companion for life.</Text>
+          {/*
+           * "It doesn't guess" is the whole positioning in three words, and it
+           * is a claim about MECHANISM rather than quality. Everyone in this
+           * category says accurate, personal, trusted. Almost none of them can
+           * tell you where a given sentence came from.
+           */}
+          <Text className="text-[21px] font-bold leading-[25px] tracking-tight text-ink-900">
+            It doesn&apos;t guess.{"\n"}
+            <Text className="text-brand-600">It reads your records.</Text>
           </Text>
           <Text className="mt-2 text-[12.5px] leading-[18px] text-ink-700">
-            Baymax keeps your family&apos;s health records in one place, remembers what matters, and
-            answers questions grounded in what you&apos;ve actually uploaded.
+            Baymax keeps your family&apos;s health documents in one place, remembers what they say,
+            and answers in plain language — naming the record every answer came from.
           </Text>
         </View>
       </View>
@@ -81,10 +109,7 @@ export default function About() {
        * meaning everywhere else in this app, and spending them on words like
        * "Personal" teaches the reader that the palette means nothing.
        */}
-      <View
-        className="mx-5 mt-3 flex-row rounded-card bg-surface px-2 py-3"
-        style={shadow.e1}
-      >
+      <View className="mx-5 mt-3 flex-row rounded-card bg-surface px-2 py-3" style={shadow.e1}>
         {(
           [
             [Lock, "Private"],
@@ -102,6 +127,114 @@ export default function About() {
             </View>
           </PopIn>
         ))}
+      </View>
+
+      {/* ------------------------------------------- how an answer is built */}
+      {/*
+       * THE SECTION THAT DOES THE WORK.
+       *
+       * A competitor can claim to know you. What it cannot do is show the
+       * chain. Three steps, each one a thing the reader can watch happen in
+       * the app, ending at the citation — which is the single feature that
+       * separates this from a confident stranger with a search engine.
+       */}
+      <View className="mt-6">
+        <View className="px-5">
+          <Text className="text-[17px] font-bold leading-[21px] tracking-tight text-ink-900">
+            Where every answer{"\n"}
+            <Text className="text-brand-600">actually comes from.</Text>
+          </Text>
+          <Text className="mt-1.5 text-[12.5px] leading-[18px] text-ink-500">
+            Not the internet. Not a guess about people like you. Your own documents, quoted back.
+          </Text>
+        </View>
+
+        <View className="mx-5 mt-3 overflow-hidden rounded-card bg-surface" style={shadow.e1}>
+          {(
+            [
+              [
+                "1",
+                "You add a document",
+                "A photo, a scan or a PDF. Photos are stripped of location data on your device before anything is uploaded.",
+              ],
+              [
+                "2",
+                "Baymax reads it, you confirm it",
+                "Values, dates, doctors and medicines are pulled out. Anything it is unsure of is flagged for you to check against the original page.",
+              ],
+              [
+                "3",
+                "Answers name their source",
+                "Ask a question and the reply points at the exact record it came from, so you can open it and see for yourself.",
+              ],
+            ] as const
+          ).map(([step, title, body], i) => (
+            <StaggerItem key={step} index={i}>
+              <View
+                className="flex-row items-start gap-3 p-3.5"
+                style={i > 0 ? { borderTopWidth: 1, borderTopColor: surface.line } : undefined}
+              >
+                <View
+                  className="h-7 w-7 items-center justify-center rounded-pill"
+                  style={{ backgroundColor: brand[600] }}
+                >
+                  <Text className="text-[12px] font-bold text-white">{step}</Text>
+                </View>
+                <View className="min-w-0 flex-1">
+                  <Text className="text-[13.5px] font-semibold text-ink-900">{title}</Text>
+                  <Text className="mt-0.5 text-[11.5px] leading-[16px] text-ink-500">{body}</Text>
+                </View>
+              </View>
+            </StaggerItem>
+          ))}
+        </View>
+
+        <View className="mx-5 mt-2 flex-row items-start gap-2">
+          <Quote size={13} color={ink[300]} style={{ marginTop: 2 }} />
+          <Text className="flex-1 text-[11.5px] leading-[16px] text-ink-500">
+            If Baymax cannot point at a record, it says so rather than filling the gap.
+          </Text>
+        </View>
+      </View>
+
+      {/* ------------------------------------------------------ the family */}
+      {/*
+       * The second thing a single-user competitor structurally cannot do. Most
+       * health assistants have one history because they have one user; the
+       * person actually holding a family's paperwork is managing three or four.
+       */}
+      <View
+        className="mx-5 mt-6 overflow-hidden rounded-card bg-brand-50 p-4"
+        style={{ borderWidth: 1, borderColor: brand[100] }}
+      >
+        <View className="flex-row items-start gap-3">
+          <View className="h-10 w-10 items-center justify-center rounded-tile bg-surface">
+            <Users size={19} color={brand[600]} />
+          </View>
+          <View className="min-w-0 flex-1">
+            <Text className="text-[16px] font-bold leading-[20px] text-ink-900">
+              Built for a family, not a user
+            </Text>
+            <Text className="mt-1 text-[12.5px] leading-[18px] text-ink-700">
+              Your mother&apos;s reports and your own are separate histories, not one blurred pile.
+              Switch member in a tap; every answer stays inside the file it belongs to.
+            </Text>
+          </View>
+        </View>
+        <View className="mt-3 gap-2">
+          {[
+            "A separate record, timeline and health file per person",
+            "Answers never mix one member's history into another's",
+            `Up to ${PLANS.family.seats} people on the Family plan`,
+          ].map((line) => (
+            <View key={line} className="flex-row items-start gap-2.5">
+              <View className="mt-px h-5 w-5 items-center justify-center rounded-pill bg-brand-600">
+                <Check size={12} color="#fff" strokeWidth={3} />
+              </View>
+              <Text className="flex-1 text-[12.5px] leading-[18px] text-ink-700">{line}</Text>
+            </View>
+          ))}
+        </View>
       </View>
 
       {/* -------------------------------------------------------- journeys */}
@@ -170,11 +303,11 @@ export default function About() {
 
       {/* ------------------------------------------------------- remembers */}
       <View
-        className="mx-5 mt-4 overflow-hidden rounded-card bg-brand-50 p-4"
-        style={{ borderWidth: 1, borderColor: brand[100] }}
+        className="mx-5 mt-4 overflow-hidden rounded-card bg-surface p-4"
+        style={shadow.e1}
       >
         <Text className="text-[16px] font-bold leading-[20px] text-ink-900">
-          Baymax remembers everything about your family, so you don&apos;t have to.
+          It remembers, so you don&apos;t have to hold it all.
         </Text>
         <View className="mt-3 gap-2">
           {[
@@ -191,20 +324,29 @@ export default function About() {
             </View>
           ))}
         </View>
-        <View className="mt-3 flex-row items-start gap-2.5 rounded-tile bg-surface px-3.5 py-3">
+        <View className="mt-3 flex-row items-start gap-2.5 rounded-tile bg-brand-50 px-3.5 py-3">
           <Brain size={15} color={brand[500]} style={{ marginTop: 1 }} />
           <Text className="flex-1 text-[12px] leading-[17px] text-ink-500">
-            The more you add, the more it can answer, and every answer points back at the document
-            it came from.
+            The more you add, the more it can answer — and every answer still points back at the
+            document it came from.
           </Text>
         </View>
       </View>
 
       {/* ------------------------------------------------------ comparison */}
+      {/*
+       * Compared against a general AI assistant, not a search engine.
+       *
+       * Search was the honest comparison two years ago. It is not the thing a
+       * reader is weighing this against today, and a comparison aimed at the
+       * wrong rival reads as evasion. Every line here is a factual difference
+       * in what the two systems have access to — not a claim that one is
+       * cleverer than the other.
+       */}
       <View className="mx-5 mt-4">
         <Text className="text-[16px] font-bold leading-[20px] text-ink-900">
-          No more guessing.{"\n"}
-          <Text style={{ color: semantic.safeText }}>No more endless searching.</Text>
+          Why not just ask{"\n"}
+          <Text className="text-brand-600">a general AI assistant?</Text>
         </Text>
 
         <View className="mt-3 flex-row gap-2">
@@ -214,14 +356,14 @@ export default function About() {
           >
             <View className="flex-row items-center gap-1.5 bg-canvas px-3 py-2">
               <X size={13} color={ink[500]} />
-              <Text className="text-[11.5px] font-semibold text-ink-500">Generic search</Text>
+              <Text className="text-[11.5px] font-semibold text-ink-500">A general assistant</Text>
             </View>
             <View className="gap-1.5 p-3">
               {[
-                "Overwhelming results",
-                "Written for nobody",
-                "No idea of your history",
-                "More worry, less clarity",
+                "Has never seen your reports",
+                "Answers about people in general",
+                "Cannot show you a source",
+                "Forgets between conversations",
               ].map((line) => (
                 <View key={line} className="flex-row items-start gap-1.5">
                   <X size={11} color={ink[300]} style={{ marginTop: 2 }} />
@@ -244,10 +386,10 @@ export default function About() {
             </View>
             <View className="gap-1.5 p-3">
               {[
-                "Reads your own reports",
-                "Cites the exact document",
-                "Knows what changed",
-                "More clarity, less worry",
+                "Reads your own documents",
+                "Answers from your history",
+                "Names the exact record",
+                "Remembers across years",
               ].map((line) => (
                 <View key={line} className="flex-row items-start gap-1.5">
                   <Check size={11} color={semantic.safe} strokeWidth={3} style={{ marginTop: 2 }} />
@@ -266,7 +408,7 @@ export default function About() {
             <ShieldCheck size={17} color={brand[600]} />
           </View>
           <Text className="flex-1 text-[15px] font-bold leading-[19px] text-ink-900">
-            Your health. Your story. Our priority.
+            Your health. Your story. Your call.
           </Text>
         </View>
         <View
@@ -303,9 +445,10 @@ export default function About() {
         <Text className="text-[14px] font-bold text-ink-900">What Baymax will never do</Text>
         <View className="mt-2 gap-1.5">
           {[
-            "Diagnose a condition, or say what a value might mean",
-            "Suggest a medication, a dose, or a treatment",
+            "Diagnose a condition, or tell you what a value means for you",
+            "Suggest a medicine, a dose, or a treatment",
             "Show one family member's records under another's name",
+            "Choose what to show you based on something it read in your documents",
             "Sell your data, or share it outside your family",
           ].map((line) => (
             <View key={line} className="flex-row items-start gap-2">
@@ -315,10 +458,12 @@ export default function About() {
           ))}
         </View>
         <Text className="mt-2.5 text-[11.5px] leading-[16px] text-ink-500">
-          Free includes {FREE_CHAT_LIMIT} chats a month. Anything a doctor should decide, Baymax
-          hands to your doctor.
+          Anything a doctor should decide, Baymax hands to your doctor.
         </Text>
       </View>
+
+      {/* -------------------------------------------------------------- FAQ */}
+      <Faq />
 
       {/* -------------------------------------------------------------- CTA */}
       <View
@@ -375,5 +520,114 @@ export default function About() {
         </Text>
       </View>
     </SettingsScreen>
+  );
+}
+
+/*
+ * The questions nobody puts on a marketing page.
+ *
+ * The strongest thing this section can do is answer the awkward ones plainly
+ * and FIRST — can it replace my doctor, what happens when I stop paying, what
+ * do you do with my documents. A reader who finds the uncomfortable question
+ * already answered stops looking for the catch; a reader who finds only
+ * flattering questions starts hunting for it.
+ *
+ * The first answer is "No, and it is not built to." That is the most important
+ * sentence on the page, and it is deliberately not softened.
+ */
+const FAQ: readonly { q: string; a: string }[] = [
+  {
+    q: "Can Baymax replace my doctor?",
+    a: "No, and it is not built to. It keeps your records straight and reads them back to you so you arrive at an appointment prepared and leave it understanding what was said. Deciding what a result means, and what to do about it, is your doctor's work.",
+  },
+  {
+    q: "Where do the answers come from?",
+    a: "The documents you have added. Baymax quotes what a report says and names the record it came from, so you can open it and check. When your file has nothing to answer with, it says so instead of guessing.",
+  },
+  {
+    q: "Does it use my results to decide what to show me?",
+    a: "No. Suggested questions and articles are chosen only from what you told us about yourself — the journey you picked and the conditions you typed in. Showing you diabetes articles because a lab value came back high would be a diagnosis dressed as a recommendation.",
+  },
+  {
+    q: "Who can see my records?",
+    a: "You, and only within your own account. Records are private to the family account they were added to, they are never sold, and they are not used to advertise to you. Every read is checked on the server, not just hidden in the app.",
+  },
+  {
+    q: "What if I ask about something urgent?",
+    a: "Baymax checks every message before it goes anywhere. If what you describe could be an emergency, it stops and points you to emergency services rather than answering. It will also flag when something sounds worth seeing someone about sooner rather than later.",
+  },
+  {
+    q: "What does it cost?",
+    a: `Free includes ${FREE_CHAT_LIMIT} chats a month and unlimited storage of your own records. Paid plans raise the chat allowance and add family seats. Your documents are yours either way.`,
+  },
+  {
+    q: "What happens to my records if I stop paying?",
+    a: "Nothing is deleted. Chat allowance and the number of members you can open return to the free plan's, but every document stays exactly where it is, and any family member's file is preserved rather than removed.",
+  },
+  {
+    q: "Can I take my data out, or delete it?",
+    a: "Both, from Settings, without asking anyone. Export gives you your records and their extracted details; delete removes your account data. Neither is buried behind a support request.",
+  },
+];
+
+function Faq() {
+  const [open, setOpen] = useState<string | null>(FAQ[0]?.q ?? null);
+
+  return (
+    <View className="mt-6">
+      <View className="px-5">
+        <Text className="text-[17px] font-bold leading-[21px] tracking-tight text-ink-900">
+          The questions worth{"\n"}
+          <Text className="text-brand-600">asking us first.</Text>
+        </Text>
+      </View>
+
+      <View className="mx-5 mt-3 overflow-hidden rounded-card bg-surface" style={shadow.e1}>
+        {FAQ.map((item, i) => {
+          const expanded = open === item.q;
+          return (
+            <View
+              key={item.q}
+              style={i > 0 ? { borderTopWidth: 1, borderTopColor: surface.line } : undefined}
+            >
+              <Pressable
+                accessibilityRole="button"
+                accessibilityState={{ expanded }}
+                accessibilityLabel={item.q}
+                onPress={() => setOpen(expanded ? null : item.q)}
+                className="flex-row items-center gap-3 px-3.5 py-3.5"
+              >
+                <Text className="min-w-0 flex-1 text-[13px] font-semibold leading-[18px] text-ink-900">
+                  {item.q}
+                </Text>
+                {/*
+                 * The chevron rotates rather than swapping to a minus: one
+                 * shape moving reads as the same control in two states, two
+                 * shapes read as two controls.
+                 */}
+                <ChevronDown
+                  size={16}
+                  color={expanded ? brand[600] : ink[300]}
+                  style={{ transform: [{ rotate: expanded ? "180deg" : "0deg" }] }}
+                />
+              </Pressable>
+              {expanded ? (
+                <View className="px-3.5 pb-3.5">
+                  <Text className="text-[12.5px] leading-[18px] text-ink-500">{item.a}</Text>
+                </View>
+              ) : null}
+            </View>
+          );
+        })}
+      </View>
+
+      <View className="mx-5 mt-2 flex-row items-start gap-2">
+        <FileText size={13} color={ink[300]} style={{ marginTop: 2 }} />
+        <Text className="flex-1 text-[11.5px] leading-[16px] text-ink-500">
+          Articles in Baymax cite the guidance they draw on. Nothing here is written to persuade you
+          out of seeing someone.
+        </Text>
+      </View>
+    </View>
   );
 }
