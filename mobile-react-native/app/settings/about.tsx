@@ -8,10 +8,13 @@ import {
   Info,
   Lock,
   MessageCircle,
+  Moon,
   Quote,
+  ScanSearch,
   ShieldCheck,
   Sliders,
   Sparkles,
+  Stethoscope,
   Users,
   X,
   type LucideIcon,
@@ -197,11 +200,94 @@ export default function About() {
         </View>
       </View>
 
+      {/* ------------------------------------------------- what you can ask */}
+      {/*
+       * The four things people actually open this app to do.
+       *
+       * Everything above explains the mechanism; this is the only section that
+       * says what a Tuesday night with Baymax looks like, and it is the one a
+       * reader recognises themselves in.
+       *
+       * ┌─ THE LINE, DRAWN EXACTLY ────────────────────────────────────────┐
+       * │                                                                  │
+       * │ "Understand what is happening" is inside it. "Here is what you   │
+       * │ have" and "here is what to take for it" are outside it, and no   │
+       * │ wording on this page may imply otherwise, however much softer it │
+       * │ would make the pitch. What Baymax genuinely removes at 2am is    │
+       * │ not the diagnosis — it is the not-knowing-what-the-words-mean    │
+       * │ and the not-knowing-whether-this-is-worth-a-call.                │
+       * │                                                                  │
+       * └──────────────────────────────────────────────────────────────────┘
+       */}
+      <View className="mt-6">
+        <View className="px-5">
+          <Text className="text-[17px] font-bold leading-[21px] tracking-tight text-ink-900">
+            Bring it anything{"\n"}
+            <Text className="text-brand-600">that&apos;s worrying you.</Text>
+          </Text>
+          <Text className="mt-1.5 text-[12.5px] leading-[18px] text-ink-500">
+            At 2am, in a pharmacy aisle, or in the ten minutes before an appointment.
+          </Text>
+        </View>
+
+        <View className="mx-5 mt-3 gap-2">
+          {(
+            [
+              [
+                Moon,
+                "A symptom, at midnight",
+                "\u201cMy ears have been blocked since I caught a cold.\u201d Baymax explains what that usually involves in plain words, reads it next to what your own records already say, and tells you honestly when it is worth seeing someone rather than waiting.",
+              ],
+              [
+                FileText,
+                "A report you can\u2019t read",
+                "Photograph it and ask what a line means. Baymax explains the term and the range the laboratory printed, and shows you the page it is reading from.",
+              ],
+              [
+                ScanSearch,
+                "A product, before you buy it",
+                "A lotion, a supplement, a snack. Baymax checks its ingredients against the conditions and allergies recorded in your own profile, and says plainly when something is worth avoiding.",
+              ],
+              [
+                Stethoscope,
+                "An appointment, both ends of it",
+                "What to ask before you go, and what was actually said afterwards \u2014 kept with the documents rather than in your head.",
+              ],
+            ] as const
+          ).map(([Icon, title, body], i) => (
+            <StaggerItem key={title} index={i}>
+              <View className="flex-row items-start gap-3 rounded-card bg-surface p-3.5" style={shadow.e1}>
+                <View className="h-10 w-10 items-center justify-center rounded-tile bg-brand-50">
+                  <Icon size={18} color={brand[600]} />
+                </View>
+                <View className="min-w-0 flex-1">
+                  <Text className="text-[13.5px] font-semibold text-ink-900">{title}</Text>
+                  <Text className="mt-1 text-[12px] leading-[17px] text-ink-500">{body}</Text>
+                </View>
+              </View>
+            </StaggerItem>
+          ))}
+        </View>
+
+        <View className="mx-5 mt-2.5 flex-row items-start gap-2 rounded-tile bg-brand-50 px-3.5 py-3">
+          <Info size={14} color={brand[500]} style={{ marginTop: 1 }} />
+          <Text className="flex-1 text-[11.5px] leading-[16px] text-ink-700">
+            Baymax will not tell you what you have or what to take for it. It explains what things
+            mean, keeps the history straight, and is candid about when a person should look at this
+            instead.
+          </Text>
+        </View>
+      </View>
+
       {/* ------------------------------------------------------ the family */}
       {/*
-       * The second thing a single-user competitor structurally cannot do. Most
-       * health assistants have one history because they have one user; the
-       * person actually holding a family's paperwork is managing three or four.
+       * "You first, your family too" — not "family, not user".
+       *
+       * The first version of this section led with "Built for a family, not a
+       * user", which reads as though somebody managing only their own health
+       * has the wrong app. Most people arrive alone, and many stay alone; the
+       * family capability is what they grow into, not the entry requirement.
+       * The offer is one file for you, and room for whoever you look after.
        */}
       <View
         className="mx-5 mt-6 overflow-hidden rounded-card bg-brand-50 p-4"
@@ -213,18 +299,20 @@ export default function About() {
           </View>
           <View className="min-w-0 flex-1">
             <Text className="text-[16px] font-bold leading-[20px] text-ink-900">
-              Built for a family, not a user
+              Yours first. Your family&apos;s when you need it.
             </Text>
             <Text className="mt-1 text-[12.5px] leading-[18px] text-ink-700">
-              Your mother&apos;s reports and your own are separate histories, not one blurred pile.
-              Switch member in a tap; every answer stays inside the file it belongs to.
+              Start with just your own file — that is the whole app for most people. When you begin
+              carrying somebody else&apos;s paperwork too, add them, and their history stays theirs
+              rather than blurring into yours.
             </Text>
           </View>
         </View>
         <View className="mt-3 gap-2">
           {[
-            "A separate record, timeline and health file per person",
-            "Answers never mix one member's history into another's",
+            "A complete file for you alone, with nothing extra to set up",
+            "Add a parent, a partner or a child whenever that day comes",
+            "Separate records, timeline and health file per person",
             `Up to ${PLANS.family.seats} people on the Family plan`,
           ].map((line) => (
             <View key={line} className="flex-row items-start gap-2.5">
