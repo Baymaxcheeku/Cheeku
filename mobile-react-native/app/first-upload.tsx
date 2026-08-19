@@ -1,120 +1,219 @@
 import { useRouter } from "expo-router";
-import { Camera, FolderUp, Mail, ShieldCheck, Sparkles, Upload } from "lucide-react-native";
-import { Text, View } from "react-native";
+import {
+  ArrowRight,
+  Camera,
+  FileText,
+  Images,
+  Lock,
+  Sparkles,
+  type LucideIcon,
+} from "lucide-react-native";
+import { Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { UploadScene } from "@/components/illustrations/scenes";
 import { Headline, OnboardingHeader } from "@/components/onboarding/chrome";
 import { Button } from "@/components/ui/button";
+import { Drift, Settle } from "@/components/ui/motion";
 import { brand, ink, shadow, surface } from "@/theme/tokens";
 
-const ALTERNATES = [
-  { icon: Camera, title: "Take a photo" },
-  { icon: Mail, title: "Email to Baymax" },
-  { icon: FolderUp, title: "Import from device" },
-] as const;
-
-/**
- * A6 — the first-upload hook. Skipping is a first-class outcome, not a
- * consolation: a nag screen at the end of onboarding costs more accounts than
- * one extra document is worth.
+/*
+ * A6 — the first upload.
+ *
+ * ┌─ WHAT WAS WRONG WITH IT ─────────────────────────────────────────────────┐
+ * │                                                                          │
+ * │ The primary button did nothing. Literally `disabled`, with a comment     │
+ * │ saying the upload pipeline landed in Phase 4 — which it did, weeks ago,  │
+ * │ at /scan. So the screen's entire purpose was decorative, and beneath it  │
+ * │ sat three more dead tiles at 60% opacity.                                │
+ * │                                                                          │
+ * │ Worse, the loudest control on the page was a solid violet "I'll upload   │
+ * │ later". The one button that worked was the one for not doing the thing.  │
+ * │                                                                          │
+ * │ It also asked for "a document". One document at the end of onboarding is │
+ * │ a demo. What makes an answer personal is having enough history to quote  │
+ * │ from, so it now asks for the last twelve months and says why that ask    │
+ * │ makes the answers better.                                                │
+ * │                                                                          │
+ * └──────────────────────────────────────────────────────────────────────────┘
+ *
+ * ONE PRIMARY ACTION. Upload is the brand card; the alternatives are quiet
+ * rows beneath it; skipping is a link. Skipping is still a first-class outcome
+ * — a nag at the end of onboarding costs more accounts than one document is
+ * worth — but it no longer outranks the thing being asked for.
+ *
+ * WHAT THE COPY MAY NOT SAY. That Baymax will interpret, assess or understand
+ * anything. It reads, remembers, and quotes back with a source. "Understands
+ * your health" is what turns a filing cabinet into a diagnosis nobody asked
+ * for, and it is a promise this app is built specifically not to make.
  */
+
+type Route = { icon: LucideIcon; title: string; body: string; source: string };
+
+const ROUTES: readonly Route[] = [
+  {
+    icon: Camera,
+    title: "Photograph a report",
+    body: "One page at a time, straight from the camera",
+    source: "photo",
+  },
+  {
+    icon: Images,
+    title: "Choose from your photos",
+    body: "Screenshots and pictures you already have",
+    source: "library",
+  },
+];
+
 export default function FirstUpload() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+
+  /*
+   * Every route lands on /scan, which already owns picking, metadata
+   * stripping, upload, extraction and the review step. `source` tells it which
+   * picker to open so nobody is asked to choose twice.
+   */
+  function open(source: string) {
+    router.push({ pathname: "/scan", params: { source } });
+  }
 
   return (
     <View className="flex-1 bg-canvas">
       <OnboardingHeader back="/journey" action={{ label: "Skip", href: "/plan" }} />
 
-      <View className="flex-1 px-5" style={{ paddingBottom: insets.bottom + 12 }}>
-        {/* The art is absolutely positioned, so the text needs its own gutter
-            or the second headline line runs underneath it. */}
-        <View className="relative pr-[35%]">
-          <Headline lead="Let's add your" accent="first health record" />
-          <Text className="mt-2 text-[13px] leading-[19px] text-ink-500">
-            Upload a document and Baymax will organize it and extract key information for you.
-          </Text>
-          <View className="mt-2.5 flex-row items-center gap-1.5 self-start rounded-pill bg-brand-50 px-3 py-1.5">
-            <ShieldCheck size={12} color={brand[700]} />
-            <Text className="text-[11px] font-medium text-brand-700">Secure · Private · Encrypted</Text>
-          </View>
-          <View className="absolute -right-2 top-0" pointerEvents="none">
-            <UploadScene size={128} />
-          </View>
-        </View>
+      <ScrollView
+        className="flex-1"
+        contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 16 }}
+        showsVerticalScrollIndicator={false}
+      >
+        <Headline lead="Bring me the last" accent="twelve months" />
+        <Text className="mt-2.5 text-[13.5px] leading-[20px] text-ink-500">
+          Lab reports, prescriptions, scans, discharge summaries — a year of them, ideally as one
+          combined PDF. The more of your history I can read, the more my answers are about{" "}
+          <Text className="font-semibold text-ink-700">you</Text> and not about people in general.
+        </Text>
 
-        <View
-          className="mt-4 items-center rounded-card px-5 py-4"
-          style={{
-            borderWidth: 2,
-            borderStyle: "dashed",
-            borderColor: brand[200],
-            backgroundColor: brand[50],
-          }}
-        >
+        {/*
+         * THE PRIMARY SURFACE, and the only loud thing on the screen.
+         *
+         * Not a dashed drop-zone: dragging is a desktop metaphor and nothing is
+         * ever dragged on a phone. A card that states the ask, names the
+         * format, and carries the action.
+         */}
+        <Settle delay={0.05} style={{ marginTop: 20 }}>
           <View
-            className="h-10 w-10 items-center justify-center rounded-pill bg-surface"
-            style={shadow.e1}
+            className="overflow-hidden rounded-card"
+            style={[shadow.e2, { backgroundColor: brand[600] }]}
           >
-            <Upload size={18} color={brand[600]} />
-          </View>
-          <Text className="mt-2 text-[15px] font-semibold text-ink-900">
-            Upload your first document
-          </Text>
-          <Text className="mt-1 max-w-[280px] text-center text-[12px] leading-[16px] text-ink-500">
-            Lab reports, prescriptions, discharge summaries and more.
-          </Text>
+            <View className="px-4 pb-4 pt-[18px]">
+              <View className="flex-row items-start gap-3">
+                <View
+                  className="h-11 w-11 items-center justify-center rounded-tile"
+                  style={{ backgroundColor: "rgba(255,255,255,0.16)" }}
+                >
+                  <FileText size={20} color="#ffffff" />
+                </View>
+                <View className="min-w-0 flex-1">
+                  <Text className="text-[16px] font-semibold leading-[20px] text-white">
+                    Upload a combined PDF
+                  </Text>
+                  <Text
+                    className="mt-1 text-[12px] leading-[17px]"
+                    style={{ color: "rgba(255,255,255,0.78)" }}
+                  >
+                    One file is easiest — most labs and hospital portals let you download a whole
+                    year at once.
+                  </Text>
+                </View>
+              </View>
 
-          {/*
-           * The frame shows a live upload here. The pipeline lands in Phase 4,
-           * and a button that opens a file picker leading nowhere would be a
-           * worse first impression than one that says it is not ready.
-           */}
-          <View className="mt-3 w-full">
-            <Button disabled>
-              <Upload size={16} color="#ffffff" />
-              <Text className="text-[16px] font-bold text-white">Upload document</Text>
-            </Button>
-          </View>
-          <Text className="mt-1.5 text-[11px] text-ink-300">PDF, JPG, PNG up to 10MB</Text>
-        </View>
+              <View className="mt-4">
+                <Button variant="secondary" onPress={() => open("file")}>
+                  <Text className="text-[16px] font-bold text-brand-700">Choose a file</Text>
+                  <ArrowRight size={17} color={brand[700]} />
+                </Button>
+              </View>
 
-        <Text className="mt-4 text-[13px] font-semibold text-ink-700">Or try these</Text>
-        {/* Title only. The frame gives each tile a description line, but these
-            three are Phase 4 placeholders — spending 30px of a fold on captions
-            for controls that do nothing pushes the real CTA off screen. */}
-        <View className="mt-2 flex-row gap-2">
-          {ALTERNATES.map(({ icon: Icon, title }) => (
-            <View
-              key={title}
-              className="flex-1 items-center gap-1.5 rounded-tile bg-surface px-2 py-2.5"
-              style={{ borderWidth: 1, borderColor: surface.line, opacity: 0.6 }}
-            >
-              <Icon size={17} color={brand[500]} />
-              <Text className="text-center text-[11px] font-semibold leading-tight text-ink-900">
-                {title}
+              <Text
+                className="mt-2 text-center text-[11px]"
+                style={{ color: "rgba(255,255,255,0.65)" }}
+              >
+                PDF, JPG, PNG or HEIC · up to 10MB each
               </Text>
             </View>
-          ))}
+          </View>
+        </Settle>
+
+        {/* Alternatives: real controls now, but deliberately lower billing. */}
+        <Text className="mt-6 text-[12px] font-bold uppercase tracking-wide text-ink-300">
+          Or add them one at a time
+        </Text>
+        <View className="mt-2.5 overflow-hidden rounded-card bg-surface" style={shadow.e1}>
+          {ROUTES.map((route, i) => {
+            const Icon = route.icon;
+            return (
+              <Pressable
+                key={route.source}
+                accessibilityRole="button"
+                accessibilityLabel={`${route.title}. ${route.body}`}
+                onPress={() => open(route.source)}
+                className="flex-row items-center gap-3 px-3.5 py-3.5"
+                style={i > 0 ? { borderTopWidth: 1, borderTopColor: surface.line } : undefined}
+              >
+                <View className="h-10 w-10 items-center justify-center rounded-tile bg-brand-50">
+                  <Icon size={18} color={brand[600]} />
+                </View>
+                <View className="min-w-0 flex-1">
+                  <Text className="text-[14px] font-semibold text-ink-900">{route.title}</Text>
+                  <Text className="mt-0.5 text-[11.5px] leading-[16px] text-ink-500">
+                    {route.body}
+                  </Text>
+                </View>
+                <ArrowRight size={16} color={ink[300]} />
+              </Pressable>
+            );
+          })}
         </View>
 
-        <View className="mt-3 flex-row items-start gap-2 rounded-tile bg-brand-50 px-3.5 py-2.5">
-          <Sparkles size={13} color={brand[400]} style={{ marginTop: 2 }} />
-          <Text className="flex-1 text-[11px] leading-[16px] text-ink-500">
-            Baymax reads and organizes your documents to answer your questions. It never diagnoses,
-            prescribes, or shares anything outside your family.
-          </Text>
-        </View>
+        {/*
+         * The promise and its limit, in the same box.
+         *
+         * "It never diagnoses" belongs exactly here — beside the moment
+         * somebody decides whether to hand over a year of their medical
+         * history — and not three screens away in a settings page nobody opens.
+         */}
+        <Drift delay={0.18} style={{ marginTop: 20 }}>
+          <View className="gap-2.5 rounded-card bg-brand-50 p-3.5">
+            <View className="flex-row items-start gap-2.5">
+              <Sparkles size={14} color={brand[500]} style={{ marginTop: 1 }} />
+              <Text className="flex-1 text-[12px] leading-[17px] text-ink-700">
+                I read what your documents say and remember it, so you never explain your history
+                twice. Every answer names the record it came from.
+              </Text>
+            </View>
+            <View className="flex-row items-start gap-2.5">
+              <Lock size={14} color={brand[500]} style={{ marginTop: 1 }} />
+              <Text className="flex-1 text-[12px] leading-[17px] text-ink-700">
+                Encrypted, private to your family, never sold. I never diagnose, never prescribe,
+                and never share anything outside your account.
+              </Text>
+            </View>
+          </View>
+        </Drift>
+      </ScrollView>
 
-        <View className="mt-auto pt-4">
-          <Button onPress={() => router.push("/plan")}>
-            <Text className="text-[16px] font-bold text-white">I&apos;ll upload later</Text>
-          </Button>
-          <Text className="mt-1.5 text-center text-[12px]" style={{ color: ink[300] }}>
-            You can add documents anytime from the app.
+      <View className="px-5 pt-2" style={{ paddingBottom: insets.bottom + 10 }}>
+        <Pressable
+          accessibilityRole="button"
+          onPress={() => router.push("/plan")}
+          hitSlop={8}
+          className="items-center py-2.5"
+        >
+          <Text className="text-[14px] font-semibold text-ink-500">I&apos;ll do this later</Text>
+          <Text className="mt-0.5 text-[11.5px]" style={{ color: ink[300] }}>
+            You can add documents any time
           </Text>
-        </View>
+        </Pressable>
       </View>
     </View>
   );

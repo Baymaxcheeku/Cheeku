@@ -21,6 +21,20 @@ import { castFaces } from "@/lib/profiles/avatar";
 import { brand, ink, shadow, surface } from "@/theme/tokens";
 
 /*
+ * The eyebrow tints, one per chapter.
+ *
+ * NON-SEMANTIC, like every other category colour in this app: green, amber and
+ * red state how a health result reads and are never spent on decoration. These
+ * are borrowed from the journey palette so the carousel and the picker that now
+ * follows sign-up belong to the same world.
+ */
+const EYEBROW: Record<string, { bg: string; fg: string }> = {
+  meet: { bg: brand[50], fg: brand[600] },
+  memory: { bg: "#e6f1fd", fg: "#1a6fc2" },
+  family: { bg: "#fdeaf0", fg: "#c22a6b" },
+};
+
+/*
  * A2 — the value carousel, before any account exists.
  *
  * Three panels, each with its OWN composition. Panels sharing one hero shape
@@ -380,17 +394,3 @@ function HeroFamily({ faces }: { faces: readonly string[] }) {
     </View>
   );
 }
-
-/*
- * The eyebrow tints, one per chapter.
- *
- * NON-SEMANTIC, like every other category colour in this app: green, amber and
- * red state how a health result reads and are never spent on decoration. These
- * are borrowed from the journey palette so the carousel and the picker that now
- * follows sign-up belong to the same world.
- */
-const EYEBROW: Record<string, { bg: string; fg: string }> = {
-  meet: { bg: brand[50], fg: brand[600] },
-  memory: { bg: "#e6f1fd", fg: "#1a6fc2" },
-  family: { bg: "#fdeaf0", fg: "#c22a6b" },
-};

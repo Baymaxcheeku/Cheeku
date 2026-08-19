@@ -1,11 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import * as DocumentPicker from "expo-document-picker";
 import * as ImagePicker from "expo-image-picker";
 import {
   Check,
   ChevronLeft,
   Cpu,
   FileText,
+  FileUp,
   Images,
   Lock,
   Camera as CameraIcon,
@@ -69,6 +71,12 @@ const STEP_NARRATIVE = [
 
 export default function Scan() {
   const router = useRouter();
+  /*
+   * `source` opens one picker straight away, so a person who has already
+   * chosen "Take a photo" on the screen before does not arrive at a screen
+   * asking them to choose again. Absent on the normal route in from Home.
+   */
+  const { source } = useLocalSearchParams<{ source?: string }>();
   const insets = useSafeAreaInsets();
 
   const [phase, setPhase] = useState<Phase>("pick");
@@ -94,6 +102,22 @@ export default function Scan() {
   useEffect(() => {
     if (!profileId && context.data?.active) setProfileId(context.data.active.id);
   }, [context.data, profileId]);
+
+  /*
+   * Fire the requested picker once, and only from the idle state. Keyed on
+   * a ref rather than on `source` so a re-render — or coming back from the
+   * picker having cancelled — cannot reopen it in a loop.
+   */
+  const autoOpened = useRef(false);
+  useEffect(() => {
+    if (autoOpened.current || !source || !profileId || phase !== "pick") return;
+    autoOpened.current = true;
+    if (source === "photo") void takePhoto();
+    else if (source === "library") void pickFromLibrary();
+    else if (source === "file") void pickFile();
+    // takePhoto/pickFromLibrary/pickFile are stable for this screen's lifetime.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [source, profileId, phase]);
 
   useEffect(() => {
     if (phase !== "working") return;
@@ -132,6 +156,37 @@ export default function Scan() {
     // Let the last steps land before the screen changes, so the transition does
     // not read as a flicker.
     setTimeout(() => router.replace(`/records/${result.documentId}`), 900);
+  }
+
+  /*
+   * PDFs, and everything else the OS calls a file.
+   *
+   * The two pickers above are photographs, which is the common case for a
+   * single report. A year of history is not a photograph — people export it
+   * from a portal or scan it to one combined PDF, and there was no way to hand
+   * that to Baymax at all. `expo-document-picker` is a third permissionless
+   * surface: the OS shows its own file browser and returns only what was
+   * chosen, so nothing here has to ask for access to anything.
+   *
+   * No EXIF strip on this path. That step rewrites image bytes; a PDF has no
+   * EXIF, and running it would corrupt the file. `stripImageMetadata` already
+   * no-ops on a non-image, and `handle` only flags a failed strip for images.
+   */
+  async function pickFile() {
+    const result = await DocumentPicker.getDocumentAsync({
+      type: ["application/pdf", "image/jpeg", "image/png", "image/heic"],
+      copyToCacheDirectory: true,
+      multiple: false,
+    });
+    if (result.canceled) return;
+
+    const asset = result.assets[0];
+    if (!asset) return;
+    void handle({
+      uri: asset.uri,
+      mimeType: asset.mimeType ?? "application/pdf",
+      name: asset.name ?? "document.pdf",
+    });
   }
 
   async function pickFromLibrary() {
@@ -357,8 +412,12 @@ export default function Scan() {
             <Images size={16} color={ink[700]} />
             <Text className="text-[16px] font-bold text-ink-700">Choose from library</Text>
           </Button>
+          <Button variant="secondary" onPress={pickFile} disabled={!profileId}>
+            <FileUp size={16} color={ink[700]} />
+            <Text className="text-[16px] font-bold text-ink-700">Upload a PDF or file</Text>
+          </Button>
         </View>
-        <Text className="mt-1.5 text-[11px] text-ink-300">JPG, PNG or HEIC up to 10MB</Text>
+        <Text className="mt-1.5 text-[11px] text-ink-300">PDF, JPG, PNG or HEIC up to 10MB</Text>
       </View>
 
       {message ? (
