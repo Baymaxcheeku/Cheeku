@@ -3,11 +3,18 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import {
   Activity,
   ArrowUp,
+  BookOpen,
   Camera,
+  CalendarCheck,
+  CalendarClock,
   FileText,
+  FolderOpen,
   History,
+  Pill,
+  ScanLine,
   Sparkles,
   Stethoscope,
+  Syringe,
   TriangleAlert,
   type LucideIcon,
 } from "lucide-react-native";
@@ -39,15 +46,37 @@ import {
   recordEscalation,
   type ChatTurn,
 } from "@/lib/ai/chat";
+import { promptEntriesFor } from "@/lib/ask/prompts";
+import { profileSignalsFor } from "@/lib/knowledge/queries";
 import { activeProfile } from "@/lib/profiles/context";
 import { detect, type SafetyResult } from "@/lib/safety/detect";
 import { brand, ink, semantic, shadow, surface } from "@/theme/tokens";
 
-const STARTERS: readonly { text: string; icon: LucideIcon }[] = [
-  { text: "What do my recent reports say?", icon: FileText },
-  { text: "Has anything changed since last time?", icon: History },
-  { text: "Is running safe during pregnancy?", icon: Activity },
-];
+/*
+ * The starter rows are generated, not written here.
+ *
+ * They were three fixed strings ending in "Is running safe during pregnancy?",
+ * which is what a reader tracking their weight saw on the empty chat screen —
+ * the same miss as the Home chips, one tap deeper. Both surfaces now draw from
+ * `promptEntriesFor`, so a question offered on Home is the same question
+ * offered here, chosen from the same two signals: the journey picked at
+ * onboarding and the conditions typed into the profile. Never a document.
+ *
+ * The icon follows the topic rather than the wording, which is why prompts
+ * carry a topic at all.
+ */
+const TOPIC_ICON: Record<string, LucideIcon> = {
+  "last-report": FileText,
+  "last-scan": ScanLine,
+  changed: History,
+  jargon: BookOpen,
+  appointment: CalendarCheck,
+  "out-of-range": Activity,
+  file: FolderOpen,
+  vaccines: Syringe,
+  medicines: Pill,
+  due: CalendarClock,
+};
 
 /*
  * E1 — Ask Baymax.
@@ -92,7 +121,11 @@ export default function Ask() {
     queryKey: ["ask-context"],
     queryFn: async () => {
       const [profile, quota] = await Promise.all([activeProfile(), chatQuota()]);
-      return { profile, quota };
+      // Read after the profile, not alongside it: the signals belong to
+      // whichever member is active, and asking for them before knowing who
+      // that is would return the wrong person's starters on a switch.
+      const signals = await profileSignalsFor(profile?.id);
+      return { profile, quota, signals };
     },
   });
 
@@ -211,6 +244,10 @@ export default function Ask() {
 
   const quota = context.data.quota;
   const empty = turns.length === 0;
+  const starters = promptEntriesFor(
+    context.data.signals?.journey,
+    context.data.signals?.conditions ?? [],
+  );
 
   return (
     <KeyboardAvoidingView
@@ -256,7 +293,9 @@ export default function Ask() {
               </Text>
 
               <View className="mt-5 w-full gap-2">
-                {STARTERS.map(({ text, icon: Icon }) => (
+                {starters.map(({ text, topic }) => {
+                  const Icon = TOPIC_ICON[topic] ?? Sparkles;
+                  return (
                   <Pressable
                     key={text}
                     accessibilityRole="button"
@@ -267,7 +306,8 @@ export default function Ask() {
                     <Icon size={16} color={brand[500]} />
                     <Text className="flex-1 text-[13.5px] text-ink-700">{text}</Text>
                   </Pressable>
-                ))}
+                  );
+                })}
               </View>
             </View>
           ) : (

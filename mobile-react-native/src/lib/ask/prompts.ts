@@ -44,7 +44,9 @@ import type { JourneyId } from "@/lib/onboarding/journeys";
  * reader does not see two lists; they see a suggestion box that repeated
  * itself. Deduplication is therefore by topic, not by text.
  */
-type Entry = { topic: string; text: string };
+export type PromptEntry = { topic: string; text: string };
+
+type Entry = PromptEntry;
 
 export type Prompt = string;
 
@@ -199,11 +201,11 @@ const BY_CONDITION: readonly { match: readonly string[]; prompts: readonly Entry
  * the most personal signal available, and a reader who declared nothing still
  * gets three sensible questions rather than an empty row.
  */
-export function promptsFor(
+export function promptEntriesFor(
   journey: string | null | undefined,
   conditions: readonly string[] = [],
   limit = 3,
-): Prompt[] {
+): PromptEntry[] {
   const declared = conditions.map((c) => c.trim().toLowerCase()).filter(Boolean);
 
   const fromConditions = BY_CONDITION.filter((entry) =>
@@ -227,14 +229,30 @@ export function promptsFor(
     if (journeyPrompt) ordered.push(journeyPrompt);
   }
 
-  // One question per topic. See the note on `Entry`.
+  // One question per topic. See the note on `PromptEntry`.
   const seen = new Set<string>();
-  const out: Prompt[] = [];
+  const out: PromptEntry[] = [];
   for (const entry of [...ordered, ...BASE]) {
     if (seen.has(entry.topic)) continue;
     seen.add(entry.topic);
-    out.push(entry.text);
+    out.push(entry);
     if (out.length === limit) break;
   }
   return out;
+}
+
+/**
+ * The same prompts as text.
+ *
+ * The Home chips need only the words; the Ask starters need the topic too, so
+ * each row can carry an icon that matches what it asks. One source either way
+ * — two lists would drift, and then the app would suggest one set of questions
+ * on Home and a different set one tap later.
+ */
+export function promptsFor(
+  journey: string | null | undefined,
+  conditions: readonly string[] = [],
+  limit = 3,
+): Prompt[] {
+  return promptEntriesFor(journey, conditions, limit).map((entry) => entry.text);
 }
