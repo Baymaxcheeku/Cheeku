@@ -1,15 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useRouter } from "expo-router";
-import {
-  CalendarDays,
-  ChevronRight,
-  FileText,
-  HeartPulse,
-  ShieldCheck,
-  type LucideIcon,
-} from "lucide-react-native";
-import { ActivityIndicator, Pressable, RefreshControl, ScrollView, Text, View } from "react-native";
+import { ActivityIndicator, RefreshControl, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AddMemberSheet } from "@/components/app/add-member-sheet";
@@ -17,13 +9,13 @@ import { FamilyTray } from "@/components/app/family-tray";
 import { Paywall } from "@/components/billing/paywall";
 import { FamilySwitcher } from "@/components/app/family-switcher";
 import { OfflineBanner } from "@/components/app/offline-banner";
-import { HealthFile } from "@/components/health/health-file";
-import { KnowledgeRail } from "@/components/knowledge/knowledge-rail";
+import { AskHero } from "@/components/home/ask-hero";
+import { BookWithCheeku } from "@/components/home/book-with-cheeku";
+import { FileStrip, PriorityPill, ReadsStrip } from "@/components/home/strips";
 import { knowledgeFeed } from "@/lib/knowledge/queries";
-import { HomeAskBox } from "@/components/app/home-ask-box";
 import { NotificationsBell } from "@/components/app/notifications-bell";
-import { RecordRow } from "@/components/records/chrome";
 import { Button } from "@/components/ui/button";
+import { StaggerItem } from "@/components/ui/motion";
 import { allowsFamily } from "@/lib/billing/plans";
 import { getEntitlement } from "@/lib/billing/quota";
 import { deriveNotifications } from "@/lib/notifications/derive";
@@ -31,7 +23,13 @@ import { activeProfile, profileAccess, switchProfile } from "@/lib/profiles/cont
 import { formatEventDate } from "@/lib/records/grouping";
 import { EMPTY_OVERVIEW, useHealthOverview } from "@/lib/records/use-overview";
 import { listProfileRecords, statsFrom } from "@/lib/records/queries";
-import { brand, ink, semantic, shadow, surface } from "@/theme/tokens";
+import { brand } from "@/theme/tokens";
+import { type } from "@/theme/type";
+
+/** "Athar Ali" → "Athar". Home talks to a person, not a record. */
+function firstName(name: string): string {
+  return name.trim().split(/\s+/)[0] ?? name;
+}
 
 /** Deliberately time-of-day aware, like the frame. */
 function greeting(): string {
@@ -60,7 +58,7 @@ export default function Home() {
   const [trayOpen, setTrayOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
 
-  const knowledge = useQuery({ queryKey: ["knowledge-feed"], queryFn: () => knowledgeFeed(3) });
+  const knowledge = useQuery({ queryKey: ["knowledge-feed"], queryFn: () => knowledgeFeed(5) });
 
   const overview = useHealthOverview();
 
@@ -146,32 +144,38 @@ export default function Home() {
         />
       }
     >
-      <View className="flex-row items-start gap-3 px-5">
-        <View className="min-w-0 flex-1">
-          <Text className="text-[20px] leading-tight text-ink-900">{greeting()},</Text>
-          <Text
-            className="text-[28px] font-bold leading-tight tracking-tight text-brand-600"
-            numberOfLines={1}
-          >
-            {profile.name} 👋
-          </Text>
-          <Text className="mt-1 text-[14px] text-ink-500">
-            Clarity and calm, for every health question.
-          </Text>
+      {/*
+       * ┌─ THE LAYOUT, REDESIGNED 2026-09-29 ──────────────────────────────────┐
+       * │                                                                     │
+       * │ One hero and small pointers. Ask Cheeku is the product, so it is    │
+       * │ the only large, dark surface; everything else is one line tall and  │
+       * │ exists to send the reader somewhere else.                           │
+       * │                                                                     │
+       * │   who  →  greeting, family switcher                                 │
+       * │   now  →  priority pill (how the file reads)                        │
+       * │   ask  →  Ask Cheeku, with the memory count                         │
+       * │   next →  Book with Cheeku (coming soon, honest about it)           │
+       * │   more →  reads as pills, the health file as one row                │
+       * │                                                                     │
+       * └─────────────────────────────────────────────────────────────────────┘
+       */}
+      <StaggerItem index={0}>
+        <View className="flex-row items-center gap-3 px-5">
+          <View className="min-w-0 flex-1">
+            <Text style={[type.caption, { fontSize: 13 }]}>{greeting()}</Text>
+            <Text style={[type.title, { fontSize: 26, lineHeight: 31 }]} numberOfLines={1}>
+              {profile.isPrimary ? firstName(profile.name) : `${firstName(profile.name)}'s health`}
+            </Text>
+          </View>
+          <NotificationsBell notifications={deriveNotifications(list)} />
         </View>
-        <NotificationsBell notifications={deriveNotifications(list)} />
-      </View>
+      </StaggerItem>
 
       <OfflineBanner updatedAt={context.dataUpdatedAt} />
 
-      <View className="mt-5">
-        <Text className="px-5 text-[12px] font-bold uppercase tracking-wide text-ink-300">
-          Family
-        </Text>
-        <View className="mt-1.5">
-          {/* Only what the plan can open, plus a count of what it cannot — the
-              switcher draws padlocks for the rest rather than faces it would
-              refuse to switch to. */}
+      <StaggerItem index={1}>
+        <View className="mt-4">
+          {/* Only what the plan can open, plus a count of what it cannot. */}
           <FamilySwitcher
             profiles={access.selectable}
             activeId={profile.id}
@@ -182,32 +186,29 @@ export default function Home() {
             onViewAll={() => setTrayOpen(true)}
           />
         </View>
-      </View>
+      </StaggerItem>
 
-      <InsightRow
-        total={stats.total}
-        needsReview={needsReview}
-        topRecordId={list.find((r) => r.severity !== "normal")?.id}
-        latest={
-          newest
-            ? {
-                date: formatEventDate(newest.eventDate),
-                facility: newest.facility,
-              }
-            : undefined
-        }
-      />
+      <StaggerItem index={2}>
+        <PriorityPill
+          total={stats.total}
+          needsReview={needsReview}
+          topRecordId={list.find((r) => r.severity !== "normal")?.id}
+          latest={newest ? formatEventDate(newest.eventDate) : undefined}
+        />
+      </StaggerItem>
 
-      {/*
-       * Ask Cheeku above Health Summary and given the mascot's own breathing
-       * room: for the anxious or pregnant reader this card is the reason they
-       * opened the app, not a footnote below a stats row.
-       */}
-      <HomeAskBox />
+      <StaggerItem index={3}>
+        <AskHero name={firstName(profile.name)} isSelf={profile.isPrimary} remembered={stats.total} />
+      </StaggerItem>
 
-      <KnowledgeRail articles={knowledge.data ?? []} />
+      <StaggerItem index={4}>
+        <BookWithCheeku />
+      </StaggerItem>
 
-      <HealthFile overview={overview.data ?? EMPTY_OVERVIEW} />
+      <StaggerItem index={5}>
+        <ReadsStrip articles={knowledge.data ?? []} />
+        <FileStrip overview={overview.data ?? EMPTY_OVERVIEW} />
+      </StaggerItem>
 
       <FamilyTray
         open={trayOpen}
@@ -290,103 +291,3 @@ function NoProfile({ topInset }: { topInset: number }) {
     </View>
   );
 }
-
-/*
- * ONE insight, in the frame's shape: eyebrow, headline, a detail line.
- *
- * The frame's CONTENT is an appointment reminder ("Time for your thyroid
- * checkup, 15 May, Fortis Hospital"). Scheduling does not exist in V1, and
- * inventing a due date for a medical test is a fabricated clinical prompt —
- * exactly what rule 4 forbids. So the row keeps the frame's shape and fills it
- * with what the records genuinely say.
- *
- * A single tappable row rather than a card with its own headline, body and
- * button: this is a pointer to something else in the app, not a destination,
- * and the full-height version competed with Ask Cheeku for the first thing the
- * eye landed on.
- */
-function InsightRow({
-  total,
-  needsReview,
-  topRecordId,
-  latest,
-}: {
-  total: number;
-  needsReview: number;
-  topRecordId?: string;
-  latest?: { date: string; facility: string | null };
-}) {
-  const router = useRouter();
-
-  const content =
-    total === 0
-      ? {
-          eyebrow: "Get started",
-          title: "Add your first record",
-          meta: "Upload a report and Cheeku will organise it for you.",
-          href: "/scan",
-          icon: FileText,
-          fg: brand[600],
-          bg: brand[50],
-        }
-      : needsReview === 0
-        ? {
-            eyebrow: "All clear",
-            title: "Everything is in range",
-            meta: `${total} record${total === 1 ? "" : "s"} reviewed`,
-            href: "/records",
-            icon: ShieldCheck,
-            fg: semantic.safe,
-            bg: semantic.safeBg,
-          }
-        : {
-            eyebrow: "Worth a look",
-            title: `${needsReview} record${needsReview === 1 ? "" : "s"} to review`,
-            meta: latest
-              ? `${latest.date}${latest.facility ? ` · ${latest.facility}` : ""}`
-              : undefined,
-            href: topRecordId ? `/records/${topRecordId}` : "/records",
-            icon: HeartPulse,
-            fg: semantic.danger,
-            bg: semantic.dangerBg,
-          };
-
-  const Icon = content.icon;
-
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={`${content.eyebrow}. ${content.title}`}
-      onPress={() => router.push(content.href as never)}
-      className="mx-5 mt-3 flex-row items-center gap-3 rounded-tile bg-surface px-3.5 py-3"
-      style={shadow.e1}
-    >
-      <View
-        className="h-10 w-10 items-center justify-center rounded-pill"
-        style={{ backgroundColor: content.bg }}
-      >
-        <Icon size={18} color={content.fg} />
-      </View>
-      <View className="min-w-0 flex-1">
-        <Text className="text-[10px] font-bold uppercase tracking-wide text-ink-300">
-          {content.eyebrow}
-        </Text>
-        <Text className="text-[14px] font-bold leading-tight text-ink-900" numberOfLines={1}>
-          {content.title}
-        </Text>
-        {content.meta ? (
-          <View className="mt-0.5 flex-row items-center gap-1">
-            <CalendarDays size={11} color={ink[500]} />
-            <Text className="flex-1 text-[11.5px] text-ink-500" numberOfLines={1}>
-              {content.meta}
-            </Text>
-          </View>
-        ) : null}
-      </View>
-      <ChevronRight size={17} color={ink[300]} />
-    </Pressable>
-  );
-}
-
-
-

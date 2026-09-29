@@ -1153,3 +1153,29 @@ it renders its final state under reduced motion.
 
 **Needs a device check:** welcome swipe (PanResponder), `transformOrigin` on the
 bubble pop, the sliding segmented control on sign-in, and the headline weights.
+
+## Home redesign — 2026-09-29 (cloud session, not yet seen on a device)
+
+One hero and small pointers. Order: greeting + bell, family switcher, priority
+pill, **Ask Cheeku**, Book with Cheeku, Worth knowing, health file.
+
+- **Ask Cheeku is the only dark surface.** It is the north-star action
+  (a conversation grounded in the reader's own records), so it gets the
+  mascot, the headline and the first reachable input. The memory line ("I
+  remember 6 documents of yours") is a real count of what is on file for the
+  active member; at zero it asks for the first document instead.
+- **The mic is honest.** Voice is not built; tapping it says "coming soon" in a
+  bubble rather than pretending to listen.
+- **Book with Cheeku (roadmap phases 2 and 3) is a front door only.** Doctor,
+  lab tests, medicines, gynae, dietician, fitness. Every tap opens a sheet that
+  says it is coming soon, with a per-service "Notify me" stored on the device
+  (`cheeku.notify`). Deliberately absent: invented doctors, ratings or slots,
+  and any "recommended specialist" inferred from records — that is triage.
+- **Worth knowing** became one row of thin pills. **Health file** became one
+  row. The full-size `KnowledgeRail` and `HomeAskBox` are deleted;
+  `health/health-file.tsx` stays because `/health-file` imports `TYPE_META`.
+- The priority pill is the one place on Home where semantic colour is used,
+  because it states how the records read.
+
+**Needs a device check:** the fading placeholder (an `Animated.Text` layered
+over the `TextInput`), the Notify-me sheet, and the staggered entrance.
