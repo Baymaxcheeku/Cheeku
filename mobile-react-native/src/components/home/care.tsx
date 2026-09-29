@@ -10,6 +10,7 @@ import {
   Stethoscope,
   type LucideIcon,
 } from "lucide-react-native";
+import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { Modal, Pressable, ScrollView, Text, View } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
@@ -57,6 +58,8 @@ type Service = {
   title: string;
   line: string;
   promise: string;
+  /** Opens a working flow instead of the coming-soon sheet. */
+  route?: string;
   Icon: LucideIcon;
   from: string;
   to: string;
@@ -77,7 +80,8 @@ const SERVICES: readonly Service[] = [
     id: "doctor",
     filter: "doctors",
     title: "Doctor consult",
-    line: "Online or at a clinic near you",
+    line: "Chat, then book online or at a clinic",
+    route: "/book/consult",
     promise: "Tell me what's bothering you, and I'll find a doctor and a time that suits you. Your reports go with you.",
     Icon: Stethoscope,
     from: "#ece6ff",
@@ -145,6 +149,7 @@ const SERVICES: readonly Service[] = [
 const ALL_PREVIEW = 3;
 
 export function CareSection() {
+  const router = useRouter();
   const still = useReducedMotion();
   const [filter, setFilter] = useState<Filter>("all");
   const [expanded, setExpanded] = useState(false);
@@ -179,8 +184,9 @@ export function CareSection() {
           <Text style={{ fontFamily: font.semibold, fontSize: 21, letterSpacing: -0.4, color: ink[900] }}>
             Book care
           </Text>
-          <Glass className="rounded-pill px-2.5 py-1">
-            <Text style={{ fontFamily: font.semibold, fontSize: 11.5, color: brand[700] }}>Coming soon</Text>
+          <Glass className="flex-row items-center gap-1.5 rounded-pill px-2.5 py-1">
+            <View className="h-1.5 w-1.5 rounded-pill" style={{ backgroundColor: brand[500] }} />
+            <Text style={{ fontFamily: font.semibold, fontSize: 11.5, color: brand[700] }}>Doctors open · more soon</Text>
           </Glass>
         </View>
         <Text style={{ fontFamily: font.regular, fontSize: 13.5, color: ink[500], marginTop: 3 }}>
@@ -229,7 +235,11 @@ export function CareSection() {
       <View className="mt-2 gap-2.5 px-5">
         {shown.map((s, i) => (
           <Animated.View key={`${filter}-${s.id}`} entering={still ? undefined : FadeInDown.delay(i * 60).duration(320)}>
-            <ServiceCard service={s} notified={notify.includes(s.id)} onPress={() => setOpen(s)} />
+            <ServiceCard
+              service={s}
+              notified={notify.includes(s.id)}
+              onPress={() => (s.route ? router.push(s.route as never) : setOpen(s))}
+            />
           </Animated.View>
         ))}
         {hidden > 0 ? (
@@ -261,7 +271,7 @@ function ServiceCard({ service: s, notified, onPress }: { service: Service; noti
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={`${s.title}. ${s.line}. Coming soon`}
+      accessibilityLabel={`${s.title}. ${s.line}.${s.route ? "" : " Coming soon"}`}
       onPress={onPress}
       style={({ pressed }) => [{ transform: [{ scale: pressed ? 0.985 : 1 }] }]}
     >
@@ -279,7 +289,14 @@ function ServiceCard({ service: s, notified, onPress }: { service: Service; noti
           ) : null}
         </View>
         <View className="min-w-0 flex-1">
-          <Text style={{ fontFamily: font.semibold, fontSize: 16, letterSpacing: -0.2, color: ink[900] }}>{s.title}</Text>
+          <View className="flex-row items-center gap-2">
+            <Text style={{ fontFamily: font.semibold, fontSize: 16, letterSpacing: -0.2, color: ink[900] }}>{s.title}</Text>
+            <View className="rounded-pill px-2 py-0.5" style={{ backgroundColor: s.route ? ink[900] : "rgba(255,255,255,0.75)" }}>
+              <Text style={{ fontFamily: font.semibold, fontSize: 10.5, color: s.route ? "#fff" : ink[500] }}>
+                {s.route ? "New" : "Soon"}
+              </Text>
+            </View>
+          </View>
           <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 3 }}>
             {s.line}
           </Text>

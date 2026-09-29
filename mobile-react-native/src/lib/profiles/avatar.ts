@@ -58,6 +58,10 @@ export type FaceTraits = {
   glassesProbability?: number;
   glasses?: readonly string[];
   earringsProbability?: number;
+  mouth?: readonly string[];
+  eyes?: readonly string[];
+  shirt?: readonly string[];
+  shirtColor?: readonly string[];
 };
 
 export function faceSvg(seed: string, background: string, traits: FaceTraits = {}): string {
