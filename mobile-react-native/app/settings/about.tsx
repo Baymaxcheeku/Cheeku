@@ -33,7 +33,7 @@ import { castFaces } from "@/lib/profiles/avatar";
 import { brand, ink, semantic, shadow, surface } from "@/theme/tokens";
 
 /**
- * About Baymax — the product's own case for itself.
+ * About Cheeku AI — the product's own case for itself.
  *
  * ┌─ THE STRATEGY, AND WHY IT IS NOT THE OBVIOUS ONE ────────────────────────┐
  * │                                                                          │
@@ -62,7 +62,7 @@ import { brand, ink, semantic, shadow, surface } from "@/theme/tokens";
  * awkward questions nobody puts on a marketing page.
  *
  * TWO RULES THIS PAGE MAY NOT BREAK. It may not promise interpretation — no
- * "insights", no "what your results mean", because rule 1 says Baymax does not
+ * "insights", no "what your results mean", because rule 1 says Cheeku does not
  * do that. And it may not end on a sell: a page that only sells has
  * overpromised by the end, and this one is read by people deciding whether to
  * trust it with a family's medical history.
@@ -75,13 +75,13 @@ export default function About() {
   const faces = castFaces(JOURNEYS.length);
 
   return (
-    <SettingsScreen title="About Baymax" eyebrow="Your AI health companion" icon={Info} bare>
+    <SettingsScreen title="About Cheeku AI" eyebrow="Your AI health companion" icon={Info} bare>
       {/* ------------------------------------------------------------ hero */}
       {/*
        * ┌─ WHY THE HEADER WAS REBUILT ─────────────────────────────────────┐
        * │                                                                  │
        * │ Two headers ran back to back: the settings chrome's "About        │
-       * │ Baymax / Your AI health companion" beside an info glyph, and      │
+       * │ Cheeku / Your AI health companion" beside an info glyph, and      │
        * │ immediately under it a card saying the same thing in larger type. │
        * │ The reader met the title twice before meeting a single idea.      │
        * │                                                                  │
@@ -147,7 +147,7 @@ export default function About() {
           className="mt-4 text-[11px] font-bold uppercase text-ink-300"
           style={{ letterSpacing: 1.4 }}
         >
-          About Baymax
+          About Cheeku AI
         </Text>
 
         {/*
@@ -234,7 +234,7 @@ export default function About() {
               ],
               [
                 "2",
-                "Baymax reads it, you confirm it",
+                "Cheeku reads it, you confirm it",
                 "Values, dates, doctors and medicines are pulled out. Anything it is unsure of is flagged for you to check against the original page.",
               ],
               [
@@ -267,7 +267,7 @@ export default function About() {
         <View className="mx-5 mt-2 flex-row items-start gap-2">
           <Quote size={13} color={ink[300]} style={{ marginTop: 2 }} />
           <Text className="flex-1 text-[11.5px] leading-[16px] text-ink-500">
-            If Baymax cannot point at a record, it says so rather than filling the gap.
+            If Cheeku cannot point at a record, it says so rather than filling the gap.
           </Text>
         </View>
       </View>
@@ -277,7 +277,7 @@ export default function About() {
        * The four things people actually open this app to do.
        *
        * Everything above explains the mechanism; this is the only section that
-       * says what a Tuesday night with Baymax looks like, and it is the one a
+       * says what a Tuesday night with Cheeku looks like, and it is the one a
        * reader recognises themselves in.
        *
        * ┌─ THE LINE, DRAWN EXACTLY ────────────────────────────────────────┐
@@ -285,7 +285,7 @@ export default function About() {
        * │ "Understand what is happening" is inside it. "Here is what you   │
        * │ have" and "here is what to take for it" are outside it, and no   │
        * │ wording on this page may imply otherwise, however much softer it │
-       * │ would make the pitch. What Baymax genuinely removes at 2am is    │
+       * │ would make the pitch. What Cheeku genuinely removes at 2am is    │
        * │ not the diagnosis — it is the not-knowing-what-the-words-mean    │
        * │ and the not-knowing-whether-this-is-worth-a-call.                │
        * │                                                                  │
@@ -308,17 +308,17 @@ export default function About() {
               [
                 Moon,
                 "A symptom, at midnight",
-                "\u201cMy ears have been blocked since I caught a cold.\u201d Baymax explains what that usually involves in plain words, reads it next to what your own records already say, and tells you honestly when it is worth seeing someone rather than waiting.",
+                "\u201cMy ears have been blocked since I caught a cold.\u201d Cheeku explains what that usually involves in plain words, reads it next to what your own records already say, and tells you honestly when it is worth seeing someone rather than waiting.",
               ],
               [
                 FileText,
                 "A report you can\u2019t read",
-                "Photograph it and ask what a line means. Baymax explains the term and the range the laboratory printed, and shows you the page it is reading from.",
+                "Photograph it and ask what a line means. Cheeku explains the term and the range the laboratory printed, and shows you the page it is reading from.",
               ],
               [
                 ScanSearch,
                 "A product, before you buy it",
-                "A lotion, a supplement, a snack. Baymax checks its ingredients against the conditions and allergies recorded in your own profile, and says plainly when something is worth avoiding.",
+                "A lotion, a supplement, a snack. Cheeku checks its ingredients against the conditions and allergies recorded in your own profile, and says plainly when something is worth avoiding.",
               ],
               [
                 Stethoscope,
@@ -344,7 +344,7 @@ export default function About() {
         <View className="mx-5 mt-2.5 flex-row items-start gap-2 rounded-tile bg-brand-50 px-3.5 py-3">
           <Info size={14} color={brand[500]} style={{ marginTop: 1 }} />
           <Text className="flex-1 text-[11.5px] leading-[16px] text-ink-700">
-            Baymax will not tell you what you have or what to take for it. It explains what things
+            Cheeku will not tell you what you have or what to take for it. It explains what things
             mean, keeps the history straight, and is candid about when a person should look at this
             instead.
           </Text>
@@ -454,7 +454,7 @@ export default function About() {
         >
           <ShieldCheck size={16} color={brand[600]} style={{ marginTop: 1 }} />
           <Text className="flex-1 text-[12.5px] leading-[18px] text-ink-700">
-            <Text className="font-bold text-brand-700">Baymax breaks the loop.</Text> It reads what
+            <Text className="font-bold text-brand-700">Cheeku breaks the loop.</Text> It reads what
             your own report says, names the document it came from, and leaves what it means to your
             doctor.
           </Text>
@@ -542,7 +542,7 @@ export default function About() {
               style={{ backgroundColor: brand[600] }}
             >
               <Check size={13} color="#fff" strokeWidth={3} />
-              <Text className="text-[11.5px] font-semibold text-white">Baymax</Text>
+              <Text className="text-[11.5px] font-semibold text-white">Cheeku</Text>
             </View>
             <View className="gap-1.5 p-3">
               {[
@@ -602,7 +602,7 @@ export default function About() {
         className="mx-5 mt-4 rounded-card bg-surface p-4"
         style={{ borderWidth: 1, borderColor: surface.line }}
       >
-        <Text className="text-[14px] font-bold text-ink-900">What Baymax will never do</Text>
+        <Text className="text-[14px] font-bold text-ink-900">What Cheeku will never do</Text>
         <View className="mt-2 gap-1.5">
           {[
             "Diagnose a condition, or tell you what a value means for you",
@@ -618,7 +618,7 @@ export default function About() {
           ))}
         </View>
         <Text className="mt-2.5 text-[11.5px] leading-[16px] text-ink-500">
-          Anything a doctor should decide, Baymax hands to your doctor.
+          Anything a doctor should decide, Cheeku hands to your doctor.
         </Text>
       </View>
 
@@ -649,7 +649,7 @@ export default function About() {
         >
           <MessageCircle size={16} color={brand[700]} />
           <Text className="text-[14px] font-semibold" style={{ color: brand[700] }}>
-            Chat with Baymax
+            Chat with Cheeku
           </Text>
         </Pressable>
       </View>
@@ -675,7 +675,7 @@ export default function About() {
       <View className="mx-5 mt-4 flex-row items-start gap-2">
         <ShieldCheck size={14} color={ink[300]} style={{ marginTop: 1 }} />
         <Text className="flex-1 text-[11px] leading-[16px] text-ink-500">
-          Baymax is not a replacement for professional medical advice. For emergencies, contact your
+          Cheeku is not a replacement for professional medical advice. For emergencies, contact your
           doctor or local emergency services.
         </Text>
       </View>
@@ -697,12 +697,12 @@ export default function About() {
  */
 const FAQ: readonly { q: string; a: string }[] = [
   {
-    q: "Can Baymax replace my doctor?",
+    q: "Can Cheeku replace my doctor?",
     a: "No, and it is not built to. It keeps your records straight and reads them back to you so you arrive at an appointment prepared and leave it understanding what was said. Deciding what a result means, and what to do about it, is your doctor's work.",
   },
   {
     q: "Where do the answers come from?",
-    a: "The documents you have added. Baymax quotes what a report says and names the record it came from, so you can open it and check. When your file has nothing to answer with, it says so instead of guessing.",
+    a: "The documents you have added. Cheeku quotes what a report says and names the record it came from, so you can open it and check. When your file has nothing to answer with, it says so instead of guessing.",
   },
   {
     q: "Does it use my results to decide what to show me?",
@@ -714,7 +714,7 @@ const FAQ: readonly { q: string; a: string }[] = [
   },
   {
     q: "What if I ask about something urgent?",
-    a: "Baymax checks every message before it goes anywhere. If what you describe could be an emergency, it stops and points you to emergency services rather than answering. It will also flag when something sounds worth seeing someone about sooner rather than later.",
+    a: "Cheeku checks every message before it goes anywhere. If what you describe could be an emergency, it stops and points you to emergency services rather than answering. It will also flag when something sounds worth seeing someone about sooner rather than later.",
   },
   {
     q: "What does it cost?",
@@ -784,7 +784,7 @@ function Faq() {
       <View className="mx-5 mt-2 flex-row items-start gap-2">
         <FileText size={13} color={ink[300]} style={{ marginTop: 2 }} />
         <Text className="flex-1 text-[11.5px] leading-[16px] text-ink-500">
-          Articles in Baymax cite the guidance they draw on. Nothing here is written to persuade you
+          Articles in Cheeku AI cite the guidance they draw on. Nothing here is written to persuade you
           out of seeing someone.
         </Text>
       </View>

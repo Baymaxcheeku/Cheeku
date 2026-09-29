@@ -3,7 +3,7 @@
 // Regenerate with: pnpm safety:build
 
 export const LEXICON_VERSION = "1.0.0";
-export const LEXICON_HASH = "167a4c6444101726";
+export const LEXICON_HASH = "aa9f23851b443f7f";
 
 export type SafetyRule = {
   readonly id: string;

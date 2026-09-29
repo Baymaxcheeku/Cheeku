@@ -76,7 +76,7 @@ export default function SecurityPage() {
           {
             icon: Sliders,
             title: "Data used only to help you",
-            body: "We use your data only to provide and improve Baymax and its features.",
+            body: "We use your data only to provide and improve Cheeku AI and its features.",
           },
         ]}
       />
@@ -98,7 +98,7 @@ export default function SecurityPage() {
       <p className="mx-5 mt-4 text-center text-[11px] leading-snug text-ink-500">
         Your security and privacy are at the heart of everything we do.
         <br />
-        Thank you for trusting Baymax.
+        Thank you for trusting Cheeku AI.
       </p>
     </div>
   );

@@ -79,7 +79,7 @@ const REASON_COPY: Record<Reason, { eyebrow: string; title: string; body: string
   },
   upgrade: {
     eyebrow: "Upgrade",
-    title: "Unlock everything in Baymax",
+    title: "Unlock everything in Cheeku AI",
     body: `Free gives you ${FREE_CHAT_LIMIT} chats a day. A plan removes the ceiling.`,
   },
   family: {
@@ -578,7 +578,7 @@ function Checkout({
           {[
             {
               icon: InfinityIcon,
-              label: isDaily ? `Unlimited for ${DAILY_PASS_HOURS}h` : "Unlimited Ask Baymax",
+              label: isDaily ? `Unlimited for ${DAILY_PASS_HOURS}h` : "Unlimited Ask Cheeku",
             },
             { icon: Zap, label: "Health insights" },
             { icon: ShieldCheck, label: "Unlimited storage" },
@@ -692,7 +692,7 @@ function Checkout({
          * is not charging anybody. The second line goes when payment is real.
          */}
         <Text className="mt-2 text-center text-[11px] leading-[16px] text-ink-500">
-          You&apos;ll confirm in Razorpay&apos;s secure screen. Baymax never sees your UPI PIN or
+          You&apos;ll confirm in Razorpay&apos;s secure screen. Cheeku never sees your UPI PIN or
           card details.
         </Text>
         <Text className="mt-1.5 text-center text-[11px] font-medium text-ink-300">
@@ -759,7 +759,7 @@ function Success({
         style={{ backgroundColor: brand[600] }}
       >
         <Text className="text-[16px] font-semibold text-white">
-          {pendingQuestion ? "Send my question" : "Start using Baymax"}
+          {pendingQuestion ? "Send my question" : "Start using Cheeku AI"}
         </Text>
       </Pressable>
 

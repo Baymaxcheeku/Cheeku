@@ -43,7 +43,7 @@ export default function Splash() {
       <Settle delay={0}>
         <MascotFigure size={200} wave />
       </Settle>
-      <Text className="mt-4 text-[28px] font-bold tracking-tight text-ink-900">Baymax</Text>
+      <Text className="mt-4 text-[28px] font-bold tracking-tight text-ink-900">Cheeku AI</Text>
       <Text className="mt-1 text-[14px] text-ink-500">Your family&apos;s health companion</Text>
     </View>
   );

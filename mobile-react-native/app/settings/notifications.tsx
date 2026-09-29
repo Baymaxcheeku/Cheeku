@@ -33,7 +33,7 @@ const GROUPS: {
 }[] = [
   {
     title: "General updates",
-    body: "Important updates about your account and Baymax.",
+    body: "Important updates about your account and Cheeku AI.",
     icon: BellRing,
     rows: [
       {
@@ -52,7 +52,7 @@ const GROUPS: {
         key: "tipsReminders",
         icon: Lightbulb,
         title: "Tips & reminders",
-        body: "Helpful tips to get the most out of Baymax.",
+        body: "Helpful tips to get the most out of Cheeku AI.",
       },
     ],
   },
@@ -163,7 +163,7 @@ export default function Notifications() {
           <View className="mx-5 mt-4 flex-row items-start gap-2 rounded-card bg-brand-50 px-4 py-3">
             <Bell size={15} color={brand[500]} style={{ marginTop: 1 }} />
             <Text className="flex-1 text-[12px] leading-[17px] text-ink-700">
-              Your choices are saved now and honoured the moment push notifications arrive. Baymax
+              Your choices are saved now and honoured the moment push notifications arrive. Cheeku
               never puts a health detail in a notification, so nothing sensitive shows on a locked
               screen.
             </Text>

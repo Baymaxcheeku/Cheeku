@@ -25,7 +25,7 @@ export default function GlobalError({ reset }: { error: Error; reset: () => void
         }}
       >
         <div style={{ maxWidth: 320 }}>
-          <h1 style={{ fontSize: 22, fontWeight: 700, margin: 0 }}>Baymax couldn&apos;t start</h1>
+          <h1 style={{ fontSize: 22, fontWeight: 700, margin: 0 }}>Cheeku AI couldn&apos;t start</h1>
           <p style={{ fontSize: 14, lineHeight: 1.6, color: "#6b6c8a", marginTop: 8 }}>
             Something went wrong loading the app. Your records are safe and untouched.
           </p>

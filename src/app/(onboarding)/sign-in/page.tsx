@@ -45,7 +45,7 @@ export default function SignInPage() {
 
       {/* The art is absolutely positioned, so the text needs its own gutter. */}
       <div className="relative px-5 pb-1 pr-[38%]">
-        <Headline lead="Welcome" accent="to Baymax" />
+        <Headline lead="Welcome" accent="to Cheeku AI" />
         <p className="mt-2 text-[13px] leading-relaxed text-ink-500">
           Your family&apos;s health, protected and organized in one secure place.
         </p>
@@ -127,7 +127,7 @@ export default function SignInPage() {
                 className="mt-0.5 h-4 w-4 shrink-0 accent-brand-600"
               />
               <span className="text-[12px] leading-snug text-ink-500">
-                I agree that Baymax may store and process my family&apos;s health records to give me
+                I agree that Cheeku may store and process my family&apos;s health records to give me
                 insights. I can export or delete everything at any time.
                 {result?.fieldErrors?.consent ? (
                   <span role="alert" className="mt-1 block font-medium text-danger">
@@ -181,7 +181,7 @@ export default function SignInPage() {
         </ul>
 
         {/*
-         * The frames also close this sheet with a "New to Baymax? Create
+         * The frames also close this sheet with a "New to Cheeku? Create
          * account" line. The tablist at the top is on screen at the same time
          * and does exactly that, so the line was a second control for the same
          * job — and the one costing the primary CTA its place above the fold.

@@ -496,7 +496,7 @@ export const SEED_PROFILES: readonly SeedProfile[] = [
         id: id("404"),
         kind: "lab_report",
         title: "HbA1c 7.4%",
-        summary: "First recorded reading in Baymax.",
+        summary: "First recorded reading in Cheeku AI.",
         eventDate: "2024-12-15",
         sourceDocumentId: id("206"),
       },

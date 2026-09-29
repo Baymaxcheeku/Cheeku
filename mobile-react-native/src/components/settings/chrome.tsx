@@ -29,7 +29,7 @@ export function SettingsScreen({
   /**
    * Suppress the icon-and-title block when the screen opens with its own hero.
    *
-   * About was rendering two headers in a row — "About Baymax / Your AI health
+   * About was rendering two headers in a row — "About Cheeku / Your AI health
    * companion" in this chrome, then a card immediately below saying the same
    * thing in bigger type. `title` and `eyebrow` are still required because
    * they are the screen's identity for accessibility and for anything that

@@ -126,7 +126,7 @@ export default async function SettingsPage() {
           body="Guides, FAQs and reporting an issue"
           href="/settings/help"
         />
-        <Row icon={Info} title="About Baymax" body="Version and information" href="/settings/about" />
+        <Row icon={Info} title="About Cheeku AI" body="Version and information" href="/settings/about" />
       </Group>
 
       <AccountData />
@@ -145,7 +145,7 @@ export default async function SettingsPage() {
       <p className="mx-5 mt-6 flex items-start gap-2 text-[11.5px] leading-relaxed text-ink-300">
         <ShieldCheck size={14} className="mt-0.5 shrink-0" aria-hidden />
         <span>
-          Baymax never sells your data and never shares it outside your family. It gives helpful
+          Cheeku never sells your data and never shares it outside your family. It gives helpful
           information, not medical advice.
         </span>
       </p>

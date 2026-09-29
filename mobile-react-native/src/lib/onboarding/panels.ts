@@ -58,7 +58,7 @@ export const PANELS: readonly Panel[] = [
     eyebrow: "Hello",
     lead: "Ask me the question",
     accent: "you'd never ask out loud",
-    body: "At 2am, in your own words, with no appointment and no judgement. I'm Baymax — a health companion for you and the people you look after.",
+    body: "At 2am, in your own words, with no appointment and no judgement. I'm Cheeku — a health companion for you and the people you look after.",
     cta: "Show me how",
   },
   {

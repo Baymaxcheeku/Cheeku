@@ -13,7 +13,7 @@ import { answerFromKnowledge, matchKnowledge } from "./knowledge";
  *
  *   4. GROUNDED, THEN GENERAL, THEN SILENT. Originally "grounded or silent":
  *      nothing outside the user's own records, full stop. Athar asked Ask
- *      Baymax to work both ways — general questions get a general, rule-1-safe
+ *      Cheeku to work both ways — general questions get a general, rule-1-safe
  *      answer (see ./knowledge.ts), and a genuinely unanswerable question still
  *      goes silent rather than improvising. `answer.kind` tells the UI which of
  *      the three happened, because each deserves different framing: a grounded
@@ -42,7 +42,7 @@ export type MockAnswer = {
   grounded: boolean;
   /** Which of the three paths produced this answer. */
   kind: AnswerKind;
-  /** Chips offered under the answer. Never actions Baymax cannot perform. */
+  /** Chips offered under the answer. Never actions Cheeku cannot perform. */
   followUps: string[];
 };
 

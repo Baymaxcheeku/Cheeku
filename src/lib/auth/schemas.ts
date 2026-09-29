@@ -22,7 +22,7 @@ export const signInSchema = z.object({
   password: z.string().min(1, "Enter your password"),
 });
 
-export const CONSENT_VERSION = "1.0.0";
+export const CONSENT_VERSION = "1.1.0";
 
 export const createAccountSchema = z.object({
   email: emailSchema,

@@ -21,7 +21,7 @@ import { confirmExtraction } from "@/lib/records/upload";
  *
  * The colour ruling matters more here than anywhere else in the app. Extraction
  * confidence is NOT rendered on the green/amber/red scale: those three hues mean
- * health severity throughout Baymax, and reusing them for "how well did the OCR
+ * health severity throughout Cheeku, and reusing them for "how well did the OCR
  * read this word" would teach people that red means danger in one card and a
  * blurry scan in the next.
  *
@@ -161,7 +161,7 @@ export function ReviewForm(props: Props) {
 
       <p className="mt-4 flex items-start gap-2 rounded-tile bg-brand-50 px-3.5 py-2.5 text-[11px] leading-snug text-ink-500">
         <ShieldCheck size={13} className="mt-0.5 shrink-0 text-brand-400" aria-hidden />
-        Baymax never interprets your results. What you confirm here is stored exactly as you enter
+        Cheeku never interprets your results. What you confirm here is stored exactly as you enter
         it.
       </p>
 

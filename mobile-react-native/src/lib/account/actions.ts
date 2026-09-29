@@ -73,7 +73,7 @@ export async function exportAccount(): Promise<
    * a backed-up directory would quietly create a second, unencrypted copy of
    * the medical record that outlives the export.
    */
-  const filename = `baymax-export-${new Date().toISOString().slice(0, 10)}.json`;
+  const filename = `cheeku-ai-export-${new Date().toISOString().slice(0, 10)}.json`;
 
   try {
     const file = new File(Paths.cache, filename);
@@ -91,7 +91,7 @@ export async function shareExport(uri: string): Promise<void> {
   if (!(await Sharing.isAvailableAsync())) return;
   await Sharing.shareAsync(uri, {
     mimeType: "application/json",
-    dialogTitle: "Export your Baymax data",
+    dialogTitle: "Export your Cheeku AI data",
     UTI: "public.json",
   });
 }

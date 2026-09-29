@@ -65,7 +65,7 @@ export type ChatQuota = { used: number; limit: number | null; remaining: number 
  * 0011, which spends one chat per user message inside the insert itself. So
  * this is the same number the database will act on, but being wrong about it in
  * the client's favour changes nothing: the send still fails at the write. The
- * pre-check in `askBaymax` exists so a refused chat costs no work and never
+ * pre-check in `askCheeku` exists so a refused chat costs no work and never
  * reaches the transcript, not because it stops anybody.
  *
  * An earlier version counted rows in `messages`, because nothing maintained the
@@ -99,7 +99,7 @@ function isQuotaRefusal(error: { message?: string } | null | undefined): boolean
 
 const QUOTA_SPENT = "You've used today's free chats. They reset tomorrow.";
 
-export async function askBaymax(
+export async function askCheeku(
   question: string,
   conversationId: string | null,
   safetyStatus: Exclude<SafetyStatus, "escalate">,
@@ -339,7 +339,7 @@ async function profileConditions(profileId: string): Promise<string[]> {
  * because "the client only ever sends one of five values" is an assumption
  * about a client, not a property of a system.
  *
- * Gated by the same quota as a text question: it is Ask Baymax, not a separate
+ * Gated by the same quota as a text question: it is Ask Cheeku, not a separate
  * feature with its own allowance.
  */
 export async function askAboutProduct(

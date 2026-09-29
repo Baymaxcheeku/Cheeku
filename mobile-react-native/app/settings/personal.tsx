@@ -157,7 +157,7 @@ export default function PersonalInfo() {
         </View>
         <Meter value={filled} total={3} />
         <Text className="text-[11.5px] leading-[16px] text-ink-300">
-          Age and sex let Baymax read a lab&apos;s reference range the way your lab intends it.
+          Age and sex let Cheeku read a lab&apos;s reference range the way your lab intends it.
         </Text>
       </View>
 

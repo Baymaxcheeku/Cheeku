@@ -63,7 +63,7 @@ export default function ProfilePage() {
         <div className="relative pr-[38%]">
           <Headline lead="Let's set up your" accent="health profile" />
           <p className="mt-2 text-[13px] leading-relaxed text-ink-500">
-            This helps Baymax personalize insights and keep your information more accurate.
+            This helps Cheeku personalize insights and keep your information more accurate.
           </p>
           <MascotBust className="pointer-events-none absolute -right-2 top-0 w-[132px]" />
         </div>
@@ -138,7 +138,7 @@ export default function ProfilePage() {
             <h2 className="text-[15px] font-semibold text-ink-900">Health snapshot</h2>
           </div>
           <p className="mt-0.5 text-[12px] text-ink-500">
-            Helps Baymax provide more relevant insights.
+            Helps Cheeku provide more relevant insights.
           </p>
 
           <div className="mt-3 space-y-3">

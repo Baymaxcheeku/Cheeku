@@ -28,7 +28,7 @@ export default function SplashPage() {
     <main className="grid min-h-app place-items-center bg-canvas px-8 text-center">
       <div>
         <HeroScene className="mx-auto w-[250px]" />
-        <h1 className="mt-4 text-[30px] font-bold tracking-[-0.02em] text-ink-900">Baymax</h1>
+        <h1 className="mt-4 text-[30px] font-bold tracking-[-0.02em] text-ink-900">Cheeku AI</h1>
         <p className="mt-1.5 text-[14px] text-ink-500">Your family&apos;s health companion</p>
         <Link
           href="/welcome"

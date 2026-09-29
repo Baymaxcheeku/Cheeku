@@ -24,23 +24,23 @@ import { castFaces } from "@/lib/profiles/avatar";
 export const dynamic = "force-static";
 
 /**
- * About Baymax — the product's own case for itself.
+ * About Cheeku AI — the product's own case for itself.
  *
  * Modelled on the reference frame, which is a long editorial page rather than a
  * settings row: hero, four pillars, the anxiety-spiral problem statement, what
- * Baymax remembers, a generic-search-versus-Baymax comparison, the privacy
+ * Cheeku remembers, a generic-search-versus-Cheeku comparison, the privacy
  * trio, and a chat CTA.
  *
  * Two departures from that frame, both for the same reason as everywhere else in
  * this app:
  *
  *   The frame's pillars claim "Insights and next steps you can trust" and
- *   "Guidance". Baymax does not give next steps on a health value — that is
+ *   "Guidance". Cheeku does not give next steps on a health value — that is
  *   rule 1 — so the pillar is about *organising* and *finding*, which is what it
  *   genuinely does.
  *
- *   The frame ends with "Baymax is not a replacement for professional medical
- *   advice", which is kept verbatim, and a "what Baymax will never do" block is
+ *   The frame ends with "Cheeku is not a replacement for professional medical
+ *   advice", which is kept verbatim, and a "what Cheeku will never do" block is
  *   added. A page that only sells is a page that has overpromised by the end.
  */
 export default function AboutPage() {
@@ -54,7 +54,7 @@ export default function AboutPage() {
 
   return (
     <div className="stagger flex flex-1 flex-col pb-8">
-      <SettingsHeader title="About Baymax" eyebrow="Your AI health companion" icon={Info} />
+      <SettingsHeader title="About Cheeku AI" eyebrow="Your AI health companion" icon={Info} />
 
       {/* ---------------------------------------------------------- hero --- */}
       <section className="relative mx-5 mt-4 overflow-hidden rounded-card bg-gradient-to-br from-brand-50 via-surface to-brand-50 p-4 ring-1 ring-brand-100">
@@ -68,7 +68,7 @@ export default function AboutPage() {
             <span className="text-brand-600">A companion for life.</span>
           </h2>
           <p className="mt-2 text-[12.5px] leading-snug text-ink-600">
-            Baymax keeps your family&apos;s health records in one place, remembers what matters, and
+            Cheeku keeps your family&apos;s health records in one place, remembers what matters, and
             answers questions grounded in what you&apos;ve actually uploaded.
           </p>
         </div>
@@ -155,7 +155,7 @@ export default function AboutPage() {
         <p className="mt-2 flex items-start gap-2.5 border-t border-line bg-surface px-4 py-3.5">
           <ShieldCheck size={16} className="mt-px shrink-0 text-brand-600" aria-hidden />
           <span className="text-[12.5px] leading-snug text-ink-700">
-            <strong className="font-bold text-brand-700">Baymax breaks the loop.</strong> It reads
+            <strong className="font-bold text-brand-700">Cheeku breaks the loop.</strong> It reads
             what your own report says, names the document it came from, and leaves what it means to
             your doctor.
           </span>
@@ -167,7 +167,7 @@ export default function AboutPage() {
         <MemoryScene className="w-full" />
         <div className="-mt-2 p-4">
           <h2 className="text-[16px] font-bold leading-tight text-ink-900">
-            Baymax remembers everything about your family, so you don&apos;t have to.
+            Cheeku remembers everything about your family, so you don&apos;t have to.
           </h2>
           <ul className="mt-3 space-y-2">
             {[
@@ -226,7 +226,7 @@ export default function AboutPage() {
           <div className="overflow-hidden rounded-card border-2 border-brand-500 bg-surface">
             <p className="flex items-center gap-1.5 bg-brand-600 px-3 py-2 text-[11.5px] font-semibold text-white">
               <Check size={13} strokeWidth={3} className="shrink-0" aria-hidden />
-              Baymax
+              Cheeku
             </p>
             <ul className="space-y-1.5 p-3">
               {[
@@ -274,7 +274,7 @@ export default function AboutPage() {
 
       {/* ------------------------------------------- what it never does ---- */}
       <section className="mx-5 mt-4 rounded-card border border-line bg-surface p-4">
-        <h2 className="text-[14px] font-bold text-ink-900">What Baymax will never do</h2>
+        <h2 className="text-[14px] font-bold text-ink-900">What Cheeku will never do</h2>
         <ul className="mt-2 space-y-1.5">
           {[
             "Diagnose a condition, or say what a value might mean",
@@ -289,7 +289,7 @@ export default function AboutPage() {
           ))}
         </ul>
         <p className="mt-2.5 text-[11.5px] leading-snug text-ink-500">
-          Free includes {FREE_CHAT_LIMIT} chats a month. Anything a doctor should decide, Baymax
+          Free includes {FREE_CHAT_LIMIT} chats a month. Anything a doctor should decide, Cheeku
           hands to your doctor.
         </p>
       </section>
@@ -310,7 +310,7 @@ export default function AboutPage() {
           className="tappable mt-3 flex h-12 w-full items-center justify-center gap-2 rounded-pill bg-white text-[14px] font-semibold text-brand-700 active:scale-[0.98]"
         >
           <MessageCircle size={16} aria-hidden />
-          Chat with Baymax
+          Chat with Cheeku
         </Link>
       </section>
 
@@ -333,7 +333,7 @@ export default function AboutPage() {
       <p className="mx-5 mt-4 flex items-start gap-2 text-[11px] leading-snug text-ink-500">
         <ShieldCheck size={14} className="mt-px shrink-0 text-ink-300" aria-hidden />
         <span>
-          Baymax is not a replacement for professional medical advice. For emergencies, contact your
+          Cheeku is not a replacement for professional medical advice. For emergencies, contact your
           doctor or local emergency services.
         </span>
       </p>

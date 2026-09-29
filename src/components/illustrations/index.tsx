@@ -133,7 +133,7 @@ function Mascot({
 
 /**
  * The mascot at card-corner size — the format used in nine places across the
- * app, from the Ask Baymax card to the paywall.
+ * app, from the Ask Cheeku card to the paywall.
  *
  * Cropped to the top of the same figure rather than drawn separately: a bust
  * with its own geometry is how the character drifted between screens last

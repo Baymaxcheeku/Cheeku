@@ -43,7 +43,7 @@ export function LogoutButton() {
             Log out
           </span>
           <span className="mt-0.5 block text-[11.5px] text-ink-500">
-            Sign out of your Baymax account
+            Sign out of your Cheeku AI account
           </span>
         </span>
       </button>
@@ -59,7 +59,7 @@ export function LogoutButton() {
               <span className="mx-auto grid h-12 w-12 place-items-center rounded-pill bg-brand-50 text-brand-600">
                 <LogOut size={20} aria-hidden />
               </span>
-              <h2 className="mt-3 text-[18px] font-bold text-ink-900">Log out of Baymax?</h2>
+              <h2 className="mt-3 text-[18px] font-bold text-ink-900">Log out of Cheeku AI?</h2>
               <p className="mx-auto mt-1.5 max-w-[280px] text-[13px] leading-snug text-ink-500">
                 You&apos;ll need to sign in again to see your family&apos;s records.
               </p>

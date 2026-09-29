@@ -284,7 +284,7 @@ export default function RecordDetail() {
       </Text>
       <View className="mt-2 flex-row gap-2">
         {/*
-         * Ask Baymax is Phase 3, trends and sharing are later still. The two
+         * Ask Cheeku is Phase 3, trends and sharing are later still. The two
          * that do not exist are marked rather than linked to a dead route, and
          * each says which phase it belongs to — a tile that looks identical to
          * a working one and silently does nothing is worse than one that admits
@@ -292,7 +292,7 @@ export default function RecordDetail() {
          */}
         <ActionTile
           icon={MessageCircle}
-          title="Ask Baymax"
+          title="Ask Cheeku"
           body="Get answers about this report"
           onPress={() => router.push(`/ask?record=${record.id}`)}
         />

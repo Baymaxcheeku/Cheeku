@@ -52,7 +52,7 @@ export function buildInsight(record: RecordDetail): Insight {
   if (measured.length === 0) {
     return {
       headline: "Saved to your records",
-      body: "Baymax has filed this document. There are no measured values in it to compare against a reference range.",
+      body: "Cheeku has filed this document. There are no measured values in it to compare against a reference range.",
       flagged: false,
     };
   }
@@ -69,7 +69,7 @@ export function buildInsight(record: RecordDetail): Insight {
     headline: `${flagged.length} value${flagged.length === 1 ? "" : "s"} outside the printed range`,
     body:
       `${listNames(flagged)} ${flagged.length === 1 ? "is" : "are"} outside the reference range on this document. ` +
-      `Baymax does not interpret results. Bring this to your doctor to discuss what it means.`,
+      `Cheeku does not interpret results. Bring this to your doctor to discuss what it means.`,
     flagged: true,
   };
 }

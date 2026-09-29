@@ -3,7 +3,7 @@ import { BatteryFull, Wifi } from "lucide-react";
 /**
  * Wraps the app in an iPhone 16 shell on anything wider than a phone.
  *
- * Baymax is only ever shipped as a phone app, so a desktop browser is a review
+ * Cheeku is only ever shipped as a phone app, so a desktop browser is a review
  * surface rather than a target: reviewers should be looking at the thing at the
  * size it will be used, not at a stretched web page. Below 480px — a real phone —
  * the frame is pure `display: contents` and adds nothing to the layout.

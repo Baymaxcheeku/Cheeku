@@ -75,7 +75,7 @@ export function PersonalInfoForm({
           value={filled}
           total={3}
           label="Profile details"
-          hint="Age and sex let Baymax read a lab's reference range the way your lab intends it."
+          hint="Age and sex let Cheeku read a lab's reference range the way your lab intends it."
         />
       </div>
 

@@ -155,7 +155,7 @@ export function MemoryScene({ className }: ArtProps) {
         <rect x="93" y="93" width="22" height="4.5" rx="2.25" fill="#e2dff5" />
       </g>
 
-      {/* The front card, brand-filled: the one Baymax has organised. */}
+      {/* The front card, brand-filled: the one Cheeku has organised. */}
       <g filter="url(#mem-lift)" transform="rotate(6 158 88)">
         <rect x="126" y="44" width="66" height="86" rx="12" fill="url(#mem-brand)" />
         <rect x="139" y="62" width="38" height="5" rx="2.5" fill="#fff" opacity="0.9" />
@@ -178,7 +178,7 @@ export function MemoryScene({ className }: ArtProps) {
 }
 
 /**
- * A journey row: a real face, the life it belongs to, and what Baymax carries
+ * A journey row: a real face, the life it belongs to, and what Cheeku carries
  * for it. Faces rather than icons alone, because the claim on this page is that
  * these are people, not segments.
  */

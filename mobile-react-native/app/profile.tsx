@@ -237,7 +237,7 @@ export default function Profile() {
 
       router.push("/journey");
     } catch {
-      setMessage("Could not reach Baymax. Check your connection and try again.");
+      setMessage("Could not reach Cheeku AI. Check your connection and try again.");
     } finally {
       setPending(false);
     }
@@ -262,7 +262,7 @@ export default function Profile() {
           <View className="relative pr-[38%]">
             <Headline lead="Let's set up your" accent="health profile" />
             <Text className="mt-2 text-[13px] leading-[19px] text-ink-500">
-              This helps Baymax personalize insights and keep your information more accurate.
+              This helps Cheeku personalize insights and keep your information more accurate.
             </Text>
             <View className="absolute -right-2 top-0" pointerEvents="none">
               <MascotBust size={132} />
@@ -344,7 +344,7 @@ export default function Profile() {
               <Text className="text-[15px] font-semibold text-ink-900">Health snapshot</Text>
             </View>
             <Text className="mt-0.5 text-[12px] text-ink-500">
-              Helps Baymax provide more relevant insights.
+              Helps Cheeku provide more relevant insights.
             </Text>
 
             <View className="mt-3 gap-3">

@@ -168,7 +168,7 @@ export default function Settings() {
             <Text className="text-[13.5px] font-bold text-ink-900">{plan.name}</Text>
             <Text className="text-[11.5px] text-ink-500">
               {entitlement.chatsRemaining === null
-                ? "Unlimited Ask Baymax"
+                ? "Unlimited Ask Cheeku"
                 : `${entitlement.chatsRemaining} of ${entitlement.limit} chats left this month`}
             </Text>
           </View>
@@ -221,7 +221,7 @@ export default function Settings() {
 
       <Group label="Support">
         <Row icon={CircleHelp} title="Help & support" body="Guides, FAQs and reporting an issue" href="/settings/help" />
-        <Row icon={Info} title="About Baymax" body="Version and information" href="/settings/about" />
+        <Row icon={Info} title="About Cheeku AI" body="Version and information" href="/settings/about" />
       </Group>
 
       <AccountData onDeleted={signOut} />
@@ -282,7 +282,7 @@ export default function Settings() {
       <View className="mx-5 mt-6 flex-row items-start gap-2">
         <ShieldCheck size={14} color={ink[300]} style={{ marginTop: 2 }} />
         <Text className="flex-1 text-[11.5px] leading-[17px] text-ink-300">
-          Baymax never sells your data and never shares it outside your family. It gives helpful
+          Cheeku never sells your data and never shares it outside your family. It gives helpful
           information, not medical advice.
         </Text>
       </View>
@@ -540,7 +540,7 @@ function AccountData({ onDeleted }: { onDeleted: () => void }) {
             <View className="min-w-0 flex-1">
               <Text className="text-[14.5px] font-semibold text-ink-900">Export my data</Text>
               <Text className="text-[11.5px] text-ink-500">
-                Everything Baymax holds, as a JSON file
+                Everything Cheeku holds, as a JSON file
               </Text>
             </View>
             <ChevronRight size={17} color={ink[300]} />
@@ -601,7 +601,7 @@ function AccountData({ onDeleted }: { onDeleted: () => void }) {
           <Text className="text-[19px] font-bold text-ink-900">Delete your account?</Text>
           <Text className="mt-2 text-[13px] leading-[19px] text-ink-700">
             Every document, lab value, conversation and file is removed permanently. This cannot be
-            undone, and Baymax keeps no copy to restore from.
+            undone, and Cheeku keeps no copy to restore from.
           </Text>
           <Text className="mt-3 text-[12.5px] text-ink-500">
             Export your data first if you want to keep it.

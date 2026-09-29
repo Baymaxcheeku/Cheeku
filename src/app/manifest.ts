@@ -10,8 +10,8 @@ import type { MetadataRoute } from "next";
  */
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Baymax: your family's health companion",
-    short_name: "Baymax",
+    name: "Cheeku AI: your family's health companion",
+    short_name: "Cheeku AI",
     description: "The health memory layer for every family.",
     start_url: "/",
     display: "standalone",

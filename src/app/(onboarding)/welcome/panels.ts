@@ -32,14 +32,14 @@ export const PANELS: readonly Panel[] = [
     kind: "journeys",
     lead: "Built for the season",
     accent: "you're in right now",
-    body: "Baymax adapts to what you're living through. Pick the one that fits. You can change it any time.",
+    body: "Cheeku adapts to what you're living through. Pick the one that fits. You can change it any time.",
     cta: "Continue",
   },
   {
     kind: "memory",
     lead: "Ask anything.",
     accent: "It already knows your history",
-    body: "Baymax reads your documents, remembers what they said, and answers in plain language, always citing the record it came from.",
+    body: "Cheeku reads your documents, remembers what they said, and answers in plain language, always citing the record it came from.",
     cta: "Continue",
   },
   {

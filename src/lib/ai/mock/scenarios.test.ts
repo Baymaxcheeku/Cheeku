@@ -11,7 +11,7 @@ import { PRODUCT_SCENARIOS, assessProduct, findScenario } from "./scenarios";
 const FORBIDDEN: [RegExp, string][] = [
   [/\bdiagnos(e|ed|es|ing|is)\b/i, "diagnoses"], // Targets the ACT of diagnosing, not the letters: facility
   // names legitimately contain "Diagnostics" and are echoed verbatim from the
-  // reader's own document, which is not Baymax making a claim.
+  // reader's own document, which is not Cheeku making a claim.
   [/\bprescrib/i, "prescribes"],
   [/\b\d+\s*(iu|mg|mcg|ml)\b/i, "gives a numeric dosage"],
   [/\byou should (take|start|stop)\b/i, "instructs treatment"],

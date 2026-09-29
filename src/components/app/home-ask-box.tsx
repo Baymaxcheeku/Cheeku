@@ -20,7 +20,7 @@ const PROMPTS = [
 ] as const;
 
 /**
- * The Ask Baymax entry on Home.
+ * The Ask Cheeku entry on Home.
  *
  * It does not answer here — it carries the question into /ask, where the safety
  * gate runs before anything is sent. Answering inline would mean a second place
@@ -68,11 +68,11 @@ export function HomeAskBox() {
 
       <div className="relative pr-[36%]">
         <h2 className="flex items-center gap-1.5 text-[21px] font-bold text-ink-900">
-          Ask Baymax
+          Ask Cheeku
           <Stethoscope size={17} className="text-brand-500" aria-hidden />
         </h2>
         <p className="mt-1.5 text-[13px] leading-snug text-ink-700">
-          Hi, I&apos;m Baymax, your personalised healthcare companion.
+          Hi, I&apos;m Cheeku, your personalised healthcare companion.
         </p>
       </div>
 
@@ -95,7 +95,7 @@ export function HomeAskBox() {
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
           placeholder="Ask anything…"
-          aria-label="Ask Baymax a question"
+          aria-label="Ask Cheeku a question"
           className="relative min-w-0 flex-1 bg-transparent text-[15px] text-ink-900 outline-none placeholder:text-ink-300"
         />
         <button

@@ -19,7 +19,7 @@ const ICONS: Record<string, { icon: LucideIcon; label: string }> = {
   // what the reader came for, and it is the word the app already uses on the
   // screen itself and in every answer that cites one.
   records: { icon: FolderClosed, label: "Health records" },
-  ask: { icon: Stethoscope, label: "Ask Baymax" },
+  ask: { icon: Stethoscope, label: "Ask Cheeku" },
   settings: { icon: User, label: "Profile" },
 };
 
@@ -74,7 +74,7 @@ export function TabBar({ state, navigation }: BottomTabBarProps) {
          * The FAB is a SIBLING of the tabs, not nested inside one of them.
          * Wrapping it together with the third tab made the pair share a single
          * flex-1 share, so 76pt of that share went to the circle and "Ask
-         * Baymax" truncated to "A…" while the other three labels sat in full.
+         * Cheeku" truncated to "A…" while the other three labels sat in full.
          */
         return (
           <Fragment key={route.key}>

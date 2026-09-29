@@ -45,7 +45,7 @@ export function AccountData() {
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `baymax-export-${new Date().toISOString().slice(0, 10)}.json`;
+      link.download = `cheeku-ai-export-${new Date().toISOString().slice(0, 10)}.json`;
       link.click();
       URL.revokeObjectURL(url);
 
@@ -130,7 +130,7 @@ export function AccountData() {
             <AlertTriangle size={16} className="mt-px shrink-0 text-danger" aria-hidden />
             <span>
               This deletes every profile, document, extracted value, conversation and uploaded file.
-              It cannot be undone, and Baymax keeps no backup.
+              It cannot be undone, and Cheeku keeps no backup.
             </span>
           </p>
 

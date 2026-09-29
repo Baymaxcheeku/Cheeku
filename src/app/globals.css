@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /*
- * Baymax design tokens.
+ * Cheeku design tokens.
  *
  * Values below were SAMPLED from ./design/screens via design/sample_tokens.py,
  * not copied from the written spec. Where the spec and the frames disagreed the
@@ -213,7 +213,7 @@
 }
 
 /*
- * A slow breathing glow behind the mascot on the Ask Baymax card — signals
+ * A slow breathing glow behind the mascot on the Ask Cheeku card — signals
  * "listening, alive" without ever demanding attention. 3.6s so it reads as
  * ambient, not a loading state; reduced-motion collapses it like everything
  * else above.
@@ -234,7 +234,7 @@
   animation: glow-pulse 3.6s ease-in-out infinite;
 }
 
-/* A single soft light sweep across the Ask Baymax input on first paint —
+/* A single soft light sweep across the Ask Cheeku input on first paint —
    invites the tap without looping forever and becoming wallpaper. */
 @keyframes sheen-once {
   0% {
@@ -329,7 +329,7 @@ body {
  * ---------------------------------------------------------------------------
  * Device frame
  *
- * Baymax is a phone app, so on anything wider than a phone the screens are put
+ * Cheeku is a phone app, so on anything wider than a phone the screens are put
  * inside an iPhone 16 shell rather than stretched across a desktop window. The
  * numbers are the real device: 393x852pt display, 59pt top inset, 34pt bottom.
  *

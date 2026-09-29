@@ -50,7 +50,7 @@ export type AskResult =
   | { ok: false; quota: true; message: string }
   | { ok: false; quota?: false; message: string };
 
-export async function askBaymax(
+export async function askCheeku(
   question: string,
   conversationId: string | null,
   safetyStatus: Exclude<SafetyStatus, "escalate">,
@@ -181,7 +181,7 @@ export async function askBaymax(
 /**
  * The product-safety demo path — a photo scenario picked from `ProductPicker`
  * rather than an arbitrary upload (see scenarios.ts for why). Gated by the
- * same quota as a text question: it is Ask Baymax, not a separate feature.
+ * same quota as a text question: it is Ask Cheeku, not a separate feature.
  *
  * `scenarioId` is validated against the fixed, server-side list before
  * anything is written — it never trusts the client to have sent a real one.

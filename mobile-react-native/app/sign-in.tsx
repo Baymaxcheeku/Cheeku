@@ -126,7 +126,7 @@ export default function SignIn() {
     } catch {
       // A throw is a transport failure. Saying "wrong password" to someone with
       // no signal sends them to reset a password that was never the problem.
-      setError("Could not reach Baymax. Check your connection and try again.");
+      setError("Could not reach Cheeku AI. Check your connection and try again.");
     } finally {
       setBusy(false);
     }
@@ -158,7 +158,7 @@ export default function SignIn() {
           <View className="pr-[38%]">
             <Text className="text-[27px] font-bold leading-[32px] tracking-tight text-ink-900">
               Welcome{"\n"}
-              <Text className="text-brand-600">to Baymax</Text>
+              <Text className="text-brand-600">to Cheeku AI</Text>
             </Text>
             <Text className="mt-2 text-[13px] leading-[19px] text-ink-500">
               Your family&apos;s health, protected and organised in one secure place.
@@ -285,7 +285,7 @@ export default function SignIn() {
                   {consent ? <View className="h-1.5 w-1.5 rounded-[1px] bg-white" /> : null}
                 </View>
                 <Text className="flex-1 text-[12px] leading-[17px] text-ink-500">
-                  I agree that Baymax may store and process my family&apos;s health records to give
+                  I agree that Cheeku may store and process my family&apos;s health records to give
                   me insights. I can export or delete everything at any time.
                 </Text>
               </Pressable>

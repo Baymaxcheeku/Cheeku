@@ -80,7 +80,7 @@ describe("escalation copy", () => {
     }
   });
 
-  it("says Baymax cannot help rather than attempting to", () => {
+  it("says Cheeku cannot help rather than attempting to", () => {
     expect(copyFor("medical").title).toMatch(/can't help/i);
     expect(copyFor("mental_health").title).toMatch(/can't help/i);
   });

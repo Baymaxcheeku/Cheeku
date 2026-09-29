@@ -11,7 +11,7 @@ import { activeProfile } from "@/lib/profiles/context";
 import { brand, ink, shadow } from "@/theme/tokens";
 
 /**
- * The Ask Baymax entry on Home.
+ * The Ask Cheeku entry on Home.
  *
  * IT DOES NOT ANSWER HERE. It carries the question into /ask, where the safety
  * gate runs before anything is sent. Answering inline would mean a second place
@@ -88,11 +88,11 @@ export function HomeAskBox() {
 
       <View className="pr-[36%]">
         <View className="flex-row items-center gap-1.5">
-          <Text className="text-[21px] font-bold text-ink-900">Ask Baymax</Text>
+          <Text className="text-[21px] font-bold text-ink-900">Ask Cheeku</Text>
           <Stethoscope size={17} color={brand[500]} />
         </View>
         <Text className="mt-1.5 text-[13px] leading-[18px] text-ink-700">
-          Hi, I&apos;m Baymax, your personalised healthcare companion.
+          Hi, I&apos;m Cheeku, your personalised healthcare companion.
         </Text>
       </View>
 
@@ -109,7 +109,7 @@ export function HomeAskBox() {
           returnKeyType="send"
           placeholder="Ask anything…"
           placeholderTextColor={ink[300]}
-          accessibilityLabel="Ask Baymax a question"
+          accessibilityLabel="Ask Cheeku a question"
           style={{ flex: 1, fontSize: 15, color: ink[900], fontFamily: "Inter_400Regular" }}
         />
         <Pressable

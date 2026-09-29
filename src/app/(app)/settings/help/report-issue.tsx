@@ -161,7 +161,7 @@ export function HelpSupportTools() {
             <div className="min-w-0 flex-1">
               <p className="text-[14px] font-bold text-ink-900">Let us know what went wrong</p>
               <p className="mt-0.5 text-[12px] leading-snug text-ink-500">
-                Help us improve Baymax by sharing as much detail as you can.
+                Help us improve Cheeku AI by sharing as much detail as you can.
               </p>
             </div>
           </div>

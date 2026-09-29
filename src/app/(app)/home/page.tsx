@@ -42,7 +42,7 @@ export default async function HomePage() {
       <main className="flex flex-1 flex-col justify-center px-5 py-10 text-center">
         <h1 className="text-[22px] font-bold text-ink-900">Set up a profile first</h1>
         <p className="mx-auto mt-2 max-w-[280px] text-[14px] text-ink-500">
-          Baymax needs someone to keep records for before it can show you anything.
+          Cheeku needs someone to keep records for before it can show you anything.
         </p>
         <Link
           href="/profile"
@@ -107,7 +107,7 @@ export default async function HomePage() {
       />
 
       {/*
-       * Ask Baymax moved above Health Summary and given the mascot's own
+       * Ask Cheeku moved above Health Summary and given the mascot's own
        * breathing room: for the anxious or pregnant user this card is the
        * reason they opened the app, not a footnote below a stats row.
        */}
@@ -199,7 +199,7 @@ function InsightCard({
       ? {
           eyebrow: "Get started",
           title: "Add your first record",
-          meta: "Upload a report and Baymax will organise it for you.",
+          meta: "Upload a report and Cheeku will organise it for you.",
           href: "/scan",
           icon: FileText,
           tint: "bg-brand-50 text-brand-600",
@@ -226,7 +226,7 @@ function InsightCard({
    * A single tappable row rather than a card with its own headline, body and
    * button: this is a pointer to something else on the app, not a
    * destination in itself, and the earlier full-height version competed with
-   * Ask Baymax for the first thing someone's eye landed on.
+   * Ask Cheeku for the first thing someone's eye landed on.
    */
   return (
     <Link

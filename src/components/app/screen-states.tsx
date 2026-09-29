@@ -98,7 +98,7 @@ export function OfflineBanner() {
       <CloudOff size={16} className="shrink-0 text-caution-text" aria-hidden />
       <p className="text-[12px] leading-snug text-caution-text">
         <strong className="font-semibold">You&apos;re offline.</strong> Saved records still open.
-        Uploads and Ask Baymax need a connection.
+        Uploads and Ask Cheeku need a connection.
       </p>
     </div>
   );
