@@ -15,6 +15,7 @@ import { MascotBust } from "@/components/illustrations/sprout";
 import { BubblePop } from "@/components/onboarding/motion";
 import { Glass, Gradient, glassShadow } from "@/components/ui/glass";
 import { useReducedMotion } from "@/components/ui/motion";
+import { PillButton } from "@/components/ui/screen";
 import { SPECIALTIES, doctorById } from "@/lib/booking/catalog";
 import { useBookingDraft } from "@/lib/booking/draft";
 import { doctorFace } from "@/lib/booking/faces";
@@ -165,21 +166,21 @@ export default function Confirmed() {
         </View>
       </ScrollView>
 
-      <View className="gap-2 px-5 pt-2" style={{ paddingBottom: insets.bottom + 12 }}>
-        <Pressable
-          accessibilityRole="button"
-          onPress={home}
-          style={({ pressed }) => ({
-            height: 56,
-            borderRadius: 999,
-            alignItems: "center",
-            justifyContent: "center",
-            backgroundColor: ink[900],
-            transform: [{ scale: pressed ? 0.98 : 1 }],
-          })}
+      <View className="flex-row gap-2.5 px-5 pt-2" style={{ paddingBottom: insets.bottom + 12 }}>
+        <PillButton tone="light" onPress={home} style={{ flex: 1 }}>
+          Home
+        </PillButton>
+        <PillButton
+          tone="dark"
+          style={{ flex: 1.6 }}
+          onPress={() => {
+            const id = booking.appointmentId;
+            reset();
+            router.replace((id ? `/appointments/${id}` : "/appointments") as never);
+          }}
         >
-          <Text style={{ fontFamily: font.semibold, fontSize: 15.5, color: "#fff" }}>Back to home</Text>
-        </Pressable>
+          View appointment
+        </PillButton>
       </View>
     </View>
   );

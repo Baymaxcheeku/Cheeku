@@ -10,6 +10,8 @@ import { Paywall } from "@/components/billing/paywall";
 import { OfflineBanner } from "@/components/app/offline-banner";
 import { AskBar, CheekuCard, HomeHeadline, ProfileChip, firstName } from "@/components/home/ask-hero";
 import { CareSection } from "@/components/home/care";
+import { AppointmentCard } from "@/components/booking/appointment-card";
+import { isUpcoming, startsAt, useAppointmentList } from "@/lib/booking/appointments";
 import { FileStrip, ReadsStrip } from "@/components/home/strips";
 import { Gradient } from "@/components/ui/glass";
 import { knowledgeFeed } from "@/lib/knowledge/queries";
@@ -46,6 +48,12 @@ function greeting(): string {
  */
 export default function Home() {
   const router = useRouter();
+  const appointments = useAppointmentList();
+  // The next one only. A list of appointments on Home would be a second
+  // Appointments screen; one card is a reminder.
+  const next = appointments.items
+    .filter((a) => isUpcoming(a))
+    .sort((a, b) => startsAt(a).getTime() - startsAt(b).getTime())[0];
   const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
   const [paywallOpen, setPaywallOpen] = useState(false);
@@ -184,6 +192,19 @@ export default function Home() {
           <AskBar />
         </View>
       </StaggerItem>
+
+      {/*
+       * An upcoming appointment outranks everything below the ask bar: on the
+       * day, it is the reason the app was opened. Absent when there is none,
+       * with no empty state — Home is not the place to sell booking twice.
+       */}
+      {next ? (
+        <StaggerItem index={3}>
+          <View className="mt-4 px-5">
+            <AppointmentCard appt={next} hero />
+          </View>
+        </StaggerItem>
+      ) : null}
 
       <StaggerItem index={3}>
         <View className="mt-4 px-5">

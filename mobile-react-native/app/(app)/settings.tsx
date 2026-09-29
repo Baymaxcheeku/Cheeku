@@ -2,7 +2,9 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import {
   Bell,
+  CalendarDays,
   ChevronDown,
+  FolderHeart,
   ChevronRight,
   CircleHelp,
   Crown,
@@ -207,6 +209,11 @@ export default function Settings() {
        * "Notifications" would read as a warning about the reader's health. The
        * grouping does the work the colour is not allowed to.
        */}
+      <Group label="Your care">
+        <Row icon={CalendarDays} title="Appointments" body="Upcoming visits, video calls and past bookings" href="/appointments" />
+        <Row icon={FolderHeart} title="Health file" body="Everything filed, and what the labs measured" href="/health-file" />
+      </Group>
+
       <Group label="Account">
         <Row icon={UserCog} title="Personal information" body="Name, date of birth and contact" href="/settings/personal" />
         <Row icon={HeartPulse} title="Health profile" body="Conditions, allergies and medicines" href="/settings/health" />
