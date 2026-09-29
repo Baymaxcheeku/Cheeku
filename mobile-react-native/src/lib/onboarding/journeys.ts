@@ -40,6 +40,12 @@ export type Journey = {
   label: string;
   /** The problem, in their words. One line, no product vocabulary. */
   problem: string;
+  /**
+   * What Cheeku says when this is picked in onboarding. Warmth and what it
+   * will keep, NEVER a statement about the reader's health or the person
+   * they care for.
+   */
+  reaction: string;
   /** Non-semantic tints. Health meaning owns green/amber/red elsewhere. */
   tint: string;
 };
@@ -48,43 +54,49 @@ export const JOURNEYS: readonly Journey[] = [
   {
     id: "expecting",
     icon: HeartHandshake,
-    label: "Expecting",
-    problem: "Every scan and test, week by week",
+    label: "Expecting a baby",
+    problem: "Every scan and test, trimester by trimester",
+    reaction: "Congratulations! I'll keep every scan and test safe, week by week.",
     tint: "bg-[#f3e9fd] text-[#7b3fd4]",
   },
   {
     id: "fertility",
     icon: Dna,
     label: "Trying to conceive",
-    problem: "Cycles and protocols that never get lost",
+    problem: "Cycles, tests and reports, never lost",
+    reaction: "I'll keep every cycle and report in order, so nothing slips.",
     tint: "bg-[#e6f1fd] text-[#1a6fc2]",
   },
   {
     id: "caregiver",
     icon: PersonStanding,
-    label: "Caring for a parent",
-    problem: "Manage their health from another city",
+    label: "Caring for parents",
+    problem: "Their reports and medicines, even from another city",
+    reaction: "Looking after the ones who looked after you. I've got the paperwork.",
     tint: "bg-[#fdeee0] text-[#c2650b]",
   },
   {
     id: "new_parent",
     icon: Baby,
     label: "New parent",
-    problem: "Vaccines, fevers and growth in one place",
+    problem: "Vaccines, fevers and growth charts in one place",
+    reaction: "Tiny human, lots of paperwork. I'll keep the vaccine card handy.",
     tint: "bg-[#fdeaf0] text-[#c22a6b]",
   },
   {
     id: "optimiser",
     icon: Activity,
-    label: "Optimising my health",
-    problem: "Panels and wearables, finally explained",
+    label: "Levelling up my health",
+    problem: "Full-body checkups, finally in one place",
+    reaction: "Love it. Every checkup side by side, so you can see what moved.",
     tint: "bg-[#eaf6ec] text-[#1f8a45]",
   },
   {
     id: "other",
     icon: Sparkles,
     label: "Just keeping track",
-    problem: "A home for everything, whenever it's needed",
+    problem: "One home for every report, whenever you need it",
+    reaction: "Perfect. One home for everything, whenever you need it.",
     tint: "bg-brand-50 text-brand-600",
   },
 ];

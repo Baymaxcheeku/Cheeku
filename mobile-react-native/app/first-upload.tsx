@@ -2,19 +2,33 @@ import { useRouter } from "expo-router";
 import {
   ArrowRight,
   Camera,
+  CalendarClock,
   FileText,
   Images,
   Lock,
+  MessageCircleQuestion,
   Sparkles,
   type LucideIcon,
 } from "lucide-react-native";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { Headline, OnboardingHeader } from "@/components/onboarding/chrome";
+import { Headline, StepLabel, Lede, OnboardingHeader } from "@/components/onboarding/chrome";
+import { BubblePop } from "@/components/onboarding/motion";
 import { Button } from "@/components/ui/button";
-import { Drift, Settle } from "@/components/ui/motion";
 import { brand, ink, shadow, surface } from "@/theme/tokens";
+import { font, type } from "@/theme/type";
+
+/*
+ * What the first report makes possible, stated as things the app does today.
+ * Gamified as "unlocks" because that is honestly what happens: with no
+ * documents, Ask can only answer in general terms.
+ */
+const UNLOCKS: readonly { icon: LucideIcon; text: string }[] = [
+  { icon: MessageCircleQuestion, text: "Questions answered from your own reports" },
+  { icon: CalendarClock, text: "Every value with its date and source" },
+  { icon: Sparkles, text: "Your whole history in one timeline" },
+];
 
 /*
  * A6 — the first upload.
@@ -79,76 +93,80 @@ export default function FirstUpload() {
 
   return (
     <View className="flex-1 bg-canvas">
-      <OnboardingHeader back="/journey" action={{ label: "Skip", href: "/plan" }} />
+      <OnboardingHeader back="/journey" action={{ label: "Skip", href: "/plan" }} step={4} />
 
       <ScrollView
         className="flex-1"
-        contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 16 }}
+        contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 16, paddingBottom: 16 }}
         showsVerticalScrollIndicator={false}
       >
-        <Headline lead="Bring me the last" accent="twelve months" />
-        <Text className="mt-2.5 text-[13.5px] leading-[20px] text-ink-500">
-          Lab reports, prescriptions, scans, discharge summaries — a year of them, ideally as one
-          combined PDF. The more of your history I can read, the more my answers are about{" "}
-          <Text className="font-semibold text-ink-700">you</Text> and not about people in general.
-        </Text>
+        <StepLabel step={4} />
+        <Headline lead="Let's fill your" accent="health file" />
+        <Lede>
+          Lab reports, prescriptions, discharge summaries. The last 12 months is perfect. The more
+          I&apos;ve read, the more my answers are about{" "}
+          <Text style={{ fontFamily: font.semibold, color: ink[700] }}>you</Text>, not people in
+          general.
+        </Lede>
 
         {/*
-         * THE PRIMARY SURFACE, and the only loud thing on the screen.
-         *
-         * Not a dashed drop-zone: dragging is a desktop metaphor and nothing is
-         * ever dragged on a phone. A card that states the ask, names the
-         * format, and carries the action.
+         * THE PRIMARY SURFACE, and the only loud thing on the screen. Not a
+         * dashed drop zone: dragging is a desktop metaphor, and nothing is ever
+         * dragged on a phone.
          */}
-        <Settle delay={0.05} style={{ marginTop: 20 }}>
-          <View
-            className="overflow-hidden rounded-card"
-            style={[shadow.e2, { backgroundColor: brand[600] }]}
-          >
-            <View className="px-4 pb-4 pt-[18px]">
-              <View className="flex-row items-start gap-3">
+        <BubblePop delay={0.1} style={{ marginTop: 22 }}>
+          <View className="overflow-hidden rounded-[26px]" style={[shadow.e2, { backgroundColor: brand[600] }]}>
+            <View className="p-5">
+              <View className="flex-row items-start gap-3.5">
                 <View
-                  className="h-11 w-11 items-center justify-center rounded-tile"
+                  className="h-12 w-12 items-center justify-center rounded-[16px]"
                   style={{ backgroundColor: "rgba(255,255,255,0.16)" }}
                 >
-                  <FileText size={20} color="#ffffff" />
+                  <FileText size={22} color="#ffffff" />
                 </View>
                 <View className="min-w-0 flex-1">
-                  <Text className="text-[16px] font-semibold leading-[20px] text-white">
-                    Upload a combined PDF
-                  </Text>
-                  <Text
-                    className="mt-1 text-[12px] leading-[17px]"
-                    style={{ color: "rgba(255,255,255,0.78)" }}
-                  >
-                    One file is easiest — most labs and hospital portals let you download a whole
-                    year at once.
+                  <Text style={[type.heading, { color: "#ffffff" }]}>Upload a PDF</Text>
+                  <Text style={[type.bodySmall, { marginTop: 3, color: "rgba(255,255,255,0.82)" }]}>
+                    Most labs and hospital portals let you download a whole year in one file.
                   </Text>
                 </View>
               </View>
 
-              <View className="mt-4">
+              <View className="mt-4 gap-2">
+                {UNLOCKS.map(({ icon: Icon, text }, i) => (
+                  <BubblePop key={text} delay={0.35 + i * 0.12}>
+                    <View className="flex-row items-center gap-2.5">
+                      <View
+                        className="h-6 w-6 items-center justify-center rounded-pill"
+                        style={{ backgroundColor: "rgba(255,255,255,0.18)" }}
+                      >
+                        <Icon size={13} color="#ffffff" />
+                      </View>
+                      <Text style={{ fontFamily: font.medium, fontSize: 13, color: "#ffffff" }}>{text}</Text>
+                    </View>
+                  </BubblePop>
+                ))}
+              </View>
+
+              <View className="mt-5">
                 <Button variant="secondary" onPress={() => open("file")}>
-                  <Text className="text-[16px] font-bold text-brand-700">Choose a file</Text>
-                  <ArrowRight size={17} color={brand[700]} />
+                  <Text style={[type.button, { color: brand[700] }]}>Choose a file</Text>
+                  <ArrowRight size={18} color={brand[700]} />
                 </Button>
               </View>
 
               <Text
-                className="mt-2 text-center text-[11px]"
-                style={{ color: "rgba(255,255,255,0.65)" }}
+                style={{ marginTop: 10, textAlign: "center", fontFamily: font.regular, fontSize: 11.5, color: "rgba(255,255,255,0.7)" }}
               >
                 PDF, JPG, PNG or HEIC · up to 10MB each
               </Text>
             </View>
           </View>
-        </Settle>
+        </BubblePop>
 
-        {/* Alternatives: real controls now, but deliberately lower billing. */}
-        <Text className="mt-6 text-[12px] font-bold uppercase tracking-wide text-ink-300">
-          Or add them one at a time
-        </Text>
-        <View className="mt-2.5 overflow-hidden rounded-card bg-surface" style={shadow.e1}>
+        {/* Alternatives: real controls, deliberately lower billing. */}
+        <Text style={[type.eyebrow, { color: ink[300], marginTop: 26 }]}>Or add them one at a time</Text>
+        <View className="mt-3 overflow-hidden rounded-[22px] bg-surface" style={shadow.e1}>
           {ROUTES.map((route, i) => {
             const Icon = route.icon;
             return (
@@ -157,62 +175,45 @@ export default function FirstUpload() {
                 accessibilityRole="button"
                 accessibilityLabel={`${route.title}. ${route.body}`}
                 onPress={() => open(route.source)}
-                className="flex-row items-center gap-3 px-3.5 py-3.5"
+                className="flex-row items-center gap-3.5 px-4 py-4"
                 style={i > 0 ? { borderTopWidth: 1, borderTopColor: surface.line } : undefined}
               >
-                <View className="h-10 w-10 items-center justify-center rounded-tile bg-brand-50">
-                  <Icon size={18} color={brand[600]} />
+                <View className="h-11 w-11 items-center justify-center rounded-[14px] bg-brand-50">
+                  <Icon size={19} color={brand[600]} />
                 </View>
                 <View className="min-w-0 flex-1">
-                  <Text className="text-[14px] font-semibold text-ink-900">{route.title}</Text>
-                  <Text className="mt-0.5 text-[11.5px] leading-[16px] text-ink-500">
-                    {route.body}
-                  </Text>
+                  <Text style={type.label}>{route.title}</Text>
+                  <Text style={[type.caption, { marginTop: 2 }]}>{route.body}</Text>
                 </View>
-                <ArrowRight size={16} color={ink[300]} />
+                <ArrowRight size={17} color={ink[300]} />
               </Pressable>
             );
           })}
         </View>
 
         {/*
-         * The promise and its limit, in the same box.
-         *
-         * "It never diagnoses" belongs exactly here — beside the moment
-         * somebody decides whether to hand over a year of their medical
-         * history — and not three screens away in a settings page nobody opens.
+         * The promise and its limit, in the same box — beside the moment
+         * somebody decides whether to hand over a year of medical history, not
+         * three screens away in a settings page nobody opens.
          */}
-        <Drift delay={0.18} style={{ marginTop: 20 }}>
-          <View className="gap-2.5 rounded-card bg-brand-50 p-3.5">
-            <View className="flex-row items-start gap-2.5">
-              <Sparkles size={14} color={brand[500]} style={{ marginTop: 1 }} />
-              <Text className="flex-1 text-[12px] leading-[17px] text-ink-700">
-                I read what your documents say and remember it, so you never explain your history
-                twice. Every answer names the record it came from.
-              </Text>
-            </View>
-            <View className="flex-row items-start gap-2.5">
-              <Lock size={14} color={brand[500]} style={{ marginTop: 1 }} />
-              <Text className="flex-1 text-[12px] leading-[17px] text-ink-700">
-                Encrypted, private to your family, never sold. I never diagnose, never prescribe,
-                and never share anything outside your account.
-              </Text>
-            </View>
-          </View>
-        </Drift>
+        <View className="mt-5 flex-row items-start gap-2.5 rounded-[18px] px-4 py-3.5" style={{ backgroundColor: brand[50] }}>
+          <Lock size={15} color={brand[500]} style={{ marginTop: 2 }} />
+          <Text style={[type.bodySmall, { flex: 1, color: ink[700] }]}>
+            Encrypted and private to your family. I read and remember, but I never diagnose, never
+            prescribe, and never share anything outside your account.
+          </Text>
+        </View>
       </ScrollView>
 
-      <View className="px-5 pt-2" style={{ paddingBottom: insets.bottom + 10 }}>
+      <View className="px-6 pt-2" style={{ paddingBottom: insets.bottom + 10 }}>
         <Pressable
           accessibilityRole="button"
           onPress={() => router.push("/plan")}
           hitSlop={8}
           className="items-center py-2.5"
         >
-          <Text className="text-[14px] font-semibold text-ink-500">I&apos;ll do this later</Text>
-          <Text className="mt-0.5 text-[11.5px]" style={{ color: ink[300] }}>
-            You can add documents any time
-          </Text>
+          <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[500] }}>I&apos;ll do this later</Text>
+          <Text style={[type.caption, { marginTop: 2, color: ink[300] }]}>You can add documents any time</Text>
         </Pressable>
       </View>
     </View>

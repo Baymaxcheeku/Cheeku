@@ -1,24 +1,11 @@
 /*
- * A2 — the four panels before any account exists.
- *
- * REWRITTEN 2026-08-19. The four panels each said a true thing, but they said
- * it as four unrelated statements: "finally remembered", "the season you're
- * in", "ask anything", "one place for everyone". Nothing carried a reader from
- * one to the next, and the voice changed between them — panel 1 spoke about
- * the product, panel 3 spoke as the product.
+ * A2 — the three panels before any account exists.
  *
  * ┌─ THE ARC ────────────────────────────────────────────────────────────────┐
  * │                                                                          │
- * │  1. I'm here, and I don't need you to know the words.  (the invitation)  │
- * │  2. Tell me once — I'll hold it, and give it back.     (the mechanism)   │
- * │  3. And not only for you.                              (the reach)       │
- * │                                                                          │
- * │ THREE, NOT FOUR. The fourth used to be the journey picker. Asking a      │
- * │ stranger to classify their own life before an account exists takes an    │
- * │ answer with nowhere to put it — it went to local storage to wait for a   │
- * │ profile that might never be created — and puts a survey between them     │
- * │ and the product. It now lives at `/journey`, one screen after the        │
- * │ profile is made, where it writes straight to the row it belongs to.      │
+ * │  1. Ask me anything, in your own words.       (the invitation)           │
+ * │  2. Give me the paperwork once; I'll keep it. (the mechanism)            │
+ * │  3. And not only yours — the whole family's.  (the reach)                │
  * │                                                                          │
  * │ Each panel's last idea is the next panel's first. The voice is FIRST     │
  * │ PERSON throughout, one character start to finish, because the thing      │
@@ -26,13 +13,17 @@
  * │                                                                          │
  * └──────────────────────────────────────────────────────────────────────────┘
  *
- * GLOBAL, NOT GENERIC. No "lakh", no "₹", no US insurance vocabulary, no
- * clinic names. The examples are body parts and worries, which travel.
+ * REWRITTEN 2026-09-29 FOR THE READER WE ACTUALLY HAVE. The launch market is
+ * India, and the earlier "global, not generic" copy was so careful not to be
+ * local that it was not anyone's. The details now are the ones an Indian
+ * household recognises on sight: reports in the almirah, prescriptions on a
+ * WhatsApp thread, Mummy and Papa. No Hindi beyond words already used in
+ * English conversation, and nothing about money.
  *
  * WHAT THE COPY MAY NEVER DO. Promise an answer, an opinion, or a reading of a
- * result. Everything here offers to REMEMBER and to EXPLAIN, and panel 3 says
- * out loud that the answer comes from the reader's own document. Onboarding is
- * where a health app makes the promise it then has to keep.
+ * result. Everything here offers to REMEMBER and to EXPLAIN, and panel 2 says
+ * out loud that every answer shows where it came from. Onboarding is where a
+ * health app makes the promise it then has to keep.
  *
  * `kind` drives the composition rather than a shared template with swapped
  * props: each panel is laid out differently on purpose.
@@ -55,26 +46,26 @@ export type Panel = {
 export const PANELS: readonly Panel[] = [
   {
     kind: "meet",
-    eyebrow: "Hello",
-    lead: "Ask me the question",
-    accent: "you'd never ask out loud",
-    body: "At 2am, in your own words, with no appointment and no judgement. I'm Cheeku — a health companion for you and the people you look after.",
+    eyebrow: "Hi, I'm Cheeku",
+    lead: "Health doubts? Ask me.",
+    accent: "Even the awkward ones.",
+    body: "The things you Google at 2am, or forgot to ask the doctor. Ask in your own words and I'll explain in plain ones. No judgement, no appointment.",
     cta: "Show me how",
   },
   {
     kind: "memory",
-    eyebrow: "Memory",
-    lead: "Tell me once.",
-    accent: "I'll never make you repeat it",
-    body: "Send me your reports, prescriptions and scans. I'll remember what they say and explain them in plain language — always showing you the document the answer came from.",
-    cta: "Continue",
+    eyebrow: "Your health memory",
+    lead: "No more digging for",
+    accent: "that one report.",
+    body: "Reports in the almirah, prescriptions on WhatsApp, scans lost in email. Give them to me once. I'll remember every line, and always show you where an answer came from.",
+    cta: "Nice, what else?",
   },
   {
     kind: "family",
-    eyebrow: "Family",
-    lead: "One place for",
-    accent: "everyone you look after",
-    body: "Add your parents, your partner, your kids. Switch between them in a tap, and keep every history separate and private.",
-    cta: "Create my account",
+    eyebrow: "The whole family",
+    lead: "Mummy, Papa, the kids and you.",
+    accent: "One app.",
+    body: "Switch between family members in a tap. Every person's history stays separate, private and never sold.",
+    cta: "Let's get started",
   },
 ];

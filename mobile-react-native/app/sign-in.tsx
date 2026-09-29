@@ -1,5 +1,5 @@
 import { useRouter } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -10,9 +10,12 @@ import {
   TextInput,
   View,
 } from "react-native";
+import Animated, { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
+  AlertCircle,
   Apple,
+  Check,
   ChevronLeft,
   Eye,
   EyeOff,
@@ -24,21 +27,54 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { MascotBust } from "@/components/illustrations/sprout";
+import { CtaLabel } from "@/components/onboarding/chrome";
+import { Bob, BubblePop, FillBar } from "@/components/onboarding/motion";
+import { useReducedMotion } from "@/components/ui/motion";
 import { createAccountSchema, signInSchema } from "@/lib/auth/schemas";
 import { resolveLanding } from "@/lib/auth/landing";
 import { supabase } from "@/lib/supabase/client";
-import { brand, ink, shadow, surface } from "@/theme/tokens";
+import { brand, ink, semantic, shadow, surface } from "@/theme/tokens";
+import { font, type } from "@/theme/type";
+
+/** Mirrors `passwordSchema`'s minimum, for the live length meter. */
+const MIN_PASSWORD = 10;
+
+/*
+ * Per-tab copy. Cheeku greets a returning person and a new one differently,
+ * because they are in different moods: one wants to get back to something, the
+ * other is deciding whether to trust an app with their family's paperwork.
+ */
+const COPY = {
+  signIn: {
+    greet: "Welcome back!",
+    title: "Good to see you again",
+    body: "Your family's health file is right where you left it.",
+    cta: "Log in",
+  },
+  create: {
+    greet: "Yay, a new friend!",
+    title: "Let's set you up",
+    body: "Takes about a minute. Your records stay private to you and the family you invite.",
+    cta: "Create my account",
+  },
+} as const;
 
 type Tab = "signIn" | "create";
 
 /**
- * A3 — sign in and create account, ported from the web build.
+ * A3 — sign in and create account.
  *
- * The sheet, the tab pair, the per-tab heading, the forgot-password link, the
- * consent panel and the three disabled providers are all in the original. They
- * are here because the screen reads as unfinished without them, not for
- * decoration: the providers in particular are in the approved frames, and
- * dropping them entirely would misrepresent what the screen becomes.
+ * REDESIGNED 2026-09-29. Same logic, new surface:
+ *
+ * - Fields carry VISIBLE LABELS. A placeholder that vanishes on the first
+ *   keystroke leaves somebody halfway through a password with no idea which
+ *   box they are in.
+ * - The tab pair is one sliding control, so switching reads as one thing
+ *   changing its mind rather than two links.
+ * - Creating a password shows a length meter instead of a rule to remember.
+ *   It is brand violet, never green: green means a health result in this app.
+ * - The three providers that are not configured yet say "Soon" in words. They
+ *   used to be 55% opacity, which failed contrast and explained nothing.
  */
 export default function SignIn() {
   const router = useRouter();
@@ -132,98 +168,74 @@ export default function SignIn() {
     }
   }
 
+  const copy = COPY[tab];
+
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <View className="flex-1 bg-canvas" style={{ paddingTop: insets.top }}>
-        <View className="h-11 flex-row items-center px-5">
+        <View className="h-12 flex-row items-center px-5">
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Go back"
             onPress={goBack}
             hitSlop={8}
-            className="h-9 w-9 items-center justify-center rounded-pill bg-surface"
+            className="h-10 w-10 items-center justify-center rounded-pill bg-surface"
             style={shadow.e1}
           >
-            <ChevronLeft size={19} color={ink[700]} />
+            <ChevronLeft size={20} color={ink[700]} />
           </Pressable>
-          <Pressable className="ml-auto" hitSlop={8} onPress={() => router.push("/welcome")}>
-            <Text className="text-[14px] font-semibold text-brand-500">Help</Text>
+          <Pressable className="ml-auto h-10 justify-center" hitSlop={8} onPress={() => router.push("/welcome")}>
+            <Text style={{ fontFamily: font.semibold, fontSize: 15, color: brand[600] }}>Help</Text>
           </Pressable>
         </View>
 
-        <View className="relative px-5 pb-2">
-          <View className="pr-[38%]">
-            <Text className="text-[27px] font-bold leading-[32px] tracking-tight text-ink-900">
-              Welcome{"\n"}
-              <Text className="text-brand-600">to Cheeku AI</Text>
-            </Text>
-            <Text className="mt-2 text-[13px] leading-[19px] text-ink-500">
-              Your family&apos;s health, protected and organised in one secure place.
+        {/* The greeting. Cheeku says hello in a bubble that changes with the tab. */}
+        <View className="flex-row items-end px-6 pb-1 pt-1">
+          <View className="flex-1 pb-3">
+            <Text accessibilityRole="header" style={type.title}>
+              Welcome to{"\n"}
+              <Text style={{ color: brand[600] }}>Cheeku AI</Text>
             </Text>
           </View>
-          <View className="absolute -right-2 top-0" pointerEvents="none">
-            <MascotBust size={140} />
+          <View className="items-center">
+            <BubblePop key={tab} from="right" style={{ marginBottom: 4 }}>
+              <View
+                accessibilityLiveRegion="polite"
+                className="rounded-[16px] px-3 py-1.5"
+                style={[shadow.e1, { backgroundColor: brand[600], borderBottomRightRadius: 4 }]}
+              >
+                <Text style={{ fontFamily: font.bold, fontSize: 12.5, color: "#ffffff" }}>{copy.greet}</Text>
+              </View>
+            </BubblePop>
+            <Bob>
+              <MascotBust size={104} />
+            </Bob>
           </View>
         </View>
 
-        {/* The sheet. Rounded at the top only, as in the frames. */}
+        {/* The sheet. Rounded at the top only. */}
         <ScrollView
-          className="mt-2 flex-1 bg-surface"
-          style={{ borderTopLeftRadius: 28, borderTopRightRadius: 28 }}
-          contentContainerStyle={{ padding: 20, paddingBottom: insets.bottom + 24 }}
+          className="flex-1 bg-surface"
+          style={[{ borderTopLeftRadius: 32, borderTopRightRadius: 32 }, shadow.e1]}
+          contentContainerStyle={{ padding: 24, paddingBottom: insets.bottom + 24 }}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          <View className="flex-row border-b border-line">
-            {(
-              [
-                ["signIn", "Sign in"],
-                ["create", "Create account"],
-              ] as const
-            ).map(([key, label]) => {
-              const on = tab === key;
-              return (
-                <Pressable
-                  key={key}
-                  accessibilityRole="tab"
-                  accessibilityState={{ selected: on }}
-                  onPress={() => switchTo(key)}
-                  className="flex-1 items-center pb-2.5 pt-1"
-                  style={{
-                    marginBottom: -1,
-                    borderBottomWidth: 2,
-                    borderBottomColor: on ? brand[600] : "transparent",
-                  }}
-                >
-                  <Text
-                    className="text-[14px] font-semibold"
-                    style={{ color: on ? brand[600] : ink[500] }}
-                  >
-                    {label}
-                  </Text>
-                </Pressable>
-              );
-            })}
+          <Segmented value={tab} onChange={switchTo} />
+
+          <View className="pt-5">
+            <Text style={type.heading}>{copy.title}</Text>
+            <Text style={[type.bodySmall, { marginTop: 4 }]}>{copy.body}</Text>
           </View>
 
-          <View className="pt-4">
-            <Text className="text-[15px] font-semibold text-ink-900">
-              {tab === "signIn" ? "Sign in to your account" : "Create your account"}
-            </Text>
-            <Text className="mt-0.5 text-[12px] text-ink-500">
-              {tab === "signIn"
-                ? "Access your health records and insights"
-                : "Your records stay private to you and the family you invite"}
-            </Text>
-          </View>
-
-          <View className="mt-4 gap-3">
+          <View className="mt-5 gap-4">
             <Field
-              icon={<Mail size={17} color={ink[300]} />}
-              placeholder="Email address"
+              label="Email"
+              icon={<Mail size={18} color={brand[400]} />}
+              placeholder="you@example.com"
               value={email}
               onChangeText={setEmail}
               keyboardType="email-address"
@@ -234,8 +246,9 @@ export default function SignIn() {
 
             <View>
               <Field
-                icon={<Lock size={17} color={ink[300]} />}
-                placeholder="Password"
+                label="Password"
+                icon={<Lock size={18} color={brand[400]} />}
+                placeholder={tab === "signIn" ? "Your password" : "At least 10 characters"}
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry={!show}
@@ -244,26 +257,23 @@ export default function SignIn() {
                 textContentType={tab === "signIn" ? "password" : "newPassword"}
                 trailing={
                   <Pressable
+                    accessibilityRole="button"
                     accessibilityLabel={show ? "Hide password" : "Show password"}
                     onPress={() => setShow((v) => !v)}
-                    hitSlop={8}
+                    hitSlop={10}
                   >
-                    {show ? (
-                      <EyeOff size={17} color={ink[300]} />
-                    ) : (
-                      <Eye size={17} color={ink[300]} />
-                    )}
+                    {show ? <EyeOff size={18} color={ink[300]} /> : <Eye size={18} color={ink[300]} />}
                   </Pressable>
                 }
               />
-              {tab === "create" ? (
-                <Text className="mt-1.5 text-[12px] text-ink-300">At least 10 characters</Text>
-              ) : null}
+              {tab === "create" ? <PasswordMeter length={password.length} /> : null}
             </View>
 
             {tab === "signIn" ? (
-              <Pressable className="self-end" hitSlop={8}>
-                <Text className="text-[13px] font-medium text-brand-500">Forgot password?</Text>
+              <Pressable className="-mt-1 self-end" hitSlop={8} accessibilityRole="button">
+                <Text style={{ fontFamily: font.semibold, fontSize: 13.5, color: brand[600] }}>
+                  Forgot password?
+                </Text>
               </Pressable>
             ) : (
               /* DPDP Act: unticked by default, and the copy names what is being
@@ -272,75 +282,82 @@ export default function SignIn() {
                 accessibilityRole="checkbox"
                 accessibilityState={{ checked: consent }}
                 onPress={() => setConsent((v) => !v)}
-                className="flex-row gap-2.5 rounded-tile bg-brand-50 px-3.5 py-3"
+                className="flex-row gap-3 rounded-[18px] px-4 py-3.5"
+                style={{
+                  backgroundColor: consent ? brand[50] : surface.canvas,
+                  borderWidth: 1.5,
+                  borderColor: consent ? brand[300] : surface.line,
+                }}
               >
                 <View
-                  className="mt-0.5 h-4 w-4 items-center justify-center rounded-[4px]"
+                  className="mt-0.5 h-[22px] w-[22px] items-center justify-center rounded-[7px]"
                   style={{
-                    borderWidth: 1.5,
+                    borderWidth: 2,
                     borderColor: consent ? brand[600] : brand[200],
-                    backgroundColor: consent ? brand[600] : "transparent",
+                    backgroundColor: consent ? brand[600] : surface.base,
                   }}
                 >
-                  {consent ? <View className="h-1.5 w-1.5 rounded-[1px] bg-white" /> : null}
+                  {consent ? <Check size={14} color="#ffffff" strokeWidth={3.2} /> : null}
                 </View>
-                <Text className="flex-1 text-[12px] leading-[17px] text-ink-500">
-                  I agree that Cheeku may store and process my family&apos;s health records to give
-                  me insights. I can export or delete everything at any time.
+                <Text style={[type.bodySmall, { flex: 1, color: ink[700] }]}>
+                  I agree that Cheeku AI may store and process my family&apos;s health records to
+                  give me insights. I can export or delete everything, any time.
                 </Text>
               </Pressable>
             )}
 
             {error ? (
-              <Text accessibilityRole="alert" className="text-[13px] font-medium text-danger-text">
-                {error}
-              </Text>
+              <View accessibilityRole="alert" className="flex-row items-start gap-2">
+                <AlertCircle size={16} color={semantic.dangerText} style={{ marginTop: 1 }} />
+                <Text style={{ flex: 1, fontFamily: font.medium, fontSize: 13.5, lineHeight: 19, color: semantic.dangerText }}>
+                  {error}
+                </Text>
+              </View>
             ) : null}
 
             <Button onPress={submit} disabled={busy}>
-              {busy ? (
-                <ActivityIndicator color="#fff" />
-              ) : (
-                <Text className="text-[16px] font-bold text-white">
-                  {tab === "signIn" ? "Sign in" : "Create account"}
-                </Text>
-              )}
+              {busy ? <ActivityIndicator color="#fff" /> : <CtaLabel>{copy.cta}</CtaLabel>}
             </Button>
           </View>
 
-          <View className="my-4 flex-row items-center gap-3">
+          <View className="my-5 flex-row items-center gap-3">
             <View className="h-px flex-1 bg-line" />
-            <Text className="text-[12px] text-ink-300">or continue with</Text>
+            <Text style={[type.caption, { color: ink[300] }]}>or continue with</Text>
             <View className="h-px flex-1 bg-line" />
           </View>
 
           {/*
-           * In the frames, but no provider is configured yet. Shipping these as
-           * buttons that silently do nothing would be worse than disabling
-           * them, so they are disabled and say why.
+           * No provider is configured yet. Buttons that silently do nothing
+           * would be worse than saying so, so each one says "Soon" in words and
+           * is marked disabled for screen readers.
            */}
           <View className="flex-row gap-2">
             {[
               { label: "Google", Icon: Mail },
               { label: "Apple", Icon: Apple },
-              { label: "Phone (OTP)", Icon: Phone },
+              { label: "Phone", Icon: Phone },
             ].map(({ label, Icon }) => (
               <View
                 key={label}
-                accessibilityLabel={`${label}. Coming soon, use email and password for now`}
-                className="h-11 flex-1 flex-row items-center justify-center gap-1.5 rounded-pill bg-surface"
-                style={{ borderWidth: 1, borderColor: surface.line, opacity: 0.55 }}
+                accessible
+                accessibilityState={{ disabled: true }}
+                accessibilityLabel={`${label}. Coming soon, use email for now`}
+                className="h-12 flex-1 flex-row items-center justify-center gap-1.5 rounded-pill"
+                style={{ borderWidth: 1, borderColor: surface.line, backgroundColor: surface.canvas }}
               >
-                <Icon size={14} color={ink[500]} />
-                <Text className="text-[12px] font-medium text-ink-500">{label}</Text>
+                <Icon size={15} color={ink[500]} />
+                <Text style={{ fontFamily: font.semibold, fontSize: 13, color: ink[500] }}>{label}</Text>
+                <View className="rounded-pill px-1.5 py-0.5" style={{ backgroundColor: brand[50] }}>
+                  <Text style={{ fontFamily: font.bold, fontSize: 9, color: brand[700] }}>SOON</Text>
+                </View>
               </View>
             ))}
           </View>
 
-          <View className="mt-4 flex-row items-center justify-center gap-2">
+          <View className="mt-5 flex-row items-center justify-center gap-2">
             <ShieldCheck size={14} color={brand[400]} />
-            <Text className="text-[12px] text-ink-500">
-              Bank-level encryption. Your data is private and secure.
+            <Text style={[type.caption, { color: ink[500] }]}>
+              Encrypted end to end. Never sold, never shared.
             </Text>
           </View>
         </ScrollView>
@@ -349,29 +366,125 @@ export default function SignIn() {
   );
 }
 
+/**
+ * The two-way switch, with a sliding thumb.
+ *
+ * Measured rather than percentage-positioned: a translate needs pixels, and the
+ * track's width is only known after layout.
+ */
+function Segmented({ value, onChange }: { value: Tab; onChange: (next: Tab) => void }) {
+  const still = useReducedMotion();
+  const [width, setWidth] = useState(0);
+  const x = useSharedValue(0);
+  const half = Math.max(0, (width - 8) / 2);
+
+  useEffect(() => {
+    const to = value === "signIn" ? 0 : half;
+    x.value = still ? to : withSpring(to, { damping: 22, stiffness: 320 });
+  }, [value, half, still, x]);
+
+  const thumb = useAnimatedStyle(() => ({ transform: [{ translateX: x.value }] }));
+
+  return (
+    <View
+      accessibilityRole="tablist"
+      onLayout={(e) => setWidth(e.nativeEvent.layout.width)}
+      className="h-12 flex-row rounded-pill p-1"
+      style={{ backgroundColor: surface.tint }}
+    >
+      {width > 0 ? (
+        <Animated.View
+          pointerEvents="none"
+          style={[
+            {
+              position: "absolute",
+              top: 4,
+              left: 4,
+              bottom: 4,
+              width: half,
+              borderRadius: 999,
+              backgroundColor: surface.base,
+            },
+            shadow.e1,
+            thumb,
+          ]}
+        />
+      ) : null}
+      {(
+        [
+          ["signIn", "Log in"],
+          ["create", "New here? Sign up"],
+        ] as const
+      ).map(([key, label]) => {
+        const on = value === key;
+        return (
+          <Pressable
+            key={key}
+            accessibilityRole="tab"
+            accessibilityState={{ selected: on }}
+            onPress={() => onChange(key)}
+            className="flex-1 items-center justify-center"
+          >
+            <Text style={{ fontFamily: on ? font.bold : font.medium, fontSize: 14, color: on ? brand[700] : ink[500] }}>
+              {label}
+            </Text>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
+
+/** Counts up to the minimum length. Violet, never green: green means health. */
+function PasswordMeter({ length }: { length: number }) {
+  const done = length >= MIN_PASSWORD;
+  return (
+    <View className="mt-2.5 flex-row items-center gap-2.5">
+      <View className="flex-1">
+        <FillBar value={length / MIN_PASSWORD} color={brand[600]} track={brand[100]} height={5} />
+      </View>
+      <Text style={{ fontFamily: font.semibold, fontSize: 12, color: done ? brand[700] : ink[500] }}>
+        {done
+          ? "Long enough"
+          : `${MIN_PASSWORD - length} more ${MIN_PASSWORD - length === 1 ? "character" : "characters"}`}
+      </Text>
+    </View>
+  );
+}
+
 function Field({
+  label,
   icon,
   trailing,
   ...props
 }: React.ComponentProps<typeof TextInput> & {
+  label: string;
   icon: React.ReactNode;
   trailing?: React.ReactNode;
 }) {
   const [focused, setFocused] = useState(false);
   return (
-    <View
-      className="h-[52px] flex-row items-center gap-2.5 rounded-tile bg-canvas px-3.5"
-      style={{ borderWidth: 1, borderColor: focused ? brand[500] : surface.line }}
-    >
-      {icon}
-      <TextInput
-        {...props}
-        onFocus={() => setFocused(true)}
-        onBlur={() => setFocused(false)}
-        placeholderTextColor={ink[300]}
-        style={{ flex: 1, fontSize: 15, color: ink[900], fontFamily: "Inter_400Regular" }}
-      />
-      {trailing}
+    <View className="gap-1.5">
+      <Text style={{ fontFamily: font.semibold, fontSize: 13, color: ink[700] }}>{label}</Text>
+      <View
+        className="h-[54px] flex-row items-center gap-3 rounded-[16px] px-4"
+        style={{
+          backgroundColor: focused ? surface.base : surface.canvas,
+          borderWidth: 1.5,
+          borderColor: focused ? brand[500] : surface.line,
+        }}
+      >
+        {icon}
+        <TextInput
+          {...props}
+          accessibilityLabel={label}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+          placeholderTextColor={ink[300]}
+          style={{ flex: 1, fontSize: 16, color: ink[900], fontFamily: font.regular }}
+        />
+        {trailing}
+      </View>
     </View>
   );
 }

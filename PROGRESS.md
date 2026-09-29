@@ -1115,3 +1115,40 @@ the locale is set: `LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8`. The repo's own
   but this must not ship as-is.
 - The nine knowledge articles need a clinician.
 - Still no test of sign-out → sign-in, or of a session revoked server-side.
+
+## Onboarding redesign — 2026-09-29 (cloud session, not yet seen on a device)
+
+Same flow and data rules, new surface: splash → welcome (3 panels) → sign-in →
+who → profile → journey → first-upload.
+
+**Type.** Headlines are Nunito Black / ExtraBold (`@expo-google-fonts/nunito`,
+JS-only, no native rebuild); everything a person reads to understand something
+stays Inter. `src/theme/type.ts` names the font FILE in every style, because on
+iOS `fontFamily: "Inter_400Regular"` plus `fontWeight: "700"` does not select
+the bold file. The rest of the app still relies on `font-bold` classes and has
+the same problem; only onboarding is fixed so far.
+
+**The setup quest.** The four steps after sign-up share one progress bar in
+the header and a "Step 2 of 4 · About you" label in the content. `/plan` is not
+a step: it only appears for family accounts, and a bar that is sometimes five
+long and sometimes four lies to half its readers.
+
+**Cheeku reacts.** `CheekuSays` answers each choice on who and journey. The
+reactions are warmth and what will be kept, never a statement about the
+reader's or a relative's health. Profile has a live "x of 8" meter that counts
+fields filled on the form and claims nothing more.
+
+**Copy is written for India.** Mummy-Papa, WhatsApp forwards, the almirah. No
+Hindi beyond words used in English conversation, nothing about money, and the
+old rule still holds: every example asks the app to explain, read back or
+prepare, never to judge a result.
+
+**Bug fixed in passing.** Profile collected an email address and never saved it
+(`profileSchema` has no email). The field is gone; sign-in already has it.
+
+**Motion** lives in `src/components/onboarding/motion.tsx`: bubbles pop from
+their tail corner, the mascot bobs, "typing" precedes a reply, bars fill. All of
+it renders its final state under reduced motion.
+
+**Needs a device check:** welcome swipe (PanResponder), `transformOrigin` on the
+bubble pop, the sliding segmented control on sign-in, and Nunito rendering.
