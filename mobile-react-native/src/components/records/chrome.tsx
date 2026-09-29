@@ -12,10 +12,14 @@ import {
   Syringe,
   TriangleAlert,
   type LucideIcon,
+  Plus,
 } from "lucide-react-native";
 import { Pressable, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { MascotBust } from "@/components/illustrations/sprout";
+import { Glass, GlassCircle } from "@/components/ui/glass";
+import { PillButton } from "@/components/ui/screen";
 import { formatEventDate } from "@/lib/records/grouping";
 import {
   DOC_TYPE_ICON,
@@ -27,6 +31,7 @@ import {
   type Severity,
 } from "@/lib/records/types";
 import { ink, semantic, shadow, surface } from "@/theme/tokens";
+import { font } from "@/theme/type";
 
 const DOC_ICON: Record<string, LucideIcon> = {
   flask: FlaskConical,
@@ -69,13 +74,20 @@ const SEVERITY_TINT: Record<Severity, { bg: string; fg: string }> = {
 /** The title block at the top of the records screen. */
 export function RecordsHeader({ title, subtitle }: { title: string; subtitle: string }) {
   const insets = useSafeAreaInsets();
+  const router = useRouter();
 
   return (
     <View className="px-5" style={{ paddingTop: insets.top + 12 }}>
       <View className="flex-row items-center gap-3">
-        <Text className="flex-1 text-[28px] font-bold leading-tight tracking-tight text-ink-900">
+        <Text
+          accessibilityRole="header"
+          style={{ flex: 1, fontFamily: font.semibold, fontSize: 28, lineHeight: 33, letterSpacing: -0.8, color: ink[900] }}
+        >
           {title}
         </Text>
+        <GlassCircle label="Add a health record" onPress={() => router.push("/scan")}>
+          <Plus size={21} color={ink[900]} />
+        </GlassCircle>
         {/*
          * The frames put a search control and a notification bell here. Search
          * over records is a Phase 2 tail item and the bell already exists on
@@ -83,7 +95,7 @@ export function RecordsHeader({ title, subtitle }: { title: string; subtitle: st
          * that looks identical to a working one and does nothing.
          */}
       </View>
-      <Text className="mt-1.5 text-[14px] text-ink-500">{subtitle}</Text>
+      <Text style={{ fontFamily: font.regular, fontSize: 14, color: ink[500], marginTop: 4 }}>{subtitle}</Text>
     </View>
   );
 }
@@ -250,30 +262,27 @@ export function EmptyRecords({ filtered }: { filtered: boolean }) {
   const router = useRouter();
 
   return (
-    <View
-      className="mx-5 mt-6 items-center rounded-card px-6 py-10"
-      style={{ borderWidth: 1, borderStyle: "dashed", borderColor: surface.line }}
-    >
-      <View className="h-12 w-12 items-center justify-center rounded-pill bg-brand-50">
-        <FileText size={22} color="#5b4ef0" />
-      </View>
-      <Text className="mt-3 text-[16px] font-semibold text-ink-900">
-        {filtered ? "Nothing matches those filters" : "No records yet"}
+    <Glass strong className="mx-5 mt-6 items-center rounded-[28px] px-6 py-8">
+      {filtered ? (
+        <View className="h-12 w-12 items-center justify-center rounded-pill bg-brand-50">
+          <FileText size={22} color="#5b4ef0" />
+        </View>
+      ) : (
+        <MascotBust size={88} />
+      )}
+      <Text style={{ fontFamily: font.semibold, fontSize: 18, color: ink[900], marginTop: 10, textAlign: "center" }}>
+        {filtered ? "Nothing matches those filters" : "Your health file is empty"}
       </Text>
-      <Text className="mt-1 max-w-[260px] text-center text-[13px] leading-[18px] text-ink-500">
+      <Text style={{ fontFamily: font.regular, fontSize: 14, lineHeight: 20, color: ink[500], marginTop: 4, textAlign: "center", maxWidth: 280 }}>
         {filtered
           ? "Try clearing a filter to see more of your documents."
-          : "Add your first document and Cheeku will organise it for you."}
+          : "Snap a report or pick a PDF. I'll read it, file it and remember every value."}
       </Text>
       {!filtered ? (
-        <Pressable
-          accessibilityRole="button"
-          onPress={() => router.push("/scan")}
-          className="mt-4 h-11 items-center justify-center rounded-pill bg-brand-600 px-5"
-        >
-          <Text className="text-[14px] font-semibold text-white">Add a document</Text>
-        </Pressable>
+        <PillButton onPress={() => router.push("/scan")} icon={<Plus size={18} color="#fff" />} style={{ marginTop: 18, alignSelf: "stretch" }}>
+          Add your first record
+        </PillButton>
       ) : null}
-    </View>
+    </Glass>
   );
 }
