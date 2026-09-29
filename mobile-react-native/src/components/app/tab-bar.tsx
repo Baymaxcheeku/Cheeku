@@ -6,21 +6,25 @@
  */
 import type { BottomTabBarProps } from "expo-router/tabs";
 import { useRouter } from "expo-router";
-import { FolderClosed, House, Plus, Stethoscope, User, type LucideIcon } from "lucide-react-native";
+import { FolderClosed, House, MessageCircleHeart, Plus, User, type LucideIcon } from "lucide-react-native";
 import { Fragment } from "react";
 import { Pressable, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { glass, glassShadow } from "@/components/ui/glass";
 import { brand, ink, shadow, surface } from "@/theme/tokens";
+import { font } from "@/theme/type";
 
-const ICONS: Record<string, { icon: LucideIcon; label: string }> = {
-  home: { icon: House, label: "Home" },
+const ICONS: Record<string, { icon: LucideIcon; label: string; short: string }> = {
+  home: { icon: House, label: "Home", short: "Home" },
   // "Health records", not "Documents". A document is a file; a health record is
   // what the reader came for, and it is the word the app already uses on the
   // screen itself and in every answer that cites one.
-  records: { icon: FolderClosed, label: "Health records" },
-  ask: { icon: Stethoscope, label: "Ask Cheeku" },
-  settings: { icon: User, label: "Profile" },
+  // `short` is what fits under the icon in the pill; `label` is what a screen
+  // reader announces.
+  records: { icon: FolderClosed, label: "Health records", short: "Records" },
+  ask: { icon: MessageCircleHeart, label: "Ask Cheeku", short: "Ask Cheeku" },
+  settings: { icon: User, label: "Profile", short: "Profile" },
 };
 
 /**
@@ -41,86 +45,105 @@ export function TabBar({ state, navigation }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
   const router = useRouter();
 
+  /*
+   * REDESIGNED 2026-09-29: a floating glass pill, after the owner's reference.
+   * It still sits IN the layout (not absolutely over content), so no screen has
+   * to pad for it and nothing scrolls invisibly underneath. The canvas-coloured
+   * strip around it is what makes it read as floating.
+   */
   return (
-    <View
-      accessibilityRole="tablist"
-      className="flex-row items-stretch justify-around bg-surface pt-1.5"
-      style={{
-        paddingBottom: insets.bottom,
-        borderTopWidth: 1,
-        borderTopColor: surface.line,
-      }}
-    >
-      {state.routes.map((route, index) => {
-        const meta = ICONS[route.name];
-        if (!meta) return null;
+    <View style={{ backgroundColor: surface.canvas, paddingHorizontal: 14, paddingTop: 6, paddingBottom: Math.max(insets.bottom, 10) }}>
+      <View
+        accessibilityRole="tablist"
+        className="flex-row items-center rounded-[30px] px-1.5"
+        style={[
+          glassShadow,
+          { height: 68, backgroundColor: glass.fillStrong, borderWidth: 1, borderColor: glass.rim },
+        ]}
+      >
+        {state.routes.map((route, index) => {
+          const meta = ICONS[route.name];
+          if (!meta) return null;
 
-        const active = state.index === index;
-        const Icon = meta.icon;
+          const active = state.index === index;
+          const Icon = meta.icon;
 
-        function onPress() {
-          const event = navigation.emit({
-            type: "tabPress",
-            target: route.key,
-            canPreventDefault: true,
-          });
-          // Re-pressing the active tab is a no-op rather than a fresh
-          // navigation, which would otherwise reset a scrolled list under
-          // someone's thumb.
-          if (!active && !event.defaultPrevented) navigation.navigate(route.name);
-        }
+          function onPress() {
+            const event = navigation.emit({
+              type: "tabPress",
+              target: route.key,
+              canPreventDefault: true,
+            });
+            // Re-pressing the active tab is a no-op rather than a fresh
+            // navigation, which would otherwise reset a scrolled list under
+            // someone's thumb.
+            if (!active && !event.defaultPrevented) navigation.navigate(route.name);
+          }
 
-        /*
-         * The FAB is a SIBLING of the tabs, not nested inside one of them.
-         * Wrapping it together with the third tab made the pair share a single
-         * flex-1 share, so 76pt of that share went to the circle and "Ask
-         * Cheeku" truncated to "A…" while the other three labels sat in full.
-         */
-        return (
-          <Fragment key={route.key}>
-            {index === 2 ? <Fab onPress={() => router.push("/scan")} /> : null}
-            <Pressable
-              accessibilityRole="tab"
-              accessibilityState={{ selected: active }}
-              accessibilityLabel={meta.label}
-              onPress={onPress}
-              className="flex-1 items-center gap-1 rounded-tile px-1 pb-1.5 pt-1"
-            >
-              <Icon
-                size={22}
-                strokeWidth={active ? 2.4 : 1.9}
-                color={active ? brand[600] : ink[500]}
-              />
-              <Text
-                className="text-[10px] font-medium"
-                numberOfLines={1}
-                style={{ color: active ? brand[600] : ink[500] }}
+          /*
+           * The FAB is a SIBLING of the tabs, not nested inside one of them, so
+           * it never eats a tab's share of the row.
+           */
+          return (
+            <Fragment key={route.key}>
+              {index === 2 ? <Fab onPress={() => router.push("/scan")} /> : null}
+              <Pressable
+                accessibilityRole="tab"
+                accessibilityState={{ selected: active }}
+                accessibilityLabel={meta.label}
+                onPress={onPress}
+                style={{ flex: 1, alignItems: "center", justifyContent: "center", height: 56 }}
               >
-                {meta.label}
-              </Text>
-            </Pressable>
-          </Fragment>
-        );
-      })}
+                <View
+                  style={{
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 3,
+                    paddingHorizontal: 10,
+                    paddingVertical: 6,
+                    borderRadius: 18,
+                    backgroundColor: active ? brand[50] : "transparent",
+                  }}
+                >
+                  <Icon size={21} strokeWidth={active ? 2.2 : 1.8} color={active ? brand[600] : ink[500]} />
+                  <Text
+                    numberOfLines={1}
+                    style={{ fontFamily: active ? font.semibold : font.medium, fontSize: 10.5, color: active ? brand[700] : ink[500] }}
+                  >
+                    {meta.short}
+                  </Text>
+                </View>
+              </Pressable>
+            </Fragment>
+          );
+        })}
+      </View>
     </View>
   );
 }
 
-/*
- * The raised circle. It overlaps the bar's top edge, so it reserves its own
- * width in the row and lifts itself with a negative margin.
- */
+/* The main write action: a dark disc in the middle of the pill. */
 function Fab({ onPress }: { onPress: () => void }) {
   return (
-    <View className="w-[76px] items-center">
+    <View style={{ width: 64, alignItems: "center" }}>
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Add a document"
+        accessibilityLabel="Add a health record"
         onPress={onPress}
-        className="h-14 w-14 items-center justify-center rounded-pill bg-brand-600"
-        style={[{ marginTop: -24 }, shadow.e2]}
+        style={({ pressed }) => [
+          shadow.e2,
+          {
+            width: 52,
+            height: 52,
+            borderRadius: 26,
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: ink[900],
+            transform: [{ scale: pressed ? 0.94 : 1 }],
+          },
+        ]}
       >
-        <Plus size={26} strokeWidth={2.5} color="#ffffff" />
+        <Plus size={24} strokeWidth={2.4} color="#ffffff" />
       </Pressable>
     </View>
   );

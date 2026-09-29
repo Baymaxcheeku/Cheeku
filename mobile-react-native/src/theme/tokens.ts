@@ -48,19 +48,21 @@ export const semantic = {
   dangerText: "#c00a1c",
 } as const;
 
-export const radius = { card: 20, tile: 16, sheet: 28, pill: 999 } as const;
+export const radius = { card: 24, tile: 16, sheet: 28, pill: 999 } as const;
 
 /*
  * Elevation. iOS reads the shadow* fields, Android only reads `elevation`, so
  * both are set. The web app's e1/e2 are the reference values.
  */
 export const shadow = {
+  // Softened on 2026-09-29 to match the glass language: wide, faint and
+  // violet-tinted rather than tight and grey. Every card in the app uses it.
   e1: {
-    shadowColor: "#0f1030",
-    shadowOpacity: 0.06,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 2,
+    shadowColor: "#2a1f6b",
+    shadowOpacity: 0.07,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 3,
   },
   e2: {
     shadowColor: "#0f1030",

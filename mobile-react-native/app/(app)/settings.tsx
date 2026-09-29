@@ -41,6 +41,9 @@ import {
   shareExport,
 } from "@/lib/account/actions";
 import { Avatar } from "@/components/ui/avatar";
+import { Glass, Gradient, glass, glassShadow } from "@/components/ui/glass";
+import { Backdrop } from "@/components/ui/screen";
+import { font } from "@/theme/type";
 import { AddMemberSheet } from "@/components/app/add-member-sheet";
 import { ConfirmSheet } from "@/components/ui/confirm-sheet";
 import { clearOfflineCache } from "@/lib/offline/cache";
@@ -124,68 +127,78 @@ export default function Settings() {
   const canUpgrade = entitlement.tier !== "family";
 
   return (
+    <View className="flex-1 bg-canvas">
+    <Backdrop height={460} />
     <ScrollView
-      className="flex-1 bg-canvas"
+      className="flex-1"
       contentContainerStyle={{ paddingTop: insets.top + 12, paddingBottom: 24 }}
       showsVerticalScrollIndicator={false}
     >
+      <Text accessibilityRole="header" style={{ paddingHorizontal: 20, fontFamily: font.semibold, fontSize: 28, letterSpacing: -0.8, color: ink[900] }}>
+        Profile
+      </Text>
+
       {/*
-       * No page title and no mascot above the identity card. The tab bar
-       * already names this screen, and a decorative portrait directly above a
-       * card showing the reader's own face is two portraits stacked.
+       * Who, and on what plan, in one glass card. The plan row is the upgrade
+       * entry point for people who came looking for one; on Family it says
+       * "Manage", because someone on the top tier still needs a way to cancel.
        */}
-      <View className="mx-5 rounded-card bg-surface p-4" style={shadow.e1}>
+      <View className="mx-5 mt-4 overflow-hidden rounded-[30px] p-4" style={glassShadow}>
+        <Gradient from="#ffffff" to="#efeaff" glow="#ffffff" />
         <View className="flex-row items-center gap-3.5">
-          <Avatar svg={profile.avatar} background={profile.avatarBackground ?? undefined} size={64} />
+          <Avatar svg={profile.avatar} background={profile.avatarBackground ?? undefined} size={68} />
           <View className="min-w-0 flex-1">
-            <Text className="text-[19px] font-bold text-ink-900" numberOfLines={1}>
+            <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 21, letterSpacing: -0.4, color: ink[900] }}>
               {profile.name}
             </Text>
-            <Text className="text-[12.5px] text-ink-500">
-              {profile.isPrimary ? "Primary profile" : (profile.relationship ?? "Family member")}
-            </Text>
-            <Text className="mt-0.5 text-[12px] text-ink-300">
-              {stats.total} {stats.total === 1 ? "document" : "documents"}
+            <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 2 }}>
+              {profile.isPrimary ? "Primary profile" : (profile.relationship ?? "Family member")} · {stats.total}{" "}
+              {stats.total === 1 ? "record" : "records"}
             </Text>
           </View>
         </View>
 
-        {/*
-         * The plan card is the upgrade entry point for people who came looking
-         * for one, rather than hitting a wall. On the Family plan there is
-         * nothing above it to sell, so it stops being a button and just states
-         * the fact — an "Upgrade" chevron on the top tier is a dead end that
-         * makes the reader wonder what they are missing.
-         */}
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={`${plan.name}. Opens your subscription`}
           onPress={() => router.push("/settings/subscription")}
-          className="mt-3.5 flex-row items-center gap-3 rounded-tile bg-brand-50 p-3"
+          style={({ pressed }) => [
+            glassShadow,
+            {
+              marginTop: 14,
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 12,
+              padding: 10,
+              paddingRight: 14,
+              borderRadius: 20,
+              backgroundColor: glass.fillStrong,
+              borderWidth: 1,
+              borderColor: glass.rim,
+              transform: [{ scale: pressed ? 0.985 : 1 }],
+            },
+          ]}
         >
-          <View className="h-9 w-9 items-center justify-center rounded-pill bg-surface">
-            <Crown size={17} color={brand[600]} />
+          <View className="h-10 w-10 items-center justify-center rounded-pill" style={{ backgroundColor: ink[900] }}>
+            <Crown size={17} color="#fff" />
           </View>
           <View className="min-w-0 flex-1">
-            <Text className="text-[13.5px] font-bold text-ink-900">{plan.name}</Text>
-            <Text className="text-[11.5px] text-ink-500">
+            <Text style={{ fontFamily: font.semibold, fontSize: 14.5, color: ink[900] }}>{plan.name}</Text>
+            <Text style={{ fontFamily: font.regular, fontSize: 12.5, color: ink[500] }}>
               {entitlement.chatsRemaining === null
                 ? "Unlimited Ask Cheeku"
-                : `${entitlement.chatsRemaining} of ${entitlement.limit} chats left this month`}
+                : `${entitlement.chatsRemaining} of ${entitlement.limit} chats left today`}
             </Text>
           </View>
-          {/*
-           * "Manage" on a paid plan, "Upgrade" on free. Both go to the same
-           * screen: someone on Family still needs a way to cancel, and a card
-           * that only ever says Upgrade has nothing to offer them.
-           */}
-          <View className="flex-row items-center gap-1">
-            <Text className="text-[12.5px] font-semibold text-brand-600">
-              {canUpgrade ? "Upgrade" : "Manage"}
-            </Text>
-            <ChevronRight size={15} color={brand[600]} />
-          </View>
+          <Text style={{ fontFamily: font.semibold, fontSize: 13.5, color: brand[600] }}>{canUpgrade ? "Upgrade" : "Manage"}</Text>
+          <ChevronRight size={15} color={brand[600]} />
         </Pressable>
+      </View>
+
+      {/* Your care: the two places people come back to, as tiles. */}
+      <View className="mx-5 mt-4 flex-row gap-3">
+        <CareTile icon={CalendarDays} title="Appointments" line="Visits and video calls" tint="#ece6ff" fg={brand[600]} href="/appointments" />
+        <CareTile icon={FolderHeart} title="Health file" line="Everything filed" tint="#dcecff" fg="#1a6fc2" href="/health-file" />
       </View>
 
       {/*
@@ -209,11 +222,6 @@ export default function Settings() {
        * "Notifications" would read as a warning about the reader's health. The
        * grouping does the work the colour is not allowed to.
        */}
-      <Group label="Your care">
-        <Row icon={CalendarDays} title="Appointments" body="Upcoming visits, video calls and past bookings" href="/appointments" />
-        <Row icon={FolderHeart} title="Health file" body="Everything filed, and what the labs measured" href="/health-file" />
-      </Group>
-
       <Group label="Account">
         <Row icon={UserCog} title="Personal information" body="Name, date of birth and contact" href="/settings/personal" />
         <Row icon={HeartPulse} title="Health profile" body="Conditions, allergies and medicines" href="/settings/health" />
@@ -233,18 +241,18 @@ export default function Settings() {
 
       <AccountData onDeleted={signOut} />
 
-      <View className="mx-5 mt-6 overflow-hidden rounded-card bg-surface" style={shadow.e1}>
+      <Glass strong className="mx-5 mt-6 overflow-hidden rounded-[26px]">
         <Pressable
           accessibilityRole="button"
           onPress={() => setSignOutOpen(true)}
-          className="flex-row items-center gap-3.5 px-3.5 py-3.5"
+          className="flex-row items-center gap-3.5 px-4 py-3.5"
         >
-          <View className="h-9 w-9 items-center justify-center rounded-tile bg-canvas">
-            <LogOut size={17} color={ink[500]} />
+          <View className="h-10 w-10 items-center justify-center rounded-[13px]" style={{ backgroundColor: "#f4f4f8" }}>
+            <LogOut size={18} color={ink[500]} />
           </View>
-          <Text className="flex-1 text-[14.5px] font-semibold text-ink-900">Sign out</Text>
+          <Text style={{ flex: 1, fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>Sign out</Text>
         </Pressable>
-      </View>
+      </Glass>
 
       {/*
        * Plain text in the page margin, not a tinted card. As a card it was the
@@ -294,6 +302,7 @@ export default function Settings() {
         </Text>
       </View>
     </ScrollView>
+    </View>
   );
 }
 
@@ -344,8 +353,11 @@ function FamilySection({
 
   return (
     <View className="mt-6">
-      <Text className="px-5 text-[12px] font-bold uppercase tracking-wide text-ink-300">Family</Text>
-      <View className="mx-5 mt-2 overflow-hidden rounded-card bg-surface" style={shadow.e1}>
+      <Text style={{ paddingHorizontal: 20, fontFamily: font.semibold, fontSize: 15, color: ink[700] }}>Family</Text>
+      <View
+        className="mx-5 mt-2.5 overflow-hidden rounded-[26px]"
+        style={[glassShadow, { backgroundColor: glass.fillStrong, borderWidth: 1, borderColor: glass.rim }]}
+      >
         <Pressable
           accessibilityRole="button"
           accessibilityState={{ expanded: open }}
@@ -385,8 +397,12 @@ function FamilySection({
       </View>
 
       <View
-        className="mx-5 mt-2 overflow-hidden rounded-card bg-surface"
-        style={[shadow.e1, open ? undefined : { height: 0, marginTop: 0, opacity: 0 }]}
+        className="mx-5 mt-2 overflow-hidden rounded-[26px]"
+        style={[
+          glassShadow,
+          { backgroundColor: glass.fillStrong, borderWidth: 1, borderColor: glass.rim },
+          open ? undefined : { height: 0, marginTop: 0, opacity: 0 },
+        ]}
       >
         {reachable.map((p, i) => (
           <View
@@ -677,12 +693,10 @@ function AccountData({ onDeleted }: { onDeleted: () => void }) {
 function Group({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <View className="mt-6">
-      <Text className="px-5 text-[12px] font-bold uppercase tracking-wide text-ink-300">
-        {label}
-      </Text>
-      <View className="mx-5 mt-2 overflow-hidden rounded-card bg-surface" style={shadow.e1}>
+      <Text style={{ paddingHorizontal: 20, fontFamily: font.semibold, fontSize: 15, color: ink[700] }}>{label}</Text>
+      <Glass strong className="mx-5 mt-2.5 overflow-hidden rounded-[26px]">
         {children}
-      </View>
+      </Glass>
     </View>
   );
 }
@@ -704,19 +718,55 @@ function Row({
       accessibilityRole="button"
       accessibilityLabel={`${title}. ${body}`}
       onPress={() => router.push(href as never)}
-      className="flex-row items-center gap-3.5 px-3.5 py-3"
-      style={{ borderBottomWidth: 1, borderBottomColor: surface.line }}
+      className="flex-row items-center gap-3.5 px-4 py-3.5"
+      style={{ borderBottomWidth: 1, borderBottomColor: "rgba(15,16,48,0.05)" }}
     >
-      <View className="h-9 w-9 items-center justify-center rounded-tile bg-brand-50">
-        <Icon size={17} color={brand[600]} />
+      <View className="h-10 w-10 items-center justify-center rounded-[13px]" style={{ backgroundColor: brand[50] }}>
+        <Icon size={18} color={brand[600]} strokeWidth={1.9} />
       </View>
       <View className="min-w-0 flex-1">
-        <Text className="text-[14.5px] font-semibold leading-tight text-ink-900">{title}</Text>
-        <Text className="mt-0.5 text-[11.5px] text-ink-500" numberOfLines={1}>
+        <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{title}</Text>
+        <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 12.5, color: ink[500], marginTop: 1 }}>
           {body}
         </Text>
       </View>
       <ChevronRight size={17} color={ink[300]} />
+    </Pressable>
+  );
+}
+
+/** A quick tile for the places people return to. */
+function CareTile({
+  icon: Icon,
+  title,
+  line,
+  tint,
+  fg,
+  href,
+}: {
+  icon: LucideIcon;
+  title: string;
+  line: string;
+  tint: string;
+  fg: string;
+  href: string;
+}) {
+  const router = useRouter();
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={`${title}. ${line}`}
+      onPress={() => router.push(href as never)}
+      style={({ pressed }) => ({ flex: 1, transform: [{ scale: pressed ? 0.97 : 1 }] })}
+    >
+      <View className="overflow-hidden rounded-[24px] p-3.5" style={glassShadow}>
+        <Gradient from={tint} to="#ffffff" />
+        <View className="h-11 w-11 items-center justify-center rounded-[14px] bg-white">
+          <Icon size={20} color={fg} strokeWidth={1.8} />
+        </View>
+        <Text style={{ fontFamily: font.semibold, fontSize: 15.5, color: ink[900], marginTop: 12 }}>{title}</Text>
+        <Text style={{ fontFamily: font.regular, fontSize: 12.5, color: ink[500], marginTop: 1 }}>{line}</Text>
+      </View>
     </Pressable>
   );
 }

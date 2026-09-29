@@ -65,7 +65,8 @@ module.exports = {
         "danger-text": "#c00a1c",
       },
       borderRadius: {
-        card: 20,
+        // 24 since the 2026-09-29 redesign: softer, closer to the glass cards.
+        card: 24,
         tile: 16,
         sheet: 28,
         pill: 999,

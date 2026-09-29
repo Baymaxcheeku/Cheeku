@@ -3,14 +3,18 @@ import { ChevronLeft, type LucideIcon } from "lucide-react-native";
 import { ActivityIndicator, Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { brand, ink, shadow, surface } from "@/theme/tokens";
+import { Glass, GlassCircle, glass, glassShadow } from "@/components/ui/glass";
+import { Backdrop } from "@/components/ui/screen";
+import { brand, ink } from "@/theme/tokens";
+import { font } from "@/theme/type";
 
 /**
- * The shared frame for every settings sub-screen. Web `settings-header`.
+ * The shared frame for every settings sub-screen.
  *
- * One header for all seven, so the back button never moves between screens —
- * a control that shifts by four pixels per route is a control people stop
- * trusting to be where they left it.
+ * One header for all of them, so the back button never moves between screens.
+ * REDESIGNED 2026-09-29 into the app's glass language: violet backdrop, a round
+ * glass back button, a large title with a glass icon tile, and glass panels.
+ * Every sub-screen inherits it without being edited.
  */
 export function SettingsScreen({
   title,
@@ -41,17 +45,12 @@ export function SettingsScreen({
   const insets = useSafeAreaInsets();
 
   return (
-    <View className="flex-1 bg-canvas" style={{ paddingTop: insets.top }}>
-      <View className="h-11 flex-row items-center px-5">
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Go back"
-          onPress={() => (router.canGoBack() ? router.back() : router.replace("/settings"))}
-          hitSlop={10}
-          className="h-9 w-9 items-center justify-center rounded-pill"
-        >
-          <ChevronLeft size={20} color={ink[700]} />
-        </Pressable>
+    <View className="flex-1 bg-canvas">
+      <Backdrop height={380} />
+      <View className="flex-row items-center px-4 pb-1" style={{ paddingTop: insets.top + 6 }}>
+        <GlassCircle label="Go back" onPress={() => (router.canGoBack() ? router.back() : router.replace("/settings"))}>
+          <ChevronLeft size={21} color={ink[900]} />
+        </GlassCircle>
       </View>
 
       <ScrollView
@@ -62,17 +61,17 @@ export function SettingsScreen({
         <View
           accessibilityRole="header"
           accessibilityLabel={`${title}. ${eyebrow}`}
-          className="flex-row items-start gap-3 px-5"
+          className="flex-row items-center gap-3.5 px-5 pt-3"
           style={bare ? { height: 0, opacity: 0, overflow: "hidden" } : undefined}
         >
-          <View className="h-11 w-11 items-center justify-center rounded-tile bg-brand-50">
-            <Icon size={20} color={brand[600]} />
-          </View>
+          <Glass strong className="h-14 w-14 items-center justify-center rounded-[18px]">
+            <Icon size={23} color={brand[600]} strokeWidth={1.8} />
+          </Glass>
           <View className="min-w-0 flex-1">
-            <Text className="text-[24px] font-bold leading-[28px] tracking-tight text-ink-900">
+            <Text style={{ fontFamily: font.semibold, fontSize: 26, lineHeight: 31, letterSpacing: -0.7, color: ink[900] }}>
               {title}
             </Text>
-            <Text className="mt-1 text-[12.5px] leading-[18px] text-ink-500">{eyebrow}</Text>
+            <Text style={{ fontFamily: font.regular, fontSize: 13.5, lineHeight: 19, color: ink[500], marginTop: 2 }}>{eyebrow}</Text>
           </View>
         </View>
 
@@ -82,12 +81,7 @@ export function SettingsScreen({
       {footer ? (
         <View
           className="px-5 pt-3"
-          style={{
-            paddingBottom: insets.bottom + 8,
-            borderTopWidth: 1,
-            borderTopColor: surface.line,
-            backgroundColor: surface.base,
-          }}
+          style={{ paddingBottom: insets.bottom + 10 }}
         >
           {footer}
         </View>
@@ -101,11 +95,9 @@ export function Section({ label, children }: { label?: string; children: React.R
   return (
     <View className="mt-6">
       {label ? (
-        <Text className="px-5 text-[12px] font-bold uppercase tracking-wide text-ink-300">
-          {label}
-        </Text>
+        <Text style={{ paddingHorizontal: 20, fontFamily: font.semibold, fontSize: 15, color: ink[700] }}>{label}</Text>
       ) : null}
-      <View className={label ? "mt-2" : undefined}>{children}</View>
+      <View style={label ? { marginTop: 10 } : undefined}>{children}</View>
     </View>
   );
 }
@@ -114,8 +106,18 @@ export function Section({ label, children }: { label?: string; children: React.R
 export function Panel({ children, padded = true }: { children: React.ReactNode; padded?: boolean }) {
   return (
     <View
-      className={`mx-5 overflow-hidden rounded-card bg-surface ${padded ? "p-4" : ""}`}
-      style={shadow.e1}
+      style={[
+        glassShadow,
+        {
+          marginHorizontal: 20,
+          overflow: "hidden",
+          borderRadius: 26,
+          backgroundColor: glass.fillStrong,
+          borderWidth: 1,
+          borderColor: glass.rim,
+          padding: padded ? 16 : 0,
+        },
+      ]}
     >
       {children}
     </View>
@@ -146,18 +148,22 @@ export function SaveButton({
       accessibilityLabel={label}
       disabled={pending}
       onPress={onPress}
-      className="h-13 items-center justify-center rounded-pill"
-      style={{
-        height: 52,
-        backgroundColor: saved ? "#23af5f" : brand[600],
+      style={({ pressed }) => ({
+        height: 54,
+        borderRadius: 999,
+        alignItems: "center",
+        justifyContent: "center",
+        // Brand, never green, for "Saved": green means a health result here.
+        backgroundColor: saved ? brand[600] : ink[900],
         opacity: pending ? 0.6 : 1,
-      }}
+        transform: [{ scale: pressed ? 0.98 : 1 }],
+      })}
     >
       {pending ? (
         <ActivityIndicator color="#fff" />
       ) : (
-        <Text accessibilityRole="alert" className="text-[16px] font-bold text-white">
-          {saved ? "Saved" : label}
+        <Text accessibilityRole="alert" style={{ fontFamily: font.semibold, fontSize: 15.5, color: "#fff" }}>
+          {saved ? "Saved ✓" : label}
         </Text>
       )}
     </Pressable>
