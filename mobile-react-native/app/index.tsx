@@ -3,7 +3,10 @@ import { useEffect } from "react";
 import { Text, View } from "react-native";
 
 import { MascotFigure } from "@/components/illustrations/sprout";
+import { Bob } from "@/components/onboarding/motion";
 import { Settle } from "@/components/ui/motion";
+import { brand } from "@/theme/tokens";
+import { font, type } from "@/theme/type";
 import { resolveLanding } from "@/lib/auth/landing";
 
 /**
@@ -41,10 +44,18 @@ export default function Splash() {
   return (
     <View className="flex-1 items-center justify-center bg-canvas">
       <Settle delay={0}>
-        <MascotFigure size={200} wave />
+        <Bob>
+          <MascotFigure size={200} wave />
+        </Bob>
       </Settle>
-      <Text className="mt-4 text-[28px] font-bold tracking-tight text-ink-900">Cheeku AI</Text>
-      <Text className="mt-1 text-[14px] text-ink-500">Your family&apos;s health companion</Text>
+      <Settle delay={0.25}>
+        <Text style={[type.hero, { marginTop: 14, fontSize: 36, lineHeight: 40, textAlign: "center" }]}>
+          Cheeku <Text style={{ color: brand[600] }}>AI</Text>
+        </Text>
+        <Text style={[type.body, { marginTop: 4, textAlign: "center", fontFamily: font.medium }]}>
+          Your family&apos;s health, remembered.
+        </Text>
+      </Settle>
     </View>
   );
 }

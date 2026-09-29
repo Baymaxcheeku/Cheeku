@@ -1,34 +1,38 @@
 import { useRouter } from "expo-router";
-import { useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { useMemo, useRef, useState } from "react";
+import { PanResponder, Pressable, Text, useWindowDimensions, View } from "react-native";
+import Animated, { FadeIn, FadeInLeft, FadeInRight } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
-  ArrowRight,
-  Check,
   ChevronLeft,
   FileText,
-  Lock,
+  Image as ImageIcon,
+  Mail,
+  MessageCircle,
+  Plus,
   ShieldCheck,
-  Stethoscope,
+  Sparkles,
 } from "lucide-react-native";
 
 import { CastAvatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { MascotBust } from "@/components/illustrations/sprout";
-import { Drift, Settle, StaggerItem } from "@/components/ui/motion";
+import { CtaLabel, ReassuranceStrip } from "@/components/onboarding/chrome";
+import { Bob, BubblePop, FillBar, TypingDots, useTypedReveal } from "@/components/onboarding/motion";
 import { PANELS } from "@/lib/onboarding/panels";
 import { castFaces } from "@/lib/profiles/avatar";
 import { brand, ink, shadow, surface } from "@/theme/tokens";
+import { font, type } from "@/theme/type";
 
 /*
  * The eyebrow tints, one per chapter.
  *
  * NON-SEMANTIC, like every other category colour in this app: green, amber and
  * red state how a health result reads and are never spent on decoration. These
- * are borrowed from the journey palette so the carousel and the picker that now
- * follows sign-up belong to the same world.
+ * come from the journey palette so the carousel and the picker that follows
+ * sign-up belong to the same world.
  */
-const EYEBROW: Record<string, { bg: string; fg: string }> = {
+const CHAPTER: Record<"meet" | "memory" | "family", { bg: string; fg: string }> = {
   meet: { bg: brand[50], fg: brand[600] },
   memory: { bg: "#e6f1fd", fg: "#1a6fc2" },
   family: { bg: "#fdeaf0", fg: "#c22a6b" },
@@ -37,360 +41,374 @@ const EYEBROW: Record<string, { bg: string; fg: string }> = {
 /*
  * A2 — the value carousel, before any account exists.
  *
- * Three panels, each with its OWN composition. Panels sharing one hero shape
- * with swapped copy is a slideshow, not a story; that was the note that drove
- * the web redesign and it carries over.
+ * Three panels, each with its OWN composition: a conversation, a round trip
+ * from paperwork to answer, and a family. Panels sharing one hero with swapped
+ * copy is a slideshow, not a story.
+ *
+ * SWIPE AND TAP BOTH WORK. People swipe onboarding carousels by reflex, and a
+ * carousel that ignores the reflex feels broken before a word is read. The
+ * button stays the primary path because it is the one that also says what
+ * comes next. PanResponder rather than a gesture-handler hook: it is plain JS,
+ * behaves identically on web and device, and a horizontal swipe on one screen
+ * does not need the UI thread.
  *
  * IT ASKS FOR NOTHING. Every screen here is something Cheeku offers; the one
- * screen that used to ask a question — which season of life you are in — now
- * lives at `/journey`, after the account and profile exist, because before
- * them there was nowhere to put the answer. A stranger deciding whether to
- * sign up should not first have to classify their own life.
+ * question about the reader's life lives at `/journey`, after the account
+ * exists, where the answer has somewhere to go.
  */
 export default function Welcome() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { height } = useWindowDimensions();
+  // Under ~760pt (iPhone SE, mini, small Androids) the scenes drop their third
+  // element instead of squeezing everything: a crowded hero reads as clutter.
+  const compact = height < 760;
+
   const [index, setIndex] = useState(0);
+  const [dir, setDir] = useState<1 | -1>(1);
 
   const panel = PANELS[index];
-  if (!panel) return null;
   const isLast = index === PANELS.length - 1;
-  const faces = castFaces(3);
+  const faces = useMemo(() => castFaces(3), []);
+
+  function go(to: number) {
+    if (to < 0 || to >= PANELS.length) return;
+    setDir(to > index ? 1 : -1);
+    setIndex(to);
+  }
 
   function next() {
     if (isLast) router.push("/sign-in");
-    else setIndex((i) => i + 1);
+    else go(index + 1);
   }
 
+  // Refs, because PanResponder is created once and would otherwise close over
+  // the first render's index forever.
+  const indexRef = useRef(index);
+  indexRef.current = index;
+  const goRef = useRef(go);
+  goRef.current = go;
+
+  const swipe = useMemo(
+    () =>
+      PanResponder.create({
+        // Claim only clearly horizontal drags, so a vertical scroll or a tap on
+        // a button is never swallowed.
+        onMoveShouldSetPanResponder: (_, g) => Math.abs(g.dx) > 14 && Math.abs(g.dx) > Math.abs(g.dy) * 1.6,
+        onPanResponderRelease: (_, g) => {
+          if (g.dx < -48) goRef.current(indexRef.current + 1);
+          else if (g.dx > 48) goRef.current(indexRef.current - 1);
+        },
+      }),
+    [],
+  );
+
+  if (!panel) return null;
+  const chapter = CHAPTER[panel.kind];
+  const entering = (dir > 0 ? FadeInRight : FadeInLeft).duration(320);
+
   return (
-    <View className="flex-1 bg-canvas" style={{ paddingTop: insets.top }}>
-      {/* Step rail. Segments fill rather than switch on, so moving forward
-          reads as progress made. */}
-      {/* pt-3, not pt-2: the rail sits directly under the Dynamic Island and
-          needs to clear it optically, not just numerically. */}
+    <View className="flex-1 bg-canvas" style={{ paddingTop: insets.top }} {...swipe.panHandlers}>
+      {/* Story rail. Each segment fills rather than switching on, so moving
+          forward reads as progress made. Tappable, like a story. */}
       <View className="flex-row gap-1.5 px-5 pt-3">
-        {PANELS.map((_, i) => (
-          <View key={i} className="h-1 flex-1 overflow-hidden rounded-pill bg-white">
-            <View
-              style={{
-                height: "100%",
-                borderRadius: 999,
-                backgroundColor: brand[600],
-                width: i <= index ? "100%" : "0%",
-              }}
-            />
-          </View>
+        {PANELS.map((p, i) => (
+          <Pressable
+            key={p.kind}
+            className="flex-1 py-1.5"
+            accessibilityRole="button"
+            accessibilityLabel={`Go to screen ${i + 1} of ${PANELS.length}`}
+            onPress={() => go(i)}
+          >
+            <FillBar value={i <= index ? 1 : 0} color={brand[600]} track={brand[100]} height={5} />
+          </Pressable>
         ))}
       </View>
 
-      <View className="h-11 flex-row items-center px-5">
+      <View className="h-12 flex-row items-center px-5">
         {index > 0 ? (
           <Pressable
+            accessibilityRole="button"
             accessibilityLabel="Previous"
-            onPress={() => setIndex((i) => i - 1)}
-            className="h-9 w-9 items-center justify-center rounded-pill bg-surface"
+            onPress={() => go(index - 1)}
+            className="h-10 w-10 items-center justify-center rounded-pill bg-surface"
             style={shadow.e1}
           >
-            <ChevronLeft size={19} color={ink[700]} />
+            <ChevronLeft size={20} color={ink[700]} />
           </Pressable>
         ) : null}
-        <Pressable className="ml-auto" onPress={() => router.push("/sign-in")}>
-          <Text className="text-[14px] font-semibold text-ink-500">Skip</Text>
-        </Pressable>
+        {!isLast ? (
+          <Pressable
+            className="ml-auto h-10 justify-center"
+            hitSlop={10}
+            accessibilityRole="button"
+            onPress={() => router.push("/sign-in")}
+          >
+            <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[500] }}>Skip</Text>
+          </Pressable>
+        ) : null}
       </View>
 
       {/*
-       * The art takes the slack, not the gap above the button.
-       *
-       * With the hero at a fixed height and the group centred, the leftover
-       * space split evenly above and below it: the composition floated and the
-       * CTA read as exiled at the bottom of an empty screen. Giving the hero
-       * `flex-1` with a floor and a ceiling means spare height goes into the
-       * picture, where it looks deliberate, and the copy stays anchored just
-       * above the button where the thumb already is.
+       * The art takes the slack, not the gap above the button: spare height
+       * goes into the picture, where it looks deliberate, and the copy stays
+       * anchored just above the thumb.
        */}
-      <View key={index} className="flex-1">
-        {/* No max height on the hero: capping it put the leftover space back
-            between the copy and the button, which is the gap this restructure
-            exists to remove. The art centres inside whatever it is given. */}
-        <View className="min-h-[210px] flex-1">
-          {panel.kind === "meet" ? <HeroMeet /> : null}
-          {panel.kind === "memory" ? <HeroMemory /> : null}
-          {panel.kind === "family" ? <HeroFamily faces={faces} /> : null}
+      {/* `style`, not `className`: NativeWind does not reach Reanimated views. */}
+      <Animated.View key={index} entering={entering} style={{ flex: 1 }}>
+        <View className="min-h-[220px] flex-1">
+          {panel.kind === "meet" ? <SceneMeet compact={compact} /> : null}
+          {panel.kind === "memory" ? <SceneMemory compact={compact} /> : null}
+          {panel.kind === "family" ? <SceneFamily faces={faces} compact={compact} /> : null}
         </View>
 
-        <View className="px-5 pt-5">
-          {/*
-           * The eyebrow. One word, in the panel's own tint, so the screens
-           * read as chapters of one thing rather than separate pitches —
-           * and so the headline never has to spend a clause labelling itself.
-           */}
-          <View
-            className="mb-2.5 self-start rounded-pill px-2.5 py-1"
-            style={{ backgroundColor: (EYEBROW[panel.kind] ?? EYEBROW.meet)?.bg }}
-          >
-            <Text
-              className="text-[10px] font-bold uppercase"
-              style={{ color: (EYEBROW[panel.kind] ?? EYEBROW.meet)?.fg, letterSpacing: 1.1 }}
-            >
-              {panel.eyebrow}
-            </Text>
+        <View className="px-6 pt-4">
+          <View className="mb-3 self-start rounded-pill px-3 py-1.5" style={{ backgroundColor: chapter.bg }}>
+            <Text style={[type.eyebrow, { color: chapter.fg }]}>{panel.eyebrow}</Text>
           </View>
-
-          {/*
-           * -0.6 tracking at 28pt. Large type reads loose at the default; the
-           * negative value is size-specific and deliberately not applied to the
-           * body copy below, where it would cost legibility.
-           */}
-          <Text
-            className="text-[28px] font-bold leading-[33px] text-ink-900"
-            style={{ letterSpacing: -0.6 }}
-          >
-            {panel.lead} <Text className="text-brand-600">{panel.accent}</Text>
+          <Text accessibilityRole="header" style={type.hero}>
+            {panel.lead} <Text style={{ color: brand[600] }}>{panel.accent}</Text>
           </Text>
-          <Text className="mt-2.5 text-[14px] leading-[21px] text-ink-500">{panel.body}</Text>
+          <Text style={[type.body, { marginTop: 12 }]}>{panel.body}</Text>
         </View>
-      </View>
+      </Animated.View>
 
-      {/* One consistent footer rhythm on every panel: 20pt above the block,
-          the safe-area inset plus 8 below it. */}
-      <View className="gap-3.5 px-5 pt-5" style={{ paddingBottom: insets.bottom + 8 }}>
-        {index > 0 ? (
-          <View className="flex-row items-center justify-center gap-2">
-            <Lock size={12} color={ink[300]} />
-            <Text className="text-[11.5px] text-ink-300">
-              Bank-level encryption. Only you and your family can access.
-            </Text>
-          </View>
-        ) : null}
-
+      <View className="gap-3.5 px-6 pt-5" style={{ paddingBottom: insets.bottom + 10 }}>
         <Button onPress={next}>
-          <Text className="text-[16px] font-bold text-white">{panel.cta}</Text>
-          <ArrowRight size={17} color="#fff" />
+          <CtaLabel>{panel.cta}</CtaLabel>
         </Button>
 
         {index === 0 ? (
-          <Pressable onPress={() => router.push("/sign-in")}>
-            <Text className="text-center text-[13px] text-ink-500">
-              Already have an account? <Text className="font-bold text-brand-600">Log in</Text>
+          <Pressable onPress={() => router.push("/sign-in")} hitSlop={6} accessibilityRole="button">
+            <Text style={[type.bodySmall, { textAlign: "center" }]}>
+              Already have an account?{" "}
+              <Text style={{ fontFamily: font.bold, color: brand[600] }}>Log in</Text>
             </Text>
           </Pressable>
-        ) : null}
+        ) : (
+          <ReassuranceStrip />
+        )}
       </View>
     </View>
   );
 }
 
 /*
- * HEROES
+ * SCENES
  *
  * All three lay their content out in FLOW and centre it, rather than pinning
- * pieces to the top and bottom of the box. The box is now flexible — it
- * absorbs whatever height the screen has spare — and absolutely-positioned
- * children in a variable-height parent drift: the family faces ended up
- * hard against the top with a void beneath them, and the pills anchored to
- * `bottom` disappeared off the composition entirely.
+ * pieces to the top and bottom of the box. The box is flexible — it absorbs
+ * whatever height the screen has spare — and absolutely positioned children in
+ * a variable-height parent drift apart.
  */
 
 /*
- * Panel 1 — the questions, and who is listening.
+ * Panel 1 — a conversation.
  *
- * WHAT CHANGED AND WHY. The old panel put a badge above the mascot and a single
- * quoted line beneath it, and the quote was the PRODUCT talking: "Your iron is
- * low. Here's what changed." Two problems. It is the app claiming a finding
- * before a reader has uploaded anything, and it sells a feature to somebody who
- * has not yet been given a reason to care.
+ * The reader's questions arrive one by one as their own messages, then Cheeku
+ * types and answers. It is the product demonstrated rather than described: you
+ * ask like you would ask a friend, and something answers.
  *
- * A person arrives here holding a question, not a feature request. So the
- * questions lead — three real ones, in the reader's own voice, drawn from the
- * lives the product is built around — and the mascot sits among them as the
- * thing that will listen. That is the whole pitch of panel 1, made before a
- * word of the headline is read.
- *
- * EVERY QUESTION HERE IS ONE CHEEKU CAN HONESTLY TAKE. Each asks it to read
- * back, compare or prepare — never to judge a result or name a treatment.
- * Putting "should I take this?" on this screen would be a promise broken on
- * the first real conversation.
+ * EVERY QUESTION HERE IS ONE CHEEKU CAN HONESTLY TAKE. Each asks it to explain
+ * a word, read something back, or help prepare — never to judge a result or
+ * name a treatment. "Should I take this?" on this screen would be a promise
+ * broken on the first real conversation. The reply promises only to explain.
  */
-const OPENING_QUESTIONS = [
-  { text: "What did this report actually say?", align: "flex-start" as const, delay: 0 },
-  { text: "What should I ask my doctor tomorrow?", align: "flex-end" as const, delay: 0.34 },
+const QUESTIONS = [
+  "What does HbA1c actually mean?",
+  "Can you read Papa's blood report to me?",
+  "What should I ask the doctor tomorrow?",
 ] as const;
 
-function HeroMeet() {
+function SceneMeet({ compact }: { compact: boolean }) {
+  const asked = compact ? QUESTIONS.filter((_, i) => i !== 1) : QUESTIONS;
+  const replyAt = 0.35 + asked.length * 0.5 + 0.9;
+  const replied = useTypedReveal(replyAt);
+
   return (
-    <View className="flex-1 items-center justify-center px-5">
-      <Drift delay={OPENING_QUESTIONS[0].delay} style={{ alignSelf: OPENING_QUESTIONS[0].align }}>
-        <QuestionChip text={OPENING_QUESTIONS[0].text} />
-      </Drift>
-
-      {/*
-       * The mascot overlaps the chips slightly rather than sitting in a lane of
-       * its own. A stack of three separated blocks reads as a list; an overlap
-       * reads as one scene, and the scene is "these are being heard".
-       */}
-      {/* -6 above, 0 below. The earlier -10/-10 pulled the second chip up over
-          the mascot's body: an overlap that reads as one scene at the top edge
-          reads as an obstruction when it covers the character. */}
-      <Settle delay={0.08} style={{ marginTop: -6 }}>
-        <MascotBust size={178} />
-      </Settle>
-
-      <Drift delay={OPENING_QUESTIONS[1].delay} style={{ alignSelf: OPENING_QUESTIONS[1].align }}>
-        <QuestionChip text={OPENING_QUESTIONS[1].text} />
-      </Drift>
-
-      <Settle delay={0.46} style={{ marginTop: 10, width: 252 }}>
-        <View
-          className="flex-row items-center gap-2.5 rounded-pill bg-surface px-3.5 py-2.5"
-          style={shadow.e2}
-        >
+    <View className="flex-1 justify-center gap-2.5 px-6">
+      {asked.map((q, i) => (
+        <BubblePop key={q} delay={0.25 + i * 0.5} from="right" style={{ alignSelf: "flex-end", maxWidth: "82%" }}>
           <View
-            className="h-8 w-8 items-center justify-center rounded-pill"
-            style={{ backgroundColor: brand[600] }}
+            className="rounded-[20px] px-4 py-2.5"
+            style={[shadow.e1, { backgroundColor: surface.base, borderBottomRightRadius: 6 }]}
           >
-            <Stethoscope size={15} color="#fff" />
+            <Text style={{ fontFamily: font.medium, fontSize: 14, lineHeight: 19, color: ink[700] }}>{q}</Text>
           </View>
-          <Text className="flex-1 text-[11px] leading-[15px] text-ink-700">
-            <Text className="font-bold text-ink-900">No question is too small. </Text>
-            Or too late at night.
-          </Text>
-        </View>
-      </Settle>
-    </View>
-  );
-}
+        </BubblePop>
+      ))}
 
-/** A question in the reader's voice: quoted, unanswered, waiting. */
-function QuestionChip({ text }: { text: string }) {
-  return (
-    <View
-      className="max-w-[250px] rounded-card bg-surface px-3.5 py-2.5"
-      style={shadow.e2}
-    >
-      <Text className="text-[12px] leading-[16px] text-ink-700">&ldquo;{text}&rdquo;</Text>
+      <View className="mt-1 flex-row items-end gap-2">
+        <BubblePop delay={0.1} from="left">
+          <Bob>
+            <MascotBust size={compact ? 78 : 96} />
+          </Bob>
+        </BubblePop>
+        <BubblePop delay={replyAt - 0.9} from="left" style={{ flexShrink: 1, marginBottom: 10 }}>
+          <View
+            className="rounded-[20px] px-4 py-3"
+            style={[shadow.e2, { backgroundColor: brand[600], borderBottomLeftRadius: 6, minWidth: 64 }]}
+          >
+            {replied ? (
+              <Animated.Text
+                entering={FadeIn.duration(220)}
+                style={{ fontFamily: font.semibold, fontSize: 14, lineHeight: 19, color: "#ffffff" }}
+              >
+                Ask away. I&apos;ll explain it simply, no judgement.
+              </Animated.Text>
+            ) : (
+              <TypingDots color="#ffffff" />
+            )}
+          </View>
+        </BubblePop>
+      </View>
     </View>
   );
 }
 
 /*
- * Panel 3 — memory, shown as the round trip it actually is.
+ * Panel 2 — from scattered paperwork to one answer.
  *
- * The old version stacked three unrelated-looking cards: a document, a heart
- * rate, an answer. It depicted the PARTS of the memory layer and left the
- * reader to infer the connection between them, which is the one thing worth
- * showing.
+ * Top: where medical paper actually lives in an Indian household, tilted and
+ * loose. Bottom: a question asked months later and answered from that paper,
+ * with the source named. The date in the answer is the date on the report: that
+ * is the proof, and the difference between this and a chatbot that sounds
+ * confident.
  *
- * So it is drawn as a conversation with a document at the top of it, reading
- * top to bottom the way the reader's own transcript will: a report goes in,
- * months pass, a question is asked in ordinary words, and the answer comes
- * back quoting that exact page. The date on the report and the date in the
- * answer are the same date on purpose — that is the proof, and it is the
- * difference between this and a chatbot that sounds confident.
- *
- * THE ANSWER READS BACK, IT DOES NOT INTERPRET. "Below the range your lab
+ * THE ANSWER READS BACK, IT DOES NOT INTERPRET. "Above the range her lab
  * printed" is the laboratory's own finding restated. Anything approaching
- * "you're anaemic" would be this screen promising a diagnosis the app must
- * never give.
+ * "she has hypothyroidism" would be this screen promising a diagnosis.
  */
-function HeroMemory() {
+const SOURCES = [
+  { label: "WhatsApp forward", Icon: MessageCircle, tint: "#e7f7ee", fg: "#1f8a45", tilt: "-5deg" },
+  { label: "Email PDF", Icon: Mail, tint: "#e6f1fd", fg: "#1a6fc2", tilt: "3deg" },
+  { label: "Gallery photo", Icon: ImageIcon, tint: "#fdeee0", fg: "#c2650b", tilt: "-2deg" },
+] as const;
+
+function SceneMemory({ compact }: { compact: boolean }) {
+  const sources = compact ? SOURCES.slice(0, 2) : SOURCES;
   return (
-    <View className="flex-1 items-center justify-center px-5">
-      <Drift delay={0} style={{ alignSelf: "flex-start", width: 196 }}>
-        <View className="rounded-card bg-surface p-3" style={shadow.e2}>
-          <View className="flex-row items-center gap-2">
+    <View className="flex-1 justify-center px-6">
+      <View className="flex-row flex-wrap items-start justify-center" style={{ gap: 8 }}>
+        {sources.map((s, i) => (
+          <BubblePop key={s.label} delay={0.15 + i * 0.18}>
+            {/* The tilt lives on the inner view: BubblePop owns its own
+                transform, and a rotate passed to it would be overwritten. */}
             <View
-              className="h-8 w-8 items-center justify-center rounded-tile"
-              style={{ backgroundColor: "#f3e9fd" }}
+              className="flex-row items-center gap-2 rounded-pill bg-surface py-2 pl-2 pr-3.5"
+              style={[shadow.e1, { transform: [{ rotate: s.tilt }] }]}
             >
-              <FileText size={14} color="#7b3fd4" />
+              <View className="h-7 w-7 items-center justify-center rounded-pill" style={{ backgroundColor: s.tint }}>
+                <s.Icon size={14} color={s.fg} />
+              </View>
+              <Text style={{ fontFamily: font.semibold, fontSize: 12.5, color: ink[700] }}>{s.label}</Text>
             </View>
-            <View className="min-w-0 flex-1">
-              <Text className="text-[11.5px] font-semibold text-ink-900">Blood test</Text>
-              <Text className="text-[9.5px] text-ink-300">14 March</Text>
-            </View>
-            <View className="h-5 w-5 items-center justify-center rounded-pill bg-safe-bg">
-              <Check size={11} color="#23af5f" strokeWidth={3} />
-            </View>
-          </View>
-          <View className="mt-2.5 gap-1.5">
-            <View className="h-1.5 w-full rounded-pill bg-line" />
-            <View className="h-1.5 w-3/4 rounded-pill bg-line" />
-          </View>
-        </View>
-      </Drift>
-
-      {/* Months later, in ordinary words. The gap is the point of the product. */}
-      <Drift delay={0.16} style={{ alignSelf: "flex-end", marginTop: 12 }}>
-        <View
-          className="max-w-[214px] rounded-card px-3.5 py-2.5"
-          style={{ backgroundColor: surface.tint, borderWidth: 1, borderColor: surface.line }}
-        >
-          <Text className="text-[11.5px] leading-[15px] text-ink-700">
-            Was my iron low the last time I checked?
-          </Text>
-        </View>
-      </Drift>
-
-      <Settle delay={0.32} style={{ alignSelf: "flex-start", width: 244, marginTop: 12 }}>
-        <View className="rounded-card p-3.5" style={[{ backgroundColor: brand[600] }, shadow.e2]}>
-          <Text className="text-[12px] leading-[17px] text-white">
-            Your ferritin was{" "}
-            <Text className="font-bold text-white">9 ng/mL on 14 March</Text> — below the range your
-            lab printed.
-          </Text>
-          <View
-            className="mt-2.5 flex-row items-center gap-1.5 pt-2.5"
-            style={{ borderTopWidth: 1, borderTopColor: "rgba(255,255,255,0.22)" }}
-          >
-            <FileText size={10} color={brand[200]} />
-            <Text className="text-[9.5px] font-bold" style={{ color: brand[200] }}>
-              From your own blood test
-            </Text>
-          </View>
-        </View>
-      </Settle>
-    </View>
-  );
-}
-
-/** Panel 4 — the family, and the promise wrapped around it. */
-function HeroFamily({ faces }: { faces: readonly string[] }) {
-  return (
-    <View className="flex-1 items-center justify-center px-5">
-      <Drift delay={0.3} style={{ alignSelf: "flex-end" }}>
-        <View className="rounded-pill bg-surface px-2.5 py-1.5" style={shadow.e2}>
-          <Text className="text-[10px] font-bold text-brand-700">Up to 4 people</Text>
-        </View>
-      </Drift>
-
-      <View className="mt-3 flex-row items-end">
-        {faces.slice(0, 3).map((svg, i) => (
-          <StaggerItem key={i} index={i} style={{ marginLeft: i > 0 ? -20 : 0 }}>
-            <View
-              className="rounded-pill bg-surface"
-              style={[shadow.e2, { borderWidth: 3, borderColor: "#fff", borderRadius: 999 }]}
-            >
-              <CastAvatar svg={svg} size={i === 1 ? 84 : 68} />
-            </View>
-          </StaggerItem>
+          </BubblePop>
         ))}
       </View>
 
-      <Settle delay={0.22} style={{ marginTop: 18, width: 268 }}>
-        <View
-          className="flex-row items-center gap-2.5 rounded-pill bg-surface px-3.5 py-2.5"
-          style={shadow.e2}
-        >
-          <View className="h-8 w-8 items-center justify-center rounded-pill bg-brand-50">
+      <BubblePop delay={0.75} style={{ alignSelf: "center", marginVertical: compact ? 10 : 14 }}>
+        <View className="flex-row items-center gap-1.5 rounded-pill px-3 py-1.5" style={{ backgroundColor: brand[50] }}>
+          <Sparkles size={13} color={brand[600]} />
+          <Text style={{ fontFamily: font.bold, fontSize: 11.5, color: brand[700] }}>Saved to Mummy&apos;s file</Text>
+        </View>
+      </BubblePop>
+
+      <BubblePop delay={1.05} from="left">
+        <View className="rounded-[22px] bg-surface p-4" style={[shadow.e2, { borderWidth: 1, borderColor: surface.line }]}>
+          <Text style={{ fontFamily: font.medium, fontSize: 12.5, color: ink[500] }}>
+            When was Mummy&apos;s last thyroid test?
+          </Text>
+          <Text style={{ fontFamily: font.regular, fontSize: 15, lineHeight: 21, color: ink[900], marginTop: 6 }}>
+            On <Text style={{ fontFamily: font.bold }}>14 March</Text>. Her TSH was{" "}
+            <Text style={{ fontFamily: font.bold }}>6.2 mIU/L</Text>, above the range her lab printed.
+          </Text>
+          <View
+            className="mt-3 flex-row items-center gap-1.5 self-start rounded-pill px-2.5 py-1"
+            style={{ backgroundColor: brand[50] }}
+          >
+            <FileText size={11} color={brand[600]} />
+            <Text style={{ fontFamily: font.bold, fontSize: 11, color: brand[700] }}>
+              From: Thyroid profile, 14 Mar
+            </Text>
+          </View>
+        </View>
+      </BubblePop>
+    </View>
+  );
+}
+
+/*
+ * Panel 3 — the family, named the way families name themselves.
+ *
+ * Name tags say "Mummy", "Papa", "You" rather than first names: that is how a
+ * household refers to each other's reports, and it lets the reader cast their
+ * own family into the picture. The dashed "+" is the fourth seat, left open.
+ */
+const FAMILY = ["Mummy", "You", "Papa"] as const;
+/** Which of `castFaces(3)` (mother, father, daughter) wears each name tag. */
+const FACE_FOR = [0, 2, 1] as const;
+
+function SceneFamily({ faces, compact }: { faces: readonly string[]; compact: boolean }) {
+  const big = compact ? 84 : 100;
+  const small = compact ? 66 : 78;
+  return (
+    <View className="flex-1 items-center justify-center px-6">
+      <BubblePop delay={0.7} style={{ alignSelf: "flex-end", marginBottom: 6 }}>
+        <View className="rounded-pill bg-surface px-3 py-1.5" style={shadow.e1}>
+          <Text style={{ fontFamily: font.bold, fontSize: 11.5, color: brand[700] }}>Up to 4 people</Text>
+        </View>
+      </BubblePop>
+
+      <View className="flex-row items-end" style={{ gap: 6 }}>
+        {FAMILY.map((name, i) => {
+          const size = i === 1 ? big : small;
+          return (
+            <BubblePop key={name} delay={0.1 + i * 0.16} style={{ alignItems: "center" }}>
+              <View style={[shadow.e2, { borderRadius: 999, borderWidth: 3, borderColor: "#fff" }]}>
+                <CastAvatar svg={faces[FACE_FOR[i] ?? 0] ?? ""} size={size} />
+              </View>
+              <View
+                className="-mt-3 rounded-pill px-2.5 py-1"
+                style={[shadow.e1, { backgroundColor: i === 1 ? brand[600] : surface.base }]}
+              >
+                <Text
+                  style={{ fontFamily: font.bold, fontSize: 11.5, color: i === 1 ? "#ffffff" : ink[700] }}
+                >
+                  {name}
+                </Text>
+              </View>
+            </BubblePop>
+          );
+        })}
+        <BubblePop delay={0.62} style={{ alignItems: "center", marginBottom: 18 }}>
+          <View
+            accessibilityLabel="Add another family member"
+            className="items-center justify-center rounded-pill"
+            style={{
+              width: 44,
+              height: 44,
+              borderWidth: 2,
+              borderStyle: "dashed",
+              borderColor: brand[300],
+              backgroundColor: brand[50],
+            }}
+          >
+            <Plus size={18} color={brand[600]} />
+          </View>
+        </BubblePop>
+      </View>
+
+      <BubblePop delay={0.9} style={{ marginTop: compact ? 14 : 20 }}>
+        <View className="flex-row items-center gap-2.5 rounded-pill bg-surface py-2.5 pl-2.5 pr-4" style={shadow.e2}>
+          <View className="h-8 w-8 items-center justify-center rounded-pill" style={{ backgroundColor: brand[50] }}>
             <ShieldCheck size={16} color={brand[600]} />
           </View>
-          <Text className="flex-1 text-[11px] leading-[15px] text-ink-700">
-            <Text className="font-bold text-ink-900">Private by default. </Text>
-            Never sold, never shared.
+          <Text style={{ fontFamily: font.regular, fontSize: 12.5, color: ink[700] }}>
+            <Text style={{ fontFamily: font.bold, color: ink[900] }}>Private by default.</Text> Never sold, never shared.
           </Text>
         </View>
-      </Settle>
+      </BubblePop>
     </View>
   );
 }

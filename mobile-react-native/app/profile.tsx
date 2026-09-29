@@ -1,12 +1,10 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
-  ArrowRight,
   Calendar,
   Droplet,
-  Mail,
+  HeartPulse,
   Phone,
   Ruler,
-  Stethoscope,
   User,
   UserCircle,
   Weight,
@@ -16,13 +14,28 @@ import { KeyboardAvoidingView, Platform, ScrollView, Text, View } from "react-na
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { MascotBust } from "@/components/illustrations/sprout";
-import { Headline, OnboardingHeader, ReassuranceStrip } from "@/components/onboarding/chrome";
+import { CtaLabel, Headline, StepLabel, Lede, OnboardingHeader, ReassuranceStrip } from "@/components/onboarding/chrome";
+import { Boop, FillBar } from "@/components/onboarding/motion";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ChipSelect, Field } from "@/components/ui/field";
 import { profileSchema } from "@/lib/auth/schemas";
 import { supabase } from "@/lib/supabase/client";
-import { brand, surface } from "@/theme/tokens";
+import { brand, ink, semantic, surface } from "@/theme/tokens";
+import { font, type } from "@/theme/type";
+
+/*
+ * The profile meter's voice. Keyed on how many of the eight fields on THIS
+ * FORM have something in them — it says "x of 8" and nothing more, so it never
+ * claims to know the reader better than the form does.
+ */
+function powerLine(filled: number, total: number): string {
+  if (filled === 0) return "Start with your name";
+  if (filled === 1) return "Nice start!";
+  if (filled < total / 2) return "Getting to know you";
+  if (filled < total) return "Almost there";
+  return "Now we're talking!";
+}
 
 const BLOOD_GROUPS = [
   ["A+", "A+"],
@@ -70,7 +83,6 @@ export default function Profile() {
   const [dob, setDob] = useState("");
   const [sex, setSex] = useState<Sex | "">("");
   const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState("");
   const [heightCm, setHeightCm] = useState("");
   const [weightKg, setWeightKg] = useState("");
   const [bloodGroup, setBloodGroup] = useState<BloodGroup | "">("");
@@ -243,178 +255,197 @@ export default function Profile() {
     }
   }
 
+  const answers = [fullName, dob, sex, phone, heightCm, weightKg, bloodGroup, conditions];
+  const filled = answers.filter((a) => a.trim() !== "").length;
+
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <View className="flex-1 bg-canvas">
-        <OnboardingHeader back="/who" action={{ label: "Skip", href: "/journey" }} />
+        <OnboardingHeader back="/who" action={{ label: "Skip", href: "/journey" }} step={2} />
 
         <ScrollView
           className="flex-1"
-          contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 20 }}
+          contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 16, paddingBottom: 20 }}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          {/* The mascot is absolutely positioned, so the text needs its own
-              gutter or the second headline line runs underneath it. */}
-          <View className="relative pr-[38%]">
-            <Headline lead="Let's set up your" accent="health profile" />
-            <Text className="mt-2 text-[13px] leading-[19px] text-ink-500">
-              This helps Cheeku personalize insights and keep your information more accurate.
-            </Text>
-            <View className="absolute -right-2 top-0" pointerEvents="none">
-              <MascotBust size={132} />
+          {/* The mascot is absolutely positioned, so the text keeps a gutter. */}
+          <View className="relative pr-[30%]">
+            <StepLabel step={2} />
+            <Headline lead="A few basics" accent="about you" />
+            <Lede>
+              Only your name is needed. The rest helps me read your lab ranges the way your lab
+              intends.
+            </Lede>
+            <View className="absolute -right-3 -top-1" pointerEvents="none">
+              <MascotBust size={112} />
             </View>
           </View>
 
-          <Card className="mt-5 p-4">
-            <View className="flex-row items-center gap-2">
-              <UserCircle size={18} color={brand[500]} />
-              <Text className="text-[15px] font-semibold text-ink-900">Basic information</Text>
+          <Section icon={UserCircle} title="About you" note="Only the name is required">
+            <Field
+              label="Full name"
+              icon={User}
+              required
+              value={fullName}
+              onChangeText={setFullName}
+              placeholder="What should I call you?"
+              autoComplete="name"
+              textContentType="name"
+              error={errors.fullName}
+            />
+            {/*
+             * A typed date rather than a picker. `dob` accepts any parseable
+             * string and the schema enforces it; a native wheel would also
+             * default to today, the one value a birth date can never be.
+             */}
+            <Field
+              label="Date of birth"
+              icon={Calendar}
+              value={dob}
+              onChangeText={setDob}
+              placeholder="YYYY-MM-DD"
+              hint="Year first, like 1994-03-21"
+              autoCapitalize="none"
+              error={errors.dob}
+            />
+            <ChipSelect label="Sex" options={SEXES} value={sex} onChange={setSex} />
+            <Field
+              label="Phone number"
+              icon={Phone}
+              value={phone}
+              onChangeText={setPhone}
+              placeholder="+91 98765 43210"
+              keyboardType="phone-pad"
+              autoComplete="tel"
+              textContentType="telephoneNumber"
+              error={errors.phone}
+            />
+          </Section>
+
+          <Section icon={HeartPulse} title="Health snapshot" note="All optional, all editable later">
+            {/* Side by side: two short numbers do not each need a full row. */}
+            <View className="flex-row gap-3">
+              <View className="flex-1">
+                <Field
+                  label="Height (cm)"
+                  icon={Ruler}
+                  value={heightCm}
+                  onChangeText={setHeightCm}
+                  placeholder="165"
+                  keyboardType="number-pad"
+                  error={errors.heightCm}
+                />
+              </View>
+              <View className="flex-1">
+                <Field
+                  label="Weight (kg)"
+                  icon={Weight}
+                  value={weightKg}
+                  onChangeText={setWeightKg}
+                  placeholder="62"
+                  keyboardType="decimal-pad"
+                  error={errors.weightKg}
+                />
+              </View>
             </View>
-            <Text className="mt-0.5 text-[12px] text-ink-500">
-              All fields are optional. You can edit later.
-            </Text>
+            <ChipSelect
+              label="Blood group"
+              icon={Droplet}
+              options={BLOOD_GROUPS}
+              value={bloodGroup}
+              onChange={setBloodGroup}
+            />
+            <Field
+              label="Known conditions"
+              value={conditions}
+              onChangeText={setConditions}
+              placeholder="Thyroid, BP, diabetes…"
+              hint="Separate with commas. Leave blank if none."
+              error={errors.conditions}
+            />
+          </Section>
 
-            <View className="mt-3 gap-3">
-              <Field
-                label="Full name"
-                icon={User}
-                required
-                value={fullName}
-                onChangeText={setFullName}
-                placeholder="Your name"
-                autoComplete="name"
-                textContentType="name"
-                error={errors.fullName}
-              />
-              {/*
-               * A typed date rather than a picker. `dob` accepts any parseable
-               * string and the schema is what enforces it, so a plain field
-               * with an explicit format keeps the port honest — a native date
-               * wheel here would also default to today, which is the one value
-               * a date of birth can never be.
-               */}
-              <Field
-                label="Date of birth"
-                icon={Calendar}
-                value={dob}
-                onChangeText={setDob}
-                placeholder="YYYY-MM-DD"
-                hint="For example 1994-03-21"
-                autoCapitalize="none"
-                error={errors.dob}
-              />
-              <ChipSelect
-                label="Gender"
-                options={SEXES}
-                value={sex}
-                onChange={setSex}
-              />
-              <Field
-                label="Phone number"
-                icon={Phone}
-                value={phone}
-                onChangeText={setPhone}
-                placeholder="+91 98765 43210"
-                keyboardType="phone-pad"
-                autoComplete="tel"
-                textContentType="telephoneNumber"
-                error={errors.phone}
-              />
-              <Field
-                label="Email address"
-                icon={Mail}
-                value={email}
-                onChangeText={setEmail}
-                placeholder="you@example.com"
-                keyboardType="email-address"
-                autoCapitalize="none"
-                autoComplete="email"
-                textContentType="emailAddress"
-              />
-            </View>
-          </Card>
-
-          <Card className="mt-4 p-4">
-            <View className="flex-row items-center gap-2">
-              <Stethoscope size={18} color={brand[500]} />
-              <Text className="text-[15px] font-semibold text-ink-900">Health snapshot</Text>
-            </View>
-            <Text className="mt-0.5 text-[12px] text-ink-500">
-              Helps Cheeku provide more relevant insights.
-            </Text>
-
-            <View className="mt-3 gap-3">
-              <Field
-                label="Height (cm)"
-                icon={Ruler}
-                value={heightCm}
-                onChangeText={setHeightCm}
-                placeholder="175"
-                keyboardType="number-pad"
-                error={errors.heightCm}
-              />
-              <Field
-                label="Weight (kg)"
-                icon={Weight}
-                value={weightKg}
-                onChangeText={setWeightKg}
-                placeholder="72"
-                keyboardType="decimal-pad"
-                error={errors.weightKg}
-              />
-              <ChipSelect
-                label="Blood group"
-                icon={Droplet}
-                options={BLOOD_GROUPS}
-                value={bloodGroup}
-                onChange={setBloodGroup}
-              />
-              <Field
-                label="Known conditions"
-                value={conditions}
-                onChangeText={setConditions}
-                placeholder="Diabetes, hypertension…"
-                hint="Separate with commas. Leave blank if none."
-                error={errors.conditions}
-              />
-            </View>
-          </Card>
-
-          {message ? (
-            <Text accessibilityRole="alert" className="mt-4 text-[13px] font-medium text-danger-text">
-              {message}
-            </Text>
-          ) : null}
-
-          <View className="mt-4">
-            <ReassuranceStrip>
-              Your data is encrypted and stored securely. Only you and your family can access it.
-            </ReassuranceStrip>
+          <View className="mt-5">
+            <ReassuranceStrip />
           </View>
         </ScrollView>
 
         {/*
-         * Pinned below the scroller rather than sitting at the end of it. Ten
-         * fields cannot fit one fold at any spacing, and every one of them is
-         * optional — so the most common action here is to submit early, and
-         * that is exactly the action a button parked below the fold hides.
+         * Pinned below the scroller. Every field is optional, so the most
+         * common action is to submit early, and a button below the fold hides
+         * exactly that. The meter rides with it so progress is always in view.
          */}
         <View
-          className="border-t bg-canvas px-5 pt-3"
+          className="gap-3 border-t bg-canvas px-6 pt-3"
           style={{ borderTopColor: surface.line, paddingBottom: insets.bottom + 12 }}
         >
-          <Button onPress={submit} disabled={pending}>
-            <Text className="text-[16px] font-bold text-white">
-              {pending ? "Saving…" : "Continue"}
+          <View
+            className="flex-row items-center gap-3"
+            accessible
+            accessibilityLabel={`${filled} of ${answers.length} fields filled. ${powerLine(filled, answers.length)}`}
+          >
+            <Boop trigger={filled}>
+              <View className="h-9 w-9 items-center justify-center rounded-pill" style={{ backgroundColor: brand[600] }}>
+                <Text style={{ fontFamily: font.bold, fontSize: 13, color: "#fff" }}>{filled}</Text>
+              </View>
+            </Boop>
+            <View className="flex-1 gap-1.5">
+              <View className="flex-row items-baseline justify-between">
+                <Text style={type.label}>{powerLine(filled, answers.length)}</Text>
+                <Text style={[type.caption, { color: ink[300] }]}>
+                  {filled} of {answers.length}
+                </Text>
+              </View>
+              <FillBar value={filled / answers.length} color={brand[600]} track={brand[100]} height={6} />
+            </View>
+          </View>
+
+          {message ? (
+            <Text
+              accessibilityRole="alert"
+              style={{ fontFamily: font.medium, fontSize: 13.5, color: semantic.dangerText }}
+            >
+              {message}
             </Text>
-            {pending ? null : <ArrowRight size={18} color="#ffffff" />}
+          ) : null}
+
+          <Button onPress={submit} disabled={pending}>
+            {pending ? <Text style={type.button}>Saving…</Text> : <CtaLabel>Save and continue</CtaLabel>}
           </Button>
         </View>
       </View>
     </KeyboardAvoidingView>
+  );
+}
+
+/** A soft card holding one group of fields. */
+function Section({
+  icon: Icon,
+  title,
+  note,
+  children,
+}: {
+  icon: React.ComponentType<{ size?: number; color?: string }>;
+  title: string;
+  note: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <Card className="mt-5 p-5">
+      <View className="flex-row items-center gap-2.5">
+        <View className="h-9 w-9 items-center justify-center rounded-[12px]" style={{ backgroundColor: brand[50] }}>
+          <Icon size={18} color={brand[600]} />
+        </View>
+        <View>
+          <Text style={[type.heading, { fontSize: 18, lineHeight: 22 }]}>{title}</Text>
+          <Text style={[type.caption, { color: ink[500] }]}>{note}</Text>
+        </View>
+      </View>
+      <View className="mt-4 gap-4">{children}</View>
+    </Card>
   );
 }

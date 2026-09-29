@@ -1,16 +1,19 @@
 import { useRouter } from "expo-router";
-import { ArrowRight, Check, ShieldCheck, Users, type LucideIcon } from "lucide-react-native";
+import { Check, ShieldCheck, Users, type LucideIcon } from "lucide-react-native";
 import { useMemo, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AvatarFamily, AvatarSolo } from "@/components/illustrations/avatar-cluster";
 import { Avatar } from "@/components/ui/avatar";
-import { Dots, Headline, OnboardingHeader, ReassuranceStrip } from "@/components/onboarding/chrome";
+import { CheekuSays, CtaLabel, Headline, StepLabel, Lede, OnboardingHeader } from "@/components/onboarding/chrome";
+import { Boop } from "@/components/onboarding/motion";
+import { PopIn } from "@/components/ui/motion";
 import { Button } from "@/components/ui/button";
 import { setAudience, type Audience } from "@/lib/auth/audience";
 import { avatarPicks } from "@/lib/profiles/avatar";
-import { brand, shadow, surface } from "@/theme/tokens";
+import { brand, ink, shadow, surface } from "@/theme/tokens";
+import { font, type } from "@/theme/type";
 
 const OPTIONS: readonly {
   value: Audience;
@@ -18,23 +21,24 @@ const OPTIONS: readonly {
   body: string;
   badge: { icon: LucideIcon; label: string };
   art: "solo" | "family";
+  /** What Cheeku says when this is picked. Warmth only, never about health. */
+  reaction: string;
 }[] = [
   {
     value: "me",
-    title: "It's for me",
-    body: "Manage and track my own health records.",
-    badge: { icon: ShieldCheck, label: "Private. Secure. Just for you" },
+    title: "Just me",
+    body: "My reports, my prescriptions, my questions.",
+    badge: { icon: ShieldCheck, label: "Private to you" },
     art: "solo",
+    reaction: "Just the two of us then. Deal!",
   },
   {
     value: "family",
-    title: "It's for my family",
-    body: "Manage health for my loved ones.",
-    // Shortened from the web build's "Add and manage family members easily".
-    // At 11px that ran the full width of the text column, so the pill stopped
-    // reading as a badge and started reading as a bar pinned to the card edge.
-    badge: { icon: Users, label: "Manage everyone in one place" },
+    title: "Me and my family",
+    body: "Parents, partner, kids. Up to 4 people.",
+    badge: { icon: Users, label: "Everyone in one place" },
     art: "family",
+    reaction: "A full house! I'll keep everyone's files separate.",
   },
 ];
 
@@ -78,107 +82,96 @@ export default function Who() {
     }
   }
 
+  const reaction = OPTIONS.find((o) => o.value === audience)?.reaction ?? "";
+
   return (
     <View className="flex-1 bg-canvas">
-      <OnboardingHeader back="/sign-in" action={{ label: "Skip", href: "/profile" }} />
+      <OnboardingHeader back="/sign-in" action={{ label: "Skip", href: "/profile" }} step={1} />
 
-      <View className="flex-1 px-5" style={{ paddingBottom: insets.bottom + 12 }}>
-        <Headline lead="Who is" accent="this for?" />
-        <Text className="mt-2 text-[13px] leading-[19px] text-ink-500">
-          Choose an option to personalize your experience. You can add more members later.
-        </Text>
+      <ScrollView
+        className="flex-1"
+        contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 16, paddingBottom: 12 }}
+        showsVerticalScrollIndicator={false}
+      >
+        <StepLabel step={1} />
+        <Headline lead="Who are we" accent="looking after?" />
+        <Lede>Pick one. You can add family members any time.</Lede>
 
         {/*
-         * The check marker sits in the card's own top right corner rather than
-         * in the text column. Inside the column its position depended on how
-         * long the title happened to be, which is why the two cards never lined
-         * up with each other in the web build.
-         *
-         * The art sits in a fixed-width column for the same reason: the solo
-         * portrait and the three-face cluster are different widths, so letting
-         * them size themselves left the two titles starting at different x.
+         * The check sits in the card's own top-right corner rather than in the
+         * text column, so both cards line up whatever their titles say. The art
+         * sits in a fixed-width column for the same reason.
          */}
-        <View
-          accessibilityRole="radiogroup"
-          accessibilityLabel="Who is this for?"
-          // Centred rather than top-aligned. The two cards cannot fill an 852pt
-          // screen at any honest spacing, and pinning them to the top dumped
-          // every leftover pixel into one slab above the footer. Splitting it
-          // reads as an airy composition instead of an unfinished one.
-          className="mt-5 flex-1 justify-center gap-3"
-        >
+        <View accessibilityRole="radiogroup" accessibilityLabel="Who is this for?" className="mt-6 gap-3">
           {OPTIONS.map((option) => {
             const selected = audience === option.value;
             const Badge = option.badge.icon;
             return (
-              <Pressable
-                key={option.value}
-                accessibilityRole="radio"
-                accessibilityState={{ selected }}
-                aria-checked={selected}
-                accessibilityLabel={`${option.title}. ${option.body}`}
-                onPress={() => setAudienceChoice(option.value)}
-                className="flex-row items-start gap-3.5 rounded-card p-3.5 pr-11"
-                style={[
-                  {
-                    borderWidth: 2,
-                    borderColor: selected ? brand[500] : surface.line,
-                    backgroundColor: selected ? brand[50] : surface.base,
-                  },
-                  selected ? shadow.e1 : null,
-                ]}
-              >
-                <View
-                  pointerEvents="none"
-                  className="absolute right-3.5 top-3.5 h-[22px] w-[22px] items-center justify-center rounded-pill"
-                  style={{
-                    borderWidth: 2,
-                    borderColor: selected ? brand[600] : brand[200],
-                    backgroundColor: selected ? brand[600] : surface.base,
-                  }}
+              <Boop key={option.value} trigger={selected ? audience : null}>
+                <Pressable
+                  accessibilityRole="radio"
+                  accessibilityState={{ selected }}
+                  aria-checked={selected}
+                  accessibilityLabel={`${option.title}. ${option.body}`}
+                  onPress={() => setAudienceChoice(option.value)}
+                  className="flex-row items-center gap-4 rounded-[24px] p-4 pr-12"
+                  style={[
+                    {
+                      borderWidth: 2,
+                      borderColor: selected ? brand[500] : surface.line,
+                      backgroundColor: selected ? brand[50] : surface.base,
+                    },
+                    selected ? shadow.e2 : shadow.e1,
+                  ]}
                 >
-                  {selected ? <Check size={13} color="#ffffff" strokeWidth={3} /> : null}
-                </View>
-
-                {/* 78pt, not the web build's 92. The badge underneath is the
-                    widest thing in the text column and at 92 it wrapped to two
-                    ragged lines inside its own pill. */}
-                {/*
-                 * The card shows the face that was picked, not a stand-in.
-                 * Choosing yourself in a tray and then still seeing somebody
-                 * else's portrait on the card above it is the same complaint
-                 * the tray exists to answer, moved eight points up the screen.
-                 */}
-                <View className="w-[78px] items-center justify-center">
-                  {option.art === "solo" ? (
-                    chosen ? (
-                      <Avatar svg={chosen.svg} background={chosen.background} size={64} />
-                    ) : (
-                      <AvatarSolo size={64} />
-                    )
-                  ) : (
-                    <AvatarFamily size={64} />
-                  )}
-                </View>
-
-                <View className="min-w-0 flex-1 pt-0.5">
-                  <Text className="text-[15.5px] font-bold leading-tight text-ink-900">
-                    {option.title}
-                  </Text>
-                  <Text className="mt-1 text-[12.5px] leading-[17px] text-ink-500">
-                    {option.body}
-                  </Text>
                   <View
-                    className="mt-2.5 flex-row items-center gap-1.5 self-start rounded-pill px-2.5 py-1.5"
-                    style={{ backgroundColor: selected ? surface.base : brand[50] }}
+                    pointerEvents="none"
+                    className="absolute right-4 top-4 h-6 w-6 items-center justify-center rounded-pill"
+                    style={{
+                      borderWidth: 2,
+                      borderColor: selected ? brand[600] : brand[200],
+                      backgroundColor: selected ? brand[600] : surface.base,
+                    }}
                   >
-                    <Badge size={12} color={brand[700]} />
-                    <Text className="text-[11px] font-medium text-brand-700" numberOfLines={1}>
-                      {option.badge.label}
-                    </Text>
+                    {selected ? (
+                      <PopIn>
+                        <Check size={14} color="#ffffff" strokeWidth={3.2} />
+                      </PopIn>
+                    ) : null}
                   </View>
-                </View>
-              </Pressable>
+
+                  {/*
+                   * The card shows the face that was picked, not a stand-in.
+                   * Choosing yourself in the tray and still seeing somebody
+                   * else's portrait above it is the complaint the tray answers.
+                   */}
+                  <View className="w-[76px] items-center justify-center">
+                    {option.art === "solo" ? (
+                      chosen ? (
+                        <Avatar svg={chosen.svg} background={chosen.background} size={66} />
+                      ) : (
+                        <AvatarSolo size={66} />
+                      )
+                    ) : (
+                      <AvatarFamily size={56} />
+                    )}
+                  </View>
+
+                  <View className="min-w-0 flex-1">
+                    <Text style={[type.heading, { fontSize: 20 }]}>{option.title}</Text>
+                    <Text style={[type.bodySmall, { marginTop: 3 }]}>{option.body}</Text>
+                    <View
+                      className="mt-2.5 flex-row items-center gap-1.5 self-start rounded-pill px-2.5 py-1"
+                      style={{ backgroundColor: selected ? surface.base : brand[50] }}
+                    >
+                      <Badge size={12} color={brand[700]} />
+                      <Text style={{ fontFamily: font.semibold, fontSize: 11.5, color: brand[700] }} numberOfLines={1}>
+                        {option.badge.label}
+                      </Text>
+                    </View>
+                  </View>
+                </Pressable>
+              </Boop>
             );
           })}
         </View>
@@ -186,30 +179,26 @@ export default function Who() {
         {/*
          * The face picker, and only for "me".
          *
-         * A uuid-derived avatar is a coin toss, so a man setting his own
-         * profile up was being handed a woman's face with no way to change it.
-         * It appears here rather than on the profile form because this is the
-         * screen where the reader has just said the account is theirs — the
-         * question "so which one is you" belongs to that answer.
+         * A uuid-derived avatar is a coin toss, so a man setting up his own
+         * profile was handed a woman's face with no way to change it.
          *
-         * NOT SHOWN FOR "family": the faces there stand for several people who
-         * do not exist yet, and picking one of them would be choosing a face
-         * for somebody else.
+         * NOT SHOWN FOR "family": those faces stand for people who do not
+         * exist yet, and picking one would be choosing a face for somebody else.
          *
-         * NOT A GENDER FIELD. Nothing is labelled, nothing is grouped, and no
-         * pick is stored as anything but a drawing id. `sex` is asked once, as
-         * a health field, on the profile form.
+         * NOT A GENDER FIELD. Nothing is labelled or grouped, and no pick is
+         * stored as anything but a drawing id. `sex` is asked once, as a health
+         * field, on the profile form.
          */}
         {audience === "me" ? (
-          <View className="mt-4">
-            <Text className="text-[13px] font-semibold text-ink-900">Pick your face</Text>
-            <Text className="mt-0.5 text-[12px] text-ink-500">
-              Optional, and you can change it later.
-            </Text>
+          <View className="mt-6">
+            <View className="flex-row items-baseline justify-between">
+              <Text style={type.label}>Pick a face that feels like you</Text>
+              <Text style={[type.caption, { color: ink[300] }]}>Optional</Text>
+            </View>
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{ gap: 10, paddingVertical: 10, paddingRight: 20 }}
+              contentContainerStyle={{ gap: 10, paddingVertical: 12, paddingRight: 24 }}
             >
               {picks.map((pick) => {
                 const on = avatar === pick.id;
@@ -221,42 +210,39 @@ export default function Who() {
                     // Numbered, because the alternative is describing a
                     // stranger's face to them in a screen reader.
                     accessibilityLabel={`Avatar option ${pick.id.slice(1)}`}
-                    // Tapping the chosen one clears it, so a pick made by
-                    // mistake does not have to be replaced by another pick.
+                    // Tapping the chosen one clears it.
                     onPress={() => setAvatar(on ? null : pick.id)}
                   >
-                    {/*
-                     * The ring is drawn as a padded disc rather than through
-                     * Avatar's own `ring`, which is a fixed 2pt everywhere in
-                     * the app. At 2pt a selected face and an unselected one
-                     * are nearly the same object; a chosen thing should be
-                     * unmistakable at a glance.
-                     */}
-                    <View
-                      className="rounded-pill p-[3px]"
-                      style={{ backgroundColor: on ? brand[600] : surface.line }}
-                    >
-                      <Avatar svg={pick.svg} background={pick.background} size={54} />
-                    </View>
+                    <Boop trigger={on ? pick.id : null}>
+                      <View
+                        className="rounded-pill p-[3px]"
+                        style={{ backgroundColor: on ? brand[600] : surface.line }}
+                      >
+                        <Avatar svg={pick.svg} background={pick.background} size={56} />
+                      </View>
+                      {on ? (
+                        <View
+                          pointerEvents="none"
+                          className="absolute -right-0.5 -top-0.5 h-5 w-5 items-center justify-center rounded-pill"
+                          style={{ backgroundColor: brand[600], borderWidth: 2, borderColor: "#fff" }}
+                        >
+                          <Check size={10} color="#fff" strokeWidth={3.5} />
+                        </View>
+                      ) : null}
+                    </Boop>
                   </Pressable>
                 );
               })}
             </ScrollView>
           </View>
         ) : null}
+      </ScrollView>
 
-        <View className="mt-5 gap-4">
-          <ReassuranceStrip>
-            Bank-level encryption. Only you and your family can access.
-          </ReassuranceStrip>
-          <Button onPress={submit} disabled={pending}>
-            <Text className="text-[16px] font-bold text-white">
-              {pending ? "One moment…" : "Continue"}
-            </Text>
-            {pending ? null : <ArrowRight size={18} color="#ffffff" />}
-          </Button>
-          <Dots current={2} total={5} />
-        </View>
+      <View className="gap-4 px-6 pt-3" style={{ paddingBottom: insets.bottom + 12 }}>
+        {reaction ? <CheekuSays>{reaction}</CheekuSays> : null}
+        <Button onPress={submit} disabled={pending}>
+          {pending ? <Text style={type.button}>One moment…</Text> : <CtaLabel>Continue</CtaLabel>}
+        </Button>
       </View>
     </View>
   );

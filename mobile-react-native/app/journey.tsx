@@ -1,15 +1,17 @@
 import { useRouter } from "expo-router";
-import { ArrowRight, Check } from "lucide-react-native";
+import { Check } from "lucide-react-native";
 import { useState } from "react";
-import { Text, View } from "react-native";
+import { ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { Dots, Headline, OnboardingHeader, ReassuranceStrip } from "@/components/onboarding/chrome";
+import { CheekuSays, CtaLabel, Headline, StepLabel, Lede, OnboardingHeader } from "@/components/onboarding/chrome";
+import { Boop } from "@/components/onboarding/motion";
 import { Button } from "@/components/ui/button";
 import { PopIn, PressRow } from "@/components/ui/motion";
 import { JOURNEYS, type JourneyId } from "@/lib/onboarding/journeys";
 import { supabase } from "@/lib/supabase/client";
-import { brand, shadow, surface } from "@/theme/tokens";
+import { brand, ink, shadow, surface } from "@/theme/tokens";
+import { type } from "@/theme/type";
 
 /*
  * A5b — the season of life, asked AFTER the account exists.
@@ -75,113 +77,105 @@ export default function Journey() {
     }
   }
 
+  const picked = JOURNEYS.find((j) => j.id === journey);
+
   return (
     <View className="flex-1 bg-canvas">
-      <OnboardingHeader back="/profile" action={{ label: "Skip", href: "/first-upload" }} />
+      <OnboardingHeader back="/profile" action={{ label: "Skip", href: "/first-upload" }} step={3} />
 
-      <View className="flex-1 px-5" style={{ paddingBottom: insets.bottom + 12 }}>
-        <Headline lead="Now tell me" accent="what you're living through" />
-        <Text className="mt-2 text-[13px] leading-[19px] text-ink-500">
-          So I speak to your life and not a generic one. This only decides what I bring you to read
-          — it is never treated as a diagnosis, and you can change it any time.
-        </Text>
+      <ScrollView
+        className="flex-1"
+        contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 16, paddingBottom: 12 }}
+        showsVerticalScrollIndicator={false}
+      >
+        <StepLabel step={3} />
+        <Headline lead="What brings you" accent="to Cheeku?" />
+        <Lede>
+          Pick what fits your life right now, and I&apos;ll bring you things worth reading. It is
+          never treated as a diagnosis, and you can change it any time.
+        </Lede>
 
-        <View className="mt-5 flex-1 justify-center">
-          <View
-            accessibilityRole="radiogroup"
-            accessibilityLabel="What are you living through?"
-            /*
-             * `items-start`, and it is load-bearing on device.
-             *
-             * A wrapped flex row stretches its items to the tallest in the
-             * line by default. On the web that produced six equal tiles; in
-             * Yoga the line's cross size resolved against the centred, flexed
-             * parent, so each item stretched to the FULL height of the screen
-             * — two full-height columns, four tiles pushed off the bottom, and
-             * the headline clipped behind them. It rendered correctly in the
-             * browser for weeks and was broken the first time it ran natively.
-             */
-            className="flex-row flex-wrap items-start"
-            style={{ gap: 8 }}
-          >
-            {JOURNEYS.map((j, i) => {
-              const active = journey === j.id;
-              const Icon = j.icon;
-              return (
-                <PressRow
-                  key={j.id}
-                  index={i}
-                  // Tapping the selected tile clears it. Without this the only
-                  // way out of an answer given by mistake is Skip, which also
-                  // throws away the screen.
-                  onPress={() => setJourney(active ? null : j.id)}
-                  style={{ width: "48%" }}
-                >
+        <View
+          accessibilityRole="radiogroup"
+          accessibilityLabel="What brings you to Cheeku?"
+          /*
+           * `items-start`, and it is load-bearing on device. A wrapped flex row
+           * stretches its items to the tallest in the line by default, and in
+           * Yoga that resolved against the flexed parent: two full-height
+           * columns and four tiles pushed off screen. See PROGRESS.md.
+           */
+          className="mt-6 flex-row flex-wrap items-start"
+          style={{ gap: 10 }}
+        >
+          {JOURNEYS.map((j, i) => {
+            const active = journey === j.id;
+            const Icon = j.icon;
+            const tint = TINT[j.id] ?? brand[50];
+            const fg = TINT_FG[j.id] ?? brand[600];
+            return (
+              <PressRow
+                key={j.id}
+                index={i}
+                // Tapping the selected tile clears it. Without this the only
+                // way out of an answer given by mistake is Skip.
+                onPress={() => setJourney(active ? null : j.id)}
+                style={{ width: "48.4%" }}
+              >
+                <Boop trigger={active ? j.id : null}>
                   <View
                     accessibilityRole="radio"
                     accessibilityState={{ selected: active }}
                     accessibilityLabel={`${j.label}. ${j.problem}`}
-                    // No `h-full`: height 100% against an auto-height animated
-                    // wrapper is undefined in Yoga, and it was the other half
-                    // of the stretch. The tiles size to their content, which is
-                    // one line of label and two of description.
-                    className="rounded-card p-3.5"
+                    // No `h-full`: a percentage height against an auto-height
+                    // animated wrapper is undefined in Yoga.
+                    className="rounded-[22px] p-4"
                     style={[
-                      shadow.e1,
+                      active ? shadow.e2 : shadow.e1,
                       {
-                        backgroundColor: active ? brand[50] : surface.base,
-                        borderWidth: 1.5,
-                        borderColor: active ? brand[500] : surface.line,
+                        backgroundColor: active ? tint : surface.base,
+                        borderWidth: 2,
+                        borderColor: active ? fg : surface.line,
+                        minHeight: 138,
                       },
                     ]}
                   >
                     <View
-                      className="h-10 w-10 items-center justify-center rounded-tile"
-                      style={{ backgroundColor: TINT[j.id] ?? brand[50] }}
+                      className="h-11 w-11 items-center justify-center rounded-pill"
+                      style={{ backgroundColor: active ? surface.base : tint }}
                     >
-                      <Icon size={18} color={TINT_FG[j.id] ?? brand[600]} />
+                      <Icon size={20} color={fg} />
                     </View>
-                    <Text className="mt-2.5 text-[13.5px] font-semibold leading-[17px] text-ink-900">
-                      {j.label}
-                    </Text>
-                    <Text className="mt-1 text-[11.5px] leading-[15px] text-ink-500">
-                      {j.problem}
-                    </Text>
+                    <Text style={[type.label, { marginTop: 12, fontSize: 14.5 }]}>{j.label}</Text>
+                    <Text style={[type.caption, { marginTop: 3, lineHeight: 16, color: ink[500] }]}>{j.problem}</Text>
 
                     {active ? (
-                      <PopIn index={0} style={{ position: "absolute", right: 10, top: 10 }}>
+                      <PopIn index={0} style={{ position: "absolute", right: 12, top: 12 }}>
                         <View
-                          className="h-5 w-5 items-center justify-center rounded-pill"
-                          style={{ backgroundColor: brand[600] }}
+                          className="h-6 w-6 items-center justify-center rounded-pill"
+                          style={{ backgroundColor: fg }}
                         >
-                          <Check size={12} color="#fff" strokeWidth={3} />
+                          <Check size={14} color="#fff" strokeWidth={3.2} />
                         </View>
                       </PopIn>
                     ) : null}
                   </View>
-                </PressRow>
-              );
-            })}
-          </View>
+                </Boop>
+              </PressRow>
+            );
+          })}
         </View>
+      </ScrollView>
 
-        <View className="gap-3.5">
-          <ReassuranceStrip>
-            This is a hint about what to read, not a medical record. Cheeku never treats it as one.
-          </ReassuranceStrip>
-          <Button onPress={submit} disabled={pending}>
-            {/*
-             * "Continue" either way. Labelling the primary button "Skip for
-             * now" when nothing is selected paints the loudest control on the
-             * screen with the word for leaving — it reads as the app pushing
-             * you past its own question. Skip already exists in the header,
-             * quietly, where a way out belongs.
-             */}
-            <Text className="text-[16px] font-bold text-white">Continue</Text>
-            <ArrowRight size={17} color="#fff" />
-          </Button>
-          <Dots current={2} total={5} />
-        </View>
+      <View className="gap-4 px-6 pt-3" style={{ paddingBottom: insets.bottom + 12 }}>
+        <CheekuSays>{picked?.reaction ?? "Pick whatever fits. Or skip it, no pressure."}</CheekuSays>
+        <Button onPress={submit} disabled={pending}>
+          {/*
+           * "Continue" either way. Labelling the primary button "Skip" when
+           * nothing is selected paints the loudest control with the word for
+           * leaving. Skip already exists in the header, quietly.
+           */}
+          <CtaLabel>Continue</CtaLabel>
+        </Button>
       </View>
     </View>
   );
