@@ -1,37 +1,28 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useRouter } from "expo-router";
-import {
-  CalendarDays,
-  ChevronRight,
-  FileText,
-  HeartPulse,
-  ShieldCheck,
-  type LucideIcon,
-} from "lucide-react-native";
-import { ActivityIndicator, Pressable, RefreshControl, ScrollView, Text, View } from "react-native";
+import { ActivityIndicator, RefreshControl, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AddMemberSheet } from "@/components/app/add-member-sheet";
 import { FamilyTray } from "@/components/app/family-tray";
 import { Paywall } from "@/components/billing/paywall";
-import { FamilySwitcher } from "@/components/app/family-switcher";
 import { OfflineBanner } from "@/components/app/offline-banner";
-import { HealthFile } from "@/components/health/health-file";
-import { KnowledgeRail } from "@/components/knowledge/knowledge-rail";
+import { AskBar, CheekuCard, HomeHeadline, ProfileChip, firstName } from "@/components/home/ask-hero";
+import { CareSection } from "@/components/home/care";
+import { FileStrip, ReadsStrip } from "@/components/home/strips";
+import { Gradient } from "@/components/ui/glass";
 import { knowledgeFeed } from "@/lib/knowledge/queries";
-import { HomeAskBox } from "@/components/app/home-ask-box";
 import { NotificationsBell } from "@/components/app/notifications-bell";
-import { RecordRow } from "@/components/records/chrome";
 import { Button } from "@/components/ui/button";
+import { StaggerItem } from "@/components/ui/motion";
 import { allowsFamily } from "@/lib/billing/plans";
 import { getEntitlement } from "@/lib/billing/quota";
 import { deriveNotifications } from "@/lib/notifications/derive";
 import { activeProfile, profileAccess, switchProfile } from "@/lib/profiles/context";
-import { formatEventDate } from "@/lib/records/grouping";
 import { EMPTY_OVERVIEW, useHealthOverview } from "@/lib/records/use-overview";
 import { listProfileRecords, statsFrom } from "@/lib/records/queries";
-import { brand, ink, semantic, shadow, surface } from "@/theme/tokens";
+import { brand } from "@/theme/tokens";
 
 /** Deliberately time-of-day aware, like the frame. */
 function greeting(): string {
@@ -54,13 +45,14 @@ function greeting(): string {
  * half-switched screen is worse than a slow one.
  */
 export default function Home() {
+  const router = useRouter();
   const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
   const [paywallOpen, setPaywallOpen] = useState(false);
   const [trayOpen, setTrayOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
 
-  const knowledge = useQuery({ queryKey: ["knowledge-feed"], queryFn: () => knowledgeFeed(3) });
+  const knowledge = useQuery({ queryKey: ["knowledge-feed"], queryFn: () => knowledgeFeed(5) });
 
   const overview = useHealthOverview();
 
@@ -127,7 +119,6 @@ export default function Home() {
   const list = records.data ?? [];
   const stats = statsFrom(list);
   const needsReview = stats.borderline + stats.highRisk;
-  const newest = list[0];
   const access = data.access;
 
   return (
@@ -146,68 +137,77 @@ export default function Home() {
         />
       }
     >
-      <View className="flex-row items-start gap-3 px-5">
-        <View className="min-w-0 flex-1">
-          <Text className="text-[20px] leading-tight text-ink-900">{greeting()},</Text>
-          <Text
-            className="text-[28px] font-bold leading-tight tracking-tight text-brand-600"
-            numberOfLines={1}
-          >
-            {profile.name} 👋
-          </Text>
-          <Text className="mt-1 text-[14px] text-ink-500">
-            Clarity and calm, for every health question.
-          </Text>
-        </View>
-        <NotificationsBell notifications={deriveNotifications(list)} />
+      {/* A soft violet wash behind the top of the screen, so the glass has
+          something to sit on. Scrolls with the content. */}
+      <View pointerEvents="none" style={{ position: "absolute", top: -insets.top - 40, left: 0, right: 0, height: 520 }}>
+        <Gradient from="#ebe6ff" to="#fafafe" angle="vertical" />
       </View>
+
+      {/*
+       * ┌─ THE LAYOUT, REDESIGNED AGAIN 2026-09-29 ────────────────────────────┐
+       * │                                                                     │
+       * │ After the owner's reference ("Smart Home, Smooth Services"):        │
+       * │                                                                     │
+       * │   profile chip (the family switcher) · bell                         │
+       * │   editorial headline, italic violet second line                     │
+       * │   ask bar, shaped like search                                       │
+       * │   Cheeku hero card: status pill · 24/7 · memory line · Start a chat │
+       * │   Book care: filter chips + pastel cards (coming soon, honest)      │
+       * │   Worth knowing pills · Health file row                             │
+       * │                                                                     │
+       * │ Everything is scoped to the active member, as before.               │
+       * └─────────────────────────────────────────────────────────────────────┘
+       */}
+      <StaggerItem index={0}>
+        <View className="flex-row items-center gap-3 px-5">
+          <ProfileChip
+            active={profile}
+            others={access.selectable.filter((p) => p.id !== profile.id)}
+            greeting={greeting()}
+            onPress={() => setTrayOpen(true)}
+          />
+          <View className="flex-1" />
+          <NotificationsBell notifications={deriveNotifications(list)} />
+        </View>
+      </StaggerItem>
 
       <OfflineBanner updatedAt={context.dataUpdatedAt} />
 
-      <View className="mt-5">
-        <Text className="px-5 text-[12px] font-bold uppercase tracking-wide text-ink-300">
-          Family
-        </Text>
-        <View className="mt-1.5">
-          {/* Only what the plan can open, plus a count of what it cannot — the
-              switcher draws padlocks for the rest rather than faces it would
-              refuse to switch to. */}
-          <FamilySwitcher
-            profiles={access.selectable}
-            activeId={profile.id}
-            tier={data.entitlement.tier}
-            lockedCount={access.lockedCount}
-            onSelect={onSelectProfile}
-            onUpgrade={() => setPaywallOpen(true)}
-            onViewAll={() => setTrayOpen(true)}
+      <StaggerItem index={1}>
+        <View className="mt-6 px-5">
+          <HomeHeadline name={firstName(profile.name)} isSelf={profile.isPrimary} />
+        </View>
+      </StaggerItem>
+
+      <StaggerItem index={2}>
+        <View className="mt-5 px-5">
+          <AskBar />
+        </View>
+      </StaggerItem>
+
+      <StaggerItem index={3}>
+        <View className="mt-4 px-5">
+          <CheekuCard
+            name={firstName(profile.name)}
+            isSelf={profile.isPrimary}
+            remembered={stats.total}
+            needsReview={needsReview}
+            onStatus={() => {
+              const top = list.find((r) => r.severity !== "normal")?.id;
+              router.push((stats.total === 0 ? "/scan" : top ? `/records/${top}` : "/records") as never);
+            }}
           />
         </View>
-      </View>
+      </StaggerItem>
 
-      <InsightRow
-        total={stats.total}
-        needsReview={needsReview}
-        topRecordId={list.find((r) => r.severity !== "normal")?.id}
-        latest={
-          newest
-            ? {
-                date: formatEventDate(newest.eventDate),
-                facility: newest.facility,
-              }
-            : undefined
-        }
-      />
+      <StaggerItem index={4}>
+        <CareSection />
+      </StaggerItem>
 
-      {/*
-       * Ask Cheeku above Health Summary and given the mascot's own breathing
-       * room: for the anxious or pregnant reader this card is the reason they
-       * opened the app, not a footnote below a stats row.
-       */}
-      <HomeAskBox />
-
-      <KnowledgeRail articles={knowledge.data ?? []} />
-
-      <HealthFile overview={overview.data ?? EMPTY_OVERVIEW} />
+      <StaggerItem index={5}>
+        <ReadsStrip articles={knowledge.data ?? []} />
+        <FileStrip overview={overview.data ?? EMPTY_OVERVIEW} />
+      </StaggerItem>
 
       <FamilyTray
         open={trayOpen}
@@ -290,103 +290,3 @@ function NoProfile({ topInset }: { topInset: number }) {
     </View>
   );
 }
-
-/*
- * ONE insight, in the frame's shape: eyebrow, headline, a detail line.
- *
- * The frame's CONTENT is an appointment reminder ("Time for your thyroid
- * checkup, 15 May, Fortis Hospital"). Scheduling does not exist in V1, and
- * inventing a due date for a medical test is a fabricated clinical prompt —
- * exactly what rule 4 forbids. So the row keeps the frame's shape and fills it
- * with what the records genuinely say.
- *
- * A single tappable row rather than a card with its own headline, body and
- * button: this is a pointer to something else in the app, not a destination,
- * and the full-height version competed with Ask Cheeku for the first thing the
- * eye landed on.
- */
-function InsightRow({
-  total,
-  needsReview,
-  topRecordId,
-  latest,
-}: {
-  total: number;
-  needsReview: number;
-  topRecordId?: string;
-  latest?: { date: string; facility: string | null };
-}) {
-  const router = useRouter();
-
-  const content =
-    total === 0
-      ? {
-          eyebrow: "Get started",
-          title: "Add your first record",
-          meta: "Upload a report and Cheeku will organise it for you.",
-          href: "/scan",
-          icon: FileText,
-          fg: brand[600],
-          bg: brand[50],
-        }
-      : needsReview === 0
-        ? {
-            eyebrow: "All clear",
-            title: "Everything is in range",
-            meta: `${total} record${total === 1 ? "" : "s"} reviewed`,
-            href: "/records",
-            icon: ShieldCheck,
-            fg: semantic.safe,
-            bg: semantic.safeBg,
-          }
-        : {
-            eyebrow: "Worth a look",
-            title: `${needsReview} record${needsReview === 1 ? "" : "s"} to review`,
-            meta: latest
-              ? `${latest.date}${latest.facility ? ` · ${latest.facility}` : ""}`
-              : undefined,
-            href: topRecordId ? `/records/${topRecordId}` : "/records",
-            icon: HeartPulse,
-            fg: semantic.danger,
-            bg: semantic.dangerBg,
-          };
-
-  const Icon = content.icon;
-
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={`${content.eyebrow}. ${content.title}`}
-      onPress={() => router.push(content.href as never)}
-      className="mx-5 mt-3 flex-row items-center gap-3 rounded-tile bg-surface px-3.5 py-3"
-      style={shadow.e1}
-    >
-      <View
-        className="h-10 w-10 items-center justify-center rounded-pill"
-        style={{ backgroundColor: content.bg }}
-      >
-        <Icon size={18} color={content.fg} />
-      </View>
-      <View className="min-w-0 flex-1">
-        <Text className="text-[10px] font-bold uppercase tracking-wide text-ink-300">
-          {content.eyebrow}
-        </Text>
-        <Text className="text-[14px] font-bold leading-tight text-ink-900" numberOfLines={1}>
-          {content.title}
-        </Text>
-        {content.meta ? (
-          <View className="mt-0.5 flex-row items-center gap-1">
-            <CalendarDays size={11} color={ink[500]} />
-            <Text className="flex-1 text-[11.5px] text-ink-500" numberOfLines={1}>
-              {content.meta}
-            </Text>
-          </View>
-        ) : null}
-      </View>
-      <ChevronRight size={17} color={ink[300]} />
-    </Pressable>
-  );
-}
-
-
-

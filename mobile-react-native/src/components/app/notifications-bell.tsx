@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Modal, Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { glass, glassShadow } from "@/components/ui/glass";
 import type { HomeNotification } from "@/lib/notifications/derive";
 import { ink, semantic, shadow, surface } from "@/theme/tokens";
 
@@ -33,13 +34,14 @@ export function NotificationsBell({ notifications }: { notifications: HomeNotifi
         accessibilityRole="button"
         accessibilityLabel={count > 0 ? `Notifications, ${count} to review` : "Notifications"}
         onPress={() => setOpen(true)}
-        className="h-10 w-10 items-center justify-center rounded-pill bg-surface"
-        style={shadow.e1}
+        // Glass, to sit with the other round controls on Home.
+        className="h-12 w-12 items-center justify-center rounded-pill"
+        style={[glassShadow, { backgroundColor: glass.fillStrong, borderWidth: 1, borderColor: glass.rim }]}
       >
-        <Bell size={19} color={ink[500]} />
+        <Bell size={20} color={ink[900]} strokeWidth={1.8} />
         {count > 0 ? (
           <View
-            className="absolute right-1.5 top-1.5 h-4 min-w-4 items-center justify-center rounded-pill px-1"
+            className="absolute right-2 top-2 h-4 min-w-4 items-center justify-center rounded-pill px-1"
             style={{ backgroundColor: semantic.danger }}
           >
             <Text className="text-[9px] font-bold leading-none text-white">

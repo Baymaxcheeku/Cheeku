@@ -1,3 +1,4 @@
+import { createContext, useContext, useId } from "react";
 import Svg, {
   Defs,
   Ellipse,
@@ -28,10 +29,33 @@ import Svg, {
  * the silhouette must change in both files.
  */
 
+/*
+ * Per-instance gradient ids.
+ *
+ * On web every SVG shares the document's id namespace, and `url(#shell)`
+ * resolves to the FIRST element with that id. Expo Router keeps earlier stack
+ * screens mounted but hidden, so a mascot on a later screen was painting with
+ * the gradients of a hidden one and came out washed white. A prefix per drawing
+ * keeps each mascot's defs its own. Harmless on device, where ids are scoped
+ * per SVG anyway.
+ */
+const IdPrefix = createContext("s");
+
+function SproutIds({ children }: { children: React.ReactNode }) {
+  const id = useId().replace(/[^a-zA-Z0-9]/g, "");
+  return <IdPrefix.Provider value={`sp${id}`}>{children}</IdPrefix.Provider>;
+}
+
+function useSproutIds() {
+  const prefix = useContext(IdPrefix);
+  return (name: string) => `${prefix}-${name}`;
+}
+
 const BODY =
   "M100 44 C126 44 144 66 149 100 C154 134 146 166 120 173 C107 176 93 176 80 173 C54 166 46 134 51 100 C56 66 74 44 100 44 Z";
 
 function SproutDefs() {
+  const u = useSproutIds();
   return (
     <Defs>
       {/*
@@ -45,7 +69,7 @@ function SproutDefs() {
        * and brand-50, and the outline below carries the silhouette on anything
        * lighter still.
        */}
-      <RadialGradient id="shell" cx="0.34" cy="0.24" r="0.88" fx="0.28" fy="0.16">
+      <RadialGradient id={u("shell")} cx="0.34" cy="0.24" r="0.88" fx="0.28" fy="0.16">
         <Stop offset="0" stopColor="#e6e1fb" />
         <Stop offset="0.34" stopColor="#d8d0f8" />
         <Stop offset="0.66" stopColor="#c3b7f4" />
@@ -53,38 +77,38 @@ function SproutDefs() {
         <Stop offset="1" stopColor="#9382e4" />
       </RadialGradient>
 
-      <RadialGradient id="limb" cx="0.36" cy="0.26" r="0.86">
+      <RadialGradient id={u("limb")} cx="0.36" cy="0.26" r="0.86">
         <Stop offset="0" stopColor="#d5ccf9" />
         <Stop offset="0.55" stopColor="#bcadf3" />
         <Stop offset="1" stopColor="#8f7ce1" />
       </RadialGradient>
 
-      <LinearGradient id="foot" x1="0" y1="0" x2="0" y2="1">
+      <LinearGradient id={u("foot")} x1="0" y1="0" x2="0" y2="1">
         <Stop offset="0" stopColor="#a99aec" />
         <Stop offset="1" stopColor="#8877dd" />
       </LinearGradient>
 
       {/* Blush, deliberately not the danger red. */}
-      <LinearGradient id="heart" x1="0" y1="0" x2="0.4" y2="1">
+      <LinearGradient id={u("heart")} x1="0" y1="0" x2="0.4" y2="1">
         <Stop offset="0" stopColor="#ffc2d4" />
         <Stop offset="1" stopColor="#f2789e" />
       </LinearGradient>
 
-      <LinearGradient id="leaf" x1="0" y1="0" x2="1" y2="1">
+      <LinearGradient id={u("leaf")} x1="0" y1="0" x2="1" y2="1">
         <Stop offset="0" stopColor="#cfc6fb" />
         <Stop offset="1" stopColor="#9f8fe8" />
       </LinearGradient>
 
       {/* Rim occlusion: transparent through the lit centre, darkening only at
           the edge, tinted indigo because black on lavender reads as dirt. */}
-      <RadialGradient id="ao" cx="0.5" cy="0.44" r="0.6">
+      <RadialGradient id={u("ao")} cx="0.5" cy="0.44" r="0.6">
         <Stop offset="0.66" stopColor="#312a6b" stopOpacity="0" />
         <Stop offset="0.89" stopColor="#312a6b" stopOpacity="0.09" />
         <Stop offset="1" stopColor="#312a6b" stopOpacity="0.2" />
       </RadialGradient>
 
       {/* Light bounced up off the ground, so the base does not go dead. */}
-      <LinearGradient id="bounce" x1="0" y1="0" x2="0" y2="1">
+      <LinearGradient id={u("bounce")} x1="0" y1="0" x2="0" y2="1">
         <Stop offset="0" stopColor="#ffffff" stopOpacity="0" />
         <Stop offset="0.62" stopColor="#ffffff" stopOpacity="0" />
         <Stop offset="1" stopColor="#fffdf8" stopOpacity="0.7" />
@@ -94,14 +118,15 @@ function SproutDefs() {
 }
 
 function Top() {
+  const u = useSproutIds();
   return (
     <G>
       <Path d="M100 48 C100 36 101 28 105 21" fill="none" stroke="#8877dd" strokeWidth="4.5" strokeLinecap="round" />
-      <Path d="M99 34 C90 33 84 27 85 21 C92 20 99 26 99 34 Z" fill="url(#leaf)" />
+      <Path d="M99 34 C90 33 84 27 85 21 C92 20 99 26 99 34 Z" fill={`url(#${u("leaf")})`} />
       {/* Health and growth in one glyph. This is the mark that identifies the
           character at 34px, so it must never be cropped by a viewBox. */}
       <G transform="translate(112 15) rotate(14)">
-        <Path d="M0 9 C-3 4 -10 1 -10 -5 C-10 -10 -5 -12 0 -7 C5 -12 10 -10 10 -5 C10 1 3 4 0 9 Z" fill="url(#heart)" />
+        <Path d="M0 9 C-3 4 -10 1 -10 -5 C-10 -10 -5 -12 0 -7 C5 -12 10 -10 10 -5 C10 1 3 4 0 9 Z" fill={`url(#${u("heart")})`} />
         <Ellipse cx="-4" cy="-5" rx="2.6" ry="1.9" fill="#fff" opacity="0.55" />
       </G>
     </G>
@@ -109,11 +134,12 @@ function Top() {
 }
 
 function Arms({ wave }: { wave: boolean }) {
+  const u = useSproutIds();
   return (
     <G>
       <Path
         d="M56 116 C42 126 36 144 42 156 C46 163 56 161 60 153 C64 143 62 128 56 116 Z"
-        fill="url(#limb)"
+        fill={`url(#${u("limb")})`}
       />
       <Path
         d={
@@ -121,7 +147,7 @@ function Arms({ wave }: { wave: boolean }) {
             ? "M144 110 C160 104 172 88 170 74 C169 66 160 64 155 72 C148 82 144 98 144 110 Z"
             : "M144 116 C158 126 164 144 158 156 C154 163 144 161 140 153 C136 143 138 128 144 116 Z"
         }
-        fill="url(#limb)"
+        fill={`url(#${u("limb")})`}
       />
     </G>
   );
@@ -151,9 +177,10 @@ function Face() {
 }
 
 function Body() {
+  const u = useSproutIds();
   return (
     <G>
-      <Path d={BODY} fill="url(#shell)" />
+      <Path d={BODY} fill={`url(#${u("shell")})`} />
       {/*
        * A soft contour, drawn once over the fill.
        *
@@ -164,8 +191,8 @@ function Body() {
        * outline.
        */}
       <Path d={BODY} fill="none" stroke="#6d5cc8" strokeWidth="1.6" opacity="0.28" />
-      <Path d={BODY} fill="url(#ao)" />
-      <Path d={BODY} fill="url(#bounce)" opacity="0.5" />
+      <Path d={BODY} fill={`url(#${u("ao")})`} />
+      <Path d={BODY} fill={`url(#${u("bounce")})`} opacity="0.5" />
       <Ellipse cx="78" cy="72" rx="20" ry="14" fill="#fff" opacity="0.32" transform="rotate(-22 78 72)" />
     </G>
   );
@@ -179,6 +206,7 @@ function Body() {
  */
 export function MascotBust({ size = 148 }: { size?: number }) {
   return (
+    <SproutIds>
     <Svg width={size} height={size * (160 / 172)} viewBox="14 -10 172 160">
       <SproutDefs />
       <Top />
@@ -186,19 +214,29 @@ export function MascotBust({ size = 148 }: { size?: number }) {
       <Body />
       <Face />
     </Svg>
+    </SproutIds>
   );
 }
 
 /** The whole character, standing. */
 export function MascotFigure({ size = 200, wave = false }: { size?: number; wave?: boolean }) {
   return (
+    <SproutIds>
+      <Figure size={size} wave={wave} />
+    </SproutIds>
+  );
+}
+
+function Figure({ size, wave }: { size: number; wave: boolean }) {
+  const u = useSproutIds();
+  return (
     <Svg width={size} height={size} viewBox="0 0 200 200">
       <SproutDefs />
       <Ellipse cx="100" cy="182" rx="52" ry="9" fill="#2f2578" opacity="0.1" />
       <Top />
       <Arms wave={wave} />
-      <Ellipse cx="80" cy="174" rx="16" ry="8.5" fill="url(#foot)" />
-      <Ellipse cx="120" cy="174" rx="16" ry="8.5" fill="url(#foot)" />
+      <Ellipse cx="80" cy="174" rx="16" ry="8.5" fill={`url(#${u("foot")})`} />
+      <Ellipse cx="120" cy="174" rx="16" ry="8.5" fill={`url(#${u("foot")})`} />
       <Body />
       <Face />
     </Svg>

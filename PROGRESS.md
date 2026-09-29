@@ -1153,3 +1153,75 @@ it renders its final state under reduced motion.
 
 **Needs a device check:** welcome swipe (PanResponder), `transformOrigin` on the
 bubble pop, the sliding segmented control on sign-in, and the headline weights.
+
+## Home redesign — 2026-09-29 (cloud session, not yet seen on a device)
+
+Rebuilt twice in one day. The first pass (dark violet Ask card, a "Book with
+Cheeku" tile row) was rejected by the owner, who pointed at a service-app
+reference ("Smart Home, Smooth Services") for the look: editorial headline with
+an italic accent, round glass controls, a search-shaped input, one pastel hero
+card with floating glass pills, filter chips over soft pastel list cards.
+
+Order: profile chip · bell → headline → ask bar → Cheeku card → Book care →
+Worth knowing pills → Health file row.
+
+- **The family switcher is the profile chip.** It names whose health the screen
+  shows ("Good evening, Athar" or "Viewing, Mummy"), shows the other members'
+  faces, and opens the family tray. The inline avatar row is gone from Home.
+- **Glass and gradients without native modules.** `ui/glass.tsx`: translucent
+  white, a bright rim and a wide soft shadow instead of `expo-blur`, and SVG
+  gradients via the already-shipped `react-native-svg` instead of
+  `expo-linear-gradient`. No new development build needed.
+- **Headline** is Inter Medium with an Inter Medium Italic violet second line
+  (`Inter_500Medium_Italic`, same font package).
+- **Cheeku card**: the status pill ("2 to review" / "All in range") is the only
+  semantic colour on Home. The memory line is a real count for the active
+  member. "Start a chat" opens /ask; the ask bar carries a typed question there,
+  where the safety gate runs. The mic says voice is coming soon.
+- **Book care** (roadmap phases 2–3): filter chips, three pastel cards under
+  "All" with "Show 3 more", each opening an honest coming-soon sheet with a
+  per-service Notify me (`cheeku.notify`, device only). No invented doctors,
+  ratings, prices or slots, and no specialist inferred from records. Pastels
+  avoid green, amber and red.
+
+**Needs a device check:** SVG gradient rendering behind rounded, clipped cards
+on Android; the fading placeholder over the input; the glass shadow on
+Android, which only reads `elevation`.
+
+## Doctor booking, chat-led — 2026-09-29 (preview, sample data, not seen on a device)
+
+Home → Book care → **Doctor consult** now opens a working flow; every other
+service is still "coming soon".
+
+`/book/consult` → `/book/doctors` → `/book/slot?id=` → `/book/confirmed`
+
+- **The conversation is scripted, not generated.** Cheeku asks: who it is for,
+  the area of concern (chips), details in their own words, since when, how much
+  it affects the day, what's been tried, whether to share recent reports. The
+  answers become a **pre-consultation note** shown for review before booking.
+- **The safety gate runs on every free-text answer**, on device, with the same
+  `detect` the chat uses. `escalate` stops the flow and opens the emergency
+  screen (verified in the browser: "severe chest pain and can't breathe" shows
+  112/108 and no doctors). Tier-2 shows the caution note and continues.
+- **No triage.** The reader picks the area; Cheeku names the department that
+  handles it and always offers a general physician (a test asserts it). Nothing
+  in the details, duration or impact answers influences the suggestion — those
+  go only into the note for the doctor.
+- **Two booking mechanics.** Online: 15-minute video slots. Clinic: half-hour
+  OPD arrival windows with a token at the desk, and the OPD hours shown, because
+  that is how most Indian OPDs work.
+- **Sample data, labelled on every screen.** `lib/booking/catalog.ts` holds
+  eleven invented doctors. No star ratings or review counts: an invented rating
+  is a fabricated trust signal. Faces are illustrated (`lib/booking/faces.ts`)
+  with calm traits pinned. Confirming books nothing and charges nothing.
+- **Draft state** is a zustand store, in memory only, never persisted: it holds
+  what somebody said about their health.
+
+**Fixed in passing (web preview):** every mascot shared SVG gradient ids, and on
+web `url(#shell)` resolves to the first match in the document — often inside a
+hidden, still-mounted stack screen — so later mascots rendered washed white.
+Each drawing now prefixes its ids (`sprout.tsx`).
+
+**Also learned:** a `Pressable` with both `className` and a function `style`
+loses its NativeWind styles on web; those buttons rendered invisible. The
+booking screens use plain style objects for pressable buttons.

@@ -25,6 +25,8 @@ export const font = {
   medium: "Inter_500Medium",
   semibold: "Inter_600SemiBold",
   bold: "Inter_700Bold",
+  /** Only for Home's editorial accent line. */
+  italic: "Inter_500Medium_Italic",
 } as const;
 
 /*

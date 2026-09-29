@@ -4,6 +4,7 @@ import {
   Inter_400Regular,
   Inter_500Medium,
   Inter_600SemiBold,
+  Inter_500Medium_Italic,
   Inter_700Bold,
   useFonts,
 } from "@expo-google-fonts/inter";
@@ -83,6 +84,8 @@ export default function RootLayout() {
     Inter_500Medium,
     Inter_600SemiBold,
     Inter_700Bold,
+    // The editorial accent line on Home's headline. Same package, JS-only.
+    Inter_500Medium_Italic,
   });
 
   useEffect(() => {

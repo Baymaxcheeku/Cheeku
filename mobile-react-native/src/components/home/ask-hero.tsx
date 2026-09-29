@@ -1,0 +1,342 @@
+import { useRouter } from "expo-router";
+import { ArrowUp, Camera, ChevronDown, Clock3, MessageCircleHeart, Mic, Sparkles } from "lucide-react-native";
+import { useEffect, useState } from "react";
+import { Pressable, Text, TextInput, View } from "react-native";
+import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
+
+import { MascotFigure } from "@/components/illustrations/sprout";
+import { Bob, BubblePop } from "@/components/onboarding/motion";
+import { Avatar } from "@/components/ui/avatar";
+import { Glass, GlassCircle, Gradient, glass, glassShadow } from "@/components/ui/glass";
+import { useReducedMotion } from "@/components/ui/motion";
+import type { ActiveProfile } from "@/lib/profiles/context";
+import { brand, ink, semantic } from "@/theme/tokens";
+import { font } from "@/theme/type";
+
+/*
+ * Home, top half: who you are looking after, the one question, and Cheeku.
+ *
+ * The visual language is borrowed from service-app home screens the owner
+ * pointed at: an editorial headline with an italic accent line, round glass
+ * controls, a search-shaped input, and one big pastel hero card with floating
+ * glass pills. What makes it ours is what the pieces say: the hero is a
+ * conversation, and the floating pills are how the reader's file reads and
+ * that Cheeku is there at any hour.
+ */
+
+/**
+ * The profile chip. The family switcher, folded into one control: it names
+ * whose health the screen is showing and opens the family tray. The small
+ * faces behind it say there are others to switch to without a second row.
+ */
+export function ProfileChip({
+  active,
+  others,
+  greeting,
+  onPress,
+}: {
+  active: ActiveProfile;
+  /** "Good evening", shown above your own name. Another member says "Viewing". */
+  greeting: string;
+  others: readonly ActiveProfile[];
+  onPress: () => void;
+}) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={`Viewing ${active.name}. Switch family member`}
+      onPress={onPress}
+      style={({ pressed }) => [
+        glassShadow,
+        {
+          flexDirection: "row",
+          alignItems: "center",
+          gap: 10,
+          paddingVertical: 5,
+          paddingLeft: 5,
+          paddingRight: 14,
+          borderRadius: 999,
+          backgroundColor: glass.fillStrong,
+          borderWidth: 1,
+          borderColor: glass.rim,
+          transform: [{ scale: pressed ? 0.98 : 1 }],
+        },
+      ]}
+    >
+      <Avatar svg={active.avatar} background={active.avatarBackground} size={40} />
+      <View>
+        <Text style={{ fontFamily: font.regular, fontSize: 11.5, color: ink[500] }}>
+          {active.isPrimary ? greeting : "Viewing"}
+        </Text>
+        <View className="flex-row items-center gap-1">
+          <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900], maxWidth: 120 }}>
+            {firstName(active.name)}
+          </Text>
+          <ChevronDown size={14} color={ink[500]} />
+        </View>
+      </View>
+      {others.length > 0 ? (
+        <View className="ml-1 flex-row">
+          {others.slice(0, 2).map((p, i) => (
+            <View key={p.id} style={{ marginLeft: i === 0 ? 0 : -8, borderRadius: 999, borderWidth: 2, borderColor: "#fff" }}>
+              <Avatar svg={p.avatar} background={p.avatarBackground} size={24} />
+            </View>
+          ))}
+        </View>
+      ) : null}
+    </Pressable>
+  );
+}
+
+/** The editorial headline: a plain first line, an italic violet second. */
+export function HomeHeadline({ name, isSelf }: { name: string; isSelf: boolean }) {
+  const [lead, accent] = isSelf
+    ? [`Hi ${name},`, "what's on your mind?"]
+    : [`${name}'s health,`, "all in one place."];
+  return (
+    <Text
+      accessibilityRole="header"
+      style={{ fontFamily: font.medium, fontSize: 34, lineHeight: 40, letterSpacing: -1.1, color: ink[900] }}
+    >
+      {lead}
+      {"\n"}
+      <Text style={{ fontFamily: font.italic, color: brand[600] }}>{accent}</Text>
+    </Text>
+  );
+}
+
+/*
+ * The placeholder cycles through three short ways in, and stops while the box
+ * is in use. Short enough to fit beside two icons on the narrowest phone.
+ */
+const HINTS = ["Ask Cheeku anything…", "Snap a report…", "Ask in your words…"] as const;
+
+/**
+ * The input, shaped like a search bar because that is the gesture everybody
+ * already knows: tap, type, go.
+ *
+ * IT DOES NOT ANSWER HERE. It carries the question into /ask, where the safety
+ * gate runs before anything is sent.
+ *
+ * VOICE IS NOT BUILT, and the mic says so when pressed rather than pretending
+ * to listen.
+ */
+export function AskBar() {
+  const router = useRouter();
+  const still = useReducedMotion();
+  const [value, setValue] = useState("");
+  const [focused, setFocused] = useState(false);
+  const [voiceHint, setVoiceHint] = useState(false);
+  const [tick, setTick] = useState(0);
+
+  useEffect(() => {
+    if (still || focused || value) return;
+    const id = setInterval(() => setTick((t) => t + 1), 3200);
+    return () => clearInterval(id);
+  }, [still, focused, value]);
+
+  useEffect(() => {
+    if (!voiceHint) return;
+    const id = setTimeout(() => setVoiceHint(false), 2600);
+    return () => clearTimeout(id);
+  }, [voiceHint]);
+
+  const hint = HINTS[tick % HINTS.length];
+
+  function ask(question: string) {
+    const trimmed = question.trim();
+    router.push(trimmed ? `/ask?q=${encodeURIComponent(trimmed)}` : "/ask");
+  }
+
+  function openUpload() {
+    const trimmed = value.trim();
+    router.push(`/ask?upload=1${trimmed ? `&q=${encodeURIComponent(trimmed)}` : ""}`);
+  }
+
+  return (
+    <View>
+      <View className="flex-row items-center gap-2.5">
+        <Glass
+          strong
+          className="h-14 flex-1 flex-row items-center gap-2 rounded-pill pl-4 pr-1"
+          style={{ borderColor: focused ? brand[300] : glass.rim, borderWidth: focused ? 1.5 : 1 }}
+        >
+          <Sparkles size={18} color={brand[500]} strokeWidth={1.8} />
+          <View className="min-w-0 flex-1 justify-center" style={{ height: 44 }}>
+            <TextInput
+              value={value}
+              onChangeText={setValue}
+              onFocus={() => setFocused(true)}
+              onBlur={() => setFocused(false)}
+              onSubmitEditing={() => ask(value)}
+              returnKeyType="send"
+              accessibilityLabel="Ask Cheeku a question"
+              style={{ fontSize: 15.5, color: ink[900], fontFamily: font.regular, height: 44 }}
+            />
+            {/* A drawn placeholder, so it can fade between hints. */}
+            {!value ? (
+              <View pointerEvents="none" style={{ position: "absolute", left: 0, right: 0 }}>
+                <Animated.Text
+                  key={focused ? "focused" : hint}
+                  entering={still ? undefined : FadeIn.duration(300)}
+                  exiting={still ? undefined : FadeOut.duration(180)}
+                  numberOfLines={1}
+                  style={{ fontFamily: font.regular, fontSize: 15.5, color: ink[300] }}
+                >
+                  {focused ? "Ask Cheeku anything…" : hint}
+                </Animated.Text>
+              </View>
+            ) : null}
+          </View>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Photograph a report to ask about"
+            onPress={openUpload}
+            hitSlop={4}
+            className="h-11 w-10 items-center justify-center"
+          >
+            <Camera size={20} color={ink[700]} strokeWidth={1.8} />
+          </Pressable>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Voice. Coming soon"
+            onPress={() => setVoiceHint(true)}
+            hitSlop={4}
+            className="h-11 w-10 items-center justify-center"
+          >
+            <Mic size={20} color={ink[700]} strokeWidth={1.8} />
+          </Pressable>
+        </Glass>
+        <GlassCircle dark size={56} label="Send" onPress={() => ask(value)}>
+          <ArrowUp size={21} color="#ffffff" />
+        </GlassCircle>
+      </View>
+
+      {voiceHint ? (
+        <BubblePop from="right" style={{ alignSelf: "flex-end", marginTop: 8, marginRight: 60 }}>
+          <Glass strong className="rounded-[14px] px-3 py-2">
+            <Text accessibilityLiveRegion="polite" style={{ fontFamily: font.medium, fontSize: 12.5, color: ink[700] }}>
+              Talking to me is coming soon. Type for now?
+            </Text>
+          </Glass>
+        </BubblePop>
+      ) : null}
+    </View>
+  );
+}
+
+/**
+ * The hero card. Cheeku, large, on a soft violet gradient, with two glass pills
+ * floating on top: how the active member's file reads, and that Cheeku is
+ * awake at any hour.
+ *
+ * THE STATUS PILL is the one place on Home where green and red appear, because
+ * it states how the records read — which is what those colours are for.
+ *
+ * THE MEMORY LINE is a real count for the active member and nothing more. At
+ * zero it asks for the first report instead of pretending.
+ */
+export function CheekuCard({
+  name,
+  isSelf,
+  remembered,
+  needsReview,
+  onStatus,
+}: {
+  name: string;
+  isSelf: boolean;
+  remembered: number;
+  needsReview: number;
+  onStatus: () => void;
+}) {
+  const router = useRouter();
+
+  const status =
+    remembered === 0
+      ? { dot: brand[500], text: "No reports yet" }
+      : needsReview === 0
+        ? { dot: semantic.safe, text: "All in range" }
+        : { dot: semantic.danger, text: `${needsReview} to review` };
+
+  const memory =
+    remembered > 0
+      ? `I remember ${remembered} ${remembered === 1 ? "report" : "reports"} ${
+          isSelf ? "of yours" : `of ${name}'s`
+        }. Ask me about any of them.`
+      : "Send me one report and I'll remember it for good.";
+
+  return (
+    <View className="overflow-hidden rounded-[32px]" style={[glassShadow, { minHeight: 318 }]}>
+      <Gradient from="#f1edff" to="#d8cffd" glow="#ffffff" />
+
+      {/* Cheeku, large and alive, anchored to the card's bottom-right corner. */}
+      <View pointerEvents="none" style={{ position: "absolute", right: -18, bottom: -14 }}>
+        <Bob>
+          <MascotFigure size={190} wave />
+        </Bob>
+      </View>
+
+      <View className="flex-1 p-4">
+        <View className="flex-row items-center justify-between">
+          <Pressable accessibilityRole="button" accessibilityLabel={`${status.text}. Open records`} onPress={onStatus}>
+            <Glass className="flex-row items-center gap-2 rounded-pill py-2 pl-2.5 pr-3.5">
+              <View className="h-5 w-5 items-center justify-center rounded-pill bg-white">
+                <View className="h-2 w-2 rounded-pill" style={{ backgroundColor: status.dot }} />
+              </View>
+              <Text style={{ fontFamily: font.semibold, fontSize: 13.5, color: ink[900] }}>{status.text}</Text>
+            </Glass>
+          </Pressable>
+          <Glass className="flex-row items-center gap-1.5 rounded-pill px-3.5 py-2">
+            <Clock3 size={14} color={ink[700]} strokeWidth={1.9} />
+            <Text style={{ fontFamily: font.semibold, fontSize: 13.5, color: ink[900] }}>24/7</Text>
+          </Glass>
+        </View>
+
+        <View className="mt-5 pr-[38%]">
+          <View className="flex-row items-center gap-1.5">
+            <MessageCircleHeart size={15} color={brand[600]} strokeWidth={1.9} />
+            <Text style={{ fontFamily: font.medium, fontSize: 13, color: brand[700] }}>Ask Cheeku</Text>
+          </View>
+          <Text
+            style={{ fontFamily: font.semibold, fontSize: 24, lineHeight: 29, letterSpacing: -0.6, color: ink[900], marginTop: 6 }}
+          >
+            Talk it through with Cheeku
+          </Text>
+          <Text style={{ fontFamily: font.regular, fontSize: 13.5, lineHeight: 19, color: ink[700], marginTop: 8 }}>
+            {memory}
+          </Text>
+        </View>
+
+        {/* The action: a dark disc joined to a glass label, one tap target. */}
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Start a chat with Cheeku"
+          onPress={() => router.push("/ask")}
+          style={({ pressed }) => ({
+            marginTop: "auto",
+            paddingTop: 20,
+            alignSelf: "flex-start",
+            flexDirection: "row",
+            alignItems: "center",
+            transform: [{ scale: pressed ? 0.97 : 1 }],
+          })}
+        >
+          <View className="z-10 h-[52px] w-[52px] items-center justify-center rounded-pill" style={{ backgroundColor: ink[900] }}>
+            <MessageCircleHeart size={21} color="#ffffff" strokeWidth={1.9} />
+          </View>
+          <Glass
+            strong
+            className="-ml-4 h-[46px] justify-center pl-7 pr-5"
+            style={{ borderTopRightRadius: 999, borderBottomRightRadius: 999 }}
+          >
+            <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>Start a chat</Text>
+          </Glass>
+        </Pressable>
+      </View>
+    </View>
+  );
+}
+
+export function firstName(name: string): string {
+  return name.trim().split(/\s+/)[0] ?? name;
+}
