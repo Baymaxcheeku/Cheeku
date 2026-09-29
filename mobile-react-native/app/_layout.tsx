@@ -7,7 +7,6 @@ import {
   Inter_700Bold,
   useFonts,
 } from "@expo-google-fonts/inter";
-import { Nunito_800ExtraBold, Nunito_900Black } from "@expo-google-fonts/nunito";
 import { QueryClient } from "@tanstack/react-query";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { Stack } from "expo-router";
@@ -84,10 +83,6 @@ export default function RootLayout() {
     Inter_500Medium,
     Inter_600SemiBold,
     Inter_700Bold,
-    // The display face. Headlines in onboarding use its rounded terminals to
-    // match the mascot's shape language; body copy stays Inter everywhere.
-    Nunito_800ExtraBold,
-    Nunito_900Black,
   });
 
   useEffect(() => {

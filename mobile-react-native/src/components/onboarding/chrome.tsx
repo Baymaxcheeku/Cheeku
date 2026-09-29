@@ -162,7 +162,7 @@ export function Dots({ current, total }: { current: number; total: number }) {
 }
 
 /**
- * The onboarding headline. Nunito Black, with the second half in brand violet.
+ * The onboarding headline. Inter SemiBold, with the second half in brand violet.
  *
  * The accent carries the emotional half of the sentence ("the awkward ones",
  * "that one report"), so the eye lands on what the screen is actually offering.

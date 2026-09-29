@@ -1121,12 +1121,13 @@ the locale is set: `LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8`. The repo's own
 Same flow and data rules, new surface: splash → welcome (3 panels) → sign-in →
 who → profile → journey → first-upload.
 
-**Type.** Headlines are Nunito Black / ExtraBold (`@expo-google-fonts/nunito`,
-JS-only, no native rebuild); everything a person reads to understand something
-stays Inter. `src/theme/type.ts` names the font FILE in every style, because on
-iOS `fontFamily: "Inter_400Regular"` plus `fontWeight: "700"` does not select
-the bold file. The rest of the app still relies on `font-bold` classes and has
-the same problem; only onboarding is fixed so far.
+**Type.** Inter only. Headlines are Inter SemiBold (600) with tight tracking.
+Nunito Black was tried first and rejected the same day as far too heavy; the
+owner picked SemiBold Inter from a side-by-side of four options. `src/theme/type.ts`
+names the font FILE in every style, because on iOS `fontFamily:
+"Inter_400Regular"` plus `fontWeight: "700"` does not select the bold file. The
+rest of the app still relies on `font-bold` classes and has the same problem;
+only onboarding is fixed so far.
 
 **The setup quest.** The four steps after sign-up share one progress bar in
 the header and a "Step 2 of 4 · About you" label in the content. `/plan` is not
@@ -1151,4 +1152,4 @@ their tail corner, the mascot bobs, "typing" precedes a reply, bars fill. All of
 it renders its final state under reduced motion.
 
 **Needs a device check:** welcome swipe (PanResponder), `transformOrigin` on the
-bubble pop, the sliding segmented control on sign-in, and Nunito rendering.
+bubble pop, the sliding segmented control on sign-in, and the headline weights.

@@ -13,20 +13,14 @@ import { ink } from "@/theme/tokens";
  * this, because browsers synthesise weights. Naming the exact file is the only
  * form that renders the same everywhere.
  *
- * TWO FACES, EACH WITH ONE JOB.
- *
- *   Nunito  — display only. Its rounded terminals are the mascot's shape
- *             language set in type, which is what makes a headline feel like
- *             Cheeku is speaking rather than a form. Never used below 18pt,
- *             where the rounding stops reading and starts looking soft.
- *   Inter   — everything a person reads to understand something: body, labels,
- *             buttons, fields. Tuned for screens, and it is what the rest of
- *             the app already uses, so onboarding does not hand over to a
- *             different-looking product at the first screen after it.
+ * ONE FACE. Inter throughout, headlines included, so onboarding looks like the
+ * product it leads into. Headlines are SemiBold (600), not Bold: a rounded
+ * Nunito Black was tried on 2026-09-29 and read as shouting, and Bold at 32pt
+ * does the same thing more quietly. The weight step from body (400) to headline
+ * (600) plus tight tracking is enough hierarchy on its own.
  */
 export const font = {
-  display: "Nunito_900Black",
-  displaySoft: "Nunito_800ExtraBold",
+  display: "Inter_600SemiBold",
   regular: "Inter_400Regular",
   medium: "Inter_500Medium",
   semibold: "Inter_600SemiBold",
@@ -42,9 +36,9 @@ export const font = {
  * default; the same value on 14pt body costs legibility.
  */
 export const type = {
-  hero: { fontFamily: font.display, fontSize: 32, lineHeight: 36, letterSpacing: -0.8, color: ink[900] },
-  title: { fontFamily: font.display, fontSize: 27, lineHeight: 31, letterSpacing: -0.5, color: ink[900] },
-  heading: { fontFamily: font.displaySoft, fontSize: 19, lineHeight: 24, letterSpacing: -0.2, color: ink[900] },
+  hero: { fontFamily: font.display, fontSize: 31, lineHeight: 37, letterSpacing: -0.9, color: ink[900] },
+  title: { fontFamily: font.display, fontSize: 27, lineHeight: 32, letterSpacing: -0.7, color: ink[900] },
+  heading: { fontFamily: font.display, fontSize: 19, lineHeight: 24, letterSpacing: -0.3, color: ink[900] },
   body: { fontFamily: font.regular, fontSize: 15, lineHeight: 22, color: ink[500] },
   bodySmall: { fontFamily: font.regular, fontSize: 13, lineHeight: 19, color: ink[500] },
   label: { fontFamily: font.semibold, fontSize: 14, lineHeight: 19, color: ink[900] },
