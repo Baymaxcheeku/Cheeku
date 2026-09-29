@@ -3,7 +3,6 @@ import {
   CalendarDays,
   ChevronRight,
   FlaskConical,
-  MapPin,
   Pill,
   ReceiptText,
   ScanLine,
@@ -12,9 +11,10 @@ import {
   type LucideIcon,
 } from "lucide-react-native";
 import { Pressable, Text, View } from "react-native";
-import Svg, { Circle, Defs, Path, RadialGradient, Stop } from "react-native-svg";
 
 import { Avatar } from "@/components/ui/avatar";
+import { Gradient } from "@/components/ui/glass";
+import { font } from "@/theme/type";
 import { generatedAvatar } from "@/lib/profiles/avatar";
 import { formatEventDate } from "@/lib/records/grouping";
 import type { DocType, RecordSummary, Severity } from "@/lib/records/types";
@@ -77,6 +77,11 @@ export function RecordCard({
   // Same rule as the switcher, so nobody has two faces across two screens.
   const face = generatedAvatar(record.profileAvatarSeed ?? record.profileId, index);
 
+  /*
+   * REDESIGNED 2026-09-29 as a pastel list card, the same shape as the Book
+   * care cards on Home: the type's wash as a soft gradient, a white tile with
+   * the type mark and the person's face, and a round glass chevron.
+   */
   return (
     <Pressable
       accessibilityRole="button"
@@ -84,103 +89,49 @@ export function RecordCard({
         severity ? severity.label : "In range"
       }`}
       onPress={() => router.push(`/records/${record.id}`)}
-      className="flex-row overflow-hidden rounded-card bg-surface"
-      style={shadow.e1}
+      style={({ pressed }) => ({ transform: [{ scale: pressed ? 0.985 : 1 }] })}
     >
-      {/*
-       * The plate. A block of the type's own colour, wide enough to read as a
-       * deliberate part of the card rather than a stripe someone forgot to
-       * remove, and carrying both the type mark and the face.
-       */}
-      <View style={{ width: 76, backgroundColor: style.wash }}>
-        <PlateArt tint={style.tint} />
-        <View className="flex-1 items-center justify-center gap-2 py-3.5">
-          <View
-            className="h-9 w-9 items-center justify-center rounded-tile"
-            style={{ backgroundColor: "rgba(255,255,255,0.75)" }}
-          >
-            <style.icon size={18} color={style.tint} />
+      <View className="flex-row items-center gap-3.5 overflow-hidden rounded-[26px] p-2.5 pr-3" style={shadow.e1}>
+        <Gradient from={style.wash} to="#ffffff" />
+        <View
+          className="h-[68px] w-[68px] items-center justify-center rounded-[20px]"
+          style={{ backgroundColor: "rgba(255,255,255,0.9)", borderWidth: 1, borderColor: "rgba(255,255,255,0.95)" }}
+        >
+          <style.icon size={26} color={style.tint} strokeWidth={1.7} />
+          <View style={{ position: "absolute", right: -4, bottom: -4, borderRadius: 999, borderWidth: 2, borderColor: "#fff" }}>
+            <Avatar svg={face.svg} background={face.background} size={24} />
           </View>
-          <Avatar svg={face.svg} background={face.background} size={22} />
         </View>
-      </View>
 
-      <View className="min-w-0 flex-1 gap-1 px-3.5 py-3">
-        <View className="flex-row items-center gap-2">
-          <Text
-            className="text-[10px] font-bold uppercase tracking-wide"
-            style={{ color: style.tint }}
-          >
-            {style.label}
+        <View className="min-w-0 flex-1 gap-0.5">
+          <View className="flex-row items-center gap-2">
+            <Text style={{ fontFamily: font.semibold, fontSize: 11.5, color: style.tint }}>{style.label}</Text>
+            {severity ? (
+              <View className="rounded-pill px-2 py-0.5" style={{ backgroundColor: severity.bg }}>
+                <Text style={{ fontFamily: font.bold, fontSize: 10.5, color: severity.fg }}>{severity.label}</Text>
+              </View>
+            ) : null}
+          </View>
+          <Text numberOfLines={2} style={{ fontFamily: font.semibold, fontSize: 15.5, lineHeight: 20, color: ink[900] }}>
+            {record.title}
           </Text>
-          {severity ? (
-            <View
-              className="ml-auto rounded-pill px-2 py-0.5"
-              style={{ backgroundColor: severity.bg }}
-            >
-              <Text className="text-[10px] font-bold" style={{ color: severity.fg }}>
-                {severity.label}
-              </Text>
-            </View>
-          ) : null}
-        </View>
-
-        <Text className="text-[15.5px] font-semibold leading-[20px] text-ink-900" numberOfLines={2}>
-          {record.title}
-        </Text>
-
-        <View className="mt-0.5 flex-row items-center gap-1.5">
-          <CalendarDays size={12} color={ink[300]} />
-          <Text className="text-[11.5px] text-ink-500">{formatEventDate(record.eventDate)}</Text>
-          <Text className="text-[11.5px] text-ink-300">·</Text>
-          <Text className="min-w-0 flex-1 text-[11.5px] text-ink-500" numberOfLines={1}>
-            {record.profileName}
-          </Text>
-        </View>
-
-        {record.facility ? (
           <View className="flex-row items-center gap-1.5">
-            <MapPin size={12} color={ink[300]} />
-            <Text className="min-w-0 flex-1 text-[11.5px] text-ink-300" numberOfLines={1}>
-              {record.facility}
+            <CalendarDays size={12} color={ink[300]} />
+            <Text numberOfLines={1} style={{ flexShrink: 1, fontFamily: font.regular, fontSize: 12, color: ink[500] }}>
+              {formatEventDate(record.eventDate)} · {record.profileName}
+              {record.facility ? ` · ${record.facility}` : ""}
             </Text>
           </View>
-        ) : null}
-      </View>
+        </View>
 
-      <View className="justify-center pr-2.5">
-        <ChevronRight size={18} color={ink[300]} />
+        <View
+          className="h-9 w-9 items-center justify-center rounded-pill"
+          style={{ backgroundColor: "rgba(255,255,255,0.75)", borderWidth: 1, borderColor: "rgba(255,255,255,0.95)" }}
+        >
+          <ChevronRight size={17} color={ink[700]} />
+        </View>
       </View>
     </Pressable>
-  );
-}
-
-/**
- * A bloom and an arc on the plate.
- *
- * Flat colour behind an icon reads as a placeholder at this size. This costs
- * nothing, needs no asset per document type, and gives every card a little
- * depth without a photograph the app would then have to ship and licence.
- */
-function PlateArt({ tint }: { tint: string }) {
-  const id = tint.slice(1);
-  return (
-    <Svg width={76} height={120} style={{ position: "absolute" }}>
-      <Defs>
-        <RadialGradient id={`plate-${id}`} cx="0.2" cy="0.1" r="1">
-          <Stop offset="0" stopColor={tint} stopOpacity="0.22" />
-          <Stop offset="1" stopColor={tint} stopOpacity="0" />
-        </RadialGradient>
-      </Defs>
-      <Circle cx={6} cy={4} r={62} fill={`url(#plate-${id})`} />
-      <Path
-        d="M-8 108 A 60 60 0 0 1 78 34"
-        stroke={tint}
-        strokeOpacity="0.16"
-        strokeWidth="1.2"
-        fill="none"
-      />
-    </Svg>
   );
 }
 

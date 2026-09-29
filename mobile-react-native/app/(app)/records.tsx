@@ -4,6 +4,7 @@ import { ActivityIndicator, RefreshControl, ScrollView, Text, View } from "react
 
 import { OfflineBanner } from "@/components/app/offline-banner";
 import { RecordsHeader } from "@/components/records/chrome";
+import { Backdrop } from "@/components/ui/screen";
 import { PulseBar } from "@/components/records/pulse-bar";
 import { FilterBar, type Filters } from "@/components/records/filter-bar";
 import { RecordsView } from "@/components/records/records-view";
@@ -102,7 +103,8 @@ export default function Records() {
         />
       }
     >
-      <RecordsHeader title="My Records" subtitle="All your health documents in one place." />
+      <Backdrop height={380} />
+      <RecordsHeader title="Health records" subtitle="Every report, prescription and scan, in one place." />
 
       <OfflineBanner updatedAt={records.dataUpdatedAt} />
 

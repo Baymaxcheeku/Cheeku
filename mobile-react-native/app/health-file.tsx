@@ -3,7 +3,6 @@ import {
   ArrowDownRight,
   ArrowUpRight,
   Building2,
-  ChevronLeft,
   ChevronRight,
   Minus,
   Pill,
@@ -14,6 +13,9 @@ import { ActivityIndicator, Pressable, ScrollView, Text, View } from "react-nati
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { TYPE_META } from "@/components/health/health-file";
+import { glass, glassShadow } from "@/components/ui/glass";
+import { Backdrop, ScreenHeader } from "@/components/ui/screen";
+import { font } from "@/theme/type";
 import type { FlaggedValue } from "@/lib/records/overview";
 import { useActiveProfileName, useHealthOverview } from "@/lib/records/use-overview";
 import { brand, ink, semantic, shadow, surface } from "@/theme/tokens";
@@ -58,28 +60,22 @@ export default function HealthFileScreen() {
   }
 
   return (
-    <View className="flex-1 bg-canvas" style={{ paddingTop: insets.top }}>
-      <View className="h-11 flex-row items-center px-5">
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Go back"
-          onPress={() => (router.canGoBack() ? router.back() : router.replace("/home"))}
-          hitSlop={10}
-          className="h-9 w-9 items-center justify-center rounded-pill"
-        >
-          <ChevronLeft size={20} color={ink[700]} />
-        </Pressable>
-      </View>
+    <View className="flex-1 bg-canvas">
+      <Backdrop />
+      <ScreenHeader />
 
       <ScrollView
         contentContainerStyle={{ paddingBottom: insets.bottom + 32 }}
         showsVerticalScrollIndicator={false}
       >
         <View className="px-5">
-          <Text className="text-[26px] font-semibold leading-[31px] tracking-tight text-ink-900">
+          <Text
+            accessibilityRole="header"
+            style={{ fontFamily: font.semibold, fontSize: 28, lineHeight: 33, letterSpacing: -0.8, color: ink[900] }}
+          >
             {name.data ? `${name.data}'s health file` : "Health file"}
           </Text>
-          <Text className="mt-1.5 text-[13px] leading-[19px] text-ink-500">
+          <Text style={{ fontFamily: font.regular, fontSize: 14, lineHeight: 20, color: ink[500], marginTop: 4 }}>
             Everything filed, and what the labs measured. Cheeku reads it back to you; it does not
             interpret it.
           </Text>
@@ -123,7 +119,7 @@ export default function HealthFileScreen() {
         {/* --------------------------------------------------- medications -- */}
         {overview.medications.length > 0 ? (
           <Section label="Medicines">
-            <View className="mx-5 overflow-hidden rounded-card bg-surface" style={shadow.e1}>
+            <View className="mx-5 overflow-hidden rounded-[26px]" style={[glassShadow, { backgroundColor: glass.fillStrong, borderWidth: 1, borderColor: glass.rim }]}>
               {overview.medications.map((med, i) => (
                 <View
                   key={med.id}
@@ -168,8 +164,8 @@ export default function HealthFileScreen() {
                   accessibilityRole="button"
                   accessibilityLabel={`${entry.count} ${meta.label}. Opens documents`}
                   onPress={() => router.push("/records")}
-                  className="flex-row items-center gap-2.5 rounded-card bg-surface px-3.5 py-3"
-                  style={[shadow.e1, { minWidth: "47%" }]}
+                  className="flex-row items-center gap-2.5 rounded-[22px] px-3.5 py-3"
+                  style={[glassShadow, { minWidth: "47%", backgroundColor: glass.fillStrong, borderWidth: 1, borderColor: glass.rim }]}
                 >
                   <View className="h-9 w-9 items-center justify-center rounded-tile bg-brand-50">
                     <meta.icon size={16} color={brand[600]} />
@@ -185,8 +181,8 @@ export default function HealthFileScreen() {
             })}
             {overview.vaccinations > 0 ? (
               <View
-                className="flex-row items-center gap-2.5 rounded-card bg-surface px-3.5 py-3"
-                style={[shadow.e1, { minWidth: "47%" }]}
+                className="flex-row items-center gap-2.5 rounded-[22px] px-3.5 py-3"
+                style={[glassShadow, { minWidth: "47%", backgroundColor: glass.fillStrong, borderWidth: 1, borderColor: glass.rim }]}
               >
                 <View className="h-9 w-9 items-center justify-center rounded-tile bg-brand-50">
                   <Syringe size={16} color={brand[600]} />
@@ -221,7 +217,7 @@ export default function HealthFileScreen() {
         {/* --------------------------------------------------------- care -- */}
         {overview.doctors.length > 0 || overview.facilities.length > 0 ? (
           <Section label="Who you've seen">
-            <View className="mx-5 overflow-hidden rounded-card bg-surface" style={shadow.e1}>
+            <View className="mx-5 overflow-hidden rounded-[26px]" style={[glassShadow, { backgroundColor: glass.fillStrong, borderWidth: 1, borderColor: glass.rim }]}>
               {overview.doctors.map((name, i) => (
                 <Row key={`d-${name}`} icon={Stethoscope} label={name} first={i === 0} />
               ))}

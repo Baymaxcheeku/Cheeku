@@ -10,7 +10,7 @@ import { Meter } from "@/components/ui/motion";
 import { activeProfile } from "@/lib/profiles/context";
 import { updatePersonalInfo } from "@/lib/settings/actions";
 import { accountEmail, profileDetail } from "@/lib/settings/queries";
-import { brand, ink } from "@/theme/tokens";
+import { brand } from "@/theme/tokens";
 
 const SEXES = [
   ["female", "Female"],

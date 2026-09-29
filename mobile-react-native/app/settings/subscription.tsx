@@ -25,7 +25,7 @@ import {
 import { getEntitlement } from "@/lib/billing/quota";
 import { cancelSubscription } from "@/lib/billing/subscribe";
 import { profileAccess } from "@/lib/profiles/context";
-import { brand, ink, semantic, shadow, surface } from "@/theme/tokens";
+import { brand, ink, semantic, surface } from "@/theme/tokens";
 
 /**
  * Subscription. What you are on, what it covers, and how to leave.

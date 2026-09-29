@@ -1225,3 +1225,40 @@ Each drawing now prefixes its ids (`sprout.tsx`).
 **Also learned:** a `Pressable` with both `className` and a function `style`
 loses its NativeWind styles on web; those buttons rendered invisible. The
 booking screens use plain style objects for pressable buttons.
+
+## Appointments and the app-wide redesign — 2026-09-29 (cloud session)
+
+**Appointments (new).** Bookings are saved on the device (`lib/booking/
+appointments.ts`, SecureStore via `kv`, capped at 8): doctor, time, mode, for
+whom and the area of concern — never the symptom note. `/appointments`
+(Upcoming / Past) and `/appointments/[id]` (countdown, Join call that opens 15
+min before and says when until then, clinic address and OPD rule, Get
+directions, Reschedule through the slot picker, Cancel with confirmation,
+"Prepare questions with Cheeku"). Entry points: an Upcoming card on Home above
+the Cheeku card (with Join on the card when the room is open), "Your care"
+tiles on Profile, and "View appointment" after booking. Not a tab: most people
+have none or one. Preview only — no video room exists; the Join button says so.
+
+**Redesign, everywhere, in the Home language.** Shared primitives in
+`components/ui/screen.tsx` (Backdrop, ScreenHeader, PageTitle, PillButton,
+Portrait) and `components/ui/glass.tsx`.
+
+- Tab bar: a floating glass pill with a dark + disc; labels Home, Records,
+  Ask Cheeku, Profile.
+- Tokens: `shadow.e1` is now the soft violet glass shadow and cards are 24pt
+  round, so every card in the app moved with it.
+- Settings chrome (all sub-screens): backdrop, glass back button, big title
+  with a glass icon tile, glass panels, ink Save. Security had its own header
+  and was converted by hand. Grey uppercase section labels are sentence-case
+  semibold everywhere in settings.
+- Profile tab, Records tab and cards, record detail, health file, Ask Cheeku,
+  upload, article, plan: see the commits of this date.
+
+**Colour rule enforced in four more places.** Processing status on a record,
+finished upload steps, plan feature ticks and the Save confirmation were
+green; green means a health result, so they are violet now.
+
+**Not seen rendered:** Ask Cheeku, upload, the Profile tab and Home with real
+data all need a signed-in account; they typecheck, lint and were built, but
+the browser preview here can only reach screens that do not query Supabase.
+The whole mobile package now lints clean.

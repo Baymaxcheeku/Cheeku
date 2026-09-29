@@ -9,7 +9,7 @@ import { Meter } from "@/components/ui/motion";
 import { activeProfile } from "@/lib/profiles/context";
 import { updateHealthProfile } from "@/lib/settings/actions";
 import { profileDetail, type ProfileDetail } from "@/lib/settings/queries";
-import { brand, ink } from "@/theme/tokens";
+import { brand } from "@/theme/tokens";
 
 const BLOOD_GROUPS = [
   ["A+", "A+"],

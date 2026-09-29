@@ -14,7 +14,10 @@ import { useState } from "react";
 import { ActivityIndicator, Linking, Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { Glass, GlassCircle } from "@/components/ui/glass";
 import { SpringSwitch } from "@/components/ui/motion";
+import { Backdrop } from "@/components/ui/screen";
+import { font } from "@/theme/type";
 import {
   isLockEnabled,
   lockCapability,
@@ -99,34 +102,34 @@ export default function Security() {
   const enabled = state.data?.enabled ?? false;
 
   return (
-    <View className="flex-1 bg-canvas" style={{ paddingTop: insets.top }}>
-      <View className="h-11 flex-row items-center px-5">
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Go back"
-          onPress={() => (router.canGoBack() ? router.back() : router.replace("/settings"))}
-          hitSlop={10}
-          className="h-9 w-9 items-center justify-center rounded-pill"
-        >
-          <ChevronLeft size={20} color={ink[700]} />
-        </Pressable>
+    <View className="flex-1 bg-canvas">
+      <Backdrop height={380} />
+      <View className="flex-row items-center px-4 pb-1" style={{ paddingTop: insets.top + 6 }}>
+        <GlassCircle label="Go back" onPress={() => (router.canGoBack() ? router.back() : router.replace("/settings"))}>
+          <ChevronLeft size={21} color={ink[900]} />
+        </GlassCircle>
       </View>
 
       <ScrollView
         contentContainerStyle={{ paddingBottom: insets.bottom + 32 }}
         showsVerticalScrollIndicator={false}
       >
-        <View className="px-5">
-          <Text className="text-[26px] font-bold leading-[31px] tracking-tight text-ink-900">
+        <View className="flex-row items-center gap-3.5 px-5 pt-3">
+          <Glass strong className="h-14 w-14 items-center justify-center rounded-[18px]">
+            <ShieldCheck size={23} color={brand[600]} strokeWidth={1.8} />
+          </Glass>
+          <View className="min-w-0 flex-1">
+          <Text accessibilityRole="header" style={{ fontFamily: font.semibold, fontSize: 26, lineHeight: 31, letterSpacing: -0.7, color: ink[900] }}>
             Security &amp; privacy
           </Text>
-          <Text className="mt-1.5 text-[13px] leading-[19px] text-ink-500">
+          <Text style={{ fontFamily: font.regular, fontSize: 13.5, lineHeight: 19, color: ink[500], marginTop: 2 }}>
             Who can open this app, and what happens to what is inside it.
           </Text>
+          </View>
         </View>
 
         {/* ------------------------------------------------------ app lock -- */}
-        <Text className="mt-7 px-5 text-[12px] font-bold uppercase tracking-wide text-ink-300">
+        <Text className="mt-7 px-5 text-[15px] font-semibold text-ink-700">
           App lock
         </Text>
         <View className="mx-5 mt-2 overflow-hidden rounded-card bg-surface" style={shadow.e1}>
@@ -200,7 +203,7 @@ export default function Security() {
         ) : null}
 
         {/* ------------------------------------------------------ password -- */}
-        <Text className="mt-7 px-5 text-[12px] font-bold uppercase tracking-wide text-ink-300">
+        <Text className="mt-7 px-5 text-[15px] font-semibold text-ink-700">
           Account
         </Text>
         <View className="mx-5 mt-2 overflow-hidden rounded-card bg-surface" style={shadow.e1}>
@@ -232,7 +235,7 @@ export default function Security() {
         ) : null}
 
         {/* ------------------------------------------------------- privacy -- */}
-        <Text className="mt-7 px-5 text-[12px] font-bold uppercase tracking-wide text-ink-300">
+        <Text className="mt-7 px-5 text-[15px] font-semibold text-ink-700">
           How your data is handled
         </Text>
         <View className="mx-5 mt-2 gap-2">

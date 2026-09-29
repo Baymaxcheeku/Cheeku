@@ -1,13 +1,10 @@
 import {
   ArrowLeft,
-  ArrowRight,
   CalendarClock,
   Check,
   CheckCircle2,
-  FileText,
   Infinity as InfinityIcon,
   Lock,
-  MessageSquare,
   ShieldCheck,
   Sparkles,
   Users,
@@ -26,7 +23,6 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { MascotBust } from "@/components/illustrations/sprout";
 import { StaggerItem } from "@/components/ui/motion";
 import {
   DAILY_PASS_HOURS,

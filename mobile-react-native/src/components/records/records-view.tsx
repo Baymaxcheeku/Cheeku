@@ -11,7 +11,7 @@ import Animated, {
   withSpring,
 } from "react-native-reanimated";
 
-import { EmptyRecords, FileChip, SeverityPill } from "@/components/records/chrome";
+import { EmptyRecords, SeverityPill } from "@/components/records/chrome";
 import { RecordCard, TYPE_STYLE } from "@/components/records/record-card";
 import { useReducedMotion } from "@/components/ui/motion";
 import { groupByMonth, groupByRecency, railDate } from "@/lib/records/grouping";

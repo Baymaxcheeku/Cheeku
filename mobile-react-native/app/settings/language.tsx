@@ -3,7 +3,7 @@ import { Text, View } from "react-native";
 
 import { Panel, SettingsScreen } from "@/components/settings/chrome";
 import { PopIn, StaggerItem } from "@/components/ui/motion";
-import { brand, ink, shadow, surface } from "@/theme/tokens";
+import { brand, shadow, surface } from "@/theme/tokens";
 
 /*
  * Every other Indian language is SHOWN rather than hidden.
@@ -42,7 +42,7 @@ export default function Language() {
       </View>
 
       <View className="mt-5 px-5">
-        <Text className="text-[12px] font-bold uppercase tracking-wide text-ink-300">
+        <Text className="text-[15px] font-semibold text-ink-700">
           Available now
         </Text>
         {/* `alignSelf: stretch` because PopIn's animated wrapper otherwise
@@ -68,7 +68,7 @@ export default function Language() {
       </View>
 
       <View className="mt-5 px-5">
-        <Text className="text-[12px] font-bold uppercase tracking-wide text-ink-300">
+        <Text className="text-[15px] font-semibold text-ink-700">
           Coming soon
         </Text>
         <View className="mt-2 overflow-hidden rounded-card bg-surface" style={shadow.e1}>

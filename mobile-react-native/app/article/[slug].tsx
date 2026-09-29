@@ -5,7 +5,8 @@ import { ActivityIndicator, Linking, Pressable, ScrollView, Text, View } from "r
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { articleBySlug, type ArticleBlock, type ArticleTint } from "@/lib/knowledge/queries";
-import { brand, ink, shadow, surface } from "@/theme/tokens";
+import { glass, glassShadow } from "@/components/ui/glass";
+import { brand, ink, surface } from "@/theme/tokens";
 
 /*
  * The same washes as the rail, so opening a panel feels like entering it.
@@ -79,17 +80,17 @@ export default function ArticleReader() {
       >
         {/* The masthead carries the article's own colour through from the rail,
             so opening one feels like entering the panel rather than leaving it. */}
-        <View style={{ backgroundColor: tint.field, paddingTop: insets.top + 8 }}>
+        <View style={{ backgroundColor: tint.field, paddingTop: insets.top + 8, borderBottomLeftRadius: 36, borderBottomRightRadius: 36, overflow: "hidden" }}>
           <View className="px-5 pb-6">
             <Pressable
               accessibilityRole="button"
               accessibilityLabel="Go back"
               onPress={() => (router.canGoBack() ? router.back() : router.replace("/home"))}
               hitSlop={10}
-              className="h-9 w-9 items-center justify-center rounded-pill"
-              style={{ backgroundColor: "rgba(255,255,255,0.7)" }}
+              className="h-12 w-12 items-center justify-center rounded-pill"
+              style={[glassShadow, { backgroundColor: glass.fillStrong, borderWidth: 1, borderColor: glass.rim }]}
             >
-              <ChevronLeft size={19} color={tint.title} />
+              <ChevronLeft size={21} color={ink[900]} />
             </Pressable>
 
             {/* Semibold at 26 rather than bold at 27: a headline this long
@@ -124,7 +125,7 @@ export default function ArticleReader() {
           <Text className="text-[12px] font-bold uppercase tracking-wide text-ink-300">
             Sources
           </Text>
-          <View className="mt-2 overflow-hidden rounded-card bg-surface" style={shadow.e1}>
+          <View className="mt-2 overflow-hidden rounded-[26px]" style={[glassShadow, { backgroundColor: glass.fillStrong, borderWidth: 1, borderColor: glass.rim }]}>
             {data.sources.map((source, i) => {
               const openable = Boolean(source.url);
               return (

@@ -5,12 +5,15 @@ import { ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { FamilyScene } from "@/components/illustrations/scenes";
-import { Dots, Headline, ReassuranceStrip } from "@/components/onboarding/chrome";
+import { Headline, ReassuranceStrip } from "@/components/onboarding/chrome";
+import { Glass, Gradient, glassShadow } from "@/components/ui/glass";
+import { Backdrop } from "@/components/ui/screen";
+import { font } from "@/theme/type";
 import { Paywall } from "@/components/billing/paywall";
 import { Button } from "@/components/ui/button";
 import { clearAudience, readAudience } from "@/lib/auth/audience";
 import { formatPrice, PLANS } from "@/lib/billing/plans";
-import { brand, semantic, shadow, surface } from "@/theme/tokens";
+import { brand, surface } from "@/theme/tokens";
 
 /**
  * A7 — family access, offered once, skippable.
@@ -73,8 +76,11 @@ export default function Plan() {
 
   return (
     <View className="flex-1 bg-canvas">
+      <Backdrop />
       <View className="h-11 flex-row items-center px-5" style={{ marginTop: insets.top }}>
-        <Text className="ml-auto text-[13px] font-medium text-ink-300">Last step</Text>
+        <Glass className="ml-auto rounded-pill px-3 py-1.5">
+          <Text style={{ fontFamily: font.semibold, fontSize: 12, color: brand[700] }}>Last step</Text>
+        </Glass>
       </View>
 
       <ScrollView
@@ -99,10 +105,8 @@ export default function Plan() {
           <FamilyScene size={150} />
         </View>
 
-        <View
-          className="rounded-card bg-surface p-4"
-          style={[{ borderWidth: 2, borderColor: brand[500] }, shadow.e1]}
-        >
+        <View className="overflow-hidden rounded-[28px] p-4" style={[glassShadow, { borderWidth: 2, borderColor: brand[300] }]}>
+          <Gradient from="#ffffff" to="#efeaff" glow="#ffffff" />
           <View className="flex-row items-start gap-3">
             <View className="h-11 w-11 items-center justify-center rounded-tile bg-brand-50">
               <Users size={20} color={brand[600]} />
@@ -132,7 +136,8 @@ export default function Plan() {
           >
             {family.features.map((feature) => (
               <View key={feature} className="flex-row items-start gap-2">
-                <Check size={14} color={semantic.safe} style={{ marginTop: 2 }} />
+                {/* Brand, not green: a plan feature is not a health result. */}
+                <Check size={14} color={brand[600]} strokeWidth={2.6} style={{ marginTop: 2 }} />
                 <Text className="flex-1 text-[12.5px] leading-[18px] text-ink-700">{feature}</Text>
               </View>
             ))}
@@ -163,7 +168,6 @@ export default function Plan() {
 
         <View className="mt-auto gap-3 pt-4">
           <ReassuranceStrip />
-          <Dots current={4} total={5} />
         </View>
 
         <Paywall

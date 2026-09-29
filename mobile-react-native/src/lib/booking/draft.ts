@@ -28,6 +28,8 @@ export type Booking = {
   /** ISO date of the day, midnight local. */
   day: string;
   slotLabel: string;
+  /** The saved appointment this booking created. */
+  appointmentId?: string;
 };
 
 type Draft = {

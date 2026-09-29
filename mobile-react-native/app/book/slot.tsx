@@ -11,6 +11,7 @@ import { Boop } from "@/components/onboarding/motion";
 import { Glass, GlassCircle, Gradient, glass, glassShadow } from "@/components/ui/glass";
 import { useReducedMotion } from "@/components/ui/motion";
 import { SPECIALTIES, addDays, dayName, doctorById, slotsFor, type Mode, type Slot } from "@/lib/booking/catalog";
+import { useAppointmentList } from "@/lib/booking/appointments";
 import { useBookingDraft } from "@/lib/booking/draft";
 import { doctorFace } from "@/lib/booking/faces";
 import { brand, ink } from "@/theme/tokens";
@@ -37,7 +38,8 @@ export default function SlotScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const still = useReducedMotion();
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, reschedule } = useLocalSearchParams<{ id: string; reschedule?: string }>();
+  const appointments = useAppointmentList();
   const { mode, setMode, intake, book } = useBookingDraft();
   const doctor = doctorById(id);
 
@@ -65,7 +67,21 @@ export default function SlotScreen() {
 
   function confirm() {
     if (!slot || !doctor) return;
-    book({ doctorId: doctor.id, mode: m, day: day.toISOString(), slotLabel: slot.label });
+    // Rescheduling moves the existing appointment rather than adding a second.
+    if (reschedule) {
+      appointments.reschedule(reschedule, day.toISOString(), slot.label);
+      router.replace(`/appointments/${reschedule}` as never);
+      return;
+    }
+    const appt = appointments.add({
+      doctorId: doctor.id,
+      mode: m,
+      day: day.toISOString(),
+      slotLabel: slot.label,
+      forName: intake?.forName ?? "Me",
+      concern: intake?.concern ?? "General consultation",
+    });
+    book({ doctorId: doctor.id, mode: m, day: day.toISOString(), slotLabel: slot.label, appointmentId: appt.id });
     router.replace("/book/confirmed");
   }
 
@@ -262,7 +278,9 @@ export default function SlotScreen() {
           })}
         >
           <Text style={{ fontFamily: font.semibold, fontSize: 15.5, color: "#fff" }}>
-            {slot ? `Book ${slot.label.split(" – ")[0]}, ${dayIndex === 0 ? "today" : dayName(day)}` : "Pick a time to continue"}
+            {slot
+              ? `${reschedule ? "Move to" : "Book"} ${slot.label.split(" – ")[0]}, ${dayIndex === 0 ? "today" : dayName(day)}`
+              : "Pick a time to continue"}
           </Text>
         </Pressable>
       </View>
