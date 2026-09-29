@@ -39,7 +39,11 @@ import { ProductPicker } from "@/components/ai/product-picker";
 import { CautionNote } from "@/components/safety/caution-note";
 import { shouldCaution } from "@/lib/safety/caution";
 import { Paywall } from "@/components/billing/paywall";
-import { MascotBust } from "@/components/illustrations/sprout";
+import { MascotBust, MascotFigure } from "@/components/illustrations/sprout";
+import { Bob, TypingDots } from "@/components/onboarding/motion";
+import { Glass, GlassCircle, Gradient, glass, glassShadow } from "@/components/ui/glass";
+import { Backdrop } from "@/components/ui/screen";
+import { font } from "@/theme/type";
 import { EmergencyEscalation } from "@/components/safety/emergency-escalation";
 import {
   askAboutProduct,
@@ -258,7 +262,8 @@ export default function Ask() {
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <View className="flex-1 bg-canvas" style={{ paddingTop: insets.top }}>
-        <View className="flex-row items-center gap-2.5 px-5 pb-2 pt-2">
+        <Backdrop height={360} />
+        <View className="flex-row items-center gap-3 px-4 pb-2 pt-2">
           {/*
            * The mascot in the header, not a stethoscope.
            *
@@ -271,27 +276,29 @@ export default function Ask() {
            * everywhere else: the mascot's own gradient starts near-white, so on
            * the plain canvas it washes out to an outline.
            */}
-          <View className="h-10 w-10 items-center justify-center overflow-hidden rounded-pill bg-brand-100">
-            {/* Nudged down so the disc frames the face rather than the stalk:
-                the bust's viewBox starts above the head to make room for the
-                heart, which at 34px is most of the circle. */}
-            <View style={{ marginTop: 7 }}>
-              <MascotBust size={34} />
+          <Glass strong className="h-12 w-12 items-center justify-center overflow-hidden rounded-pill">
+            {/* Nudged down so the disc frames the face rather than the stalk. */}
+            <View style={{ marginTop: 8 }}>
+              <MascotBust size={40} />
             </View>
-          </View>
+          </Glass>
           <View className="flex-1">
-            <Text className="text-[17px] font-bold text-ink-900">Cheeku</Text>
-            <Text className="text-[11.5px] text-ink-500">
+            <View className="flex-row items-center gap-1.5">
+              <Text style={{ fontFamily: font.semibold, fontSize: 18, color: ink[900] }}>Cheeku</Text>
+              <View className="h-2 w-2 rounded-pill" style={{ backgroundColor: "#8ff0b8" }} />
+            </View>
+            <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 12.5, color: ink[500] }}>
               Reading {context.data.profile.name}&apos;s records with you
             </Text>
           </View>
           {quota.remaining !== null ? (
-            <View className="rounded-pill bg-surface px-2.5 py-1" style={shadow.e1}>
-              <Text className="text-[11px] font-semibold text-ink-500">
-                {quota.remaining} left
-              </Text>
-            </View>
+            <Glass className="rounded-pill px-3 py-1.5">
+              <Text style={{ fontFamily: font.semibold, fontSize: 12, color: ink[700] }}>{quota.remaining} left today</Text>
+            </Glass>
           ) : null}
+          <GlassCircle label="Book a doctor" onPress={() => router.push("/book/consult")}>
+            <Stethoscope size={19} color={ink[900]} />
+          </GlassCircle>
         </View>
 
         <ScrollView
@@ -314,17 +321,12 @@ export default function Ask() {
                * which is what "consistent" has to mean here.
                */}
               <View className="items-center">
-                <View
-                  className="h-[116px] w-[116px] items-center justify-center overflow-hidden rounded-pill"
-                  style={{ backgroundColor: brand[100] }}
-                >
-                  <View style={{ marginTop: 20 }}>
-                    <MascotBust size={110} />
-                  </View>
-                </View>
+                <Bob>
+                  <MascotFigure size={132} wave />
+                </Bob>
 
-                <Text className="mt-3.5 text-center text-[19px] font-bold tracking-tight text-ink-900">
-                  Hi, I&apos;m Cheeku
+                <Text style={{ fontFamily: font.semibold, fontSize: 26, letterSpacing: -0.7, color: ink[900], marginTop: 8, textAlign: "center" }}>
+                  Hi, I&apos;m <Text style={{ fontFamily: font.italic, color: brand[600] }}>Cheeku</Text>
                 </Text>
                 {/*
                  * The old line spent its second half on two things Cheeku will
@@ -334,7 +336,7 @@ export default function Ask() {
                  * the starters, where it reads as candour rather than a warning
                  * label.
                  */}
-                <Text className="mt-1.5 max-w-[290px] text-center text-[13.5px] leading-[20px] text-ink-500">
+                <Text style={{ fontFamily: font.regular, fontSize: 14.5, lineHeight: 21, color: ink[500], marginTop: 6, textAlign: "center", maxWidth: 300 }}>
                   Ask me anything about {context.data.profile.name}&apos;s health — a word on a
                   report, something that has been bothering you, or what to raise at the next
                   appointment.
@@ -342,9 +344,7 @@ export default function Ask() {
               </View>
 
               <View className="mt-5 w-full gap-2">
-                <Text className="px-0.5 text-[11px] font-bold uppercase tracking-wide text-ink-300">
-                  Try one of these
-                </Text>
+                <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[700], paddingHorizontal: 2 }}>Try one of these</Text>
                 {starters.map(({ text, topic }) => {
                   const Icon = TOPIC_ICON[topic] ?? Sparkles;
                   return (
@@ -352,22 +352,43 @@ export default function Ask() {
                     key={text}
                     accessibilityRole="button"
                     onPress={() => void send(text)}
-                    className="flex-row items-center gap-3 rounded-card bg-surface px-3 py-3"
-                    style={[shadow.e1, { borderWidth: 1, borderColor: brand[50] }]}
+                    className="flex-row items-center gap-3 rounded-[22px] px-3 py-3"
+                    style={[glassShadow, { backgroundColor: glass.fillStrong, borderWidth: 1, borderColor: glass.rim }]}
                   >
-                    <View className="h-8 w-8 items-center justify-center rounded-tile bg-brand-50">
-                      <Icon size={15} color={brand[600]} />
+                    <View className="h-10 w-10 items-center justify-center rounded-[13px] bg-brand-50">
+                      <Icon size={17} color={brand[600]} />
                     </View>
-                    <Text className="min-w-0 flex-1 text-[13.5px] leading-[18px] text-ink-900">
-                      {text}
-                    </Text>
-                    <ArrowUpRight size={14} color={ink[300]} />
+                    <Text style={{ flex: 1, fontFamily: font.medium, fontSize: 14, lineHeight: 19, color: ink[900] }}>{text}</Text>
+                    <ArrowUpRight size={15} color={ink[300]} />
                   </Pressable>
                   );
                 })}
               </View>
 
-              <View className="mt-4 flex-row items-start gap-2 rounded-card bg-brand-50 px-3.5 py-3">
+              {/*
+               * The bridge from talking to doing: when a conversation is not
+               * enough, the next step is a doctor, and the booking flow starts
+               * with Cheeku asking the same kind of questions.
+               */}
+              <Pressable
+                accessibilityRole="button"
+                onPress={() => router.push("/book/consult")}
+                style={({ pressed }) => ({ marginTop: 10, transform: [{ scale: pressed ? 0.985 : 1 }] })}
+              >
+                <View className="flex-row items-center gap-3 overflow-hidden rounded-[22px] p-3" style={glassShadow}>
+                  <Gradient from="#ece6ff" to="#f7f5ff" />
+                  <View className="h-10 w-10 items-center justify-center rounded-[13px] bg-white">
+                    <Stethoscope size={17} color={brand[600]} />
+                  </View>
+                  <View className="flex-1">
+                    <Text style={{ fontFamily: font.semibold, fontSize: 14, color: ink[900] }}>Need to see a doctor?</Text>
+                    <Text style={{ fontFamily: font.regular, fontSize: 12.5, color: ink[500] }}>I&apos;ll help you book, online or nearby</Text>
+                  </View>
+                  <ArrowUpRight size={15} color={ink[500]} />
+                </View>
+              </Pressable>
+
+              <View className="mt-4 flex-row items-start gap-2 rounded-[18px] px-3.5 py-3" style={{ backgroundColor: "rgba(241,240,254,0.8)" }}>
                 <ShieldCheck size={14} color={brand[500]} style={{ marginTop: 1 }} />
                 <Text className="flex-1 text-[11.5px] leading-[16px] text-ink-700">
                   I answer from your own records and name the one I used. I never diagnose or
@@ -381,9 +402,9 @@ export default function Ask() {
                 <Turn key={turn.id} turn={turn} onCitation={(id) => router.push(`/records/${id}`)} />
               ))}
               {pending ? (
-                <View className="self-start rounded-card bg-surface px-4 py-3" style={shadow.e1}>
-                  <ActivityIndicator size="small" color={brand[600]} />
-                </View>
+                <Glass strong className="self-start rounded-[20px] px-4 py-3.5" style={{ borderBottomLeftRadius: 6, marginLeft: 36 }}>
+                  <TypingDots color={brand[400]} />
+                </Glass>
               ) : null}
             </View>
           )}
@@ -405,18 +426,13 @@ export default function Ask() {
          * place to talk, and matches the Ask box on Home so the two entry
          * points feel like the same product.
          */}
-        <View
-          className="px-4 pt-2"
-          style={{
-            paddingBottom: 8,
-            borderTopWidth: 1,
-            borderTopColor: surface.line,
-            backgroundColor: surface.base,
-          }}
-        >
+        <View className="px-4 pt-2" style={{ paddingBottom: 6 }}>
           <View
-            className="flex-row items-end gap-1.5 rounded-card bg-canvas p-1.5 pl-3.5"
-            style={{ borderWidth: 1, borderColor: composerFocused ? brand[300] : surface.line }}
+            className="flex-row items-end gap-1.5 rounded-[26px] p-1.5 pl-4"
+            style={[
+              glassShadow,
+              { backgroundColor: glass.fillStrong, borderWidth: composerFocused ? 1.5 : 1, borderColor: composerFocused ? brand[300] : glass.rim },
+            ]}
           >
           <TextInput
             value={draft}
@@ -449,8 +465,8 @@ export default function Ask() {
             accessibilityState={{ disabled: pending || !draft.trim() }}
             disabled={pending || !draft.trim()}
             onPress={() => void send(draft)}
-            className="h-10 w-10 items-center justify-center rounded-pill bg-brand-600"
-            style={{ opacity: pending || !draft.trim() ? 0.4 : 1 }}
+            className="h-11 w-11 items-center justify-center rounded-pill"
+            style={{ backgroundColor: ink[900], opacity: pending || !draft.trim() ? 0.35 : 1 }}
           >
             <ArrowUp size={19} color="#ffffff" />
           </Pressable>
@@ -511,8 +527,8 @@ function Turn({ turn, onCitation }: { turn: ChatTurn; onCitation: (id: string) =
          * the conversation lean towards each other.
          */}
         <View
-          className="bg-brand-600 px-3.5 py-2.5"
-          style={{ borderRadius: 20, borderBottomRightRadius: 6 }}
+          className="bg-brand-600 px-4 py-3"
+          style={{ borderRadius: 22, borderBottomRightRadius: 6 }}
         >
           <Text className="text-[14px] leading-[20px] text-white">{turn.content}</Text>
         </View>
@@ -547,15 +563,13 @@ function Turn({ turn, onCitation }: { turn: ChatTurn; onCitation: (id: string) =
        * not leave it floating in the middle of a paragraph.
        */}
       <View className="flex-row items-start gap-2">
-        <View className="h-7 w-7 items-center justify-center overflow-hidden rounded-pill bg-brand-100">
-          <View style={{ marginTop: 5 }}>
-            <MascotBust size={24} />
-          </View>
+        <View style={{ width: 28, flexShrink: 0, marginTop: 2 }}>
+          <MascotBust size={28} />
         </View>
 
         <View
-          className="min-w-0 flex-1 bg-surface px-3.5 py-3"
-          style={[shadow.e1, { borderRadius: 20, borderBottomLeftRadius: 6 }]}
+          className="min-w-0 flex-1 px-4 py-3"
+          style={[glassShadow, { backgroundColor: glass.fillStrong, borderWidth: 1, borderColor: glass.rim, borderRadius: 22, borderBottomLeftRadius: 6 }]}
         >
         <Text className="text-[14px] leading-[21px] text-ink-900">{turn.content}</Text>
 
@@ -612,8 +626,8 @@ function Turn({ turn, onCitation }: { turn: ChatTurn; onCitation: (id: string) =
       {turn.followUps.length > 0 ? (
         <View className="mt-2 flex-row flex-wrap gap-1.5">
           {turn.followUps.map((followUp) => (
-            <View key={followUp} className="rounded-pill bg-surface px-3 py-1.5" style={shadow.e1}>
-              <Text className="text-[11.5px] text-ink-500">{followUp}</Text>
+            <View key={followUp} className="rounded-pill px-3 py-2" style={[glassShadow, { backgroundColor: glass.fillStrong, borderWidth: 1, borderColor: glass.rim }]}>
+              <Text style={{ fontFamily: font.medium, fontSize: 12.5, color: ink[700] }}>{followUp}</Text>
             </View>
           ))}
         </View>

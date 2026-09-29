@@ -4,7 +4,7 @@ import * as DocumentPicker from "expo-document-picker";
 import * as ImagePicker from "expo-image-picker";
 import {
   Check,
-  ChevronLeft,
+  ChevronRight,
   Cpu,
   FileText,
   FileUp,
@@ -13,18 +13,22 @@ import {
   Camera as CameraIcon,
   Search,
   ShieldCheck,
-  Upload,
   type LucideIcon,
 } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Alert, Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { Button } from "@/components/ui/button";
+import { MascotFigure } from "@/components/illustrations/sprout";
+import { Bob } from "@/components/onboarding/motion";
+import { Avatar } from "@/components/ui/avatar";
+import { Glass, Gradient, glass, glassShadow } from "@/components/ui/glass";
+import { Backdrop, ScreenHeader } from "@/components/ui/screen";
+import { font } from "@/theme/type";
 import { activeProfile, selectableProfiles } from "@/lib/profiles/context";
 import { uploadDocument, type PickedFile } from "@/lib/records/upload";
 import { stripImageMetadata } from "@/lib/upload/strip-exif";
-import { brand, ink, semantic, shadow, surface } from "@/theme/tokens";
+import { brand, ink, semantic } from "@/theme/tokens";
 
 type Phase = "pick" | "working" | "error";
 
@@ -253,8 +257,16 @@ export default function Scan() {
         className="flex-1 bg-canvas px-5"
         style={{ paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24 }}
       >
-        <Text className="text-[20px] font-bold text-ink-900">Working on it</Text>
-        <Text className="mt-1 text-[13px] leading-[19px] text-ink-500">
+        <Backdrop />
+        <View className="items-center">
+          <Bob>
+            <MascotFigure size={120} />
+          </Bob>
+        </View>
+        <Text style={{ fontFamily: font.semibold, fontSize: 26, letterSpacing: -0.7, color: ink[900], textAlign: "center", marginTop: 6 }}>
+          Reading it now
+        </Text>
+        <Text style={{ fontFamily: font.regular, fontSize: 14, lineHeight: 20, color: ink[500], textAlign: "center", marginTop: 4 }}>
           {STEP_NARRATIVE[Math.min(stepIndex, STEP_NARRATIVE.length - 1)]}
         </Text>
 
@@ -266,15 +278,16 @@ export default function Scan() {
             return (
               <View
                 key={step.key}
-                className="flex-row items-center gap-3 rounded-card bg-surface p-3.5"
-                style={[shadow.e1, { opacity: done || current ? 1 : 0.45 }]}
+                className="flex-row items-center gap-3 rounded-[22px] p-3.5"
+                style={[glassShadow, { backgroundColor: glass.fillStrong, borderWidth: 1, borderColor: glass.rim, opacity: done || current ? 1 : 0.45 }]}
               >
                 <View
                   className="h-10 w-10 items-center justify-center rounded-pill"
-                  style={{ backgroundColor: done ? semantic.safeBg : brand[50] }}
+                  // Brand, not green: a finished upload step is not a health result.
+                  style={{ backgroundColor: done ? brand[600] : brand[50] }}
                 >
                   {done ? (
-                    <Check size={18} color={semantic.safe} />
+                    <Check size={18} color="#ffffff" strokeWidth={3} />
                   ) : current ? (
                     <ActivityIndicator size="small" color={brand[600]} />
                   ) : (
@@ -308,37 +321,38 @@ export default function Scan() {
 
   const profiles = context.data?.allowed ?? [];
 
+  /*
+   * REDESIGNED 2026-09-29. Three sources as three pastel cards, the same shape
+   * as the Book care list on Home: one tap each, no dashed drop zone (nothing
+   * is ever dragged on a phone). Camera and library stay separate because they
+   * are two permissions natively, and asking for the camera from someone who
+   * only wanted a photo they already have is the request most often denied.
+   */
+  const sources = [
+    { key: "camera", title: "Take a photo", line: "Snap a report or prescription, page by page", Icon: CameraIcon, from: "#ece6ff", fg: brand[600], onPress: takePhoto },
+    { key: "library", title: "Choose from photos", line: "Screenshots and pictures you already have", Icon: Images, from: "#dcecff", fg: "#1a6fc2", onPress: pickFromLibrary },
+    { key: "file", title: "Upload a PDF or file", line: "A full lab report, a discharge summary", Icon: FileUp, from: "#ffe3d3", fg: "#c2650b", onPress: pickFile },
+  ] as const;
+
   return (
+    <View className="flex-1 bg-canvas">
+      <Backdrop />
+      <ScreenHeader title="Add a record" />
     <ScrollView
-      className="flex-1 bg-canvas"
-      contentContainerStyle={{
-        paddingHorizontal: 20,
-        paddingTop: insets.top + 12,
-        paddingBottom: insets.bottom + 24,
-      }}
+      className="flex-1"
+      contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 8, paddingBottom: insets.bottom + 24 }}
       showsVerticalScrollIndicator={false}
     >
-      <View className="flex-row items-center gap-3">
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Go back"
-          onPress={() => (router.canGoBack() ? router.back() : router.replace("/home"))}
-          hitSlop={8}
-          className="h-9 w-9 items-center justify-center rounded-tile bg-surface"
-          style={shadow.e1}
-        >
-          <ChevronLeft size={20} color={brand[600]} />
-        </Pressable>
-        <Text className="text-[20px] font-bold text-ink-900">Add a document</Text>
-      </View>
-
-      <Text className="mt-2 text-[13px] leading-[19px] text-ink-500">
-        Cheeku will read it and pull out the key information. You review everything before it is
-        saved.
+      <Text accessibilityRole="header" style={{ fontFamily: font.medium, fontSize: 30, lineHeight: 36, letterSpacing: -1, color: ink[900] }}>
+        What are we{"\n"}
+        <Text style={{ fontFamily: font.italic, color: brand[600] }}>filing today?</Text>
+      </Text>
+      <Text style={{ fontFamily: font.regular, fontSize: 14, lineHeight: 20, color: ink[500], marginTop: 8 }}>
+        I&apos;ll read it and pull out the key details. You check everything before it&apos;s saved.
       </Text>
 
-      <Text className="mt-5 text-[13px] font-medium text-ink-700">Who is this for?</Text>
-      <View className="mt-2 flex-row flex-wrap gap-2">
+      <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[700], marginTop: 22 }}>Whose record is it?</Text>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingTop: 10, paddingBottom: 4 }}>
         {profiles.map((p) => {
           const active = p.id === profileId;
           return (
@@ -348,91 +362,79 @@ export default function Scan() {
               accessibilityState={{ selected: active }}
               aria-checked={active}
               onPress={() => setProfileId(p.id)}
-              className="flex-row items-center gap-2 rounded-pill py-1.5 pl-1.5 pr-3.5"
-              style={{
-                borderWidth: 1,
-                borderColor: active ? brand[500] : surface.line,
-                backgroundColor: active ? brand[50] : surface.base,
-              }}
+              style={[
+                active ? null : glassShadow,
+                {
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 8,
+                  height: 48,
+                  paddingLeft: 5,
+                  paddingRight: 16,
+                  borderRadius: 999,
+                  backgroundColor: active ? ink[900] : glass.fillStrong,
+                  borderWidth: active ? 0 : 1,
+                  borderColor: glass.rim,
+                },
+              ]}
             >
-              <View
-                className="h-7 w-7 items-center justify-center rounded-pill"
-                style={{ backgroundColor: active ? brand[600] : ink[300] }}
-              >
-                <Text className="text-[12px] font-bold text-white">
-                  {p.name.charAt(0).toUpperCase()}
-                </Text>
-              </View>
-              <Text
-                className="text-[13px] font-semibold"
-                style={{ color: active ? brand[700] : ink[700] }}
-              >
-                {p.name}
-              </Text>
+              <Avatar svg={p.avatar} background={p.avatarBackground ?? undefined} size={38} />
+              <Text style={{ fontFamily: font.semibold, fontSize: 14, color: active ? "#ffffff" : ink[900] }}>{p.name.split(" ")[0]}</Text>
             </Pressable>
           );
         })}
-      </View>
+      </ScrollView>
 
-      <View
-        className="mt-5 items-center rounded-card px-5 py-8"
-        style={{
-          borderWidth: 2,
-          borderStyle: "dashed",
-          borderColor: brand[200],
-          backgroundColor: brand[50],
-        }}
-      >
-        <View
-          className="h-14 w-14 items-center justify-center rounded-pill bg-surface"
-          style={shadow.e2}
-        >
-          <Upload size={22} color={brand[600]} />
-        </View>
-        <Text className="mt-3 text-[16px] font-semibold text-ink-900">Choose a document</Text>
-        <Text className="mt-1 max-w-[280px] text-center text-[12px] leading-[17px] text-ink-500">
-          Lab reports, prescriptions, discharge summaries and more.
-        </Text>
-
-        {/*
-         * Two explicit buttons rather than the web build's single file input.
-         *
-         * A browser's <input type="file"> lets the OS offer camera and library
-         * behind one control. Natively they are two different permissions and
-         * two different pickers, and merging them into one button means asking
-         * for camera access from someone who only wanted a photo they already
-         * have — which is the request most likely to be denied outright.
-         */}
-        <View className="mt-4 w-full gap-2">
-          <Button onPress={takePhoto} disabled={!profileId}>
-            <CameraIcon size={16} color="#ffffff" />
-            <Text className="text-[16px] font-bold text-white">Take a photo</Text>
-          </Button>
-          <Button variant="secondary" onPress={pickFromLibrary} disabled={!profileId}>
-            <Images size={16} color={ink[700]} />
-            <Text className="text-[16px] font-bold text-ink-700">Choose from library</Text>
-          </Button>
-          <Button variant="secondary" onPress={pickFile} disabled={!profileId}>
-            <FileUp size={16} color={ink[700]} />
-            <Text className="text-[16px] font-bold text-ink-700">Upload a PDF or file</Text>
-          </Button>
-        </View>
-        <Text className="mt-1.5 text-[11px] text-ink-300">PDF, JPG, PNG or HEIC up to 10MB</Text>
+      <View className="mt-5 gap-2.5">
+        {sources.map((src) => (
+          <Pressable
+            key={src.key}
+            accessibilityRole="button"
+            accessibilityLabel={`${src.title}. ${src.line}`}
+            accessibilityState={{ disabled: !profileId }}
+            disabled={!profileId}
+            onPress={() => void src.onPress()}
+            style={({ pressed }) => ({ opacity: profileId ? 1 : 0.5, transform: [{ scale: pressed ? 0.985 : 1 }] })}
+          >
+            <View className="flex-row items-center gap-3.5 overflow-hidden rounded-[26px] p-2.5 pr-3" style={glassShadow}>
+              <Gradient from={src.from} to="#ffffff" />
+              <View
+                className="h-[68px] w-[68px] items-center justify-center rounded-[20px]"
+                style={{ backgroundColor: "rgba(255,255,255,0.9)", borderWidth: 1, borderColor: glass.rim }}
+              >
+                <src.Icon size={26} color={src.fg} strokeWidth={1.7} />
+              </View>
+              <View className="min-w-0 flex-1">
+                <Text style={{ fontFamily: font.semibold, fontSize: 16, color: ink[900] }}>{src.title}</Text>
+                <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 2 }}>
+                  {src.line}
+                </Text>
+              </View>
+              <View className="h-10 w-10 items-center justify-center rounded-pill" style={{ backgroundColor: "rgba(255,255,255,0.75)", borderWidth: 1, borderColor: glass.rim }}>
+                <ChevronRight size={18} color={ink[700]} />
+              </View>
+            </View>
+          </Pressable>
+        ))}
       </View>
+      <Text style={{ fontFamily: font.regular, fontSize: 12, color: ink[300], textAlign: "center", marginTop: 10 }}>
+        PDF, JPG, PNG or HEIC, up to 10MB
+      </Text>
 
       {message ? (
-        <Text accessibilityRole="alert" className="mt-3 text-[13px] font-medium text-danger-text">
+        <Text accessibilityRole="alert" style={{ fontFamily: font.medium, fontSize: 13.5, color: semantic.dangerText, marginTop: 12 }}>
           {message}
         </Text>
       ) : null}
 
-      <View className="mt-4 flex-row items-start gap-2 rounded-tile bg-brand-50 px-3.5 py-2.5">
-        <ShieldCheck size={13} color={brand[400]} style={{ marginTop: 2 }} />
-        <Text className="flex-1 text-[11px] leading-[16px] text-ink-500">
-          Photos are stripped of location data on your device before they are uploaded. Files are
-          stored privately and only you and your family can open them.
+      <Glass className="mt-5 flex-row items-start gap-2.5 rounded-[20px] px-4 py-3">
+        <ShieldCheck size={15} color={brand[500]} style={{ marginTop: 1 }} />
+        <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 12.5, lineHeight: 18, color: ink[700] }}>
+          Photos lose their location data on your phone before upload. Files stay private to you and
+          your family.
         </Text>
-      </View>
+      </Glass>
     </ScrollView>
+    </View>
   );
 }
