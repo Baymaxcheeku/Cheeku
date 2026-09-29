@@ -40,7 +40,7 @@ import { contactsFor, copyFor, escalationKind, HOLD_MS } from "@/lib/safety/esca
  * to have alerted someone's family when it has not is the worst possible place
  * to put a reassuring lie, so this marks only what actually happened.
  *
- * Nothing here diagnoses. It says Baymax cannot help, and hands over.
+ * Nothing here diagnoses. It says Cheeku cannot help, and hands over.
  */
 
 type Props = {
@@ -108,7 +108,7 @@ export function EmergencyEscalation({ result, onDismiss }: Props) {
               type="button"
               onClick={back}
               disabled={step === 1 && !held}
-              aria-label={step === 1 ? "Back to Baymax" : "Previous step"}
+              aria-label={step === 1 ? "Back to Cheeku" : "Previous step"}
               className={cn(
                 "tappable grid h-10 w-10 place-items-center rounded-tile bg-surface shadow-e1 active:scale-90",
                 step === 1 && !held ? "text-ink-300" : "text-danger",
@@ -281,7 +281,7 @@ function StepOne({
           <strong className="block text-[13px] font-semibold text-danger-strong">
             Your safety comes first
           </strong>
-          Baymax is not a substitute for professional medical advice, diagnosis, or treatment.
+          Cheeku is not a substitute for professional medical advice, diagnosis, or treatment.
         </span>
       </p>
     </>
@@ -384,7 +384,7 @@ function StepTwo({
           <strong className="block text-[13px] font-semibold text-safe-text">
             You&apos;re not alone.
           </strong>
-          Baymax is here to support you and your family. Please reach out for help.
+          Cheeku is here to support you and your family. Please reach out for help.
         </span>
       </p>
     </>
@@ -423,7 +423,7 @@ function StepThree({
           <strong className="block text-[13px] font-semibold text-safe-text">
             This conversation is saved
           </strong>
-          Baymax kept a record of what you asked, so you can show it to a doctor.
+          Cheeku kept a record of what you asked, so you can show it to a doctor.
         </span>
       </p>
 

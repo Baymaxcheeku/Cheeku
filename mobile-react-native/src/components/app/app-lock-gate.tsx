@@ -71,7 +71,7 @@ export function AppLockGate({ children }: { children: React.ReactNode }) {
 
   const unlock = useCallback(async () => {
     setPrompting(true);
-    const passed = await authenticate("Unlock Baymax");
+    const passed = await authenticate("Unlock Cheeku AI");
     setPrompting(false);
     if (passed) {
       lockedRef.current = false;
@@ -155,7 +155,7 @@ export function AppLockGate({ children }: { children: React.ReactNode }) {
           {locked ? (
             <>
               <Text className="mt-5 text-center text-[21px] font-bold text-ink-900">
-                Baymax is locked
+                Cheeku AI is locked
               </Text>
               <Text className="mt-2 text-center text-[13.5px] leading-[20px] text-ink-500">
                 {failed
@@ -190,7 +190,7 @@ export function AppLockGate({ children }: { children: React.ReactNode }) {
                this is the frame that ends up in the app switcher. */
             <View className="mt-5 flex-row items-center gap-2">
               <ShieldCheck size={16} color={ink[300]} />
-              <Text className="text-[13px] text-ink-300">Baymax</Text>
+              <Text className="text-[13px] text-ink-300">Cheeku AI</Text>
             </View>
           )}
         </View>

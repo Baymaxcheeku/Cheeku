@@ -115,7 +115,7 @@ export async function profileAccess(): Promise<{
  * Resolved against the SELECTABLE list, not every profile the account owns.
  * That matters on a downgrade: the cookie still names whoever was last chosen,
  * so without this a Family subscriber who dropped to Solo would keep landing on
- * their mother's records — reading her history, and grounding Ask Baymax in it,
+ * their mother's records — reading her history, and grounding Ask Cheeku in it,
  * on a plan that no longer covers her. Falling back to the primary profile is
  * also how a stale or forged cookie degrades: to "your own records", never to
  * someone else's and never to a crash.

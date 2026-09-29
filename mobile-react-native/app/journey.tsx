@@ -167,7 +167,7 @@ export default function Journey() {
 
         <View className="gap-3.5">
           <ReassuranceStrip>
-            This is a hint about what to read, not a medical record. Baymax never treats it as one.
+            This is a hint about what to read, not a medical record. Cheeku never treats it as one.
           </ReassuranceStrip>
           <Button onPress={submit} disabled={pending}>
             {/*

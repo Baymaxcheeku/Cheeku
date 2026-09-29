@@ -7,7 +7,7 @@ import { brand, ink, surface } from "@/theme/tokens";
 /**
  * The "structured / original" escape hatch on D2.
  *
- * EXTRACTION IS A GUESS. Everything above this on the screen is Baymax's
+ * EXTRACTION IS A GUESS. Everything above this on the screen is Cheeku's
  * reading of the document, and a medical record UI that only ever shows the
  * machine's interpretation — with no route back to what the lab actually
  * printed — is asking to be trusted further than it has earned. This is that

@@ -148,7 +148,7 @@ export default function Security() {
                   Require {lockName(capability.kind)}
                 </Text>
                 <Text className="mt-0.5 text-[11.5px] leading-[16px] text-ink-500">
-                  Ask every time Baymax is opened or comes back from the background.
+                  Ask every time Cheeku AI is opened or comes back from the background.
                 </Text>
               </View>
               {busy ? (
@@ -157,7 +157,7 @@ export default function Security() {
                 <SpringSwitch
                   checked={enabled}
                   onChange={() => void toggleLock()}
-                  label={`Require ${lockName(capability.kind)} to open Baymax`}
+                  label={`Require ${lockName(capability.kind)} to open Cheeku AI`}
                 />
               )}
             </View>
@@ -194,7 +194,7 @@ export default function Security() {
 
         {enabled ? (
           <Text className="mx-5 mt-2 text-[11.5px] leading-[17px] text-ink-300">
-            Baymax also hides the screen in your app switcher, so a preview of your records is
+            Cheeku also hides the screen in your app switcher, so a preview of your records is
             never left in the list of open apps.
           </Text>
         ) : null}
@@ -244,7 +244,7 @@ export default function Security() {
           <Fact
             icon={EyeOff}
             title="Location is stripped from photos"
-            body="A photo of a prescription carries the GPS of the room it was taken in. Baymax removes it before the file ever leaves your phone."
+            body="A photo of a prescription carries the GPS of the room it was taken in. Cheeku removes it before the file ever leaves your phone."
           />
           <Fact
             icon={DatabaseZap}

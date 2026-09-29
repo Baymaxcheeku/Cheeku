@@ -204,13 +204,13 @@ export default async function RecordDetailPage({ params }: { params: Promise<{ i
       </h2>
       <ul className="mt-2 grid grid-cols-3 gap-2">
         {/*
-         * Ask Baymax is Phase 5 and sharing is Phase 6. These are marked
+         * Ask Cheeku is Phase 5 and sharing is Phase 6. These are marked
          * disabled rather than linked to a 404, and each says why on hover —
          * the same call made for the social sign-in buttons in Phase 3.
          */}
         <ActionTile
           icon={MessageCircle}
-          title="Ask Baymax"
+          title="Ask Cheeku"
           body="Get answers about this report"
           href={`/ask?record=${record.id}`}
         />

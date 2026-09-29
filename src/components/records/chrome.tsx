@@ -248,7 +248,7 @@ export function EmptyRecords({ filtered }: { filtered: boolean }) {
       <p className="mx-auto mt-1 max-w-[260px] text-[13px] leading-snug text-ink-500">
         {filtered
           ? "Try clearing a filter to see more of your documents."
-          : "Add your first document and Baymax will organise it for you."}
+          : "Add your first document and Cheeku will organise it for you."}
       </p>
       {!filtered ? (
         <Link

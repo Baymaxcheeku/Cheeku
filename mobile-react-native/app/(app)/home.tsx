@@ -199,7 +199,7 @@ export default function Home() {
       />
 
       {/*
-       * Ask Baymax above Health Summary and given the mascot's own breathing
+       * Ask Cheeku above Health Summary and given the mascot's own breathing
        * room: for the anxious or pregnant reader this card is the reason they
        * opened the app, not a footnote below a stats row.
        */}
@@ -280,7 +280,7 @@ function NoProfile({ topInset }: { topInset: number }) {
     <View className="flex-1 justify-center bg-canvas px-8" style={{ paddingTop: topInset }}>
       <Text className="text-center text-[22px] font-bold text-ink-900">Set up a profile first</Text>
       <Text className="mt-2 text-center text-[14px] leading-[20px] text-ink-500">
-        Baymax needs someone to keep records for before it can show you anything.
+        Cheeku needs someone to keep records for before it can show you anything.
       </Text>
       <View className="mt-5">
         <Button onPress={() => router.push("/profile")}>
@@ -302,7 +302,7 @@ function NoProfile({ topInset }: { topInset: number }) {
  *
  * A single tappable row rather than a card with its own headline, body and
  * button: this is a pointer to something else in the app, not a destination,
- * and the full-height version competed with Ask Baymax for the first thing the
+ * and the full-height version competed with Ask Cheeku for the first thing the
  * eye landed on.
  */
 function InsightRow({
@@ -323,7 +323,7 @@ function InsightRow({
       ? {
           eyebrow: "Get started",
           title: "Add your first record",
-          meta: "Upload a report and Baymax will organise it for you.",
+          meta: "Upload a report and Cheeku will organise it for you.",
           href: "/scan",
           icon: FileText,
           fg: brand[600],

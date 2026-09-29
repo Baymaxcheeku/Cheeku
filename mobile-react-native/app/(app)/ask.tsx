@@ -43,7 +43,7 @@ import { MascotBust } from "@/components/illustrations/sprout";
 import { EmergencyEscalation } from "@/components/safety/emergency-escalation";
 import {
   askAboutProduct,
-  askBaymax,
+  askCheeku,
   chatQuota,
   recordEscalation,
   type ChatTurn,
@@ -81,7 +81,7 @@ const TOPIC_ICON: Record<string, LucideIcon> = {
 };
 
 /*
- * E1 — Ask Baymax.
+ * E1 — Ask Cheeku.
  *
  * THE SAFETY GATE RUNS HERE, on the device, before anything is sent. Rule 2
  * requires it to be deterministic and under 200ms, and a network round trip can
@@ -159,7 +159,7 @@ export default function Ask() {
     setError(null);
     setPending(true);
     try {
-      const result = await askBaymax(text, conversationId, verdict.status);
+      const result = await askCheeku(text, conversationId, verdict.status);
       if (!result.ok) {
         if (result.quota) {
           // Not an error — the free allowance ran out. The question goes back
@@ -280,7 +280,7 @@ export default function Ask() {
             </View>
           </View>
           <View className="flex-1">
-            <Text className="text-[17px] font-bold text-ink-900">Baymax</Text>
+            <Text className="text-[17px] font-bold text-ink-900">Cheeku</Text>
             <Text className="text-[11.5px] text-ink-500">
               Reading {context.data.profile.name}&apos;s records with you
             </Text>
@@ -324,10 +324,10 @@ export default function Ask() {
                 </View>
 
                 <Text className="mt-3.5 text-center text-[19px] font-bold tracking-tight text-ink-900">
-                  Hi, I&apos;m Baymax
+                  Hi, I&apos;m Cheeku
                 </Text>
                 {/*
-                 * The old line spent its second half on two things Baymax will
+                 * The old line spent its second half on two things Cheeku will
                  * not do. The limit belongs on this screen — it just does not
                  * belong in the greeting, where it makes the first thing the
                  * companion says about itself a disclaimer. It now sits under
@@ -425,7 +425,7 @@ export default function Ask() {
             onBlur={() => setComposerFocused(false)}
             placeholder="Ask anything…"
             placeholderTextColor={ink[300]}
-            accessibilityLabel="Ask Baymax a question"
+            accessibilityLabel="Ask Cheeku a question"
             multiline
             className="flex-1 py-2"
             style={{
@@ -507,7 +507,7 @@ function Turn({ turn, onCitation }: { turn: ChatTurn; onCitation: (id: string) =
         {/*
          * Asymmetric corners. One squared corner on the side a bubble came
          * from reads as speech; four equal corners read as a card. The user's
-         * squares bottom-right and Baymax's bottom-left, so the two sides of
+         * squares bottom-right and Cheeku's bottom-left, so the two sides of
          * the conversation lean towards each other.
          */}
         <View

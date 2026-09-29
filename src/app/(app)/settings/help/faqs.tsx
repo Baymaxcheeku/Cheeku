@@ -8,15 +8,15 @@ import { cn } from "@/lib/cn";
 const FAQS = [
   {
     q: "Is my health data shared with anyone?",
-    a: "No. Baymax never sells your data and never shares it outside your family. Only you can access your family's health information.",
+    a: "No. Cheeku never sells your data and never shares it outside your family. Only you can access your family's health information.",
   },
   {
-    q: "Can Baymax diagnose or prescribe anything?",
-    a: "No. Baymax explains what's in your own records and never invents a diagnosis, a dosage or a treatment. For medical decisions, always talk to a doctor.",
+    q: "Can Cheeku diagnose or prescribe anything?",
+    a: "No. Cheeku explains what's in your own records and never invents a diagnosis, a dosage or a treatment. For medical decisions, always talk to a doctor.",
   },
   {
     q: "What happens if I switch to a paid plan?",
-    a: "Solo unlocks unlimited Ask Baymax chats for one profile. Family adds up to four members and shared insights. You can cancel anytime from your Profile screen.",
+    a: "Solo unlocks unlimited Ask Cheeku chats for one profile. Family adds up to four members and shared insights. You can cancel anytime from your Profile screen.",
   },
   {
     q: "How do I delete my account?",

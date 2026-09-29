@@ -56,7 +56,7 @@ const FORBIDDEN: [RegExp, string][] = [
   [/\bdeficien/i, "names a condition"],
   [/\bdiagnos(e|ed|es|ing|is)\b/i, "diagnoses"], // Targets the ACT of diagnosing, not the letters: facility
   // names legitimately contain "Diagnostics" and are echoed verbatim from the
-  // reader's own document, which is not Baymax making a claim.
+  // reader's own document, which is not Cheeku making a claim.
   [/\bprescrib/i, "prescribes"],
   [/\b\d+\s*(iu|mg|mcg|ml)\b/i, "gives a dosage"],
   [/\bsupplement/i, "recommends a treatment"],
@@ -212,7 +212,7 @@ describe("answerQuestion — the product rules", () => {
     }
   });
 
-  it("never offers a follow-up Baymax cannot actually do", () => {
+  it("never offers a follow-up Cheeku cannot actually do", () => {
     const answer = answerQuestion("how is my haemoglobin", [record()]);
     for (const chip of answer.followUps) {
       expect(chip).not.toMatch(/order|book|prescribe|buy/i);

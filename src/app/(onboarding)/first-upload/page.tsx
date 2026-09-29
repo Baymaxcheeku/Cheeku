@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 
 const ALTERNATES = [
   { icon: Camera, title: "Take a photo" },
-  { icon: Mail, title: "Email to Baymax" },
+  { icon: Mail, title: "Email to Cheeku" },
   { icon: FolderUp, title: "Import from device" },
 ];
 
@@ -30,7 +30,7 @@ export default function FirstUploadPage() {
         <div className="relative pr-[35%]">
           <Headline lead="Let's add your" accent="first health record" />
           <p className="mt-2 text-[13px] leading-relaxed text-ink-500">
-            Upload a document and Baymax will organize it and extract key information for you.
+            Upload a document and Cheeku will organize it and extract key information for you.
           </p>
           <p className="mt-2.5 inline-flex items-center gap-1.5 rounded-pill bg-brand-50 px-3 py-1.5 text-[11px] font-medium text-brand-700">
             <ShieldCheck size={12} aria-hidden />
@@ -77,7 +77,7 @@ export default function FirstUploadPage() {
 
         <p className="mt-3 flex items-start gap-2 rounded-tile bg-brand-50 px-3.5 py-2.5 text-[11px] leading-snug text-ink-500">
           <Sparkles size={13} className="mt-0.5 shrink-0 text-brand-400" aria-hidden />
-          Baymax reads and organizes your documents to answer your questions. It never diagnoses,
+          Cheeku reads and organizes your documents to answer your questions. It never diagnoses,
           prescribes, or shares anything outside your family.
         </p>
 

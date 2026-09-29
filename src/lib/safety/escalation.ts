@@ -105,17 +105,17 @@ export function contactsFor(result: SafetyResult): readonly EmergencyContact[] {
 export function copyFor(kind: EscalationKind) {
   if (kind === "mental_health") {
     return {
-      title: "Baymax can't help with this.",
+      title: "Cheeku can't help with this.",
       lead: "Please talk to someone who can.",
       body: "You deserve real support right now, from a person trained to give it. These lines are free and confidential.",
-      why: "Your message mentions harm to yourself. That is outside what Baymax can safely respond to, and it is not something you should have to handle alone.",
+      why: "Your message mentions harm to yourself. That is outside what Cheeku can safely respond to, and it is not something you should have to handle alone.",
     };
   }
   return {
-    title: "Baymax can't help with this.",
+    title: "Cheeku can't help with this.",
     lead: "This may need immediate medical attention.",
     body: "Please contact a doctor or seek emergency care right away.",
-    why: "Your message describes symptoms that fall outside what Baymax can safely respond to. A doctor can assess this properly; Baymax cannot.",
+    why: "Your message describes symptoms that fall outside what Cheeku can safely respond to. A doctor can assess this properly; Cheeku cannot.",
   };
 }
 

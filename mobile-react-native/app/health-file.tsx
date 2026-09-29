@@ -80,7 +80,7 @@ export default function HealthFileScreen() {
             {name.data ? `${name.data}'s health file` : "Health file"}
           </Text>
           <Text className="mt-1.5 text-[13px] leading-[19px] text-ink-500">
-            Everything filed, and what the labs measured. Baymax reads it back to you; it does not
+            Everything filed, and what the labs measured. Cheeku reads it back to you; it does not
             interpret it.
           </Text>
         </View>
@@ -152,7 +152,7 @@ export default function HealthFileScreen() {
               ))}
             </View>
             <Text className="mx-5 mt-2 text-[11.5px] leading-[17px] text-ink-300">
-              Baymax never suggests a medicine, a dose or a change. This is the list, not advice.
+              Cheeku never suggests a medicine, a dose or a change. This is the list, not advice.
             </Text>
           </Section>
         ) : null}

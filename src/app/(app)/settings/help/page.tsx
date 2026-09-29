@@ -16,7 +16,7 @@ export const dynamic = "force-static";
  *
  * Every row here goes somewhere. The frame lists "Help center" as a link to an
  * article library that does not exist; rather than draw a dead row, that slot
- * points at About Baymax and the FAQs, which are the documentation this build
+ * points at About Cheeku and the FAQs, which are the documentation this build
  * actually has.
  */
 export default function HelpPage() {
@@ -72,7 +72,7 @@ export default function HelpPage() {
               </span>
               <span className="min-w-0 flex-1">
                 <span className="block text-[14px] font-semibold text-ink-900">
-                  How Baymax works
+                  How Cheeku works
                 </span>
                 <span className="block text-[12px] text-ink-500">
                   What it does, and what it never does
@@ -89,7 +89,7 @@ export default function HelpPage() {
                 <MessageCircle size={18} aria-hidden />
               </span>
               <span className="min-w-0 flex-1">
-                <span className="block text-[14px] font-semibold text-ink-900">Ask Baymax</span>
+                <span className="block text-[14px] font-semibold text-ink-900">Ask Cheeku</span>
                 <span className="block text-[12px] text-ink-500">
                   Questions about your own records
                 </span>
@@ -116,7 +116,7 @@ export default function HelpPage() {
         <ShieldCheck size={14} className="mt-px shrink-0 text-ink-300" aria-hidden />
         <span>
           Support tickets never include your health records. Only what you write. Thank you for
-          being part of Baymax.
+          being part of Cheeku AI.
         </span>
       </p>
     </div>

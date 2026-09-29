@@ -21,7 +21,7 @@ const COMING_SOON = [
 
 /**
  * Language — English only in V1, per the frame. Every other language is shown
- * rather than hidden: someone deciding whether Baymax will work for their
+ * rather than hidden: someone deciding whether Cheeku will work for their
  * family should see the roadmap, not an empty list.
  */
 export default function LanguagePage() {
@@ -34,7 +34,7 @@ export default function LanguagePage() {
           Your language, <span className="text-brand-600">your experience</span>
         </h2>
         <p className="mt-1.5 text-[12.5px] leading-snug text-ink-500">
-          We&apos;re working hard to bring Baymax to more languages.
+          We&apos;re working hard to bring Cheeku AI to more languages.
         </p>
       </section>
 
@@ -84,7 +84,7 @@ export default function LanguagePage() {
 
       <p className="mx-5 mt-4 flex items-start gap-2 rounded-card bg-brand-50 px-3.5 py-3 text-[12px] leading-snug text-ink-500">
         <Globe size={15} className="mt-0.5 shrink-0 text-brand-500" aria-hidden />
-        We&apos;re constantly adding more languages to make Baymax accessible for everyone.
+        We&apos;re constantly adding more languages to make Cheeku AI accessible for everyone.
       </p>
     </div>
   );

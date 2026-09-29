@@ -61,12 +61,12 @@ describe("promptsFor", () => {
   /*
    * THE ONE THAT MATTERS.
    *
-   * A suggested question is a promise the app will answer it. Baymax must
+   * A suggested question is a promise the app will answer it. Cheeku must
    * never advise on a medicine, a dose or a treatment, and must never judge a
    * result — so no prompt may invite it to. Adding a chip like "Should I take
    * this?" would put the app one tap from the thing it is built not to do.
    */
-  it("never suggests a question Baymax must refuse", () => {
+  it("never suggests a question Cheeku must refuse", () => {
     const banned = [
       /\bshould i (take|stop|start|change|increase|reduce)\b/i,
       /\bis (it|this) safe to take\b/i,
@@ -77,7 +77,7 @@ describe("promptsFor", () => {
       /\bdiagnos/i,
       // Asking the app TO prescribe. Not "which prescriptions are on file" —
       // that is a question about documents the reader already has, which is
-      // exactly what Baymax is for.
+      // exactly what Cheeku is for.
       /\bprescribe\b/i,
       /\bwhat (should i|do i) be (taking|on)\b/i,
       /\bdosage|\bdose\b/i,

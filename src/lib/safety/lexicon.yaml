@@ -1,5 +1,5 @@
 ---
-# Baymax safety lexicon — the human-readable source of truth.
+# Cheeku safety lexicon — the human-readable source of truth.
 #
 # SAFETY-CRITICAL. Any edit here must be followed by:
 #   pnpm safety:build   # regenerate lexicon.generated.ts

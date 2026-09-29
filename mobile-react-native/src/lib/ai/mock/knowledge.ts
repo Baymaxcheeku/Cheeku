@@ -1,9 +1,9 @@
 /*
- * General-knowledge answers — the half of Ask Baymax that isn't grounded in a
+ * General-knowledge answers — the half of Ask Cheeku that isn't grounded in a
  * document.
  *
  * Rule 4 used to be "grounded or silent": nothing outside the user's own
- * records, full stop. Athar asked for Ask Baymax to work both ways — general
+ * records, full stop. Athar asked for Ask Cheeku to work both ways — general
  * questions get a general answer, and when the reader's own health profile
  * says something relevant, that gets folded in too. Rule 1 didn't move: this
  * file names no condition on the reader, gives no dose, and prescribes
@@ -61,7 +61,7 @@ export const KNOWLEDGE_TOPICS: KnowledgeTopic[] = [
     paragraphs: [
       "Labs commonly print a reference range for haemoglobin, and pregnancy has its own lower range than the general population, so a value that would be unremarkable outside pregnancy is often flagged during it.",
       "Fatigue alongside a lower reading is a common combination worth mentioning to whoever is monitoring the pregnancy, since it's one of several things they may want to look at together.",
-      "This is general information about how labs are read, not a reading of any specific report. If you have the actual report in Baymax, ask about it directly and I'll read the exact number and range that were printed.",
+      "This is general information about how labs are read, not a reading of any specific report. If you have the actual report in Cheeku AI, ask about it directly and I'll read the exact number and range that were printed.",
     ],
     followUps: ["Upload the report", "What foods are iron-rich?"],
   },

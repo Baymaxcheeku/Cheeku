@@ -64,7 +64,7 @@ const REASON_COPY: Record<Reason, { eyebrow: string; title: string; body: string
   },
   upgrade: {
     eyebrow: "Upgrade",
-    title: "Unlock everything in Baymax",
+    title: "Unlock everything in Cheeku AI",
     body: `Free includes ${FREE_CHAT_LIMIT} chats a month. Pick a plan to keep the conversation going.`,
   },
   family: {
@@ -397,7 +397,7 @@ function Checkout({
           {[
             {
               icon: InfinityIcon,
-              label: isDaily ? `Unlimited for ${DAILY_PASS_HOURS}h` : "Unlimited Ask Baymax",
+              label: isDaily ? `Unlimited for ${DAILY_PASS_HOURS}h` : "Unlimited Ask Cheeku",
             },
             { icon: Zap, label: "Health insights" },
             { icon: ShieldCheck, label: "Unlimited storage" },
@@ -471,12 +471,12 @@ function Checkout({
 
         {/*
          * Said plainly, because it is true and because it is the reassuring
-         * thing: Baymax never sees the credential. When a real provider is
+         * thing: Cheeku never sees the credential. When a real provider is
          * wired in, this stays accurate — authorisation happens in their sheet.
          */}
         <p className="mt-2 text-center text-[11px] leading-snug text-ink-500">
           You&apos;ll confirm in your own {method === "upi" ? "UPI app" : "bank's"} secure screen.
-          Baymax never sees your {method === "upi" ? "UPI PIN" : "card details"}.
+          Cheeku never sees your {method === "upi" ? "UPI PIN" : "card details"}.
         </p>
       </div>
     </div>
@@ -596,7 +596,7 @@ function Success({
         onClick={onDone}
         className="tappable mt-5 h-14 w-full rounded-pill bg-gradient-to-b from-brand-600 to-brand-800 text-[16px] font-semibold text-white active:scale-[0.98]"
       >
-        {pendingQuestion ? "Send my question" : "Start using Baymax"}
+        {pendingQuestion ? "Send my question" : "Start using Cheeku AI"}
       </button>
 
       {pendingQuestion ? (

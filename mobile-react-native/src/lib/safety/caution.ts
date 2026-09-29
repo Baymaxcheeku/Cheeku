@@ -33,7 +33,7 @@ export type CautionCopy = {
 
 const DEFAULT: CautionCopy = {
   title: "Worth seeing someone today",
-  body: "What you've described is the kind of thing a doctor should look at soon rather than wait out. Baymax can help you find the record, but it can't examine anyone.",
+  body: "What you've described is the kind of thing a doctor should look at soon rather than wait out. Cheeku can help you find the record, but it can't examine anyone.",
 };
 
 /*
@@ -60,7 +60,7 @@ const BY_RULE: Record<string, CautionCopy> = {
   },
   "double-dose": {
     title: "Call a doctor or pharmacist now",
-    body: "For anything to do with a dose already taken, speak to a pharmacist or your doctor rather than waiting. Baymax will not advise on medication amounts.",
+    body: "For anything to do with a dose already taken, speak to a pharmacist or your doctor rather than waiting. Cheeku will not advise on medication amounts.",
   },
   "allergic-reaction": {
     title: "This needs seeing urgently",

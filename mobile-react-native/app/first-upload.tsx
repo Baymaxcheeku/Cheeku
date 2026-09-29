@@ -41,7 +41,7 @@ import { brand, ink, shadow, surface } from "@/theme/tokens";
  * — a nag at the end of onboarding costs more accounts than one document is
  * worth — but it no longer outranks the thing being asked for.
  *
- * WHAT THE COPY MAY NOT SAY. That Baymax will interpret, assess or understand
+ * WHAT THE COPY MAY NOT SAY. That Cheeku will interpret, assess or understand
  * anything. It reads, remembers, and quotes back with a source. "Understands
  * your health" is what turns a filing cabinet into a diagnosis nobody asked
  * for, and it is a promise this app is built specifically not to make.

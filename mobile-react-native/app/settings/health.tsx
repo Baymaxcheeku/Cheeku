@@ -82,7 +82,7 @@ export default function HealthProfile() {
         return;
       }
       setSaved(true);
-      // Conditions feed Ask Baymax's personalised paragraph, so the chat's
+      // Conditions feed Ask Cheeku's personalised paragraph, so the chat's
       // cached context has to go too, not only this screen's.
       await queryClient.invalidateQueries();
     } finally {
@@ -113,7 +113,7 @@ export default function HealthProfile() {
   /*
    * Completeness, counted from what is actually STORED.
    *
-   * Not a vanity score. Every one of these five changes what Ask Baymax is able
+   * Not a vanity score. Every one of these five changes what Ask Cheeku is able
    * to say: a reader who has recorded a pregnancy or a peanut allergy gets a
    * different, safer answer than one who has not. Showing the gap is the most
    * useful thing this screen does. Counted from the saved record rather than
@@ -142,8 +142,8 @@ export default function HealthProfile() {
         <Meter value={filled} total={5} />
         <Text className="text-[11.5px] leading-[16px] text-ink-300">
           {filled === 5
-            ? "All set. Ask Baymax can factor every one of these into an answer."
-            : "The more of this Baymax knows, the more careful its answers can be."}
+            ? "All set. Ask Cheeku can factor every one of these into an answer."
+            : "The more of this Cheeku knows, the more careful its answers can be."}
         </Text>
       </View>
 
@@ -156,7 +156,7 @@ export default function HealthProfile() {
       <View className="mx-5 mt-4 flex-row items-start gap-2 rounded-card bg-brand-50 px-4 py-3">
         <Info size={15} color={brand[500]} style={{ marginTop: 1 }} />
         <Text className="flex-1 text-[12px] leading-[17px] text-ink-700">
-          This is your own summary, not a diagnosis. Baymax never edits it and never infers it from
+          This is your own summary, not a diagnosis. Cheeku never edits it and never infers it from
           your reports.
         </Text>
       </View>
@@ -208,7 +208,7 @@ export default function HealthProfile() {
           error={errors.medications}
           multiline
           style={{ minHeight: 108, textAlignVertical: "top" }}
-          hint="Baymax reads these to spot interactions worth asking about. It never suggests a dose."
+          hint="Cheeku reads these to spot interactions worth asking about. It never suggests a dose."
         />
       </View>
 

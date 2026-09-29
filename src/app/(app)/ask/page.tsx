@@ -6,7 +6,7 @@ import { AskChat } from "./ask-chat";
 export const dynamic = "force-dynamic";
 
 /**
- * E1 — Ask Baymax. `q` carries a question typed on Home; `upload=1` carries
+ * E1 — Ask Cheeku. `q` carries a question typed on Home; `upload=1` carries
  * the Home Ask box's camera button, so a photo question opens straight into
  * the picker instead of landing on an empty chat first.
  */

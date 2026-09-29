@@ -23,12 +23,12 @@ import { EmergencyEscalation } from "@/components/safety/emergency-escalation";
 import { ProductAssessmentCard } from "@/components/ai/product-assessment-card";
 import { ProductPicker } from "@/components/ai/product-picker";
 import { cn } from "@/lib/cn";
-import { askAboutProduct, askBaymax, recordEscalation, type ChatTurn } from "@/lib/ai/actions";
+import { askAboutProduct, askCheeku, recordEscalation, type ChatTurn } from "@/lib/ai/actions";
 import { FREE_CHAT_LIMIT } from "@/lib/billing/plans";
 import { detect, type SafetyResult } from "@/lib/safety/detect";
 
 /*
- * E1 / E2 — Ask Baymax.
+ * E1 / E2 — Ask Cheeku.
  *
  * The safety gate runs HERE, in the browser, before anything is sent. Rule 2
  * requires it to be deterministic and under 200ms, and a network round trip can
@@ -127,7 +127,7 @@ export function AskChat({
     // return above does not survive into an async callback.
     const status = verdict.status;
     start(async () => {
-      const result = await askBaymax(text, conversationId, status);
+      const result = await askCheeku(text, conversationId, status);
       if (!result.ok) {
         if (result.quota) {
           // Not an error — hold the question, show the card, open the plans.
@@ -194,7 +194,7 @@ export function AskChat({
         />
         <div className="relative pr-[34%]">
           <h1 className="flex items-center gap-1.5 text-[26px] font-bold leading-tight tracking-tight text-ink-900">
-            Ask Baymax
+            Ask Cheeku
             <Stethoscope size={18} className="text-brand-500" aria-hidden />
           </h1>
           <p className="mt-0.5 text-[13px] text-ink-700">
@@ -316,7 +316,7 @@ export function AskChat({
                       {turn.kind === "silent" ? (
                         <p className="mt-3 flex items-start gap-2 rounded-tile bg-caution-bg px-3 py-2 text-[11px] leading-snug text-caution-text">
                           <TriangleAlert size={13} className="mt-0.5 shrink-0" aria-hidden />
-                          Baymax only answers from your saved documents or general topics it knows, and
+                          Cheeku only answers from your saved documents or general topics it knows, and
                           this one is outside both.
                         </p>
                       ) : turn.kind === "general" ? (
@@ -404,7 +404,7 @@ export function AskChat({
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             placeholder="Ask about your reports…"
-            aria-label="Ask Baymax a question"
+            aria-label="Ask Cheeku a question"
             className="min-w-0 flex-1 bg-transparent text-[14px] text-ink-900 outline-none placeholder:text-ink-300"
           />
           <button
@@ -426,7 +426,7 @@ export function AskChat({
           </button>
         </form>
         <p className="mt-1.5 text-center text-[11px] text-ink-300">
-          Baymax gives helpful information, not medical advice.
+          Cheeku gives helpful information, not medical advice.
         </p>
       </div>
 

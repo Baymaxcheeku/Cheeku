@@ -37,7 +37,7 @@ export function HealthProfileForm({ profile }: { profile: ProfileDetail }) {
   /*
    * Completeness, counted from what is actually stored.
    *
-   * Not a vanity score: every one of these five fields changes what Ask Baymax
+   * Not a vanity score: every one of these five fields changes what Ask Cheeku
    * can say. A reader who has recorded a pregnancy or a peanut allergy gets a
    * different, safer answer than one who has not, so showing the gap is the
    * most useful thing this screen can do. Counted from `profile`, the saved
@@ -62,15 +62,15 @@ export function HealthProfileForm({ profile }: { profile: ProfileDetail }) {
           label="Health profile"
           hint={
             filled === 5
-              ? "All set. Ask Baymax can factor every one of these into an answer."
-              : "The more of this Baymax knows, the more careful its answers can be."
+              ? "All set. Ask Cheeku can factor every one of these into an answer."
+              : "The more of this Cheeku knows, the more careful its answers can be."
           }
         />
       </div>
 
       <p className="flex items-start gap-2 rounded-card bg-brand-50 px-4 py-3 text-[12px] leading-snug text-ink-600">
         <Info size={15} className="mt-px shrink-0 text-brand-500" aria-hidden />
-        This is your own summary, not a diagnosis. Baymax never edits it and never infers it from
+        This is your own summary, not a diagnosis. Cheeku never edits it and never infers it from
         your reports.
       </p>
 

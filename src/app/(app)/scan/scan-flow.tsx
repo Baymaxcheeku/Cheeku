@@ -60,8 +60,8 @@ const STEPS = [
 /** One line of calm reassurance per step — never clinical, never rushed. */
 const STEP_NARRATIVE = [
   "Nice and safe. Nothing leaves your device unprotected.",
-  "Take a breath, Baymax is doing the careful reading for you.",
-  "This is the fiddly part. Baymax has got it from here.",
+  "Take a breath, Cheeku is doing the careful reading for you.",
+  "This is the fiddly part. Cheeku has got it from here.",
   "A second look, just to be sure it's right.",
   "Almost time to see everything, laid out clearly.",
 ] as const;
@@ -138,7 +138,7 @@ export function ScanFlow({ profiles }: { profiles: readonly { id: string; name: 
         </header>
 
         <p className="mt-2 text-[13px] leading-relaxed text-ink-500">
-          Baymax will read it and pull out the key information. You review everything before it is
+          Cheeku will read it and pull out the key information. You review everything before it is
           saved.
         </p>
 
@@ -177,7 +177,7 @@ export function ScanFlow({ profiles }: { profiles: readonly { id: string; name: 
         </div>
 
         {/*
-         * The dropzone breathes with the same ambient glow as Ask Baymax on
+         * The dropzone breathes with the same ambient glow as Ask Cheeku on
          * Home — the two places in the app that are "waiting for you to do
          * something" now feel like they belong to the same product, rather
          * than a functional form bolted onto a designed home screen.
@@ -270,7 +270,7 @@ export function ScanFlow({ profiles }: { profiles: readonly { id: string; name: 
           <span className="block text-brand-600">document</span>
         </h1>
         <p className="mt-2 text-[13px] leading-relaxed text-ink-500">
-          Baymax is securely reading your document and extracting key information.
+          Cheeku is securely reading your document and extracting key information.
         </p>
         <UploadScene className="pointer-events-none absolute -right-2 top-0 w-[132px]" />
       </div>

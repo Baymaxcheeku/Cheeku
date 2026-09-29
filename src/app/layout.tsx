@@ -25,7 +25,7 @@ const editorial = Fraunces({
 });
 
 export const metadata: Metadata = {
-  title: "Baymax",
+  title: "Cheeku AI",
   description: "The health memory layer for every family.",
   // Medical screens must never be indexed or previewed by third parties.
   robots: { index: false, follow: false },
@@ -39,7 +39,7 @@ export const metadata: Metadata = {
    */
   appleWebApp: {
     capable: true,
-    title: "Baymax",
+    title: "Cheeku AI",
     // Matches --canvas, so the status bar area blends into the app.
     statusBarStyle: "default",
   },

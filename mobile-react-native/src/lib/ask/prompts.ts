@@ -28,7 +28,7 @@ import type { JourneyId } from "@/lib/onboarding/journeys";
  * │                                                                          │
  * └──────────────────────────────────────────────────────────────────────────┘
  *
- * EVERY PROMPT IS ONE BAYMAX CAN HONESTLY TAKE. They ask it to read back,
+ * EVERY PROMPT IS ONE CHEEKU CAN HONESTLY TAKE. They ask it to read back,
  * compare, explain a term, or help prepare for an appointment. None asks
  * whether to take something, change a dose, or whether a result is bad — the
  * app must never answer those, and a suggested question is a promise that it

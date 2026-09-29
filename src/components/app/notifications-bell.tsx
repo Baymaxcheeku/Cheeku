@@ -80,7 +80,7 @@ export function NotificationsBell({ notifications }: { notifications: HomeNotifi
               </span>
               <p className="mt-3 text-[14px] font-semibold text-ink-900">You&apos;re all caught up</p>
               <p className="mt-1 max-w-[220px] text-[12px] leading-snug text-ink-500">
-                Baymax will let you know here if a new record needs a look.
+                Cheeku will let you know here if a new record needs a look.
               </p>
             </div>
           )}

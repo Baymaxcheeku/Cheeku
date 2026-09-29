@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Baymax",
+    "name": "Cheeku AI",
     "slug": "baymax",
     "version": "0.1.0",
     "orientation": "portrait",
@@ -17,9 +17,9 @@
       "supportsTablet": false,
       "bundleIdentifier": "com.baymax.app",
       "infoPlist": {
-        "NSCameraUsageDescription": "Baymax uses the camera so you can photograph a report, prescription or scan and file it against a family member.",
-        "NSPhotoLibraryUsageDescription": "Baymax needs access to your photos so you can upload medical documents you have already saved.",
-        "NSFaceIDUsageDescription": "Baymax can lock your family's medical records behind Face ID."
+        "NSCameraUsageDescription": "Cheeku AI uses the camera so you can photograph a report, prescription or scan and file it against a family member.",
+        "NSPhotoLibraryUsageDescription": "Cheeku AI needs access to your photos so you can upload medical documents you have already saved.",
+        "NSFaceIDUsageDescription": "Cheeku AI can lock your family's medical records behind Face ID."
       }
     },
     "android": {
@@ -41,14 +41,14 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Baymax needs access to your photos so you can upload medical documents you have already saved.",
-          "cameraPermission": "Baymax uses the camera so you can photograph a report, prescription or scan."
+          "photosPermission": "Cheeku AI needs access to your photos so you can upload medical documents you have already saved.",
+          "cameraPermission": "Cheeku AI uses the camera so you can photograph a report, prescription or scan."
         }
       ],
       [
         "expo-local-authentication",
         {
-          "faceIDPermission": "Baymax can lock your family's medical records behind Face ID."
+          "faceIDPermission": "Cheeku AI can lock your family's medical records behind Face ID."
         }
       ],
       "expo-font",

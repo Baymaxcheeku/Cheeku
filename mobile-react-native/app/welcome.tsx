@@ -41,7 +41,7 @@ const EYEBROW: Record<string, { bg: string; fg: string }> = {
  * with swapped copy is a slideshow, not a story; that was the note that drove
  * the web redesign and it carries over.
  *
- * IT ASKS FOR NOTHING. Every screen here is something Baymax offers; the one
+ * IT ASKS FOR NOTHING. Every screen here is something Cheeku offers; the one
  * screen that used to ask a question — which season of life you are in — now
  * lives at `/journey`, after the account and profile exist, because before
  * them there was nowhere to put the answer. A stranger deciding whether to
@@ -207,7 +207,7 @@ export default function Welcome() {
  * thing that will listen. That is the whole pitch of panel 1, made before a
  * word of the headline is read.
  *
- * EVERY QUESTION HERE IS ONE BAYMAX CAN HONESTLY TAKE. Each asks it to read
+ * EVERY QUESTION HERE IS ONE CHEEKU CAN HONESTLY TAKE. Each asks it to read
  * back, compare or prepare — never to judge a result or name a treatment.
  * Putting "should I take this?" on this screen would be a promise broken on
  * the first real conversation.

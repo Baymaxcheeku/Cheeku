@@ -1,4 +1,4 @@
-# Baymax
+# Cheeku AI
 
 A family health-memory app. Upload medical documents, have them read and
 organised, and ask questions that are answered **from your own records** — never

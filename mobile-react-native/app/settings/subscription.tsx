@@ -129,7 +129,7 @@ export default function Subscription() {
         <Panel>
           <View className="flex-row items-center gap-2.5">
             <MessageCircle size={16} color={brand[500]} />
-            <Text className="flex-1 text-[13.5px] font-semibold text-ink-900">Ask Baymax</Text>
+            <Text className="flex-1 text-[13.5px] font-semibold text-ink-900">Ask Cheeku</Text>
             {isUnlimited(entitlement.tier) ? (
               <View className="flex-row items-center gap-1">
                 <InfinityIcon size={15} color={semantic.safe} />

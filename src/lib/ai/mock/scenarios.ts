@@ -1,5 +1,5 @@
 /*
- * Product-safety scenarios — the photo half of Ask Baymax.
+ * Product-safety scenarios — the photo half of Ask Cheeku.
  *
  * There is no vision model wired into this app. Rather than fake one (a text
  * box that pretends to "read" any photo but actually pattern-matches a

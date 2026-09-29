@@ -8,7 +8,7 @@ import { brand, ink, shadow, surface } from "@/theme/tokens";
 /*
  * Every other Indian language is SHOWN rather than hidden.
  *
- * Someone deciding whether Baymax will work for their family — often for a
+ * Someone deciding whether Cheeku will work for their family — often for a
  * parent who does not read English — should see the roadmap, not an empty
  * list with English ticked. The honest answer is "not yet, and here is the
  * queue", which is a different message from "no".
@@ -36,7 +36,7 @@ export default function Language() {
             Your language, <Text className="text-brand-600">your experience</Text>
           </Text>
           <Text className="mt-1.5 text-[12.5px] leading-[18px] text-ink-500">
-            We&apos;re working hard to bring Baymax to more languages.
+            We&apos;re working hard to bring Cheeku AI to more languages.
           </Text>
         </Panel>
       </View>
@@ -102,7 +102,7 @@ export default function Language() {
       <View className="mx-5 mt-4 flex-row items-start gap-2 rounded-card bg-brand-50 px-3.5 py-3">
         <Globe size={15} color={brand[500]} style={{ marginTop: 1 }} />
         <Text className="flex-1 text-[12px] leading-[17px] text-ink-500">
-          We&apos;re constantly adding more languages to make Baymax accessible for everyone.
+          We&apos;re constantly adding more languages to make Cheeku AI accessible for everyone.
         </Text>
       </View>
     </SettingsScreen>

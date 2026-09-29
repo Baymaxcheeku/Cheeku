@@ -138,7 +138,7 @@ export function NotificationsBell({ notifications }: { notifications: HomeNotifi
                 You&apos;re all caught up
               </Text>
               <Text className="mt-1 max-w-[220px] text-center text-[12px] leading-[17px] text-ink-500">
-                Baymax will let you know here if a new record needs a look.
+                Cheeku will let you know here if a new record needs a look.
               </Text>
             </View>
           )}

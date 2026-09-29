@@ -9,7 +9,7 @@ import {
 } from "lucide-react-native";
 
 /*
- * The five journeys Baymax is built around.
+ * The five journeys Cheeku is built around.
  *
  * These are the product's actual wedge, not marketing segments invented for an
  * onboarding screen: each one is a household that already keeps medical paper
@@ -19,7 +19,7 @@ import {
  * they are deciding, and it gives the rest of onboarding something true to
  * personalise against.
  *
- * `other` is deliberately part of the list rather than a fallback. Baymax is a
+ * `other` is deliberately part of the list rather than a fallback. Cheeku is a
  * general health companion; a grid of five specific lives with no way to say
  * "none of these, but I still want this" would read as a product that is not
  * for you.

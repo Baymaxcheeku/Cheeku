@@ -63,8 +63,8 @@ const STEPS: readonly { key: string; icon: LucideIcon; title: string; body: stri
 /** One line of calm reassurance per step — never clinical, never rushed. */
 const STEP_NARRATIVE = [
   "Nice and safe. Nothing leaves your device unprotected.",
-  "Take a breath, Baymax is doing the careful reading for you.",
-  "This is the fiddly part. Baymax has got it from here.",
+  "Take a breath, Cheeku is doing the careful reading for you.",
+  "This is the fiddly part. Cheeku has got it from here.",
   "A second look, just to be sure it's right.",
   "Almost time to see everything, laid out clearly.",
 ] as const;
@@ -164,7 +164,7 @@ export default function Scan() {
    * The two pickers above are photographs, which is the common case for a
    * single report. A year of history is not a photograph — people export it
    * from a portal or scan it to one combined PDF, and there was no way to hand
-   * that to Baymax at all. `expo-document-picker` is a third permissionless
+   * that to Cheeku at all. `expo-document-picker` is a third permissionless
    * surface: the OS shows its own file browser and returns only what was
    * chosen, so nothing here has to ask for access to anything.
    *
@@ -194,7 +194,7 @@ export default function Scan() {
     if (!permission.granted) {
       Alert.alert(
         "Photo access is off",
-        "Baymax needs access to your photos to add a document from your library. You can turn it on in Settings.",
+        "Cheeku needs access to your photos to add a document from your library. You can turn it on in Settings.",
       );
       return;
     }
@@ -222,7 +222,7 @@ export default function Scan() {
     if (!permission.granted) {
       Alert.alert(
         "Camera access is off",
-        "Baymax needs the camera to photograph a document. You can turn it on in Settings.",
+        "Cheeku needs the camera to photograph a document. You can turn it on in Settings.",
       );
       return;
     }
@@ -333,7 +333,7 @@ export default function Scan() {
       </View>
 
       <Text className="mt-2 text-[13px] leading-[19px] text-ink-500">
-        Baymax will read it and pull out the key information. You review everything before it is
+        Cheeku will read it and pull out the key information. You review everything before it is
         saved.
       </Text>
 

@@ -30,7 +30,7 @@ const GROUPS: {
 }[] = [
   {
     title: "General updates",
-    body: "Important updates about your account and Baymax.",
+    body: "Important updates about your account and Cheeku AI.",
     icon: BellRing,
     rows: [
       {
@@ -49,7 +49,7 @@ const GROUPS: {
         key: "tipsReminders",
         icon: Lightbulb,
         title: "Tips & reminders",
-        body: "Helpful tips to get the most out of Baymax.",
+        body: "Helpful tips to get the most out of Cheeku AI.",
       },
     ],
   },

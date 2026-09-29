@@ -6,7 +6,7 @@ import { ExternalLink, FileSearch } from "lucide-react";
 /**
  * The "structured / original" escape hatch on D2.
  *
- * Extraction is a guess. Everything above this on the screen is Baymax's
+ * Extraction is a guess. Everything above this on the screen is Cheeku's
  * reading of the document, and a medical record UI that only ever shows the
  * machine's interpretation — with no route back to what the lab actually
  * printed — is asking to be trusted further than it has earned. This is that

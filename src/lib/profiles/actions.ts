@@ -21,7 +21,7 @@ import { selectableProfiles, PROFILE_COOKIE } from "./context";
  * the tap, not the request — this action is a public endpoint, and a Solo
  * subscriber posting a family member's id to it would otherwise have their
  * whole session rescoped to a person they are not paying to see, including the
- * records handed to Ask Baymax as grounding. `selectableProfiles` is the same
+ * records handed to Ask Cheeku as grounding. `selectableProfiles` is the same
  * rule the screens draw from, so the button and the gate cannot drift.
  */
 export async function switchProfile(profileId: string): Promise<{ ok: boolean }> {

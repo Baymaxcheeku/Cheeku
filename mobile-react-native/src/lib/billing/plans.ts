@@ -4,7 +4,7 @@
  * TWO CONFLICTS were resolved here, both recorded in PROGRESS.md.
  *
  * 1. THE FREE LIMIT. The spec says three chats a month; the chat frame says
- *    "Free users can have 5 chats with Baymax". The frames win by the standing
+ *    "Free users can have 5 chats with Cheeku". The frames win by the standing
  *    rule, so it is five.
  *
  *    CHANGED 2026-08-19, by Athar: five a DAY, not a month. Five a month is a
@@ -68,7 +68,7 @@ export const PLANS: Record<Exclude<Tier, "free">, Plan> = {
     period: "day",
     seats: 1,
     features: [
-      `Unlimited Ask Baymax for ${DAILY_PASS_HOURS} hours`,
+      `Unlimited Ask Cheeku for ${DAILY_PASS_HOURS} hours`,
       "Health insights from your records",
       "No subscription, no renewal",
     ],
@@ -81,7 +81,7 @@ export const PLANS: Record<Exclude<Tier, "free">, Plan> = {
     period: "month",
     seats: 1,
     features: [
-      "Unlimited Ask Baymax",
+      "Unlimited Ask Cheeku",
       "Health insights from your records",
       "Unlimited document storage",
       "Priority support",
@@ -98,7 +98,7 @@ export const PLANS: Record<Exclude<Tier, "free">, Plan> = {
     features: [
       "Up to 4 family members",
       "Shared health insights",
-      "Unlimited Ask Baymax",
+      "Unlimited Ask Cheeku",
       "All premium features",
     ],
   },
@@ -112,7 +112,7 @@ export const FREE_PLAN: Plan = {
   period: "month",
   seats: 1,
   features: [
-    `${FREE_CHAT_LIMIT} Ask Baymax chats a day`,
+    `${FREE_CHAT_LIMIT} Ask Cheeku chats a day`,
     "Unlimited document storage",
     "One profile",
   ],

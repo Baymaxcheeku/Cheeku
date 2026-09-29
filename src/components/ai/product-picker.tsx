@@ -33,7 +33,7 @@ export function ProductPicker({
           <div className="min-w-0 flex-1">
             <h2 className="text-[19px] font-bold text-ink-900">Try a product safety check</h2>
             <p className="mt-0.5 text-[12.5px] leading-snug text-ink-500">
-              A demo. Pick an item and Baymax will check its ingredients, generally and against your
+              A demo. Pick an item and Cheeku will check its ingredients, generally and against your
               Health profile.
             </p>
           </div>
