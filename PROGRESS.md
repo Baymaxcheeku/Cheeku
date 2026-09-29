@@ -998,3 +998,120 @@ echoed verbatim from the user's own document. It now targets the act
   tiers and the auth endpoints are still unbounded, and a durable store is
   needed to do this properly.
 - `README.md`, `SECURITY.md`, `PRIVACY_NOTES.md`.
+
+## Design pass and first native run — 2026-09-29
+
+Everything before this section was verified in the Expo **web** preview. This
+session was the first time the app ran on iOS, and two of the bugs below were
+invisible in a browser by construction. That is the headline: the web preview
+is a fast way to check copy and composition, and it cannot be trusted for
+layout, routing on cold start, or anything native.
+
+### Onboarding, rebuilt
+
+**The welcome carousel is three panels, and asks for nothing.** It was four,
+and the second asked which season of life you are in — before an account
+existed. The answer had nowhere to go, so it went to local storage to wait for
+a profile that might never be created; anyone who abandoned at sign-up had
+answered a personal question into a drawer. It now lives at `/journey`, one
+screen after the profile is made, writing straight to the row. The kv bridge
+is deleted.
+
+Order: sign-in → who → profile → journey → first-upload → plan.
+
+**Profile setup could not save.** A plain INSERT with `is_primary: true`
+against an account that already had a primary profile raised 23505 (migration
+0013's unique index) and reported it as "We couldn't save that" — which reads
+as *your data is wrong* and sends people to edit fields that were fine. It
+updates the existing primary now and only inserts when there is none. Two more
+bugs surfaced in the same file: height, weight and blood group were validated
+and then left out of the insert entirely, and the phone number had no column at
+all (0020 adds it). The phone rule was also not global — no parentheses, no
+dots, and a length counted in characters, so `+44 7700 900 123` passed and
+`+44 (0) 7700 900 123` failed for the same number. It now validates 7–15
+digits, E.164's maximum.
+
+**A face you choose.** Every avatar was derived from the profile uuid, so a man
+setting up his own profile was handed a woman's portrait with no way out.
+`/who` offers ten illustrated faces when the account is "for me"; the choice
+travels to `/profile` as a route param and lands in the insert. `avatar_seed`
+(0019) stores it, null keeps the old behaviour, and the seed is threaded
+through the switcher and the records list together so nobody has two faces on
+two screens.
+
+**First-upload's button did nothing.** It was `disabled`, with a comment saying
+the pipeline landed in Phase 4 — it had, weeks earlier, at `/scan`. Every route
+now opens `/scan` with a `source` param. `/scan` gained PDF support via
+`expo-document-picker`, because a year of history is not a photograph.
+
+### Content that follows the reader
+
+Suggested questions on Home and the chat's empty state were hardcoded and led
+with "Is this safe during pregnancy?" — shown to somebody who had told us they
+track their weight. Both surfaces now draw from `promptsFor`, keyed on the
+journey and the conditions the reader typed, and **never** on anything read out
+of a document: surfacing diabetes prompts because a lab value came back high is
+a diagnosis dressed as a suggestion. A test asserts that across every journey ×
+condition combination no prompt asks whether to take something, change a dose,
+or whether a result is bad — a suggested question is a promise the app will
+answer it.
+
+Migration 0021 adds six articles (BMI, lipids, thyroid, blood pressure,
+childhood vaccinations, caring at a distance) so the rail has something to be
+dynamic with. Same standing rule as 0017: explanation not advice, sources
+cited, **and all nine still need a clinician's read before any store build.**
+
+### About, and the paywall
+
+About was rewritten against the category's playbook — benchmark score, user
+count, testimonials — which we cannot run honestly, having none of the three.
+It trades borrowed authority for verifiable authority: every claim on the page
+can be checked inside the app in a minute. New sections: how an answer is
+built, what to bring it, and an FAQ that leads with *"Can Baymax replace my
+doctor?" — "No, and it is not built to."*
+
+The paywall was rebuilt twice. The first pass took the right structure from the
+reference paywalls (one decision, one action; unit pricing; a computed saving;
+a what-happens-next timeline) and the wrong surface — three bordered cards each
+with its own shadow, badge, divider and radio. It is one container with
+hairlines now, no shadows, colour in two places. Refused throughout: countdown
+timers, invented strikethroughs, uncheckable percentages, and a decline button
+written to shame.
+
+**Free chats are now DAILY** (0022). Five a month is not a trial of a health
+companion — one worrying result spends all five in an evening and the app has
+nothing to offer for four weeks.
+
+### The first native run
+
+`npx expo run:ios` fails on this machine with a CocoaPods Unicode error unless
+the locale is set: `LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8`. The repo's own
+`pods` script already does this; `expo run:ios` does not.
+
+**Two bugs the browser could never have shown:**
+
+- The journey tiles rendered as two full-height columns with four tiles pushed
+  off the bottom. A wrapped flex row stretches its items to the tallest in the
+  line; on the web that produced six equal tiles because the line's cross size
+  came from the content, and in Yoga it resolved against the centred `flex-1`
+  parent. `items-start`, plus removing an `h-full` whose percentage height had
+  no definite parent.
+- Every launch walked a returning user through onboarding. The splash always
+  replaced to `/welcome` and sign-in always replaced to `/who`, each hard-coded
+  in its own screen. Neither was wrong when written; they rotted because **a
+  returning user is the one case a developer with a fresh database never
+  tests.** `resolveLanding` asks the question once: no session → carousel,
+  session without profile → onboarding, session with profile → home. It fails
+  towards onboarding, because sending someone to an empty home reads as though
+  their records are gone.
+
+### Open after this session
+
+- The demo account has a **duplicate "Athar" profile**; the seeded documents
+  hang off it rather than the primary, so Ask answers "nothing in your records"
+  on the primary profile.
+- The product checker answers from **five mock scenarios**, not a real
+  ingredient lookup. About describes what it does rather than "scan anything",
+  but this must not ship as-is.
+- The nine knowledge articles need a clinician.
+- Still no test of sign-out → sign-in, or of a session revoked server-side.

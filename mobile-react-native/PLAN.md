@@ -201,10 +201,53 @@ in a shell. See `../SHIPPING.md`.
 5. No health data in logs, URLs, query strings, or analytics.
 6. The app does not diagnose. Copy implying it does is a bug.
 
+## Running it
+
+Web preview (fast, and NOT sufficient — see below):
+
+    npx expo start --port 8081        # then open http://localhost:8081
+
+iOS simulator:
+
+    LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 npx expo run:ios --device "iPhone 17 Pro"
+
+The locale is not optional. Without it CocoaPods dies with
+`Unicode Normalization not appropriate for ASCII-8BIT` and Expo reports it as
+"Something went wrong running `pod install`", which looks like a dependency
+problem and is not one. The `pods` script in package.json already sets it.
+
+Expo Go cannot run this build — it is SDK 57 and Expo Go ships the SDK it was
+released with. Use the simulator, or a development build on a device.
+
+Copy `.env.example` to `.env.local` first. `DATABASE_URL` lives in the ROOT
+`.env.local`, not this one, and migrations run from the repo root with
+`npm run db:migrate`.
+
+**THE WEB PREVIEW IS NOT A VERIFICATION.** It is a browser: React Native Web
+maps flexbox onto CSS, and the two disagree in ways that are invisible until
+the app runs natively. Two bugs shipped looking perfect in the browser for
+weeks — a wrapped row that stretched its tiles to full screen height in Yoga,
+and a stacking order that painted a "behind" element in front on web only.
+Anything about layout, cold-start routing, gestures, camera, biometrics or
+haptics has to be seen on a simulator or a device before it counts as done.
+
 ## Open
 
 - **Rename.** "Baymax" is Disney's character and blocks store submission. It is
   currently the Expo `name`, `slug`, `scheme` and both bundle identifiers.
   Change before creating any store account.
+- **The product checker is a mock.** `askAboutProduct` answers from five
+  scenarios in `src/lib/ai/mock/scenarios.ts`, not a real ingredient lookup.
+  The About page describes the capability without claiming "scan anything", but
+  this cannot ship as-is.
+- **Nine knowledge articles need a clinician.** Migrations 0017 and 0021.
+  `reviewed_on` is the date the text was checked against its sources — it is
+  not a medical review, and the migration headers say so.
+- **Demo data is attached to a duplicate profile.** The seed account has two
+  profiles named "Athar"; the seeded documents hang off the non-primary one, so
+  Ask answers "nothing in your records" while looking at the primary.
+- **`activate_tier_demo` grants paid tiers for free** (0012, gated on
+  `app_flags.demo_billing`). Drop it before real billing.
 - Real OCR and model — separate track, contract in `../REACT_NATIVE_BUILD.md`.
 - Rate limiting on auth and AI endpoints.
+- Untested: sign-out then sign-in, and a session revoked server-side.
