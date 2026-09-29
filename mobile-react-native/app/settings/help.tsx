@@ -5,7 +5,6 @@ import {
   CircleHelp,
   MessageSquareWarning,
   ShieldCheck,
-  type LucideIcon,
 } from "lucide-react-native";
 import { useState } from "react";
 import { LayoutAnimation, Platform, Pressable, Text, UIManager, View } from "react-native";

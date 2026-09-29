@@ -173,7 +173,7 @@ export default function Notifications() {
             <View key={group.title} className="mt-6">
               <View className="flex-row items-center gap-2 px-5">
                 <group.icon size={15} color={ink[300]} />
-                <Text className="text-[12px] font-bold uppercase tracking-wide text-ink-300">
+                <Text className="text-[15px] font-semibold text-ink-700">
                   {group.title}
                 </Text>
               </View>
