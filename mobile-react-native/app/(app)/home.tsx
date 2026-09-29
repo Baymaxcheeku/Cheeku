@@ -7,11 +7,11 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AddMemberSheet } from "@/components/app/add-member-sheet";
 import { FamilyTray } from "@/components/app/family-tray";
 import { Paywall } from "@/components/billing/paywall";
-import { FamilySwitcher } from "@/components/app/family-switcher";
 import { OfflineBanner } from "@/components/app/offline-banner";
-import { AskHero } from "@/components/home/ask-hero";
-import { BookWithCheeku } from "@/components/home/book-with-cheeku";
-import { FileStrip, PriorityPill, ReadsStrip } from "@/components/home/strips";
+import { AskBar, CheekuCard, HomeHeadline, ProfileChip, firstName } from "@/components/home/ask-hero";
+import { CareSection } from "@/components/home/care";
+import { FileStrip, ReadsStrip } from "@/components/home/strips";
+import { Gradient } from "@/components/ui/glass";
 import { knowledgeFeed } from "@/lib/knowledge/queries";
 import { NotificationsBell } from "@/components/app/notifications-bell";
 import { Button } from "@/components/ui/button";
@@ -20,16 +20,9 @@ import { allowsFamily } from "@/lib/billing/plans";
 import { getEntitlement } from "@/lib/billing/quota";
 import { deriveNotifications } from "@/lib/notifications/derive";
 import { activeProfile, profileAccess, switchProfile } from "@/lib/profiles/context";
-import { formatEventDate } from "@/lib/records/grouping";
 import { EMPTY_OVERVIEW, useHealthOverview } from "@/lib/records/use-overview";
 import { listProfileRecords, statsFrom } from "@/lib/records/queries";
 import { brand } from "@/theme/tokens";
-import { type } from "@/theme/type";
-
-/** "Athar Ali" → "Athar". Home talks to a person, not a record. */
-function firstName(name: string): string {
-  return name.trim().split(/\s+/)[0] ?? name;
-}
 
 /** Deliberately time-of-day aware, like the frame. */
 function greeting(): string {
@@ -52,6 +45,7 @@ function greeting(): string {
  * half-switched screen is worse than a slow one.
  */
 export default function Home() {
+  const router = useRouter();
   const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
   const [paywallOpen, setPaywallOpen] = useState(false);
@@ -125,7 +119,6 @@ export default function Home() {
   const list = records.data ?? [];
   const stats = statsFrom(list);
   const needsReview = stats.borderline + stats.highRisk;
-  const newest = list[0];
   const access = data.access;
 
   return (
@@ -144,29 +137,36 @@ export default function Home() {
         />
       }
     >
+      {/* A soft violet wash behind the top of the screen, so the glass has
+          something to sit on. Scrolls with the content. */}
+      <View pointerEvents="none" style={{ position: "absolute", top: -insets.top - 40, left: 0, right: 0, height: 520 }}>
+        <Gradient from="#ebe6ff" to="#fafafe" angle="vertical" />
+      </View>
+
       {/*
-       * ┌─ THE LAYOUT, REDESIGNED 2026-09-29 ──────────────────────────────────┐
+       * ┌─ THE LAYOUT, REDESIGNED AGAIN 2026-09-29 ────────────────────────────┐
        * │                                                                     │
-       * │ One hero and small pointers. Ask Cheeku is the product, so it is    │
-       * │ the only large, dark surface; everything else is one line tall and  │
-       * │ exists to send the reader somewhere else.                           │
+       * │ After the owner's reference ("Smart Home, Smooth Services"):        │
        * │                                                                     │
-       * │   who  →  greeting, family switcher                                 │
-       * │   now  →  priority pill (how the file reads)                        │
-       * │   ask  →  Ask Cheeku, with the memory count                         │
-       * │   next →  Book with Cheeku (coming soon, honest about it)           │
-       * │   more →  reads as pills, the health file as one row                │
+       * │   profile chip (the family switcher) · bell                         │
+       * │   editorial headline, italic violet second line                     │
+       * │   ask bar, shaped like search                                       │
+       * │   Cheeku hero card: status pill · 24/7 · memory line · Start a chat │
+       * │   Book care: filter chips + pastel cards (coming soon, honest)      │
+       * │   Worth knowing pills · Health file row                             │
        * │                                                                     │
+       * │ Everything is scoped to the active member, as before.               │
        * └─────────────────────────────────────────────────────────────────────┘
        */}
       <StaggerItem index={0}>
         <View className="flex-row items-center gap-3 px-5">
-          <View className="min-w-0 flex-1">
-            <Text style={[type.caption, { fontSize: 13 }]}>{greeting()}</Text>
-            <Text style={[type.title, { fontSize: 26, lineHeight: 31 }]} numberOfLines={1}>
-              {profile.isPrimary ? firstName(profile.name) : `${firstName(profile.name)}'s health`}
-            </Text>
-          </View>
+          <ProfileChip
+            active={profile}
+            others={access.selectable.filter((p) => p.id !== profile.id)}
+            greeting={greeting()}
+            onPress={() => setTrayOpen(true)}
+          />
+          <View className="flex-1" />
           <NotificationsBell notifications={deriveNotifications(list)} />
         </View>
       </StaggerItem>
@@ -174,35 +174,34 @@ export default function Home() {
       <OfflineBanner updatedAt={context.dataUpdatedAt} />
 
       <StaggerItem index={1}>
-        <View className="mt-4">
-          {/* Only what the plan can open, plus a count of what it cannot. */}
-          <FamilySwitcher
-            profiles={access.selectable}
-            activeId={profile.id}
-            tier={data.entitlement.tier}
-            lockedCount={access.lockedCount}
-            onSelect={onSelectProfile}
-            onUpgrade={() => setPaywallOpen(true)}
-            onViewAll={() => setTrayOpen(true)}
-          />
+        <View className="mt-6 px-5">
+          <HomeHeadline name={firstName(profile.name)} isSelf={profile.isPrimary} />
         </View>
       </StaggerItem>
 
       <StaggerItem index={2}>
-        <PriorityPill
-          total={stats.total}
-          needsReview={needsReview}
-          topRecordId={list.find((r) => r.severity !== "normal")?.id}
-          latest={newest ? formatEventDate(newest.eventDate) : undefined}
-        />
+        <View className="mt-5 px-5">
+          <AskBar />
+        </View>
       </StaggerItem>
 
       <StaggerItem index={3}>
-        <AskHero name={firstName(profile.name)} isSelf={profile.isPrimary} remembered={stats.total} />
+        <View className="mt-4 px-5">
+          <CheekuCard
+            name={firstName(profile.name)}
+            isSelf={profile.isPrimary}
+            remembered={stats.total}
+            needsReview={needsReview}
+            onStatus={() => {
+              const top = list.find((r) => r.severity !== "normal")?.id;
+              router.push((stats.total === 0 ? "/scan" : top ? `/records/${top}` : "/records") as never);
+            }}
+          />
+        </View>
       </StaggerItem>
 
       <StaggerItem index={4}>
-        <BookWithCheeku />
+        <CareSection />
       </StaggerItem>
 
       <StaggerItem index={5}>

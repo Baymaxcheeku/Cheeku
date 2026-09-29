@@ -1156,26 +1156,34 @@ bubble pop, the sliding segmented control on sign-in, and the headline weights.
 
 ## Home redesign — 2026-09-29 (cloud session, not yet seen on a device)
 
-One hero and small pointers. Order: greeting + bell, family switcher, priority
-pill, **Ask Cheeku**, Book with Cheeku, Worth knowing, health file.
+Rebuilt twice in one day. The first pass (dark violet Ask card, a "Book with
+Cheeku" tile row) was rejected by the owner, who pointed at a service-app
+reference ("Smart Home, Smooth Services") for the look: editorial headline with
+an italic accent, round glass controls, a search-shaped input, one pastel hero
+card with floating glass pills, filter chips over soft pastel list cards.
 
-- **Ask Cheeku is the only dark surface.** It is the north-star action
-  (a conversation grounded in the reader's own records), so it gets the
-  mascot, the headline and the first reachable input. The memory line ("I
-  remember 6 documents of yours") is a real count of what is on file for the
-  active member; at zero it asks for the first document instead.
-- **The mic is honest.** Voice is not built; tapping it says "coming soon" in a
-  bubble rather than pretending to listen.
-- **Book with Cheeku (roadmap phases 2 and 3) is a front door only.** Doctor,
-  lab tests, medicines, gynae, dietician, fitness. Every tap opens a sheet that
-  says it is coming soon, with a per-service "Notify me" stored on the device
-  (`cheeku.notify`). Deliberately absent: invented doctors, ratings or slots,
-  and any "recommended specialist" inferred from records — that is triage.
-- **Worth knowing** became one row of thin pills. **Health file** became one
-  row. The full-size `KnowledgeRail` and `HomeAskBox` are deleted;
-  `health/health-file.tsx` stays because `/health-file` imports `TYPE_META`.
-- The priority pill is the one place on Home where semantic colour is used,
-  because it states how the records read.
+Order: profile chip · bell → headline → ask bar → Cheeku card → Book care →
+Worth knowing pills → Health file row.
 
-**Needs a device check:** the fading placeholder (an `Animated.Text` layered
-over the `TextInput`), the Notify-me sheet, and the staggered entrance.
+- **The family switcher is the profile chip.** It names whose health the screen
+  shows ("Good evening, Athar" or "Viewing, Mummy"), shows the other members'
+  faces, and opens the family tray. The inline avatar row is gone from Home.
+- **Glass and gradients without native modules.** `ui/glass.tsx`: translucent
+  white, a bright rim and a wide soft shadow instead of `expo-blur`, and SVG
+  gradients via the already-shipped `react-native-svg` instead of
+  `expo-linear-gradient`. No new development build needed.
+- **Headline** is Inter Medium with an Inter Medium Italic violet second line
+  (`Inter_500Medium_Italic`, same font package).
+- **Cheeku card**: the status pill ("2 to review" / "All in range") is the only
+  semantic colour on Home. The memory line is a real count for the active
+  member. "Start a chat" opens /ask; the ask bar carries a typed question there,
+  where the safety gate runs. The mic says voice is coming soon.
+- **Book care** (roadmap phases 2–3): filter chips, three pastel cards under
+  "All" with "Show 3 more", each opening an honest coming-soon sheet with a
+  per-service Notify me (`cheeku.notify`, device only). No invented doctors,
+  ratings, prices or slots, and no specialist inferred from records. Pastels
+  avoid green, amber and red.
+
+**Needs a device check:** SVG gradient rendering behind rounded, clipped cards
+on Android; the fading placeholder over the input; the glass shadow on
+Android, which only reads `elevation`.
