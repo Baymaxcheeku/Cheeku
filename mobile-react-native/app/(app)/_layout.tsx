@@ -1,6 +1,9 @@
 import { Tabs } from "expo-router";
 
 import { TabBar } from "@/components/app/tab-bar";
+import { useToast } from "@/components/notifications/toast";
+import { useInboxLive } from "@/lib/notifications/use-inbox";
+import { usePushSetup } from "@/lib/notifications/use-push";
 
 /*
  * The signed-in shell. Everything past onboarding lives here and shares the tab
@@ -13,6 +16,17 @@ import { TabBar } from "@/components/app/tab-bar";
  * behind the status bar rather than start below it.
  */
 export default function AppLayout() {
+  /*
+   * Notifications live here because this is the signed-in shell: it mounts
+   * once after sign-in, stays mounted under every pushed screen, and unmounts
+   * on sign-out, which is exactly the lifetime of a Realtime subscription and
+   * of the push routing. New rows raise the in-app banner (drawn at the root
+   * so it shows above pushed screens too).
+   */
+  const show = useToast((s) => s.show);
+  useInboxLive(show);
+  usePushSetup();
+
   return (
     <Tabs
       tabBar={(props) => <TabBar {...props} />}

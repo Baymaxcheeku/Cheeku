@@ -19,6 +19,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider, type Metrics } from "react-native-safe-area-context";
 
 import { AppLock } from "@/components/app/app-lock-gate";
+import { ToastHost } from "@/components/notifications/toast";
 import { persistOptions } from "@/lib/offline/cache";
 import { startOnlineManager } from "@/lib/offline/status";
 import { DeviceFrame } from "@/components/ui/device-frame";
@@ -121,7 +122,12 @@ export default function RootLayout() {
               contentStyle: { backgroundColor: surface.canvas },
               animation: "slide_from_right",
             }}
-          />
+          >
+            {/* Opens fast and from the side like every other push, but a
+                touch quicker: it is a glance, not a destination. */}
+            <Stack.Screen name="notifications" options={{ animationDuration: 240 }} />
+          </Stack>
+          <ToastHost />
           </AppLock>
           </DeviceFrame>
         </PersistQueryClientProvider>

@@ -8,6 +8,7 @@ import { MascotBust } from "@/components/illustrations/sprout";
 import { authenticate, isLockEnabled } from "@/lib/security/app-lock";
 import { clearOfflineCache } from "@/lib/offline/cache";
 import { clearActiveProfile } from "@/lib/profiles/context";
+import { forgetThisDevice } from "@/lib/notifications/push";
 import { supabase } from "@/lib/supabase/client";
 import { brand, ink, surface } from "@/theme/tokens";
 
@@ -117,6 +118,8 @@ export function AppLockGate({ children }: { children: React.ReactNode }) {
    */
   async function escapeBySigningOut() {
     await clearActiveProfile();
+    // Before the session goes: removing this phone's push token needs it.
+    await forgetThisDevice();
     await supabase.auth.signOut();
     queryClient.clear();
     await clearOfflineCache();

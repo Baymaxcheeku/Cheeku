@@ -61,6 +61,8 @@ export const persister = createAsyncStoragePersister({
  *   `settings-*`    — forms. Editing against a stale copy overwrites whatever
  *                     was saved elsewhere in the meantime.
  *   `own-family`    — notification preferences, same reason as the forms.
+ *   `notifications` — the inbox. Titles name reports and doctors, and the
+ *                     bell refetches it in well under a second anyway.
  *
  * ONE HONEST QUALIFICATION on entitlement. Excluding the `entitlement` key does
  * NOT keep the tier off the disk: `home-context` fetches the access list, the

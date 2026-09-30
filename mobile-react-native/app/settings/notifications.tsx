@@ -1,125 +1,123 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "expo-router";
 import {
   Bell,
+  BellOff,
   BellRing,
   CalendarClock,
-  Gift,
-  Lightbulb,
-  LineChart,
-  Mail,
-  Megaphone,
-  ShieldAlert,
+  ChevronRight,
+  FileText,
+  Inbox,
+  KeyRound,
+  Lock,
+  Rocket,
   Tag,
   Users2,
   type LucideIcon,
 } from "lucide-react-native";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, Text, View } from "react-native";
+import { ActivityIndicator, Linking, Pressable, Text, View } from "react-native";
 
-import { SettingsScreen } from "@/components/settings/chrome";
+import { Panel, Section, SettingsScreen } from "@/components/settings/chrome";
 import { SpringSwitch } from "@/components/ui/motion";
+import { PillButton } from "@/components/ui/screen";
+import { enablePush, pushPermission } from "@/lib/notifications/push";
 import { updateNotificationPrefs } from "@/lib/settings/actions";
 import { DEFAULT_PREFS, ownFamily } from "@/lib/settings/queries";
 import type { NotificationPrefs } from "@/lib/settings/schemas";
-import { brand, ink, shadow, surface } from "@/theme/tokens";
+import { brand, ink } from "@/theme/tokens";
+import { font } from "@/theme/type";
 
 type Key = keyof NotificationPrefs;
 
-const GROUPS: {
-  title: string;
-  body: string;
-  icon: LucideIcon;
-  rows: { key: Key; icon: LucideIcon; title: string; body: string }[];
-}[] = [
+/*
+ * What can buzz the phone, per kind of message.
+ *
+ * REWRITTEN 2026-09-30 alongside the real inbox. The old screen listed nine
+ * switches, four of which (daily check-ins, insights, invitations, tips) had
+ * nothing behind them and never would have sent anything. Every switch here
+ * now maps to messages the app really produces (see migration 0024 and the
+ * push-dispatch function), and the screen says plainly that the inbox gets
+ * everything regardless, so turning a switch off can never hide something.
+ *
+ * The retired keys stay in the stored JSON and the schema, untouched, so an
+ * older build reading the row does not break.
+ */
+const GROUPS: { title: string; rows: { key: Key; icon: LucideIcon; tint: string; fg: string; title: string; body: string }[] }[] = [
   {
-    title: "General updates",
-    body: "Important updates about your account and Cheeku AI.",
-    icon: BellRing,
+    title: "Your health",
     rows: [
       {
-        key: "accountSecurity",
-        icon: ShieldAlert,
-        title: "Account & security",
-        body: "Login, password changes and security alerts.",
-      },
-      {
-        key: "productUpdates",
-        icon: Megaphone,
-        title: "Product updates",
-        body: "New features, improvements and announcements.",
-      },
-      {
-        key: "tipsReminders",
-        icon: Lightbulb,
-        title: "Tips & reminders",
-        body: "Helpful tips to get the most out of Cheeku AI.",
-      },
-    ],
-  },
-  {
-    title: "Health & insights",
-    body: "Stay on top of your health and check-ins.",
-    icon: LineChart,
-    rows: [
-      {
-        key: "checkinReminders",
+        key: "appointmentReminders",
         icon: CalendarClock,
-        title: "Daily check-in reminders",
-        body: "Receive reminders to complete your check-in.",
-      },
-      {
-        key: "healthInsights",
-        icon: LineChart,
-        title: "Health insights",
-        body: "Personalised insights based on your data.",
+        tint: "#e3f0ff",
+        fg: "#1a6fc2",
+        title: "Appointment reminders",
+        body: "A day before, an hour before, and the moment your call room opens.",
       },
       {
         key: "reportNotifications",
-        icon: Mail,
-        title: "Report notifications",
-        body: "When your reports are ready or updated.",
+        icon: FileText,
+        tint: "#ece8ff",
+        fg: brand[600],
+        title: "Reports",
+        body: "When a report is filed, needs a quick check, or has values worth a look.",
       },
-    ],
-  },
-  {
-    title: "Family & sharing",
-    body: "Updates about your family members and sharing.",
-    icon: Users2,
-    rows: [
       {
         key: "familyActivity",
         icon: Users2,
-        title: "Family member activity",
-        body: "Check-ins and added reports from family members.",
-      },
-      {
-        key: "invitations",
-        icon: Mail,
-        title: "Invitations & requests",
-        body: "Alerts for invites to join or share.",
+        tint: "#ffe9f1",
+        fg: "#c22a6b",
+        title: "Family",
+        body: "When someone new joins your family's health files.",
       },
     ],
   },
   {
-    title: "Marketing & offers",
-    body: "Special offers and content we think you'll love.",
-    icon: Gift,
+    title: "Your account",
     rows: [
+      {
+        key: "accountSecurity",
+        icon: KeyRound,
+        tint: "#eef0f5",
+        fg: ink[700],
+        title: "Account and security",
+        body: "Password changes, plan changes and replies from our support team.",
+      },
+    ],
+  },
+  {
+    title: "From Cheeku",
+    rows: [
+      {
+        key: "productUpdates",
+        icon: Rocket,
+        tint: "#fff1e3",
+        fg: "#c2650b",
+        title: "New on Cheeku",
+        body: "When a service you asked about goes live. We keep it rare.",
+      },
       {
         key: "promotions",
         icon: Tag,
-        title: "Promotions & offers",
-        body: "Discounts, offers and exclusive deals.",
+        tint: "#fff1e3",
+        fg: "#c2650b",
+        title: "Offers",
+        body: "Discounts on plans and bookings, only if you want them.",
       },
     ],
   },
 ];
 
-export default function Notifications() {
+export default function NotificationSettings() {
+  const router = useRouter();
+  const qc = useQueryClient();
   const family = useQuery({ queryKey: ["own-family"], queryFn: ownFamily });
+  const permission = useQuery({ queryKey: ["push-permission"], queryFn: pushPermission });
 
   const [prefs, setPrefs] = useState<NotificationPrefs>(DEFAULT_PREFS);
   const [error, setError] = useState<string | null>(null);
+  const [asking, setAsking] = useState(false);
 
   useEffect(() => {
     if (family.data) setPrefs(family.data.prefs);
@@ -128,92 +126,146 @@ export default function Notifications() {
   /*
    * Optimistic, and reverted on failure.
    *
-   * A switch is the one control where lag is unacceptable — it exists to feel
-   * instant. But a switch that stays on after the write failed is worse than a
-   * slow one: the reader believes they turned something off. So it moves at
-   * once and moves back if the save does not land.
+   * A switch is the one control where lag is unacceptable. But a switch that
+   * stays on after the write failed is worse than a slow one: the reader
+   * believes they turned something off. So it moves at once and moves back if
+   * the save does not land. The cached family row is patched too, so the
+   * reminder scheduler (which reads it) reacts without a refetch.
    */
   function toggle(key: Key) {
     const next = !prefs[key];
     setPrefs((p) => ({ ...p, [key]: next }));
     setError(null);
+    qc.setQueryData(["own-family"], (old: { id: string; prefs: NotificationPrefs } | null | undefined) =>
+      old ? { ...old, prefs: { ...old.prefs, [key]: next } } : old,
+    );
     void updateNotificationPrefs({ [key]: next }).then((result) => {
       if (!result.ok) {
         setPrefs((p) => ({ ...p, [key]: !next }));
+        void qc.invalidateQueries({ queryKey: ["own-family"] });
         setError(result.message);
       }
     });
   }
 
+  async function allow() {
+    setAsking(true);
+    await enablePush();
+    await permission.refetch();
+    setAsking(false);
+  }
+
+  const status = permission.data;
+
   return (
-    <SettingsScreen title="Notifications" eyebrow="Alerts and reminders" icon={Bell}>
+    <SettingsScreen title="Notifications" eyebrow="What reaches your phone" icon={Bell}>
       {family.isPending ? (
         <View className="mt-16 items-center">
           <ActivityIndicator color={brand[600]} />
         </View>
       ) : (
         <>
-          {/*
-           * The honest caveat, first. Every switch below writes a real stored
-           * preference, but nothing delivers a push yet — that is Phase 5, and
-           * it needs APNs and FCM credentials. Collecting consent for a
-           * delivery system that does not exist is fine; implying messages are
-           * already being sent is not.
-           */}
-          <View className="mx-5 mt-4 flex-row items-start gap-2 rounded-card bg-brand-50 px-4 py-3">
-            <Bell size={15} color={brand[500]} style={{ marginTop: 1 }} />
-            <Text className="flex-1 text-[12px] leading-[17px] text-ink-700">
-              Your choices are saved now and honoured the moment push notifications arrive. Cheeku
-              never puts a health detail in a notification, so nothing sensitive shows on a locked
-              screen.
+          {/* Phone alerts: the one thing the switches below depend on. */}
+          <Section>
+            <Panel>
+              <View className="flex-row items-center gap-3">
+                <View
+                  className="h-11 w-11 items-center justify-center rounded-[14px]"
+                  style={{ backgroundColor: status === "granted" ? brand[50] : "#eef0f5" }}
+                >
+                  {status === "granted" ? <BellRing size={20} color={brand[600]} /> : <BellOff size={20} color={ink[500]} />}
+                </View>
+                <View className="flex-1">
+                  <Text style={{ fontFamily: font.semibold, fontSize: 15.5, color: ink[900] }}>
+                    {status === "granted"
+                      ? "Phone alerts are on"
+                      : status === "denied"
+                        ? "Phone alerts are off"
+                        : status === "unsupported"
+                          ? "Phone alerts live in the app"
+                          : "Phone alerts aren't on yet"}
+                  </Text>
+                  <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[500], marginTop: 2 }}>
+                    {status === "granted"
+                      ? "Choose below what's allowed to buzz you."
+                      : status === "denied"
+                        ? "Your phone's settings are blocking Cheeku. Switch it back on there."
+                        : status === "unsupported"
+                          ? "Open Cheeku AI on your phone to turn these on."
+                          : "Turn them on so reminders can actually reach you."}
+                  </Text>
+                </View>
+              </View>
+              {status === "undetermined" ? (
+                <PillButton tone="brand" loading={asking} onPress={() => void allow()} icon={<BellRing size={16} color="#fff" />} style={{ marginTop: 14, height: 48 }}>
+                  Turn on phone alerts
+                </PillButton>
+              ) : status === "denied" ? (
+                <PillButton tone="light" onPress={() => void Linking.openSettings()} style={{ marginTop: 14, height: 48 }}>
+                  Open phone settings
+                </PillButton>
+              ) : null}
+            </Panel>
+          </Section>
+
+          <View className="mx-5 mt-4 flex-row items-start gap-2.5 rounded-[18px] px-4 py-3" style={{ backgroundColor: brand[50] }}>
+            <Inbox size={16} color={brand[600]} style={{ marginTop: 1 }} />
+            <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[700] }}>
+              Everything always lands in your inbox. These switches only choose what can also buzz your phone.
             </Text>
           </View>
 
           {GROUPS.map((group) => (
-            <View key={group.title} className="mt-6">
-              <View className="flex-row items-center gap-2 px-5">
-                <group.icon size={15} color={ink[300]} />
-                <Text className="text-[15px] font-semibold text-ink-700">
-                  {group.title}
-                </Text>
-              </View>
-              <Text className="mt-1 px-5 text-[11.5px] text-ink-300">{group.body}</Text>
-
-              <View
-                className="mx-5 mt-2 overflow-hidden rounded-card bg-surface"
-                style={shadow.e1}
-              >
+            <Section key={group.title} label={group.title}>
+              <Panel padded={false}>
                 {group.rows.map((row, i) => (
                   <View
                     key={row.key}
-                    className="flex-row items-center gap-3 px-3.5 py-3"
-                    style={i > 0 ? { borderTopWidth: 1, borderTopColor: surface.line } : undefined}
+                    className="flex-row items-center gap-3 px-4 py-3.5"
+                    style={i > 0 ? { borderTopWidth: 1, borderTopColor: "rgba(15,16,48,0.06)" } : undefined}
                   >
-                    <View className="h-9 w-9 items-center justify-center rounded-tile bg-brand-50">
-                      <row.icon size={16} color={brand[600]} />
+                    <View className="h-10 w-10 items-center justify-center rounded-[13px]" style={{ backgroundColor: row.tint }}>
+                      <row.icon size={18} color={row.fg} />
                     </View>
                     <View className="min-w-0 flex-1">
-                      <Text className="text-[14px] font-semibold text-ink-900">{row.title}</Text>
-                      <Text className="mt-0.5 text-[11.5px] leading-[16px] text-ink-500">
-                        {row.body}
-                      </Text>
+                      <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{row.title}</Text>
+                      <Text style={{ fontFamily: font.regular, fontSize: 12.5, lineHeight: 17, color: ink[500], marginTop: 2 }}>{row.body}</Text>
                     </View>
-                    <SpringSwitch
-                      checked={prefs[row.key]}
-                      onChange={() => toggle(row.key)}
-                      label={row.title}
-                    />
+                    <SpringSwitch checked={prefs[row.key]} onChange={() => toggle(row.key)} label={row.title} />
                   </View>
                 ))}
-              </View>
-            </View>
+              </Panel>
+            </Section>
           ))}
 
+          <View className="mx-5 mt-6 flex-row items-start gap-2.5">
+            <Lock size={14} color={ink[300]} style={{ marginTop: 2 }} />
+            <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 12.5, lineHeight: 18, color: ink[500] }}>
+              Your lock screen stays private. A buzz says something like &quot;Cheeku has an update on a report&quot;, never
+              a result, a doctor or a name. The details wait inside the app.
+            </Text>
+          </View>
+
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => router.push("/notifications")}
+            style={({ pressed }) => ({
+              marginHorizontal: 20,
+              marginTop: 18,
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 4,
+              height: 44,
+              opacity: pressed ? 0.6 : 1,
+            })}
+          >
+            <Text style={{ fontFamily: font.semibold, fontSize: 14, color: brand[700] }}>Open your inbox</Text>
+            <ChevronRight size={16} color={brand[700]} />
+          </Pressable>
+
           {error ? (
-            <Text
-              accessibilityRole="alert"
-              className="mx-5 mt-4 text-[13px] font-medium text-danger-text"
-            >
+            <Text accessibilityRole="alert" style={{ marginHorizontal: 20, marginTop: 8, fontFamily: font.medium, fontSize: 13, color: "#c00a1c" }}>
               {error}
             </Text>
           ) : null}

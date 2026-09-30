@@ -58,6 +58,7 @@ import {
 } from "@/lib/profiles/context";
 import { castFaces } from "@/lib/profiles/avatar";
 import { listProfileRecords, statsFrom } from "@/lib/records/queries";
+import { forgetThisDevice } from "@/lib/notifications/push";
 import { supabase } from "@/lib/supabase/client";
 import { brand, ink, semantic, shadow, surface } from "@/theme/tokens";
 
@@ -95,6 +96,8 @@ export default function Settings() {
     // next account that signs in on this device a stale selection pointing at
     // someone else's profile id.
     await clearActiveProfile();
+    // Before the session goes: removing this phone's push token needs it.
+    await forgetThisDevice();
     await supabase.auth.signOut();
     queryClient.clear();
     // The in-memory cache is not the copy that matters. `queryClient.clear()`
@@ -230,7 +233,7 @@ export default function Settings() {
       </Group>
 
       <Group label="Preferences">
-        <Row icon={Bell} title="Notifications" body="Alerts and reminders" href="/settings/notifications" />
+        <Row icon={Bell} title="Notifications" body="Your inbox and phone alerts" href="/notifications" />
         <Row icon={Globe} title="Language" body="English" href="/settings/language" />
       </Group>
 

@@ -1,7 +1,9 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
   Activity,
+  BadgeCheck,
   Stethoscope,
   Droplet,
   FileText,
@@ -24,7 +26,7 @@ import { OriginalToggle } from "@/components/records/original-toggle";
 import { selectableProfiles } from "@/lib/profiles/context";
 import { formatEventDate } from "@/lib/records/grouping";
 import { buildInsight, flaggedEntities, formatValue } from "@/lib/records/insight";
-import { getRecord, signedDocumentUrl } from "@/lib/records/queries";
+import { confirmRecord, getRecord, signedDocumentUrl } from "@/lib/records/queries";
 import {
   FLAG_LABEL,
   SEVERITY_LABEL,
@@ -65,6 +67,23 @@ export default function RecordDetail() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
+  const qc = useQueryClient();
+  const [confirming, setConfirming] = useState(false);
+  const [confirmError, setConfirmError] = useState(false);
+
+  async function confirm() {
+    setConfirming(true);
+    setConfirmError(false);
+    const ok = await confirmRecord(id);
+    setConfirming(false);
+    if (!ok) {
+      setConfirmError(true);
+      return;
+    }
+    void qc.invalidateQueries({ queryKey: ["record", id] });
+    void qc.invalidateQueries({ queryKey: ["records"] });
+    void qc.invalidateQueries({ queryKey: ["notifications"] });
+  }
 
   const query = useQuery({
     queryKey: ["record", id],
@@ -178,6 +197,40 @@ export default function RecordDetail() {
           </Glass>
         </View>
       </View>
+
+      {/*
+       * The other half of the "Quick check" notification. Without this, the
+       * notification asked for a check nobody could complete.
+       */}
+      {record.status === "needs_review" ? (
+        <Glass strong className="mt-3 rounded-[26px] p-4">
+          <View className="flex-row items-start gap-3">
+            <View className="h-10 w-10 items-center justify-center rounded-[13px]" style={{ backgroundColor: brand[50] }}>
+              <BadgeCheck size={19} color={brand[600]} />
+            </View>
+            <View className="flex-1">
+              <Text style={{ fontFamily: font.semibold, fontSize: 16, color: ink[900] }}>Did I read this right?</Text>
+              <Text style={{ fontFamily: font.regular, fontSize: 13.5, lineHeight: 19, color: ink[700], marginTop: 3 }}>
+                Match the values below with the original page. If they line up, file it and I&apos;ll remember it.
+              </Text>
+            </View>
+          </View>
+          {confirmError ? (
+            <Text accessibilityRole="alert" style={{ fontFamily: font.medium, fontSize: 13, color: semantic.dangerText, marginTop: 10 }}>
+              That didn&apos;t save. Check your connection and try again.
+            </Text>
+          ) : null}
+          <PillButton
+            tone="brand"
+            loading={confirming}
+            onPress={() => void confirm()}
+            icon={<BadgeCheck size={17} color="#fff" />}
+            style={{ marginTop: 14, height: 48 }}
+          >
+            Looks right, file it
+          </PillButton>
+        </Glass>
+      ) : null}
 
       {/* ---------------------------------------------------------- status */}
       <Glass strong className="mt-3 rounded-[26px] p-4">

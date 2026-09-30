@@ -9,7 +9,17 @@ import tseslint from "typescript-eslint";
 const compat = new FlatCompat({ baseDirectory: dirname(fileURLToPath(import.meta.url)) });
 
 const eslintConfig = [
-  { ignores: [".next/**", "out/**", "build/**", "next-env.d.ts", ".designvenv/**"] },
+  {
+    ignores: [
+      ".next/**",
+      "out/**",
+      "build/**",
+      "next-env.d.ts",
+      ".designvenv/**",
+      // Deno code, deployed to Supabase, with its own imports and globals.
+      "supabase/functions/**",
+    ],
+  },
   ...compat.extends("next/core-web-vitals", "next/typescript"),
   ...tseslint.configs.strict,
   prettier,
