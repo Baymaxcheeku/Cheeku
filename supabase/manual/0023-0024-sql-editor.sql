@@ -17,6 +17,9 @@ create table if not exists schema_migrations (
   filename text primary key,
   applied_at timestamptz not null default now()
 );
+-- Deny-all through the API, as migration 0007 set it. The SQL Editor runs as
+-- the owner, so the inserts below still work.
+alter table schema_migrations enable row level security;
 
 -- ================================================ 0023_rename_to_cheeku.sql
 -- The product is now Cheeku AI, and the companion inside it is Cheeku.
