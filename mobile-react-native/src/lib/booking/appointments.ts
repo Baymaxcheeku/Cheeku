@@ -1,7 +1,8 @@
 import { useEffect } from "react";
 import { create } from "zustand";
 
-import { doctorById, type Mode } from "@/lib/booking/catalog";
+import { doctorById, SPECIALTIES, type Mode } from "@/lib/booking/catalog";
+import { cancelConsultationInvoice, fileConsultationInvoice, rescheduleConsultationInvoice } from "@/lib/records/record-actions";
 import { recordDeviceEvent } from "@/lib/notifications/queries";
 import { kv } from "@/lib/storage";
 
@@ -35,6 +36,10 @@ export type Appointment = {
   concern: string;
   status: "booked" | "cancelled";
   createdAt: string;
+  /** The family member it is for, when known; the invoice is filed under them. */
+  profileId?: string;
+  /** The consultation invoice filed in their records (migration 0028). */
+  invoiceId?: string;
 };
 
 const KEY = "cheeku.appointments";
@@ -44,7 +49,7 @@ type Store = {
   items: Appointment[];
   loaded: boolean;
   load: () => Promise<void>;
-  add: (a: Omit<Appointment, "id" | "status" | "createdAt">) => Appointment;
+  add: (a: Omit<Appointment, "id" | "status" | "createdAt" | "invoiceId">) => Appointment;
   reschedule: (id: string, day: string, slotLabel: string) => void;
   cancel: (id: string) => void;
 };
@@ -94,6 +99,37 @@ function inbox(a: Appointment, change: "booked" | "rescheduled" | "cancelled") {
   }
 }
 
+/*
+ * The invoice goes into the member's records, where bills and receipts live,
+ * so "what did that consultation cost" has an answer next to the
+ * prescription it produced. Best effort: a booking never fails because its
+ * invoice didn't file.
+ */
+async function fileInvoice(a: Appointment, done: (invoiceId: string) => void) {
+  const doctor = doctorById(a.doctorId);
+  if (!doctor || !a.profileId) return;
+  const fee = doctor.fee[a.mode];
+  if (fee === undefined) return;
+  const id = await fileConsultationInvoice({
+    profileId: a.profileId,
+    doctor: doctor.name,
+    specialty: SPECIALTIES[doctor.specialty]?.label ?? null,
+    clinic: a.mode === "clinic" ? `${doctor.clinic.name}, ${doctor.clinic.area}` : null,
+    mode: a.mode,
+    day: localDay(a.day),
+    slot: a.slotLabel,
+    fee,
+    appointmentId: a.id,
+  }).catch(() => null);
+  if (id) done(id);
+}
+
+/** The appointment's calendar day where the person is, as YYYY-MM-DD. */
+function localDay(iso: string): string {
+  const d = new Date(iso);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
 export const useAppointments = create<Store>((set, get) => ({
   items: [],
   loaded: false,
@@ -117,6 +153,11 @@ export const useAppointments = create<Store>((set, get) => ({
     set({ items });
     persist(items);
     inbox(appt, "booked");
+    void fileInvoice(appt, (invoiceId) => {
+      const next = get().items.map((x) => (x.id === appt.id ? { ...x, invoiceId } : x));
+      set({ items: next });
+      persist(next);
+    });
     return appt;
   },
   reschedule: (id, day, slotLabel) => {
@@ -125,13 +166,18 @@ export const useAppointments = create<Store>((set, get) => ({
     persist(items);
     const moved = items.find((x) => x.id === id);
     if (moved) inbox(moved, "rescheduled");
+    if (moved?.invoiceId) void rescheduleConsultationInvoice(moved.invoiceId, day, slotLabel);
   },
   cancel: (id) => {
     const before = get().items.find((x) => x.id === id);
     const items = get().items.map((x) => (x.id === id ? { ...x, status: "cancelled" as const } : x));
     set({ items });
     persist(items);
-    if (before && before.status !== "cancelled") inbox(before, "cancelled");
+    if (before && before.status !== "cancelled") {
+      inbox(before, "cancelled");
+      // Refunded if it was paid in the app, otherwise just cancelled.
+      if (before.invoiceId) void cancelConsultationInvoice(before.invoiceId);
+    }
   },
 }));
 

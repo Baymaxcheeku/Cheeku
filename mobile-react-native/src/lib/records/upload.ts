@@ -5,6 +5,9 @@ import { extractFromFile, routeFor } from "@/lib/ai/mock/extract";
 import { selectableProfiles } from "@/lib/profiles/context";
 import { supabase } from "@/lib/supabase/client";
 
+import { entityRows } from "./reading";
+import type { DocType } from "./types";
+
 /*
  * Upload, extract, file. The one write path into the records system.
  *
@@ -60,6 +63,8 @@ export type PickedFile = {
 export async function uploadDocument(
   picked: PickedFile,
   profileId: string,
+  /** What the person said it is. Omitted, the reader decides. */
+  docType?: DocType,
 ): Promise<UploadResult> {
   const {
     data: { user },
@@ -120,7 +125,7 @@ export async function uploadDocument(
     return { ok: false, message: "The upload did not complete. Please try again." };
   }
 
-  const extraction = extractFromFile(picked.name, size);
+  const extraction = extractFromFile(picked.name, size, docType);
   const status = routeFor(extraction);
 
   const { data: inserted, error: insertError } = await supabase
@@ -134,12 +139,14 @@ export async function uploadDocument(
       status,
       event_date: extraction.eventDate,
       facility: extraction.facility,
+      doctor: extraction.doctor,
       confidence: extraction.confidence,
       raw_text: extraction.rawText,
       extraction: {
         title: extraction.title,
         fields: extraction.fields,
         values: extraction.values,
+        details: extraction.details,
       },
     })
     .select("id")
@@ -168,5 +175,22 @@ export async function uploadDocument(
     return { ok: false, message: "The document could not be saved. Please try again." };
   }
 
-  return { ok: true, documentId: inserted.id as string, needsReview: status === "needs_review" };
+  const documentId = inserted.id as string;
+
+  /*
+   * What was read, as rows the rest of the app can use: lab values for trends
+   * and the health file, medicines and vaccines for the member's history.
+   * A failure here doesn't undo the record. The page still shows everything
+   * from the document itself, and the values are only an index over it.
+   */
+  const rows = entityRows(extraction).map((e) => ({
+    ...e,
+    profile_id: profileId,
+    user_id: user.id,
+    document_id: documentId,
+    event_date: extraction.eventDate,
+  }));
+  if (rows.length) await supabase.from("entities").insert(rows);
+
+  return { ok: true, documentId, needsReview: status === "needs_review" };
 }

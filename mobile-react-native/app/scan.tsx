@@ -13,6 +13,7 @@ import {
   Camera as CameraIcon,
   Search,
   ShieldCheck,
+  Sparkles,
   type LucideIcon,
 } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
@@ -26,7 +27,9 @@ import { Glass, Gradient, glass, glassShadow } from "@/components/ui/glass";
 import { Backdrop, ScreenHeader } from "@/components/ui/screen";
 import { font } from "@/theme/type";
 import { activeProfile, selectableProfiles } from "@/lib/profiles/context";
+import { TYPE_STYLE } from "@/components/records/record-card";
 import { uploadDocument, type PickedFile } from "@/lib/records/upload";
+import { DOC_TYPE_LABEL, DOC_TYPES, type DocType } from "@/lib/records/types";
 import { stripImageMetadata } from "@/lib/upload/strip-exif";
 import { brand, ink, semantic } from "@/theme/tokens";
 import { useFamily } from "@/lib/profiles/family";
@@ -42,6 +45,10 @@ type Phase = "pick" | "working" | "error";
  * a lie that costs the reader their trust at exactly the moment the app is
  * handling their medical records.
  */
+// Every type a person might photograph. The app files its own booking
+// invoices, but a clinic's paper receipt is still worth keeping.
+const PICKABLE = DOC_TYPES.filter((t) => t !== "other");
+
 const STEPS: readonly { key: string; icon: LucideIcon; title: string; body: string }[] = [
   {
     key: "upload",
@@ -86,6 +93,8 @@ export default function Scan() {
 
   const [phase, setPhase] = useState<Phase>("pick");
   const [profileId, setProfileId] = useState("");
+  // Null lets the reader decide from the document itself.
+  const [docType, setDocType] = useState<DocType | null>(null);
   const [stepIndex, setStepIndex] = useState(0);
   const [settleStep, setSettleStep] = useState(0);
   const [message, setMessage] = useState<string | null>(null);
@@ -157,6 +166,7 @@ export default function Scan() {
     const result = await uploadDocument(
       stripped ? { ...picked, uri, mimeType: "image/jpeg" } : picked,
       profileId,
+      docType ?? undefined,
     );
 
     if (!result.ok) {
@@ -389,6 +399,35 @@ export default function Scan() {
             >
               <Avatar svg={p.avatar} photo={p.photo} image={p.avatarImage} background={p.avatarBackground ?? undefined} size={38} />
               <Text style={{ fontFamily: font.semibold, fontSize: 14, color: active ? "#ffffff" : ink[900] }}>{p.name.split(" ")[0]}</Text>
+            </Pressable>
+          );
+        })}
+      </ScrollView>
+
+      {/*
+       * What kind of record. Optional: "Let Cheeku tell" reads it from the
+       * page. Saying it up front means the record opens in the right layout
+       * even when the page is hard to read, and it can be changed later.
+       */}
+      <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[700], marginTop: 20 }}>What is it?</Text>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingTop: 10, paddingBottom: 4 }}>
+        {([null, ...PICKABLE] as (DocType | null)[]).map((t) => {
+          const on = t === docType;
+          const style = t ? TYPE_STYLE[t] : null;
+          const Icon = style?.icon ?? Sparkles;
+          return (
+            <Pressable
+              key={t ?? "auto"}
+              accessibilityRole="radio"
+              accessibilityState={{ selected: on }}
+              onPress={() => setDocType(t)}
+              style={[
+                on ? null : glassShadow,
+                { flexDirection: "row", alignItems: "center", gap: 7, height: 40, paddingLeft: 12, paddingRight: 14, borderRadius: 999, backgroundColor: on ? ink[900] : glass.fillStrong, borderWidth: on ? 0 : 1, borderColor: glass.rim },
+              ]}
+            >
+              <Icon size={15} color={on ? "#fff" : (style?.tint ?? brand[600])} />
+              <Text style={{ fontFamily: font.semibold, fontSize: 13.5, color: on ? "#fff" : ink[900] }}>{t ? DOC_TYPE_LABEL[t] : "Let Cheeku tell"}</Text>
             </Pressable>
           );
         })}

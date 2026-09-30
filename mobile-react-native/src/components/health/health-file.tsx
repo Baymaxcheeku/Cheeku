@@ -57,6 +57,10 @@ const TYPE_META: Record<DocType, { label: string; icon: LucideIcon }> = {
   vaccination: { label: "Vaccinations", icon: Syringe },
   discharge: { label: "Discharge notes", icon: FileText },
   bill: { label: "Bills", icon: FileText },
+  consultation_invoice: { label: "Consultation invoices", icon: FileText },
+  booking_invoice: { label: "Booking invoices", icon: FileText },
+  insurance: { label: "Insurance", icon: FileText },
+  medication: { label: "Medication lists", icon: Pill },
   other: { label: "Other documents", icon: FileText },
 };
 

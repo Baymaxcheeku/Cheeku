@@ -11,7 +11,7 @@ import { useState } from "react";
 import { Modal, Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { DOC_TYPE_LABEL, type DocType } from "@/lib/records/types";
+import { DOC_TYPE_LABEL, DOC_TYPES, type DocType } from "@/lib/records/types";
 import { brand, ink, shadow, surface } from "@/theme/tokens";
 
 /*
@@ -31,15 +31,6 @@ export type Filters = {
   sort: "newest" | "oldest";
 };
 
-const DOC_TYPES: readonly DocType[] = [
-  "lab_report",
-  "prescription",
-  "discharge",
-  "scan",
-  "vaccination",
-  "bill",
-  "other",
-];
 
 const PERIODS = [
   { value: "", label: "All time" },

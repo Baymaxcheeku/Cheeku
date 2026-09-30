@@ -26,6 +26,10 @@ export type {
 } from "./extract-types";
 export { LOW_CONFIDENCE } from "./extract-types";
 
+import type { DocType } from "@/lib/records/types";
+
+import { fixtureFor, guessDocType } from "./fixtures/records";
+
 /**
  * A stable 0–1 number from a seed, so the same file always scores the same.
  *
@@ -68,99 +72,67 @@ function confidenceFor(seed: string, index: number, floor: number, ceiling: numb
   return Number((floor + seeded(seed, index) * (ceiling - floor)).toFixed(2));
 }
 
-const SAMPLE_TEXT = `LUCID MEDICAL DIAGNOSTICS
-Complete Blood Count (CBC)
-
-Patient      : -
-Collected on : -
-
-Haemoglobin        10.4 g/dL     (12.0-15.0)
-MCV                78 fL         (80-100)
-Platelet count     2.4 lakh/uL   (1.5-4.1)
-
-*Synthetic sample text produced by the mock extraction adapter.`;
-
 /**
  * Extract from an uploaded file.
  *
- * Handwriting is detected the only way a mock honestly can — from the filename —
- * and scores lower across the board, which is what routes it to review.
+ * `docType` is what the person said it is on the upload screen; without it
+ * the type is guessed from the file's name. Handwriting is detected the only
+ * way a mock honestly can, also from the name, and scores lower across the
+ * board, which is what routes it to review.
  */
-export function extractFromFile(fileName: string, fileSize: number): Extraction {
+export function extractFromFile(fileName: string, fileSize: number, docType?: DocType, today: string = new Date().toISOString().slice(0, 10)): Extraction {
   const seed = `${fileName}:${fileSize}`;
-  const handwritten = /hand|scan|photo|img|jpe?g/i.test(fileName);
+  const type = docType ?? guessDocType(fileName);
+  const handwritten = /hand|photo|img|jpe?g/i.test(fileName) || type === "prescription";
+  const fixture = fixtureFor(type, today);
 
   // Printed headers read well; a handwritten page does not.
   const hi: [number, number] = handwritten ? [0.62, 0.82] : [0.88, 0.98];
   const mid: [number, number] = handwritten ? [0.5, 0.75] : [0.82, 0.96];
 
   const fields: ExtractedField[] = [
-    {
-      key: "patientName",
-      label: "Patient name",
-      value: "-",
-      confidence: confidenceFor(seed, 1, ...hi),
-    },
-    {
-      key: "eventDate",
-      label: "Date of test",
-      value: new Date().toISOString().slice(0, 10),
-      confidence: confidenceFor(seed, 2, ...hi),
-    },
-    {
-      key: "facility",
-      label: "Lab name",
-      value: "Lucid Medical Diagnostics",
-      confidence: confidenceFor(seed, 3, ...mid),
-    },
+    { key: "patientName", label: "Patient name", value: "-", confidence: confidenceFor(seed, 1, ...hi) },
+    { key: "eventDate", label: "Date on the document", value: fixture.eventDate, confidence: confidenceFor(seed, 2, ...hi) },
   ];
+  if (fixture.facility) {
+    fields.push({ key: "facility", label: FACILITY_LABEL[type], value: fixture.facility, confidence: confidenceFor(seed, 3, ...mid) });
+  }
+  if (fixture.doctor) {
+    fields.push({ key: "doctor", label: "Doctor", value: fixture.doctor, confidence: confidenceFor(seed, 7, ...mid) });
+  }
 
-  const values: ExtractedValue[] = [
-    {
-      key: "haemoglobin",
-      label: "Haemoglobin",
-      value: "10.4",
-      unit: "g/dL",
-      refRange: "12.0-15.0",
-      flag: "low",
-      confidence: confidenceFor(seed, 4, ...mid),
-    },
-    {
-      key: "mcv",
-      label: "MCV",
-      value: "78",
-      unit: "fL",
-      refRange: "80-100",
-      flag: "low",
-      confidence: confidenceFor(seed, 5, ...mid),
-    },
-    {
-      key: "platelets",
-      label: "Platelet count",
-      value: "2.4",
-      unit: "lakh/uL",
-      refRange: "1.5-4.1",
-      flag: "normal",
-      confidence: confidenceFor(seed, 6, ...mid),
-    },
-  ];
+  const values: ExtractedValue[] = fixture.values.map((v, i) => ({ ...v, confidence: confidenceFor(seed, 10 + i, ...mid) }));
 
   const all = [...fields, ...values];
-  const confidence = Number(
-    (all.reduce((sum, f) => sum + f.confidence, 0) / all.length).toFixed(2),
-  );
+  const confidence = Number((all.reduce((sum, f) => sum + f.confidence, 0) / all.length).toFixed(2));
 
   return {
-    title: handwritten ? "Scanned report" : "Complete blood count",
-    docType: "lab_report",
-    eventDate: fields.find((f) => f.key === "eventDate")?.value ?? null,
-    facility: "Lucid Medical Diagnostics",
+    title: fixture.title,
+    docType: type,
+    eventDate: fixture.eventDate,
+    facility: fixture.facility,
+    doctor: fixture.doctor,
+    details: fixture.details,
     fields,
     values,
-    rawText: SAMPLE_TEXT,
+    rawText: `${fixture.rawText}\n\n*Sample text from the preview reader.`,
     confidence,
   };
 }
+
+const FACILITY_LABEL: Record<DocType, string> = {
+  lab_report: "Lab name",
+  prescription: "Clinic",
+  scan: "Imaging centre",
+  discharge: "Hospital",
+  bill: "Billed by",
+  consultation_invoice: "Clinic",
+  booking_invoice: "Lab partner",
+  vaccination: "Given at",
+  insurance: "Insurer",
+  medication: "Pharmacy",
+  other: "From",
+};
 
 /** Fields the reviewer must look at before this can be filed. */
 export function lowConfidenceFields(extraction: Extraction): (ExtractedField | ExtractedValue)[] {

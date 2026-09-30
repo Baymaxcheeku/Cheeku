@@ -77,8 +77,27 @@ export type DocType =
   | "discharge"
   | "scan"
   | "bill"
+  | "consultation_invoice"
+  | "booking_invoice"
   | "vaccination"
+  | "insurance"
+  | "medication"
   | "other";
+
+/** Every type, in the order the filter and the upload picker offer them. */
+export const DOC_TYPES: readonly DocType[] = [
+  "lab_report",
+  "prescription",
+  "scan",
+  "discharge",
+  "medication",
+  "vaccination",
+  "insurance",
+  "bill",
+  "consultation_invoice",
+  "booking_invoice",
+  "other",
+];
 
 export const DOC_TYPE_LABEL: Record<DocType, string> = {
   lab_report: "Lab report",
@@ -86,7 +105,11 @@ export const DOC_TYPE_LABEL: Record<DocType, string> = {
   discharge: "Discharge summary",
   scan: "Scan",
   bill: "Bill",
+  consultation_invoice: "Consultation invoice",
+  booking_invoice: "Booking invoice",
   vaccination: "Vaccination",
+  insurance: "Insurance",
+  medication: "Medication",
   other: "Other",
 };
 
@@ -95,24 +118,18 @@ export const DOC_TYPE_LABEL: Record<DocType, string> = {
  * shelf of colour-coded folders does — a lab report and a prescription should
  * never look like the same grey rectangle with different words on it.
  */
-export const DOC_TYPE_ICON: Record<DocType, "flask" | "pill" | "clipboard" | "scan" | "receipt" | "syringe" | "file"> = {
+export const DOC_TYPE_ICON: Record<DocType, "flask" | "pill" | "clipboard" | "scan" | "receipt" | "syringe" | "file" | "shield" | "stethoscope" | "calendar" | "tablets"> = {
   lab_report: "flask",
   prescription: "pill",
   discharge: "clipboard",
   scan: "scan",
   bill: "receipt",
+  consultation_invoice: "stethoscope",
+  booking_invoice: "calendar",
   vaccination: "syringe",
+  insurance: "shield",
+  medication: "tablets",
   other: "file",
-};
-
-export const DOC_TYPE_TINT: Record<DocType, string> = {
-  lab_report: "bg-brand-50 text-brand-600",
-  prescription: "bg-[#fdeee0] text-[#c2650b]",
-  discharge: "bg-[#e6f1fd] text-[#1a6fc2]",
-  scan: "bg-[#f1eafd] text-[#7b3fd4]",
-  bill: "bg-[#eaf6ec] text-[#1f8a45]",
-  vaccination: "bg-[#fdeaf0] text-[#c22a6b]",
-  other: "bg-canvas text-ink-500",
 };
 
 export type DocStatus = "processing" | "needs_review" | "filed";
@@ -146,6 +163,8 @@ export type RecordSummary = {
   confidence: number | null;
   severity: Severity;
   createdAt: string;
+  /** The type's one useful line for a list ("₹608 · Paid"), when it has one. */
+  summary?: string | null;
 };
 
 export type RecordDetail = RecordSummary & {
