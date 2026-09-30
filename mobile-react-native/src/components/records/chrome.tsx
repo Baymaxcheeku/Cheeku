@@ -1,18 +1,22 @@
 import { useRouter } from "expo-router";
 import {
+  CalendarCheck,
   ChevronRight,
   ClipboardList,
   FileText,
   Flag,
   FlaskConical,
   Pill,
-  Receipt,
+  Plus,
+  ReceiptIndianRupee,
+  ReceiptText,
   ScanLine,
   ShieldCheck,
+  ShieldPlus,
   Syringe,
+  Tablets,
   TriangleAlert,
   type LucideIcon,
-  Plus,
 } from "lucide-react-native";
 import { Pressable, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -38,9 +42,13 @@ const DOC_ICON: Record<string, LucideIcon> = {
   pill: Pill,
   clipboard: ClipboardList,
   scan: ScanLine,
-  receipt: Receipt,
+  receipt: ReceiptText,
   syringe: Syringe,
   file: FileText,
+  shield: ShieldPlus,
+  stethoscope: ReceiptIndianRupee,
+  calendar: CalendarCheck,
+  tablets: Tablets,
 };
 
 /*
@@ -56,8 +64,12 @@ const DOC_TINT: Record<DocType, { bg: string; fg: string }> = {
   prescription: { bg: "#fdeee0", fg: "#c2650b" },
   discharge: { bg: "#e6f1fd", fg: "#1a6fc2" },
   scan: { bg: "#f1eafd", fg: "#7b3fd4" },
-  bill: { bg: "#eaf6ec", fg: "#1f8a45" },
+  bill: { bg: "#efeff5", fg: "#5b5580" },
   vaccination: { bg: "#fdeaf0", fg: "#c22a6b" },
+  consultation_invoice: { bg: "#e5eefb", fg: "#2563a8" },
+  booking_invoice: { bg: "#efeafd", fg: "#6b4fc4" },
+  insurance: { bg: "#e0f2f6", fg: "#155e75" },
+  medication: { bg: "#fbe9f5", fg: "#b0428a" },
   other: { bg: surface.canvas, fg: ink[500] },
 };
 

@@ -8,8 +8,11 @@
  *
  * Types alone would have been fine (they erase), but LOW_CONFIDENCE is a real
  * runtime value, and one runtime import is enough to drag the whole module
- * across. So the contract lives here, with no dependencies at all.
+ * across. So the contract lives here, with no runtime dependencies at all
+ * (the one import below is a type, and erases).
  */
+
+import type { DocType } from "@/lib/records/types";
 
 export type ExtractedField = {
   key: string;
@@ -27,9 +30,12 @@ export type ExtractedValue = ExtractedField & {
 
 export type Extraction = {
   title: string;
-  docType: "lab_report" | "prescription" | "other";
+  docType: DocType;
   eventDate: string | null;
   facility: string | null;
+  doctor: string | null;
+  /** The type's own details (lib/records/details.ts reads them). */
+  details: Record<string, unknown>;
   fields: ExtractedField[];
   values: ExtractedValue[];
   rawText: string;

@@ -201,3 +201,58 @@ export async function syncLabReminders(visits: LabVisit[], enabled: boolean): Pr
     // As with appointments: the tracker still shows the time.
   }
 }
+
+// ---------------------------------------------------------- record reminders --
+
+export type RecordReminder = {
+  /** Stable per record and purpose: `rec-<documentId>-<what>`. */
+  id: string;
+  at: Date;
+  title: string;
+  body: string;
+  url: string;
+};
+
+export type ReminderOutcome = "set" | "denied" | "unsupported" | "past";
+
+/*
+ * One-off reminders a person asks for from a record: a vaccine's next dose,
+ * a policy's renewal, a follow-up visit, a refill. Unlike appointments these
+ * are not resynced from a list; each is set or cleared by hand, under an id
+ * that names the record, so setting it twice replaces rather than doubles.
+ *
+ * Lock-screen text stays general ("A dose is due soon"), like the others,
+ * and never names a condition.
+ */
+export async function setRecordReminder(r: RecordReminder): Promise<ReminderOutcome> {
+  if (!native) return "unsupported";
+  if (r.at.getTime() <= Date.now() + 60_000) return "past";
+  try {
+    const permission = await enablePush();
+    if (permission !== "granted") return permission === "unsupported" ? "unsupported" : "denied";
+    await Notifications.cancelScheduledNotificationAsync(r.id).catch(() => undefined);
+    await Notifications.scheduleNotificationAsync({
+      identifier: r.id,
+      content: { title: r.title, body: r.body, sound: "default", data: { url: r.url } },
+      trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: r.at, channelId: "appointments" },
+    });
+    return "set";
+  } catch {
+    return "unsupported";
+  }
+}
+
+export async function clearRecordReminder(id: string): Promise<void> {
+  if (!native) return;
+  await Notifications.cancelScheduledNotificationAsync(id).catch(() => undefined);
+}
+
+export async function hasRecordReminder(id: string): Promise<boolean> {
+  if (!native) return false;
+  try {
+    const scheduled = await Notifications.getAllScheduledNotificationsAsync();
+    return scheduled.some((n) => n.identifier === id);
+  } catch {
+    return false;
+  }
+}

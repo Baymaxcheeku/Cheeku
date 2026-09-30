@@ -1,4 +1,6 @@
 import { supabase } from "@/lib/supabase/client";
+
+import { readDetails, summaryLine } from "./details";
 import {
   severityFromFlags,
   type DocStatus,
@@ -96,6 +98,10 @@ const DOC_TYPE_FALLBACK: Record<DocType, string> = {
   scan: "Scan",
   bill: "Bill",
   vaccination: "Vaccination record",
+  consultation_invoice: "Consultation invoice",
+  booking_invoice: "Booking invoice",
+  insurance: "Insurance policy",
+  medication: "Medication list",
   other: "Document",
 };
 
@@ -117,6 +123,7 @@ function toSummary(row: DocumentRow): RecordSummary {
     confidence: row.confidence,
     severity: severityFromFlags(flags),
     createdAt: row.created_at,
+    summary: summaryLine(readDetails(row.doc_type, row.extraction)),
   };
 }
 

@@ -14,6 +14,7 @@ import { SPECIALTIES, addDays, dayName, doctorById, slotsFor, type Mode, type Sl
 import { useAppointmentList } from "@/lib/booking/appointments";
 import { useBookingDraft } from "@/lib/booking/draft";
 import { doctorFace } from "@/lib/booking/faces";
+import { useFamily } from "@/lib/profiles/family";
 import { brand, ink } from "@/theme/tokens";
 import { font } from "@/theme/type";
 
@@ -41,6 +42,7 @@ export default function SlotScreen() {
   const { id, reschedule } = useLocalSearchParams<{ id: string; reschedule?: string }>();
   const appointments = useAppointmentList();
   const { mode, setMode, intake, book } = useBookingDraft();
+  const family = useFamily();
   const doctor = doctorById(id);
 
   const days = useMemo(() => Array.from({ length: 7 }, (_, i) => addDays(new Date(), i)), []);
@@ -65,6 +67,14 @@ export default function SlotScreen() {
   const fee = doctor.fee[m] ?? 0;
   const face = doctorFace(doctor);
 
+  // Who it's for, as a family member, so the invoice files under them. "Me"
+  // is the account holder; otherwise the member whose first name was picked.
+  function memberFor(forName: string): string | undefined {
+    const all = family.data?.access.selectable ?? [];
+    if (forName === "Me") return all.find((p) => p.isPrimary)?.id;
+    return all.find((p) => p.name.split(" ")[0]?.toLowerCase() === forName.split(" ")[0]?.toLowerCase())?.id;
+  }
+
   function confirm() {
     if (!slot || !doctor) return;
     // Rescheduling moves the existing appointment rather than adding a second.
@@ -80,6 +90,7 @@ export default function SlotScreen() {
       slotLabel: slot.label,
       forName: intake?.forName ?? "Me",
       concern: intake?.concern ?? "General consultation",
+      profileId: memberFor(intake?.forName ?? "Me"),
     });
     book({ doctorId: doctor.id, mode: m, day: day.toISOString(), slotLabel: slot.label, appointmentId: appt.id });
     router.replace("/book/confirmed");

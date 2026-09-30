@@ -1723,3 +1723,108 @@ and an upload into someone else's folder are all refused.
 **Depends on migration 0026 being applied**, which adds the photo rule and
 accepts the new face ids. **Not verified:** the native picker, camera and
 upload on a real phone.
+
+## Record pages, one layout per kind of record, 2026-09-30 (cloud session, not seen on a device)
+
+**What was wrong.** Every record opened in the lab-report template (gauge,
+values, insight), whatever it was. Worse, the preview reader turned every
+upload into the same blood count, and the phone upload never wrote the
+values it read into `entities` (the old web build did), so uploads came out
+thin and trends had nothing to compare.
+
+**The model** (`src/lib/records/details.ts`, 48 tests with reading.test.ts).
+Eleven types now:
+- lab report, prescription, scan, discharge summary, medication list
+- vaccination, insurance, bill
+- consultation invoice, booking invoice, other
+
+Each type keeps its own details in `extraction.details`. `readDetails`
+rebuilds them field by field and never trusts the jsonb. A record whose
+details can't be read falls back to a plain page instead of crashing. Pure
+helpers cover the maths:
+- medicine schedules ("1-0-1", "Twice a day after food, for 5 days")
+- course days left and supply/refill dates
+- where a value sits in its range, and the change since last time
+- cover status and cover left, dose status, length of stay
+- rupees the Indian way (₹1,23,456, ₹5 lakh)
+
+**The pages** (`components/records/detail/`). Shared frame: a hero in the
+type's colour, a member chip, the review check, the original page, and Ask
+Cheeku. Between them:
+- **Lab report:** the gauge, tallies, values grouped as the lab printed
+  them, a range bar per value, "Down 0.8 from 11.2 on 12 Mar", sample
+  details, lab notes.
+- **Prescription:** the doctor card (tap to call), the visit (complaints,
+  note, vitals), medicines in morning/afternoon/night slots with food timing
+  and days left, "Add to Amma's medicines", "Book these tests at home"
+  (attaches the prescription to the lab cart), and a follow-up reminder.
+- **Scan:** the radiologist's conclusion first, then why it was done, the
+  findings, and who reported and referred it.
+- **Discharge:** a stay timeline, what happened, medicines to take home (with
+  add to medicines), home instructions, a "go back to the hospital if" card
+  in the caution hue (it is about health), and the follow-up.
+- **Medication list:** "your day" by time slot, supply and expiry, and a
+  refill reminder for whatever runs out first.
+- **Vaccination:** dose segments, the next dose with a reminder, and the
+  member's other doses of the same vaccine.
+- **Insurance:** an e-card, cover left with a meter, who's covered (matched
+  to family faces), key terms, waiting periods, claims, a helpline call, and
+  a renewal reminder.
+- **Bill:** the total and payment status, items by category, discount and
+  GST lines as a receipt, and a "can be claimed" link to the policy.
+- **Consultation and booking invoices:** receipts with status (paid, due,
+  refunded, cancelled), and links to the appointment or lab tracker.
+
+Payment and dose states never use green/amber/red; those stay health-only.
+
+**Menu on every record:** move to another member, change the kind of record
+(the page redraws), delete (row, values and file).
+
+**Backend, migration 0028** (tested on scratch Postgres):
+- New doc types.
+- Lab bookings file their own booking invoice on creation. It is due until
+  collection, then paid; cancelled with the visit. Existing bookings are
+  backfilled for covered members.
+- `file_consultation_invoice` checks the member and the plan. Video calls
+  are paid in the app; clinic visits are "pay at the clinic". Cancelling an
+  appointment refunds or cancels the invoice; rescheduling moves it.
+- `move_document` moves the record, its values, timeline and inbox rows,
+  and only to a member the plan covers.
+- App-made invoices don't also post "is filed" to the inbox.
+
+**Upload:** "What is it?" chips on Add a record ("Let Cheeku tell" by
+default, otherwise a guess from the file name). The preview reader returns a
+realistic sample per type. Uploads now write lab values, medicines and
+vaccine doses as `entities`, so trends and dose history work.
+
+**Records list:** each card has its type's one-liner ("₹608.75 · Paid",
+"Dose 2 of 3 · next due 27 Feb 2027", "₹10 lakh cover · till 13 Mar 2027").
+
+**Profile sync:**
+- A record belongs to its member. Moving it switches the viewed member too.
+- "Add to medicines" writes to that member's own list and skips what is
+  already there.
+- Doctor bookings file their invoice under the member they're for.
+
+**Reminders** (follow-up, next dose, renewal, refill) are phone-only
+one-offs, keyed per record so setting one twice replaces it. On web the
+button says reminders work in the phone app.
+
+**Apply:**
+1. Migration 0028: `supabase/manual/0028-sql-editor.sql` after 0027.
+2. Optional, to see every page: `supabase/manual/demo-records.sql`, with your
+   email on the EMAIL line. The last line in it removes the samples.
+
+**Verified here:**
+- Every page, the three sheets and the upload picker in a web export with
+  seeded data.
+- The migration and demo SQL on scratch Postgres.
+- 194 tests.
+
+**Not verified:** anything on a phone. Check these:
+- scroll performance on the long pages
+- the range-bar marker position on iOS
+- the Share sheet
+- tel: links
+- reminders firing
+- "Add to medicines" against a real member

@@ -1,13 +1,17 @@
 import { useRouter } from "expo-router";
 import {
+  CalendarCheck,
   CalendarDays,
   ChevronRight,
   FlaskConical,
   Pill,
+  ReceiptIndianRupee,
   ReceiptText,
   ScanLine,
   Stethoscope,
+  ShieldPlus,
   Syringe,
+  Tablets,
   type LucideIcon,
 } from "lucide-react-native";
 import { Pressable, Text, View } from "react-native";
@@ -51,6 +55,10 @@ const TYPE_STYLE: Record<DocType, TypeStyle> = {
   vaccination: { icon: Syringe, tint: "#c4396c", wash: "#fdeaf0", label: "Vaccination" },
   discharge: { icon: Stethoscope, tint: "#a9631a", wash: "#fdf0dc", label: "Discharge" },
   bill: { icon: ReceiptText, tint: "#5b5580", wash: "#efeff5", label: "Bill" },
+  consultation_invoice: { icon: ReceiptIndianRupee, tint: "#2563a8", wash: "#e5eefb", label: "Consultation invoice" },
+  booking_invoice: { icon: CalendarCheck, tint: "#6b4fc4", wash: "#efeafd", label: "Booking invoice" },
+  insurance: { icon: ShieldPlus, tint: "#155e75", wash: "#e0f2f6", label: "Insurance" },
+  medication: { icon: Tablets, tint: "#b0428a", wash: "#fbe9f5", label: "Medication" },
   other: { icon: ReceiptText, tint: "#5b5580", wash: "#efeff5", label: "Document" },
 };
 
@@ -119,9 +127,14 @@ export function RecordCard({
             <CalendarDays size={12} color={ink[300]} />
             <Text numberOfLines={1} style={{ flexShrink: 1, fontFamily: font.regular, fontSize: 12, color: ink[500] }}>
               {formatEventDate(record.eventDate)} · {record.profileName}
-              {record.facility ? ` · ${record.facility}` : ""}
+              {record.facility && !record.summary ? ` · ${record.facility}` : ""}
             </Text>
           </View>
+          {record.summary ? (
+            <Text numberOfLines={1} style={{ fontFamily: font.medium, fontSize: 12.5, color: ink[700] }}>
+              {record.summary}
+            </Text>
+          ) : null}
         </View>
 
         <View
