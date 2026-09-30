@@ -40,6 +40,12 @@ export const addMemberSchema = z.object({
     .optional()
     .or(z.literal("")),
   sex: z.enum(["female", "male", "other", "prefer_not_to_say"]).optional().or(z.literal("")),
+  /** A face from the app's own catalogue ("p1".."p10"), or empty to derive one. */
+  avatarSeed: z
+    .string()
+    .regex(/^p[0-9]{1,2}$/, "Pick one of the faces shown")
+    .optional()
+    .or(z.literal("")),
 });
 export type AddMemberInput = z.infer<typeof addMemberSchema>;
 

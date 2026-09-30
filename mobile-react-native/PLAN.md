@@ -41,6 +41,7 @@ nothing lies about having data.
 | `/settings/health` | done | `health-profile-form.tsx` (170) |
 | `/settings/notifications` | done, rewritten 2026-09-30 | `notification-toggles.tsx` (210) |
 | `/notifications` inbox | done 2026-09-30, needs migration 0024 | — |
+| `/family`, `/family/add`, `/family/[id]` | done 2026-09-30, needs migration 0025 | — |
 | `/settings/language` | done | `settings/language` (91) |
 | `/settings/help` | done | `help` + `report-issue` (395) |
 | `/settings/about` | done | `settings/about` (342) |

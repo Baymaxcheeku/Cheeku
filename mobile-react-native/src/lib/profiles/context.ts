@@ -38,6 +38,8 @@ export type ActiveProfile = {
   avatarRing: string | null;
   dob: string | null;
   sex: string | null;
+  /** The chosen face's catalogue id, or null when the face is derived. */
+  avatarSeed: string | null;
   /** Generated from the id. Raw SVG markup for SvgXml, not a data URI. */
   avatar: string;
   avatarBackground: string;
@@ -72,6 +74,7 @@ export async function familyProfiles(): Promise<ActiveProfile[]> {
       avatarRing: p.avatar_ring as string | null,
       dob: p.dob as string | null,
       sex: p.sex as string | null,
+      avatarSeed: (p.avatar_seed as string | null) ?? null,
       avatar: generated.svg,
       avatarBackground: generated.background,
     };
@@ -147,8 +150,12 @@ export async function activeProfile(): Promise<ActiveProfile | null> {
  * place. Returns false rather than throwing: a switcher that cannot switch
  * should say so, not crash the screen it lives on.
  */
-export async function switchProfile(profileId: string): Promise<boolean> {
-  const profiles = await selectableProfiles();
+export async function switchProfile(profileId: string, known?: readonly ActiveProfile[]): Promise<boolean> {
+  // `known` is the selectable list a screen already holds (the cached family
+  // context). Trusting it skips two network reads, which is what makes a
+  // switch feel instant; it is the same list this would have fetched, and the
+  // stored id is re-checked against the plan on every read regardless.
+  const profiles = known ?? (await selectableProfiles());
   if (!profiles.some((p) => p.id === profileId)) return false;
   await kv.set(KEY, profileId);
   return true;

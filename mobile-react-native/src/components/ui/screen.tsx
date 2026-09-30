@@ -40,19 +40,22 @@ export function ScreenHeader({
   right,
   fallback = "/home",
   back = true,
+  onBack,
 }: {
   title?: string;
   subtitle?: string;
   right?: React.ReactNode;
   fallback?: string;
   back?: boolean;
+  /** Overrides leaving the screen, for multi-step flows that step back instead. */
+  onBack?: () => void;
 }) {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   return (
     <View className="flex-row items-center gap-3 px-4 pb-2" style={{ paddingTop: insets.top + 6 }}>
       {back ? (
-        <GlassCircle label="Go back" onPress={() => (router.canGoBack() ? router.back() : router.replace(fallback as never))}>
+        <GlassCircle label="Go back" onPress={onBack ?? (() => (router.canGoBack() ? router.back() : router.replace(fallback as never)))}>
           <ChevronLeft size={21} color={ink[900]} />
         </GlassCircle>
       ) : (

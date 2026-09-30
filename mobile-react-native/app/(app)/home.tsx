@@ -4,8 +4,8 @@ import { useRouter } from "expo-router";
 import { ActivityIndicator, RefreshControl, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { AddMemberSheet } from "@/components/app/add-member-sheet";
-import { FamilyTray } from "@/components/app/family-tray";
+import { FamilyTray, FamilyUpsellSheet } from "@/components/family/tray";
+import { SwitchPulse } from "@/components/family/switch-pulse";
 import { Paywall } from "@/components/billing/paywall";
 import { OfflineBanner } from "@/components/app/offline-banner";
 import { AskBar, CheekuCard, HomeHeadline, ProfileChip, firstName } from "@/components/home/ask-hero";
@@ -18,9 +18,8 @@ import { knowledgeFeed } from "@/lib/knowledge/queries";
 import { NotificationsBell } from "@/components/app/notifications-bell";
 import { Button } from "@/components/ui/button";
 import { StaggerItem } from "@/components/ui/motion";
-import { allowsFamily } from "@/lib/billing/plans";
-import { getEntitlement } from "@/lib/billing/quota";
-import { activeProfile, profileAccess, switchProfile } from "@/lib/profiles/context";
+import { seatsFor } from "@/lib/billing/plans";
+import { familyMode, prefetchMembers, refreshRoster, useFamily, useSwitchMember } from "@/lib/profiles/family";
 import { EMPTY_OVERVIEW, useHealthOverview } from "@/lib/records/use-overview";
 import { listProfileRecords, statsFrom } from "@/lib/records/queries";
 import { brand } from "@/theme/tokens";
@@ -57,23 +56,15 @@ export default function Home() {
   const queryClient = useQueryClient();
   const [paywallOpen, setPaywallOpen] = useState(false);
   const [trayOpen, setTrayOpen] = useState(false);
-  const [addOpen, setAddOpen] = useState(false);
+  const [upsellOpen, setUpsellOpen] = useState(false);
 
   const knowledge = useQuery({ queryKey: ["knowledge-feed"], queryFn: () => knowledgeFeed(5) });
 
   const overview = useHealthOverview();
 
-  const context = useQuery({
-    queryKey: ["home-context"],
-    queryFn: async () => {
-      const [access, profile, entitlement] = await Promise.all([
-        profileAccess(),
-        activeProfile(),
-        getEntitlement(),
-      ]);
-      return { access, profile, entitlement };
-    },
-  });
+  // The family, from the one query every screen shares (lib/profiles/family).
+  const context = useFamily();
+  const switchMember = useSwitchMember();
 
   const profileId = context.data?.profile?.id;
 
@@ -84,15 +75,22 @@ export default function Home() {
     // exists to prevent.
     enabled: Boolean(profileId),
     queryFn: () => listProfileRecords(profileId as string),
+    // Keep the last member's list up while the next one loads, rather than
+    // flashing empty; the header has already moved, so nothing is misnamed
+    // for more than a beat, and prefetch usually makes this instant anyway.
+    placeholderData: (prev) => prev,
   });
 
-  async function onSelectProfile(id: string) {
-    const ok = await switchProfile(id);
-    if (!ok) return;
-    // Both, together. Invalidating only the records would leave the greeting
-    // naming the previous member above their sibling's results.
-    await queryClient.invalidateQueries({ queryKey: ["home-context"] });
-    await queryClient.invalidateQueries({ queryKey: ["records"] });
+  function openFamily() {
+    const d = context.data;
+    if (!d) return;
+    if (familyMode(d.entitlement.tier) === "family") {
+      // Warm everyone's records now, so the switch lands on a full screen.
+      prefetchMembers(queryClient, d.access.selectable);
+      setTrayOpen(true);
+    } else {
+      setUpsellOpen(true);
+    }
   }
 
   if (context.isPending) {
@@ -127,6 +125,7 @@ export default function Home() {
   const stats = statsFrom(list);
   const needsReview = stats.borderline + stats.highRisk;
   const access = data.access;
+  const mode = familyMode(data.entitlement.tier);
 
   return (
     <ScrollView
@@ -137,8 +136,7 @@ export default function Home() {
         <RefreshControl
           refreshing={records.isFetching && !records.isPending}
           onRefresh={() => {
-            void queryClient.invalidateQueries({ queryKey: ["home-context"] });
-            void queryClient.invalidateQueries({ queryKey: ["records"] });
+            refreshRoster(queryClient);
           }}
           tintColor={brand[600]}
         />
@@ -171,13 +169,15 @@ export default function Home() {
             active={profile}
             others={access.selectable.filter((p) => p.id !== profile.id)}
             greeting={greeting()}
-            onPress={() => setTrayOpen(true)}
+            locked={mode !== "family"}
+            onPress={openFamily}
           />
           <View className="flex-1" />
           <NotificationsBell />
         </View>
       </StaggerItem>
 
+      <SwitchPulse />
       <OfflineBanner updatedAt={context.dataUpdatedAt} />
 
       <StaggerItem index={1}>
@@ -233,23 +233,25 @@ export default function Home() {
         open={trayOpen}
         onClose={() => setTrayOpen(false)}
         profiles={access.selectable}
-        lockedCount={access.lockedCount}
+        pausedCount={access.lockedCount}
+        seats={seatsFor(data.entitlement.tier)}
         activeId={profile.id}
-        canAdd={allowsFamily(data.entitlement.tier)}
-        onSelect={(id) => void onSelectProfile(id)}
-        onAdd={() => setAddOpen(true)}
+        onSelect={(id) => void switchMember(id)}
+        onAdd={() => router.push("/family/add")}
+        onManage={() => router.push("/family")}
         onUpgrade={() => setPaywallOpen(true)}
       />
 
-      <AddMemberSheet
-        open={addOpen}
-        onClose={() => setAddOpen(false)}
-        onAdded={() => {
-          setAddOpen(false);
-          void queryClient.invalidateQueries();
-        }}
-        onUpgrade={() => setPaywallOpen(true)}
-      />
+      {mode !== "family" ? (
+        <FamilyUpsellSheet
+          open={upsellOpen}
+          mode={mode}
+          me={profile}
+          onClose={() => setUpsellOpen(false)}
+          onUpgrade={() => setPaywallOpen(true)}
+          onCompare={() => router.push("/settings/subscription")}
+        />
+      ) : null}
 
       <Paywall
         open={paywallOpen}
@@ -257,10 +259,9 @@ export default function Home() {
         onClose={() => setPaywallOpen(false)}
         onActivated={() => {
           setPaywallOpen(false);
-          // The switcher's locked count and the greeting both derive from the
-          // entitlement, so the whole context is refetched rather than patched.
-          void queryClient.invalidateQueries({ queryKey: ["home-context"] });
-          void queryClient.invalidateQueries({ queryKey: ["entitlement"] });
+          // A new plan changes who can be opened, so everything that depends
+          // on the roster refetches together.
+          refreshRoster(queryClient);
         }}
       />
     </ScrollView>
