@@ -51,7 +51,10 @@ export function Avatar({
   background?: string;
   ring?: string;
 }) {
-  const [broken, setBroken] = useState(false);
+  // Remembers WHICH link failed, not just that one did: a flag alone stuck
+  // forever, so after one expired link a newly saved photo never showed.
+  const [brokenUrl, setBrokenUrl] = useState<string | null>(null);
+  const broken = Boolean(photo) && brokenUrl === photo;
   const generated = svg ? null : generatedAvatar(profileId ?? "", index);
   const markup = svg ?? generated?.svg ?? "";
   const art = image ?? generated?.image ?? null;
@@ -77,7 +80,7 @@ export function Avatar({
           alt=""
           source={{ uri: photo }}
           style={{ width: inner, height: inner, borderRadius: inner / 2 }}
-          onError={() => setBroken(true)}
+          onError={() => setBrokenUrl(photo ?? null)}
           accessibilityIgnoresInvertColors
         />
       ) : art ? (

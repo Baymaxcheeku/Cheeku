@@ -25,6 +25,7 @@ import { listProfileRecords } from "@/lib/records/queries";
 import {
   listMembers,
   refreshRoster,
+  showPhotoNow,
   removeMember,
   updateAvatar,
   updateMember,
@@ -89,6 +90,9 @@ export default function Member() {
   // or `cleared` to go back to a drawn face.
   const [newPhoto, setNewPhoto] = useState<string | null>(null);
   const [cleared, setCleared] = useState(false);
+  // The photo just saved, shown from the phone's own copy until the roster
+  // comes back with a signed link to the stored one.
+  const [savedPhoto, setSavedPhoto] = useState<string | null>(null);
   const [health, setHealth] = useState<MemberHealth>(EMPTY_HEALTH);
   const [queue, setQueue] = useState<QueueItem[]>([]);
   const [filing, setFiling] = useState(false);
@@ -131,8 +135,8 @@ export default function Member() {
   const derived = generatedAvatar(member.id, index);
   const face = seed ? generatedAvatar(seed, 0) : derived;
   const viewing = family.data?.profile?.id === member.id;
-  const photoShown = cleared ? null : (newPhoto ?? member.photo);
-  const photoDirty = Boolean(newPhoto) || (cleared && Boolean(member.photoPath));
+  const photoShown = cleared ? null : (newPhoto ?? savedPhoto ?? member.photo);
+  const photoDirty = Boolean(newPhoto) || (cleared && Boolean(member.photoPath || savedPhoto));
   const age = ageFrom(member.isPrimary ? member.dob : dob);
   const dirty = photoDirty || healthDirty || (member.isPrimary
     ? seed !== (member.avatarSeed ?? "")
@@ -147,43 +151,58 @@ export default function Member() {
     setSaving(true);
     setErrors({});
     setMessage(null);
-    const result = member.isPrimary
-      ? await updateAvatar(member.id, seed || null)
-      : await updateMember(member.id, { name, relationship, dob, sex, avatarSeed: seed });
-    if (!result.ok) {
+    // `finally`, so the button can never be left spinning: whatever fails,
+    // the person gets the button back and a sentence saying what happened.
+    try {
+      const result = member.isPrimary
+        ? await updateAvatar(member.id, seed || null)
+        : await updateMember(member.id, { name, relationship, dob, sex, avatarSeed: seed });
+      if (!result.ok) {
+        setErrors(("fieldErrors" in result && result.fieldErrors) || {});
+        setMessage(result.message);
+        return;
+      }
+      if (newPhoto) {
+        const p = await setProfilePhoto(member.id, newPhoto);
+        if (!p.ok) {
+          // The rest saved; keep the picked photo on screen so one more tap
+          // on Save retries just the photo.
+          setMessage(p.message);
+          refreshRoster(qc);
+          return;
+        }
+        setSavedPhoto(newPhoto);
+        showPhotoNow(qc, member.id, newPhoto, p.path);
+        setNewPhoto(null);
+      } else if (cleared && (member.photoPath || savedPhoto)) {
+        const c = await clearProfilePhoto(member.id);
+        if (!c.ok) {
+          setMessage(c.message);
+          return;
+        }
+        setSavedPhoto(null);
+        showPhotoNow(qc, member.id, null, null);
+        setCleared(false);
+      }
+      if (healthDirty) {
+        const h = await saveMemberHealth(member.id, health);
+        if (!h.ok) {
+          setMessage(h.message);
+          return;
+        }
+        void qc.invalidateQueries({ queryKey: ["member-health", member.id] });
+        // Ask grounds itself in these, so it hears about the change too.
+        void qc.invalidateQueries({ queryKey: ["ask-context"] });
+        void qc.invalidateQueries({ queryKey: ["settings-health"] });
+      }
+      setSaved(true);
+      setTimeout(() => setSaved(false), 1600);
+      refreshRoster(qc);
+    } catch {
+      setMessage("That didn't save. Check your connection and try again.");
+    } finally {
       setSaving(false);
-      setErrors(("fieldErrors" in result && result.fieldErrors) || {});
-      setMessage(result.message);
-      return;
     }
-    if (newPhoto) {
-      const p = await setProfilePhoto(member.id, newPhoto);
-      if (!p.ok) {
-        setSaving(false);
-        setMessage(p.message);
-        return;
-      }
-      setNewPhoto(null);
-    } else if (cleared && member.photoPath) {
-      await clearProfilePhoto(member.id);
-      setCleared(false);
-    }
-    if (healthDirty) {
-      const h = await saveMemberHealth(member.id, health);
-      if (!h.ok) {
-        setSaving(false);
-        setMessage(h.message);
-        return;
-      }
-      void qc.invalidateQueries({ queryKey: ["member-health", member.id] });
-      // Ask grounds itself in these, so it hears about the change too.
-      void qc.invalidateQueries({ queryKey: ["ask-context"] });
-      void qc.invalidateQueries({ queryKey: ["settings-health"] });
-    }
-    setSaving(false);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 1600);
-    refreshRoster(qc);
   }
 
   async function remove() {

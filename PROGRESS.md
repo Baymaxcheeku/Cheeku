@@ -1674,3 +1674,52 @@ so no third-party licence applies.
 - Derived faces for older profiles that never picked one still come only
   from the fifteen grown-ups, so nobody's existing face changed.
 - The old set's baby and kid ids (f01 to f07) now point at the new children.
+
+## Profile photos: the Save button that spun forever, 2026-09-30 (cloud session)
+
+Reported: choosing a photo instead of a face, then saving, left the button
+loading and the photo never saved.
+
+**Why it could hang.** `setProfilePhoto` let errors escape (reading the file
+with expo-file-system throws on web, where the picker hands back blob: URLs),
+and neither screen reset its spinner on a throw. Separately, a request on a
+dead or switching network had no time limit, so it could simply never answer.
+
+**Fix.**
+- `setProfilePhoto` and `clearProfilePhoto` never throw and never hang.
+  Every step has a time limit, and the upload gets 20 seconds per attempt.
+  It retries once, only after a lost connection, and `upsert` makes that
+  retry safe. Worst case is about 40 seconds, then a plain message.
+- Messages now say what happened: no connection, storage refused it, or
+  uploaded but not attached (the orphaned file is deleted).
+- The user id comes from the stored session (no network) before falling
+  back to `getUser`.
+- Web reads the picked file with `fetch`, native with expo-file-system.
+- Both screens wrap saving in `try/finally`, so the button always comes back.
+- **Add flow:** a face is always stored with the new member, so a failed
+  photo leaves a proper face rather than a blank. The done screen offers
+  "Try the photo again" in place.
+- **Member page:** if only the photo fails, the other edits stay saved and
+  the picked photo stays on screen, so Save again retries just the photo.
+- A saved photo shows at once everywhere (`showPhotoNow` patches Home's
+  cache with the local file) instead of flashing back to the drawn face
+  while a signed link is fetched.
+- `Avatar` remembered a failed link as a single flag, so after one expired
+  link no later photo ever showed. It now remembers which link failed.
+
+**Verified here, in a browser against a faked Supabase** (the real
+`setProfilePhoto`, a real JPEG with camera EXIF):
+- Happy path: one upload, a 512x512 JPEG, EXIF gone, and the path matches
+  the 0026 check.
+- Connection reset: retried once, then saved.
+- Storage error: its own message, no retry.
+- Attach refused: message, and the uploaded file removed.
+- Upload never answers: gives up at 40 seconds with the offline message.
+
+**Verified on scratch Postgres** (all migrations): a correct path attaches and
+clears. A path under another account, a wrongly named file, a made-up face id
+and an upload into someone else's folder are all refused.
+
+**Depends on migration 0026 being applied**, which adds the photo rule and
+accepts the new face ids. **Not verified:** the native picker, camera and
+upload on a real phone.
