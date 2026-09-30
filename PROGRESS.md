@@ -1618,3 +1618,40 @@ and Health profile.
 - Lab reminders firing.
 - A report opening from the tracker.
 - Reviews posting.
+
+## Avatars: the owner's illustrated set replaces the generated faces, 2026-09-30 (cloud session, not seen on a device)
+
+The generated faces (`micah`, then the 24-face `personas` set) looked cheap
+next to the rest of the app. The owner supplied fifteen flat vector portraits
+in one hand-drawn style, and those are now the only faces a person can pick
+or be given.
+
+**Assets.** `mobile-react-native/assets/avatars/v01.png` to `v15.png`, 384px,
+cut from the supplied sheet onto transparent backgrounds (the sheet's beige
+circles and their anti-aliased rim removed) so each sits on the app's own
+pastel. About 1.3 MB for the set. They load through `import`, and
+`images.d.ts` declares `*.png` because `expo-env.d.ts` is gitignored and a
+fresh checkout's typecheck would otherwise fail.
+
+**Ids.** The new faces are `f25` to `f39`, which the 0026 check on
+`profiles.avatar_seed` already accepts, so there is **no migration**. Every
+older id (`p1`–`p10`, `f01`–`f24`) maps in `faces.ts` LEGACY to its nearest
+face by hair, age and look, so nobody's pick vanishes. Anyone who never
+picked still gets a stable face derived from their profile id, from the same
+fifteen.
+
+**Picker.** One grid, five by three, no life-stage tabs: fifteen faces scan
+faster whole than paged. Photo buttons, "Keep generated face" and "Surprise
+me" are unchanged. The Family upsell's placeholder faces use the set too, so
+the app never shows two styles of person side by side. The onboarding cast
+(`castFaces`) still uses `micah`; swapping it is a separate change.
+
+**Gaps.**
+- The set has no babies or toddlers. A photo is the better answer for a
+  newborn; a matching kids set would close it.
+- **Licence.** The artwork is third-party stock. Keep proof of the licence,
+  and any attribution it asks for, with the release.
+
+**Not verified here:** anything on a device. Check the picker on the add
+flow and the member page, the tray, record cards and notification badges on
+iOS and Android, especially image sharpness at 24px.

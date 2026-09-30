@@ -67,7 +67,7 @@ export function ProfileChip({
         },
       ]}
     >
-      <Avatar svg={active.avatar} photo={active.photo} background={active.avatarBackground} size={40} />
+      <Avatar svg={active.avatar} photo={active.photo} image={active.avatarImage} background={active.avatarBackground} size={40} />
       <View>
         <Text style={{ fontFamily: font.regular, fontSize: 11.5, color: ink[500] }}>
           {active.isPrimary ? greeting : "Viewing"}
@@ -106,7 +106,7 @@ export function ProfileChip({
         <View className="ml-1 flex-row">
           {others.slice(0, 2).map((p, i) => (
             <View key={p.id} style={{ marginLeft: i === 0 ? 0 : -8, borderRadius: 999, borderWidth: 2, borderColor: "#fff" }}>
-              <Avatar svg={p.avatar} photo={p.photo} background={p.avatarBackground} size={24} />
+              <Avatar svg={p.avatar} photo={p.photo} image={p.avatarImage} background={p.avatarBackground} size={24} />
             </View>
           ))}
         </View>

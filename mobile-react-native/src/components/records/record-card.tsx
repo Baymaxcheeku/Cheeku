@@ -99,7 +99,7 @@ export function RecordCard({
         >
           <style.icon size={26} color={style.tint} strokeWidth={1.7} />
           <View style={{ position: "absolute", right: -4, bottom: -4, borderRadius: 999, borderWidth: 2, borderColor: "#fff" }}>
-            <Avatar svg={face.svg} background={face.background} size={24} />
+            <Avatar svg={face.svg} image={face.image} background={face.background} size={24} />
           </View>
         </View>
 

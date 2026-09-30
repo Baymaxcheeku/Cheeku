@@ -1,4 +1,5 @@
 import { createAvatar } from "@dicebear/core";
+import type { ImageSourcePropType } from "react-native";
 import { micah } from "@dicebear/collection";
 
 import { allFaceIds, catalogFace, derivedFace } from "./faces";
@@ -28,10 +29,11 @@ import { allFaceIds, catalogFace, derivedFace } from "./faces";
  * generator reproduces those, and this is the honest approximation.
  */
 
-/** Soft backgrounds, cycled by position. Deliberately not the semantic hues. */
-const BACKGROUNDS = ["d1d4f9", "ffd5dc", "c0aede", "b6e3f4", "ffdfbf", "d7f0e0"] as const;
-
-export type GeneratedAvatar = { svg: string; background: string };
+/**
+ * `image` is set for every face from the illustrated set (faces.ts), which is
+ * now all of them; `svg` stays for the onboarding cast illustrations only.
+ */
+export type GeneratedAvatar = { svg: string; background: string; image?: ImageSourcePropType };
 
 /**
  * THE avatar renderer. Every face in the app comes through here.
@@ -109,17 +111,17 @@ export function faceSvg(seed: string, background: string, traits: FaceTraits = {
  * Reordering this array is safe; renaming an id is not.
  */
 
-export type AvatarPick = { id: string; svg: string; background: string };
+export type AvatarPick = { id: string; svg: string; background: string; image: ImageSourcePropType };
 
 /**
- * Every choosable face, in catalogue order (life stage by life stage). The
- * catalogue itself lives in faces.ts; a face stored before 2026-09-30 (the old
- * "p" ids) still resolves through faces.ts LEGACY.
+ * Every choosable face, in catalogue order. The catalogue itself lives in
+ * faces.ts; a face stored before 2026-09-30 (the old "p" and f01–f24 ids)
+ * still resolves through faces.ts LEGACY.
  */
 export function avatarPicks(): AvatarPick[] {
   return allFaceIds().map((id) => {
     const f = catalogFace(id) as NonNullable<ReturnType<typeof catalogFace>>;
-    return { id: f.id, svg: f.svg, background: f.background };
+    return { id: f.id, svg: "", background: f.background, image: f.image };
   });
 }
 
@@ -129,11 +131,11 @@ export function generatedAvatar(profileId: string, index: number): GeneratedAvat
    * caller had: a stored `avatar_seed` if the person picked (old "p" ids
    * included), otherwise the profile id.
    */
-  const picked = catalogFace(profileId);
-  if (picked) return { svg: picked.svg, background: picked.background };
-
-  const background = BACKGROUNDS[index % BACKGROUNDS.length] as (typeof BACKGROUNDS)[number];
-  return derivedFace(profileId, background);
+  const face = catalogFace(profileId) ?? derivedFace(profileId);
+  // `index` used to pick a background for a derived face; the set carries its
+  // own now. Kept in the signature so no caller has to change.
+  void index;
+  return { svg: "", background: face.background, image: face.image };
 }
 
 /*

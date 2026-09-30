@@ -387,7 +387,7 @@ export default function Scan() {
                 },
               ]}
             >
-              <Avatar svg={p.avatar} photo={p.photo} background={p.avatarBackground ?? undefined} size={38} />
+              <Avatar svg={p.avatar} photo={p.photo} image={p.avatarImage} background={p.avatarBackground ?? undefined} size={38} />
               <Text style={{ fontFamily: font.semibold, fontSize: 14, color: active ? "#ffffff" : ink[900] }}>{p.name.split(" ")[0]}</Text>
             </Pressable>
           );

@@ -1,3 +1,5 @@
+import type { ImageSourcePropType } from "react-native";
+
 import { seatsFor } from "@/lib/billing/plans";
 import { getEntitlement } from "@/lib/billing/quota";
 import { kv } from "@/lib/storage";
@@ -44,6 +46,8 @@ export type ActiveProfile = {
   /** Generated from the id. Raw SVG markup for SvgXml, not a data URI. */
   avatar: string;
   avatarBackground: string;
+  /** Their face from the illustrated set; drawn whenever there is no photo. */
+  avatarImage: ImageSourcePropType | null;
   /** A signed, hour-long URL for their own photo, or null for a drawn face. */
   photo: string | null;
   /** The photo's storage key, for replacing or deleting it. */
@@ -87,6 +91,7 @@ export async function familyProfiles(): Promise<ActiveProfile[]> {
       avatarSeed: (p.avatar_seed as string | null) ?? null,
       avatar: generated.svg,
       avatarBackground: generated.background,
+      avatarImage: generated.image ?? null,
       photo: p.avatar_url ? (photos.get(p.avatar_url as string) ?? null) : null,
       photoPath: (p.avatar_url as string | null) ?? null,
     };

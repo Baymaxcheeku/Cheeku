@@ -6,7 +6,7 @@ import { ActivityIndicator, Image, KeyboardAvoidingView, Platform, Pressable, Sc
 import Animated, { FadeIn, FadeInRight, FadeOutLeft, ZoomIn } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { AvatarPicker, groupFor } from "@/components/family/avatar-picker";
+import { AvatarPicker } from "@/components/family/avatar-picker";
 import { HealthEditor } from "@/components/family/health-editor";
 import { ReportQueue } from "@/components/family/report-queue";
 import { Avatar } from "@/components/ui/avatar";
@@ -99,7 +99,7 @@ export default function AddMember() {
   const ids = useMemo(() => allFaceIds(), []);
   const roll = (not?: string) => {
     const pool = ids.filter((id) => id !== not);
-    return pool[Math.floor(Math.random() * pool.length)] ?? "f08";
+    return pool[Math.floor(Math.random() * pool.length)] ?? "f25";
   };
 
   const face = seed ? generatedAvatar(seed, 0) : null;
@@ -197,7 +197,7 @@ export default function AddMember() {
               {photo ? (
                 <Image alt="" source={{ uri: photo }} style={{ width: 120, height: 120, borderRadius: 60 }} />
               ) : face ? (
-                <Avatar svg={face.svg} background={face.background} size={120} />
+                <Avatar svg={face.svg} image={face.image} background={face.background} size={120} />
               ) : (
                 <View style={{ width: 120, height: 120, borderRadius: 60, backgroundColor: brand[100] }} />
               )}
@@ -287,7 +287,7 @@ export default function AddMember() {
             {photo ? (
               <Image alt="" source={{ uri: photo }} style={{ width: 64, height: 64, borderRadius: 32 }} />
             ) : face ? (
-              <Avatar svg={face.svg} background={face.background} size={64} />
+              <Avatar svg={face.svg} image={face.image} background={face.background} size={64} />
             ) : (
               <View style={{ width: 64, height: 64, borderRadius: 32, backgroundColor: brand[100], alignItems: "center", justifyContent: "center" }}>
                 <Text style={{ fontFamily: font.semibold, fontSize: 26, color: brand[700] }}>{name.trim() ? name.trim()[0]?.toUpperCase() : "?"}</Text>
@@ -370,7 +370,6 @@ export default function AddMember() {
                 photo={photo}
                 onPickPhoto={(source) => void pickPhoto(source).then((uri) => uri && setPhoto(uri))}
                 onClearPhoto={() => setPhoto(null)}
-                initialGroup={groupFor(relationship)}
               />
             </View>
           ) : step === 2 ? (

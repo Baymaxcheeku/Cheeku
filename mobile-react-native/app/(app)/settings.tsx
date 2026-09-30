@@ -145,7 +145,7 @@ export default function Settings() {
       <View className="mx-5 mt-4 overflow-hidden rounded-[30px] p-4" style={glassShadow}>
         <Gradient from="#ffffff" to="#efeaff" glow="#ffffff" />
         <View className="flex-row items-center gap-3.5">
-          <Avatar svg={profile.avatar} photo={profile.photo} background={profile.avatarBackground ?? undefined} size={68} />
+          <Avatar svg={profile.avatar} photo={profile.photo} image={profile.avatarImage} background={profile.avatarBackground ?? undefined} size={68} />
           <View className="min-w-0 flex-1">
             <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 21, letterSpacing: -0.4, color: ink[900] }}>
               {profile.name}
@@ -347,7 +347,7 @@ function FamilySection({
         <View className="flex-row">
           {reachable.slice(0, 3).map((p, i) => (
             <View key={p.id} style={{ marginLeft: i === 0 ? 0 : -10 }}>
-              <Avatar svg={p.avatar} photo={p.photo} background={p.avatarBackground ?? undefined} size={38} ring={surface.base} />
+              <Avatar svg={p.avatar} photo={p.photo} image={p.avatarImage} background={p.avatarBackground ?? undefined} size={38} ring={surface.base} />
             </View>
           ))}
           {!canAdd ? (

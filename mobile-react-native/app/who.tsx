@@ -148,7 +148,7 @@ export default function Who() {
                   <View className="w-[76px] items-center justify-center">
                     {option.art === "solo" ? (
                       chosen ? (
-                        <Avatar svg={chosen.svg} background={chosen.background} size={66} />
+                        <Avatar svg={chosen.svg} image={chosen.image} background={chosen.background} size={66} />
                       ) : (
                         <AvatarSolo size={66} />
                       )
@@ -218,7 +218,7 @@ export default function Who() {
                         className="rounded-pill p-[3px]"
                         style={{ backgroundColor: on ? brand[600] : surface.line }}
                       >
-                        <Avatar svg={pick.svg} background={pick.background} size={56} />
+                        <Avatar svg={pick.svg} image={pick.image} background={pick.background} size={56} />
                       </View>
                       {on ? (
                         <View
