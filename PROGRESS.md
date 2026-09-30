@@ -1811,7 +1811,13 @@ one-offs, keyed per record so setting one twice replaces it. On web the
 button says reminders work in the phone app.
 
 **Apply:**
-1. Migration 0028: `supabase/manual/0028-sql-editor.sql` after 0027.
+1. Migration 0028: `supabase/manual/0028-part-1-of-3.sql`, then part 2,
+   then part 3, after 0027. The single file came through the SQL Editor
+   cut off ("syntax error at end of input"), so it is split into three
+   short parts, and 0028 is now safe to run again (create-or-replace
+   functions, `if not exists` columns, trigger dropped before it is
+   created). Tested: in order on a fresh database, all three twice, and
+   over a database that already had the old 0028.
 2. Optional, to see every page: `supabase/manual/demo-records.sql`, with your
    email on the EMAIL line. The last line in it removes the samples.
 

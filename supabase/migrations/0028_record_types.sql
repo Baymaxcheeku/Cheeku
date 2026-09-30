@@ -110,14 +110,14 @@ $$ language plpgsql;
 
 -- An invoice number people can read out on a support call: a prefix, the
 -- date, and five characters of the record's own id.
-create function invoice_number (p_prefix text, p_id uuid) returns text
+create or replace function invoice_number (p_prefix text, p_id uuid) returns text
 set
   search_path = public as $$
   select p_prefix || '-' || to_char(now() at time zone 'Asia/Kolkata', 'YYMMDD') || '-' || upper(substr(replace(p_id::text, '-', ''), 1, 5));
 $$ language sql stable;
 
 -- Rewrites one key inside `extraction.details`.
-create function set_invoice_detail (p_doc uuid, p_key text, p_value jsonb) returns void
+create or replace function set_invoice_detail (p_doc uuid, p_key text, p_value jsonb) returns void
 security definer
 set
   search_path = public as $$
@@ -131,11 +131,11 @@ revoke execute on function set_invoice_detail (uuid, text, jsonb) from public, a
 -- ------------------------------------------------- lab booking invoices --
 
 alter table lab_bookings
-add column invoice_document_id uuid references documents (id) on delete set null;
+add column if not exists invoice_document_id uuid references documents (id) on delete set null;
 
 -- Where a booking's payment stands. The collector takes payment at the door,
 -- so it is due until the sample is collected and paid from then on.
-create function lab_payment_status (p_status text) returns text
+create or replace function lab_payment_status (p_status text) returns text
 set
   search_path = public as $$
   select case
@@ -145,7 +145,7 @@ set
   end;
 $$ language sql immutable;
 
-create function file_lab_invoice (p_booking uuid) returns uuid
+create or replace function file_lab_invoice (p_booking uuid) returns uuid
 security definer
 set
   search_path = public as $$
@@ -203,7 +203,7 @@ $$ language plpgsql;
 
 revoke execute on function file_lab_invoice (uuid) from public, anon, authenticated;
 
-create function lab_booking_invoice_trigger () returns trigger
+create or replace function lab_booking_invoice_trigger () returns trigger
 security definer
 set
   search_path = public as $$
@@ -216,6 +216,8 @@ begin
   return null;
 end;
 $$ language plpgsql;
+
+drop trigger if exists lab_bookings_invoice_trigger on lab_bookings;
 
 create trigger lab_bookings_invoice_trigger
 after insert or update of status on lab_bookings for each row
@@ -230,7 +232,7 @@ where b.invoice_document_id is null
 
 -- ------------------------------------------------ consultation invoices --
 
-create function file_consultation_invoice (
+create or replace function file_consultation_invoice (
   p_profile uuid,
   p_doctor text,
   p_specialty text,
@@ -300,7 +302,7 @@ grant execute on function file_consultation_invoice (uuid, text, text, text, tex
 
 -- A cancelled appointment: refunded if it was paid, otherwise just cancelled.
 -- A moved one: same invoice, new day and time.
-create function update_consultation_invoice (p_doc uuid, p_action text, p_day date default null, p_slot text default null) returns boolean
+create or replace function update_consultation_invoice (p_doc uuid, p_action text, p_day date default null, p_slot text default null) returns boolean
 security definer
 set
   search_path = public as $$
@@ -337,7 +339,7 @@ grant execute on function update_consultation_invoice (uuid, text, date, text) t
 -- its timeline entries together, so the old member keeps nothing of it and
 -- the new one gets all of it. Only to someone the plan covers: a record
 -- cannot be parked on a locked member and read from there.
-create function move_document (p_doc uuid, p_profile uuid) returns boolean
+create or replace function move_document (p_doc uuid, p_profile uuid) returns boolean
 security definer
 set
   search_path = public as $$
