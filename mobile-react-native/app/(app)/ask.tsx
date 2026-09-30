@@ -57,6 +57,7 @@ import { profileSignalsFor } from "@/lib/knowledge/queries";
 import { activeProfile } from "@/lib/profiles/context";
 import { detect, type SafetyResult } from "@/lib/safety/detect";
 import { brand, ink, semantic, shadow, surface } from "@/theme/tokens";
+import { useFamily } from "@/lib/profiles/family";
 
 /*
  * The starter rows are generated, not written here.
@@ -120,6 +121,25 @@ export default function Ask() {
   const [pending, setPending] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [composerFocused, setComposerFocused] = useState(false);
+
+  /*
+   * A new member means a new conversation. This tab stays mounted under the
+   * tab bar, so without this a switch from Home would leave Athar's chat on
+   * screen under Amma's name and ground the next question in the wrong file
+   * (PLAN.md rule 4).
+   */
+  const memberId = useFamily().data?.profile?.id;
+  const lastMember = useRef(memberId);
+  useEffect(() => {
+    if (lastMember.current && memberId && lastMember.current !== memberId) {
+      setTurns([]);
+      setConversationId(null);
+      setDraft("");
+      setEscalation(null);
+      setError(null);
+    }
+    lastMember.current = memberId;
+  }, [memberId]);
 
   const scroller = useRef<ScrollView>(null);
   const sentInitial = useRef(false);

@@ -1350,3 +1350,88 @@ settings were checked in the web export with sample data only. Look at: the
 inbox with real rows, long press on iOS and Android, the banner over a pushed
 screen, the permission primer on first open, a reminder firing and its tap
 opening the appointment, and a cold start from a notification tap.
+
+## Family: tray, adding, removing, switching, and the three plans — 2026-09-30 (cloud session, not seen on a device)
+
+**What was wrong.**
+- The family tray was a plain list, and it looked the same on every plan.
+  Free and Solo accounts got a switcher with nothing in it to switch to.
+- Adding someone was one sheet: type "Mother" into a text box, and get a face
+  chosen by dice.
+- Nobody could be removed, short of deleting the whole account. The database
+  would also have let the app delete the account holder's own profile.
+- Switching member refetched everything before anything moved, so each screen
+  caught up on its own schedule.
+- The Ask tab stays mounted, so after a switch it kept showing the previous
+  person's chat under the new name, and would have answered from the wrong
+  file (rule 4).
+
+**One family query, one switch.** `lib/profiles/family.ts`
+- `useFamily()` is the `home-context` query every screen now shares.
+- `useSwitchMember()` writes the new member into that cache first, so every
+  screen reading it re-renders in the same frame. Then it stores the choice and
+  marks everything member-scoped as stale (`MEMBER_SCOPED`).
+- Opening the tray prefetches every member's records, so the switch lands on a
+  full screen.
+- Home keeps the previous list up while the next loads instead of flashing
+  empty, and shows a short "Now viewing Amma's file" pill.
+- The Ask tab starts a fresh conversation when the member changes.
+- Notification taps use the same switch.
+
+**The three plans.**
+
+| Plan | Chip on Home | Tap opens | Plan screen |
+| --- | --- | --- | --- |
+| Free | your face + two dashed seats + a plus | "Bring your family along" sheet, Family at ₹249 | Solo and Family as upgrades |
+| Solo (and Daily pass) | same | "Make room for your family", upgrade for ₹150 more | Family up, Free down |
+| Family | your face + two family faces | the tray: face cards, switch, add, manage | Solo and Free as downgrades that pause named people |
+
+**Plan changes.**
+- Every change goes through one sheet that reads out the consequences in names:
+  "Amma and Ananya are paused. Nothing is deleted." / "Amma and Ananya come
+  back, files and all" / "Chats drop to 5 a day".
+- Anything that starts a new purchase goes to checkout; the paywall now opens
+  straight at checkout via `startAt`. A step down between subscriptions, or to
+  Free, happens on the sheet.
+- The logic is `planChange()` in `family-plan.ts`, with tests.
+
+**Adding someone** (`/family/add`) is three steps and a hello:
+1. Pick the relationship with one tap.
+2. Name and face. A live card at the top fills in as you go.
+3. Date of birth and sex, both skippable.
+
+Then comes the hello screen, with buttons for the member's first report and
+for switching to them.
+- No face is pre-picked. A random first pick once handed "Mother" a bearded
+  face, so skipping the pick rolls one at save time, and the hello screen shows
+  what was saved.
+- The `avatar_seed` check (0025) only allows the app's own catalogue faces.
+
+**Removing someone** (`/family/[id]`).
+- The confirm sheet names the person and how many reports they have before
+  anything happens.
+- Storage files are deleted before any row. If that fails, nothing else is
+  touched. Then a single profile delete cascades their documents, values, chats
+  and notifications.
+- An inbox line is written: "Amma's health file was removed. If this wasn't
+  you, change your password."
+- The account holder cannot be removed; migration 0025 refuses it in the
+  database too. Nor can a profile be re-parented or promoted to primary.
+
+**Paused members.**
+- In the tray they have no name or face (unchanged rule: never sell against
+  someone with their own data).
+- In Manage family they are named, because there the reader is deciding what
+  to do about them.
+
+**Migration 0025** (tested on a scratch Postgres 16 with all migrations): the
+primary-profile guard, the avatar check, the `family_removed` kind, and
+plan-change notifications that say how many members were paused. Paste
+`supabase/manual/0025-sql-editor.sql` into the SQL Editor, or run `db:migrate`.
+
+**Not verified here:** anything on a device. Look at: the tray on a Family
+account (switch speed, check landing before close), the chip and upsell on a
+Free and a Solo account, the add flow with the keyboard up, removing a member
+who is currently being viewed (should land on your own file), a Family to Solo
+downgrade (tray shows paused cards, Manage family names them), and Ask
+clearing after a switch.

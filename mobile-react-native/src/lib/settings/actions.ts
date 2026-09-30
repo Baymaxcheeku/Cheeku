@@ -179,7 +179,7 @@ export async function submitSupportTicket(
  */
 export async function addFamilyMember(
   input: AddMemberInput,
-): Promise<SettingsResult & { needsUpgrade?: true }> {
+): Promise<({ ok: true; id: string } | Exclude<SettingsResult, { ok: true }>) & { needsUpgrade?: true }> {
   const parsed = addMemberSchema.safeParse(input);
   if (!parsed.success) {
     return { ok: false, message: "Check the fields below.", fieldErrors: fieldErrors(parsed.error) };
@@ -214,15 +214,20 @@ export async function addFamilyMember(
     };
   }
 
-  const { error } = await supabase.from("profiles").insert({
-    family_id: family.id,
-    user_id: userId,
-    name: parsed.data.name,
-    relationship: parsed.data.relationship,
-    dob: parsed.data.dob || null,
-    sex: parsed.data.sex || null,
-    is_primary: false,
-  });
+  const { data: inserted, error } = await supabase
+    .from("profiles")
+    .insert({
+      family_id: family.id,
+      user_id: userId,
+      name: parsed.data.name,
+      relationship: parsed.data.relationship,
+      dob: parsed.data.dob || null,
+      sex: parsed.data.sex || null,
+      avatar_seed: parsed.data.avatarSeed || null,
+      is_primary: false,
+    })
+    .select("id")
+    .single();
 
   if (error) {
     // The 6-profile trigger from migration 0001 surfaces here as a raw
@@ -241,7 +246,9 @@ export async function addFamilyMember(
     }
     return { ok: false, message: "We couldn't add that member. Try again." };
   }
-  return { ok: true };
+  if (!inserted) return { ok: false, message: "We couldn't add that member. Try again." };
+  // The id, so the caller can switch straight to the person just added.
+  return { ok: true, id: inserted.id as string };
 }
 
 /**

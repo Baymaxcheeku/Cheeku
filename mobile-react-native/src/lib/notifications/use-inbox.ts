@@ -3,7 +3,8 @@ import { useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { AppState } from "react-native";
 
-import { switchProfile, type ActiveProfile } from "@/lib/profiles/context";
+import type { ActiveProfile } from "@/lib/profiles/context";
+import { useSwitchMember } from "@/lib/profiles/family";
 import { supabase } from "@/lib/supabase/client";
 
 import { unreadCount } from "./inbox";
@@ -140,6 +141,7 @@ export function useOpenNotification() {
   const router = useRouter();
   const qc = useQueryClient();
   const { markRead } = useInboxActions();
+  const switchMember = useSwitchMember();
 
   return useCallback(
     (item: Pick<InboxItem, "id" | "route" | "profileId" | "readAt">) => {
@@ -154,14 +156,8 @@ export function useOpenNotification() {
 
       if (item.route) router.push(item.route as never);
 
-      if (item.profileId && item.profileId !== activeId) {
-        void switchProfile(item.profileId).then((ok) => {
-          if (!ok) return;
-          void qc.invalidateQueries({ queryKey: ["home-context"] });
-          void qc.invalidateQueries({ queryKey: ["records"] });
-        });
-      }
+      if (item.profileId && item.profileId !== activeId) void switchMember(item.profileId);
     },
-    [qc, router, markRead],
+    [qc, router, markRead, switchMember],
   );
 }

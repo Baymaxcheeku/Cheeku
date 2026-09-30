@@ -3,7 +3,6 @@ import { useRouter } from "expo-router";
 import {
   Bell,
   CalendarDays,
-  ChevronDown,
   FolderHeart,
   ChevronRight,
   CircleHelp,
@@ -12,7 +11,6 @@ import {
   Globe,
   HeartPulse,
   Info,
-  Lock,
   LogOut,
   ShieldCheck,
   Trash2,
@@ -24,7 +22,6 @@ import { useState } from "react";
 
 import {
   ActivityIndicator,
-  LayoutAnimation,
   Modal,
   Pressable,
   ScrollView,
@@ -44,7 +41,6 @@ import { Avatar } from "@/components/ui/avatar";
 import { Glass, Gradient, glass, glassShadow } from "@/components/ui/glass";
 import { Backdrop } from "@/components/ui/screen";
 import { font } from "@/theme/type";
-import { AddMemberSheet } from "@/components/app/add-member-sheet";
 import { ConfirmSheet } from "@/components/ui/confirm-sheet";
 import { clearOfflineCache } from "@/lib/offline/cache";
 import { Paywall } from "@/components/billing/paywall";
@@ -56,8 +52,8 @@ import {
   activeProfile,
   type ActiveProfile,
 } from "@/lib/profiles/context";
-import { castFaces } from "@/lib/profiles/avatar";
 import { listProfileRecords, statsFrom } from "@/lib/records/queries";
+import { refreshRoster } from "@/lib/profiles/family";
 import { forgetThisDevice } from "@/lib/notifications/push";
 import { supabase } from "@/lib/supabase/client";
 import { brand, ink, semantic, shadow, surface } from "@/theme/tokens";
@@ -75,7 +71,6 @@ export default function Settings() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [paywallOpen, setPaywallOpen] = useState(false);
-  const [addOpen, setAddOpen] = useState(false);
   const [signOutOpen, setSignOutOpen] = useState(false);
 
   const context = useQuery({
@@ -213,8 +208,7 @@ export default function Settings() {
         activeId={profile.id}
         seats={seatsFor(entitlement.tier)}
         canAdd={allowsFamily(entitlement.tier)}
-        onUpgrade={() => setPaywallOpen(true)}
-        onAddMember={() => setAddOpen(true)}
+        onOpen={() => router.push("/family")}
       />
 
       {/*
@@ -272,18 +266,6 @@ export default function Settings() {
         onClose={() => setSignOutOpen(false)}
       />
 
-      <AddMemberSheet
-        open={addOpen}
-        onClose={() => setAddOpen(false)}
-        onAdded={() => {
-          setAddOpen(false);
-          // The roster, the seat count and the home switcher all derive from
-          // the profile list, so everything is refetched rather than patched.
-          void queryClient.invalidateQueries();
-        }}
-        onUpgrade={() => setPaywallOpen(true)}
-      />
-
       <Paywall
         open={paywallOpen}
         reason="upgrade"
@@ -292,8 +274,7 @@ export default function Settings() {
           setPaywallOpen(false);
           // Seats, the locked rows and the chat allowance all read from the
           // entitlement, so the whole screen is refetched rather than patched.
-          void queryClient.invalidateQueries({ queryKey: ["settings-context"] });
-          void queryClient.invalidateQueries({ queryKey: ["entitlement"] });
+          refreshRoster(queryClient);
         }}
       />
 
@@ -322,180 +303,72 @@ function FamilySection({
   activeId,
   seats,
   canAdd,
-  onUpgrade,
-  onAddMember,
+  onOpen,
 }: {
   profiles: readonly ActiveProfile[];
   activeId: string;
   seats: number;
   canAdd: boolean;
-  onUpgrade: () => void;
-  onAddMember: () => void;
+  onOpen: () => void;
 }) {
   const reachable = profiles.slice(0, seats);
-  const lockedCount = Math.max(0, profiles.length - reachable.length);
-  // Clamped: a downgrade leaves more profiles than seats, and "-2 seats free"
-  // is a number nobody should ever be shown.
-  const free = Math.max(0, seats - profiles.length);
-  const lockedFaces = castFaces(4);
-
-  /*
-   * COLLAPSED BY DEFAULT once there is more than one member.
-   *
-   * At full height this was six rows plus an add row, so a family of four
-   * pushed Account, Preferences and Support entirely below the fold — the
-   * settings screen became a family screen with settings underneath it. The
-   * summary row carries the same facts (who is active, how many people, how
-   * many seats) in one line, and the roster is one tap away.
-   *
-   * A single-member account expands, because a collapsed list of one is a
-   * disclosure triangle hiding nothing.
-   */
-  const [open, setOpen] = useState(profiles.length <= 1);
+  const paused = Math.max(0, profiles.length - reachable.length);
   const active = profiles.find((p) => p.id === activeId);
 
+  /*
+   * One card, one tap into Manage family. The roster, faces, seats, adding
+   * and removing all live there now; this only has to say who is being viewed
+   * and how full the plan is. On Free and Solo it is the way into Family.
+   */
   return (
     <View className="mt-6">
       <Text style={{ paddingHorizontal: 20, fontFamily: font.semibold, fontSize: 15, color: ink[700] }}>Family</Text>
-      <View
-        className="mx-5 mt-2.5 overflow-hidden rounded-[26px]"
-        style={[glassShadow, { backgroundColor: glass.fillStrong, borderWidth: 1, borderColor: glass.rim }]}
-      >
-        <Pressable
-          accessibilityRole="button"
-          accessibilityState={{ expanded: open }}
-          accessibilityLabel={`Family. ${profiles.length} ${profiles.length === 1 ? "member" : "members"}. ${open ? "Collapse" : "Expand"}`}
-          onPress={() => {
-            LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-            setOpen((v) => !v);
-          }}
-          className="flex-row items-center gap-3 px-3.5 py-3"
-        >
-          <View className="flex-row">
-            {/* Overlapped faces: the roster at a glance, in one row's height. */}
-            {profiles.slice(0, 3).map((p, i) => (
-              <View key={p.id} style={{ marginLeft: i === 0 ? 0 : -10 }}>
-                <Avatar
-                  svg={p.avatar}
-                  background={p.avatarBackground ?? undefined}
-                  size={36}
-                  ring={surface.base}
-                />
-              </View>
-            ))}
-          </View>
-          <View className="min-w-0 flex-1">
-            <Text className="text-[14px] font-semibold text-ink-900" numberOfLines={1}>
-              {active ? `Viewing ${active.name}` : "Your family"}
-            </Text>
-            <Text className="text-[11.5px] text-ink-500">
-              {profiles.length} of {seats} {seats === 1 ? "seat" : "seats"} used
-              {free > 0 ? `, ${free} free` : ""}
-            </Text>
-          </View>
-          <View style={{ transform: [{ rotate: open ? "180deg" : "0deg" }] }}>
-            <ChevronDown size={18} color={ink[300]} />
-          </View>
-        </Pressable>
-      </View>
-
-      <View
-        className="mx-5 mt-2 overflow-hidden rounded-[26px]"
-        style={[
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={canAdd ? "Manage family" : "Add your family with the Family plan"}
+        onPress={onOpen}
+        style={({ pressed }) => [
           glassShadow,
-          { backgroundColor: glass.fillStrong, borderWidth: 1, borderColor: glass.rim },
-          open ? undefined : { height: 0, marginTop: 0, opacity: 0 },
+          {
+            marginHorizontal: 20,
+            marginTop: 10,
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 12,
+            padding: 14,
+            borderRadius: 26,
+            backgroundColor: pressed ? "#ffffff" : glass.fillStrong,
+            borderWidth: 1,
+            borderColor: glass.rim,
+          },
         ]}
       >
-        {reachable.map((p, i) => (
-          <View
-            key={p.id}
-            className="flex-row items-center gap-3 px-3.5 py-3"
-            style={i > 0 ? { borderTopWidth: 1, borderTopColor: surface.line } : undefined}
-          >
-            <Avatar svg={p.avatar} background={p.avatarBackground ?? undefined} size={40} />
-            <View className="min-w-0 flex-1">
-              <Text className="text-[14px] font-semibold text-ink-900" numberOfLines={1}>
-                {p.name}
-              </Text>
-              <Text className="text-[11.5px] text-ink-500">
-                {/* "Currently viewing" beats the relationship: on a settings
-                    screen the first question is whose data is on screen. */}
-                {p.id === activeId
-                  ? "Currently viewing"
-                  : p.isPrimary
-                    ? "You"
-                    : (p.relationship ?? "Family")}
-              </Text>
+        <View className="flex-row">
+          {reachable.slice(0, 3).map((p, i) => (
+            <View key={p.id} style={{ marginLeft: i === 0 ? 0 : -10 }}>
+              <Avatar svg={p.avatar} background={p.avatarBackground ?? undefined} size={38} ring={surface.base} />
             </View>
-          </View>
-        ))}
-
-        {lockedCount > 0
-          ? Array.from({ length: lockedCount }, (_, i) => (
-              <Pressable
-                key={`locked-${i}`}
-                accessibilityRole="button"
-                accessibilityLabel="Locked family member. Opens plans"
-                onPress={onUpgrade}
-                className="flex-row items-center gap-3 px-3.5 py-3"
-                style={{ borderTopWidth: 1, borderTopColor: surface.line }}
-              >
-                <View className="h-10 w-10 items-center justify-center">
-                  {/* A stand-in face behind a padlock — never the real
-                      member's. See the note on this component. */}
-                  <View style={{ opacity: 0.25, position: "absolute" }}>
-                    <Avatar svg={lockedFaces[i % lockedFaces.length] ?? ""} size={40} />
-                  </View>
-                  <Lock size={15} color={ink[500]} />
-                </View>
-                <View className="min-w-0 flex-1">
-                  <Text className="text-[14px] font-semibold text-ink-300">Family member</Text>
-                  <Text className="text-[11.5px] text-ink-300">
-                    Part of the Family plan. Their records are safe.
-                  </Text>
-                </View>
-                <ChevronRight size={16} color={ink[300]} />
-              </Pressable>
-            ))
-          : null}
-
-        {/*
-         * Shown only while there is room. On a full Family plan this becomes a
-         * plain line rather than a button: an invitation that the database is
-         * going to refuse is worse than no invitation, and there is nothing to
-         * upsell to above Family.
-         */}
-        {canAdd && free > 0 ? (
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Add a family member"
-            onPress={onAddMember}
-            className="flex-row items-center gap-3.5 px-3.5 py-3"
-            style={{ borderTopWidth: 1, borderTopColor: surface.line }}
-          >
-            <View
-              className="h-10 w-10 items-center justify-center rounded-pill bg-brand-50"
-              style={{ borderWidth: 1, borderStyle: "dashed", borderColor: brand[200] }}
-            >
-              <UserPlus size={17} color={brand[600]} />
+          ))}
+          {!canAdd ? (
+            <View style={{ marginLeft: -10, width: 38, height: 38, borderRadius: 19, borderWidth: 2, borderColor: "#fff", backgroundColor: brand[600], alignItems: "center", justifyContent: "center" }}>
+              <UserPlus size={15} color="#fff" />
             </View>
-            <View className="min-w-0 flex-1">
-              <Text className="text-[14px] font-semibold text-brand-600">Add a family member</Text>
-              <Text className="text-[11.5px] text-ink-500">
-                {free} of {seats} {seats === 1 ? "seat" : "seats"} free
-              </Text>
-            </View>
-            <ChevronRight size={16} color={ink[300]} />
-          </Pressable>
-        ) : canAdd ? (
-          <View className="px-3.5 py-3" style={{ borderTopWidth: 1, borderTopColor: surface.line }}>
-            <Text className="text-[12.5px] text-ink-300">
-              All {seats} seats on your plan are in use.
-            </Text>
-          </View>
-        ) : null}
-      </View>
+          ) : null}
+        </View>
+        <View className="min-w-0 flex-1">
+          <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>
+            {canAdd ? (active ? `Viewing ${active.name.split(" ")[0]}` : "Your family") : "Add your family"}
+          </Text>
+          <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 12.5, color: ink[500], marginTop: 1 }}>
+            {canAdd
+              ? `${reachable.length} of ${seats} seats used`
+              : paused > 0
+                ? `${paused} paused · Family opens them again`
+                : "Up to 4 people with the Family plan"}
+          </Text>
+        </View>
+        <ChevronRight size={18} color={ink[300]} />
+      </Pressable>
     </View>
   );
 }

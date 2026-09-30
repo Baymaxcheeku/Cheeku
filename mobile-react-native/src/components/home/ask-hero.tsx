@@ -1,5 +1,5 @@
 import { useRouter } from "expo-router";
-import { ArrowUp, Camera, ChevronDown, Clock3, MessageCircleHeart, Mic, Sparkles } from "lucide-react-native";
+import { ArrowUp, Camera, ChevronDown, Clock3, MessageCircleHeart, Mic, Plus, Sparkles } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import { Pressable, Text, TextInput, View } from "react-native";
 import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
@@ -33,9 +33,12 @@ export function ProfileChip({
   active,
   others,
   greeting,
+  locked = false,
   onPress,
 }: {
   active: ActiveProfile;
+  /** Free and Solo: the family is a Family-plan feature, so the chip offers it instead of switching. */
+  locked?: boolean;
   /** "Good evening", shown above your own name. Another member says "Viewing". */
   greeting: string;
   others: readonly ActiveProfile[];
@@ -44,7 +47,7 @@ export function ProfileChip({
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={`Viewing ${active.name}. Switch family member`}
+      accessibilityLabel={locked ? `${active.name}. Add your family with the Family plan` : `Viewing ${active.name}. Switch family member`}
       onPress={onPress}
       style={({ pressed }) => [
         glassShadow,
@@ -72,10 +75,33 @@ export function ProfileChip({
           <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900], maxWidth: 120 }}>
             {firstName(active.name)}
           </Text>
-          <ChevronDown size={14} color={ink[500]} />
+          {locked ? null : <ChevronDown size={14} color={ink[500]} />}
         </View>
       </View>
-      {others.length > 0 ? (
+      {locked ? (
+        // Two empty places and a plus: "your family could be here".
+        <View className="ml-1 flex-row items-center">
+          {[0, 1].map((i) => (
+            <View
+              key={i}
+              style={{
+                marginLeft: i === 0 ? 0 : -8,
+                width: 26,
+                height: 26,
+                borderRadius: 13,
+                borderWidth: 1.5,
+                borderStyle: "dashed",
+                borderColor: brand[300],
+                backgroundColor: i === 1 ? brand[600] : "rgba(241,240,254,0.9)",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              {i === 1 ? <Plus size={13} color="#fff" strokeWidth={2.8} /> : null}
+            </View>
+          ))}
+        </View>
+      ) : others.length > 0 ? (
         <View className="ml-1 flex-row">
           {others.slice(0, 2).map((p, i) => (
             <View key={p.id} style={{ marginLeft: i === 0 ? 0 : -8, borderRadius: 999, borderWidth: 2, borderColor: "#fff" }}>

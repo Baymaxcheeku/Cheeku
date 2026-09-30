@@ -15,6 +15,7 @@ export type NotificationKind =
   | "appointment_rescheduled"
   | "appointment_cancelled"
   | "family_added"
+  | "family_removed"
   | "plan_changed"
   | "plan_ended"
   | "password_changed"

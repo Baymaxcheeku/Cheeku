@@ -12,7 +12,7 @@ import {
   Zap,
   type LucideIcon,
 } from "lucide-react-native";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Modal,
@@ -102,10 +102,17 @@ export function Paywall({
   onActivated,
   pendingQuestion,
   reason = "quota",
+  startAt,
 }: {
   open: boolean;
   onClose: () => void;
   onActivated: (tier: Tier) => void;
+  /**
+   * Skip the chooser and open straight at checkout for this plan. Used when
+   * the reader already chose on the plan screen; making them choose twice
+   * is how a two-tap upgrade becomes a five-tap one.
+   */
+  startAt?: Exclude<Tier, "free">;
   /** Shown back to the reader so they can see it was not lost. */
   pendingQuestion?: string;
   reason?: Reason;
@@ -115,6 +122,13 @@ export function Paywall({
   const [selected, setSelected] = useState<Plan>(PLANS.family);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+
+  useEffect(() => {
+    if (open && startAt) {
+      setSelected(PLANS[startAt]);
+      setStage("checkout");
+    }
+  }, [open, startAt]);
 
   function reset() {
     setStage("plans");
