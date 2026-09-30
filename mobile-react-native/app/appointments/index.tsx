@@ -1,5 +1,5 @@
 import { useRouter } from "expo-router";
-import { CalendarPlus, Plus } from "lucide-react-native";
+import { CalendarPlus, ChevronRight, FlaskConical, Plus } from "lucide-react-native";
 import { useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
@@ -11,6 +11,7 @@ import { Glass, GlassCircle, glass, glassShadow } from "@/components/ui/glass";
 import { useReducedMotion } from "@/components/ui/motion";
 import { Backdrop, PageTitle, PillButton, ScreenHeader } from "@/components/ui/screen";
 import { isUpcoming, startsAt, useAppointmentList } from "@/lib/booking/appointments";
+import { useLabBookings } from "@/lib/labs/queries";
 import { ink } from "@/theme/tokens";
 import { font } from "@/theme/type";
 
@@ -31,6 +32,8 @@ export default function Appointments() {
   const still = useReducedMotion();
   const { items, loaded } = useAppointmentList();
   const [tab, setTab] = useState<"upcoming" | "past">("upcoming");
+  const labs = useLabBookings();
+  const labsOpen = (labs.data ?? []).filter((b) => b.status !== "ready" && b.status !== "cancelled").length;
 
   const upcoming = items.filter((a) => isUpcoming(a)).sort((a, b) => startsAt(a).getTime() - startsAt(b).getTime());
   const past = items.filter((a) => !isUpcoming(a)).sort((a, b) => startsAt(b).getTime() - startsAt(a).getTime());
@@ -50,6 +53,21 @@ export default function Appointments() {
 
       <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: insets.bottom + 24 }} showsVerticalScrollIndicator={false}>
         <PageTitle title="Your appointments" line="Doctors you've booked through Cheeku." style={{ marginTop: 8 }} />
+
+        {/* Lab collections live on their own screen; this is the way across. */}
+        <Pressable
+          accessibilityRole="button"
+          onPress={() => router.push("/labs/bookings")}
+          style={({ pressed }) => [glassShadow, { marginTop: 14, flexDirection: "row", alignItems: "center", gap: 12, padding: 14, borderRadius: 22, backgroundColor: pressed ? "#fff" : glass.fillStrong, borderWidth: 1, borderColor: glass.rim }]}
+        >
+          <View style={{ width: 38, height: 38, borderRadius: 12, backgroundColor: "#dcecff", alignItems: "center", justifyContent: "center" }}>
+            <FlaskConical size={18} color="#1a6fc2" />
+          </View>
+          <Text style={{ flex: 1, fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>
+            Lab tests at home{labsOpen ? ` · ${labsOpen} in progress` : ""}
+          </Text>
+          <ChevronRight size={18} color={ink[300]} />
+        </Pressable>
 
         <View className="mt-5 flex-row gap-2">
           {(

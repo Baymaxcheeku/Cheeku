@@ -7,6 +7,7 @@ import {
   Crown,
   FileCheck2,
   FileSearch,
+  FlaskConical,
   KeyRound,
   LifeBuoy,
   PartyPopper,
@@ -41,6 +42,7 @@ import { relativeTime } from "@/lib/notifications/inbox";
 import { ACTION_LABEL, type InboxItem, type NotificationKind } from "@/lib/notifications/types";
 import { brand, ink, semantic, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
+import { Brand, brandify } from "@/components/ui/brand";
 
 /*
  * The pieces of the inbox.
@@ -61,6 +63,9 @@ export const KIND_STYLE: Record<NotificationKind, Tone> = {
   appointment_booked: { bg: "#e3f0ff", fg: "#1a6fc2", icon: CalendarCheck2 },
   appointment_rescheduled: { bg: "#e3f0ff", fg: "#1a6fc2", icon: CalendarClock },
   appointment_cancelled: { bg: "#eef0f5", fg: ink[500], icon: CalendarX2 },
+  lab_booked: { bg: "#dcecff", fg: "#1a6fc2", icon: FlaskConical },
+  lab_update: { bg: "#dcecff", fg: "#1a6fc2", icon: FlaskConical },
+  lab_cancelled: { bg: "#eef0f5", fg: ink[500], icon: FlaskConical },
   family_added: { bg: "#ffe9f1", fg: "#c22a6b", icon: UserRoundPlus },
   family_removed: { bg: "#eef0f5", fg: ink[500], icon: UserRoundMinus },
   plan_changed: { bg: "#f3ecff", fg: "#7b3fd4", icon: Crown },
@@ -174,7 +179,7 @@ export function NotificationRow({
               color: ink[900],
             }}
           >
-            {item.title}
+            {brandify(item.title)}
           </Text>
           <Text style={{ fontFamily: font.regular, fontSize: 12, lineHeight: 20, color: ink[300] }}>
             {relativeTime(item.createdAt, now)}
@@ -184,7 +189,7 @@ export function NotificationRow({
           numberOfLines={2}
           style={{ fontFamily: font.regular, fontSize: 13.5, lineHeight: 19, color: unread ? ink[700] : ink[500], marginTop: 2 }}
         >
-          {item.body}
+          {brandify(item.body)}
         </Text>
         {who || action ? (
           <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginTop: 9 }}>
@@ -304,7 +309,7 @@ export function PushBlocked({ onOpenSettings }: { onOpenSettings: () => void }) 
     >
       <BellRing size={17} color={brand[600]} />
       <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[700] }}>
-        Phone alerts are off for Cheeku. Everything still lands here.{" "}
+        Phone alerts are off for <Brand />. Everything still lands here.{" "}
         <Text style={{ fontFamily: font.semibold, color: brand[700] }}>Turn on in Settings</Text>
       </Text>
     </Pressable>

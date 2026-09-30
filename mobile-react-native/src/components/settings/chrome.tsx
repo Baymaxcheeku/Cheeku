@@ -7,6 +7,7 @@ import { Glass, GlassCircle, glass, glassShadow } from "@/components/ui/glass";
 import { Backdrop } from "@/components/ui/screen";
 import { brand, ink } from "@/theme/tokens";
 import { font } from "@/theme/type";
+import { brandify } from "@/components/ui/brand";
 
 /**
  * The shared frame for every settings sub-screen.
@@ -69,9 +70,9 @@ export function SettingsScreen({
           </Glass>
           <View className="min-w-0 flex-1">
             <Text style={{ fontFamily: font.semibold, fontSize: 26, lineHeight: 31, letterSpacing: -0.7, color: ink[900] }}>
-              {title}
+              {brandify(title)}
             </Text>
-            <Text style={{ fontFamily: font.regular, fontSize: 13.5, lineHeight: 19, color: ink[500], marginTop: 2 }}>{eyebrow}</Text>
+            <Text style={{ fontFamily: font.regular, fontSize: 13.5, lineHeight: 19, color: ink[500], marginTop: 2 }}>{brandify(eyebrow)}</Text>
           </View>
         </View>
 

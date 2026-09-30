@@ -46,6 +46,8 @@ export async function exportAccount(): Promise<
     "support_tickets",
     "notifications",
     "service_waitlist",
+    "lab_bookings",
+    "provider_reviews",
   ] as const;
 
   const bundle: ExportBundle = {
@@ -60,7 +62,10 @@ export async function exportAccount(): Promise<
   };
 
   for (const table of tables) {
-    const { data, error } = await supabase.from(table).select("*");
+    // Reviews are public to every signed-in user (0027), so RLS alone would
+    // export everyone's. Only the reader's own go in their file.
+    const base = supabase.from(table).select("*");
+    const { data, error } = table === "provider_reviews" ? await base.eq("user_id", user.id) : await base;
     if (error) {
       return { ok: false, message: "Could not gather all of your data. Nothing was exported." };
     }
@@ -194,7 +199,9 @@ export async function deleteAccountData(confirmation: string): Promise<DeleteRes
    * the family. Inbox titles name reports and doctors, so leaving them behind
    * would keep exactly what erasure is meant to remove.
    */
-  for (const table of ["notifications", "service_waitlist", "push_devices"] as const) {
+  // Reviews the reader wrote go too; lab bookings cascade with their member,
+  // and are removed here as well in case a member was removed earlier.
+  for (const table of ["notifications", "service_waitlist", "push_devices", "lab_bookings", "provider_reviews"] as const) {
     const { error } = await supabase.from(table).delete().eq("user_id", user.id);
     if (error) {
       return {

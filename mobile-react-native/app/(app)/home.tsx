@@ -23,6 +23,7 @@ import { familyMode, prefetchMembers, refreshRoster, useFamily, useSwitchMember 
 import { EMPTY_OVERVIEW, useHealthOverview } from "@/lib/records/use-overview";
 import { listProfileRecords, statsFrom } from "@/lib/records/queries";
 import { brand } from "@/theme/tokens";
+import { Brand } from "@/components/ui/brand";
 
 /** Deliberately time-of-day aware, like the frame. */
 function greeting(): string {
@@ -301,7 +302,7 @@ function NoProfile({ topInset }: { topInset: number }) {
     <View className="flex-1 justify-center bg-canvas px-8" style={{ paddingTop: topInset }}>
       <Text className="text-center text-[22px] font-bold text-ink-900">Set up a profile first</Text>
       <Text className="mt-2 text-center text-[14px] leading-[20px] text-ink-500">
-        Cheeku needs someone to keep records for before it can show you anything.
+        <Brand /> needs someone to keep records for before it can show you anything.
       </Text>
       <View className="mt-5">
         <Button onPress={() => router.push("/profile")}>

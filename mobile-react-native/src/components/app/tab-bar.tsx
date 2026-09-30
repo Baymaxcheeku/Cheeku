@@ -14,6 +14,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { glass, glassShadow } from "@/components/ui/glass";
 import { brand, ink, shadow, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
+import { brandify } from "@/components/ui/brand";
 
 const ICONS: Record<string, { icon: LucideIcon; label: string; short: string }> = {
   home: { icon: House, label: "Home", short: "Home" },
@@ -110,7 +111,8 @@ export function TabBar({ state, navigation }: BottomTabBarProps) {
                     numberOfLines={1}
                     style={{ fontFamily: active ? font.semibold : font.medium, fontSize: 10.5, color: active ? brand[700] : ink[500] }}
                   >
-                    {meta.short}
+                    {/* The serif wordmark runs small at 10.5, so it is set up a size. */}
+                    {brandify(meta.short, { size: 12.5 })}
                   </Text>
                 </View>
               </Pressable>

@@ -12,6 +12,7 @@ import type { InboxItem } from "@/lib/notifications/types";
 import { useOpenNotification } from "@/lib/notifications/use-inbox";
 import { ink } from "@/theme/tokens";
 import { font } from "@/theme/type";
+import { brandify } from "@/components/ui/brand";
 
 import { NotificationIcon } from "./parts";
 
@@ -85,7 +86,7 @@ export function ToastHost() {
           <NotificationIcon kind={item.kind} size={40} />
           <View style={{ flex: 1, minWidth: 0 }}>
             <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 14.5, color: ink[900] }}>
-              {item.title}
+              {brandify(item.title)}
             </Text>
             <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 1 }}>
               {item.body}

@@ -14,6 +14,7 @@ import { ChipSelect, Field } from "@/components/ui/field";
 import { submitSupportTicket } from "@/lib/settings/actions";
 import { SUPPORT_CATEGORIES } from "@/lib/settings/schemas";
 import { brand, ink, shadow, surface } from "@/theme/tokens";
+import { Brand } from "@/components/ui/brand";
 
 if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -249,7 +250,7 @@ export default function Help() {
         <ShieldCheck size={14} color={ink[300]} style={{ marginTop: 2 }} />
         <Text className="flex-1 text-[11.5px] leading-[17px] text-ink-300">
           For anything urgent about your health, contact a doctor or your local emergency number.
-          Cheeku support cannot give medical advice.
+          <Brand /> support cannot give medical advice.
         </Text>
       </View>
     </SettingsScreen>

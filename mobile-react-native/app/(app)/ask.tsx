@@ -58,6 +58,7 @@ import { activeProfile } from "@/lib/profiles/context";
 import { detect, type SafetyResult } from "@/lib/safety/detect";
 import { brand, ink, semantic, shadow, surface } from "@/theme/tokens";
 import { useFamily } from "@/lib/profiles/family";
+import { Brand } from "@/components/ui/brand";
 
 /*
  * The starter rows are generated, not written here.
@@ -304,7 +305,7 @@ export default function Ask() {
           </Glass>
           <View className="flex-1">
             <View className="flex-row items-center gap-1.5">
-              <Text style={{ fontFamily: font.semibold, fontSize: 18, color: ink[900] }}>Cheeku</Text>
+              <Text style={{ fontFamily: font.semibold, fontSize: 18, color: ink[900] }}><Brand /></Text>
               <View className="h-2 w-2 rounded-pill" style={{ backgroundColor: "#8ff0b8" }} />
             </View>
             <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 12.5, color: ink[500] }}>
@@ -346,7 +347,7 @@ export default function Ask() {
                 </Bob>
 
                 <Text style={{ fontFamily: font.semibold, fontSize: 26, letterSpacing: -0.7, color: ink[900], marginTop: 8, textAlign: "center" }}>
-                  Hi, I&apos;m <Text style={{ fontFamily: font.italic, color: brand[600] }}>Cheeku</Text>
+                  Hi, I&apos;m <Text style={{ fontFamily: font.italic, color: brand[600] }}><Brand /></Text>
                 </Text>
                 {/*
                  * The old line spent its second half on two things Cheeku will

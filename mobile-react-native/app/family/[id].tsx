@@ -32,6 +32,7 @@ import {
 } from "@/lib/profiles/family";
 import { brand, ink, semantic } from "@/theme/tokens";
 import { font } from "@/theme/type";
+import { Brand } from "@/components/ui/brand";
 
 /*
  * One family member: switch to them, change their face or details, or remove
@@ -380,7 +381,7 @@ export default function Member() {
         {/* Health basics, the same editor as when they were added. */}
         <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900], marginTop: 28, marginBottom: 4 }}>Health basics</Text>
         <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginBottom: 14 }}>
-          Cheeku uses these when reading {member.isPrimary ? "your" : `${firstName(member.name)}'s`} reports and answering questions.
+          <Brand /> uses these when reading {member.isPrimary ? "your" : `${firstName(member.name)}'s`} reports and answering questions.
         </Text>
         <HealthEditor value={health} onChange={setHealth} age={age} name={member.isPrimary ? undefined : member.name} />
 

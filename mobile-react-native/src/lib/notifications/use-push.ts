@@ -4,9 +4,11 @@ import { useEffect } from "react";
 import { Platform } from "react-native";
 
 import { startsAt, useAppointmentList } from "@/lib/booking/appointments";
+import { fastingFor } from "@/lib/labs/logic";
+import { useCatalog, useLabBookings } from "@/lib/labs/queries";
 import { DEFAULT_PREFS, ownFamily } from "@/lib/settings/queries";
 
-import { configureNotifications, registerThisDevice, syncAppointmentReminders } from "./push";
+import { configureNotifications, registerThisDevice, syncAppointmentReminders, syncLabReminders } from "./push";
 import type { InboxItem } from "./types";
 import { INBOX_KEY, useOpenNotification } from "./use-inbox";
 
@@ -27,6 +29,27 @@ export function usePushSetup() {
   const { items, loaded } = useAppointmentList();
   const family = useQuery({ queryKey: ["own-family"], queryFn: ownFamily });
   const remindersOn = (family.data?.prefs ?? DEFAULT_PREFS).appointmentReminders;
+  // Also keeps lab statuses moving: reading bookings runs the sync.
+  const labs = useLabBookings();
+  const catalog = useCatalog();
+
+  useEffect(() => {
+    if (!labs.data || !catalog.data) return;
+    const tests = catalog.data.tests;
+    void syncLabReminders(
+      labs.data.map((b) => {
+        const [y, m, d] = b.slotDate.split("-").map(Number);
+        const hour = Number(b.slotWindow.split("-")[0]) + (b.slotWindow.startsWith("4") ? 12 : 0);
+        return {
+          id: b.id,
+          start: new Date(y ?? 0, (m ?? 1) - 1, d ?? 1, hour),
+          fastingHours: fastingFor(tests, b.tests),
+          open: b.status === "booked" || b.status === "assigned",
+        };
+      }),
+      remindersOn,
+    );
+  }, [labs.data, catalog.data, remindersOn]);
 
   useEffect(() => {
     configureNotifications();

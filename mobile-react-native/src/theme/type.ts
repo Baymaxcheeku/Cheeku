@@ -27,6 +27,14 @@ export const font = {
   bold: "Inter_700Bold",
   /** Only for Home's editorial accent line. */
   italic: "Inter_500Medium_Italic",
+  /**
+   * The wordmark. "Cheeku" and "Cheeku AI" are always set in Instrument
+   * Serif Italic, in brand violet, through <Brand /> (components/ui/brand).
+   * One classic face against all that Inter is what makes the name
+   * recognisable at a glance, the way a logotype is. Never used for
+   * anything else, or it stops meaning the brand.
+   */
+  brand: "InstrumentSerif_400Regular_Italic",
 } as const;
 
 /*

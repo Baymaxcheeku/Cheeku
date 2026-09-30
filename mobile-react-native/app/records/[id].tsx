@@ -113,7 +113,9 @@ export default function RecordDetail() {
         return { record: null, allowed: false, url: null };
       }
 
-      const url = await signedDocumentUrl(record.storagePath);
+      // Results a lab delivered directly (0027) have no scanned page to sign.
+      const fromLab = (record.extraction as { source?: string } | null)?.source === "lab_partner";
+      const url = fromLab ? null : await signedDocumentUrl(record.storagePath);
       return { record, allowed: true, url };
     },
   });
@@ -329,12 +331,21 @@ export default function RecordDetail() {
       </View>
 
       {/* -------------------------------------------------------- original */}
-      <OriginalToggle
-        url={query.data?.url ?? null}
-        rawText={record.rawText}
-        fileLabel={record.title}
-        confidence={record.confidence}
-      />
+      {(record.extraction as { source?: string } | null)?.source === "lab_partner" ? (
+        <Glass strong className="mt-3 flex-row items-center gap-3 rounded-[22px] p-4">
+          <BadgeCheck size={18} color={brand[600]} />
+          <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 13.5, lineHeight: 19, color: ink[700] }}>
+            Sent straight from {(record.extraction as { partner?: string }).partner ?? "the lab"}, so there is no scanned page. Every value above is exactly as the lab reported it.
+          </Text>
+        </Glass>
+      ) : (
+        <OriginalToggle
+          url={query.data?.url ?? null}
+          rawText={record.rawText}
+          fileLabel={record.title}
+          confidence={record.confidence}
+        />
+      )}
 
       {/* --------------------------------------------------------- actions */}
       {/*
