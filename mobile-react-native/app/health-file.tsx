@@ -19,6 +19,7 @@ import { font } from "@/theme/type";
 import type { FlaggedValue } from "@/lib/records/overview";
 import { useActiveProfileName, useHealthOverview } from "@/lib/records/use-overview";
 import { brand, ink, semantic, shadow, surface } from "@/theme/tokens";
+import { Brand } from "@/components/ui/brand";
 
 /**
  * The whole file, opened from the stack on Home.
@@ -148,7 +149,7 @@ export default function HealthFileScreen() {
               ))}
             </View>
             <Text className="mx-5 mt-2 text-[11.5px] leading-[17px] text-ink-300">
-              Cheeku never suggests a medicine, a dose or a change. This is the list, not advice.
+              <Brand /> never suggests a medicine, a dose or a change. This is the list, not advice.
             </Text>
           </Section>
         ) : null}

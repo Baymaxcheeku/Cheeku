@@ -160,3 +160,44 @@ export async function syncAppointmentReminders(appts: Bookable[], enabled: boole
     // appointment card on Home still counts down.
   }
 }
+
+// ------------------------------------------------------------ lab reminders --
+
+type LabVisit = { id: string; start: Date; fastingHours: number; open: boolean };
+
+/**
+ * Two phone reminders per open lab booking: half an hour before the fast has
+ * to start (for tests that need one), and half an hour before the collector's
+ * window. Same
+ * full-resync rule as appointments, and just as generic on a locked screen.
+ */
+export async function syncLabReminders(visits: LabVisit[], enabled: boolean): Promise<void> {
+  if (!native) return;
+  try {
+    const scheduled = await Notifications.getAllScheduledNotificationsAsync();
+    await Promise.all(scheduled.filter((n) => n.identifier.startsWith("lab-")).map((n) => Notifications.cancelScheduledNotificationAsync(n.identifier)));
+    if (!enabled || (await pushPermission()) !== "granted") return;
+    const now = Date.now();
+    for (const v of visits) {
+      if (!v.open) continue;
+      const plan: { id: string; at: Date; title: string; body: string }[] = [];
+      if (v.fastingHours > 0) {
+        // Half an hour before the fast has to begin, naming the exact time.
+        const fastFrom = new Date(v.start.getTime() - v.fastingHours * 3_600_000);
+        const time = fastFrom.toLocaleTimeString("en-IN", { hour: "numeric", minute: "2-digit" });
+        plan.push({ id: `lab-${v.id}-fast`, at: new Date(fastFrom.getTime() - 30 * 60_000), title: "Fasting for tomorrow's blood test", body: `Last food by ${time}. Water is fine.` });
+      }
+      plan.push({ id: `lab-${v.id}-soon`, at: new Date(v.start.getTime() - 30 * 60_000), title: "Your sample collector is on the way", body: "Keep an ID handy. Tap to track the visit." });
+      for (const r of plan) {
+        if (r.at.getTime() <= now + 60_000) continue;
+        await Notifications.scheduleNotificationAsync({
+          identifier: r.id,
+          content: { title: r.title, body: r.body, sound: "default", data: { url: `/labs/booking/${v.id}` } },
+          trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: r.at, channelId: "appointments" },
+        });
+      }
+    }
+  } catch {
+    // As with appointments: the tracker still shows the time.
+  }
+}

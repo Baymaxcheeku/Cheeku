@@ -20,6 +20,7 @@ import { detect, type SafetyResult } from "@/lib/safety/detect";
 import { shouldCaution } from "@/lib/safety/caution";
 import { brand, ink } from "@/theme/tokens";
 import { font } from "@/theme/type";
+import { Brand } from "@/components/ui/brand";
 
 /*
  * Book a doctor — the conversation.
@@ -451,7 +452,7 @@ function Header({ onBack, topInset }: { onBack: () => void; topInset: number }) 
       </GlassCircle>
       <View className="flex-1 items-center">
         <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>Book a doctor</Text>
-        <Text style={{ fontFamily: font.regular, fontSize: 12, color: ink[500] }}>with Cheeku</Text>
+        <Text style={{ fontFamily: font.regular, fontSize: 12, color: ink[500] }}>with <Brand /></Text>
       </View>
       <Glass className="rounded-pill px-3 py-1.5">
         <Text style={{ fontFamily: font.semibold, fontSize: 11.5, color: brand[700] }}>Preview</Text>

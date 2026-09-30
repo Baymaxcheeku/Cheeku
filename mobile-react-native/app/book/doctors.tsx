@@ -10,6 +10,8 @@ import { useReducedMotion } from "@/components/ui/motion";
 import { SPECIALTIES, doctorsFor, nextFree, type Doctor, type Mode } from "@/lib/booking/catalog";
 import { useBookingDraft } from "@/lib/booking/draft";
 import { doctorFace } from "@/lib/booking/faces";
+import { RatingLine } from "@/components/labs/parts";
+import { useRatings, type Rating } from "@/lib/labs/queries";
 import { brand, ink } from "@/theme/tokens";
 import { font } from "@/theme/type";
 
@@ -31,6 +33,7 @@ export default function Doctors() {
   const insets = useSafeAreaInsets();
   const still = useReducedMotion();
   const { specialty, mode, intake, setMode } = useBookingDraft();
+  const ratings = useRatings("doctor");
 
   const sp = SPECIALTIES[specialty ?? "gp"];
   const m: Mode = mode ?? "online";
@@ -113,6 +116,8 @@ export default function Doctors() {
                 doctor={d}
                 mode={m}
                 face={doctorFace(d)}
+                rating={ratings.data?.get(d.id)}
+                onOpen={() => router.push({ pathname: "/book/doctor/[id]", params: { id: d.id } })}
                 onBook={() => router.push({ pathname: "/book/slot", params: { id: d.id } })}
               />
             </Animated.View>
@@ -137,11 +142,16 @@ function DoctorCard({
   doctor: d,
   mode,
   face,
+  rating,
+  onOpen,
   onBook,
 }: {
   doctor: Doctor;
   mode: Mode;
   face?: { svg: string; background: string };
+  rating?: Rating;
+  /** The whole top of the card opens the profile; the button books. */
+  onOpen: () => void;
   onBook: () => void;
 }) {
   const next = nextFree(d, mode);
@@ -149,7 +159,7 @@ function DoctorCard({
 
   return (
     <Glass strong className="overflow-hidden rounded-[28px] p-3">
-      <View className="flex-row gap-3.5">
+      <Pressable accessibilityRole="button" accessibilityLabel={`${d.name}. Open profile and reviews`} onPress={onOpen} className="flex-row gap-3.5">
         <View className="overflow-hidden rounded-[22px]" style={{ width: 92, height: 104 }}>
           {/* The illustrated face as a portrait tile, full bleed. */}
           {face ? (
@@ -167,13 +177,16 @@ function DoctorCard({
           <Text style={{ fontFamily: font.medium, fontSize: 13, color: brand[600], marginTop: 1 }}>
             {SPECIALTIES[d.specialty].label}
           </Text>
+          <View style={{ marginTop: 5 }}>
+            <RatingLine rating={rating} />
+          </View>
           <Fact icon={<GraduationCap size={13} color={ink[500]} />} text={`${d.years} yrs · ${d.qualifications}`} />
           <Fact icon={<Languages size={13} color={ink[500]} />} text={d.languages.join(", ")} />
           {mode === "clinic" ? (
             <Fact icon={<MapPin size={13} color={ink[500]} />} text={`${d.clinic.name}, ${d.clinic.area} · ${d.clinic.km} km`} />
           ) : null}
         </View>
-      </View>
+      </Pressable>
 
       <View className="mt-3 flex-row items-center gap-2 rounded-[18px] px-3 py-2.5" style={{ backgroundColor: "rgba(241,240,254,0.8)" }}>
         <Clock3 size={14} color={brand[600]} />

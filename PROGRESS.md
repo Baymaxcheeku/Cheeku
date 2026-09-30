@@ -1518,3 +1518,103 @@ and Health profile.
 - Ten reports uploading on a slow connection.
 - Keyboard behaviour in the medicines rows.
 - Opening Amma's report from her page, then Ask (it should be about Amma).
+
+## Home polish, lab tests end to end, provider profiles and reviews — 2026-09-30 (cloud session, not seen on a device)
+
+**Brand wordmark.**
+- "Cheeku" and "Cheeku AI" are now always set in Instrument Serif Italic, in
+  brand violet, through `<Brand />` and `brandify()` (`components/ui/brand`).
+  One classic italic among the Inter works like a logotype across every
+  screen.
+- A codemod wrapped every literal mention in on-screen JSX text. The shared
+  components (ScreenHeader, PageTitle, SectionTitle, PillButton, settings
+  chrome, notification rows, tab bar) brandify the strings they are given.
+  On ink and violet buttons the wordmark switches to a light violet so it
+  stays visible.
+- Strings built at runtime inside other screens still render plainly. Wrap
+  them in `brandify()` when touched.
+
+**Home.**
+- The generic AI sparkle in the ask bar is replaced by a small Cheeku.
+- The ask bar's two rotating hints were stacking half a line apart while they
+  cross-faded (seen on a device). Both are now absolutely placed in the same
+  spot.
+- "Doctors & labs open" is a citrus-lime pill with a pulsing dot. The lime is
+  deliberately far from the semantic green (#23af5f), because green means
+  "healthy" in this app (rule 3).
+- Lab tests are live; the service tags now read "Live".
+- Health insurance is added as a locked module with its own filter. It opens
+  the coming-soon sheet with "Notify me".
+
+**Lab tests at home** (migration 0027, `lib/labs`, `app/labs/*`).
+- Screens:
+  - Search that understands everyday words (sugar, hair fall, dadi).
+  - Suggestions for the member being viewed, from their health profile.
+  - "Got a doctor's slip?" to attach a prescription.
+  - Category chips, packages as cards, tests as rows, and a sticky cart bar.
+  - Test detail, in the reference layout.
+  - Choose a lab: only labs that do everything, cheapest total first.
+  - The lab's own profile, with its reviews.
+  - Booking: whose sample, which day, which window, the address and the bill.
+  - A tracker with a timeline, and the list of all lab bookings.
+- The backend does the real work:
+  - The catalogue and prices live in tables.
+  - `create_lab_booking` prices the order itself and checks plan cover. The
+    app cannot insert a booking, so it cannot choose a price.
+  - Status changes write to the inbox.
+  - When results are "ready", they are filed as a real `documents` row with
+    `entities`, under the right member. They appear in Records, the health
+    file and Ask exactly like an uploaded report.
+  - Tested in scratch Postgres: a forged price is refused, a lab that lacks a
+    test is refused, 10 values filed for Shakeela, cancel works, and the
+    clock-based sync walked a past booking through all 4 stages.
+- There is no partner integration yet, so `sync_lab_bookings()` moves bookings
+  by the clock. `advance_lab_booking_demo()`, the tracker's "Preview: skip to
+  the next step", steps one stage at a time for demos. It is gated by
+  `app_flags.demo_labs`: TURN IT OFF BEFORE LAUNCH.
+- Local reminders go out half an hour before a fast must start, naming the
+  exact time, and half an hour before the collector's window.
+- Lab-delivered records have no scanned page. The record screen says so
+  instead of offering an original that doesn't exist.
+
+**Sample data is labelled as sample.**
+- The five lab partners use real brand names, at the owner's request, with
+  illustrative prices and turnaround times, and every seeded review is
+  flagged `is_sample`.
+- Each screen carries a "Preview · sample" line, and each partner page says it
+  is not a live partnership.
+- Replace the seed with partner feeds before launch.
+- Seeded results are always within the printed range, so a demo never
+  frightens anyone.
+
+**Ratings and reviews** (`provider_reviews`, `provider_ratings` view).
+- Everyone signed in can read reviews. A person can write one per provider,
+  editable, and can never mark it as a sample.
+- A review can be written after results from a lab, or after a past
+  appointment with a doctor.
+- Stars are ink, not gold: gold sits too near the caution amber.
+- The account export includes only the reader's own reviews (RLS alone would
+  have exported everyone's). Account deletion removes lab bookings and
+  reviews.
+
+**Doctor profiles** (`/book/doctor/[id]`).
+- A portrait hero, rating, Video and Clinic tiers with fee and next slot
+  (like the reference's pricing chips), and facts.
+- An "About" paragraph built only from the listed facts, the clinic card, and
+  reviews.
+- A sticky price and Book button. Tapping a doctor card now opens the profile;
+  the card's own button still books directly.
+- On web the portrait was invisible under the gradient: the same stacking
+  issue recorded earlier, fixed with `zIndex`.
+
+**Apply:** migration 0027 (`db:migrate`, or paste
+`supabase/manual/0027-sql-editor.sql` after 0026).
+
+**Not verified here:** anything on a device. Look at:
+- The serif wordmark on iOS and Android at small sizes (tab bar, notification
+  rows).
+- The mascot in the ask bar.
+- The labs flow with the keyboard up on the address field.
+- Lab reminders firing.
+- A report opening from the tracker.
+- Reviews posting.

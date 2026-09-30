@@ -8,6 +8,7 @@ import { Settle } from "@/components/ui/motion";
 import { brand } from "@/theme/tokens";
 import { font, type } from "@/theme/type";
 import { resolveLanding } from "@/lib/auth/landing";
+import { Brand } from "@/components/ui/brand";
 
 /**
  * A1 — splash. Holds just long enough to be seen, then hands off.
@@ -50,7 +51,7 @@ export default function Splash() {
       </Settle>
       <Settle delay={0.25}>
         <Text style={[type.hero, { marginTop: 14, fontSize: 36, lineHeight: 40, textAlign: "center" }]}>
-          Cheeku <Text style={{ color: brand[600] }}>AI</Text>
+          <Brand /> <Text style={{ color: brand[600] }}>AI</Text>
         </Text>
         <Text style={[type.body, { marginTop: 4, textAlign: "center", fontFamily: font.medium }]}>
           Your family&apos;s health, remembered.

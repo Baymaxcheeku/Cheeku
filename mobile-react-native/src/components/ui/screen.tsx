@@ -4,6 +4,7 @@ import { ActivityIndicator, Pressable, Text, View, type ViewProps } from "react-
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SvgXml } from "react-native-svg";
 
+import { brandify } from "@/components/ui/brand";
 import { GlassCircle, Gradient, glassShadow } from "@/components/ui/glass";
 import { brand, ink } from "@/theme/tokens";
 import { font } from "@/theme/type";
@@ -64,7 +65,7 @@ export function ScreenHeader({
       <View className="flex-1 items-center">
         {title ? (
           <Text accessibilityRole="header" numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>
-            {title}
+            {brandify(title)}
           </Text>
         ) : null}
         {subtitle ? <Text style={{ fontFamily: font.regular, fontSize: 12, color: ink[500] }}>{subtitle}</Text> : null}
@@ -79,9 +80,9 @@ export function PageTitle({ title, line, style }: { title: string; line?: string
   return (
     <View style={style}>
       <Text accessibilityRole="header" style={{ fontFamily: font.semibold, fontSize: 28, lineHeight: 33, letterSpacing: -0.8, color: ink[900] }}>
-        {title}
+        {brandify(title)}
       </Text>
-      {line ? <Text style={{ fontFamily: font.regular, fontSize: 14, lineHeight: 20, color: ink[500], marginTop: 4 }}>{line}</Text> : null}
+      {line ? <Text style={{ fontFamily: font.regular, fontSize: 14, lineHeight: 20, color: ink[500], marginTop: 4 }}>{brandify(line)}</Text> : null}
     </View>
   );
 }
@@ -90,7 +91,7 @@ export function PageTitle({ title, line, style }: { title: string; line?: string
 export function SectionTitle({ children, action }: { children: string; action?: React.ReactNode }) {
   return (
     <View className="flex-row items-end justify-between">
-      <Text style={{ fontFamily: font.semibold, fontSize: 19, letterSpacing: -0.3, color: ink[900] }}>{children}</Text>
+      <Text style={{ fontFamily: font.semibold, fontSize: 19, letterSpacing: -0.3, color: ink[900] }}>{brandify(children)}</Text>
       {action}
     </View>
   );
@@ -145,7 +146,7 @@ export function PillButton({
       ]}
     >
       {loading ? <ActivityIndicator color={fg} /> : icon}
-      <Text style={{ fontFamily: font.semibold, fontSize: 15.5, color: fg }}>{children}</Text>
+      <Text style={{ fontFamily: font.semibold, fontSize: 15.5, color: fg }}>{brandify(children, { onDark: tone === "dark" || tone === "brand" })}</Text>
     </Pressable>
   );
 }

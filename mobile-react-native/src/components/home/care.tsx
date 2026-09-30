@@ -5,8 +5,10 @@ import {
   Dumbbell,
   FlaskConical,
   HeartHandshake,
+  Lock,
   Pill,
   Salad,
+  ShieldCheck,
   Stethoscope,
   type LucideIcon,
 } from "lucide-react-native";
@@ -14,7 +16,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { Modal, Pressable, ScrollView, Text, View } from "react-native";
-import Animated, { FadeInDown } from "react-native-reanimated";
+import Animated, { FadeInDown, useAnimatedStyle, useSharedValue, withRepeat, withSequence, withTiming } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { MascotBust } from "@/components/illustrations/sprout";
@@ -25,6 +27,7 @@ import { fetchWaitlist, setWaitlisted } from "@/lib/notifications/queries";
 import { kv } from "@/lib/storage";
 import { brand, ink } from "@/theme/tokens";
 import { font } from "@/theme/type";
+import { Brand } from "@/components/ui/brand";
 
 /*
  * Book care — the marketplace roadmap, as a front door that is honest about
@@ -55,7 +58,7 @@ import { font } from "@/theme/type";
  * an inbox row, and a buzz if they allowed it. Taps from before this existed
  * lived only on the phone (`cheeku.notify`); they are carried over once.
  */
-type Filter = "all" | "doctors" | "tests" | "medicines" | "women" | "wellness";
+type Filter = "all" | "doctors" | "tests" | "medicines" | "women" | "wellness" | "insurance";
 
 type Service = {
   id: string;
@@ -65,6 +68,8 @@ type Service = {
   promise: string;
   /** Opens a working flow instead of the coming-soon sheet. */
   route?: string;
+  /** Shown with a padlock: the module exists in the plan, not in the app yet. */
+  locked?: boolean;
   Icon: LucideIcon;
   from: string;
   to: string;
@@ -78,6 +83,7 @@ const FILTERS: readonly { id: Filter; label: string }[] = [
   { id: "medicines", label: "Medicines" },
   { id: "women", label: "Women's health" },
   { id: "wellness", label: "Diet & fitness" },
+  { id: "insurance", label: "Insurance" },
 ];
 
 const SERVICES: readonly Service[] = [
@@ -97,7 +103,8 @@ const SERVICES: readonly Service[] = [
     id: "labs",
     filter: "tests",
     title: "Lab tests at home",
-    line: "Samples collected at home",
+    line: "Top labs, results filed for you",
+    route: "/labs",
     promise: "Book a home sample collection, and the report lands straight in your health file.",
     Icon: FlaskConical,
     from: "#dcecff",
@@ -147,6 +154,18 @@ const SERVICES: readonly Service[] = [
     from: "#dfe6ff",
     to: "#f0f3ff",
     fg: "#3f5bd9",
+  },
+  {
+    id: "insurance",
+    filter: "insurance",
+    title: "Health insurance",
+    line: "Compare family floater plans",
+    promise: "Compare health cover for your family, with your records ready for the claim when you need it.",
+    Icon: ShieldCheck,
+    from: "#e3f5ef",
+    to: "#f1faf6",
+    fg: "#0f7a5c",
+    locked: true,
   },
 ];
 
@@ -200,13 +219,19 @@ export function CareSection() {
           <Text style={{ fontFamily: font.semibold, fontSize: 21, letterSpacing: -0.4, color: ink[900] }}>
             Book care
           </Text>
-          <Glass className="flex-row items-center gap-1.5 rounded-pill px-2.5 py-1">
-            <View className="h-1.5 w-1.5 rounded-pill" style={{ backgroundColor: brand[500] }} />
-            <Text style={{ fontFamily: font.semibold, fontSize: 11.5, color: brand[700] }}>Doctors open · more soon</Text>
-          </Glass>
+          {/*
+           * Lime, not green. Green means "healthy" everywhere else in this app
+           * (PLAN.md rule 3), so this is a citrus lime a long way from the
+           * semantic #23af5f: bright enough to say "open now", with no health
+           * meaning attached.
+           */}
+          <View className="flex-row items-center gap-1.5 rounded-pill px-2.5 py-1" style={{ backgroundColor: LIVE.bg }}>
+            <LiveDot />
+            <Text style={{ fontFamily: font.semibold, fontSize: 11.5, color: LIVE.fg }}>Doctors & labs open</Text>
+          </View>
         </View>
         <Text style={{ fontFamily: font.regular, fontSize: 13.5, color: ink[500], marginTop: 3 }}>
-          Tell Cheeku what you need. It books and files it.
+          Tell <Brand /> what you need. It books and files it.
         </Text>
       </View>
 
@@ -283,6 +308,20 @@ export function CareSection() {
 
 const KEY = "cheeku.notify";
 
+/** The "open now" accent: citrus lime on deep olive. See the note on the pill. */
+export const LIVE = { bg: "#e4ff7a", fg: "#2f3d00", dot: "#5f7a00" } as const;
+
+function LiveDot() {
+  const still = useReducedMotion();
+  const o = useSharedValue(1);
+  useEffect(() => {
+    if (still) return;
+    o.value = withRepeat(withSequence(withTiming(0.25, { duration: 700 }), withTiming(1, { duration: 700 })), -1);
+  }, [still, o]);
+  const style = useAnimatedStyle(() => ({ opacity: o.value }));
+  return <Animated.View style={[{ width: 7, height: 7, borderRadius: 4, backgroundColor: LIVE.dot }, style]} />;
+}
+
 function ServiceCard({ service: s, notified, onPress }: { service: Service; notified: boolean; onPress: () => void }) {
   return (
     <Pressable
@@ -307,11 +346,18 @@ function ServiceCard({ service: s, notified, onPress }: { service: Service; noti
         <View className="min-w-0 flex-1">
           <View className="flex-row items-center gap-2">
             <Text style={{ fontFamily: font.semibold, fontSize: 16, letterSpacing: -0.2, color: ink[900] }}>{s.title}</Text>
-            <View className="rounded-pill px-2 py-0.5" style={{ backgroundColor: s.route ? ink[900] : "rgba(255,255,255,0.75)" }}>
-              <Text style={{ fontFamily: font.semibold, fontSize: 10.5, color: s.route ? "#fff" : ink[500] }}>
-                {s.route ? "New" : "Soon"}
-              </Text>
-            </View>
+            {s.locked ? (
+              <View className="flex-row items-center gap-1 rounded-pill px-2 py-0.5" style={{ backgroundColor: "rgba(15,16,48,0.08)" }}>
+                <Lock size={9} color={ink[700]} />
+                <Text style={{ fontFamily: font.semibold, fontSize: 10.5, color: ink[700] }}>Locked</Text>
+              </View>
+            ) : (
+              <View className="rounded-pill px-2 py-0.5" style={{ backgroundColor: s.route ? LIVE.bg : "rgba(255,255,255,0.75)" }}>
+                <Text style={{ fontFamily: font.semibold, fontSize: 10.5, color: s.route ? LIVE.fg : ink[500] }}>
+                  {s.route ? "Live" : "Soon"}
+                </Text>
+              </View>
+            )}
           </View>
           <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 3 }}>
             {s.line}
@@ -360,7 +406,7 @@ function SoonSheet({
                 {service.title}
               </Text>
               <Text style={{ fontFamily: font.medium, fontSize: 13, color: service.fg, marginTop: 2 }}>
-                Coming soon to Cheeku
+                Coming soon to <Brand />
               </Text>
             </View>
           </View>

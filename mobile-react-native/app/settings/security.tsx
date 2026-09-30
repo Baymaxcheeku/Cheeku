@@ -26,6 +26,7 @@ import {
 } from "@/lib/security/app-lock";
 import { supabase } from "@/lib/supabase/client";
 import { brand, ink, shadow, surface } from "@/theme/tokens";
+import { Brand } from "@/components/ui/brand";
 
 /**
  * Security & privacy. Phase 5's app lock, plus the facts about where the data
@@ -151,7 +152,7 @@ export default function Security() {
                   Require {lockName(capability.kind)}
                 </Text>
                 <Text className="mt-0.5 text-[11.5px] leading-[16px] text-ink-500">
-                  Ask every time Cheeku AI is opened or comes back from the background.
+                  Ask every time <Brand ai /> is opened or comes back from the background.
                 </Text>
               </View>
               {busy ? (
@@ -197,7 +198,7 @@ export default function Security() {
 
         {enabled ? (
           <Text className="mx-5 mt-2 text-[11.5px] leading-[17px] text-ink-300">
-            Cheeku also hides the screen in your app switcher, so a preview of your records is
+            <Brand /> also hides the screen in your app switcher, so a preview of your records is
             never left in the list of open apps.
           </Text>
         ) : null}

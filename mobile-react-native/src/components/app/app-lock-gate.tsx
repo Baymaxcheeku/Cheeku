@@ -11,6 +11,7 @@ import { clearActiveProfile } from "@/lib/profiles/context";
 import { forgetThisDevice } from "@/lib/notifications/push";
 import { supabase } from "@/lib/supabase/client";
 import { brand, ink, surface } from "@/theme/tokens";
+import { Brand } from "@/components/ui/brand";
 
 /*
  * Holds the app behind a biometric challenge when the lock is on.
@@ -158,7 +159,7 @@ export function AppLockGate({ children }: { children: React.ReactNode }) {
           {locked ? (
             <>
               <Text className="mt-5 text-center text-[21px] font-bold text-ink-900">
-                Cheeku AI is locked
+                <Brand ai /> is locked
               </Text>
               <Text className="mt-2 text-center text-[13.5px] leading-[20px] text-ink-500">
                 {failed
@@ -193,7 +194,7 @@ export function AppLockGate({ children }: { children: React.ReactNode }) {
                this is the frame that ends up in the app switcher. */
             <View className="mt-5 flex-row items-center gap-2">
               <ShieldCheck size={16} color={ink[300]} />
-              <Text className="text-[13px] text-ink-300">Cheeku AI</Text>
+              <Text className="text-[13px] text-ink-300"><Brand ai /></Text>
             </View>
           )}
         </View>

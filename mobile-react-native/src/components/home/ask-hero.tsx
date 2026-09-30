@@ -1,10 +1,10 @@
 import { useRouter } from "expo-router";
-import { ArrowUp, Camera, ChevronDown, Clock3, MessageCircleHeart, Mic, Plus, Sparkles } from "lucide-react-native";
+import { ArrowUp, Camera, ChevronDown, Clock3, MessageCircleHeart, Mic, Plus } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import { Pressable, Text, TextInput, View } from "react-native";
 import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 
-import { MascotFigure } from "@/components/illustrations/sprout";
+import { MascotBust, MascotFigure } from "@/components/illustrations/sprout";
 import { Bob, BubblePop } from "@/components/onboarding/motion";
 import { Avatar } from "@/components/ui/avatar";
 import { Glass, GlassCircle, Gradient, glass, glassShadow } from "@/components/ui/glass";
@@ -12,6 +12,7 @@ import { useReducedMotion } from "@/components/ui/motion";
 import type { ActiveProfile } from "@/lib/profiles/context";
 import { brand, ink, semantic } from "@/theme/tokens";
 import { font } from "@/theme/type";
+import { Brand, brandify } from "@/components/ui/brand";
 
 /*
  * Home, top half: who you are looking after, the one question, and Cheeku.
@@ -187,7 +188,11 @@ export function AskBar() {
           className="h-14 flex-1 flex-row items-center gap-2 rounded-pill pl-4 pr-1"
           style={{ borderColor: focused ? brand[300] : glass.rim, borderWidth: focused ? 1.5 : 1 }}
         >
-          <Sparkles size={18} color={brand[500]} strokeWidth={1.8} />
+          {/* Cheeku himself, small, where a generic AI sparkle used to be: the
+              bar is a conversation with him, not with "AI". */}
+          <View style={{ width: 34, height: 34, marginLeft: -6, alignItems: "center", justifyContent: "center" }}>
+            <MascotBust size={34} />
+          </View>
           <View className="min-w-0 flex-1 justify-center" style={{ height: 44 }}>
             <TextInput
               value={value}
@@ -201,15 +206,21 @@ export function AskBar() {
             />
             {/* A drawn placeholder, so it can fade between hints. */}
             {!value ? (
-              <View pointerEvents="none" style={{ position: "absolute", left: 0, right: 0 }}>
+              /*
+               * Both hints are absolutely placed in the same spot, so the one
+               * fading out sits exactly under the one fading in. They used to
+               * stack in normal flow, and the outgoing line showed half a line
+               * above the new one while it faded (seen on device 2026-09-30).
+               */
+              <View pointerEvents="none" style={{ position: "absolute", left: 0, right: 0, top: 0, bottom: 0 }}>
                 <Animated.Text
                   key={focused ? "focused" : hint}
-                  entering={still ? undefined : FadeIn.duration(300)}
-                  exiting={still ? undefined : FadeOut.duration(180)}
+                  entering={still ? undefined : FadeIn.duration(260)}
+                  exiting={still ? undefined : FadeOut.duration(120)}
                   numberOfLines={1}
-                  style={{ fontFamily: font.regular, fontSize: 15.5, color: ink[300] }}
+                  style={{ position: "absolute", left: 0, right: 0, top: 0, bottom: 0, lineHeight: 44, fontFamily: font.regular, fontSize: 15.5, color: ink[300] }}
                 >
-                  {focused ? "Ask Cheeku anything…" : hint}
+                  {brandify(focused ? "Ask Cheeku anything…" : hint, { size: 17 })}
                 </Animated.Text>
               </View>
             ) : null}
@@ -321,12 +332,12 @@ export function CheekuCard({
         <View className="mt-5 pr-[38%]">
           <View className="flex-row items-center gap-1.5">
             <MessageCircleHeart size={15} color={brand[600]} strokeWidth={1.9} />
-            <Text style={{ fontFamily: font.medium, fontSize: 13, color: brand[700] }}>Ask Cheeku</Text>
+            <Text style={{ fontFamily: font.medium, fontSize: 13, color: brand[700] }}>Ask <Brand /></Text>
           </View>
           <Text
             style={{ fontFamily: font.semibold, fontSize: 24, lineHeight: 29, letterSpacing: -0.6, color: ink[900], marginTop: 6 }}
           >
-            Talk it through with Cheeku
+            Talk it through with <Brand />
           </Text>
           <Text style={{ fontFamily: font.regular, fontSize: 13.5, lineHeight: 19, color: ink[700], marginTop: 8 }}>
             {memory}

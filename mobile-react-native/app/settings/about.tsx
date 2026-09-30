@@ -31,6 +31,7 @@ import { FREE_CHAT_LIMIT, PLANS } from "@/lib/billing/plans";
 import { JOURNEYS } from "@/lib/onboarding/journeys";
 import { castFaces } from "@/lib/profiles/avatar";
 import { brand, ink, semantic, shadow, surface } from "@/theme/tokens";
+import { Brand } from "@/components/ui/brand";
 
 /**
  * About Cheeku AI — the product's own case for itself.
@@ -147,7 +148,7 @@ export default function About() {
           className="mt-4 text-[11px] font-bold uppercase text-ink-300"
           style={{ letterSpacing: 1.4 }}
         >
-          About Cheeku AI
+          About <Brand ai />
         </Text>
 
         {/*
@@ -267,7 +268,7 @@ export default function About() {
         <View className="mx-5 mt-2 flex-row items-start gap-2">
           <Quote size={13} color={ink[300]} style={{ marginTop: 2 }} />
           <Text className="flex-1 text-[11.5px] leading-[16px] text-ink-500">
-            If Cheeku cannot point at a record, it says so rather than filling the gap.
+            If <Brand /> cannot point at a record, it says so rather than filling the gap.
           </Text>
         </View>
       </View>
@@ -344,7 +345,7 @@ export default function About() {
         <View className="mx-5 mt-2.5 flex-row items-start gap-2 rounded-tile bg-brand-50 px-3.5 py-3">
           <Info size={14} color={brand[500]} style={{ marginTop: 1 }} />
           <Text className="flex-1 text-[11.5px] leading-[16px] text-ink-700">
-            Cheeku will not tell you what you have or what to take for it. It explains what things
+            <Brand /> will not tell you what you have or what to take for it. It explains what things
             mean, keeps the history straight, and is candid about when a person should look at this
             instead.
           </Text>
@@ -454,7 +455,7 @@ export default function About() {
         >
           <ShieldCheck size={16} color={brand[600]} style={{ marginTop: 1 }} />
           <Text className="flex-1 text-[12.5px] leading-[18px] text-ink-700">
-            <Text className="font-bold text-brand-700">Cheeku breaks the loop.</Text> It reads what
+            <Text className="font-bold text-brand-700"><Brand /> breaks the loop.</Text> It reads what
             your own report says, names the document it came from, and leaves what it means to your
             doctor.
           </Text>
@@ -542,7 +543,7 @@ export default function About() {
               style={{ backgroundColor: brand[600] }}
             >
               <Check size={13} color="#fff" strokeWidth={3} />
-              <Text className="text-[11.5px] font-semibold text-white">Cheeku</Text>
+              <Text className="text-[11.5px] font-semibold text-white"><Brand /></Text>
             </View>
             <View className="gap-1.5 p-3">
               {[
@@ -602,7 +603,7 @@ export default function About() {
         className="mx-5 mt-4 rounded-card bg-surface p-4"
         style={{ borderWidth: 1, borderColor: surface.line }}
       >
-        <Text className="text-[14px] font-bold text-ink-900">What Cheeku will never do</Text>
+        <Text className="text-[14px] font-bold text-ink-900">What <Brand /> will never do</Text>
         <View className="mt-2 gap-1.5">
           {[
             "Diagnose a condition, or tell you what a value means for you",
@@ -618,7 +619,7 @@ export default function About() {
           ))}
         </View>
         <Text className="mt-2.5 text-[11.5px] leading-[16px] text-ink-500">
-          Anything a doctor should decide, Cheeku hands to your doctor.
+          Anything a doctor should decide, <Brand /> hands to your doctor.
         </Text>
       </View>
 
@@ -649,7 +650,7 @@ export default function About() {
         >
           <MessageCircle size={16} color={brand[700]} />
           <Text className="text-[14px] font-semibold" style={{ color: brand[700] }}>
-            Chat with Cheeku
+            Chat with <Brand />
           </Text>
         </Pressable>
       </View>
@@ -675,7 +676,7 @@ export default function About() {
       <View className="mx-5 mt-4 flex-row items-start gap-2">
         <ShieldCheck size={14} color={ink[300]} style={{ marginTop: 1 }} />
         <Text className="flex-1 text-[11px] leading-[16px] text-ink-500">
-          Cheeku is not a replacement for professional medical advice. For emergencies, contact your
+          <Brand /> is not a replacement for professional medical advice. For emergencies, contact your
           doctor or local emergency services.
         </Text>
       </View>
@@ -784,7 +785,7 @@ function Faq() {
       <View className="mx-5 mt-2 flex-row items-start gap-2">
         <FileText size={13} color={ink[300]} style={{ marginTop: 2 }} />
         <Text className="flex-1 text-[11.5px] leading-[16px] text-ink-500">
-          Articles in Cheeku AI cite the guidance they draw on. Nothing here is written to persuade you
+          Articles in <Brand ai /> cite the guidance they draw on. Nothing here is written to persuade you
           out of seeing someone.
         </Text>
       </View>

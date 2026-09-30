@@ -8,6 +8,7 @@ import {
   Inter_700Bold,
   useFonts,
 } from "@expo-google-fonts/inter";
+import { InstrumentSerif_400Regular_Italic } from "@expo-google-fonts/instrument-serif";
 import { QueryClient } from "@tanstack/react-query";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { Stack } from "expo-router";
@@ -87,6 +88,8 @@ export default function RootLayout() {
     Inter_700Bold,
     // The editorial accent line on Home's headline. Same package, JS-only.
     Inter_500Medium_Italic,
+    // The "Cheeku" wordmark, and nothing else.
+    InstrumentSerif_400Regular_Italic,
   });
 
   useEffect(() => {

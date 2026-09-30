@@ -14,6 +14,9 @@ export type NotificationKind =
   | "appointment_booked"
   | "appointment_rescheduled"
   | "appointment_cancelled"
+  | "lab_booked"
+  | "lab_update"
+  | "lab_cancelled"
   | "family_added"
   | "family_removed"
   | "plan_changed"
@@ -70,5 +73,7 @@ export const ACTION_LABEL: Partial<Record<NotificationKind, string>> = {
   welcome: "Snap a report",
   appointment_booked: "View",
   appointment_rescheduled: "View",
+  lab_booked: "Track",
+  lab_update: "Track",
   service_live: "Book now",
 };
