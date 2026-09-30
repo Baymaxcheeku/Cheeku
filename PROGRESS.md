@@ -1646,12 +1646,80 @@ me" are unchanged. The Family upsell's placeholder faces use the set too, so
 the app never shows two styles of person side by side. The onboarding cast
 (`castFaces`) still uses `micah`; swapping it is a separate change.
 
-**Gaps.**
-- The set has no babies or toddlers. A photo is the better answer for a
-  newborn; a matching kids set would close it.
-- **Licence.** The artwork is third-party stock. Keep proof of the licence,
-  and any attribution it asks for, with the release.
+**Licence.** f25 to f39 are third-party stock. Keep proof of the licence,
+and any attribution it asks for, with the release.
 
 **Not verified here:** anything on a device. Check the picker on the add
 flow and the member page, the tray, record cards and notification badges on
 iOS and Android, especially image sharpness at 24px.
+
+### Children added (f40 to f44)
+
+The supplied set had no children, so five were drawn for the app to match
+it: a baby, a toddler with two top buns, a toddler with a red bowl cut, a
+school-age girl with braids, and a curly-haired boy with a gap-toothed grin.
+They use the set's own palette (sampled from the PNGs) and its line style.
+Sources are SVG in `assets/avatars/source/v16.svg` to `v20.svg`; edit those
+and re-render at 384px with a transparent background. They were made here,
+so no third-party licence applies.
+
+- **Picker:** four rows now, three of grown-ups and one of children. When the
+  person is plainly a child (under 13 by date of birth, or a relationship
+  like son, daughter or baby when there is no date), the children's row
+  moves to the top.
+- **Automatic picks stay in the right age band** (`face-pool.ts`, tested):
+  skip the picker or tap "Surprise me" and a child gets a child's face and
+  an adult an adult's.
+- The account holder's own picker (`/who`) offers only the grown-ups.
+- Derived faces for older profiles that never picked one still come only
+  from the fifteen grown-ups, so nobody's existing face changed.
+- The old set's baby and kid ids (f01 to f07) now point at the new children.
+
+## Profile photos: the Save button that spun forever, 2026-09-30 (cloud session)
+
+Reported: choosing a photo instead of a face, then saving, left the button
+loading and the photo never saved.
+
+**Why it could hang.** `setProfilePhoto` let errors escape (reading the file
+with expo-file-system throws on web, where the picker hands back blob: URLs),
+and neither screen reset its spinner on a throw. Separately, a request on a
+dead or switching network had no time limit, so it could simply never answer.
+
+**Fix.**
+- `setProfilePhoto` and `clearProfilePhoto` never throw and never hang.
+  Every step has a time limit, and the upload gets 20 seconds per attempt.
+  It retries once, only after a lost connection, and `upsert` makes that
+  retry safe. Worst case is about 40 seconds, then a plain message.
+- Messages now say what happened: no connection, storage refused it, or
+  uploaded but not attached (the orphaned file is deleted).
+- The user id comes from the stored session (no network) before falling
+  back to `getUser`.
+- Web reads the picked file with `fetch`, native with expo-file-system.
+- Both screens wrap saving in `try/finally`, so the button always comes back.
+- **Add flow:** a face is always stored with the new member, so a failed
+  photo leaves a proper face rather than a blank. The done screen offers
+  "Try the photo again" in place.
+- **Member page:** if only the photo fails, the other edits stay saved and
+  the picked photo stays on screen, so Save again retries just the photo.
+- A saved photo shows at once everywhere (`showPhotoNow` patches Home's
+  cache with the local file) instead of flashing back to the drawn face
+  while a signed link is fetched.
+- `Avatar` remembered a failed link as a single flag, so after one expired
+  link no later photo ever showed. It now remembers which link failed.
+
+**Verified here, in a browser against a faked Supabase** (the real
+`setProfilePhoto`, a real JPEG with camera EXIF):
+- Happy path: one upload, a 512x512 JPEG, EXIF gone, and the path matches
+  the 0026 check.
+- Connection reset: retried once, then saved.
+- Storage error: its own message, no retry.
+- Attach refused: message, and the uploaded file removed.
+- Upload never answers: gives up at 40 seconds with the offline message.
+
+**Verified on scratch Postgres** (all migrations): a correct path attaches and
+clears. A path under another account, a wrongly named file, a made-up face id
+and an upload into someone else's folder are all refused.
+
+**Depends on migration 0026 being applied**, which adds the photo rule and
+accepts the new face ids. **Not verified:** the native picker, camera and
+upload on a real phone.

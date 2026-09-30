@@ -80,6 +80,30 @@ export function refreshRoster(qc: QueryClient) {
   for (const key of ROSTER_SCOPED) void qc.invalidateQueries({ queryKey: [key] });
 }
 
+/*
+ * A just-saved photo, shown at once from the file already on the phone.
+ *
+ * The roster refetch that follows signs a fresh link to the stored copy, and
+ * that takes a round trip or two. Until it lands, the tray, the header and
+ * the member page would otherwise flash back to the drawn face, which reads
+ * as "it didn't save". `photo: null` does the same for a removed photo.
+ */
+export function showPhotoNow(qc: QueryClient, profileId: string, photo: string | null, photoPath: string | null) {
+  const patch = <T extends ActiveProfile>(p: T): T => (p.id === profileId ? { ...p, photo, photoPath } : p);
+  qc.setQueryData<FamilyContext>(FAMILY_KEY, (ctx) =>
+    ctx
+      ? {
+          ...ctx,
+          profile: ctx.profile ? patch(ctx.profile) : null,
+          access: { ...ctx.access, all: ctx.access.all.map(patch), selectable: ctx.access.selectable.map(patch) },
+        }
+      : ctx,
+  );
+  // Not ["family-members"]: the member page resets its form from that list,
+  // and patching it early would flash the pre-save values back in. The page
+  // holds its own just-saved photo instead.
+}
+
 /** Warms each member's records so a switch lands on a full screen. */
 export function prefetchMembers(qc: QueryClient, members: readonly ActiveProfile[]) {
   for (const m of members) {

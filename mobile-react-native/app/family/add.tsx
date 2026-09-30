@@ -1,7 +1,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { ArrowRight, Camera, Check, FileText, HeartPulse, Lock, TriangleAlert } from "lucide-react-native";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { ActivityIndicator, Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, View } from "react-native";
 import Animated, { FadeIn, FadeInRight, FadeOutLeft, ZoomIn } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -16,8 +16,8 @@ import { useReducedMotion } from "@/components/ui/motion";
 import { Backdrop, PillButton, ScreenHeader } from "@/components/ui/screen";
 import { uploadQueue, type QueueItem } from "@/lib/records/bulk-upload";
 import { generatedAvatar } from "@/lib/profiles/avatar";
-import { familyMode, refreshRoster, useFamily, useSwitchMember } from "@/lib/profiles/family";
-import { allFaceIds } from "@/lib/profiles/faces";
+import { familyMode, refreshRoster, showPhotoNow, useFamily, useSwitchMember } from "@/lib/profiles/family";
+import { facePool, isChild } from "@/lib/profiles/face-pool";
 import { ageFrom, EMPTY_HEALTH, hasHealth, saveMemberHealth, type MemberHealth } from "@/lib/profiles/health";
 import { pickPhoto, setProfilePhoto } from "@/lib/profiles/photo";
 import { addFamilyMember } from "@/lib/settings/actions";
@@ -95,17 +95,35 @@ export default function AddMember() {
   const [addedId, setAddedId] = useState<string | null>(null);
   const [outcome, setOutcome] = useState<Outcome | null>(null);
   const [phase, setPhase] = useState("");
+  const [photoError, setPhotoError] = useState<string | null>(null);
+  const [retrying, setRetrying] = useState(false);
 
-  const ids = useMemo(() => allFaceIds(), []);
-  const roll = (not?: string) => {
-    const pool = ids.filter((id) => id !== not);
-    return pool[Math.floor(Math.random() * pool.length)] ?? "f25";
-  };
+  async function retryPhoto() {
+    if (!addedId || !photo || !outcome) return;
+    setRetrying(true);
+    const p = await setProfilePhoto(addedId, photo);
+    setRetrying(false);
+    if (p.ok) {
+      showPhotoNow(qc, addedId, photo, p.path);
+      setOutcome({ ...outcome, photo: "saved" });
+      setPhotoError(null);
+      refreshRoster(qc);
+    } else {
+      setPhotoError(p.message);
+    }
+  }
 
   const face = seed ? generatedAvatar(seed, 0) : null;
   const relationship = relation === "Someone else" ? custom.trim() : relation;
   const hint = RELATIONS.find(([r]) => r === relation)?.[1] ?? "Their name";
   const age = ageFrom(dob);
+
+  // The app's own pick stays in their age band: no toddler face for a
+  // grandmother, no grey beard for a six-year-old (face-pool.ts).
+  const roll = (not?: string) => {
+    const pool = facePool(age, relationship).filter((id) => id !== not);
+    return pool[Math.floor(Math.random() * pool.length)] ?? "f25";
+  };
   const first = firstName(name) || "them";
 
   const ctx = family.data;
@@ -118,9 +136,16 @@ export default function AddMember() {
     setMessage(null);
     setPhase(`Setting up ${first}'s file`);
 
-    const chosen = photo ? "" : seed || roll();
-    if (!photo) setSeed(chosen);
-    const result = await addFamilyMember({ name, relationship, dob, sex: sex as never, avatarSeed: chosen });
+    // A face is stored even when a photo is chosen: the photo wins while it
+    // is there, and the face stands in if the upload fails or it's removed.
+    const chosen = seed || roll();
+    setSeed(chosen);
+    let result: Awaited<ReturnType<typeof addFamilyMember>>;
+    try {
+      result = await addFamilyMember({ name, relationship, dob, sex: sex as never, avatarSeed: chosen });
+    } catch {
+      result = { ok: false, message: "That didn't save. Check your connection and try again." };
+    }
     if (!result.ok) {
       if (result.needsUpgrade) {
         router.replace("/settings/subscription");
@@ -139,19 +164,21 @@ export default function AddMember() {
 
     if (photo) {
       setPhase("Adding their photo");
-      const p = await setProfilePhoto(id, photo);
+      const p = await setProfilePhoto(id, photo); // never throws, never hangs
       out.photo = p.ok ? "saved" : "failed";
+      if (p.ok) showPhotoNow(qc, id, photo, p.path);
+      else setPhotoError(p.message);
     }
     if (hasHealth(health)) {
       setPhase("Saving health basics");
-      const h = await saveMemberHealth(id, health);
+      const h = await saveMemberHealth(id, health).catch(() => ({ ok: false as const }));
       out.health = h.ok ? "saved" : "failed";
     }
     if (queue.length) {
       setPhase(`Filing ${queue.length === 1 ? "their report" : `${queue.length} reports`}`);
       const r = await uploadQueue(id, queue, (key, patch) =>
         setQueue((q) => q.map((x) => (x.key === key ? { ...x, ...patch } : x))),
-      );
+      ).catch(() => ({ done: 0, failed: queue.length }));
       out.filed = r.done;
       out.failed = r.failed;
     }
@@ -220,8 +247,20 @@ export default function AddMember() {
           {done && outcome ? (
             <Glass strong className="mt-6 gap-3 rounded-[24px] p-4">
               <Line ok icon={<Check size={15} color={brand[600]} />} text={`${first}'s profile is set up`} />
-              {outcome.photo !== "none" ? (
-                <Line ok={outcome.photo === "saved"} icon={<Camera size={15} color={outcome.photo === "saved" ? brand[600] : "#c00a1c"} />} text={outcome.photo === "saved" ? "Photo added" : "The photo didn't upload. Add it again from their page."} />
+              {outcome.photo === "saved" ? <Line ok icon={<Camera size={15} color={brand[600]} />} text="Photo added" /> : null}
+              {outcome.photo === "failed" ? (
+                <View style={{ gap: 10 }}>
+                  <Line ok={false} icon={<Camera size={15} color="#c00a1c" />} text={`${photoError ?? "The photo didn't upload."} ${first} has a drawn face for now.`} />
+                  <Pressable
+                    accessibilityRole="button"
+                    disabled={retrying}
+                    onPress={() => void retryPhoto()}
+                    style={{ alignSelf: "flex-start", marginLeft: 40, flexDirection: "row", alignItems: "center", gap: 8, height: 36, paddingHorizontal: 14, borderRadius: 999, backgroundColor: brand[50], opacity: retrying ? 0.6 : 1 }}
+                  >
+                    {retrying ? <ActivityIndicator size="small" color={brand[600]} /> : <Camera size={14} color={brand[700]} />}
+                    <Text style={{ fontFamily: font.semibold, fontSize: 13.5, color: brand[700] }}>{retrying ? "Uploading..." : "Try the photo again"}</Text>
+                  </Pressable>
+                </View>
               ) : null}
               {outcome.health !== "skipped" ? (
                 <Line ok={outcome.health === "saved"} icon={<HeartPulse size={15} color={outcome.health === "saved" ? brand[600] : "#c00a1c"} />} text={outcome.health === "saved" ? "Health basics saved" : "Health basics didn't save. Add them from their page."} />
@@ -370,6 +409,7 @@ export default function AddMember() {
                 photo={photo}
                 onPickPhoto={(source) => void pickPhoto(source).then((uri) => uri && setPhoto(uri))}
                 onClearPhoto={() => setPhoto(null)}
+                kidsFirst={isChild(age, relationship)}
               />
             </View>
           ) : step === 2 ? (
