@@ -1646,12 +1646,31 @@ me" are unchanged. The Family upsell's placeholder faces use the set too, so
 the app never shows two styles of person side by side. The onboarding cast
 (`castFaces`) still uses `micah`; swapping it is a separate change.
 
-**Gaps.**
-- The set has no babies or toddlers. A photo is the better answer for a
-  newborn; a matching kids set would close it.
-- **Licence.** The artwork is third-party stock. Keep proof of the licence,
-  and any attribution it asks for, with the release.
+**Licence.** f25 to f39 are third-party stock. Keep proof of the licence,
+and any attribution it asks for, with the release.
 
 **Not verified here:** anything on a device. Check the picker on the add
 flow and the member page, the tray, record cards and notification badges on
 iOS and Android, especially image sharpness at 24px.
+
+### Children added (f40 to f44)
+
+The supplied set had no children, so five were drawn for the app to match
+it: a baby, a toddler with two top buns, a toddler with a red bowl cut, a
+school-age girl with braids, and a curly-haired boy with a gap-toothed grin.
+They use the set's own palette (sampled from the PNGs) and its line style.
+Sources are SVG in `assets/avatars/source/v16.svg` to `v20.svg`; edit those
+and re-render at 384px with a transparent background. They were made here,
+so no third-party licence applies.
+
+- **Picker:** four rows now, three of grown-ups and one of children. When the
+  person is plainly a child (under 13 by date of birth, or a relationship
+  like son, daughter or baby when there is no date), the children's row
+  moves to the top.
+- **Automatic picks stay in the right age band** (`face-pool.ts`, tested):
+  skip the picker or tap "Surprise me" and a child gets a child's face and
+  an adult an adult's.
+- The account holder's own picker (`/who`) offers only the grown-ups.
+- Derived faces for older profiles that never picked one still come only
+  from the fifteen grown-ups, so nobody's existing face changed.
+- The old set's baby and kid ids (f01 to f07) now point at the new children.

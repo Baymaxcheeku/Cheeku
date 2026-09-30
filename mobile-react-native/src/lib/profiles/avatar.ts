@@ -2,7 +2,8 @@ import { createAvatar } from "@dicebear/core";
 import type { ImageSourcePropType } from "react-native";
 import { micah } from "@dicebear/collection";
 
-import { allFaceIds, catalogFace, derivedFace } from "./faces";
+import { ADULT_FACE_IDS } from "./face-pool";
+import { catalogFace, derivedFace } from "./faces";
 
 /*
  * Generated profile pictures.
@@ -114,12 +115,13 @@ export function faceSvg(seed: string, background: string, traits: FaceTraits = {
 export type AvatarPick = { id: string; svg: string; background: string; image: ImageSourcePropType };
 
 /**
- * Every choosable face, in catalogue order. The catalogue itself lives in
- * faces.ts; a face stored before 2026-09-30 (the old "p" and f01–f24 ids)
- * still resolves through faces.ts LEGACY.
+ * The grown-up faces, in catalogue order, for someone picking their own face
+ * (the account holder is an adult). The children are chosen for family
+ * members in the family picker. The catalogue itself lives in faces.ts; a
+ * face stored before 2026-09-30 still resolves through faces.ts LEGACY.
  */
 export function avatarPicks(): AvatarPick[] {
-  return allFaceIds().map((id) => {
+  return ADULT_FACE_IDS.map((id) => {
     const f = catalogFace(id) as NonNullable<ReturnType<typeof catalogFace>>;
     return { id: f.id, svg: "", background: f.background, image: f.image };
   });

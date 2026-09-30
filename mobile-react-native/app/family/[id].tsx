@@ -16,6 +16,7 @@ import { Glass, Gradient, glass, glassShadow } from "@/components/ui/glass";
 import { useReducedMotion } from "@/components/ui/motion";
 import { Backdrop, PillButton, ScreenHeader } from "@/components/ui/screen";
 import { generatedAvatar } from "@/lib/profiles/avatar";
+import { isChild } from "@/lib/profiles/face-pool";
 import { ageFrom, EMPTY_HEALTH, loadMemberHealth, saveMemberHealth, type MemberHealth } from "@/lib/profiles/health";
 import { clearProfilePhoto, pickPhoto, setProfilePhoto } from "@/lib/profiles/photo";
 import { uploadQueue, type QueueItem } from "@/lib/records/bulk-upload";
@@ -268,6 +269,7 @@ export default function Member() {
             onChange={setSeed}
             derived={derived}
             size={48}
+            kidsFirst={isChild(age, relationship)}
             photo={photoShown}
             onPickPhoto={(source) => void pickPhoto(source).then((uri) => { if (uri) { setNewPhoto(uri); setCleared(false); } })}
             onClearPhoto={() => { setNewPhoto(null); setCleared(true); }}

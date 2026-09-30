@@ -2,6 +2,7 @@ import { Camera, Check, ImagePlus, Shuffle, X } from "lucide-react-native";
 import { Image, Pressable, Text, View, type ImageSourcePropType } from "react-native";
 
 import { Avatar } from "@/components/ui/avatar";
+import { KID_FACE_IDS } from "@/lib/profiles/face-pool";
 import { allFaces, type Face } from "@/lib/profiles/faces";
 import { brand, ink } from "@/theme/tokens";
 import { font } from "@/theme/type";
@@ -11,11 +12,13 @@ import { font } from "@/theme/type";
  *
  *   photo     Take one or choose one. Square-cropped, stripped of location
  *             data and stored privately (lib/profiles/photo.ts).
- *   grid      the fifteen illustrated faces, five to a row, all on one
- *             screen. No tabs: a set this size is quicker to scan whole than
- *             to page through, and it is never grouped or labelled by gender.
+ *   grid      twenty illustrated faces, five to a row, all on one screen:
+ *             three rows of grown-ups and one of children. No tabs: a set
+ *             this size is quicker to scan whole than to page through, and
+ *             it is never grouped or labelled by gender.
  *
- * A photo wins while it is set; picking a face clears it.
+ * A photo wins while it is set; picking a face clears it. When the person
+ * being added is plainly a child (`kidsFirst`), the children's row leads.
  *
  * Rows are built by hand, never a wrapping row: a wrapped flex row once
  * stretched its tiles to full screen height on iOS (PROGRESS.md).
@@ -31,6 +34,7 @@ export function AvatarPicker({
   photo,
   onPickPhoto,
   onClearPhoto,
+  kidsFirst = false,
   size = 52,
 }: {
   /** The picked catalogue id, or "" for none / the generated face. */
@@ -43,9 +47,12 @@ export function AvatarPicker({
   photo?: string | null;
   onPickPhoto?: (source: "camera" | "library") => void;
   onClearPhoto?: () => void;
+  /** Lead with the children's row. */
+  kidsFirst?: boolean;
   size?: number;
 }) {
-  const faces = allFaces();
+  const all = allFaces();
+  const faces = kidsFirst ? [...all.filter((f) => KID_FACE_IDS.includes(f.id)), ...all.filter((f) => !KID_FACE_IDS.includes(f.id))] : all;
   const rows: Face[][] = [];
   for (let i = 0; i < faces.length; i += PER_ROW) rows.push(faces.slice(i, i + PER_ROW));
 

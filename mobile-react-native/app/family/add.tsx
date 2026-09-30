@@ -1,7 +1,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { ArrowRight, Camera, Check, FileText, HeartPulse, Lock, TriangleAlert } from "lucide-react-native";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { ActivityIndicator, Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, View } from "react-native";
 import Animated, { FadeIn, FadeInRight, FadeOutLeft, ZoomIn } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -17,7 +17,7 @@ import { Backdrop, PillButton, ScreenHeader } from "@/components/ui/screen";
 import { uploadQueue, type QueueItem } from "@/lib/records/bulk-upload";
 import { generatedAvatar } from "@/lib/profiles/avatar";
 import { familyMode, refreshRoster, useFamily, useSwitchMember } from "@/lib/profiles/family";
-import { allFaceIds } from "@/lib/profiles/faces";
+import { facePool, isChild } from "@/lib/profiles/face-pool";
 import { ageFrom, EMPTY_HEALTH, hasHealth, saveMemberHealth, type MemberHealth } from "@/lib/profiles/health";
 import { pickPhoto, setProfilePhoto } from "@/lib/profiles/photo";
 import { addFamilyMember } from "@/lib/settings/actions";
@@ -96,16 +96,17 @@ export default function AddMember() {
   const [outcome, setOutcome] = useState<Outcome | null>(null);
   const [phase, setPhase] = useState("");
 
-  const ids = useMemo(() => allFaceIds(), []);
-  const roll = (not?: string) => {
-    const pool = ids.filter((id) => id !== not);
-    return pool[Math.floor(Math.random() * pool.length)] ?? "f25";
-  };
-
   const face = seed ? generatedAvatar(seed, 0) : null;
   const relationship = relation === "Someone else" ? custom.trim() : relation;
   const hint = RELATIONS.find(([r]) => r === relation)?.[1] ?? "Their name";
   const age = ageFrom(dob);
+
+  // The app's own pick stays in their age band: no toddler face for a
+  // grandmother, no grey beard for a six-year-old (face-pool.ts).
+  const roll = (not?: string) => {
+    const pool = facePool(age, relationship).filter((id) => id !== not);
+    return pool[Math.floor(Math.random() * pool.length)] ?? "f25";
+  };
   const first = firstName(name) || "them";
 
   const ctx = family.data;
@@ -370,6 +371,7 @@ export default function AddMember() {
                 photo={photo}
                 onPickPhoto={(source) => void pickPhoto(source).then((uri) => uri && setPhoto(uri))}
                 onClearPhoto={() => setPhoto(null)}
+                kidsFirst={isChild(age, relationship)}
               />
             </View>
           ) : step === 2 ? (

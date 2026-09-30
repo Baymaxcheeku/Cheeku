@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 384" width="384" height="384">
+<defs><clipPath id="c"><circle cx="192" cy="192" r="191"/></clipPath></defs>
+<g clip-path="url(#c)"><g transform="translate(192 330) scale(1.12) translate(-192 -330)">
+<circle cx="118" cy="206" r="14" fill="#141414"/><circle cx="118" cy="230" r="14" fill="#141414"/><circle cx="118" cy="254" r="14" fill="#141414"/><circle cx="268" cy="206" r="14" fill="#141414"/><circle cx="268" cy="230" r="14" fill="#141414"/><circle cx="268" cy="254" r="14" fill="#141414"/><rect x="108" y="266" width="20" height="10" rx="4" fill="#fcb05c"/><rect x="258" y="266" width="20" height="10" rx="4" fill="#fcb05c"/>
+<ellipse cx="192" cy="414" rx="148" ry="150" fill="#7870d0"/>
+
+<path d="M170 220 L210 220 L210 268 Q190 278 170 268 Z" fill="#f07c64"/>
+<path d="M168 224 Q188 254 212 228 L212 236 Q194 268 168 260 Z" fill="#141414"/>
+<path d="M162 266 Q190 282 218 266" fill="none" stroke="#fcb05c" stroke-width="5" stroke-linecap="round"/>
+<circle cx="258" cy="174" r="15" fill="#f07c64"/>
+<path d="M254 168 q8 2 6 10 q-2 4 -7 3" fill="none" stroke="#141414" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
+<ellipse cx="192" cy="166" rx="70" ry="72" fill="#f07c64"/>
+<path d="M118 190 Q106 90 192 90 Q282 90 266 190 Q262 150 244 132 Q206 150 166 134 Q150 128 142 124 Q126 146 118 190 Z" fill="#141414"/>
+<g transform="translate(-7 0)"><path d="M160 166 v12" fill="none" stroke="#141414" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M196 166 v12" fill="none" stroke="#141414" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M154 152 q6 -4 12 -2" fill="none" stroke="#141414" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M190 150 q6 -4 12 -1" fill="none" stroke="#141414" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M166 196 Q180 218 194 196 Z" fill="#141414"/><path d="M171 197 L189 197 L187 203 L173 203 Z" fill="#ffffff"/></g>
+</g></g></svg>
