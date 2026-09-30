@@ -141,7 +141,16 @@ export async function deleteAccountData(confirmation: string): Promise<DeleteRes
     return { ok: false, message: "Could not read your documents. Nothing was deleted." };
   }
 
-  const paths = (docs ?? []).map((d) => d.storage_path as string).filter(Boolean);
+  // Profile photos sit in the same bucket and must go with everything else.
+  const { data: faces, error: faceError } = await supabase.from("profiles").select("avatar_url");
+  if (faceError) {
+    return { ok: false, message: "Could not read your profiles. Nothing was deleted." };
+  }
+
+  const paths = [
+    ...(docs ?? []).map((d) => d.storage_path as string),
+    ...(faces ?? []).map((f) => f.avatar_url as string | null).filter((x): x is string => Boolean(x)),
+  ].filter(Boolean);
 
   if (paths.length > 0) {
     const { error: storageError } = await supabase.storage.from("documents").remove(paths);

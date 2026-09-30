@@ -29,6 +29,7 @@ import { activeProfile, selectableProfiles } from "@/lib/profiles/context";
 import { uploadDocument, type PickedFile } from "@/lib/records/upload";
 import { stripImageMetadata } from "@/lib/upload/strip-exif";
 import { brand, ink, semantic } from "@/theme/tokens";
+import { useFamily } from "@/lib/profiles/family";
 
 type Phase = "pick" | "working" | "error";
 
@@ -103,9 +104,17 @@ export default function Scan() {
   // Defaults to whoever is selected on Home rather than to the first profile:
   // filing a document against the wrong family member is a correction that
   // needs a support request, not a tap.
+  //
+  // Read from the shared family cache, NOT from `scan-context`. That query can
+  // still hold the previous member for a moment after a switch (it refetches
+  // on mount), and seeding from it filed a report under the person you had
+  // just switched away from. The family cache moves in the same frame as the
+  // switch (lib/profiles/family.ts).
+  const family = useFamily();
+  const viewing = family.data?.profile?.id ?? context.data?.active?.id;
   useEffect(() => {
-    if (!profileId && context.data?.active) setProfileId(context.data.active.id);
-  }, [context.data, profileId]);
+    if (!profileId && viewing) setProfileId(viewing);
+  }, [viewing, profileId]);
 
   /*
    * Fire the requested picker once, and only from the idle state. Keyed on
@@ -378,7 +387,7 @@ export default function Scan() {
                 },
               ]}
             >
-              <Avatar svg={p.avatar} background={p.avatarBackground ?? undefined} size={38} />
+              <Avatar svg={p.avatar} photo={p.photo} background={p.avatarBackground ?? undefined} size={38} />
               <Text style={{ fontFamily: font.semibold, fontSize: 14, color: active ? "#ffffff" : ink[900] }}>{p.name.split(" ")[0]}</Text>
             </Pressable>
           );

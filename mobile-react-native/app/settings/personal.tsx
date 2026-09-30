@@ -1,7 +1,8 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Mail, UserCog } from "lucide-react-native";
+import { useRouter } from "expo-router";
+import { ChevronRight, HeartPulse, Mail, UserCog } from "lucide-react-native";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, Text, View } from "react-native";
 
 import { Avatar } from "@/components/ui/avatar";
 import { Panel, SaveButton, SettingsScreen } from "@/components/settings/chrome";
@@ -31,6 +32,7 @@ type Sex = (typeof SEXES)[number][0];
  */
 export default function PersonalInfo() {
   const queryClient = useQueryClient();
+  const router = useRouter();
 
   const context = useQuery({
     queryKey: ["settings-personal"],
@@ -38,7 +40,7 @@ export default function PersonalInfo() {
       const active = await activeProfile();
       if (!active) return null;
       const [detail, email] = await Promise.all([profileDetail(active.id), accountEmail()]);
-      return detail ? { detail, email, avatar: active.avatar } : null;
+      return detail ? { detail, email, avatar: active.avatar, photo: active.photo, background: active.avatarBackground } : null;
     },
   });
 
@@ -127,7 +129,7 @@ export default function PersonalInfo() {
       <View className="mt-4">
         <Panel>
           <View className="flex-row items-center gap-3">
-            <Avatar svg={context.data?.avatar ?? ""} size={56} />
+            <Avatar svg={context.data?.avatar ?? ""} photo={context.data?.photo} background={context.data?.background} size={56} />
             <View className="min-w-0 flex-1">
               <Text className="text-[15px] font-semibold text-ink-900" numberOfLines={1}>
                 {detail.name}
@@ -140,7 +142,21 @@ export default function PersonalInfo() {
         </Panel>
       </View>
 
-      {context.data?.email ? (
+      {/* The sign-in email belongs to the account holder, so it only shows on
+          their own profile. On a family member's it would read as theirs. */}
+      {!detail.isPrimary ? (
+        <Pressable
+          accessibilityRole="button"
+          onPress={() => router.push({ pathname: "/family/[id]", params: { id: detail.id } })}
+          className="mx-5 mt-3 flex-row items-center gap-3 rounded-card bg-brand-50 px-4 py-3"
+        >
+          <HeartPulse size={16} color={brand[500]} />
+          <Text className="min-w-0 flex-1 text-[13px] text-ink-700">
+            Photo, health basics and past reports for {detail.name.split(" ")[0]} are on their page.
+          </Text>
+          <ChevronRight size={16} color={brand[500]} />
+        </Pressable>
+      ) : context.data?.email ? (
         <View className="mx-5 mt-3 flex-row items-center gap-3 rounded-card bg-brand-50 px-4 py-3">
           <Mail size={16} color={brand[500]} />
           <Text className="min-w-0 flex-1 text-[13px] text-ink-700" numberOfLines={1}>

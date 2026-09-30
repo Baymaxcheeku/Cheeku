@@ -3,6 +3,7 @@ import { getEntitlement } from "@/lib/billing/quota";
 import { kv } from "@/lib/storage";
 import { supabase } from "@/lib/supabase/client";
 import { generatedAvatar } from "./avatar";
+import { signPhotos } from "./photo";
 
 /*
  * Which family member the app is currently showing.
@@ -43,6 +44,10 @@ export type ActiveProfile = {
   /** Generated from the id. Raw SVG markup for SvgXml, not a data URI. */
   avatar: string;
   avatarBackground: string;
+  /** A signed, hour-long URL for their own photo, or null for a drawn face. */
+  photo: string | null;
+  /** The photo's storage key, for replacing or deleting it. */
+  photoPath: string | null;
 };
 
 /**
@@ -52,11 +57,16 @@ export type ActiveProfile = {
 export async function familyProfiles(): Promise<ActiveProfile[]> {
   const { data, error } = await supabase
     .from("profiles")
-    .select("id, name, relationship, is_primary, avatar_ring, avatar_seed, dob, sex")
+    .select("id, name, relationship, is_primary, avatar_ring, avatar_seed, avatar_url, dob, sex")
     .order("is_primary", { ascending: false })
     .order("created_at", { ascending: true });
 
   if (error) throw new Error(`familyProfiles: ${error.message}`);
+
+  // Every photo signed in one request rather than one per face.
+  const photos = await signPhotos(
+    (data ?? []).map((p) => p.avatar_url as string | null).filter((x): x is string => Boolean(x)),
+  );
 
   return (data ?? []).map((p, i) => {
     /*
@@ -77,6 +87,8 @@ export async function familyProfiles(): Promise<ActiveProfile[]> {
       avatarSeed: (p.avatar_seed as string | null) ?? null,
       avatar: generated.svg,
       avatarBackground: generated.background,
+      photo: p.avatar_url ? (photos.get(p.avatar_url as string) ?? null) : null,
+      photoPath: (p.avatar_url as string | null) ?? null,
     };
   });
 }

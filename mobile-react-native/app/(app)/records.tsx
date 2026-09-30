@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, RefreshControl, ScrollView, Text, View } from "react-native";
 
 import { OfflineBanner } from "@/components/app/offline-banner";
@@ -13,6 +13,7 @@ import { sinceFromPeriod } from "@/lib/records/filters";
 import { listRecords, statsFrom } from "@/lib/records/queries";
 import type { Severity } from "@/lib/records/types";
 import { brand } from "@/theme/tokens";
+import { useFamily } from "@/lib/profiles/family";
 
 /**
  * D1 — every document the reader can see, newest first.
@@ -46,7 +47,20 @@ export default function Records() {
   });
 
   const allowed = context.data?.allowed ?? [];
-  const activeId = context.data?.active?.id;
+  // The shared family cache first: it moves in the same frame as a switch,
+  // while `records-context` catches up a moment later.
+  const family = useFamily();
+  const activeId = family.data?.profile?.id ?? context.data?.active?.id;
+
+  // A new member means a fresh list. A filter picked for the last person
+  // ("Ananya", say) must not survive into the next one's view.
+  const lastActive = useRef(activeId);
+  useEffect(() => {
+    if (lastActive.current && activeId && lastActive.current !== activeId) {
+      setFilters((f) => ({ ...f, profileId: undefined }));
+    }
+    lastActive.current = activeId;
+  }, [activeId]);
   const canSeeEveryone = allowed.length > 1;
 
   /*

@@ -1,6 +1,8 @@
 import { createAvatar } from "@dicebear/core";
 import { micah } from "@dicebear/collection";
 
+import { allFaceIds, catalogFace, derivedFace } from "./faces";
+
 /*
  * Generated profile pictures.
  *
@@ -106,51 +108,32 @@ export function faceSvg(seed: string, background: string, traits: FaceTraits = {
  * The id is what gets stored, so a face survives the catalogue being extended.
  * Reordering this array is safe; renaming an id is not.
  */
-const PICKS = [
-  { id: "p1", background: "d1d4f9", traits: { hair: ["fonze"], hairColor: ["2c1b18"], baseColor: ["f9c9b6"], facialHairProbability: 0, earringsProbability: 0, glassesProbability: 0 } },
-  { id: "p2", background: "ffd5dc", traits: { hair: ["full"], hairColor: ["2c1b18"], baseColor: ["ac6651"], facialHairProbability: 0, earringsProbability: 100, glassesProbability: 0 } },
-  { id: "p3", background: "b6e3f4", traits: { hair: ["dougFunny"], hairColor: ["000000"], baseColor: ["77311d"], facialHair: ["scruff"], facialHairProbability: 100, earringsProbability: 0, glassesProbability: 0 } },
-  { id: "p4", background: "d7f0e0", traits: { hair: ["pixie"], hairColor: ["6a4e35"], baseColor: ["f9c9b6"], facialHairProbability: 0, earringsProbability: 100, glassesProbability: 0 } },
-  { id: "p5", background: "ffdfbf", traits: { hair: ["turban"], hairColor: ["000000"], baseColor: ["77311d"], facialHair: ["beard"], facialHairProbability: 100, earringsProbability: 0, glassesProbability: 0 } },
-  { id: "p6", background: "c0aede", traits: { hair: ["dannyPhantom"], hairColor: ["ac6651"], baseColor: ["ac6651"], facialHairProbability: 0, earringsProbability: 0, glassesProbability: 100, glasses: ["round"] } },
-  { id: "p7", background: "d1d4f9", traits: { hair: ["mrClean"], hairColor: ["000000"], baseColor: ["ac6651"], facialHair: ["beard"], facialHairProbability: 100, earringsProbability: 0, glassesProbability: 100, glasses: ["square"] } },
-  { id: "p8", background: "ffd5dc", traits: { hair: ["full"], hairColor: ["b0b0b0"], baseColor: ["f9c9b6"], facialHairProbability: 0, earringsProbability: 100, glassesProbability: 0 } },
-  { id: "p9", background: "b6e3f4", traits: { hair: ["fonze"], hairColor: ["f4d150"], baseColor: ["f9c9b6"], facialHairProbability: 0, earringsProbability: 0, glassesProbability: 0 } },
-  { id: "p10", background: "d7f0e0", traits: { hair: ["pixie"], hairColor: ["000000"], baseColor: ["77311d"], facialHairProbability: 0, earringsProbability: 100, glassesProbability: 0 } },
-] as const;
 
 export type AvatarPick = { id: string; svg: string; background: string };
 
-/** Every choosable face, in catalogue order. */
+/**
+ * Every choosable face, in catalogue order (life stage by life stage). The
+ * catalogue itself lives in faces.ts; a face stored before 2026-09-30 (the old
+ * "p" ids) still resolves through faces.ts LEGACY.
+ */
 export function avatarPicks(): AvatarPick[] {
-  return PICKS.map((p) => ({
-    id: p.id,
-    svg: faceSvg(p.id, p.background, p.traits),
-    background: `#${p.background}`,
-  }));
+  return allFaceIds().map((id) => {
+    const f = catalogFace(id) as NonNullable<ReturnType<typeof catalogFace>>;
+    return { id: f.id, svg: f.svg, background: f.background };
+  });
 }
 
 export function generatedAvatar(profileId: string, index: number): GeneratedAvatar {
   /*
-   * A chosen face wins over a derived one. `seed` here is whatever the caller
-   * had — a stored `avatar_seed` if the person picked, otherwise the profile
-   * id — so every call site gets the right face without knowing which case it
-   * is in. An id that is no longer in the catalogue falls through to the
-   * derived face rather than rendering nothing.
+   * A chosen face wins over a derived one. `profileId` here is whatever the
+   * caller had: a stored `avatar_seed` if the person picked (old "p" ids
+   * included), otherwise the profile id.
    */
-  const picked = PICKS.find((p) => p.id === profileId);
-  if (picked) {
-    return {
-      svg: faceSvg(picked.id, picked.background, picked.traits),
-      background: `#${picked.background}`,
-    };
-  }
+  const picked = catalogFace(profileId);
+  if (picked) return { svg: picked.svg, background: picked.background };
 
-  // `as const` makes the modulo index provably in range, so this needs no
-  // fallback and no assertion — noUncheckedIndexedAccess is satisfied.
   const background = BACKGROUNDS[index % BACKGROUNDS.length] as (typeof BACKGROUNDS)[number];
-
-  return { svg: faceSvg(profileId, background), background: `#${background}` };
+  return derivedFace(profileId, background);
 }
 
 /*
