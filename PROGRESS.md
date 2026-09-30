@@ -1262,3 +1262,91 @@ green; green means a health result, so they are violet now.
 data all need a signed-in account; they typecheck, lint and were built, but
 the browser preview here can only reach screens that do not query Supabase.
 The whole mobile package now lints clean.
+
+## Notifications, end to end — 2026-09-30 (cloud session, not yet seen on a device)
+
+The bell used to open a bottom sheet listing records that happened to be
+flagged, derived on the phone. It could never say "your report is filed",
+"Amma was added", "your plan changed" or "the service you asked about is live",
+because none of those show up in a list of documents. Tapping a row ignored
+whose record it was, and "Notify me" on the Book care cards saved to the phone
+and told nobody.
+
+**The model now.** One inbox table, `public.notifications` (migration 0024).
+Events write rows at the moment they happen:
+
+| Event | Written by | Row |
+| --- | --- | --- |
+| Report filed / needs a check | trigger on `documents` | "Lipid profile is filed" / "Quick check on …" |
+| Values outside the printed range | trigger on `entities` (one per document) | "Some values in … need a look" |
+| Review confirmed | same trigger | marks the "Quick check" row read, no new row |
+| First profile / family member added | trigger on `profiles` | "Welcome to Cheeku AI" / "Amma is in the family now" |
+| Plan on / ended | trigger on `subscriptions` | "Family plan is on" / "You're back on the Free plan" |
+| Support ticket closed | trigger on `support_tickets` | "We've closed your support request" |
+| Service launched | `announce_service_launch()`, run by the team | "Dietitian consults is live on Cheeku" |
+| Booked / moved / cancelled | the app (appointments live on the phone) | "You're booked with Dr …" |
+| Password changed | the app, after the change succeeds | "Your password was changed" |
+
+**Why triggers, not the app.** Same reasoning as the entitlement triggers: a
+client that chooses to write "your report is filed" is a client that can
+forget to, or invent one. RLS lets the app insert only the four device kinds,
+and column grants let it change only `read_at` and `dismissed_at`. Tested
+against a scratch Postgres 16 with every migration applied in order: forged
+kinds, rows for another user, off-app routes and title rewrites are all
+refused; dedupe keys make every writer idempotent; the backfill creates unread
+rows only for the last 30 days.
+
+**The inbox is a record; preferences only govern the buzz.** Nothing is ever
+hidden from the inbox by a switch. The Notifications settings screen was cut
+from nine switches to six that each map to messages the app really sends
+(the four for daily check-ins, insights, invitations and tips had nothing
+behind them). Retired keys stay in the stored JSON so older builds still parse.
+
+**Lock screen privacy.** Push text never carries the row's title. It is one
+generic line per category ("Cheeku has an update on a report"); the details
+wait behind the app lock. Appointment reminders say "video call" or "clinic
+visit" and a time, never the doctor or the department (tested).
+
+**Delivery.**
+- Appointment reminders: local notifications via `expo-notifications`, a day
+  before (moved to 8 pm the evening before if it would land 10 pm to 7 am), an
+  hour before, and when the call room opens; clinic visits get "2 hours to go"
+  instead. Resynced in full whenever the appointment list or the switch
+  changes, so a reminder can never outlive its booking.
+- Remote push: `supabase/functions/push-dispatch` (Deno) is called by a
+  Database Webhook on insert, checks the category's preference, sends via
+  Expo's push API and prunes dead tokens. Tokens are registered through
+  `register_push_device()` so a phone that changes accounts moves cleanly.
+- In-app: Supabase Realtime streams new rows into the cached inbox; the bell
+  badge pops and a glass banner slides down (not on the inbox itself).
+
+**Routing.** Every tap, whether from the inbox, the banner or the phone's own
+notification (including a cold start), goes through `useOpenNotification`:
+mark read in the cache, navigate in the same tick, and switch to the family
+member the row is about in the background (PLAN.md rule 4). A member the plan
+no longer covers opens the plan chooser instead.
+
+**Snappiness.** One cached query feeds the bell, the badge and the screen, so
+the inbox paints in its first frame. Read, unread, mark-all and remove are
+optimistic with rollback. Rows respond on press-in (tint and a 0.99 scale).
+The notification screen's push animation is 240 ms. The inbox is deliberately
+NOT persisted to disk (titles name reports and doctors).
+
+**The review loop is closed.** Record detail now has "Looks right, file it" for
+documents waiting on a check, which is what the "Quick check" notification
+asks for; before this there was no way to complete it.
+
+**Before this works on the real backend:**
+1. `npm run db:migrate` from the repo root (migration 0024).
+2. A new development build (`expo-notifications` is a native module).
+3. For remote push only: EAS project id in `app.json` (`extra.eas.projectId`),
+   APNs/FCM credentials in EAS, `supabase functions deploy push-dispatch
+   --no-verify-jwt`, `supabase secrets set PUSH_WEBHOOK_SECRET=…`, and a
+   Database Webhook on `notifications` INSERT sending header
+   `x-webhook-secret`.
+
+**Not verified here:** anything on a device. The inbox, menu, banner and
+settings were checked in the web export with sample data only. Look at: the
+inbox with real rows, long press on iOS and Android, the banner over a pushed
+screen, the permission primer on first open, a reminder firing and its tap
+opening the appointment, and a cold start from a notification tap.

@@ -10,6 +10,7 @@ import {
   Stethoscope,
   type LucideIcon,
 } from "lucide-react-native";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { Modal, Pressable, ScrollView, Text, View } from "react-native";
@@ -20,6 +21,7 @@ import { MascotBust } from "@/components/illustrations/sprout";
 import { Boop, BubblePop } from "@/components/onboarding/motion";
 import { Glass, Gradient, glass, glassShadow } from "@/components/ui/glass";
 import { useReducedMotion } from "@/components/ui/motion";
+import { fetchWaitlist, setWaitlisted } from "@/lib/notifications/queries";
 import { kv } from "@/lib/storage";
 import { brand, ink } from "@/theme/tokens";
 import { font } from "@/theme/type";
@@ -48,7 +50,10 @@ import { font } from "@/theme/type";
  * PASTELS ARE NON-SEMANTIC and deliberately avoid green, amber and red, which
  * mean a health result everywhere in this app.
  *
- * "Notify me" is stored on this device, per service (`cheeku.notify`).
+ * "Notify me" joins a real waitlist (`service_waitlist`, migration 0024). On
+ * launch day the team runs announce_service_launch() and everyone on it gets
+ * an inbox row, and a buzz if they allowed it. Taps from before this existed
+ * lived only on the phone (`cheeku.notify`); they are carried over once.
  */
 type Filter = "all" | "doctors" | "tests" | "medicines" | "women" | "wellness";
 
@@ -154,23 +159,34 @@ export function CareSection() {
   const [filter, setFilter] = useState<Filter>("all");
   const [expanded, setExpanded] = useState(false);
   const [open, setOpen] = useState<Service | null>(null);
-  const [notify, setNotify] = useState<string[]>([]);
+  const qc = useQueryClient();
+  const waitlist = useQuery({ queryKey: ["waitlist"], queryFn: fetchWaitlist });
+  const notify = waitlist.data ?? [];
 
+  // One-time carry-over of taps that were only ever saved on this phone.
   useEffect(() => {
-    void kv.get(KEY).then((raw) => {
+    void kv.get(KEY).then(async (raw) => {
       if (!raw) return;
       try {
-        setNotify(JSON.parse(raw) as string[]);
+        const ids = JSON.parse(raw) as string[];
+        await Promise.all(ids.map((id) => setWaitlisted(id, true)));
+        await kv.remove(KEY);
+        void qc.invalidateQueries({ queryKey: ["waitlist"] });
       } catch {
-        // A corrupt value is not worth surfacing; start again.
+        // Try again next time; nothing is lost while the key is still there.
       }
     });
-  }, []);
+  }, [qc]);
 
+  // Optimistic: the pill flips on tap, and flips back if the save fails.
   async function toggle(id: string) {
-    const next = notify.includes(id) ? notify.filter((n) => n !== id) : [...notify, id];
-    setNotify(next);
-    await kv.set(KEY, JSON.stringify(next));
+    const on = !notify.includes(id);
+    qc.setQueryData<string[]>(["waitlist"], (old = []) => (on ? [...old, id] : old.filter((n) => n !== id)));
+    try {
+      await setWaitlisted(id, on);
+    } catch {
+      qc.setQueryData<string[]>(["waitlist"], (old = []) => (on ? old.filter((n) => n !== id) : [...old, id]));
+    }
   }
 
   const matching = SERVICES.filter((s) => filter === "all" || s.filter === filter);

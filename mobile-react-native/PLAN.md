@@ -39,7 +39,8 @@ nothing lies about having data.
 | `/settings/security` | done | `settings/security` (134) |
 | `/settings/personal` | done | `personal-info-form.tsx` (149) |
 | `/settings/health` | done | `health-profile-form.tsx` (170) |
-| `/settings/notifications` | done | `notification-toggles.tsx` (210) |
+| `/settings/notifications` | done, rewritten 2026-09-30 | `notification-toggles.tsx` (210) |
+| `/notifications` inbox | done 2026-09-30, needs migration 0024 | — |
 | `/settings/language` | done | `settings/language` (91) |
 | `/settings/help` | done | `help` + `report-issue` (395) |
 | `/settings/about` | done | `settings/about` (342) |
@@ -170,8 +171,11 @@ Screens: `/settings` and its seven sub-screens, paywall, export, delete
 Not polish. Without these, App Store Guideline 4.2 rejects the app as a website
 in a shell. See `../SHIPPING.md`.
 
-1. Push: APNs and FCM. The Notifications screen already collects preferences
-   against a delivery system that does not exist.
+1. Push: APNs and FCM. **Partly done 2026-09-30.** Appointment reminders are
+   local notifications and need no credentials. Remote push is written end to
+   end (token registry in migration 0024, `supabase/functions/push-dispatch`)
+   and waits on three things: an EAS project id in app.json, APNs/FCM keys in
+   EAS, and deploying the function plus its Database Webhook.
 2. Biometric app lock (`expo-local-authentication`).
 3. Native document scanner, not a file input.
 4. Offline read of fetched records. A medical app that is blank on a train is

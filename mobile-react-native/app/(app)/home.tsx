@@ -20,7 +20,6 @@ import { Button } from "@/components/ui/button";
 import { StaggerItem } from "@/components/ui/motion";
 import { allowsFamily } from "@/lib/billing/plans";
 import { getEntitlement } from "@/lib/billing/quota";
-import { deriveNotifications } from "@/lib/notifications/derive";
 import { activeProfile, profileAccess, switchProfile } from "@/lib/profiles/context";
 import { EMPTY_OVERVIEW, useHealthOverview } from "@/lib/records/use-overview";
 import { listProfileRecords, statsFrom } from "@/lib/records/queries";
@@ -175,7 +174,7 @@ export default function Home() {
             onPress={() => setTrayOpen(true)}
           />
           <View className="flex-1" />
-          <NotificationsBell notifications={deriveNotifications(list)} />
+          <NotificationsBell />
         </View>
       </StaggerItem>
 

@@ -3,6 +3,7 @@ import type { ZodError } from "zod";
 import { APP_VERSION } from "@/lib/app-meta";
 import { allowsFamily, seatsFor } from "@/lib/billing/plans";
 import { getEntitlement } from "@/lib/billing/quota";
+import { recordDeviceEvent } from "@/lib/notifications/queries";
 import { supabase } from "@/lib/supabase/client";
 import { ownFamily } from "./queries";
 import {
@@ -298,6 +299,16 @@ export async function changePassword(input: ChangePasswordInput): Promise<Settin
 
   const { error } = await supabase.auth.updateUser({ password: parsed.data.newPassword });
   if (error) return { ok: false, message: "Couldn't update your password. Try again." };
+
+  // A paper trail in the inbox. If the change was not theirs, this is where
+  // they find out and what they tap to fix it.
+  await recordDeviceEvent({
+    kind: "password_changed",
+    title: "Your password was changed",
+    body: "Done from this phone just now. If that wasn't you, reset it from Security straight away.",
+    route: "/settings/security",
+    dedupeKey: `password:${new Date().toISOString()}`,
+  });
 
   return { ok: true };
 }

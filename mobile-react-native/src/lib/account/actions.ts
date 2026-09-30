@@ -44,6 +44,8 @@ export async function exportAccount(): Promise<
     "consent_log",
     "subscriptions",
     "support_tickets",
+    "notifications",
+    "service_waitlist",
   ] as const;
 
   const bundle: ExportBundle = {
@@ -175,6 +177,22 @@ export async function deleteAccountData(confirmation: string): Promise<DeleteRes
       ok: false,
       message: "Your records were removed but support messages could not be. Please contact support.",
     };
+  }
+
+  /*
+   * Same for the inbox, the waitlist and this account's push tokens: they hang
+   * off the user, and only the rows about a family member would cascade with
+   * the family. Inbox titles name reports and doctors, so leaving them behind
+   * would keep exactly what erasure is meant to remove.
+   */
+  for (const table of ["notifications", "service_waitlist", "push_devices"] as const) {
+    const { error } = await supabase.from(table).delete().eq("user_id", user.id);
+    if (error) {
+      return {
+        ok: false,
+        message: "Your records were removed but some notifications could not be. Please try again.",
+      };
+    }
   }
 
   // consent_log hangs off the user, not the family, and is kept deliberately:

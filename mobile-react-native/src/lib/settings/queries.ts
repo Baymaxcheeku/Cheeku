@@ -59,14 +59,21 @@ export async function profileDetail(profileId: string): Promise<ProfileDetail | 
 }
 
 /**
- * Every notification off by default.
+ * Every notification off by default, with two exceptions.
  *
  * A medical app that opts people into "tips and reminders" it never asked
  * permission for is one uninstall away from being the app that told a shared
  * home screen someone has a thyroid appointment.
+ *
+ * These govern PUSH only. The in-app inbox always receives everything, so a
+ * switch here can never make something silently disappear. Kept in step with
+ * DEFAULTS in supabase/functions/push-dispatch.
  */
 export const DEFAULT_PREFS: NotificationPrefs = {
-  accountSecurity: true, // the one exception: this is how a break-in is noticed
+  accountSecurity: true, // this is how a break-in is noticed
+  // Someone who booked a call expects to be told when it starts. The text of
+  // the reminder is generic ("Your video call starts in 15 minutes").
+  appointmentReminders: true,
   productUpdates: false,
   tipsReminders: false,
   checkinReminders: false,

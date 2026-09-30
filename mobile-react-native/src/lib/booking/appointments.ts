@@ -1,7 +1,8 @@
 import { useEffect } from "react";
 import { create } from "zustand";
 
-import type { Mode } from "@/lib/booking/catalog";
+import { doctorById, type Mode } from "@/lib/booking/catalog";
+import { recordDeviceEvent } from "@/lib/notifications/queries";
 import { kv } from "@/lib/storage";
 
 /*
@@ -52,6 +53,47 @@ function persist(items: Appointment[]) {
   void kv.set(KEY, JSON.stringify(items.slice(0, CAP)));
 }
 
+/*
+ * Each change also leaves a row in the inbox, so "what did I book, and when
+ * did I move it" has an answer after the fact. The row names the doctor and
+ * the time and nothing about why; the phone reminders (notifications/push.ts)
+ * are more careful still and name neither.
+ */
+function what(a: Appointment): string {
+  return a.mode === "online" ? "video call" : "clinic visit";
+}
+
+function inbox(a: Appointment, change: "booked" | "rescheduled" | "cancelled") {
+  const doctor = doctorById(a.doctorId)?.name ?? "your doctor";
+  const when = whenLabel(a);
+  const route = `/appointments/${a.id}`;
+  if (change === "booked") {
+    void recordDeviceEvent({
+      kind: "appointment_booked",
+      title: `You're booked with ${doctor}`,
+      body: `${a.mode === "online" ? "Video call" : "Clinic visit"}, ${when}. I'll remind you before it starts.`,
+      route,
+      dedupeKey: `appt:${a.id}:booked`,
+    });
+  } else if (change === "rescheduled") {
+    void recordDeviceEvent({
+      kind: "appointment_rescheduled",
+      title: `Moved to ${when}`,
+      body: `Your ${what(a)} with ${doctor} has a new time. Reminders are updated too.`,
+      route,
+      dedupeKey: `appt:${a.id}:moved:${a.day.slice(0, 10)}:${a.slotLabel}`,
+    });
+  } else {
+    void recordDeviceEvent({
+      kind: "appointment_cancelled",
+      title: "Appointment cancelled",
+      body: `Your ${what(a)} with ${doctor}, ${when}, is off. Book again whenever you're ready.`,
+      route,
+      dedupeKey: `appt:${a.id}:cancelled`,
+    });
+  }
+}
+
 export const useAppointments = create<Store>((set, get) => ({
   items: [],
   loaded: false,
@@ -74,17 +116,22 @@ export const useAppointments = create<Store>((set, get) => ({
     const items = [appt, ...get().items].slice(0, CAP);
     set({ items });
     persist(items);
+    inbox(appt, "booked");
     return appt;
   },
   reschedule: (id, day, slotLabel) => {
     const items = get().items.map((x) => (x.id === id ? { ...x, day, slotLabel, status: "booked" as const } : x));
     set({ items });
     persist(items);
+    const moved = items.find((x) => x.id === id);
+    if (moved) inbox(moved, "rescheduled");
   },
   cancel: (id) => {
+    const before = get().items.find((x) => x.id === id);
     const items = get().items.map((x) => (x.id === id ? { ...x, status: "cancelled" as const } : x));
     set({ items });
     persist(items);
+    if (before && before.status !== "cancelled") inbox(before, "cancelled");
   },
 }));
 

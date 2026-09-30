@@ -234,3 +234,18 @@ export async function signedDocumentUrl(storagePath: string): Promise<string | n
   if (error) return null;
   return data.signedUrl;
 }
+
+/**
+ * The reader checked what was read and says it is right. Moves the document
+ * from "needs review" to "filed"; the database then marks the matching "Quick
+ * check" notification as read (migration 0024), so the inbox and the badge
+ * settle without a second write from here.
+ */
+export async function confirmRecord(id: string): Promise<boolean> {
+  const { error } = await supabase
+    .from("documents")
+    .update({ status: "filed" })
+    .eq("id", id)
+    .eq("status", "needs_review");
+  return !error;
+}
