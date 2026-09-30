@@ -97,7 +97,7 @@ export default function Family() {
                 })}
               >
                 <View style={{ opacity: m.locked ? 0.45 : 1 }}>
-                  <Avatar svg={m.avatar} background={m.avatarBackground} size={50} />
+                  <Avatar svg={m.avatar} photo={m.photo} background={m.avatarBackground} size={50} />
                 </View>
                 <View className="min-w-0 flex-1">
                   <View className="flex-row items-center gap-2">

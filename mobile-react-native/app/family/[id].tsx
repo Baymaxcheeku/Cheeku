@@ -1,12 +1,14 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { ArrowLeftRight, Check, ChevronRight, Lock, Trash2, UserCog } from "lucide-react-native";
-import { useEffect, useState } from "react";
+import { ArrowLeftRight, Check, ChevronRight, FileText, Lock, Plus, Trash2, UserCog } from "lucide-react-native";
+import { useEffect, useMemo, useState } from "react";
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, View } from "react-native";
 import Animated, { ZoomIn } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AvatarPicker } from "@/components/family/avatar-picker";
+import { HealthEditor } from "@/components/family/health-editor";
+import { ReportQueue } from "@/components/family/report-queue";
 import { Avatar } from "@/components/ui/avatar";
 import { ConfirmSheet } from "@/components/ui/confirm-sheet";
 import { Field } from "@/components/ui/field";
@@ -14,6 +16,11 @@ import { Glass, Gradient, glass, glassShadow } from "@/components/ui/glass";
 import { useReducedMotion } from "@/components/ui/motion";
 import { Backdrop, PillButton, ScreenHeader } from "@/components/ui/screen";
 import { generatedAvatar } from "@/lib/profiles/avatar";
+import { ageFrom, EMPTY_HEALTH, loadMemberHealth, saveMemberHealth, type MemberHealth } from "@/lib/profiles/health";
+import { clearProfilePhoto, pickPhoto, setProfilePhoto } from "@/lib/profiles/photo";
+import { uploadQueue, type QueueItem } from "@/lib/records/bulk-upload";
+import { formatEventDate } from "@/lib/records/grouping";
+import { listProfileRecords } from "@/lib/records/queries";
 import {
   listMembers,
   refreshRoster,
@@ -76,6 +83,25 @@ export default function Member() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [confirm, setConfirm] = useState(false);
+  // Photo edits wait for Save like everything else: a local file to upload,
+  // or `cleared` to go back to a drawn face.
+  const [newPhoto, setNewPhoto] = useState<string | null>(null);
+  const [cleared, setCleared] = useState(false);
+  const [health, setHealth] = useState<MemberHealth>(EMPTY_HEALTH);
+  const [queue, setQueue] = useState<QueueItem[]>([]);
+  const [filing, setFiling] = useState(false);
+
+  const savedHealth = useQuery({ queryKey: ["member-health", id], queryFn: () => loadMemberHealth(id), enabled: Boolean(id) });
+  // Same key Home uses, so this list and Home's are one cache entry.
+  const records = useQuery({ queryKey: ["records", id], queryFn: () => listProfileRecords(id), enabled: Boolean(id) && !member?.locked });
+
+  useEffect(() => {
+    if (savedHealth.data) setHealth(savedHealth.data);
+  }, [savedHealth.data]);
+  const healthDirty = useMemo(
+    () => Boolean(savedHealth.data) && JSON.stringify(health) !== JSON.stringify(savedHealth.data),
+    [health, savedHealth.data],
+  );
 
   useEffect(() => {
     if (!member) return;
@@ -103,13 +129,16 @@ export default function Member() {
   const derived = generatedAvatar(member.id, index);
   const face = seed ? generatedAvatar(seed, 0) : derived;
   const viewing = family.data?.profile?.id === member.id;
-  const dirty = member.isPrimary
+  const photoShown = cleared ? null : (newPhoto ?? member.photo);
+  const photoDirty = Boolean(newPhoto) || (cleared && Boolean(member.photoPath));
+  const age = ageFrom(member.isPrimary ? member.dob : dob);
+  const dirty = photoDirty || healthDirty || (member.isPrimary
     ? seed !== (member.avatarSeed ?? "")
     : name !== member.name ||
       relationship !== (member.relationship ?? "") ||
       dob !== (member.dob ?? "") ||
       sex !== (member.sex ?? "") ||
-      seed !== (member.avatarSeed ?? "");
+      seed !== (member.avatarSeed ?? ""));
 
   async function save() {
     if (!member) return;
@@ -119,12 +148,37 @@ export default function Member() {
     const result = member.isPrimary
       ? await updateAvatar(member.id, seed || null)
       : await updateMember(member.id, { name, relationship, dob, sex, avatarSeed: seed });
-    setSaving(false);
     if (!result.ok) {
+      setSaving(false);
       setErrors(("fieldErrors" in result && result.fieldErrors) || {});
       setMessage(result.message);
       return;
     }
+    if (newPhoto) {
+      const p = await setProfilePhoto(member.id, newPhoto);
+      if (!p.ok) {
+        setSaving(false);
+        setMessage(p.message);
+        return;
+      }
+      setNewPhoto(null);
+    } else if (cleared && member.photoPath) {
+      await clearProfilePhoto(member.id);
+      setCleared(false);
+    }
+    if (healthDirty) {
+      const h = await saveMemberHealth(member.id, health);
+      if (!h.ok) {
+        setSaving(false);
+        setMessage(h.message);
+        return;
+      }
+      void qc.invalidateQueries({ queryKey: ["member-health", member.id] });
+      // Ask grounds itself in these, so it hears about the change too.
+      void qc.invalidateQueries({ queryKey: ["ask-context"] });
+      void qc.invalidateQueries({ queryKey: ["settings-health"] });
+    }
+    setSaving(false);
     setSaved(true);
     setTimeout(() => setSaved(false), 1600);
     refreshRoster(qc);
@@ -143,6 +197,18 @@ export default function Member() {
     router.back();
   }
 
+  async function fileReports() {
+    if (!member) return;
+    setFiling(true);
+    await uploadQueue(member.id, queue, (key, patch) => setQueue((q) => q.map((x) => (x.key === key ? { ...x, ...patch } : x))));
+    setFiling(false);
+    void qc.invalidateQueries({ queryKey: ["records", member.id] });
+    void qc.invalidateQueries({ queryKey: ["family-members"] });
+    void qc.invalidateQueries({ queryKey: ["health-overview"] });
+    // Clear the ones that made it; leave failures to retry.
+    setQueue((q) => q.filter((x) => x.status !== "done"));
+  }
+
   return (
     <KeyboardAvoidingView className="flex-1 bg-canvas" behavior={Platform.OS === "ios" ? "padding" : undefined}>
       <Backdrop height={460} />
@@ -152,8 +218,8 @@ export default function Member() {
         {/* Hero. */}
         <View style={[glassShadow, { borderRadius: 30, overflow: "hidden", paddingVertical: 22, alignItems: "center" }]}>
           <Gradient from={face.background} to="#ffffff" angle="vertical" glow="#ffffff" />
-          <Animated.View key={seed || "derived"} entering={still ? undefined : ZoomIn.springify().damping(14)} style={{ borderRadius: 999, borderWidth: 4, borderColor: "#fff", opacity: member.locked ? 0.5 : 1 }}>
-            <Avatar svg={face.svg} background={face.background} size={96} />
+          <Animated.View key={photoShown ?? (seed || "derived")} entering={still ? undefined : ZoomIn.springify().damping(14)} style={{ borderRadius: 999, borderWidth: 4, borderColor: "#fff", opacity: member.locked ? 0.5 : 1 }}>
+            <Avatar svg={face.svg} photo={photoShown} background={face.background} size={96} />
           </Animated.View>
           <Text style={{ fontFamily: font.semibold, fontSize: 22, letterSpacing: -0.5, color: ink[900], marginTop: 12 }}>{member.name}</Text>
           <Text style={{ fontFamily: font.medium, fontSize: 13.5, color: ink[500], marginTop: 2 }}>
@@ -194,9 +260,17 @@ export default function Member() {
         ) : null}
 
         {/* Face. */}
-        <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900], marginTop: 24, marginBottom: 12 }}>Face</Text>
+        <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900], marginTop: 24, marginBottom: 12 }}>Photo or face</Text>
         <Glass strong className="rounded-[26px] p-4">
-          <AvatarPicker value={seed} onChange={setSeed} derived={derived} size={50} />
+          <AvatarPicker
+            value={seed}
+            onChange={setSeed}
+            derived={derived}
+            size={48}
+            photo={photoShown}
+            onPickPhoto={(source) => void pickPhoto(source).then((uri) => { if (uri) { setNewPhoto(uri); setCleared(false); } })}
+            onClearPhoto={() => { setNewPhoto(null); setCleared(true); }}
+          />
         </Glass>
 
         {/* Details. */}
@@ -244,6 +318,71 @@ export default function Member() {
         {message ? (
           <Text accessibilityRole="alert" style={{ fontFamily: font.medium, fontSize: 13, color: semantic.dangerText, marginTop: 14 }}>{message}</Text>
         ) : null}
+
+        {/* Their records: the same list their file shows, never anyone else's. */}
+        {!member.locked ? (
+          <>
+            <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900], marginTop: 28, marginBottom: 12 }}>
+              {member.isPrimary ? "Your reports" : `${firstName(member.name)}'s reports`}
+            </Text>
+            <Glass strong className="rounded-[26px] p-4">
+              {(records.data ?? []).slice(0, 3).map((r, i) => (
+                <Pressable
+                  key={r.id}
+                  accessibilityRole="button"
+                  onPress={() => {
+                    // Opening their report makes them the person being viewed,
+                    // so Ask and everything else follow the record.
+                    void switchMember(member.id);
+                    router.push(`/records/${r.id}`);
+                  }}
+                  style={{ flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 10, borderTopWidth: i ? 1 : 0, borderTopColor: "rgba(15,16,48,0.06)" }}
+                >
+                  <View style={{ width: 36, height: 36, borderRadius: 11, backgroundColor: brand[50], alignItems: "center", justifyContent: "center" }}>
+                    <FileText size={16} color={brand[600]} />
+                  </View>
+                  <View style={{ flex: 1, minWidth: 0 }}>
+                    <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 14.5, color: ink[900] }}>{r.title}</Text>
+                    <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 12.5, color: ink[500] }}>{formatEventDate(r.eventDate)}{r.facility ? ` · ${r.facility}` : ""}</Text>
+                  </View>
+                  <ChevronRight size={16} color={ink[300]} />
+                </Pressable>
+              ))}
+              {records.data && records.data.length === 0 ? (
+                <Text style={{ fontFamily: font.regular, fontSize: 13.5, color: ink[500], marginBottom: 4 }}>
+                  Nothing filed yet. Add old reports and I&apos;ll read them for {member.isPrimary ? "you" : firstName(member.name)}.
+                </Text>
+              ) : null}
+              {records.data && records.data.length > 3 ? (
+                <Pressable
+                  accessibilityRole="button"
+                  onPress={() => {
+                    void switchMember(member.id);
+                    router.push("/records");
+                  }}
+                  style={{ height: 40, justifyContent: "center" }}
+                >
+                  <Text style={{ fontFamily: font.semibold, fontSize: 14, color: brand[700] }}>See all {records.data.length}</Text>
+                </Pressable>
+              ) : null}
+              <View style={{ marginTop: 10 }}>
+                <ReportQueue items={queue} onChange={setQueue} locked={filing} />
+              </View>
+              {queue.some((q) => q.status !== "done") ? (
+                <PillButton tone="brand" loading={filing} onPress={() => void fileReports()} icon={<Plus size={17} color="#fff" />} style={{ marginTop: 12, height: 48 }}>
+                  {`File ${queue.filter((q) => q.status !== "done").length === 1 ? "1 report" : `${queue.filter((q) => q.status !== "done").length} reports`}`}
+                </PillButton>
+              ) : null}
+            </Glass>
+          </>
+        ) : null}
+
+        {/* Health basics, the same editor as when they were added. */}
+        <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900], marginTop: 28, marginBottom: 4 }}>Health basics</Text>
+        <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginBottom: 14 }}>
+          Cheeku uses these when reading {member.isPrimary ? "your" : `${firstName(member.name)}'s`} reports and answering questions.
+        </Text>
+        <HealthEditor value={health} onChange={setHealth} age={age} name={member.isPrimary ? undefined : member.name} />
 
         {/* Remove. */}
         {!member.isPrimary ? (

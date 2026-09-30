@@ -1435,3 +1435,86 @@ Free and a Solo account, the add flow with the keyboard up, removing a member
 who is currently being viewed (should land on your own file), a Family to Solo
 downgrade (tray shows paused cards, Manage family names them), and Ask
 clearing after a switch.
+
+## Members: faces for every age, real photos, health basics, past reports — 2026-09-30 (cloud session, not seen on a device)
+
+**Faces for the whole family** (`lib/profiles/faces.ts`).
+- The picker was ten adults in the `micah` style. That style cannot draw a
+  baby or a grandparent at all, and the ICP is exactly those people: expecting
+  and new parents, fertility couples, caregivers of diabetic parents, diaspora
+  children, health optimisers.
+- The new catalogue has 24 faces in the `personas` style, grouped Little ones
+  (a pacifier, a sleeping newborn), Kids, Grown-ups and Elders (grey bun and
+  glasses, balding with a moustache, wrinkles). Skin tones sit in the South
+  Asian range, and vary.
+- Faces are grouped by life stage, never by gender. The tab opens on the stage
+  the relationship suggests (a Grandparent opens on Elders).
+- Old `p1`–`p10` ids map to their nearest new face, so nobody's pick vanished.
+  Faces derived from an id use the same style, restricted to grown-up looks.
+
+**Real photos** (`lib/profiles/photo.ts`).
+- Take a photo or choose one, square-cropped. It is re-drawn at 512 x 512 as a
+  fresh JPEG, which drops the EXIF location data, and stored privately at
+  `<user>/<profile>/avatar-<uuid>.jpg`.
+- Migration 0026 only accepts a key under the owner's own folder for that
+  profile.
+- Shown through hour-long signed URLs, signed in one batch. The avatar falls
+  back to the drawn face if a link has expired.
+- Replacing a photo deletes the old file. Removing a member or deleting the
+  account deletes their photos too.
+
+**Adding a member is five steps.**
+1. Who
+2. Name and look
+3. About them (the age shows as you type)
+4. Health basics
+5. Past reports
+
+Nothing is written until the last tap, so backing out leaves no half-made
+person. Then the profile is created first and photo, health and reports are
+filed against its new id. The hello screen says exactly what landed, and names
+anything that didn't.
+
+**Health basics** (`components/family/health-editor.tsx`,
+`lib/profiles/health.ts`): one editor, used by the add flow, the member page
+and Health profile.
+- Conditions are chips chosen by age (a baby's list is jaundice and birth
+  weight, a grandparent's is sugar, BP and arthritis), plus "Add another".
+- Allergies have a column of their own (0026) and a "None known" option.
+- One row per medicine; blood group; height and weight.
+- The suggestions are there to save typing. The app never infers that anyone
+  has anything.
+- Reads and writes fall back gracefully if 0026 hasn't run yet.
+
+**Past reports** (`lib/records/bulk-upload.ts`).
+- Snap, Photos (multi-select) or Files (PDFs), up to ten at a time.
+- Each file goes through the same path a single scan does: EXIF stripped,
+  then `uploadDocument`, which re-checks ownership and plan cover.
+- Files upload one at a time, each with its own status. A failed one says why,
+  and can be retried from the member page without re-picking the rest.
+
+**Every record stays with its member.**
+- Record detail switches to the report's owner when opened, so Ask and every
+  screen behind it follow the record. It also shows "In Amma's file".
+- Scan took its default member from its own cached query, which could still
+  name the previous person right after a switch, so a report could be filed
+  under the wrong member. It now reads the shared family cache, which moves in
+  the same frame as the switch.
+- The records tab reads the same cache and clears a member filter left over
+  from the previous person.
+- The member page lists that person's own reports: the same cache entry Home
+  uses. Opening one switches to them first.
+- Personal information no longer shows the account's sign-in email on a family
+  member's profile, where it read as theirs.
+
+**Apply:** migration 0026 (`db:migrate`, or paste
+`supabase/manual/0026-sql-editor.sql` into the SQL Editor after 0025).
+
+**Not verified here:** anything on a device. Look at:
+- The camera and library pickers with the square crop.
+- A photo showing in the tray and on Home, and falling back after an hour
+  offline.
+- Multi-select in Photos.
+- Ten reports uploading on a slow connection.
+- Keyboard behaviour in the medicines rows.
+- Opening Amma's report from her page, then Ask (it should be about Amma).

@@ -204,7 +204,12 @@ export async function removeMember(id: string): Promise<MemberResult> {
   const { data: docs, error: readError } = await supabase.from("documents").select("storage_path").eq("profile_id", id);
   if (readError) return { ok: false, message: "Couldn't reach their records. Nothing was removed." };
 
-  const paths = (docs ?? []).map((d) => d.storage_path as string).filter(Boolean);
+  // Their photo too, which lives beside their reports in the same folder.
+  const { data: me } = await supabase.from("profiles").select("avatar_url").eq("id", id).maybeSingle();
+  const paths = [
+    ...(docs ?? []).map((d) => d.storage_path as string),
+    (me?.avatar_url as string | null | undefined) ?? "",
+  ].filter(Boolean);
   if (paths.length > 0) {
     const { error } = await supabase.storage.from("documents").remove(paths);
     if (error) return { ok: false, message: "Couldn't remove their files. Nothing was removed." };

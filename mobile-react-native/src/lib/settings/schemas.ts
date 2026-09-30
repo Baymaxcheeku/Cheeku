@@ -43,7 +43,7 @@ export const addMemberSchema = z.object({
   /** A face from the app's own catalogue ("p1".."p10"), or empty to derive one. */
   avatarSeed: z
     .string()
-    .regex(/^p[0-9]{1,2}$/, "Pick one of the faces shown")
+    .regex(/^(p|f)[0-9]{1,2}$/, "Pick one of the faces shown")
     .optional()
     .or(z.literal("")),
 });

@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
   Activity,
@@ -35,6 +35,7 @@ import {
   type Severity,
 } from "@/lib/records/types";
 import { brand, ink, semantic, surface } from "@/theme/tokens";
+import { useFamily, useSwitchMember } from "@/lib/profiles/family";
 
 const SEVERITY_BLURB: Record<Severity, string> = {
   normal: "All values are within the range printed on this report.",
@@ -119,6 +120,20 @@ export default function RecordDetail() {
 
   const record = query.data?.record ?? null;
 
+  /*
+   * THE CONTEXT FOLLOWS THE RECORD. Opening Amma's report (from a
+   * notification, her member page, search or a link) makes Amma the person
+   * being viewed, so "Ask Cheeku about this" and every screen behind this one
+   * are about her, not whoever was selected before (PLAN.md rule 4).
+   */
+  const family = useFamily();
+  const switchMember = useSwitchMember();
+  const owner = record?.profileId;
+  const viewingId = family.data?.profile?.id;
+  useEffect(() => {
+    if (owner && viewingId && owner !== viewingId) void switchMember(owner);
+  }, [owner, viewingId, switchMember]);
+
   if (query.isPending) {
     return (
       <View className="flex-1 items-center justify-center bg-canvas">
@@ -193,6 +208,11 @@ export default function RecordDetail() {
             <View className="h-1.5 w-1.5 rounded-pill" style={{ backgroundColor: record.status === "filed" ? brand[600] : ink[300] }} />
             <Text style={{ fontFamily: font.semibold, fontSize: 12, color: record.status === "filed" ? brand[700] : ink[700] }}>
               {record.status === "filed" ? "Filed" : "Waiting for your review"}
+            </Text>
+          </Glass>
+          <Glass className="ml-2 flex-row items-center gap-1.5 rounded-pill px-3 py-1.5">
+            <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 12, color: ink[700] }}>
+              {`In ${record.profileName.split(" ")[0]}'s file`}
             </Text>
           </Glass>
         </View>

@@ -209,7 +209,7 @@ function MemberCard({ profile, active, onPress }: { profile: ActiveProfile; acti
       <Gradient from={profile.avatarBackground} to="#ffffff" angle="vertical" />
       <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start" }}>
         <View style={{ borderRadius: 999, borderWidth: 3, borderColor: "#fff" }}>
-          <Avatar svg={profile.avatar} background={profile.avatarBackground} size={62} />
+          <Avatar svg={profile.avatar} photo={profile.photo} background={profile.avatarBackground} size={62} />
         </View>
         {active ? (
           <Animated.View entering={still ? undefined : ZoomIn.springify().damping(12)}>
@@ -343,7 +343,7 @@ export function FamilyUpsellSheet({
               <Ghost key={`l${i}`} svg={svg} tilt={-8} />
             ))}
             <Animated.View entering={still ? undefined : ZoomIn.springify().damping(13)} style={{ marginHorizontal: -6, zIndex: 2, borderRadius: 999, borderWidth: 4, borderColor: "#fff" }}>
-              <Avatar svg={me.avatar} background={me.avatarBackground} size={78} />
+              <Avatar svg={me.avatar} photo={me.photo} background={me.avatarBackground} size={78} />
             </Animated.View>
             {faces.slice(1, 3).map((svg, i) => (
               <Ghost key={`r${i}`} svg={svg} tilt={i === 0 ? 6 : 10} />
