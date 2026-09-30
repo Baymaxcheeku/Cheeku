@@ -23,7 +23,7 @@ import {
   type LucideIcon,
 } from "lucide-react-native";
 import { useEffect } from "react";
-import { Modal, Pressable, Text, View } from "react-native";
+import { Modal, Pressable, Text, View, type ImageSourcePropType } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -32,9 +32,9 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { SvgXml } from "react-native-svg";
 
 import { MascotBust } from "@/components/illustrations/sprout";
+import { Avatar } from "@/components/ui/avatar";
 import { Glass, glass } from "@/components/ui/glass";
 import { useReducedMotion } from "@/components/ui/motion";
 import { PillButton } from "@/components/ui/screen";
@@ -76,7 +76,14 @@ export const KIND_STYLE: Record<NotificationKind, Tone> = {
   welcome: { bg: "#fff1e3", fg: "#c2650b", icon: PartyPopper },
 };
 
-export type Member = { name: string; avatar: string; avatarBackground: string; isPrimary: boolean };
+export type Member = {
+  name: string;
+  avatar: string;
+  avatarBackground: string;
+  avatarImage?: ImageSourcePropType | null;
+  photo?: string | null;
+  isPrimary: boolean;
+};
 
 /** The category tile, with the family member's face tucked in the corner when it is about someone else. */
 export function NotificationIcon({ kind, member, size = 46 }: { kind: NotificationKind; member?: Member; size?: number }) {
@@ -111,7 +118,7 @@ export function NotificationIcon({ kind, member, size = 46 }: { kind: Notificati
             backgroundColor: member.avatarBackground,
           }}
         >
-          <SvgXml xml={member.avatar} width={22} height={22} />
+          <Avatar svg={member.avatar} image={member.avatarImage} photo={member.photo} background={member.avatarBackground} size={18} />
         </View>
       ) : null}
     </View>

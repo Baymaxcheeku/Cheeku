@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Image, View } from "react-native";
+import { Image, View, type ImageSourcePropType } from "react-native";
 import { SvgXml } from "react-native-svg";
 
 import { faceSvg, generatedAvatar } from "@/lib/profiles/avatar";
@@ -39,8 +39,11 @@ export function Avatar({
   ring,
   /** A signed URL for a real photo. Falls back to the drawn face if it fails to load (an expired link, no signal). */
   photo,
+  image,
 }: {
   photo?: string | null;
+  /** A face from the illustrated set (faces.ts). Drawn when there is no photo. */
+  image?: ImageSourcePropType | null;
   svg?: string;
   profileId?: string;
   index?: number;
@@ -51,6 +54,7 @@ export function Avatar({
   const [broken, setBroken] = useState(false);
   const generated = svg ? null : generatedAvatar(profileId ?? "", index);
   const markup = svg ?? generated?.svg ?? "";
+  const art = image ?? generated?.image ?? null;
   const fill = background ?? generated?.background ?? "transparent";
 
   // Border-box: a ring eats into the content area, so the face must be drawn
@@ -76,6 +80,8 @@ export function Avatar({
           onError={() => setBroken(true)}
           accessibilityIgnoresInvertColors
         />
+      ) : art ? (
+        <Image alt="" source={art} style={{ width: inner, height: inner }} accessibilityIgnoresInvertColors />
       ) : (
         <SvgXml xml={markup} width={inner} height={inner} />
       )}

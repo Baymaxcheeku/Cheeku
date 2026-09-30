@@ -220,7 +220,7 @@ export default function Member() {
         <View style={[glassShadow, { borderRadius: 30, overflow: "hidden", paddingVertical: 22, alignItems: "center" }]}>
           <Gradient from={face.background} to="#ffffff" angle="vertical" glow="#ffffff" />
           <Animated.View key={photoShown ?? (seed || "derived")} entering={still ? undefined : ZoomIn.springify().damping(14)} style={{ borderRadius: 999, borderWidth: 4, borderColor: "#fff", opacity: member.locked ? 0.5 : 1 }}>
-            <Avatar svg={face.svg} photo={photoShown} background={face.background} size={96} />
+            <Avatar svg={face.svg} image={face.image} photo={photoShown} background={face.background} size={96} />
           </Animated.View>
           <Text style={{ fontFamily: font.semibold, fontSize: 22, letterSpacing: -0.5, color: ink[900], marginTop: 12 }}>{member.name}</Text>
           <Text style={{ fontFamily: font.medium, fontSize: 13.5, color: ink[500], marginTop: 2 }}>

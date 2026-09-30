@@ -9,11 +9,13 @@ import { Glass, Gradient, glass, glassShadow } from "@/components/ui/glass";
 import { useReducedMotion } from "@/components/ui/motion";
 import { PillButton } from "@/components/ui/screen";
 import { formatPrice, PLANS } from "@/lib/billing/plans";
-import { castFaces } from "@/lib/profiles/avatar";
 import type { ActiveProfile } from "@/lib/profiles/context";
 import type { FamilyMode } from "@/lib/profiles/family";
+import { catalogFace, type Face } from "@/lib/profiles/faces";
 import { brand, ink } from "@/theme/tokens";
 import { font } from "@/theme/type";
+
+const GHOSTS = ["f34", "f33", "f39"];
 
 /*
  * THE FAMILY TRAY, for a Family plan.
@@ -209,7 +211,7 @@ function MemberCard({ profile, active, onPress }: { profile: ActiveProfile; acti
       <Gradient from={profile.avatarBackground} to="#ffffff" angle="vertical" />
       <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start" }}>
         <View style={{ borderRadius: 999, borderWidth: 3, borderColor: "#fff" }}>
-          <Avatar svg={profile.avatar} photo={profile.photo} background={profile.avatarBackground} size={62} />
+          <Avatar svg={profile.avatar} photo={profile.photo} image={profile.avatarImage} background={profile.avatarBackground} size={62} />
         </View>
         {active ? (
           <Animated.View entering={still ? undefined : ZoomIn.springify().damping(12)}>
@@ -320,7 +322,8 @@ export function FamilyUpsellSheet({
 }) {
   const insets = useSafeAreaInsets();
   const still = useReducedMotion();
-  const faces = castFaces(3);
+  // A grandparent, a parent and a child from the picker's own set.
+  const faces = GHOSTS.map((id) => catalogFace(id)).filter((f): f is Face => Boolean(f));
   const step = PLANS.family.priceInPaise - PLANS.solo.priceInPaise;
 
   const perks: [React.ReactNode, string, string][] = [
@@ -339,14 +342,14 @@ export function FamilyUpsellSheet({
         <View style={{ marginHorizontal: 16, marginTop: 12, height: 150, borderRadius: 28, overflow: "hidden", alignItems: "center", justifyContent: "center" }}>
           <Gradient from="#e2d9ff" to="#fff1f6" glow="#ffffff" />
           <View style={{ flexDirection: "row", alignItems: "center" }}>
-            {faces.slice(0, 1).map((svg, i) => (
-              <Ghost key={`l${i}`} svg={svg} tilt={-8} />
+            {faces.slice(0, 1).map((f, i) => (
+              <Ghost key={`l${i}`} face={f} tilt={-8} />
             ))}
             <Animated.View entering={still ? undefined : ZoomIn.springify().damping(13)} style={{ marginHorizontal: -6, zIndex: 2, borderRadius: 999, borderWidth: 4, borderColor: "#fff" }}>
-              <Avatar svg={me.avatar} photo={me.photo} background={me.avatarBackground} size={78} />
+              <Avatar svg={me.avatar} photo={me.photo} image={me.avatarImage} background={me.avatarBackground} size={78} />
             </Animated.View>
-            {faces.slice(1, 3).map((svg, i) => (
-              <Ghost key={`r${i}`} svg={svg} tilt={i === 0 ? 6 : 10} />
+            {faces.slice(1, 3).map((f, i) => (
+              <Ghost key={`r${i}`} face={f} tilt={i === 0 ? 6 : 10} />
             ))}
           </View>
           <View style={{ position: "absolute", top: 12, right: 12 }}>
@@ -393,10 +396,10 @@ export function FamilyUpsellSheet({
   );
 }
 
-function Ghost({ svg, tilt }: { svg: string; tilt: number }) {
+function Ghost({ face, tilt }: { face: Face; tilt: number }) {
   return (
     <View style={{ marginHorizontal: -6, opacity: 0.55, transform: [{ rotate: `${tilt}deg` }], borderRadius: 999, borderWidth: 3, borderColor: "rgba(255,255,255,0.9)" }}>
-      <Avatar svg={svg} size={54} />
+      <Avatar svg="" image={face.image} background={face.background} size={54} />
       <View style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, alignItems: "center", justifyContent: "center" }}>
         <View style={{ width: 24, height: 24, borderRadius: 12, backgroundColor: "rgba(255,255,255,0.92)", alignItems: "center", justifyContent: "center" }}>
           <Plus size={14} color={brand[600]} strokeWidth={2.6} />
