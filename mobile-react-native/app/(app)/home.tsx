@@ -12,7 +12,7 @@ import { AskBar, CheekuCard, HomeHeadline, ProfileChip, firstName } from "@/comp
 import { CareSection } from "@/components/home/care";
 import { AppointmentCard } from "@/components/booking/appointment-card";
 import { isUpcoming, startsAt, useAppointmentList } from "@/lib/booking/appointments";
-import { FileStrip, ReadsStrip } from "@/components/home/strips";
+import { FileCard, ReadsStrip } from "@/components/home/strips";
 import { Gradient } from "@/components/ui/glass";
 import { knowledgeFeed } from "@/lib/knowledge/queries";
 import { NotificationsBell } from "@/components/app/notifications-bell";
@@ -20,7 +20,7 @@ import { Button } from "@/components/ui/button";
 import { StaggerItem } from "@/components/ui/motion";
 import { seatsFor } from "@/lib/billing/plans";
 import { familyMode, prefetchMembers, refreshRoster, useFamily, useSwitchMember } from "@/lib/profiles/family";
-import { EMPTY_OVERVIEW, useHealthOverview } from "@/lib/records/use-overview";
+import { useHealthFile } from "@/lib/health/queries";
 import { listProfileRecords, statsFrom } from "@/lib/records/queries";
 import { brand } from "@/theme/tokens";
 import { Brand } from "@/components/ui/brand";
@@ -59,15 +59,16 @@ export default function Home() {
   const [trayOpen, setTrayOpen] = useState(false);
   const [upsellOpen, setUpsellOpen] = useState(false);
 
-  const knowledge = useQuery({ queryKey: ["knowledge-feed"], queryFn: () => knowledgeFeed(5) });
-
-  const overview = useHealthOverview();
-
   // The family, from the one query every screen shares (lib/profiles/family).
   const context = useFamily();
   const switchMember = useSwitchMember();
 
   const profileId = context.data?.profile?.id;
+
+  // Both follow the member: "for you" depends on whose profile is in view,
+  // and the file is theirs.
+  const knowledge = useQuery({ queryKey: ["knowledge-feed", profileId], queryFn: () => knowledgeFeed(profileId, 6), enabled: Boolean(profileId), placeholderData: (prev) => prev });
+  const file = useHealthFile(profileId);
 
   const records = useQuery({
     queryKey: ["records", profileId],
@@ -227,7 +228,7 @@ export default function Home() {
 
       <StaggerItem index={5}>
         <ReadsStrip articles={knowledge.data ?? []} />
-        <FileStrip overview={overview.data ?? EMPTY_OVERVIEW} />
+        <FileCard file={file.data} member={profile} loading={file.isPending} />
       </StaggerItem>
 
       <FamilyTray

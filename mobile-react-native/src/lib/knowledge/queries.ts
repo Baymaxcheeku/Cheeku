@@ -1,8 +1,11 @@
-import { activeProfile } from "@/lib/profiles/context";
 import { supabase } from "@/lib/supabase/client";
 
+import { matchesReader, rankFeed, toArticle, toCard, toReadState, type Article, type ArticleCard, type ReadState } from "./catalog";
+
+export type { Article, ArticleBlock, ArticleCard, ArticleCategory, ArticleIcon, ArticleSource, ReadState } from "./catalog";
+
 /*
- * The knowledge feed.
+ * The knowledge feed: what the team publishes, ranked for one reader.
  *
  * ┌─ HOW AN ARTICLE IS CHOSEN, AND WHAT IS NEVER USED TO CHOOSE IT ──────────┐
  * │                                                                          │
@@ -11,145 +14,82 @@ import { supabase } from "@/lib/supabase/client";
  * │                                                                          │
  * │ NEVER USED: anything read out of their documents. Showing somebody       │
  * │ diabetes articles because a lab value came back high is a diagnosis      │
- * │ delivered as a content recommendation — the app would be telling them    │
- * │ what it thinks they have, while pretending to be a reading list. This is │
- * │ the same line `profileConditions` holds for the chat, and it holds here. │
+ * │ delivered as a content recommendation. Same line as profileConditions    │
+ * │ holds for the chat.                                                      │
  * │                                                                          │
  * └──────────────────────────────────────────────────────────────────────────┘
+ *
+ * Every read tolerates a database that hasn't had migration 0029 yet: the new
+ * columns are asked for first, and on "column does not exist" the old set is
+ * used, so the rail and the reader keep working through the upgrade.
  */
 
-export type ArticleTint = "violet" | "teal" | "amber" | "rose" | "indigo";
+const CARD_COLUMNS: string = "id, slug, title, standfirst, tint, read_minutes, journeys, conditions, published_at";
+const CARD_COLUMNS_V2: string = `${CARD_COLUMNS}, category, icon, featured`;
+const ARTICLE_COLUMNS: string = "id, slug, title, standfirst, tint, read_minutes, body, sources, reviewed_on, published_at";
+const ARTICLE_COLUMNS_V2: string = `${ARTICLE_COLUMNS}, category, icon, featured, key_points, author`;
 
-export type ArticleBlock =
-  | { type: "p"; text: string }
-  | { type: "h"; text: string }
-  | { type: "callout"; text: string }
-  | { type: "list"; items: string[] };
+const missingColumn = (message: string | undefined) => Boolean(message && /column .* does not exist|could not find .* column/i.test(message));
 
-export type ArticleSource = {
-  publisher: string;
-  title: string;
-  year?: string;
-  url?: string;
-};
-
-export type ArticleCard = {
-  id: string;
-  slug: string;
-  title: string;
-  standfirst: string;
-  tint: ArticleTint;
-  readMinutes: number;
-  /** True when it matched this reader rather than arriving as a general pick. */
-  forYou: boolean;
-};
-
-export type Article = Omit<ArticleCard, "forYou"> & {
-  body: ArticleBlock[];
-  sources: ArticleSource[];
-  reviewedOn: string;
-};
-
-const CARD_COLUMNS = "id, slug, title, standfirst, tint, read_minutes, journeys, conditions";
-
-function toCard(row: Record<string, unknown>, forYou: boolean): ArticleCard {
-  return {
-    id: row.id as string,
-    slug: row.slug as string,
-    title: row.title as string,
-    standfirst: row.standfirst as string,
-    tint: (row.tint as ArticleTint) ?? "violet",
-    readMinutes: Number(row.read_minutes ?? 3),
-    forYou,
-  };
+/** This account's reading history, by article id. Empty before 0029. */
+export async function readingHistory(): Promise<Map<string, ReadState>> {
+  const out = new Map<string, ReadState>();
+  const { data, error } = await supabase.from("article_reads").select("article_id, progress, saved, finished_at, opened_at").order("opened_at", { ascending: false });
+  if (error || !data) return out;
+  for (const row of data) out.set(String(row.article_id), toReadState(row));
+  return out;
 }
 
-/**
- * Up to `limit` articles for the banner rail.
- *
- * Matches first, then fills from everything else. Filling matters: a reader
- * who has declared nothing would otherwise see an empty section, and an empty
- * section on Home reads as a broken app rather than a personalisation gap.
- */
-export async function knowledgeFeed(limit = 3): Promise<ArticleCard[]> {
-  const profile = await activeProfile();
+/** Every published article as a card, marked for this member and this reader. */
+export async function allArticles(profileId: string | undefined): Promise<ArticleCard[]> {
+  const [signals, history] = await Promise.all([profileSignalsFor(profileId), readingHistory()]);
 
-  /*
-   * Conditions are compared lowercased. Somebody types "Type 2 Diabetes",
-   * somebody else types "type 2 diabetes", and an exact match would show the
-   * second reader nothing.
-   */
-  const { conditions: declared, journey } = await profileSignalsFor(profile?.id);
-  const journeys = journey ? [journey] : [];
-
-  const { data, error } = await supabase
-    .from("articles")
-    .select(CARD_COLUMNS)
-    .not("published_at", "is", null)
-    .order("published_at", { ascending: false })
-    .limit(24);
-
-  if (error || !data) return [];
-
-  const matched: ArticleCard[] = [];
-  const rest: ArticleCard[] = [];
-
-  for (const row of data) {
-    const rowConditions = ((row.conditions as string[] | null) ?? []).map((c) => c.toLowerCase());
-    const rowJourneys = (row.journeys as string[] | null) ?? [];
-
-    const hit =
-      rowConditions.some((c) => declared.includes(c)) ||
-      rowJourneys.some((j) => journeys.includes(j));
-
-    (hit ? matched : rest).push(toCard(row, hit));
+  let res = await supabase.from("articles").select(CARD_COLUMNS_V2).not("published_at", "is", null).order("published_at", { ascending: false }).limit(60);
+  if (res.error && missingColumn(res.error.message)) {
+    res = await supabase.from("articles").select(CARD_COLUMNS).not("published_at", "is", null).order("published_at", { ascending: false }).limit(60);
   }
+  if (res.error || !res.data) return [];
 
-  return [...matched, ...rest].slice(0, limit);
+  return (res.data as unknown as Record<string, unknown>[]).map((row) =>
+    toCard(row, matchesReader(row, signals.conditions, signals.journey), history.get(String(row.id)) ?? null),
+  );
 }
 
-/** One article, with its body and sources. */
+/** Up to `limit` for the rail on Home: for-you and unread first. */
+export async function knowledgeFeed(profileId: string | undefined, limit = 6): Promise<ArticleCard[]> {
+  return rankFeed(await allArticles(profileId)).slice(0, limit);
+}
+
+/** One article, with its body, sources and this reader's progress. */
 export async function articleBySlug(slug: string): Promise<Article | null> {
-  const { data, error } = await supabase
-    .from("articles")
-    .select("id, slug, title, standfirst, tint, read_minutes, body, sources, reviewed_on")
-    .eq("slug", slug)
-    .not("published_at", "is", null)
-    .maybeSingle();
+  let res = await supabase.from("articles").select(ARTICLE_COLUMNS_V2).eq("slug", slug).not("published_at", "is", null).maybeSingle();
+  if (res.error && missingColumn(res.error.message)) {
+    res = await supabase.from("articles").select(ARTICLE_COLUMNS).eq("slug", slug).not("published_at", "is", null).maybeSingle();
+  }
+  if (res.error || !res.data) return null;
+  const row = res.data as unknown as Record<string, unknown>;
+  const { data: read } = await supabase.from("article_reads").select("progress, saved, finished_at").eq("article_id", String(row.id)).maybeSingle();
+  return toArticle(row, read ? toReadState(read) : null);
+}
 
-  if (error || !data) return null;
+/** How far down the reader got. Only ever moves forward (migration 0029). */
+export async function recordRead(articleId: string, progress: number): Promise<void> {
+  await supabase.rpc("record_article_read", { p_article: articleId, p_progress: Math.round(progress * 100) / 100 });
+}
 
-  return {
-    id: data.id as string,
-    slug: data.slug as string,
-    title: data.title as string,
-    standfirst: data.standfirst as string,
-    tint: (data.tint as ArticleTint) ?? "violet",
-    readMinutes: Number(data.read_minutes ?? 3),
-    body: (data.body as ArticleBlock[] | null) ?? [],
-    sources: (data.sources as ArticleSource[] | null) ?? [],
-    reviewedOn: data.reviewed_on as string,
-  };
+export async function setSaved(articleId: string, saved: boolean): Promise<boolean> {
+  const { error } = await supabase.rpc("set_article_saved", { p_article: articleId, p_saved: saved });
+  return !error;
 }
 
 /**
- * The two signals, both of them the reader's own words.
- *
- * `conditions` is what they typed into their health profile. `journey` is the
- * tile they tapped during onboarding — a personalisation hint, never a
- * diagnosis. Neither is inferred from a document.
+ * The two signals, both of them the reader's own words: the conditions they
+ * typed into their profile and the journey tile they tapped. Neither is ever
+ * inferred from a document.
  */
-export async function profileSignalsFor(
-  profileId: string | undefined,
-): Promise<{ conditions: string[]; journey: string | null }> {
+export async function profileSignalsFor(profileId: string | undefined): Promise<{ conditions: string[]; journey: string | null }> {
   if (!profileId) return { conditions: [], journey: null };
-
-  const { data } = await supabase
-    .from("profiles")
-    .select("conditions, journey")
-    .eq("id", profileId)
-    .maybeSingle();
-
+  const { data } = await supabase.from("profiles").select("conditions, journey").eq("id", profileId).maybeSingle();
   const conditions = data?.conditions;
   return {
     conditions: Array.isArray(conditions) ? (conditions as string[]).map((c) => c.toLowerCase()) : [],
