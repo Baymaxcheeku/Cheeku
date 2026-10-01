@@ -196,9 +196,9 @@ describe("answerQuestion — the product rules", () => {
     }
   });
 
-  it("always defers interpretation to a doctor when it answers", () => {
+  it("always leaves the decision on what to do with the doctor", () => {
     const answer = answerQuestion("how is my haemoglobin", [record()]);
-    expect(answer.paragraphs.join(" ")).toMatch(/do not interpret|your doctor/i);
+    expect(answer.paragraphs.join(" ")).toMatch(/the doctor's call|your doctor/i);
   });
 
   it("only quotes numbers that came from the document", () => {

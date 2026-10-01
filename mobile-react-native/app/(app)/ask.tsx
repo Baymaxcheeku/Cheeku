@@ -1,258 +1,223 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient, type InfiniteData } from "@tanstack/react-query";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
-  Activity,
   ArrowUp,
   ArrowUpRight,
   BookOpen,
+  Brain,
   Camera,
-  CalendarCheck,
   CalendarClock,
   FileText,
-  FolderOpen,
   History,
   Pill,
-  ScanLine,
   ShieldCheck,
-  Sparkles,
   Stethoscope,
-  Syringe,
-  TriangleAlert,
+  TrendingUp,
+  X,
   type LucideIcon,
 } from "lucide-react-native";
-import { useEffect, useRef, useState } from "react";
-import {
-  ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  ScrollView,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
-import { SvgXml } from "react-native-svg";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ProductAssessmentCard } from "@/components/ai/product-assessment-card";
 import { ProductPicker } from "@/components/ai/product-picker";
-import { CautionNote } from "@/components/safety/caution-note";
-import { shouldCaution } from "@/lib/safety/caution";
 import { Paywall } from "@/components/billing/paywall";
+import { AssistantTurn, UserBubble } from "@/components/chat/turn";
 import { MascotBust, MascotFigure } from "@/components/illustrations/sprout";
 import { Bob, TypingDots } from "@/components/onboarding/motion";
-import { Glass, GlassCircle, Gradient, glass, glassShadow } from "@/components/ui/glass";
-import { Backdrop } from "@/components/ui/screen";
-import { font } from "@/theme/type";
 import { EmergencyEscalation } from "@/components/safety/emergency-escalation";
-import {
-  askAboutProduct,
-  askCheeku,
-  chatQuota,
-  recordEscalation,
-  type ChatTurn,
-} from "@/lib/ai/chat";
+import { Brand } from "@/components/ui/brand";
+import { Glass, GlassCircle, glass, glassShadow } from "@/components/ui/glass";
+import { Backdrop } from "@/components/ui/screen";
+import { askAboutProduct, chatQuota } from "@/lib/ai/chat";
 import { promptEntriesFor } from "@/lib/ask/prompts";
 import { profileSignalsFor } from "@/lib/knowledge/queries";
-import { activeProfile } from "@/lib/profiles/context";
-import { detect, type SafetyResult } from "@/lib/safety/detect";
-import { brand, ink, semantic, shadow, surface } from "@/theme/tokens";
+import { todayIso } from "@/lib/memory/clock";
+import { buildContext, memoryLine } from "@/lib/memory/context";
+import { memoryStarters, type Starter } from "@/lib/memory/starters";
+import { refreshMemory, sendTurn, threadKey, useMemory, useThread } from "@/lib/memory/store";
+import { inOrder, sittingFor, withDayBreaks, type ThreadMessage } from "@/lib/memory/thread";
 import { useFamily } from "@/lib/profiles/family";
-import { Brand } from "@/components/ui/brand";
+import { shortDate } from "@/lib/records/details";
+import { detect, type SafetyResult } from "@/lib/safety/detect";
+import { brand, ink, surface } from "@/theme/tokens";
+import { font } from "@/theme/type";
 
 /*
- * The starter rows are generated, not written here.
+ * ASK CHEEKU: ONE CONTINUOUS, REMEMBERED THREAD PER FAMILY MEMBER.
  *
- * They were three fixed strings ending in "Is running safe during pregnancy?",
- * which is what a reader tracking their weight saw on the empty chat screen —
- * the same miss as the Home chips, one tap deeper. Both surfaces now draw from
- * `promptEntriesFor`, so a question offered on Home is the same question
- * offered here, chosen from the same two signals: the journey picked at
- * onboarding and the conditions typed into the profile. Never a document.
+ * Cheeku is a longitudinal health memory, and this is the way in and out of
+ * it. The screen opens on everything already said about the active member,
+ * not a blank page, because the value is that last week's bilirubin, last
+ * month's prescription and tonight's question sit in one scroll.
  *
- * The icon follows the topic rather than the wording, which is why prompts
- * carry a topic at all.
+ * Every message runs through the memory layer (lib/memory/pipeline):
+ *
+ *   1. THE SAFETY GATE RUNS HERE FIRST, on the device, before anything else.
+ *      An emergency gets the full-screen interrupt immediately and is recorded
+ *      for audit afterwards. Rule 2 of PLAN.md, unchanged.
+ *   2. Clock-aware hard-stops (reduced movements at 30 weeks, a fever at three
+ *      weeks old) answer with a go-now card and never reach the model.
+ *   3. Everything else is read against the person's own history: their clock,
+ *      their numbers and how they changed, their medicines, what is pending.
+ *      The answer carries an urgency tier, what it read, the signs to watch,
+ *      and a script for the doctor when the tier calls for one.
+ *
+ * It does not diagnose. It understands a symptom to a point using general
+ * health models, cuts the noise, says how urgent it looks and why, and makes
+ * the conversation with the doctor better.
  */
-const TOPIC_ICON: Record<string, LucideIcon> = {
+
+const STARTER_ICON: Record<Starter["icon"] | string, LucideIcon> = {
+  loop: CalendarClock,
+  trend: TrendingUp,
+  clock: CalendarClock,
+  meds: Pill,
+  symptom: Stethoscope,
+  file: FileText,
   "last-report": FileText,
-  "last-scan": ScanLine,
-  changed: History,
   jargon: BookOpen,
-  appointment: CalendarCheck,
-  "out-of-range": Activity,
-  file: FolderOpen,
-  vaccines: Syringe,
-  medicines: Pill,
-  due: CalendarClock,
+  appointment: CalendarClock,
 };
 
-/*
- * E1 — Ask Cheeku.
- *
- * THE SAFETY GATE RUNS HERE, on the device, before anything is sent. Rule 2
- * requires it to be deterministic and under 200ms, and a network round trip can
- * promise neither. It is the first statement in `send()` for the same reason
- * there is only one send path: a second way to reach the model would be a
- * second place to forget the gate.
- *
- * Three kinds of answer can come back: grounded in the active profile's own
- * records and cited, general information on a known health topic, or silent
- * when neither applies. None of them diagnose or give a dose.
- */
 export default function Ask() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const queryClient = useQueryClient();
-  const { q, upload } = useLocalSearchParams<{ q?: string; upload?: string }>();
+  const qc = useQueryClient();
+  const { q, upload, record } = useLocalSearchParams<{ q?: string; upload?: string; record?: string }>();
 
-  const [turns, setTurns] = useState<ChatTurn[]>([]);
-  const [conversationId, setConversationId] = useState<string | null>(null);
+  const family = useFamily();
+  const member = family.data?.profile ?? null;
+  const memberId = member?.id;
+  const name = member?.name.split(/\s+/)[0] ?? "them";
+
+  const memory = useMemory(memberId);
+  const thread = useThread(memberId);
+  const quota = useQuery({ queryKey: ["ask-context", memberId, "quota"], queryFn: chatQuota, enabled: Boolean(memberId) });
+  const signals = useQuery({ queryKey: ["ask-context", memberId, "signals"], queryFn: () => profileSignalsFor(memberId), enabled: Boolean(memberId) });
+
+  const ctx = useMemo(() => (memory.data ? buildContext(memory.data, todayIso()) : null), [memory.data]);
+  const messages = useMemo(() => inOrder(thread.data?.pages.flat() ?? []), [thread.data]);
+  const items = useMemo(() => withDayBreaks(messages), [messages]);
+
   const [draft, setDraft] = useState("");
-  const [escalation, setEscalation] = useState<SafetyResult | null>(null);
-  /*
-   * The paywall, and the question that triggered it.
-   *
-   * Held rather than discarded: someone hits the limit mid-thought, and making
-   * them retype it after paying is the moment a plan starts feeling like a toll
-   * booth. It goes back in the composer immediately and is sent automatically
-   * once a tier is active.
-   */
-  const [paywallFor, setPaywallFor] = useState<string | null>(null);
+  const [pendingText, setPendingText] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [pending, setPending] = useState(false);
+  const [escalation, setEscalation] = useState<SafetyResult | null>(null);
+  const [paywallFor, setPaywallFor] = useState<string | null>(null);
   const [pickerOpen, setPickerOpen] = useState(false);
-  const [composerFocused, setComposerFocused] = useState(false);
+  const [focused, setFocused] = useState(false);
+  const [aboutId, setAboutId] = useState<string | null>(record ?? null);
+  const input = useRef<TextInput>(null);
+  const scroller = useRef<ScrollView>(null);
+  const stickToEnd = useRef(true);
+  const sentInitial = useRef(false);
 
-  /*
-   * A new member means a new conversation. This tab stays mounted under the
-   * tab bar, so without this a switch from Home would leave Athar's chat on
-   * screen under Amma's name and ground the next question in the wrong file
-   * (PLAN.md rule 4).
-   */
-  const memberId = useFamily().data?.profile?.id;
+  // A different member is a different thread: clear what was being typed.
   const lastMember = useRef(memberId);
   useEffect(() => {
     if (lastMember.current && memberId && lastMember.current !== memberId) {
-      setTurns([]);
-      setConversationId(null);
       setDraft("");
-      setEscalation(null);
       setError(null);
+      setAboutId(null);
+      setPendingText(null);
+      stickToEnd.current = true;
     }
     lastMember.current = memberId;
   }, [memberId]);
 
-  const scroller = useRef<ScrollView>(null);
-  const sentInitial = useRef(false);
+  const about = useMemo(() => {
+    if (!aboutId || !memory.data) return null;
+    const d = memory.data.documents.find((x) => x.id === aboutId);
+    if (!d) return null;
+    return { id: aboutId, title: String(d.title ?? "this record"), date: (d.event_date as string | null) ?? null };
+  }, [aboutId, memory.data]);
 
-  const context = useQuery({
-    queryKey: ["ask-context"],
-    queryFn: async () => {
-      const [profile, quota] = await Promise.all([activeProfile(), chatQuota()]);
-      // Read after the profile, not alongside it: the signals belong to
-      // whichever member is active, and asking for them before knowing who
-      // that is would return the wrong person's starters on a switch.
-      const signals = await profileSignalsFor(profile?.id);
-      return { profile, quota, signals };
-    },
-  });
+  /** Puts a just-saved turn into the cached thread without a refetch. */
+  function appendToThread(rows: ThreadMessage[]) {
+    qc.setQueryData<InfiniteData<ThreadMessage[], string | null>>(threadKey(memberId), (old) => {
+      if (!old) return { pages: [rows.slice().reverse()], pageParams: [null] };
+      const [first = [], ...rest] = old.pages;
+      return { ...old, pages: [[...rows.slice().reverse(), ...first], ...rest] };
+    });
+  }
 
-  useEffect(() => {
-    scroller.current?.scrollToEnd({ animated: true });
-  }, [turns, pending]);
+  async function send(raw: string) {
+    const text = raw.trim();
+    if (!text || pendingText || !memberId) return;
 
-  async function send(question: string) {
-    const text = question.trim();
-    if (!text || pending) return;
-
-    /*
-     * THE GATE. Before the transcript, before the network, before anything.
-     */
+    // THE GATE. Before the network, before the model, before anything.
     const verdict = detect(text);
     if (verdict.status === "escalate") {
       setDraft("");
       setEscalation(verdict);
-      // The question still enters the transcript, flagged. An escalation that
-      // leaves no record is not auditable.
-      void recordEscalation(text, conversationId).then((r) => {
-        if (r.conversationId) setConversationId(r.conversationId);
-      });
+    }
+
+    if (!memory.data) {
+      if (verdict.status !== "escalate") setError("Still loading what I remember. Try again in a moment.");
       return;
     }
 
-    setDraft("");
+    stickToEnd.current = true;
     setError(null);
-    setPending(true);
+    setDraft("");
+    setPendingText(text);
     try {
-      const result = await askCheeku(text, conversationId, verdict.status);
-      if (!result.ok) {
-        if (result.quota) {
-          // Not an error — the free allowance ran out. The question goes back
-          // in the composer AND is held for the paywall to send on activation.
+      const res = await sendTurn({ text, profileId: memberId, thread: messages, bundle: memory.data, about });
+      if (!res.ok) {
+        if (res.quota) {
           setPaywallFor(text);
           setDraft(text);
           return;
         }
-        setError(result.message);
-        setDraft(text);
+        if (verdict.status !== "escalate") {
+          setError(res.message);
+          setDraft(text);
+        }
         return;
       }
-      setConversationId(result.conversationId);
-      /*
-       * The verdict rides along on the assistant turn rather than being held in
-       * screen state. Screen state would show one banner for the whole
-       * conversation and move it to whichever message was last; attaching it
-       * here keeps it beside the answer it belongs to, still there when someone
-       * scrolls back an hour later.
-       */
-      setTurns((t) => [...t, result.user, { ...result.assistant, caution: verdict }]);
+      appendToThread(res.assistant ? [res.user, res.assistant] : [res.user]);
+      setAboutId(null);
+      if (res.plan.facts.length || res.plan.revisions.length) refreshMemory(qc, memberId);
+      void qc.invalidateQueries({ queryKey: ["ask-context", memberId, "quota"] });
     } finally {
-      setPending(false);
+      setPendingText(null);
     }
   }
 
   async function sendProduct(scenarioId: string) {
     setPickerOpen(false);
     setError(null);
-    setPending(true);
+    setPendingText("Checking a product…");
+    stickToEnd.current = true;
     try {
-      // "clear" rather than a gate result: the question text is fixed copy
-      // attached to the scenario, not something the reader typed, so there is
-      // no free input to screen. See askAboutProduct.
-      const result = await askAboutProduct(scenarioId, conversationId, "clear");
+      const result = await askAboutProduct(scenarioId, sittingFor(messages), "clear");
       if (!result.ok) {
-        if (result.quota) {
-          // No text to hold: the question is fixed copy on the scenario.
-          setPaywallFor("");
-          return;
-        }
-        setError(result.message);
+        if (result.quota) setPaywallFor("");
+        else setError(result.message);
         return;
       }
-      setConversationId(result.conversationId);
-      setTurns((t) => [...t, result.user, result.assistant]);
+      void qc.invalidateQueries({ queryKey: threadKey(memberId) });
     } finally {
-      setPending(false);
+      setPendingText(null);
     }
   }
 
-  // Home's Ask box camera button lands here with ?upload=1. Runs once, so
-  // closing the sheet does not reopen it on the next render.
   useEffect(() => {
     if (upload === "1") setPickerOpen(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // A question carried in from Home's Ask box. Runs once: a later re-render
-  // must not re-send it.
+  // A question carried in from elsewhere: sent once, when the memory is ready.
   useEffect(() => {
-    if (sentInitial.current || !q || !context.data) return;
+    if (sentInitial.current || !q || !memory.data || !thread.data) return;
     sentInitial.current = true;
     void send(q);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [q, context.data]);
+  }, [q, memory.data, thread.data]);
 
-  if (context.isPending) {
+  if (family.isPending || (memberId && (memory.isPending || thread.isPending))) {
     return (
       <View className="flex-1 items-center justify-center bg-canvas">
         <ActivityIndicator color={brand[600]} />
@@ -260,176 +225,199 @@ export default function Ask() {
     );
   }
 
-  if (!context.data?.profile) {
+  if (!member) {
     return (
       <View className="flex-1 items-center justify-center bg-canvas px-10">
-        <Text className="text-center text-[15px] text-ink-500">
-          Set up a profile before asking.
-        </Text>
+        <Text className="text-center text-[15px] text-ink-500">Set up a profile before asking.</Text>
       </View>
     );
   }
 
-  const quota = context.data.quota;
-  const empty = turns.length === 0;
-  const starters = promptEntriesFor(
-    context.data.signals?.journey,
-    context.data.signals?.conditions ?? [],
-  );
+  const empty = messages.length === 0 && !pendingText;
+  const fromMemory = ctx ? memoryStarters(ctx) : [];
+  const starters: { key: string; text: string; detail: string | null; icon: string }[] = fromMemory.length
+    ? fromMemory
+    : promptEntriesFor(signals.data?.journey, signals.data?.conditions ?? []).map((p) => ({ key: p.text, text: p.text, detail: null, icon: p.topic }));
+  const loops = ctx?.loops.length ?? 0;
 
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-    >
+    <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
       <View className="flex-1 bg-canvas" style={{ paddingTop: insets.top }}>
         <Backdrop height={360} />
-        <View className="flex-row items-center gap-3 px-4 pb-2 pt-2">
-          {/*
-           * The mascot in the header, not a stethoscope.
-           *
-           * This is a conversation with a character the app has already
-           * introduced by name twice — on the carousel and on Home. Swapping in
-           * a clinical glyph at the moment the conversation starts is the point
-           * where a companion turns back into a medical form.
-           *
-           * It sits on a brand-tinted disc for the same reason it does
-           * everywhere else: the mascot's own gradient starts near-white, so on
-           * the plain canvas it washes out to an outline.
-           */}
+
+        <View className="flex-row items-center gap-3 px-4 pb-1 pt-2">
           <Glass strong className="h-12 w-12 items-center justify-center overflow-hidden rounded-pill">
-            {/* Nudged down so the disc frames the face rather than the stalk. */}
             <View style={{ marginTop: 8 }}>
               <MascotBust size={40} />
             </View>
           </Glass>
           <View className="flex-1">
-            <View className="flex-row items-center gap-1.5">
-              <Text style={{ fontFamily: font.semibold, fontSize: 18, color: ink[900] }}><Brand /></Text>
-              <View className="h-2 w-2 rounded-pill" style={{ backgroundColor: "#8ff0b8" }} />
-            </View>
+            <Text style={{ fontFamily: font.semibold, fontSize: 18, color: ink[900] }}>
+              <Brand />
+            </Text>
             <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 12.5, color: ink[500] }}>
-              Reading {context.data.profile.name}&apos;s records with you
+              {name}&apos;s health memory
             </Text>
           </View>
-          {quota.remaining !== null ? (
-            <Glass className="rounded-pill px-3 py-1.5">
-              <Text style={{ fontFamily: font.semibold, fontSize: 12, color: ink[700] }}>{quota.remaining} left today</Text>
-            </Glass>
-          ) : null}
-          <GlassCircle label="Book a doctor" onPress={() => router.push("/book/consult")}>
-            <Stethoscope size={19} color={ink[900]} />
+          <GlassCircle label="Past conversations" onPress={() => router.push("/chats")}>
+            <History size={19} color={ink[900]} />
+          </GlassCircle>
+          <GlassCircle label={`What Cheeku remembers about ${name}`} onPress={() => router.push("/memory")}>
+            <Brain size={19} color={ink[900]} />
           </GlassCircle>
         </View>
+
+        {/* What is remembered, at a glance. One row, scrolls rather than wraps. */}
+        {ctx ? (
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flexGrow: 0 }} contentContainerStyle={{ gap: 8, paddingHorizontal: 16, paddingVertical: 8 }}>
+            <MemoryChip label={ctx.clock.label} strong onPress={() => router.push("/memory")} />
+            <MemoryChip label={memoryLine(ctx)} onPress={() => router.push("/memory")} />
+            {loops ? <MemoryChip label={`${loops} open item${loops === 1 ? "" : "s"}`} onPress={() => router.push("/memory")} /> : null}
+            {quota.data?.remaining !== null && quota.data?.remaining !== undefined ? <MemoryChip label={`${quota.data.remaining} chats left today`} /> : null}
+          </ScrollView>
+        ) : null}
 
         <ScrollView
           ref={scroller}
           className="flex-1"
-          contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 16, flexGrow: 1 }}
+          contentContainerStyle={{ paddingHorizontal: 18, paddingBottom: 16, flexGrow: 1 }}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
+          maintainVisibleContentPosition={{ minIndexForVisible: 0 }}
+          onContentSizeChange={() => {
+            if (stickToEnd.current) scroller.current?.scrollToEnd({ animated: messages.length > 0 });
+          }}
         >
           {empty ? (
-            <View className="flex-1 justify-center py-6">
-              {/*
-               * The mascot needs a ground to stand on.
-               *
-               * Its shell gradient starts at #e6e1fb, which is nearly the
-               * canvas colour — on a plain background only the outline and the
-               * face survived, so the friendliest element on the screen
-               * rendered as a ghost. A brand-tinted disc behind it restores the
-               * character, and it is the same treatment used on Home and About,
-               * which is what "consistent" has to mean here.
-               */}
+            <View className="flex-1 justify-center py-4">
               <View className="items-center">
                 <Bob>
-                  <MascotFigure size={132} wave />
+                  <MascotFigure size={120} wave />
                 </Bob>
-
-                <Text style={{ fontFamily: font.semibold, fontSize: 26, letterSpacing: -0.7, color: ink[900], marginTop: 8, textAlign: "center" }}>
-                  Hi, I&apos;m <Text style={{ fontFamily: font.italic, color: brand[600] }}><Brand /></Text>
+                <Text style={{ fontFamily: font.semibold, fontSize: 25, letterSpacing: -0.7, color: ink[900], marginTop: 6, textAlign: "center" }}>
+                  Hi, I&apos;m{" "}
+                  <Text style={{ fontFamily: font.italic, color: brand[600] }}>
+                    <Brand />
+                  </Text>
                 </Text>
-                {/*
-                 * The old line spent its second half on two things Cheeku will
-                 * not do. The limit belongs on this screen — it just does not
-                 * belong in the greeting, where it makes the first thing the
-                 * companion says about itself a disclaimer. It now sits under
-                 * the starters, where it reads as candour rather than a warning
-                 * label.
-                 */}
-                <Text style={{ fontFamily: font.regular, fontSize: 14.5, lineHeight: 21, color: ink[500], marginTop: 6, textAlign: "center", maxWidth: 300 }}>
-                  Ask me anything about {context.data.profile.name}&apos;s health — a word on a
-                  report, something that has been bothering you, or what to raise at the next
-                  appointment.
+                <Text style={{ fontFamily: font.regular, fontSize: 14.5, lineHeight: 21, color: ink[500], marginTop: 6, textAlign: "center", maxWidth: 320 }}>
+                  I keep {name}&apos;s health memory: every report, every reading you tell me, everything we talk about. Tell me what&apos;s going on and I&apos;ll read it against {name}&apos;s history.
                 </Text>
               </View>
 
               <View className="mt-5 w-full gap-2">
-                <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[700], paddingHorizontal: 2 }}>Try one of these</Text>
-                {starters.map(({ text, topic }) => {
-                  const Icon = TOPIC_ICON[topic] ?? Sparkles;
+                {starters.map((s) => {
+                  const Icon = STARTER_ICON[s.icon] ?? FileText;
                   return (
-                  <Pressable
-                    key={text}
-                    accessibilityRole="button"
-                    onPress={() => void send(text)}
-                    className="flex-row items-center gap-3 rounded-[22px] px-3 py-3"
-                    style={[glassShadow, { backgroundColor: glass.fillStrong, borderWidth: 1, borderColor: glass.rim }]}
-                  >
-                    <View className="h-10 w-10 items-center justify-center rounded-[13px] bg-brand-50">
-                      <Icon size={17} color={brand[600]} />
-                    </View>
-                    <Text style={{ flex: 1, fontFamily: font.medium, fontSize: 14, lineHeight: 19, color: ink[900] }}>{text}</Text>
-                    <ArrowUpRight size={15} color={ink[300]} />
-                  </Pressable>
+                    <Pressable
+                      key={s.key}
+                      accessibilityRole="button"
+                      onPress={() => void send(s.text)}
+                      className="flex-row items-center gap-3 rounded-[22px] px-3 py-3"
+                      style={[glassShadow, { backgroundColor: glass.fillStrong, borderWidth: 1, borderColor: glass.rim }]}
+                    >
+                      <View className="h-10 w-10 items-center justify-center rounded-[13px] bg-brand-50">
+                        <Icon size={17} color={brand[600]} />
+                      </View>
+                      <View style={{ flex: 1 }}>
+                        <Text style={{ fontFamily: font.medium, fontSize: 14, lineHeight: 19, color: ink[900] }}>{s.text}</Text>
+                        {s.detail ? (
+                          <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 12, color: ink[500] }}>
+                            {s.detail}
+                          </Text>
+                        ) : null}
+                      </View>
+                      <ArrowUpRight size={15} color={ink[300]} />
+                    </Pressable>
                   );
                 })}
-              </View>
-
-              {/*
-               * The bridge from talking to doing: when a conversation is not
-               * enough, the next step is a doctor, and the booking flow starts
-               * with Cheeku asking the same kind of questions.
-               */}
-              <Pressable
-                accessibilityRole="button"
-                onPress={() => router.push("/book/consult")}
-                style={({ pressed }) => ({ marginTop: 10, transform: [{ scale: pressed ? 0.985 : 1 }] })}
-              >
-                <View className="flex-row items-center gap-3 overflow-hidden rounded-[22px] p-3" style={glassShadow}>
-                  <Gradient from="#ece6ff" to="#f7f5ff" />
+                <Pressable
+                  accessibilityRole="button"
+                  onPress={() => input.current?.focus()}
+                  className="flex-row items-center gap-3 rounded-[22px] px-3 py-3"
+                  style={{ borderWidth: 1, borderStyle: "dashed", borderColor: brand[200] }}
+                >
                   <View className="h-10 w-10 items-center justify-center rounded-[13px] bg-white">
                     <Stethoscope size={17} color={brand[600]} />
                   </View>
-                  <View className="flex-1">
-                    <Text style={{ fontFamily: font.semibold, fontSize: 14, color: ink[900] }}>Need to see a doctor?</Text>
-                    <Text style={{ fontFamily: font.regular, fontSize: 12.5, color: ink[500] }}>I&apos;ll help you book, online or nearby</Text>
-                  </View>
-                  <ArrowUpRight size={15} color={ink[500]} />
-                </View>
-              </Pressable>
+                  <Text style={{ flex: 1, fontFamily: font.medium, fontSize: 14, color: ink[900] }}>Something&apos;s not right with {name}</Text>
+                </Pressable>
+              </View>
 
-              <View className="mt-4 flex-row items-start gap-2 rounded-[18px] px-3.5 py-3" style={{ backgroundColor: "rgba(241,240,254,0.8)" }}>
-                <ShieldCheck size={14} color={brand[500]} style={{ marginTop: 1 }} />
-                <Text className="flex-1 text-[11.5px] leading-[16px] text-ink-700">
-                  I answer from your own records and name the one I used. I never diagnose or
-                  prescribe.
+              <View className="mt-4 gap-2.5 rounded-[22px] p-4" style={{ backgroundColor: "rgba(241,240,254,0.85)" }}>
+                <How icon={Brain} text={`Reads what you describe against ${name}'s own reports, readings and medicines`} />
+                <How icon={ShieldCheck} text="Tells you how urgent it looks: fits the pattern, keep an eye on it, call today, or go now" />
+                <How icon={Stethoscope} text="Writes out exactly what to tell the doctor, with the numbers" />
+                <Text style={{ fontFamily: font.regular, fontSize: 11.5, lineHeight: 16, color: ink[500], marginTop: 2 }}>
+                  I don&apos;t diagnose. The doctor examines and decides; I make sure they hear the whole story.
                 </Text>
               </View>
             </View>
           ) : (
-            <View className="gap-3 pt-2">
-              {turns.map((turn) => (
-                <Turn key={turn.id} turn={turn} onCitation={(id) => router.push(`/records/${id}`)} />
-              ))}
-              {pending ? (
-                <Glass strong className="self-start rounded-[20px] px-4 py-3.5" style={{ borderBottomLeftRadius: 6, marginLeft: 36 }}>
-                  <TypingDots color={brand[400]} />
-                </Glass>
+            <View style={{ gap: 14, paddingTop: 4 }}>
+              {thread.hasNextPage ? (
+                <Pressable
+                  accessibilityRole="button"
+                  onPress={() => {
+                    stickToEnd.current = false;
+                    void thread.fetchNextPage();
+                  }}
+                  style={{ alignSelf: "center", paddingHorizontal: 14, paddingVertical: 8, borderRadius: 999, backgroundColor: surface.tint }}
+                >
+                  <Text style={{ fontFamily: font.medium, fontSize: 12.5, color: ink[700] }}>{thread.isFetchingNextPage ? "Loading…" : "Show earlier"}</Text>
+                </Pressable>
+              ) : messages.length ? (
+                <Text style={{ alignSelf: "center", fontFamily: font.regular, fontSize: 11.5, color: ink[300] }}>
+                  Everything you&apos;ve told me about {name} starts here
+                </Text>
+              ) : null}
+
+              {items.map((item) => {
+                if (item.kind === "day") {
+                  return (
+                    <View key={item.key} style={{ flexDirection: "row", alignItems: "center", gap: 10, marginTop: 4 }}>
+                      <View style={{ flex: 1, height: 1, backgroundColor: surface.line }} />
+                      <Text style={{ fontFamily: font.semibold, fontSize: 11, letterSpacing: 0.4, color: ink[500] }}>{item.label}</Text>
+                      <View style={{ flex: 1, height: 1, backgroundColor: surface.line }} />
+                    </View>
+                  );
+                }
+                const m = item.message;
+                if (m.role === "user") return <UserBubble key={item.key} message={m} />;
+                if (m.assessment) {
+                  return (
+                    <View key={item.key} style={{ alignSelf: "stretch" }}>
+                      <ProductAssessmentCard assessment={m.assessment} />
+                    </View>
+                  );
+                }
+                const last = m.id === messages[messages.length - 1]?.id;
+                return (
+                  <AssistantTurn
+                    key={item.key}
+                    message={m}
+                    name={name}
+                    onSend={last ? (t) => void send(t) : undefined}
+                    onOpenRecord={(id) => router.push(`/records/${id}`)}
+                    onOpenMemory={() => router.push("/memory")}
+                  />
+                );
+              })}
+
+              {pendingText ? (
+                <>
+                  {pendingText !== "Checking a product…" ? <UserBubble message={{ id: "pending", conversationId: "", role: "user", content: pendingText, createdAt: "", tier: null, memory: null, citations: [], safety: "clear", attachment: null, assessment: null }} /> : null}
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                    <MascotBust size={28} />
+                    <Glass strong className="rounded-[20px] px-4 py-3.5" style={{ borderTopLeftRadius: 6 }}>
+                      <TypingDots color={brand[400]} />
+                    </Glass>
+                    <Text style={{ fontFamily: font.regular, fontSize: 11.5, color: ink[500] }}>Reading {name}&apos;s history…</Text>
+                  </View>
+                </>
               ) : null}
             </View>
           )}
-
 
           {error ? (
             <Text accessibilityRole="alert" className="mt-3 text-[13px] font-medium text-danger-text">
@@ -438,71 +426,56 @@ export default function Ask() {
           ) : null}
         </ScrollView>
 
-        {/*
-         * The composer as one object, not three.
-         *
-         * Three separate boxes with their own borders made the bar read as a
-         * toolbar. Wrapping the field and both controls in a single rounded
-         * shell — which brightens to brand on focus — makes it read as one
-         * place to talk, and matches the Ask box on Home so the two entry
-         * points feel like the same product.
-         */}
-        <View className="px-4 pt-2" style={{ paddingBottom: 6 }}>
+        <View className="px-4 pt-2" style={{ paddingBottom: 6, gap: 6 }}>
+          {about ? (
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 8, alignSelf: "flex-start", paddingLeft: 12, paddingRight: 6, paddingVertical: 6, borderRadius: 999, backgroundColor: brand[50] }}>
+              <FileText size={13} color={brand[600]} />
+              <Text numberOfLines={1} style={{ maxWidth: 240, fontFamily: font.medium, fontSize: 12.5, color: brand[700] }}>
+                About {about.title}
+                {about.date ? ` · ${shortDate(about.date)}` : ""}
+              </Text>
+              <Pressable accessibilityRole="button" accessibilityLabel="Stop asking about this record" onPress={() => setAboutId(null)} hitSlop={8}>
+                <X size={14} color={brand[600]} />
+              </Pressable>
+            </View>
+          ) : null}
           <View
             className="flex-row items-end gap-1.5 rounded-[26px] p-1.5 pl-4"
-            style={[
-              glassShadow,
-              { backgroundColor: glass.fillStrong, borderWidth: composerFocused ? 1.5 : 1, borderColor: composerFocused ? brand[300] : glass.rim },
-            ]}
+            style={[glassShadow, { backgroundColor: glass.fillStrong, borderWidth: focused ? 1.5 : 1, borderColor: focused ? brand[300] : glass.rim }]}
           >
-          <TextInput
-            value={draft}
-            onChangeText={setDraft}
-            onFocus={() => setComposerFocused(true)}
-            onBlur={() => setComposerFocused(false)}
-            placeholder="Ask anything…"
-            placeholderTextColor={ink[300]}
-            accessibilityLabel="Ask Cheeku a question"
-            multiline
-            className="flex-1 py-2"
-            style={{
-              maxHeight: 120,
-              fontSize: 15,
-              color: ink[900],
-              fontFamily: "Inter_400Regular",
-            }}
-          />
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Ask about a product"
-            onPress={() => setPickerOpen(true)}
-            className="h-10 w-10 items-center justify-center rounded-pill"
-          >
-            <Camera size={19} color={brand[600]} />
-          </Pressable>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Send"
-            accessibilityState={{ disabled: pending || !draft.trim() }}
-            disabled={pending || !draft.trim()}
-            onPress={() => void send(draft)}
-            className="h-11 w-11 items-center justify-center rounded-pill"
-            style={{ backgroundColor: ink[900], opacity: pending || !draft.trim() ? 0.35 : 1 }}
-          >
-            <ArrowUp size={19} color="#ffffff" />
-          </Pressable>
+            <TextInput
+              ref={input}
+              value={draft}
+              onChangeText={setDraft}
+              onFocus={() => setFocused(true)}
+              onBlur={() => setFocused(false)}
+              placeholder={about ? `What do you want to know about it?` : `Ask, or tell me what's going on with ${name}`}
+              placeholderTextColor={ink[300]}
+              accessibilityLabel="Message Cheeku"
+              multiline
+              className="flex-1 py-2"
+              style={{ maxHeight: 120, fontSize: 15, color: ink[900], fontFamily: "Inter_400Regular" }}
+            />
+            <Pressable accessibilityRole="button" accessibilityLabel="Ask about a product" onPress={() => setPickerOpen(true)} className="h-10 w-10 items-center justify-center rounded-pill">
+              <Camera size={19} color={brand[600]} />
+            </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Send"
+              accessibilityState={{ disabled: Boolean(pendingText) || !draft.trim() }}
+              disabled={Boolean(pendingText) || !draft.trim()}
+              onPress={() => void send(draft)}
+              className="h-11 w-11 items-center justify-center rounded-pill"
+              style={{ backgroundColor: ink[900], opacity: pendingText || !draft.trim() ? 0.35 : 1 }}
+            >
+              <ArrowUp size={19} color="#ffffff" />
+            </Pressable>
           </View>
         </View>
       </View>
 
-      <ProductPicker
-        open={pickerOpen}
-        onClose={() => setPickerOpen(false)}
-        onPick={(id) => void sendProduct(id)}
-      />
-
+      <ProductPicker open={pickerOpen} onClose={() => setPickerOpen(false)} onPick={(id) => void sendProduct(id)} />
       <EmergencyEscalation result={escalation} onClose={() => setEscalation(null)} />
-
       <Paywall
         open={paywallFor !== null}
         reason="quota"
@@ -511,16 +484,8 @@ export default function Ask() {
         onActivated={() => {
           const held = paywallFor;
           setPaywallFor(null);
-          /*
-           * The quota banner reads from the entitlement, so it has to be
-           * refetched before the header can stop saying zero left. Invalidating
-           * rather than patching keeps one source of truth.
-           */
-          void queryClient.invalidateQueries({ queryKey: ["ask-context"] });
-          void queryClient.invalidateQueries({ queryKey: ["entitlement"] });
-          // The promise of the held question: it goes now, without being
-          // retyped. An empty string is the product path, which has nothing to
-          // resend.
+          void qc.invalidateQueries({ queryKey: ["ask-context"] });
+          void qc.invalidateQueries({ queryKey: ["entitlement"] });
           if (held) {
             setDraft("");
             void send(held);
@@ -531,128 +496,26 @@ export default function Ask() {
   );
 }
 
-function Turn({ turn, onCitation }: { turn: ChatTurn; onCitation: (id: string) => void }) {
-  if (turn.role === "user") {
-    return (
-      <View className="max-w-[85%] items-end self-end gap-1.5">
-        {turn.attachment ? (
-          <View className="flex-row items-center gap-2 rounded-card bg-surface px-2.5 py-2" style={shadow.e1}>
-            <SvgXml xml={turn.attachment.thumbnail} width={28} height={28} />
-            <Text className="text-[12px] font-medium text-ink-700">{turn.attachment.title}</Text>
-          </View>
-        ) : null}
-        {/*
-         * Asymmetric corners. One squared corner on the side a bubble came
-         * from reads as speech; four equal corners read as a card. The user's
-         * squares bottom-right and Cheeku's bottom-left, so the two sides of
-         * the conversation lean towards each other.
-         */}
-        <View
-          className="bg-brand-600 px-4 py-3"
-          style={{ borderRadius: 22, borderBottomRightRadius: 6 }}
-        >
-          <Text className="text-[14px] leading-[20px] text-white">{turn.content}</Text>
-        </View>
-      </View>
-    );
-  }
-
-  if (turn.assessment) {
-    return (
-      <View className="w-full self-start">
-        <ProductAssessmentCard assessment={turn.assessment} />
-      </View>
-    );
-  }
-
+function MemoryChip({ label, strong, onPress }: { label: string; strong?: boolean; onPress?: () => void }) {
   return (
-    <View className="max-w-[92%] gap-2 self-start">
-      {/*
-       * ABOVE the answer, not below it. Someone who has just described a
-       * three-day fever should meet "see a doctor today" before they meet an
-       * explanation they might read as reassurance and stop there.
-       */}
-      {turn.caution && shouldCaution(turn.caution) ? <CautionNote result={turn.caution} /> : null}
+    <Pressable
+      accessibilityRole={onPress ? "button" : "text"}
+      disabled={!onPress}
+      onPress={onPress}
+      style={[glassShadow, { height: 32, justifyContent: "center", paddingHorizontal: 12, borderRadius: 999, backgroundColor: strong ? ink[900] : glass.fillStrong, borderWidth: strong ? 0 : 1, borderColor: glass.rim }]}
+    >
+      <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 12, color: strong ? "#fff" : ink[700] }}>
+        {label}
+      </Text>
+    </Pressable>
+  );
+}
 
-      {/*
-       * The face beside the answer.
-       *
-       * Without it an answer is a white card from nobody in particular, which
-       * is exactly the tone this app is trying not to have. The mascot sits on
-       * its brand disc for contrast — its own gradient starts near-white — and
-       * aligns to the first line rather than centring, so a long answer does
-       * not leave it floating in the middle of a paragraph.
-       */}
-      <View className="flex-row items-start gap-2">
-        <View style={{ width: 28, flexShrink: 0, marginTop: 2 }}>
-          <MascotBust size={28} />
-        </View>
-
-        <View
-          className="min-w-0 flex-1 px-4 py-3"
-          style={[glassShadow, { backgroundColor: glass.fillStrong, borderWidth: 1, borderColor: glass.rim, borderRadius: 22, borderBottomLeftRadius: 6 }]}
-        >
-        <Text className="text-[14px] leading-[21px] text-ink-900">{turn.content}</Text>
-
-        {/*
-         * Citations are tappable through to the record. A citation that cannot
-         * be checked is decoration — and on a medical answer, decoration that
-         * looks like evidence.
-         */}
-        {turn.citations.length > 0 ? (
-          <View className="mt-2.5 gap-1.5 border-t pt-2.5" style={{ borderTopColor: surface.line }}>
-            {turn.citations.map((citation) => (
-              <Pressable
-                key={citation.documentId}
-                accessibilityRole="button"
-                accessibilityLabel={`Open ${citation.label}`}
-                onPress={() => onCitation(citation.documentId)}
-                className="flex-row items-center gap-1.5"
-              >
-                <FileText size={12} color={brand[600]} />
-                <Text className="flex-1 text-[11.5px] font-medium text-brand-700" numberOfLines={1}>
-                  {citation.label}
-                </Text>
-              </Pressable>
-            ))}
-          </View>
-        ) : null}
-        </View>
-      </View>
-
-      {/*
-       * A general answer is labelled as one. The difference between "your
-       * report says" and "in general" is the difference between a fact about
-       * the reader and a fact about the world, and blurring it is how an app
-       * ends up implying it knows something it does not.
-       */}
-      {turn.kind === "general" ? (
-        <View className="mt-1.5 flex-row items-center gap-1.5">
-          <Sparkles size={11} color={ink[300]} />
-          <Text className="text-[11px] text-ink-300">
-            General information, not from your records
-          </Text>
-        </View>
-      ) : null}
-
-      {turn.kind === "silent" ? (
-        <View className="mt-1.5 flex-row items-center gap-1.5">
-          <TriangleAlert size={11} color={semantic.caution} />
-          <Text className="flex-1 text-[11px] text-ink-500">
-            Nothing in your records covers this
-          </Text>
-        </View>
-      ) : null}
-
-      {turn.followUps.length > 0 ? (
-        <View className="mt-2 flex-row flex-wrap gap-1.5">
-          {turn.followUps.map((followUp) => (
-            <View key={followUp} className="rounded-pill px-3 py-2" style={[glassShadow, { backgroundColor: glass.fillStrong, borderWidth: 1, borderColor: glass.rim }]}>
-              <Text style={{ fontFamily: font.medium, fontSize: 12.5, color: ink[700] }}>{followUp}</Text>
-            </View>
-          ))}
-        </View>
-      ) : null}
+function How({ icon: Icon, text }: { icon: LucideIcon; text: string }) {
+  return (
+    <View style={{ flexDirection: "row", gap: 10, alignItems: "flex-start" }}>
+      <Icon size={15} color={brand[600]} style={{ marginTop: 1 }} />
+      <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 12.5, lineHeight: 18, color: ink[700] }}>{text}</Text>
     </View>
   );
 }

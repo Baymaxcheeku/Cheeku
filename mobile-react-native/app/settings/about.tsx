@@ -606,10 +606,10 @@ export default function About() {
         <Text className="text-[14px] font-bold text-ink-900">What <Brand /> will never do</Text>
         <View className="mt-2 gap-1.5">
           {[
-            "Diagnose a condition, or tell you what a value means for you",
-            "Suggest a medicine, a dose, or a treatment",
+            "Name a diagnosis, or decide what a result means for treatment",
+            "Suggest a medicine, change a dose, or tell anyone to stop one",
             "Show one family member's records under another's name",
-            "Choose what to show you based on something it read in your documents",
+            "Answer an emergency with analysis instead of sending you to help",
             "Sell your data, or share it outside your family",
           ].map((line) => (
             <View key={line} className="flex-row items-start gap-2">
@@ -619,7 +619,7 @@ export default function About() {
           ))}
         </View>
         <Text className="mt-2.5 text-[11.5px] leading-[16px] text-ink-500">
-          Anything a doctor should decide, <Brand /> hands to your doctor.
+          What it does instead: reads what you describe against everything it remembers, tells you how urgent it looks, and hands the doctor the whole story.
         </Text>
       </View>
 
@@ -699,15 +699,15 @@ export default function About() {
 const FAQ: readonly { q: string; a: string }[] = [
   {
     q: "Can Cheeku replace my doctor?",
-    a: "No, and it is not built to. It keeps your records straight and reads them back to you so you arrive at an appointment prepared and leave it understanding what was said. Deciding what a result means, and what to do about it, is your doctor's work.",
+    a: "No, and it is not built to. It is a memory: every report, reading and conversation, kept in order and read against each other. That lets it say how urgent something looks and what to tell the doctor, with the numbers. Examining, diagnosing and treating stay with your doctor.",
   },
   {
     q: "Where do the answers come from?",
-    a: "The documents you have added. Cheeku quotes what a report says and names the record it came from, so you can open it and check. When your file has nothing to answer with, it says so instead of guessing.",
+    a: "Your own memory first: the documents you added, the readings you mentioned, and what you talked about before, each with its date. Symptoms are read using general health knowledge, against limits that fit the person's age or stage (a newborn's day of life, a pregnancy's trimester). Every answer shows what it read, and when there is nothing to go on it says so instead of guessing.",
   },
   {
     q: "Does it use my results to decide what to show me?",
-    a: "No. Suggested questions and articles are chosen only from what you told us about yourself — the journey you picked and the conditions you typed in. Showing you diabetes articles because a lab value came back high would be a diagnosis dressed as a recommendation.",
+    a: "In the chat, yes, because that is the point of a memory: a starter might be a result that is still pending or a number that changed. It never suggests you have a condition. Articles are still chosen only from what you told us about yourself, the journey you picked and the conditions you typed in.",
   },
   {
     q: "Who can see my records?",

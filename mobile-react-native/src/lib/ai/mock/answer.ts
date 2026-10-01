@@ -163,7 +163,7 @@ function overviewAnswer(records: readonly GroundingRecord[]): MockAnswer {
 
   paragraphs.push(
     flagged.length > 0
-      ? "Ask me about any single value and I'll read you the exact number and the range printed next to it. What those numbers mean for you is your doctor's call, not mine."
+      ? "Ask about any single value and I'll give you the exact number, the range it was read against, and how it moved. If something's going on alongside it, tell me and I'll read the two together."
       : "Ask me about any single value and I'll read you the exact number and the range printed next to it.",
   );
 
@@ -290,7 +290,7 @@ export function answerQuestion(
   }
 
   paragraphs.push(
-    "I read what your documents say. I do not interpret results or suggest treatment. Your doctor can tell you what these numbers mean for you.",
+    "That's what the report says. If something's going on alongside it, tell me and I'll read the two together. What to do about it is the doctor's call, and I can write out exactly what to tell them.",
   );
 
   return {

@@ -204,7 +204,11 @@ in a shell. See `../SHIPPING.md`.
    tint. Broken twice on web, caught twice.
 4. Never show one family member's data in another's context.
 5. No health data in logs, URLs, query strings, or analytics.
-6. The app does not diagnose. Copy implying it does is a bug.
+6. The app does not diagnose. It reads what people describe against the
+   person's own memory (records, readings, medicines, clock) using general
+   health models, says how urgent it looks in one of four tiers, and writes
+   out what to tell the doctor. Naming a diagnosis or changing a dose is a
+   bug. Hard-stops and the safety lexicon always beat the model.
 
 ## Running it
 
@@ -254,5 +258,16 @@ haptics has to be seen on a simulator or a device before it counts as done.
 - **`activate_tier_demo` grants paid tiers for free** (0012, gated on
   `app_flags.demo_billing`). Drop it before real billing.
 - Real OCR and model — separate track, contract in `../REACT_NATIVE_BUILD.md`.
+  The chat model contract is `src/lib/memory/model.ts` (ModelRequest in,
+  ModelReply out); turn it on with `EXPO_PUBLIC_CHAT_MODEL=edge` and the
+  `cheeku-chat` Edge Function secrets. Until then the stand-in answers.
+- **Clinical sign-off for the memory layer.** The clock-keyed limits in
+  `src/lib/memory/thresholds.ts` (newborn bilirubin rows are examples from
+  the reference thread, not a guideline), the hard-stop rules in
+  `src/lib/memory/ladder.ts` and the symptom models in
+  `src/lib/memory/symptoms.ts` need a clinician's review before launch.
+- **Migration 0030** (memory layer) must be applied for chat memory,
+  readings, open loops, pregnancy and birth promotion. The chat still works
+  before it, without remembering readings or tiers.
 - Rate limiting on auth and AI endpoints.
 - Untested: sign-out then sign-in, and a session revoked server-side.
