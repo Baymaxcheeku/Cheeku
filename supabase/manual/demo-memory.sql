@@ -11,6 +11,10 @@ declare
   i uuid;
   k int := 0;
 begin
+  if to_regclass('public.memory_facts') is null or to_regclass('public.open_loops') is null then
+    return 'NOT ADDED: run 0030-step-1-of-6 to 0030-step-6-of-6 first';
+  end if;
+
   select p.user_id into v_user from profiles p
   where lower(split_part(trim(p.name), ' ', 1)) = 'athar'
     and exists (select 1 from profiles q where q.user_id = p.user_id and lower(split_part(trim(q.name), ' ', 1)) = 'nisha')
