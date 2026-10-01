@@ -22,7 +22,7 @@ const OFFLINE = "That didn't save. Check your connection and try again.";
 /** Everything that shows a record, a list of them, or counts over them. */
 export function refreshRecords(qc: QueryClient, id?: string) {
   if (id) void qc.invalidateQueries({ queryKey: ["record", id] });
-  for (const key of ["records", "records-list", "records-context", "health-overview", "notifications", "family-members"]) {
+  for (const key of ["records", "records-list", "records-context", "health-overview", "health-file", "notifications", "family-members"]) {
     void qc.invalidateQueries({ queryKey: [key] });
   }
 }

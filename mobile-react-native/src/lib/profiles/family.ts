@@ -5,6 +5,7 @@ import { create } from "zustand";
 import { seatsFor, type Tier } from "@/lib/billing/plans";
 import { getEntitlement, type Entitlement } from "@/lib/billing/quota";
 import { listProfileRecords } from "@/lib/records/queries";
+import { prefetchHealthFile } from "@/lib/health/queries";
 import { supabase } from "@/lib/supabase/client";
 import { addMemberSchema } from "@/lib/settings/schemas";
 
@@ -58,6 +59,7 @@ export const MEMBER_SCOPED = [
   "active-profile-name",
   "health-overview",
   "settings-context",
+  "health-file",
 ] as const;
 
 /** Every query that changes when the roster or the plan does. */
@@ -108,6 +110,7 @@ export function showPhotoNow(qc: QueryClient, profileId: string, photo: string |
 export function prefetchMembers(qc: QueryClient, members: readonly ActiveProfile[]) {
   for (const m of members) {
     void qc.prefetchQuery({ queryKey: ["records", m.id], queryFn: () => listProfileRecords(m.id), staleTime: 60_000 });
+    prefetchHealthFile(qc, m.id);
   }
 }
 

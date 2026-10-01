@@ -1,4 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useLocalSearchParams } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, RefreshControl, ScrollView, Text, View } from "react-native";
 
@@ -11,7 +12,7 @@ import { RecordsView } from "@/components/records/records-view";
 import { activeProfile, selectableProfiles } from "@/lib/profiles/context";
 import { sinceFromPeriod } from "@/lib/records/filters";
 import { listRecords, statsFrom } from "@/lib/records/queries";
-import type { Severity } from "@/lib/records/types";
+import { DOC_TYPES, type DocType, type Severity } from "@/lib/records/types";
 import { brand } from "@/theme/tokens";
 import { useFamily } from "@/lib/profiles/family";
 
@@ -27,6 +28,12 @@ import { useFamily } from "@/lib/profiles/family";
 export default function Records() {
   const queryClient = useQueryClient();
   const [filters, setFilters] = useState<Filters>({ sort: "newest" });
+  // "/records?type=prescription" (from the health file's tiles) opens on that
+  // type. Read each time it changes, since this is a tab and stays mounted.
+  const { type } = useLocalSearchParams<{ type?: string }>();
+  useEffect(() => {
+    if (type && (DOC_TYPES as readonly string[]).includes(type)) setFilters((f) => ({ ...f, docType: type as DocType }));
+  }, [type]);
   /*
    * Severity is filtered CLIENT-SIDE, unlike the others.
    *

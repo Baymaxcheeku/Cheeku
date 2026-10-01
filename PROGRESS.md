@@ -1811,7 +1811,13 @@ one-offs, keyed per record so setting one twice replaces it. On web the
 button says reminders work in the phone app.
 
 **Apply:**
-1. Migration 0028: `supabase/manual/0028-sql-editor.sql` after 0027.
+1. Migration 0028: `supabase/manual/0028-part-1-of-3.sql`, then part 2,
+   then part 3, after 0027. The single file came through the SQL Editor
+   cut off ("syntax error at end of input"), so it is split into three
+   short parts, and 0028 is now safe to run again (create-or-replace
+   functions, `if not exists` columns, trigger dropped before it is
+   created). Tested: in order on a fresh database, all three twice, and
+   over a database that already had the old 0028.
 2. Optional, to see every page: `supabase/manual/demo-records.sql`, with your
    email on the EMAIL line. The last line in it removes the samples.
 
@@ -1828,3 +1834,146 @@ button says reminders work in the phone app.
 - tel: links
 - reminders firing
 - "Add to medicines" against a real member
+
+## Worth knowing and the health file, rebuilt end to end, 2026-10-01 (cloud session, not seen on a device)
+
+### Worth knowing (the content side)
+
+**Before:**
+- Home showed identical grey pills.
+- The article page was a pale masthead and paragraphs.
+- Articles had a colour and nothing else to organise them.
+
+**Migration 0029** (tested on scratch Postgres, safe to rerun):
+- **New article fields:**
+  - `category`: reports, family, prevention, pregnancy, living.
+  - `icon`: from a fixed list the app draws.
+  - `key_points`: the "In short" list.
+  - `author`, and a `featured` flag.
+- **Backfill:** the nine published articles each get a category, an icon,
+  three key points taken from their own text, and a "questions to take to
+  your appointment" block. Questions only, no advice.
+- **Corrected paragraph:** the vaccine-card article said the app does not
+  remind you of doses. That stopped being true with the record pages, so it
+  now says it can remind you of a date your clinic gave you, and still
+  doesn't decide what is due.
+- **`article_reads`**, one row per account per article (progress, saved,
+  finished), with RLS:
+  - `record_article_read` only ever moves progress forward and marks
+    finished at 90%.
+  - `set_article_saved` toggles Save.
+  - Another account sees none of it.
+
+**Design language** (`components/learn/parts.tsx`):
+- Each category has its own colour family: field, ring, accent, and deep ink
+  for titles. Violet is reports, teal family, blue prevention, rose
+  pregnancy, terracotta living well.
+- Each article has an emblem: a soft ring, a white disc, its icon and two
+  dots.
+- None of these colours are the semantic health hues.
+
+**Home:** the rail is now pastel cards (category eyebrow, emblem, title,
+read time, "For you", progress line, or "Read"), with "See all".
+
+**Library** (`/learn`):
+- Filters for All, Saved and each category.
+- The featured pick as a large card.
+- "Continue reading" for anything started and not finished.
+- A shelf per category.
+
+**Article page:**
+- A pinned bar: back, reading progress, Save, Share. It gets a solid
+  backdrop once you scroll.
+- The category masthead with the emblem and a byline (author, date checked,
+  minutes).
+- "In short", then the body.
+- New block types: steps, stat, and a questions card with "Get ready with
+  Cheeku".
+- "Ask Cheeku about this", "Read next" (same category first, unread first),
+  then the sources.
+- Progress is saved at each quarter and on leaving.
+
+**Ranking** (`lib/knowledge/catalog.ts`, tested): for-you first, then
+unread, then newest. Still only the reader's own declared conditions and
+journey; never anything read from their documents. Every query falls back
+cleanly before 0029 runs.
+
+### The health file
+
+**Before:**
+- One cache key for whoever was in view, so a switch could show the last
+  person's file until it refetched.
+- Three separate reads.
+- A flat page.
+
+**`health_file_bundle(profile)`** (0029): one call returns the member's
+profile, records and values. It only answers for a member of the caller's
+own family that the plan covers; otherwise it returns nothing. Tested for
+another account, and for a member locked by a downgrade.
+
+**`lib/health/file.ts`** (tested) shapes the bundle into:
+- the person (age, blood group, height, weight, allergies, conditions)
+- totals
+- tracked values, each with its full history, latest, previous and
+  direction
+- what the labs flagged
+- medicines merged from records and the member's own list, never twice
+- vaccinations
+- active insurance cover
+- who they've seen (with the app's own booking invoices not double-counted)
+- recent records
+- **coming up:** only dates the records and bookings gave (follow-ups, next
+  doses including overdue ones, renewals within 60 days, booked visits,
+  lab collections, refills within 3 weeks).
+
+**The page:**
+- A member switcher that switches the whole app.
+- An identity card: allergies first, in the caution hue.
+- Counts, and a "waiting for a check" banner.
+- Coming up.
+- Worth a look and values over time, with sparklines that shade the lab's
+  normal band.
+- Medicines (with where each came from), vaccinations, insurance cover, who
+  they've seen, recent records.
+- Type tiles that open Records already filtered (`/records?type=`).
+- Share: a plain-text summary for a doctor, made of what the file says
+  only.
+
+**Home's card:** the member's face, three counts, and the one thing most
+worth knowing (the next date, else flagged values, else allergies).
+
+**Keyed per member** (`["health-file", id]`), refreshed with the
+member-scoped and record queries, and warmed when the family tray opens.
+The old overview module is removed.
+
+**Apply:** see the SQL Editor note below.
+
+**Verified here:**
+- Home's rail and card, the library, the article page and the health file,
+  in a web export with seeded data.
+- The migration, run twice, and its access rules on scratch Postgres.
+- 211 tests.
+
+**Not verified:** on a phone, look at:
+- the rail's snap scrolling
+- the article bar over the masthead on iOS
+- sparklines at small sizes
+- Share
+
+### SQL Editor pastes arriving cut off, 2026-10-01
+
+Pastes into the Supabase SQL Editor kept arriving truncated ("syntax error
+at end of input"; the last one stopped at character 5,290, mid-statement).
+The SQL itself runs cleanly when sent whole. So 0028 and 0029 now ship as
+small steps in `supabase/manual/` (0028 in 6, 0029 in 5, each under about
+3,000 characters).
+
+- Each step is its own transaction, so a bad paste changes nothing.
+- Every step is safe to run again. The last step of each records the
+  migration as applied.
+- `0000-check-what-is-applied.sql` lists which migrations a database
+  already has.
+- Tested: every step in order on a fresh database at 0027, then all of them
+  a second time.
+- The longer-term fix is to connect the Supabase connector, so migrations
+  can be applied without copying at all.
