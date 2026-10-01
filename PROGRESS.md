@@ -1946,8 +1946,7 @@ worth knowing (the next date, else flagged values, else allergies).
 member-scoped and record queries, and warmed when the family tray opens.
 The old overview module is removed.
 
-**Apply:** `supabase/manual/0029-part-1-of-2.sql`, then part 2, after
-0028.
+**Apply:** see the SQL Editor note below.
 
 **Verified here:**
 - Home's rail and card, the library, the article page and the health file,
@@ -1960,3 +1959,21 @@ The old overview module is removed.
 - the article bar over the masthead on iOS
 - sparklines at small sizes
 - Share
+
+### SQL Editor pastes arriving cut off, 2026-10-01
+
+Pastes into the Supabase SQL Editor kept arriving truncated ("syntax error
+at end of input"; the last one stopped at character 5,290, mid-statement).
+The SQL itself runs cleanly when sent whole. So 0028 and 0029 now ship as
+small steps in `supabase/manual/` (0028 in 6, 0029 in 5, each under about
+3,000 characters).
+
+- Each step is its own transaction, so a bad paste changes nothing.
+- Every step is safe to run again. The last step of each records the
+  migration as applied.
+- `0000-check-what-is-applied.sql` lists which migrations a database
+  already has.
+- Tested: every step in order on a fresh database at 0027, then all of them
+  a second time.
+- The longer-term fix is to connect the Supabase connector, so migrations
+  can be applied without copying at all.
