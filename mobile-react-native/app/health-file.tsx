@@ -1,5 +1,6 @@
 import { useRouter } from "expo-router";
 import {
+  MessageCircle,
   BadgeCheck,
   Building2,
   CalendarHeart,
@@ -231,6 +232,14 @@ function FileBody({ f, memberId, member, onAdd }: { f: HealthFile; memberId: str
           <Text style={{ fontFamily: font.regular, fontSize: 12, lineHeight: 17, color: ink[500], marginTop: 8 }}>
             Flagged by the lab that ran the test, against its own printed range. A flag is not a diagnosis.
           </Text>
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => router.push({ pathname: "/ask", params: { q: `How have ${p.isPrimary ? "my" : `${p.firstName}'s`} flagged values moved, and does anything need a doctor?` } })}
+            style={{ flexDirection: "row", alignItems: "center", gap: 6, marginTop: 10, alignSelf: "flex-start", paddingHorizontal: 12, paddingVertical: 8, borderRadius: 999, backgroundColor: brand[50] }}
+          >
+            <MessageCircle size={14} color={brand[600]} />
+            <Text style={{ fontFamily: font.semibold, fontSize: 12.5, color: brand[700] }}>Ask Cheeku about these</Text>
+          </Pressable>
         </>
       ) : null}
 

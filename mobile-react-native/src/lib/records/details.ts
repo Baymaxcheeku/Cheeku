@@ -180,13 +180,32 @@ export type InsuranceDetails = {
   claims: { id: string; date: string | null; amount: number; status: "settled" | "pending" | "rejected" }[];
 };
 
+/*
+ * What a photographed box says about itself. The licence printed on it is the
+ * part most systems drop: a drug licence, an FSSAI food licence and a cosmetic
+ * licence mean very different things about how far the label can be trusted.
+ */
+export type RegulatoryClass = "drug" | "nutraceutical" | "cosmetic" | "device" | "unknown";
+
+export type PackInfo = {
+  /** Active ingredients with their amount per unit (tablet, ml, sachet). */
+  composition: { name: string; amount: number | null; unit: string | null }[];
+  regulatoryClass: RegulatoryClass;
+  licence: string | null;
+  batch: string | null;
+  manufacturer: string | null;
+  route: "oral" | "topical" | "inhaled" | "injection" | "eye_ear_nose" | "other" | null;
+  /** Inactive ingredients worth knowing: sweeteners, alcohol, dyes. */
+  excipients: string[];
+};
+
 export type MedicationDetails = {
   kind: "medication";
   source: "pharmacy" | "list" | "label";
   pharmacy: string | null;
   prescribedBy: string | null;
   startedOn: string | null;
-  medicines: (Medicine & { qty: number | null; expiry: string | null })[];
+  medicines: (Medicine & { qty: number | null; expiry: string | null; pack: PackInfo | null })[];
 };
 
 export type RecordDetails =
@@ -261,6 +280,25 @@ const readLine = (o: Obj) => {
   const label = str(o.label);
   return label ? { label, amount: num(o.amount) ?? 0 } : null;
 };
+
+const REG_CLASSES: readonly RegulatoryClass[] = ["drug", "nutraceutical", "cosmetic", "device", "unknown"];
+const ROUTES = ["oral", "topical", "inhaled", "injection", "eye_ear_nose", "other"] as const;
+
+function readPack(v: unknown): PackInfo | null {
+  if (!isObj(v)) return null;
+  return {
+    composition: list(v.composition, (c) => {
+      const name = str(c.name);
+      return name ? { name, amount: num(c.amount), unit: str(c.unit) } : null;
+    }, 20),
+    regulatoryClass: oneOf(v.regulatoryClass, REG_CLASSES, "unknown"),
+    licence: str(v.licence),
+    batch: str(v.batch),
+    manufacturer: str(v.manufacturer),
+    route: typeof v.route === "string" && (ROUTES as readonly string[]).includes(v.route) ? (v.route as PackInfo["route"]) : null,
+    excipients: strs(v.excipients, 12),
+  };
+}
 
 const READERS: { [K in RecordDetails["kind"]]: (d: Obj) => Extract<RecordDetails, { kind: K }> | null } = {
   lab_report: (d) => ({
@@ -485,7 +523,7 @@ const READERS: { [K in RecordDetails["kind"]]: (d: Obj) => Extract<RecordDetails
   medication: (d) => {
     const medicines = list(d.medicines, (o) => {
       const m = readMedicine(o);
-      return m ? { ...m, qty: num(o.qty), expiry: date(o.expiry) } : null;
+      return m ? { ...m, qty: num(o.qty), expiry: date(o.expiry), pack: readPack(o.pack) } : null;
     });
     if (medicines.length === 0) return null;
     return {

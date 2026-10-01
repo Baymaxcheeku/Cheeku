@@ -94,8 +94,8 @@ export default function HealthProfile() {
       <View className="mx-5 mt-4 flex-row items-start gap-2.5 rounded-[18px] px-4 py-3" style={{ backgroundColor: brand[50] }}>
         <Info size={16} color={brand[600]} style={{ marginTop: 1 }} />
         <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[700] }}>
-          {active.isPrimary ? "Yours" : `${first}'s`}, in your own words. Cheeku uses this when reading reports and answering questions, and never
-          guesses at a diagnosis.
+          {active.isPrimary ? "Yours" : `${first}'s`}, in your own words. Cheeku reads every report and every symptom you mention against this, and
+          never guesses at a diagnosis.
         </Text>
       </View>
 

@@ -26,8 +26,12 @@ const FAQS = [
     a: "No. Cheeku never sells your data and never shares it outside your family. Only you can access your family's health information.",
   },
   {
-    q: "Can Cheeku diagnose or prescribe anything?",
-    a: "No. Cheeku explains what's in your own records and never invents a diagnosis, a dosage or a treatment. For medical decisions, always talk to a doctor.",
+    q: "Does Cheeku diagnose?",
+    a: "No. Cheeku uses general health knowledge to understand a symptom up to a point, reads it against your own reports, readings and medicines, and tells you how urgent it looks: fits the usual pattern, keep an eye on it, call the doctor today, or go now. When a doctor is needed, it writes out what to tell them, with the numbers. It never names a diagnosis or changes a dose.",
+  },
+  {
+    q: "What does Cheeku remember?",
+    a: "Every record you add, every reading you mention in a chat (a BP, a weight, a temperature), and every conversation, kept separately for each family member. You can see all of it, correct a reading or forget one from the Memory page in the chat.",
   },
   {
     q: "What happens if I switch to a paid plan?",

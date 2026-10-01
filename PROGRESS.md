@@ -2026,3 +2026,96 @@ steps run as single SQL Editor commands, twice (second pass adds nothing),
 counts 7 / 6 / 6, no 1950s dates left, and each member's
 `health_file_bundle` fed through `buildHealthFile` gives sensible tracked
 values, medicines, Upcoming and care team. Not seen on a device.
+
+## The chat becomes a memory layer, 2026-10-01 (cloud session, not seen on a device)
+
+Athar's brief: Cheeku is a longitudinal memory that remembers every record,
+every chat and every reading, so answers are personal; it does not diagnose,
+it uses general health models to understand a symptom to a point, cuts the
+noise, reads the risk against the person's history and says what to do. The
+spec he sent, reverse-engineered from a twelve-month family thread
+(pregnancy, delivery, newborn), is kept at `docs/health-memory-layer-spec.md`.
+The fine-tuned model comes later; everything around it is built now.
+
+**The logic (`mobile-react-native/src/lib/memory`, pure, 40 tests).**
+- `clock.ts`: a person-relative clock. Gestational age from the LMP and scan
+  dating (earliest scan wins, a gap of a week or more is said out loud), day
+  of life for newborns (birth is day 0), postpartum for six weeks.
+- `thresholds.ts`: limits keyed on analyte AND clock (day of life, trimester,
+  age band, term/preterm). Each row names its source. Guideline rows (WHO,
+  ATA, IADPSG, NICE, ACOG) may reassure; "example" rows (the newborn
+  bilirubin limits from the reference thread) can only raise concern. A
+  value is read against the clock on the day it was taken.
+- `series.ts`: every number with previous, delta, rate, baseline. A 24-point
+  BP drop from the usual is what gets said, not "108".
+- `ledger.ts`: running medicine state from prescriptions, discharge notes,
+  pharmacy lists, boxes (new `pack` info on medication records: composition,
+  licence class, batch, excipients) and the member's own list. Checks:
+  ingredient stacking with vitamin D against IOM upper limits by age,
+  FSSAI/cosmetic licence surfaced, age and route (steroid cream on a newborn,
+  aspirin under 16), expiry.
+- `loops.ts`: open loops, including the invoice insight (a billed test with
+  no result). Raised in context: a pending newborn screen comes up the moment
+  a product with aspartame is on the list.
+- `symptoms.ts` + `ladder.ts`: twelve general symptom models, each with a
+  base tier per kind of person, a recency window, home care (never a dose),
+  watch-for signs and questions for the doctor. Four tiers. Clock-aware
+  hard-stops (reduced movements from 24 weeks, fever under 3 months, waters,
+  postpartum bleeding...) answer go-now without calling a model. The frozen
+  safety lexicon is untouched and still runs first.
+- `facts.ts`: readings said in the chat (BP from a monitor, weight in grams,
+  °F) join the same series. A message that says it is a correction replaces
+  the earlier reading and names the answers that leaned on it. A record and a
+  chat reading that disagree on the same day are both shown.
+- `script.ts`: the clinician script, built only from stored values. Shown at
+  "call today" and above, with call and share buttons.
+- `pipeline.ts`: the spec's loop, end to end. `model.ts` is the contract
+  for the fine-tuned model (MemoryDigest in, paragraphs and an optional tier
+  out; the rules' tier is a floor it can only raise). `mock-model.ts`
+  answers from the digest alone, which proves the digest carries enough.
+  `models.ts` switches to the `cheeku-chat` Edge Function with
+  `EXPO_PUBLIC_CHAT_MODEL=edge`, falling back to the stand-in on any error.
+
+**Backend: migration 0030** (and `supabase/manual/0030-step-1..6-of-6.sql`,
+made by the new `scripts/sql-editor-steps.ts`). `memory_facts`, `open_loops`,
+`pregnancies`, `profile_relations`, `profiles.birth`, `messages.tier/memory/
+model_id`, `conversations.last_message_at`, `chat_thread()` (one continuous
+thread per member, paged), `memory_bundle()` (one member's memory in one
+call, plan-scoped; a relative contributes their name and blood group, nothing
+else) and `promote_pregnancy()` (the baby becomes a member and inherits weeks
+at birth, delivery, weight, mother's blood group and medicines; seat limits
+apply). All new tables use the documents plan-scope trigger.
+
+**Fixed on the way.** Emergencies were never recorded: the old send path wrote
+`safety_status = 'escalate'` and the column only allows `'escalated'`, so the
+insert failed silently. Emergencies and hard-stops are now saved as
+`escalated`, which the quota never charges. Product checks now store their
+card on the message, so it survives a reload.
+
+**Screens.** Ask is one continuous thread per member with day breaks, "show
+earlier" paging and a memory strip (clock, what's remembered, open items).
+Each answer: correction note, tier badge with the clock, the answer, "what I
+read" cards, the doctor script, watch-for list, medicine alerts, still-open
+nudges, cited records, follow-ups. Go-now is a single red card with where to
+go and 108. New: `/memory` (what's remembered, with correct/forget and
+done/not needed), `/chats` and `/chats/[id]` (sittings by month, highest tier
+each), `/pregnancy` (track, and "the baby has arrived"). Starters come from
+memory. Record pages already open the chat with `?record=`; the health file
+now does too. Copy across onboarding, Home, Help and About is reframed from
+"never diagnoses" to what Cheeku does instead.
+
+**Verified here:** typecheck, lint, 252 tests. 0030 applied twice on scratch
+Postgres; the six editor steps give the same schema; promotion, seat limits,
+plan downgrade hiding, relation ownership and thread order exercised by hand.
+Real bundles from the test database run through the pipeline. Web preview
+screenshots of the newborn thread, a hard-stop, an empty thread, Athar's BP
+drop, the memory page and the conversation list. **Not seen on a device.**
+Worth checking on iOS: keyboard and the thread's scroll position when
+"Show earlier" loads, the horizontal reading cards, and the script's share.
+
+**Demo:** `supabase/manual/demo-memory.sql` adds home BP readings for Athar
+(a 24-point drop two days ago), Nisha's weight, Imaad's temperatures and
+weight, and a "check BP every morning" reminder. Re-runnable.
+
+**Needs a clinician:** every threshold row, the hard-stops and the symptom
+models. Recorded under Open in PLAN.md.

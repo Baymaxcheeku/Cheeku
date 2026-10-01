@@ -60,6 +60,8 @@ export const MEMBER_SCOPED = [
   "health-overview",
   "settings-context",
   "health-file",
+  "memory",
+  "thread",
 ] as const;
 
 /** Every query that changes when the roster or the plan does. */

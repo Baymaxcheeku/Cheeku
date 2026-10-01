@@ -136,7 +136,7 @@ export function HomeHeadline({ name, isSelf }: { name: string; isSelf: boolean }
  * The placeholder cycles through three short ways in, and stops while the box
  * is in use. Short enough to fit beside two icons on the narrowest phone.
  */
-const HINTS = ["Ask Cheeku anything…", "Snap a report…", "Ask in your words…"] as const;
+const HINTS = ["Tell Cheeku what's going on…", "Snap a report…", "Ask about any reading…"] as const;
 
 /**
  * The input, shaped like a search bar because that is the gesture everybody
@@ -299,8 +299,8 @@ export function CheekuCard({
     remembered > 0
       ? `I remember ${remembered} ${remembered === 1 ? "report" : "reports"} ${
           isSelf ? "of yours" : `of ${name}'s`
-        }. Ask me about any of them.`
-      : "Send me one report and I'll remember it for good.";
+        }, and everything we've talked about. Tell me what's going on and I'll read it against all of it.`
+      : "Send me one report and I'll keep it for good. Every chat after that builds on it.";
 
   return (
     <View className="overflow-hidden rounded-[32px]" style={[glassShadow, { minHeight: 318 }]}>
@@ -337,7 +337,7 @@ export function CheekuCard({
           <Text
             style={{ fontFamily: font.semibold, fontSize: 24, lineHeight: 29, letterSpacing: -0.6, color: ink[900], marginTop: 6 }}
           >
-            Talk it through with <Brand />
+            Tell me what&apos;s going on
           </Text>
           <Text style={{ fontFamily: font.regular, fontSize: 13.5, lineHeight: 19, color: ink[700], marginTop: 8 }}>
             {memory}

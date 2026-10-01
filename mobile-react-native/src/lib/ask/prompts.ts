@@ -28,6 +28,12 @@ import type { JourneyId } from "@/lib/onboarding/journeys";
  * │                                                                          │
  * └──────────────────────────────────────────────────────────────────────────┘
  *
+ * THE CHAT'S OWN STARTERS NOW COME FROM MEMORY (lib/memory/starters): a
+ * pending result, a number that moved, where someone is on their clock.
+ * That is the memory layer doing its job, and it still never asks whether a
+ * result is bad. This file remains for Home's chips, and as the chat's
+ * fallback when there is nothing remembered yet.
+ *
  * EVERY PROMPT IS ONE CHEEKU CAN HONESTLY TAKE. They ask it to read back,
  * compare, explain a term, or help prepare for an appointment. None asks
  * whether to take something, change a dose, or whether a result is bad — the

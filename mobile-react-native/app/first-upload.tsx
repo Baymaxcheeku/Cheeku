@@ -199,8 +199,8 @@ export default function FirstUpload() {
         <View className="mt-5 flex-row items-start gap-2.5 rounded-[18px] px-4 py-3.5" style={{ backgroundColor: brand[50] }}>
           <Lock size={15} color={brand[500]} style={{ marginTop: 2 }} />
           <Text style={[type.bodySmall, { flex: 1, color: ink[700] }]}>
-            Encrypted and private to your family. I read and remember, but I never diagnose, never
-            prescribe, and never share anything outside your account.
+            Encrypted and private to your family. I read it, remember it, and check everything you tell me
+            against it. I won&apos;t diagnose or prescribe, and nothing leaves your account.
           </Text>
         </View>
       </ScrollView>
