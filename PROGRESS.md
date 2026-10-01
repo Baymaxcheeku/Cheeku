@@ -1818,8 +1818,8 @@ button says reminders work in the phone app.
    functions, `if not exists` columns, trigger dropped before it is
    created). Tested: in order on a fresh database, all three twice, and
    over a database that already had the old 0028.
-2. Optional, to see every page: `supabase/manual/demo-records.sql`, with your
-   email on the EMAIL line. The last line in it removes the samples.
+2. Optional, to see every page: superseded by the family demo below
+   (`supabase/manual/demo-step-*`).
 
 **Verified here:**
 - Every page, the three sheets and the upload picker in a web export with
@@ -1990,3 +1990,39 @@ SQL. Verified:
 - a rerun is safe
 - starting from the user's actual state (old steps 1 and 2 applied, step 3
   failed) works, and the old helper function is cleaned up
+
+## Demo records for Athar, Nisha and Imaad, 2026-10-01 (cloud session)
+
+Nineteen sample records across the three of them, so every record page, the
+health file and Upcoming have something real-looking to show. Athar: two
+check-ups six months apart (lipids, HbA1c, sugar, vitamin D, so the trends
+have two points), a prescription, a clinic invoice, a pharmacy bill, the
+family floater policy and a chest X-ray. Nisha: two thyroid and iron panels,
+a prescription left in "needs review", a lab bill, a flu shot and an
+ultrasound. Imaad: a CBC with its Healthians booking invoice, a video visit
+with its prescription and invoice, Hepatitis A dose 1 of 2 (dose 2 due in
+ten days) and a flu shot.
+
+**How it's built.** `mobile-react-native/scripts/demo-family-sql.ts` holds the
+records as typed data, checks each one with `readDetails`, and writes
+`supabase/manual/demo-step-1..12-of-12.sql`. Step 1 makes a loader function,
+steps 2 to 11 hand it one base64 batch each (prose in base64 because the SQL
+Editor mangles English text in a paste), step 12 drops it and prints counts.
+Every step is under 3,100 characters and ends on `commit;`.
+
+- No email in the repo: the loader finds the one account whose family has
+  an Athar, a Nisha and an Imaad.
+- Dates are written against 1950-06-15 and shifted to today when loaded, so
+  "follow-up in 3 days" stays true whenever it is run.
+- Re-runnable: each record carries `DEMO-RECORDS <key>` in `raw_text` and is
+  skipped if already there. The "new record" notifications they raise are
+  deleted. Removal is one line, noted at the top of step 12.
+
+**Fixed on the way.** A yearly shot (dose 1 of 1 with a next date) showed in
+Upcoming as "Flu, dose 1" again; it now reads "Flu, next dose", with a test.
+
+**Verified here:** on scratch Postgres at 0029 with a family plan: all twelve
+steps run as single SQL Editor commands, twice (second pass adds nothing),
+counts 7 / 6 / 6, no 1950s dates left, and each member's
+`health_file_bundle` fed through `buildHealthFile` gives sensible tracked
+values, medicines, Upcoming and care team. Not seen on a device.
