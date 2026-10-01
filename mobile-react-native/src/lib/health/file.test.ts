@@ -66,6 +66,11 @@ describe("upcomingFrom", () => {
       ["renewal", 30],
     ]);
   });
+
+  it("names a yearly shot as the next dose, not dose 1 again", () => {
+    const up = upcomingFrom([{ id: "flu", doc_type: "vaccination", details: { vaccine: "Flu", dose: 1, doses: 1, nextDue: "2027-09-01" } }], NOW);
+    expect(up.map((u) => u.title)).toEqual(["Flu, next dose"]);
+  });
 });
 
 describe("careTeamFrom", () => {

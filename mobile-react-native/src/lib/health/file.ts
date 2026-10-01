@@ -193,7 +193,7 @@ export function upcomingFrom(documents: Row[], now: Date): Upcoming[] {
         push(doc, "follow_up", "Follow-up after discharge", d.followUp?.with ?? d.hospital, d.followUp?.date ?? null);
         break;
       case "vaccination":
-        if (d.dose < d.doses || d.nextDue) push(doc, "next_dose", `${d.vaccine}, dose ${Math.min(d.dose + 1, d.doses)}`, d.centre, d.nextDue, 120);
+        if (d.dose < d.doses || d.nextDue) push(doc, "next_dose", d.dose < d.doses ? `${d.vaccine}, dose ${d.dose + 1}` : `${d.vaccine}, next dose`, d.centre, d.nextDue, 120);
         break;
       case "insurance": {
         const left = daysUntil(d.end, now);
