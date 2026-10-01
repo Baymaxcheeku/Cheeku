@@ -48,6 +48,7 @@ begin
   );
 end;
 $$ language plpgsql stable;
+
 revoke execute on function health_file_bundle (uuid) from public, anon;
 grant execute on function health_file_bundle (uuid) to authenticated;
 

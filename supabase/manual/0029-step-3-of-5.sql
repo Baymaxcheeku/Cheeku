@@ -1,54 +1,67 @@
 -- 0029 step 3 of 5. Run the steps in order, each in a new query. Safe to run again.
 begin;
 
-create or replace function add_questions_block (p_slug text, p_items text[]) returns void
-set
-  search_path = public as $$
-  update articles
-  set body = body || jsonb_build_array(jsonb_build_object('type', 'questions', 'items', to_jsonb(p_items)))
-  where slug = p_slug
-    and not exists (select 1 from jsonb_array_elements(body) b where b ->> 'type' = 'questions');
-$$ language sql;
-select add_questions_block('making-sense-of-a-lipid-panel', array[
-  'Was this sample fasting or non-fasting?',
-  'Is the LDL on this report measured or calculated?',
-  'How does this fit with my blood pressure and family history?'
-]);
-update articles set category = 'reports', icon = 'activity', key_points = array[
-  'TSH comes from the pituitary, so it rises when the thyroid makes less.',
-  'TSH and free T4 are read together, not one without the other.',
-  'Ranges vary between labs, and pregnancy uses its own.'
-] where slug = 'what-a-thyroid-panel-reports';
-select add_questions_block('what-a-thyroid-panel-reports', array[
-  'Should this be repeated before reading much into it?',
-  'Was free T4 checked alongside the TSH?'
-]);
-update articles set category = 'reports', icon = 'gauge', key_points = array[
-  'Systolic is the pressure as the heart pushes; diastolic is the pressure between beats.',
-  'A single clinic reading is the least reliable kind. Patterns over time matter.',
-  'Same arm, seated and rested, time noted: that is what makes home readings comparable.'
-] where slug = 'the-two-numbers-in-a-blood-pressure-reading';
-select add_questions_block('the-two-numbers-in-a-blood-pressure-reading', array[
-  'Should I keep a log of readings at home?',
-  'How many readings would you like to see, and at what time of day?'
-]);
-update articles set category = 'family', icon = 'shield', key_points = array[
-  'A record shows what was given, when, and which dose in a series it was.',
-  'Schedules are national, so a move between countries can make a record look out of step.',
-  'Photograph the card, the clinic stamps and the batch numbers, and keep it all in one place.'
-] where slug = 'reading-your-childs-vaccination-record';
-select add_questions_block('reading-your-childs-vaccination-record', array[
-  'Is anything on this card due under our schedule?',
-  'Do doses given in another country need checking?'
-]);
-update articles set category = 'family', icon = 'home', featured = true, key_points = array[
-  'A new doctor will ask for the medicine list, the latest discharge summary and recent reports in full.',
-  'Pass records on exactly as they are. Never summarise or edit them.',
-  'Settle your parent''s consent with the hospital once, before you need it.'
-] where slug = 'organising-a-parents-records-from-another-city';
-select add_questions_block('organising-a-parents-records-from-another-city', array[
-  'Can you share the full discharge summary and the recent reports?',
-  'Who should we call if something changes between visits?'
-]);
+with d as (
+  select * from jsonb_to_recordset(convert_from(decode(
+'W3sic2x1ZyI6ICJ3aGF0LWEtdGh5cm9pZC1wYW5lbC1yZXBvcnRzIiwgImNhdGVnb3J5IjogInJlcG9ydHMiLCAiaWNvbiI6ICJh
+Y3Rpdml0eSIsICJmZWF0dXJlZCI6IGZhbHNlLCAia2V5X3BvaW50cyI6IFsiVFNIIGNvbWVzIGZyb20gdGhlIHBpdHVpdGFyeSwg
+c28gaXQgcmlzZXMgd2hlbiB0aGUgdGh5cm9pZCBtYWtlcyBsZXNzLiIsICJUU0ggYW5kIGZyZWUgVDQgYXJlIHJlYWQgdG9nZXRo
+ZXIsIG5vdCBvbmUgd2l0aG91dCB0aGUgb3RoZXIuIiwgIlJhbmdlcyB2YXJ5IGJldHdlZW4gbGFicywgYW5kIHByZWduYW5jeSB1
+c2VzIGl0cyBvd24uIl0sICJxdWVzdGlvbnMiOiBbIlNob3VsZCB0aGlzIGJlIHJlcGVhdGVkIGJlZm9yZSByZWFkaW5nIG11Y2gg
+aW50byBpdD8iLCAiV2FzIGZyZWUgVDQgY2hlY2tlZCBhbG9uZ3NpZGUgdGhlIFRTSD8iXX0sIHsic2x1ZyI6ICJ0aGUtdHdvLW51
+bWJlcnMtaW4tYS1ibG9vZC1wcmVzc3VyZS1yZWFkaW5nIiwgImNhdGVnb3J5IjogInJlcG9ydHMiLCAiaWNvbiI6ICJnYXVnZSIs
+ICJmZWF0dXJlZCI6IGZhbHNlLCAia2V5X3BvaW50cyI6IFsiU3lzdG9saWMgaXMgdGhlIHByZXNzdXJlIGFzIHRoZSBoZWFydCBw
+dXNoZXM7IGRpYXN0b2xpYyBpcyB0aGUgcHJlc3N1cmUgYmV0d2VlbiBiZWF0cy4iLCAiQSBzaW5nbGUgY2xpbmljIHJlYWRpbmcg
+aXMgdGhlIGxlYXN0IHJlbGlhYmxlIGtpbmQuIFBhdHRlcm5zIG92ZXIgdGltZSBtYXR0ZXIuIiwgIlNhbWUgYXJtLCBzZWF0ZWQg
+YW5kIHJlc3RlZCwgdGltZSBub3RlZDogdGhhdCBpcyB3aGF0IG1ha2VzIGhvbWUgcmVhZGluZ3MgY29tcGFyYWJsZS4iXSwgInF1
+ZXN0aW9ucyI6IFsiU2hvdWxkIEkga2VlcCBhIGxvZyBvZiByZWFkaW5ncyBhdCBob21lPyIsICJIb3cgbWFueSByZWFkaW5ncyB3
+b3VsZCB5b3UgbGlrZSB0byBzZWUsIGFuZCBhdCB3aGF0IHRpbWUgb2YgZGF5PyJdfSwgeyJzbHVnIjogInJlYWRpbmcteW91ci1j
+aGlsZHMtdmFjY2luYXRpb24tcmVjb3JkIiwgImNhdGVnb3J5IjogImZhbWlseSIsICJpY29uIjogInNoaWVsZCIsICJmZWF0dXJl
+ZCI6IGZhbHNlLCAia2V5X3BvaW50cyI6IFsiQSByZWNvcmQgc2hvd3Mgd2hhdCB3YXMgZ2l2ZW4sIHdoZW4sIGFuZCB3aGljaCBk
+b3NlIGluIGEgc2VyaWVzIGl0IHdhcy4iLCAiU2NoZWR1bGVzIGFyZSBuYXRpb25hbCwgc28gYSBtb3ZlIGJldHdlZW4gY291bnRy
+aWVzIGNhbiBtYWtlIGEgcmVjb3JkIGxvb2sgb3V0IG9mIHN0ZXAuIiwgIlBob3RvZ3JhcGggdGhlIGNhcmQsIHRoZSBjbGluaWMg
+c3RhbXBzIGFuZCB0aGUgYmF0Y2ggbnVtYmVycywgYW5kIGtlZXAgaXQgYWxsIGluIG9uZSBwbGFjZS4iXSwgInF1ZXN0aW9ucyI6
+IFsiSXMgYW55dGhpbmcgb24gdGhpcyBjYXJkIGR1ZSB1bmRlciBvdXIgc2NoZWR1bGU/IiwgIkRvIGRvc2VzIGdpdmVuIGluIGFu
+b3RoZXIgY291bnRyeSBuZWVkIGNoZWNraW5nPyJdfSwgeyJzbHVnIjogIm9yZ2FuaXNpbmctYS1wYXJlbnRzLXJlY29yZHMtZnJv
+bS1hbm90aGVyLWNpdHkiLCAiY2F0ZWdvcnkiOiAiZmFtaWx5IiwgImljb24iOiAiaG9tZSIsICJmZWF0dXJlZCI6IHRydWUsICJr
+ZXlfcG9pbnRzIjogWyJBIG5ldyBkb2N0b3Igd2lsbCBhc2sgZm9yIHRoZSBtZWRpY2luZSBsaXN0LCB0aGUgbGF0ZXN0IGRpc2No
+YXJnZSBzdW1tYXJ5IGFuZCByZWNlbnQgcmVwb3J0cyBpbiBmdWxsLiIsICJQYXNzIHJlY29yZHMgb24gZXhhY3RseSBhcyB0aGV5
+IGFyZS4gTmV2ZXIgc3VtbWFyaXNlIG9yIGVkaXQgdGhlbS4iLCAiU2V0dGxlIHlvdXIgcGFyZW50J3MgY29uc2VudCB3aXRoIHRo
+ZSBob3NwaXRhbCBvbmNlLCBiZWZvcmUgeW91IG5lZWQgaXQuIl0sICJxdWVzdGlvbnMiOiBbIkNhbiB5b3Ugc2hhcmUgdGhlIGZ1
+bGwgZGlzY2hhcmdlIHN1bW1hcnkgYW5kIHRoZSByZWNlbnQgcmVwb3J0cz8iLCAiV2hvIHNob3VsZCB3ZSBjYWxsIGlmIHNvbWV0
+aGluZyBjaGFuZ2VzIGJldHdlZW4gdmlzaXRzPyJdfV0=',
+  'base64'), 'UTF8')::jsonb) as x (slug text, category text, icon text, featured boolean, key_points text[], questions text[])
+)
+update articles a
+set category = d.category,
+    icon = d.icon,
+    featured = coalesce(d.featured, false),
+    key_points = d.key_points,
+    body = case
+      when d.questions is null
+        or exists (select 1 from jsonb_array_elements(a.body) b where b ->> 'type' = 'questions')
+      then a.body
+      else a.body || jsonb_build_array(jsonb_build_object('type', 'questions', 'items', to_jsonb(d.questions)))
+    end
+from d
+where a.slug = d.slug;
+
+update articles
+set body = (
+  select jsonb_agg(
+    case when e ->> 'text' like 'Which vaccines are due%'
+      then jsonb_build_object('type', 'p', 'text', convert_from(decode(
+'V2hpY2ggdmFjY2luZXMgYXJlIGR1ZSwgYW5kIHdoZW4sIGlzIHNldCBieSB5b3VyIHBhZWRpYXRyaWNpYW4gYW5kIHlvdXIgbmF0
+aW9uYWwgc2NoZWR1bGUuIENoZWVrdSBrZWVwcyB3aGF0IGhhcyBhbHJlYWR5IGhhcHBlbmVkLCBsZWdpYmxlIGFuZCBpbiBvbmUg
+cGxhY2UsIGFuZCBjYW4gcmVtaW5kIHlvdSBvZiBhIG5leHQtZG9zZSBkYXRlIHlvdXIgY2xpbmljIGdhdmUgeW91LiBJdCBkb2Vz
+IG5vdCBkZWNpZGUgd2hhdCBpcyBkdWUu',
+      'base64'), 'UTF8'))
+      else e end
+    order by i)
+  from jsonb_array_elements(body) with ordinality as t (e, i)
+)
+where slug = 'why-the-vaccine-card-matters-more-than-you-think';
+
+drop function if exists add_questions_block (text, text[]);
 
 commit;

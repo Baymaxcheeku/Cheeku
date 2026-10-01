@@ -1977,3 +1977,16 @@ small steps in `supabase/manual/` (0028 in 6, 0029 in 5, each under about
   a second time.
 - The longer-term fix is to connect the Supabase connector, so migrations
   can be applied without copying at all.
+
+**Update, same day.** `0029-step-3` then failed in the SQL Editor with
+`relation "it" does not exist`, though the file runs cleanly anywhere else.
+That error means the text that ran contained SQL-like words outside their
+quotes (`TABLE it` produces exactly that), so the English text in the
+article steps was being mangled somewhere between GitHub and the editor.
+The 0029 article steps now carry their text base64-encoded and decode it in
+the database: no apostrophes, question marks or prose left in the pasted
+SQL. Verified:
+- the result matches the migration file byte for byte
+- a rerun is safe
+- starting from the user's actual state (old steps 1 and 2 applied, step 3
+  failed) works, and the old helper function is cleaned up
