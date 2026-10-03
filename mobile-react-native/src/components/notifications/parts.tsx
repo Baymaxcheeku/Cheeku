@@ -17,6 +17,7 @@ import {
   UserRoundMinus,
   UserRoundPlus,
   Activity,
+  Check,
   CheckCheck,
   CircleDot,
   X,
@@ -52,7 +53,29 @@ import { Brand, brandify } from "@/components/ui/brand";
  * None of those are green, amber or red: those mean something about health in
  * this app (PLAN.md rule 3). The one row that IS about health, values outside
  * the printed range, uses the caution amber, and only the tile, never the text.
+ *
+ * READ STATE. The one exception to the rule above, asked for by the product
+ * owner on 2026-10-03 because a long inbox made it hard to tell what still
+ * needed a look: a yellow dot marks a new notification and a green tick marks
+ * one that has been read. They are small, always paired with words ("3 new",
+ * "Read"), and never used for anything else on this screen.
  */
+
+/** New: a yellow dot with a soft halo. Read: a small green tick. */
+export function ReadMark({ read, size = 10 }: { read: boolean; size?: number }) {
+  if (read) {
+    return (
+      <View style={{ width: size + 6, height: size + 6, borderRadius: (size + 6) / 2, backgroundColor: semantic.safeBg, alignItems: "center", justifyContent: "center" }}>
+        <Check size={size - 1} color={semantic.safe} strokeWidth={3.2} />
+      </View>
+    );
+  }
+  return (
+    <View style={{ width: size + 6, height: size + 6, borderRadius: (size + 6) / 2, backgroundColor: semantic.cautionBg, alignItems: "center", justifyContent: "center" }}>
+      <View style={{ width: size, height: size, borderRadius: size / 2, backgroundColor: semantic.caution }} />
+    </View>
+  );
+}
 
 type Tone = { bg: string; fg: string; icon: LucideIcon };
 
@@ -140,6 +163,7 @@ export function NotificationRow({
   now,
   onPress,
   onLongPress,
+  compact = false,
 }: {
   item: InboxItem;
   member?: Member;
@@ -147,40 +171,44 @@ export function NotificationRow({
   now: Date;
   onPress: () => void;
   onLongPress: () => void;
+  /** Read rows in the folded group: one line each, no action chip. */
+  compact?: boolean;
 }) {
   const unread = !item.readAt;
-  const action = item.route ? ACTION_LABEL[item.kind] : undefined;
+  const action = item.route && !compact ? ACTION_LABEL[item.kind] : undefined;
   const who = member && !member.isPrimary ? member.name.split(" ")[0] : null;
 
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={`${unread ? "Unread. " : ""}${item.title}. ${item.body}`}
+      accessibilityLabel={`${unread ? "New. " : "Read. "}${item.title}. ${item.body}`}
       accessibilityHint="Long press for more options"
       onPress={onPress}
       onLongPress={onLongPress}
       delayLongPress={320}
       style={({ pressed }) => ({
         flexDirection: "row",
-        alignItems: "flex-start",
+        alignItems: compact ? "center" : "flex-start",
         gap: 13,
         paddingHorizontal: 14,
-        paddingVertical: 14,
-        backgroundColor: pressed ? "rgba(74,42,222,0.08)" : unread ? "rgba(116,92,255,0.05)" : "transparent",
+        paddingVertical: compact ? 11 : 14,
+        backgroundColor: pressed ? "rgba(74,42,222,0.08)" : unread ? "rgba(255,175,35,0.07)" : "transparent",
+        borderLeftWidth: 3,
+        borderLeftColor: unread ? semantic.caution : "transparent",
         borderTopWidth: first ? 0 : 1,
         borderTopColor: "rgba(15,16,48,0.06)",
         transform: [{ scale: pressed ? 0.992 : 1 }],
       })}
     >
-      <NotificationIcon kind={item.kind} member={member} />
+      <NotificationIcon kind={item.kind} member={member} size={compact ? 36 : 46} />
       <View style={{ flex: 1, minWidth: 0 }}>
         <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 8 }}>
           <Text
-            numberOfLines={2}
+            numberOfLines={compact ? 1 : 2}
             style={{
               flex: 1,
               fontFamily: unread ? font.semibold : font.medium,
-              fontSize: 15,
+              fontSize: compact ? 14 : 15,
               lineHeight: 20,
               letterSpacing: -0.15,
               color: ink[900],
@@ -193,8 +221,8 @@ export function NotificationRow({
           </Text>
         </View>
         <Text
-          numberOfLines={2}
-          style={{ fontFamily: font.regular, fontSize: 13.5, lineHeight: 19, color: unread ? ink[700] : ink[500], marginTop: 2 }}
+          numberOfLines={compact ? 1 : 2}
+          style={{ fontFamily: font.regular, fontSize: compact ? 12.5 : 13.5, lineHeight: compact ? 17 : 19, color: unread ? ink[700] : ink[500], marginTop: 2 }}
         >
           {brandify(item.body)}
         </Text>
@@ -225,8 +253,8 @@ export function NotificationRow({
           </View>
         ) : null}
       </View>
-      <View style={{ width: 8, paddingTop: 7 }}>
-        {unread ? <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: brand[500] }} /> : null}
+      <View style={{ paddingTop: compact ? 0 : 4 }}>
+        <ReadMark read={!unread} size={compact ? 9 : 10} />
       </View>
     </Pressable>
   );

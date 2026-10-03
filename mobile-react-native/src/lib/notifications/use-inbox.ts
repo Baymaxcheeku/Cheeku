@@ -7,8 +7,8 @@ import type { ActiveProfile } from "@/lib/profiles/context";
 import { useSwitchMember } from "@/lib/profiles/family";
 import { supabase } from "@/lib/supabase/client";
 
-import { unreadCount } from "./inbox";
-import { dismiss, fetchInbox, markAllRead, setRead, toItem } from "./queries";
+import { readIds, unreadCount } from "./inbox";
+import { dismiss, fetchInbox, markAllRead, restore, setRead, toItem } from "./queries";
 import type { InboxItem } from "./types";
 
 /*
@@ -68,6 +68,26 @@ export function useInboxActions() {
       return optimistic(qc, (items) => items.map((i) => (i.readAt ? i : { ...i, readAt: now })), markAllRead);
     },
     dismiss: (ids: string[]) => optimistic(qc, (items) => items.filter((i) => !ids.includes(i.id)), () => dismiss(ids)),
+    /**
+     * Clears every read notification at once and hands back what it removed,
+     * so the screen can offer Undo. New ones are never touched.
+     */
+    clearRead: (): InboxItem[] => {
+      const items = qc.getQueryData<InboxItem[]>(INBOX_KEY) ?? [];
+      const ids = readIds(items);
+      const removed = items.filter((i) => ids.includes(i.id));
+      void optimistic(qc, (all) => all.filter((i) => !ids.includes(i.id)), () => dismiss(ids));
+      return removed;
+    },
+    /** Puts cleared rows back where they were. */
+    restore: (removed: InboxItem[]) => {
+      const ids = removed.map((i) => i.id);
+      return optimistic(
+        qc,
+        (items) => [...items.filter((i) => !ids.includes(i.id)), ...removed].sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
+        () => restore(ids),
+      );
+    },
   }), [qc]);
 }
 

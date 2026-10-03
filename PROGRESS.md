@@ -2143,3 +2143,23 @@ how-to answer was checked against the real screen it names.
 **Verified here:** typecheck, lint, 256 tests, web preview screenshots of
 every page. **Not seen on a device.** Worth checking on iOS: the snap of the
 plan cards, the Reveal timing on long pages, and the help search keyboard.
+
+## Notifications: read state and clean-up · 2026-10-03
+
+The inbox stacked up and it was hard to see what still needed a look. Now:
+
+- A yellow dot (and a thin yellow edge) marks a new notification; a green tick
+  marks a read one. This is a deliberate, owner-approved exception to PLAN.md
+  rule 3, recorded there, and limited to this screen.
+- Two status tiles under the title: "3 new" (tap to filter to new) and
+  "5 read" with Clear.
+- Read notifications fold into one "Read" group at the bottom, closed by
+  default, with one-line compact rows when opened.
+- "Clear" removes every read notification in one tap; any row can be swiped
+  left to clear it. Each clear shows a five-second Undo. Cleared rows are
+  hidden (`dismissed_at`), not deleted, and Undo sets it back to null, which
+  the existing column grant already allows. No migration.
+
+**Verified here:** typecheck, lint, tests (two new for the read split), web
+preview screenshots. **Not seen on a device:** the swipe gesture feel and the
+Undo bar position above the home indicator are worth a look on iOS.
