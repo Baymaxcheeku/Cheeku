@@ -1,6 +1,7 @@
 import {
   ArrowDownRight,
   ArrowUpRight,
+  BookOpen,
   BookOpenText,
   CircleAlert,
   CornerDownRight,
@@ -12,7 +13,6 @@ import {
   Phone,
   PillBottle,
   Share2,
-  Sparkles,
   Stethoscope,
   Video,
 } from "lucide-react-native";
@@ -144,7 +144,7 @@ export function AssistantTurn({
             <LoopNudge key={l.key} title={l.title} when={l.when} because={l.because} onPress={onOpenMemory} />
           ))}
 
-          {m?.basis === "general" ? <Footnote icon={Sparkles} text={`General health knowledge, not from ${name}'s records`} /> : null}
+          {m?.basis === "general" ? <Footnote icon={BookOpen} text={`General health knowledge, not from ${name}'s records`} /> : null}
           {m?.basis === "silent" ? <Footnote icon={CircleAlert} text={`Nothing in ${name}'s memory covers this yet`} /> : null}
 
           {onSend && m?.followUps.length ? (

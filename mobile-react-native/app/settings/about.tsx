@@ -6,6 +6,7 @@ import {
   FileText,
   Heart,
   Info,
+  LayoutList,
   Lock,
   MessageCircle,
   Moon,
@@ -13,7 +14,6 @@ import {
   ScanSearch,
   ShieldCheck,
   Sliders,
-  Sparkles,
   Stethoscope,
   Users,
   X,
@@ -190,7 +190,7 @@ export default function About() {
             [Lock, "Private"],
             [Sliders, "Personal"],
             [MessageCircle, "Grounded"],
-            [Sparkles, "Organised"],
+            [LayoutList, "Organised"],
           ] as const
         ).map(([Icon, label], i) => (
           <PopIn key={label} index={i} style={{ flex: 1 }}>

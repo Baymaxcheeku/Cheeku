@@ -6,12 +6,12 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   ChevronLeft,
   FileText,
+  FolderCheck,
   Image as ImageIcon,
   Mail,
   MessageCircle,
   Plus,
   ShieldCheck,
-  Sparkles,
 } from "lucide-react-native";
 
 import { CastAvatar } from "@/components/ui/avatar";
@@ -309,7 +309,7 @@ function SceneMemory({ compact }: { compact: boolean }) {
 
       <BubblePop delay={0.75} style={{ alignSelf: "center", marginVertical: compact ? 10 : 14 }}>
         <View className="flex-row items-center gap-1.5 rounded-pill px-3 py-1.5" style={{ backgroundColor: brand[50] }}>
-          <Sparkles size={13} color={brand[600]} />
+          <FolderCheck size={13} color={brand[600]} />
           <Text style={{ fontFamily: font.bold, fontSize: 11.5, color: brand[700] }}>Saved to Mummy&apos;s file</Text>
         </View>
       </BubblePop>

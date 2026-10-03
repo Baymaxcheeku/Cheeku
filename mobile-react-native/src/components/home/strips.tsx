@@ -1,5 +1,5 @@
 import { useRouter } from "expo-router";
-import { CalendarClock, ChevronRight, FolderHeart, ShieldAlert, Sparkles } from "lucide-react-native";
+import { CalendarClock, ChevronRight, FlaskConical, FolderHeart, ShieldAlert } from "lucide-react-native";
 import { Pressable, ScrollView, Text, View } from "react-native";
 
 import { ArticlePill } from "@/components/learn/parts";
@@ -66,7 +66,7 @@ function pairs<T>(items: readonly T[]): [T, ...T[]][] {
   return out;
 }
 
-type Highlight = { icon: typeof Sparkles; text: string; tint: string; bg: string };
+type Highlight = { icon: typeof FlaskConical; text: string; tint: string; bg: string };
 
 function highlight(file: HealthFile): Highlight | null {
   const soon = file.upcoming.find((u) => u.days >= -30 && u.days <= 30);
@@ -75,7 +75,7 @@ function highlight(file: HealthFile): Highlight | null {
   }
   if (file.flagged.length) {
     const n = file.flagged.length;
-    return { icon: Sparkles, text: `${n} value${n === 1 ? "" : "s"} outside the lab's range`, tint: semantic.dangerText, bg: semantic.dangerBg };
+    return { icon: FlaskConical, text: `${n} value${n === 1 ? "" : "s"} outside the lab's range`, tint: semantic.dangerText, bg: semantic.dangerBg };
   }
   if (file.person.allergies.length) {
     return { icon: ShieldAlert, text: `Allergic to ${file.person.allergies.join(", ")}`, tint: semantic.cautionText, bg: semantic.cautionBg };

@@ -1,13 +1,13 @@
 import { useRouter } from "expo-router";
 import {
   ArrowRight,
-  Camera,
   CalendarClock,
+  Camera,
   FileText,
+  History,
   Images,
   Lock,
   MessageCircleQuestion,
-  Sparkles,
   type LucideIcon,
 } from "lucide-react-native";
 import { Pressable, ScrollView, Text, View } from "react-native";
@@ -27,7 +27,7 @@ import { font, type } from "@/theme/type";
 const UNLOCKS: readonly { icon: LucideIcon; text: string }[] = [
   { icon: MessageCircleQuestion, text: "Questions answered from your own reports" },
   { icon: CalendarClock, text: "Every value with its date and source" },
-  { icon: Sparkles, text: "Your whole history in one timeline" },
+  { icon: History, text: "Your whole history in one timeline" },
 ];
 
 /*
