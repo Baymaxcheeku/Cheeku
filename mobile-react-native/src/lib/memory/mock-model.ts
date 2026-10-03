@@ -84,34 +84,81 @@ function focusLines(m: MemoryDigest): string[] {
   return lines;
 }
 
+/*
+ * EVERY SYMPTOM ANSWER HAS THE SAME SHAPE, in the order a worried parent
+ * needs it:
+ *
+ *   1. what is probably going on, for this person at this age, in plain words
+ *   2. what their own numbers say, or which reading would help
+ *   3. things that usually help, as a list
+ *   4. how urgent it looks, and that a doctor's proper look is still worth it
+ *   5. an invitation to add a record or a reading
+ *   6. "Shall I connect you with a doctor nearby, or an online consultation?"
+ */
+const KIDS = new Set(["neonate", "infant", "toddler", "child", "teen"]);
+
+function closing(m: MemoryDigest, tier: ModelRequest["floor"]["tier"]): string[] {
+  const name = m.person.firstName;
+  const doctor = KIDS.has(m.person.stage) ? "paediatrician" : "doctor";
+  const out: string[] = [];
+  const flagged = m.changes.some((c) => c.includes("the lab printed")) ? " Mention the values outside the lab's range when you do." : "";
+  if (tier === null) out.push(`Still, it's always better to have a ${doctor} take a proper look, especially if it isn't settling or something seems off.`);
+  else if (tier === "reassure") out.push(`This fits the usual pattern. Still, if anything feels off or it isn't settling, it's always better to have a ${doctor} take a proper look.${flagged}`);
+  else if (tier === "monitor") out.push(`Nothing here looks urgent right now. Keep an eye on the signs below, and if you see any of them, call the doctor straight away. Even so, it's better to have a ${doctor} take a proper look soon.${flagged}`);
+  else if (tier === "contact_today") out.push("This is worth a call to the doctor today, not an emergency. I've written out what to tell them below, with the numbers, so the call takes two minutes.");
+  out.push(`If there's a record or a reading you'd like to add (a weight, a temperature, a report), send it here and I'll keep it with ${name}'s file.`);
+  out.push(`Shall I connect you with a ${doctor} nearby, or set up an online consultation?`);
+  return out;
+}
+
+function tipsParagraph(tips: string[]): string[] {
+  const unique = [...new Set(tips)].slice(0, 8);
+  return unique.length ? [`Things that usually help:\n${unique.map((t) => `• ${t}`).join("\n")}`] : [];
+}
+
 function symptomReply(req: ModelRequest): ModelReply {
   const m = req.memory;
   const [first, ...rest] = m.symptoms;
-  if (!first) return { paragraphs: [], citations: [], followUps: [], basis: "general" };
+  if (!first) return genericSymptomReply(req);
   const name = m.person.firstName;
   const paragraphs: string[] = [first.mechanism];
-  for (const s of rest.slice(0, 1)) paragraphs.push(s.mechanism);
+  // The age is said once: a second symptom's "At 22 days old, ..." becomes "On sleep, ...".
+  for (const s of rest.slice(0, 1)) {
+    const lead = `At ${m.person.age}, `;
+    paragraphs.push(s.mechanism.startsWith(lead) ? `On ${s.label.toLowerCase()}: ${s.mechanism.slice(lead.length)}` : s.mechanism);
+  }
 
   if (m.logged.length) paragraphs.push(`Noted: ${m.logged.join("; ")}. I've kept it with ${name}'s readings.`);
   const own = [...m.changes, ...focusLines(m).filter((l) => !m.changes.some((c) => c.startsWith(l.slice(0, 12))))];
   if (own.length) paragraphs.push(`From ${name}'s own numbers: ${own.slice(0, 3).join(" ")}`);
   else if (m.askForReadings.length) paragraphs.push(`There's no recent reading on file for this, so I'm going on what you've described. ${m.askForReadings[0]}`);
   // Notes (blood group, dating) are drawn beside the answer, not repeated in it.
-  const tier = req.floor.tier;
-  const stage = m.person.modifiers.some((x) => x === "pregnant" || x === "neonate" || x === "postpartum") ? `For ${m.person.clock.toLowerCase()}, this` : "This";
-  if (tier === "reassure") paragraphs.push(`${stage} fits the usual pattern. ${first.homeCare.slice(0, 2).join(" ")}`);
-  else if (tier === "monitor") {
-    const flagged = m.changes.some((c) => c.includes("the lab printed")) ? " The values outside the lab's range are worth raising at the next appointment." : "";
-    paragraphs.push(`Nothing here needs a doctor tonight.${flagged} ${first.homeCare[0] ?? ""} Keep an eye on the signs below; any one of them changes the answer, and I'd want you to call.`);
-  }
-  else if (tier === "contact_today") paragraphs.push("This is worth a call to the doctor today, not an emergency. I've written out what to tell them below, with the numbers, so the call takes two minutes.");
+
+  // Most of the list for the main worry, and the key few for the next one.
+  paragraphs.push(...tipsParagraph([...first.homeCare.slice(0, 5), ...rest.slice(0, 1).flatMap((s) => s.homeCare.slice(0, 3))]));
+  paragraphs.push(...closing(m, req.floor.tier));
 
   return {
     paragraphs,
     citations: [],
-    followUps: tier === "contact_today" ? ["Find the doctor's number", "What if it gets worse tonight?"] : ["What would make this urgent?", "Log a reading"],
+    followUps: req.floor.tier === "contact_today" ? ["What if it gets worse tonight?", "What would make this urgent?"] : ["What would make this urgent?", "Log a reading"],
     basis: own.length ? "grounded" : "general",
+    careOffer: true,
   };
+}
+
+/** Someone describing something there is no specific guide for yet. Still useful, still honest. */
+const DESCRIBES = /\b(feel(s|ing)?|felt|has been|have been|keeps|seems|having|getting|pain|ache|aching|hurts?|sore|itch(y|ing)?|since (yesterday|morning|last|today))\b/i;
+
+function genericSymptomReply(req: ModelRequest): ModelReply {
+  const m = req.memory;
+  const name = m.person.firstName;
+  const paragraphs = [
+    `I don't have a specific guide for that yet, so I'll keep this general and won't guess at a cause. ${KIDS.has(m.person.stage) ? `At ${m.person.age}, ` : ""}the things that tell you most are whether ${name} is eating and drinking normally, sleeping and waking as usual, and whether it's getting better or worse.`,
+    ...tipsParagraph(["Note when it started, how often it happens, and anything that makes it better or worse.", "Check for a temperature if you have a thermometer, and tell me the number.", "Keep up fluids and normal feeds or meals."]),
+    ...closing(m, null),
+  ];
+  return { paragraphs, citations: [], followUps: ["What would make this urgent?", "Log a reading"], basis: "general", careOffer: true };
 }
 
 /** A reading said on its own: keep it, place it against the last one, say what it means. */
@@ -198,6 +245,7 @@ export const mockModel: ChatModel = {
   id: "cheeku-mock-1",
   async respond(req) {
     if (req.memory.symptoms.length) return symptomReply(req);
+    if (DESCRIBES.test(req.question) && !LOOPS.test(req.question) && !MED.test(req.question)) return genericSymptomReply(req);
     if (req.memory.logged.length) return loggedReply(req);
     if (CLOCK.test(req.question)) return clockReply(req);
     if (LOOPS.test(req.question)) return loopsReply(req);

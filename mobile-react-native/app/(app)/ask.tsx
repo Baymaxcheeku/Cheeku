@@ -400,6 +400,7 @@ export default function Ask() {
                     onSend={last ? (t) => void send(t) : undefined}
                     onOpenRecord={(id) => router.push(`/records/${id}`)}
                     onOpenMemory={() => router.push("/memory")}
+                    onBook={(mode) => router.push({ pathname: "/book/consult", params: { mode } })}
                   />
                 );
               })}

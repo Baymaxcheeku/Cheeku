@@ -3,7 +3,7 @@ import { shortDate } from "@/lib/records/details";
 import type { MemoryContext } from "./context";
 import type { LoopView } from "./loops";
 import { loopWhen } from "./loops";
-import type { SymptomMatch } from "./symptoms";
+import { ageWords, type SymptomMatch } from "./symptoms";
 import type { ThresholdRead } from "./thresholds";
 import type { Tier } from "./types";
 
@@ -46,6 +46,8 @@ export type MemoryDigest = {
   person: {
     firstName: string;
     clock: string;
+    /** "22 days old", "4 months old", "36": how old, in words. */
+    age: string;
     /** Due date by the dating that won, when pregnant. */
     edd: string | null;
     stage: string;
@@ -85,6 +87,8 @@ export type ModelReply = {
   followUps: string[];
   /** "grounded": from their records; "general": general health knowledge; "silent": nothing to go on. */
   basis: "grounded" | "general" | "silent";
+  /** Offer to connect them with a doctor nearby or online, under the answer. */
+  careOffer?: boolean;
 };
 
 export interface ChatModel {
@@ -149,6 +153,7 @@ export function digest(
     person: {
       firstName: c.subject.firstName,
       clock: c.clock.label,
+      age: ageWords(c.clock),
       edd: c.clock.relative?.kind === "gestational" ? c.clock.relative.edd : null,
       stage: c.clock.stage,
       modifiers: c.clock.modifiers,
@@ -166,7 +171,7 @@ export function digest(
       .slice(0, 6)
       .map((l) => ({ title: l.title, when: loopWhen(l), type: l.type, because: "because" in l && typeof l.because === "string" ? l.because : undefined })),
     records,
-    symptoms: focus.symptoms.map((s) => ({ id: s.model.id, label: s.model.label, mechanism: s.mechanism, homeCare: s.model.homeCare, watchFor: s.watchFor, tier: s.tier })),
+    symptoms: focus.symptoms.map((s) => ({ id: s.model.id, label: s.model.label, mechanism: s.mechanism, homeCare: s.homeCare, watchFor: s.watchFor, tier: s.tier })),
     logged: focus.logged ?? [],
     changes: focus.changes ?? [],
     askForReadings: focus.askForReadings ?? [],

@@ -288,3 +288,41 @@ describe("readings in context", () => {
     expect(plan.reply?.paragraphs.join(" ")).toMatch(/TSH 5.8 µIU\/mL is above the range the lab printed \(0.4-4.5\)/);
   });
 });
+
+describe("the answer shape for everyday baby worries", () => {
+  const day22 = (): MemoryBundle => imaad({ profile: { ...(imaad().profile as Record<string, unknown>), dob: "2026-09-09" } });
+
+  it("explains, lists what helps, suggests a paediatrician, invites a record, and offers a doctor", async () => {
+    const plan = await run("He is feeling bit sleepy today and farting a lot recently", day22(), "2026-10-01");
+    expect(plan.status).toBe("answered");
+    expect(plan.decision.tier).toBe("monitor");
+    const [first, ...rest] = plan.reply?.paragraphs ?? [];
+    expect(first).toMatch(/^At 22 days old, gas is one of the most common things/);
+    const tips = rest.find((p) => p.startsWith("Things that usually help:"));
+    expect(tips).toMatch(/• Bicycle legs: with him on his back/);
+    expect(tips).toMatch(/• Tummy massage/);
+    const tail = rest.slice(-3);
+    expect(tail[0]).toMatch(/better to have a paediatrician take a proper look/);
+    expect(tail[1]).toMatch(/record or a reading you'd like to add/);
+    expect(tail[2]).toBe("Shall I connect you with a paediatrician nearby, or set up an online consultation?");
+    expect(plan.reply?.careOffer).toBe(true);
+    expect(plan.decision.watchFor[0]).toMatch(/Hard to wake/);
+  });
+
+  it("still sends a very sleepy newborn straight to a doctor", async () => {
+    const plan = await run("he is very sleepy and hard to wake for feeds", day22(), "2026-10-01");
+    expect(plan.status).toBe("hard_stop");
+  });
+
+  it("says they, not he or she, when the profile has no sex", async () => {
+    const b = day22();
+    const plan = await run("so much gas lately", { ...b, profile: { ...(b.profile as Record<string, unknown>), sex: null } }, "2026-10-01");
+    expect(plan.reply?.paragraphs.join(" ")).toMatch(/Burp them during/);
+  });
+
+  it("keeps an unfamiliar description general, and still offers a doctor", async () => {
+    const plan = await run("he keeps hiccupping since yesterday", day22(), "2026-10-01");
+    expect(plan.reply?.paragraphs[0]).toMatch(/^I don't have a specific guide for that yet/);
+    expect(plan.reply?.careOffer).toBe(true);
+  });
+});

@@ -38,6 +38,8 @@ export type TurnMemory = {
   usedFactIds: string[];
   basis: "grounded" | "general" | "silent" | "rules";
   followUps: string[];
+  /** Show "Doctors nearby" and "Online consultation" under the answer. */
+  careOffer: boolean;
   hardStop: { title: string; text: string; where: string } | null;
   /** The person's clock when it was said: "Day 6 of life". */
   clock: string;
@@ -74,6 +76,7 @@ export function toTurnMemory(plan: TurnPlan): TurnMemory {
     usedFactIds: plan.usedFactIds,
     basis: plan.reply?.basis ?? "rules",
     followUps: plan.reply?.followUps ?? [],
+    careOffer: Boolean(plan.reply?.careOffer),
     hardStop: plan.decision.hardStop ? { title: plan.decision.hardStop.title, text: plan.decision.hardStop.text, where: plan.decision.hardStop.where } : null,
     clock: plan.context.clock.label,
   };
@@ -110,6 +113,7 @@ function readMemory(v: unknown): TurnMemory | null {
     usedFactIds: arr(o.usedFactIds),
     basis: o.basis ?? "general",
     followUps: arr(o.followUps),
+    careOffer: o.careOffer === true,
     hardStop: o.hardStop ?? null,
     clock: typeof o.clock === "string" ? o.clock : "",
   };
