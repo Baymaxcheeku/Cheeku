@@ -84,6 +84,13 @@ export async function dismiss(ids: string[]): Promise<void> {
   if (error) throw new Error(`dismiss: ${error.message}`);
 }
 
+/** Undo for a dismiss: back in the inbox, still read. */
+export async function restore(ids: string[]): Promise<void> {
+  if (ids.length === 0) return;
+  const { error } = await supabase.from("notifications").update({ dismissed_at: null }).in("id", ids);
+  if (error) throw new Error(`restore: ${error.message}`);
+}
+
 /**
  * An event that happened on this phone. Idempotent through `dedupeKey`, so a
  * double tap on "Confirm" is still one row. Failures are swallowed on purpose:

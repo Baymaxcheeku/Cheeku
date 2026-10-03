@@ -202,6 +202,9 @@ in a shell. See `../SHIPPING.md`.
 2. Ported tests are the specification. If one fails, the port is wrong.
 3. Semantic colour is health meaning only. Never a button, never a category
    tint. Broken twice on web, caught twice.
+   One owner-approved exception (2026-10-03): the notification inbox marks new
+   rows with a yellow dot and read rows with a green tick, always next to the
+   words "new" and "read". Nowhere else.
 4. Never show one family member's data in another's context.
 5. No health data in logs, URLs, query strings, or analytics.
 6. The app does not diagnose. It reads what people describe against the

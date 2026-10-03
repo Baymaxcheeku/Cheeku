@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { applyFilter, groupByDay, relativeTime, reminderPlan, unreadCount } from "./inbox";
+import { applyFilter, groupByDay, readIds, relativeTime, reminderPlan, splitByRead, unreadCount } from "./inbox";
 import type { InboxItem } from "./types";
 
 const NOW = new Date(2026, 8, 30, 15, 0); // Wed 30 Sep 2026, 3 pm local
@@ -87,5 +87,25 @@ describe("reminderPlan", () => {
       .map((r) => `${r.title} ${r.body}`)
       .join(" ");
     expect(text).not.toMatch(/Dr\.?\s|derm|gyn|cardio/i);
+  });
+});
+
+describe("read and new", () => {
+  const items = [
+    item("old-read", new Date(2026, 7, 4, 10), { readAt: "x" }),
+    item("new-1", new Date(2026, 8, 30, 9)),
+    item("read-1", new Date(2026, 8, 29, 22), { readAt: "x" }),
+    item("new-2", new Date(2026, 8, 30, 11)),
+  ];
+
+  it("splits new from read, newest first in each", () => {
+    const { fresh, seen } = splitByRead(items);
+    expect(fresh.map((i) => i.id)).toEqual(["new-2", "new-1"]);
+    expect(seen.map((i) => i.id)).toEqual(["read-1", "old-read"]);
+  });
+
+  it("clears only what has been read", () => {
+    expect(readIds(items).sort()).toEqual(["old-read", "read-1"]);
+    expect(readIds(items.filter((i) => !i.readAt))).toEqual([]);
   });
 });

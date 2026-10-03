@@ -9,6 +9,21 @@ export function unreadCount(items: readonly InboxItem[]): number {
   return items.reduce((n, i) => (i.readAt ? n : n + 1), 0);
 }
 
+/**
+ * New first, read after. The inbox shows new ones in full and folds the read
+ * ones into one group you can open, so a busy week does not bury what still
+ * needs a look. Newest first inside each.
+ */
+export function splitByRead(items: readonly InboxItem[]): { fresh: InboxItem[]; seen: InboxItem[] } {
+  const sorted = [...items].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  return { fresh: sorted.filter((i) => !i.readAt), seen: sorted.filter((i) => Boolean(i.readAt)) };
+}
+
+/** The ids "Clear read" removes: everything already read, nothing new. */
+export function readIds(items: readonly InboxItem[]): string[] {
+  return items.filter((i) => Boolean(i.readAt)).map((i) => i.id);
+}
+
 export function applyFilter(items: readonly InboxItem[], filter: InboxFilter): InboxItem[] {
   if (filter === "all") return [...items];
   if (filter === "unread") return items.filter((i) => !i.readAt);
