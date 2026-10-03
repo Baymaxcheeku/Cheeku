@@ -2,21 +2,21 @@ import { useRouter } from "expo-router";
 import {
   Activity,
   Apple,
+  Baby,
   BookOpen,
   Check,
   Clock3,
   Droplet,
   FlaskConical,
   Gauge,
+  Heart,
   HeartPulse,
   House,
   Moon,
   Pill,
   Ruler,
   ShieldCheck,
-  Sparkles,
   Syringe,
-  Baby,
   type LucideIcon,
 } from "lucide-react-native";
 import { Pressable, Text, View } from "react-native";
@@ -105,7 +105,7 @@ export function ReadMeta({ card, light }: { card: ArticleCard; light?: boolean }
       </View>
       {card.forYou && !finished ? (
         <View style={{ flexDirection: "row", alignItems: "center", gap: 3, paddingHorizontal: 7, paddingVertical: 2.5, borderRadius: 999, backgroundColor: light ? "rgba(255,255,255,0.85)" : s.field }}>
-          <Sparkles size={10} color={s.accent} />
+          <Heart size={10} color={s.accent} />
           <Text style={{ fontFamily: font.semibold, fontSize: 10.5, color: s.accent }}>For you</Text>
         </View>
       ) : null}
@@ -225,7 +225,7 @@ export function ArticlePill({ card, width = 268 }: { card: ArticleCard; width?: 
           {card.title}
         </Text>
         <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
-          {finished ? <Check size={11} color={s.accent} strokeWidth={2.6} /> : card.forYou ? <Sparkles size={11} color={s.accent} /> : null}
+          {finished ? <Check size={11} color={s.accent} strokeWidth={2.6} /> : card.forYou ? <Heart size={11} color={s.accent} /> : null}
           <Text numberOfLines={1} style={{ fontFamily: font.medium, fontSize: 11.5, color: finished || card.forYou ? s.accent : s.body }}>
             {[card.forYou && !finished ? "For you" : null, readLabel(card)].filter(Boolean).join(" · ")}
           </Text>

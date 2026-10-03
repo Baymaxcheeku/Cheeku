@@ -3,6 +3,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import * as DocumentPicker from "expo-document-picker";
 import * as ImagePicker from "expo-image-picker";
 import {
+  Camera as CameraIcon,
   Check,
   ChevronRight,
   Cpu,
@@ -10,10 +11,9 @@ import {
   FileUp,
   Images,
   Lock,
-  Camera as CameraIcon,
+  ScanSearch,
   Search,
   ShieldCheck,
-  Sparkles,
   type LucideIcon,
 } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
@@ -414,7 +414,7 @@ export default function Scan() {
         {([null, ...PICKABLE] as (DocType | null)[]).map((t) => {
           const on = t === docType;
           const style = t ? TYPE_STYLE[t] : null;
-          const Icon = style?.icon ?? Sparkles;
+          const Icon = style?.icon ?? ScanSearch;
           return (
             <Pressable
               key={t ?? "auto"}

@@ -295,20 +295,20 @@ export function CheekuCard({
         ? { dot: semantic.safe, text: "All in range" }
         : { dot: semantic.danger, text: `${needsReview} to review` };
 
-  // One line, read at a glance. The full promise lives in the chat itself.
+  // Short and warm: an introduction, then one line that makes it personal.
   const memory =
     remembered > 0
-      ? `Read against ${isSelf ? "your" : `${name}'s`} ${remembered} ${remembered === 1 ? "report" : "reports"}.`
-      : "Send one report. I'll keep it for good.";
+      ? `Ask me anything about ${isSelf ? "your" : `${name}'s`} ${remembered} ${remembered === 1 ? "report" : "reports"}.`
+      : "Snap one report and I'll take it from there.";
 
   return (
-    <View className="overflow-hidden rounded-[32px]" style={[glassShadow, { minHeight: 236 }]}>
+    <View className="overflow-hidden rounded-[32px]" style={[glassShadow, { minHeight: 318 }]}>
       <Gradient from="#f1edff" to="#d8cffd" glow="#ffffff" />
 
       {/* Cheeku, large and alive, anchored to the card's bottom-right corner. */}
-      <View pointerEvents="none" style={{ position: "absolute", right: -14, bottom: -12 }}>
+      <View pointerEvents="none" style={{ position: "absolute", right: -18, bottom: -14 }}>
         <Bob>
-          <MascotFigure size={150} wave />
+          <MascotFigure size={190} wave />
         </Bob>
       </View>
 
@@ -328,19 +328,12 @@ export function CheekuCard({
           </Glass>
         </View>
 
-        <View className="mt-4 pr-[34%]">
-          <View className="flex-row items-center gap-1.5">
-            <MessageCircleHeart size={15} color={brand[600]} strokeWidth={1.9} />
-            <Text style={{ fontFamily: font.medium, fontSize: 13, color: brand[700] }}>Ask <Brand /></Text>
-          </View>
-          <Text
-            style={{ fontFamily: font.semibold, fontSize: 22, lineHeight: 27, letterSpacing: -0.5, color: ink[900], marginTop: 4 }}
-          >
-            What&apos;s going on?
+        <View className="mt-6 pr-[38%]">
+          <Text style={{ fontFamily: font.semibold, fontSize: 26, lineHeight: 31, letterSpacing: -0.7, color: ink[900] }}>
+            Hi, I&apos;m <Brand size={28} />
           </Text>
-          <Text numberOfLines={1} style={{ fontFamily: font.medium, fontSize: 13, color: ink[500], marginTop: 6 }}>
-            {memory}
-          </Text>
+          <Text style={{ fontFamily: font.medium, fontSize: 15, lineHeight: 20, color: ink[700], marginTop: 4 }}>Your personal health companion.</Text>
+          <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[500], marginTop: 12 }}>{memory}</Text>
         </View>
 
         {/* The action: a dark disc joined to a glass label, one tap target. */}
@@ -350,7 +343,7 @@ export function CheekuCard({
           onPress={() => router.push("/ask")}
           style={({ pressed }) => ({
             marginTop: "auto",
-            paddingTop: 16,
+            paddingTop: 22,
             alignSelf: "flex-start",
             flexDirection: "row",
             alignItems: "center",

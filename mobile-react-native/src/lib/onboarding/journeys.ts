@@ -4,7 +4,7 @@ import {
   Dna,
   HeartHandshake,
   PersonStanding,
-  Sparkles,
+  FolderOpen,
   type LucideIcon,
 } from "lucide-react-native";
 
@@ -93,7 +93,7 @@ export const JOURNEYS: readonly Journey[] = [
   },
   {
     id: "other",
-    icon: Sparkles,
+    icon: FolderOpen,
     label: "Just keeping track",
     problem: "One home for every report, whenever you need it",
     reaction: "Perfect. One home for everything, whenever you need it.",

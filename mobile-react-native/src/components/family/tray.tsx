@@ -1,4 +1,4 @@
-import { Check, Lock, Plus, Settings2, ShieldCheck, Sparkles, Users, X } from "lucide-react-native";
+import { Check, Lock, MessagesSquare, Plus, Settings2, ShieldCheck, Users, X } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
 import { Modal, Pressable, ScrollView, Text, View } from "react-native";
 import Animated, { FadeInDown, ZoomIn } from "react-native-reanimated";
@@ -329,7 +329,7 @@ export function FamilyUpsellSheet({
   const perks: [React.ReactNode, string, string][] = [
     [<Users key="u" size={18} color={brand[600]} />, "Up to 4 people, one plan", "Parents, partner, kids. Everyone gets their own file."],
     [<ShieldCheck key="s" size={18} color={brand[600]} />, "Files never mix", "Switch in a tap. Cheeku only talks about who you're viewing."],
-    [<Sparkles key="k" size={18} color={brand[600]} />, "Unlimited chats for all", "Ask about anyone's report, any time of day."],
+    [<MessagesSquare key="k" size={18} color={brand[600]} />, "Unlimited chats for all", "Ask about anyone's report, any time of day."],
   ];
 
   return (

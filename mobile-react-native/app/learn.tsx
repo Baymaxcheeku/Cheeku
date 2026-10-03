@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
-import { Bookmark, Sparkles } from "lucide-react-native";
+import { Award, Bookmark } from "lucide-react-native";
 import { useState } from "react";
 import { ActivityIndicator, Pressable, RefreshControl, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -128,7 +128,7 @@ function Featured({ card }: { card: ArticleCard }) {
       <View style={{ padding: 20 }}>
         <View style={{ flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between" }}>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 5, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 999, backgroundColor: "#fff" }}>
-            <Sparkles size={12} color={s.accent} />
+            <Award size={12} color={s.accent} />
             <Text style={{ fontFamily: font.semibold, fontSize: 11.5, color: s.accent }}>Featured</Text>
           </View>
           <Emblem icon={card.icon} category={card.category} size={76} />

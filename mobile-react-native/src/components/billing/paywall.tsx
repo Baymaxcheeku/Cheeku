@@ -6,7 +6,7 @@ import {
   Infinity as InfinityIcon,
   Lock,
   ShieldCheck,
-  Sparkles,
+  UserRound,
   Users,
   X,
   Zap,
@@ -92,7 +92,7 @@ const REASON_COPY: Record<Reason, { eyebrow: string; title: string; body: string
 
 const PLAN_ICON: Record<string, LucideIcon> = {
   family: Users,
-  solo: Sparkles,
+  solo: UserRound,
   micro: CalendarClock,
 };
 
@@ -533,7 +533,7 @@ function Checkout({
   onPay: () => void;
 }) {
   const isDaily = plan.tier === "micro";
-  const Icon = PLAN_ICON[plan.tier] ?? Sparkles;
+  const Icon = PLAN_ICON[plan.tier] ?? UserRound;
 
   return (
     <View className="px-5">

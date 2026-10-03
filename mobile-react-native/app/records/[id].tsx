@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { ArrowRightLeft, BadgeCheck, FileType2, MessageCircle, MoreHorizontal, Sparkles, Stethoscope, Trash2 } from "lucide-react-native";
+import { ArrowRightLeft, BadgeCheck, FileType2, Lightbulb, MessageCircle, MoreHorizontal, Stethoscope, Trash2 } from "lucide-react-native";
 import { ActivityIndicator, Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -419,7 +419,7 @@ function Insight({ record }: { record: Detail }) {
       <Gradient from="#efeaff" to="#f8f6ff" />
       <View className="flex-row items-center gap-2.5">
         <View className="h-9 w-9 items-center justify-center rounded-[12px] bg-white">
-          <Sparkles size={17} color={brand[600]} />
+          <Lightbulb size={17} color={brand[600]} />
         </View>
         <Text style={{ flex: 1, fontFamily: font.semibold, fontSize: 15, color: brand[700] }}>{insight.headline}</Text>
       </View>
