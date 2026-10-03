@@ -2119,3 +2119,27 @@ weight, and a "check BP every morning" reminder. Re-runnable.
 
 **Needs a clinician:** every threshold row, the hard-stops and the symptom
 models. Recorded under Open in PLAN.md.
+
+## Settings pages redesign · 2026-10-03
+
+About, Your plan, Personal information, Health profile and Help were rebuilt
+as editorial pages that share one type ramp and one question list
+(`src/components/settings/editorial.tsx`). Sections rise in once as they
+scroll into view (`src/components/ui/reveal.tsx`, all on the UI thread, off
+with Reduce motion). The settings menu now sets "Cheeku AI" in the wordmark.
+
+**Your plan** opens on the plan you're on, what's left today (five segments on
+Free), who it covers, and one next step. Then swipeable plan cards with Family
+first, an honest comparison table showing that urgency levels and emergency
+guidance are on every plan, the Daily Pass, billing questions and a plain
+Cancel link. Plan copy in `plans.ts` was rewritten around the memory. The
+paywall lost its green (plan state is not health), and checkout now lists the
+plan's own features instead of "Health insights".
+
+**Help** is a help centre: search over every answer, a call-112 strip first,
+six topic tiles, a contact pair and the report form with its own button. Every
+how-to answer was checked against the real screen it names.
+
+**Verified here:** typecheck, lint, 256 tests, web preview screenshots of
+every page. **Not seen on a device.** Worth checking on iOS: the snap of the
+plan cards, the Reveal timing on long pages, and the help search keyboard.

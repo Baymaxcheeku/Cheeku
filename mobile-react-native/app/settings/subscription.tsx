@@ -7,29 +7,39 @@ import {
   Check,
   ChevronRight,
   Crown,
+  FileHeart,
   Infinity as InfinityIcon,
   MessageCircle,
+  Minus,
   Pause,
   Play,
   ShieldCheck,
+  UserRound,
   Users,
   Zap,
   type LucideIcon,
 } from "lucide-react-native";
 import { useState } from "react";
-import { ActivityIndicator, Modal, Pressable, Text, View } from "react-native";
+import { ActivityIndicator, Modal, Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Paywall } from "@/components/billing/paywall";
 import { SettingsScreen } from "@/components/settings/chrome";
-import { Glass, Gradient, glass, glassShadow } from "@/components/ui/glass";
+import { Body, Eyebrow, Questions, Title, type QA } from "@/components/settings/editorial";
+import { Avatar } from "@/components/ui/avatar";
+import { BRAND_ON_DARK, brandify } from "@/components/ui/brand";
+import { Glass, Gradient, glassShadow } from "@/components/ui/glass";
+import { Reveal } from "@/components/ui/reveal";
 import { PillButton } from "@/components/ui/screen";
 import {
   DAILY_PASS_HOURS,
+  familySavingPercent,
   FREE_CHAT_LIMIT,
   FREE_PLAN,
   formatPrice,
   isUnlimited,
+  perDayLabel,
+  perSeatLabel,
   planFor,
   PLANS,
   seatsFor,
@@ -38,44 +48,83 @@ import {
 } from "@/lib/billing/plans";
 import { getEntitlement } from "@/lib/billing/quota";
 import { cancelSubscription, subscribeDemo } from "@/lib/billing/subscribe";
-import { profileAccess } from "@/lib/profiles/context";
+import { profileAccess, type ActiveProfile } from "@/lib/profiles/context";
 import { joinNames, planChange, refreshRoster } from "@/lib/profiles/family";
-import { brand, ink } from "@/theme/tokens";
+import { brand, ink, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
 
 /*
- * Your plan: what you have, what each other plan would do to YOUR family, and
- * one clear way to move between them.
+ * YOUR PLAN. Rebuilt 2026-10 as a page that sells by being straight with
+ * people rather than by hiding things:
  *
- * THE THREE STARTING POINTS
+ *   hero        the plan you're on, what's left today, who it covers, and
+ *               the ONE next step that makes sense from where you are
+ *   included    what this plan gives you, in plain words
+ *   plans       swipeable cards, Family first; each says what it would do
+ *               for you (Upgrade, Switch, Your plan)
+ *   compare     the honest table. Every plan gets the same Cheeku; plans only
+ *               differ in how many chats and how many people. Saying so is
+ *               the point: urgency levels and emergency guidance are never
+ *               a paid feature, and the table proves it
+ *   daily       the no-commitment option, for one worrying night
+ *   questions   billing, cancelling, what happens to paused people
+ *   cancel      a plain link, never hidden
  *
- *   Free    hero says "5 chats a day, just you"; Solo and Family are upgrades.
- *   Solo    hero says "unlimited, just you"; Family is the upgrade, Free is a
- *           downgrade that costs chats.
- *   Family  hero shows seats; Solo and Free are downgrades that PAUSE named
- *           people. Paused, never deleted, and the sheet says so by name.
- *
- * Every change goes through one sheet that reads out the consequences in
- * names and numbers before anyone confirms ("Amma and Ananya are paused",
- * "Amma and Ananya come back"). Upgrades continue to checkout; downgrades
- * happen here. Cancelling stays a labelled button, not a maze: stores
- * require it in-app and it is the clearest sign the app is on the reader's
- * side.
+ * Every change still goes through ChangeSheet, which reads out consequences in
+ * names ("Amma and Ananya are paused") before anyone confirms. Upgrades go on
+ * to checkout; downgrades happen in the sheet.
  *
  * COLOUR. Plan state is not health, so nothing here is green, amber or red
- * (PLAN.md rule 3). The old screen drew "Unlimited" in the healthy green and
- * the Daily pass countdown in caution amber; both are violet now.
+ * (PLAN.md rule 3). Paid plans get the deep violet hero, Free the light one.
  */
 
-const ORDER: Tier[] = ["free", "solo", "family"];
 const RANK: Record<Tier, number> = { free: 0, micro: 1, solo: 1, family: 2 };
 
-const PERKS: Record<Tier, string[]> = {
-  free: [`${FREE_CHAT_LIMIT} chats with Cheeku a day`, "Your own health file", "Unlimited report storage"],
-  micro: [`Unlimited chats for ${DAILY_PASS_HOURS} hours`, "No subscription, no renewal"],
-  solo: ["Unlimited chats, day and night", "Your own health file", "Priority support"],
-  family: ["Up to 4 people, one plan", "Unlimited chats for everyone", "Separate files that never mix"],
-};
+/** The swipeable cards, most useful first. */
+const CARDS: Tier[] = ["family", "solo", "micro", "free"];
+
+const ICON: Record<Tier, LucideIcon> = { free: UserRound, micro: Zap, solo: Crown, family: Users };
+
+/**
+ * The comparison. Rows that are the same everywhere are there on purpose:
+ * they tell people what they will NOT lose by staying on Free.
+ */
+const COMPARE: { label: string; free: string | boolean; solo: string | boolean; family: string | boolean }[] = [
+  { label: "Chats with Cheeku", free: `${FREE_CHAT_LIMIT} a day`, solo: "Unlimited", family: "Unlimited" },
+  { label: "People covered", free: "1", solo: "1", family: "Up to 4" },
+  { label: "Health file and report storage", free: true, solo: true, family: true },
+  { label: "Readings tracked over time", free: true, solo: true, family: true },
+  { label: "Urgency level on every answer", free: true, solo: true, family: true },
+  { label: "Emergency guidance", free: true, solo: true, family: true },
+  { label: "Separate file for each person", free: false, solo: false, family: true },
+];
+
+const BILLING_FAQ: QA[] = [
+  {
+    q: "Can I cancel any time?",
+    a: "Yes. Tap Cancel plan at the bottom of this page. You keep what you paid for until the period ends, then you're on Free. No calls, no forms.",
+  },
+  {
+    q: "What happens to my records if I downgrade?",
+    a: "Nothing is deleted. Your health file, reports and chats stay exactly where they are. On Free you simply get 5 chats a day instead of unlimited.",
+  },
+  {
+    q: "What happens to family members if I leave Family?",
+    a: "Anyone beyond your plan's limit is paused, not removed. Their files are kept safe, and they come back the moment you return to Family.",
+  },
+  {
+    q: "How does the Daily Pass work?",
+    a: `You pay once and get unlimited chats for ${DAILY_PASS_HOURS} hours. It ends by itself and never renews, so there's nothing to remember to cancel.`,
+  },
+  {
+    q: "How can I pay?",
+    a: "UPI, debit and credit cards, net banking and popular wallets, all through Razorpay. Cheeku never sees or stores your card details.",
+  },
+  {
+    q: "Is emergency help ever behind the paywall?",
+    a: "Never. If something you type sounds like an emergency, Cheeku tells you what to do right away, whatever plan you're on and however many chats you've used.",
+  },
+];
 
 export default function Subscription() {
   const router = useRouter();
@@ -116,8 +165,9 @@ export default function Subscription() {
   const plan = planFor(tier);
   const members = context.data.access.all;
   const seats = seatsFor(tier);
-  const reachable = Math.min(members.length, seats);
+  const covered = members.slice(0, seats);
   const paused = members.slice(seats).map((m) => m.name.split(" ")[0] ?? m.name);
+  const paid = tier !== "free";
 
   function done() {
     setTarget(null);
@@ -125,83 +175,167 @@ export default function Subscription() {
     refreshRoster(qc);
   }
 
-  return (
-    <SettingsScreen title="Your plan" eyebrow="What you get and who it covers" icon={Crown}>
-      {/* -------------------------------------------------------- the hero -- */}
-      <View style={[glassShadow, { marginHorizontal: 20, marginTop: 16, borderRadius: 30, overflow: "hidden", padding: 18 }]}>
-        <Gradient from={tier === "family" ? "#dcd2ff" : tier === "free" ? "#eef0f7" : "#e6e0ff"} to="#ffffff" glow="#ffffff" />
-        <Text style={{ fontFamily: font.semibold, fontSize: 12.5, color: brand[700] }}>You&apos;re on</Text>
-        <View className="mt-1 flex-row items-end justify-between">
-          <Text style={{ fontFamily: font.semibold, fontSize: 28, letterSpacing: -0.8, color: ink[900] }}>{plan.name}</Text>
-          <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[700], marginBottom: 4 }}>
-            {tier === "free" ? "₹0" : `${formatPrice(plan.priceInPaise)}/${plan.period}`}
-          </Text>
-        </View>
+  // The one next step from where you are.
+  const next: { label: string; icon: LucideIcon; go: () => void } =
+    tier === "free"
+      ? { label: "Go unlimited", icon: InfinityIcon, go: () => setTarget("solo") }
+      : tier === "micro"
+        ? { label: "Keep it going, monthly", icon: Crown, go: () => setTarget("solo") }
+        : tier === "solo"
+          ? { label: "Bring your family in", icon: Users, go: () => setTarget("family") }
+          : { label: "Manage family", icon: Users, go: () => router.push("/family") };
 
-        <View className="mt-4 flex-row gap-2.5">
-          <Stat
-            icon={isUnlimited(tier) ? InfinityIcon : MessageCircle}
-            label="Chats"
-            value={isUnlimited(tier) ? "Unlimited" : `${entitlement.chatsRemaining ?? 0} of ${FREE_CHAT_LIMIT} left today`}
-          />
-          <Stat icon={Users} label="People" value={seats === 1 ? "Just you" : `${reachable} of ${seats}`} />
+  return (
+    <SettingsScreen title="Your plan" eyebrow="What you get and who it covers" icon={Crown} bare>
+      {/* -------------------------------------------------------- the hero -- */}
+      <Reveal style={[glassShadow, { marginHorizontal: 20, marginTop: 4, borderRadius: 32, overflow: "hidden", padding: 20 }]}>
+        {paid ? <Gradient from={brand[800]} to={brand[500]} glow="#8a82f5" /> : <Gradient from="#e6e0ff" to="#ffffff" glow="#ffffff" />}
+        <Eyebrow color={paid ? BRAND_ON_DARK : brand[600]}>You&apos;re on</Eyebrow>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 10, marginTop: 6 }}>
+          <View style={{ width: 40, height: 40, borderRadius: 14, alignItems: "center", justifyContent: "center", backgroundColor: paid ? "rgba(255,255,255,0.16)" : "#fff" }}>
+            {(() => {
+              const Icon = ICON[tier];
+              return <Icon size={20} color={paid ? "#fff" : brand[600]} />;
+            })()}
+          </View>
+          <Text style={{ flex: 1, fontFamily: font.semibold, fontSize: 30, letterSpacing: -0.9, color: paid ? "#fff" : ink[900] }}>{plan.name}</Text>
+        </View>
+        <Text style={{ fontFamily: font.regular, fontSize: 14.5, lineHeight: 20, color: paid ? "rgba(255,255,255,0.82)" : ink[700], marginTop: 8 }}>{plan.tagline}</Text>
+        <Text style={{ fontFamily: font.semibold, fontSize: 14, color: paid ? "#fff" : ink[900], marginTop: 10 }}>
+          {paid ? `${formatPrice(plan.priceInPaise)} a ${plan.period}` : "₹0, for as long as you like"}
+          {paid && perDayLabel(plan) ? <Text style={{ fontFamily: font.regular, color: paid ? "rgba(255,255,255,0.7)" : ink[500] }}>{`  ·  ${perDayLabel(plan)}`}</Text> : null}
+        </Text>
+
+        {/* Usage. A meter on Free, a plain promise on paid plans. */}
+        <View style={{ marginTop: 16, padding: 14, borderRadius: 20, backgroundColor: paid ? "rgba(255,255,255,0.12)" : "rgba(255,255,255,0.85)" }}>
+          {isUnlimited(tier) ? (
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+              <InfinityIcon size={18} color="#fff" />
+              <Text style={{ flex: 1, fontFamily: font.semibold, fontSize: 14.5, color: "#fff" }}>Unlimited chats{tier === "family" ? " for everyone" : ""}</Text>
+            </View>
+          ) : (
+            <Meter left={entitlement.chatsRemaining ?? 0} />
+          )}
+          <View style={{ height: 1, backgroundColor: paid ? "rgba(255,255,255,0.14)" : surface.line, marginVertical: 12 }} />
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+            <Faces members={covered} dark={paid} />
+            <Text style={{ flex: 1, fontFamily: font.medium, fontSize: 13.5, color: paid ? "#fff" : ink[900] }}>
+              {seats === 1 ? "Covers just you" : `${covered.length} of ${seats} people covered`}
+            </Text>
+            {seats > 1 && covered.length < seats ? (
+              <Text style={{ fontFamily: font.regular, fontSize: 12.5, color: paid ? "rgba(255,255,255,0.7)" : ink[500] }}>
+                {seats - covered.length === 1 ? "1 seat free" : `${seats - covered.length} seats free`}
+              </Text>
+            ) : null}
+          </View>
         </View>
 
         {tier === "micro" && entitlement.expiresAt ? <PassExpiry expiresAt={entitlement.expiresAt} /> : null}
 
         {paused.length > 0 ? (
-          <View style={{ marginTop: 12, flexDirection: "row", gap: 8, alignItems: "flex-start", padding: 12, borderRadius: 16, backgroundColor: "rgba(255,255,255,0.75)" }}>
+          <View style={{ marginTop: 12, flexDirection: "row", gap: 8, alignItems: "flex-start", padding: 12, borderRadius: 16, backgroundColor: "rgba(255,255,255,0.85)" }}>
             <Pause size={15} color={brand[700]} style={{ marginTop: 2 }} />
             <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[700] }}>
-              {joinNames(paused)} {paused.length === 1 ? "is" : "are"} paused on this plan. Their records are safe and come back with Family.
+              {joinNames(paused)} {paused.length === 1 ? "is" : "are"} paused on this plan. Their files are safe and come back with Family.
             </Text>
           </View>
         ) : null}
-      </View>
 
-      {tier === "family" ? (
         <Pressable
           accessibilityRole="button"
-          onPress={() => router.push("/family")}
-          style={({ pressed }) => [glassShadow, { marginHorizontal: 20, marginTop: 12, flexDirection: "row", alignItems: "center", gap: 12, padding: 14, borderRadius: 22, backgroundColor: pressed ? "#fff" : glass.fillStrong, borderWidth: 1, borderColor: glass.rim }]}
+          onPress={next.go}
+          style={({ pressed }) => ({ marginTop: 16, height: 52, borderRadius: 999, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, backgroundColor: paid ? "#fff" : brand[600], opacity: pressed ? 0.88 : 1, transform: [{ scale: pressed ? 0.985 : 1 }] })}
         >
-          <Users size={18} color={brand[600]} />
-          <Text style={{ flex: 1, fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>Manage family</Text>
-          <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[500] }}>{seats - reachable === 1 ? "1 seat free" : `${seats - reachable} seats free`}</Text>
-          <ChevronRight size={18} color={ink[300]} />
+          <next.icon size={17} color={paid ? brand[700] : "#fff"} />
+          <Text style={{ fontFamily: font.semibold, fontSize: 15.5, color: paid ? brand[700] : "#fff" }}>{next.label}</Text>
         </Pressable>
-      ) : null}
+      </Reveal>
+
+      {/* --------------------------------------------------- what you get -- */}
+      <Reveal style={{ marginHorizontal: 20, marginTop: 16 }}>
+        <View style={[glassShadow, { borderRadius: 24, backgroundColor: "#fff", padding: 18 }]}>
+          <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>Included in your plan</Text>
+          <View style={{ marginTop: 12, gap: 10 }}>
+            {plan.features.map((f) => (
+              <Perk key={f} text={f} />
+            ))}
+          </View>
+        </View>
+      </Reveal>
 
       {/* ------------------------------------------------------ the plans -- */}
-      <Text style={{ paddingHorizontal: 20, marginTop: 26, fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>
-        All plans
-      </Text>
-      <View style={{ marginHorizontal: 20, marginTop: 10, gap: 10 }}>
-        {ORDER.map((t) => (
-          <PlanCard key={t} plan={t === "free" ? FREE_PLAN : PLANS[t as Exclude<Tier, "free">]} current={t === tier} from={tier} onPress={() => setTarget(t)} />
-        ))}
-        {tier !== "micro" ? (
+      <Reveal style={{ paddingHorizontal: 20, marginTop: 34 }}>
+        <Eyebrow>Plans</Eyebrow>
+        <Title>Pick what fits your family</Title>
+        <Body>Same Cheeku on every plan. You only choose how often you chat and how many people it looks after.</Body>
+      </Reveal>
+      <Reveal style={{ marginTop: 14 }}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          snapToInterval={CARD_W + 12}
+          decelerationRate="fast"
+          contentContainerStyle={{ paddingHorizontal: 20, paddingVertical: 10, gap: 12 }}
+        >
+          {CARDS.map((t) => (
+            <PlanCard key={t} plan={planFor(t)} current={t === tier} from={tier} onPress={() => setTarget(t)} />
+          ))}
+        </ScrollView>
+      </Reveal>
+
+      {/* ---------------------------------------------------- the compare -- */}
+      <Reveal style={{ paddingHorizontal: 20, marginTop: 30 }}>
+        <Eyebrow>Side by side</Eyebrow>
+        <Title>No small print</Title>
+        <Body>Safety is never a paid extra. Every plan gets urgency levels, emergency guidance and a health file that remembers.</Body>
+      </Reveal>
+      <Reveal style={{ marginHorizontal: 20, marginTop: 14 }}>
+        <Compare current={tier} />
+      </Reveal>
+
+      {/* ---------------------------------------------------- daily pass -- */}
+      {tier !== "micro" ? (
+        <Reveal style={{ marginHorizontal: 20, marginTop: 18 }}>
           <Pressable
             accessibilityRole="button"
             onPress={() => setTarget("micro")}
-            style={({ pressed }) => ({ flexDirection: "row", alignItems: "center", gap: 10, paddingHorizontal: 14, paddingVertical: 12, borderRadius: 18, backgroundColor: pressed ? "#ece8ff" : brand[50] })}
+            style={({ pressed }) => [glassShadow, { flexDirection: "row", alignItems: "center", gap: 12, padding: 16, borderRadius: 24, backgroundColor: pressed ? brand[100] : brand[50] }]}
           >
-            <Zap size={16} color={brand[600]} />
-            <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 13.5, color: ink[700] }}>
-              Only need today?{" "}
-              <Text style={{ fontFamily: font.semibold, color: brand[700] }}>Daily pass, {formatPrice(PLANS.micro.priceInPaise)}</Text>
-            </Text>
-            <ChevronRight size={16} color={brand[600]} />
+            <View style={{ width: 42, height: 42, borderRadius: 14, backgroundColor: "#fff", alignItems: "center", justifyContent: "center" }}>
+              <Zap size={19} color={brand[600]} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>Just need tonight?</Text>
+              <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[700], marginTop: 2 }}>
+                Daily Pass, {formatPrice(PLANS.micro.priceInPaise)}. Unlimited for {DAILY_PASS_HOURS} hours, never renews.
+              </Text>
+            </View>
+            <ChevronRight size={18} color={brand[600]} />
+          </Pressable>
+        </Reveal>
+      ) : null}
+
+      {/* ----------------------------------------------------- questions -- */}
+      <Reveal style={{ paddingHorizontal: 20, marginTop: 34 }}>
+        <Eyebrow>Billing</Eyebrow>
+        <Title>Good to know</Title>
+      </Reveal>
+      <Reveal style={{ marginHorizontal: 20, marginTop: 12 }}>
+        <Questions items={BILLING_FAQ} />
+      </Reveal>
+
+      {/* -------------------------------------------------------- footer -- */}
+      <Reveal style={{ marginHorizontal: 20, marginTop: 24, gap: 10 }}>
+        <View style={{ flexDirection: "row", gap: 10 }}>
+          <Assurance icon={ShieldCheck} text="Pay safely with Razorpay" />
+          <Assurance icon={FileHeart} text="Nothing deleted on a change" />
+        </View>
+        {paid && tier !== "micro" ? (
+          <Pressable accessibilityRole="button" onPress={() => setTarget("free")} style={{ alignSelf: "center", paddingVertical: 14, paddingHorizontal: 20 }}>
+            <Text style={{ fontFamily: font.semibold, fontSize: 14, color: ink[500], textDecorationLine: "underline" }}>Cancel plan</Text>
           </Pressable>
         ) : null}
-      </View>
-
-      <View className="mx-5 mt-6 flex-row items-start gap-2">
-        <ShieldCheck size={14} color={ink[300]} style={{ marginTop: 2 }} />
-        <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 12.5, lineHeight: 18, color: ink[500] }}>
-          Changing or cancelling never deletes anything. Records, chats and family members stay, even while a plan doesn&apos;t cover them.
-        </Text>
-      </View>
+      </Reveal>
 
       <ChangeSheet
         from={tier}
@@ -226,63 +360,181 @@ export default function Subscription() {
   );
 }
 
-function Stat({ icon: Icon, label, value }: { icon: LucideIcon; label: string; value: string }) {
+// -------------------------------------------------------------------- parts --
+
+function Meter({ left }: { left: number }) {
+  const used = Math.max(0, FREE_CHAT_LIMIT - left);
   return (
-    <View style={{ flex: 1, padding: 12, borderRadius: 18, backgroundColor: "rgba(255,255,255,0.8)" }}>
-      <View className="flex-row items-center gap-1.5">
-        <Icon size={14} color={brand[600]} />
-        <Text style={{ fontFamily: font.medium, fontSize: 12, color: ink[500] }}>{label}</Text>
+    <View>
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+        <MessageCircle size={17} color={brand[600]} />
+        <Text style={{ flex: 1, fontFamily: font.semibold, fontSize: 14.5, color: ink[900] }}>
+          {left} of {FREE_CHAT_LIMIT} chats left today
+        </Text>
       </View>
-      <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 14.5, color: ink[900], marginTop: 4 }}>{value}</Text>
+      {/* Five segments rather than a bar: you can count them at a glance. */}
+      <View style={{ flexDirection: "row", gap: 5, marginTop: 10 }}>
+        {Array.from({ length: FREE_CHAT_LIMIT }, (_, i) => (
+          <View key={i} style={{ flex: 1, height: 6, borderRadius: 3, backgroundColor: i < used ? brand[100] : brand[500] }} />
+        ))}
+      </View>
+      <Text style={{ fontFamily: font.regular, fontSize: 12, color: ink[500], marginTop: 8 }}>A fresh 5 every day. Emergency guidance never counts.</Text>
     </View>
   );
 }
 
+function Faces({ members, dark }: { members: readonly ActiveProfile[]; dark: boolean }) {
+  const shown = members.slice(0, 4);
+  return (
+    <View style={{ flexDirection: "row" }}>
+      {shown.map((m, i) => (
+        <View key={m.id} style={{ marginLeft: i === 0 ? 0 : -9, borderRadius: 999, borderWidth: 2, borderColor: dark ? brand[700] : "#fff" }}>
+          <Avatar svg={m.avatar} photo={m.photo} image={m.avatarImage} background={m.avatarBackground} size={28} />
+        </View>
+      ))}
+    </View>
+  );
+}
+
+function Perk({ text, dark = false }: { text: string; dark?: boolean }) {
+  return (
+    <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 10 }}>
+      <View style={{ width: 20, height: 20, borderRadius: 10, marginTop: 1, alignItems: "center", justifyContent: "center", backgroundColor: dark ? "rgba(255,255,255,0.18)" : brand[50] }}>
+        <Check size={12} color={dark ? "#fff" : brand[600]} strokeWidth={3} />
+      </View>
+      <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 14, lineHeight: 20, color: dark ? "#fff" : ink[700] }}>{text}</Text>
+    </View>
+  );
+}
+
+function Assurance({ icon: Icon, text }: { icon: LucideIcon; text: string }) {
+  return (
+    <View style={{ flex: 1, flexDirection: "row", alignItems: "center", gap: 8, padding: 12, borderRadius: 18, backgroundColor: "rgba(255,255,255,0.7)", borderWidth: 1, borderColor: surface.line }}>
+      <Icon size={16} color={brand[600]} />
+      <Text style={{ flex: 1, fontFamily: font.medium, fontSize: 12.5, lineHeight: 17, color: ink[700] }}>{text}</Text>
+    </View>
+  );
+}
+
+const CARD_W = 268;
+
 function PlanCard({ plan, current, from, onPress }: { plan: Plan; current: boolean; from: Tier; onPress: () => void }) {
-  const up = RANK[plan.tier] > RANK[from] || (from === "micro" && plan.tier === "solo");
-  const label = current ? "Your plan" : up ? "Upgrade" : "Switch";
+  const up = RANK[plan.tier] > RANK[from] || (from === "free" && plan.tier !== "free") || (from === "micro" && plan.tier === "solo");
+  const label = current ? "Your plan" : up ? `Choose ${plan.name.replace(" Plan", "")}` : `Switch to ${plan.name.replace(" Plan", "")}`;
+  const featured = plan.tier === "family";
+  const Icon = ICON[plan.tier];
+  const perDay = perDayLabel(plan);
+  const perSeat = perSeatLabel(plan);
+  const fg = featured ? "#fff" : ink[900];
+  const soft = featured ? "rgba(255,255,255,0.75)" : ink[500];
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityState={{ disabled: current }}
+      accessibilityState={{ disabled: current, selected: current }}
       disabled={current}
       onPress={onPress}
-      style={({ pressed }) => [current ? null : glassShadow, {
-        padding: 16,
-        borderRadius: 24,
-        backgroundColor: current ? "rgba(241,240,254,0.9)" : pressed ? "#fff" : glass.fillStrong,
-        borderWidth: current ? 2 : 1,
-        borderColor: current ? brand[500] : glass.rim,
-        transform: [{ scale: pressed ? 0.985 : 1 }],
+      style={({ pressed }) => [glassShadow, {
+        width: CARD_W,
+        padding: 18,
+        borderRadius: 28,
+        overflow: "hidden",
+        backgroundColor: featured ? brand[700] : "#fff",
+        borderWidth: current ? 2 : 0,
+        borderColor: featured ? BRAND_ON_DARK : brand[500],
+        transform: [{ scale: pressed ? 0.98 : 1 }],
       }]}
     >
-      <View className="flex-row items-center justify-between">
-        <View className="flex-row items-center gap-2">
-          <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>{plan.name}</Text>
-          {plan.tier === "family" && !current ? (
-            <View style={{ paddingHorizontal: 8, height: 22, borderRadius: 999, justifyContent: "center", backgroundColor: brand[600] }}>
-              <Text style={{ fontFamily: font.semibold, fontSize: 11, color: "#fff" }}>Best for families</Text>
-            </View>
-          ) : null}
+      {featured ? <Gradient from={brand[800]} to={brand[500]} glow="#8a82f5" /> : null}
+      <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+        <View style={{ width: 40, height: 40, borderRadius: 14, alignItems: "center", justifyContent: "center", backgroundColor: featured ? "rgba(255,255,255,0.16)" : brand[50] }}>
+          <Icon size={19} color={featured ? "#fff" : brand[600]} />
         </View>
-        <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>
-          {plan.priceInPaise === 0 ? "₹0" : `${formatPrice(plan.priceInPaise)}`}
-          <Text style={{ fontFamily: font.regular, fontSize: 12.5, color: ink[500] }}>{plan.priceInPaise === 0 ? "" : `/${plan.period}`}</Text>
-        </Text>
-      </View>
-      <View style={{ marginTop: 10, gap: 6 }}>
-        {PERKS[plan.tier].map((perk) => (
-          <View key={perk} className="flex-row items-center gap-2">
-            <Check size={14} color={brand[600]} strokeWidth={2.6} />
-            <Text style={{ fontFamily: font.regular, fontSize: 13.5, color: ink[700] }}>{perk}</Text>
+        {featured ? (
+          <View style={{ paddingHorizontal: 10, height: 24, borderRadius: 999, justifyContent: "center", backgroundColor: "#fff" }}>
+            <Text style={{ fontFamily: font.semibold, fontSize: 11, color: brand[700] }}>Most popular · save {familySavingPercent()}%</Text>
           </View>
+        ) : current ? (
+          <View style={{ paddingHorizontal: 10, height: 24, borderRadius: 999, justifyContent: "center", backgroundColor: brand[50] }}>
+            <Text style={{ fontFamily: font.semibold, fontSize: 11, color: brand[700] }}>Current</Text>
+          </View>
+        ) : null}
+      </View>
+
+      <Text style={{ fontFamily: font.semibold, fontSize: 19, color: fg, marginTop: 14 }}>{plan.name}</Text>
+      <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: soft, marginTop: 2 }}>{plan.tagline}</Text>
+
+      <View style={{ flexDirection: "row", alignItems: "flex-end", gap: 4, marginTop: 14 }}>
+        <Text style={{ fontFamily: font.semibold, fontSize: 32, letterSpacing: -1, color: fg }}>{plan.priceInPaise === 0 ? "₹0" : formatPrice(plan.priceInPaise)}</Text>
+        <Text style={{ fontFamily: font.regular, fontSize: 13.5, color: soft, marginBottom: 6 }}>{plan.priceInPaise === 0 ? "forever" : `/ ${plan.period}`}</Text>
+      </View>
+      <Text style={{ fontFamily: font.medium, fontSize: 12.5, color: soft, minHeight: 17 }}>
+        {[perDay, perSeat].filter(Boolean).join("  ·  ") || (plan.tier === "micro" ? "One payment, no renewal" : "No card needed")}
+      </Text>
+
+      <View style={{ height: 1, backgroundColor: featured ? "rgba(255,255,255,0.18)" : surface.line, marginVertical: 14 }} />
+      <View style={{ gap: 9, flex: 1 }}>
+        {plan.features.map((f) => (
+          <Perk key={f} text={f} dark={featured} />
         ))}
       </View>
-      <View className="mt-3 flex-row items-center justify-end gap-1">
-        {current ? <Check size={14} color={brand[700]} strokeWidth={2.8} /> : up ? <ArrowUpRight size={15} color={brand[700]} /> : <ArrowDownRight size={15} color={ink[500]} />}
-        <Text style={{ fontFamily: font.semibold, fontSize: 13.5, color: current || up ? brand[700] : ink[500] }}>{label}</Text>
+
+      <View
+        style={{
+          marginTop: 16,
+          height: 46,
+          borderRadius: 999,
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 6,
+          backgroundColor: current ? (featured ? "rgba(255,255,255,0.16)" : brand[50]) : featured ? "#fff" : up ? brand[600] : "#eef0f5",
+        }}
+      >
+        {current ? <Check size={15} color={featured ? "#fff" : brand[700]} strokeWidth={2.8} /> : up ? <ArrowUpRight size={16} color={featured ? brand[700] : "#fff"} /> : <ArrowDownRight size={16} color={ink[700]} />}
+        <Text style={{ fontFamily: font.semibold, fontSize: 14.5, color: current ? (featured ? "#fff" : brand[700]) : featured ? brand[700] : up ? "#fff" : ink[700] }}>{label}</Text>
       </View>
     </Pressable>
+  );
+}
+
+function Compare({ current }: { current: Tier }) {
+  const cols: { tier: "free" | "solo" | "family"; name: string }[] = [
+    { tier: "free", name: "Free" },
+    { tier: "solo", name: "Solo" },
+    { tier: "family", name: "Family" },
+  ];
+  return (
+    <View style={[glassShadow, { borderRadius: 24, backgroundColor: "#fff", overflow: "hidden" }]}>
+      <View style={{ flexDirection: "row", paddingHorizontal: 14, paddingVertical: 12, backgroundColor: brand[50] }}>
+        <View style={{ flex: 1.5 }} />
+        {cols.map((c) => (
+          <Text key={c.tier} style={{ flex: 1, textAlign: "center", fontFamily: font.semibold, fontSize: 13, color: c.tier === current ? brand[700] : ink[900] }}>
+            {c.name}
+          </Text>
+        ))}
+      </View>
+      {COMPARE.map((row, i) => (
+        <View key={row.label} style={{ flexDirection: "row", alignItems: "center", paddingHorizontal: 14, paddingVertical: 12, borderTopWidth: i === 0 ? 0 : 1, borderTopColor: surface.line }}>
+          <Text style={{ flex: 1.5, fontFamily: font.medium, fontSize: 12.5, lineHeight: 17, color: ink[700], paddingRight: 6 }}>{brandify(row.label)}</Text>
+          {cols.map((c) => {
+            const v = row[c.tier];
+            return (
+              <View key={c.tier} style={{ flex: 1, alignItems: "center" }}>
+                {v === true ? (
+                  <View style={{ width: 22, height: 22, borderRadius: 11, backgroundColor: brand[50], alignItems: "center", justifyContent: "center" }}>
+                    <Check size={13} color={brand[600]} strokeWidth={3} />
+                  </View>
+                ) : v === false ? (
+                  <Minus size={15} color={ink[300]} />
+                ) : (
+                  <Text style={{ fontFamily: font.semibold, fontSize: 12.5, color: ink[900], textAlign: "center" }}>{v}</Text>
+                )}
+              </View>
+            );
+          })}
+        </View>
+      ))}
+    </View>
   );
 }
 

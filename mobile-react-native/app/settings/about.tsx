@@ -1,794 +1,399 @@
 import { useRouter } from "expo-router";
 import {
-  Brain,
-  Check,
-  ChevronDown,
-  FileText,
-  Heart,
-  Info,
-  LayoutList,
+  Activity,
+  ChevronLeft,
+  CircleCheck,
+  ClipboardList,
+  Download,
+  Eye,
+  FileHeart,
+  FlaskConical,
+  HeartHandshake,
+  History,
   Lock,
-  MessageCircle,
-  Moon,
-  Quote,
-  ScanSearch,
-  ShieldCheck,
-  Sliders,
+  MessageCircleHeart,
+  PhoneCall,
+  PillBottle,
+  ScanLine,
+  Siren,
   Stethoscope,
-  Users,
+  Trash2,
   X,
   type LucideIcon,
 } from "lucide-react-native";
-import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import { SvgXml } from "react-native-svg";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { SettingsScreen } from "@/components/settings/chrome";
-import { MascotBust } from "@/components/illustrations/sprout";
-import { PopIn, StaggerItem, TapToWiggle } from "@/components/ui/motion";
-import { APP_VERSION } from "@/lib/app-meta";
-import { FREE_CHAT_LIMIT, PLANS } from "@/lib/billing/plans";
-import { JOURNEYS } from "@/lib/onboarding/journeys";
-import { castFaces } from "@/lib/profiles/avatar";
-import { brand, ink, semantic, shadow, surface } from "@/theme/tokens";
+import { MascotFigure } from "@/components/illustrations/sprout";
+import { Bob } from "@/components/onboarding/motion";
 import { Brand } from "@/components/ui/brand";
+import { GlassCircle, Gradient, glass, glassShadow } from "@/components/ui/glass";
+import { Drift, PulseRing } from "@/components/ui/motion";
+import { Body, Eyebrow, Question, Title } from "@/components/settings/editorial";
+import { Reveal, RevealScroll, Spin } from "@/components/ui/reveal";
+import { APP_VERSION } from "@/lib/app-meta";
+import { castFaces } from "@/lib/profiles/avatar";
+import { brand, ink, semantic, surface } from "@/theme/tokens";
+import { font } from "@/theme/type";
 
-/**
- * About Cheeku AI — the product's own case for itself.
+/*
+ * ABOUT CHEEKU. The product's case for itself, told as a short story:
  *
- * ┌─ THE STRATEGY, AND WHY IT IS NOT THE OBVIOUS ONE ────────────────────────┐
- * │                                                                          │
- * │ The category's playbook is visible on any competitor's site: lead with a │
- * │ benchmark score, follow with a user count, then testimonials, then       │
- * │ features. It works because it borrows authority — a number on an exam, a │
- * │ crowd, four happy strangers.                                             │
- * │                                                                          │
- * │ We cannot run that play honestly. There is no benchmark result, no user  │
- * │ count worth printing, and no testimonial that was not written by us.     │
- * │ Inventing any of them is exactly the behaviour this app exists to be the │
- * │ opposite of, and a reader who later discovers a fabricated stat does not │
- * │ revise the stat — they revise everything.                                │
- * │                                                                          │
- * │ So this page trades BORROWED authority for VERIFIABLE authority. Every   │
- * │ claim on it can be checked inside the app within a minute: the answer    │
- * │ that names its source, the record that shows which member it belongs to, │
- * │ the export button, the delete button, the refusal. That is a stronger    │
- * │ position than a leaderboard, because it survives being checked.          │
- * │                                                                          │
- * └──────────────────────────────────────────────────────────────────────────┘
+ *   hero          what it is, in one line, with Cheeku and the kind of thing
+ *                 it remembers floating around it
+ *   how it works  four steps, revealed as you scroll
+ *   four levels   the urgency ladder, which is the promise in one picture
+ *   inside        the parts nobody else does: the doctor script, medicine
+ *                 overlaps, results still pending, honest corrections
+ *   families      one plan, separate files
+ *   trust         private, exportable, deletable; and what it will never do
+ *   questions     the awkward ones, answered plainly
  *
- * The order answers the questions a wary reader actually asks, in the order
- * they ask them: what is it, how does it know, who is it for, why not just
- * search, what happens to my data, what will it refuse, and then the specific
- * awkward questions nobody puts on a marketing page.
+ * WHAT IT MAY CLAIM. Cheeku reads symptoms against a person's own history
+ * using general health knowledge and says how urgent things look, up to the
+ * point where a doctor or an emergency is needed. It does not diagnose, and
+ * no line on this page says or implies it does. No invented user counts,
+ * ratings or testimonials: every claim here can be checked inside the app.
  *
- * TWO RULES THIS PAGE MAY NOT BREAK. It may not promise interpretation — no
- * "insights", no "what your results mean", because rule 1 says Cheeku does not
- * do that. And it may not end on a sell: a page that only sells has
- * overpromised by the end, and this one is read by people deciding whether to
- * trust it with a family's medical history.
+ * MOTION. Sections rise in once as they scroll into view (Reveal), the hero
+ * floats, a ring turns behind Cheeku. All of it stops for "Reduce motion".
  */
+
 export default function About() {
   const router = useRouter();
-
-  // One face per journey. Generated here so the same cast appears each render
-  // rather than reshuffling on every scroll.
-  const faces = castFaces(JOURNEYS.length);
+  const insets = useSafeAreaInsets();
+  const faces = castFaces(4);
 
   return (
-    <SettingsScreen title="About Cheeku AI" eyebrow="Your AI health companion" icon={Info} bare>
-      {/* ------------------------------------------------------------ hero */}
-      {/*
-       * ┌─ WHY THE HEADER WAS REBUILT ─────────────────────────────────────┐
-       * │                                                                  │
-       * │ Two headers ran back to back: the settings chrome's "About        │
-       * │ Cheeku / Your AI health companion" beside an info glyph, and      │
-       * │ immediately under it a card saying the same thing in larger type. │
-       * │ The reader met the title twice before meeting a single idea.      │
-       * │                                                                  │
-       * │ And the mascot was drawn at -right-3 -top-3 inside an             │
-       * │ overflow-hidden card, so it was clipped on two edges — and its    │
-       * │ shell gradient starts near-white, which on a brand-50 card left   │
-       * │ an outline with a face in it. The friendliest thing on the page   │
-       * │ rendered as a ghost, again.                                      │
-       * │                                                                  │
-       * │ One header now. The mascot sits whole and centred on its own disc │
-       * │ — the treatment used on Home, Ask and the paywall — and the       │
-       * │ screen's name is the small line above the headline rather than a  │
-       * │ heading competing with it.                                        │
-       * │                                                                  │
-       * └──────────────────────────────────────────────────────────────────┘
-       */}
-      <View
-        className="mx-5 items-center overflow-hidden rounded-card px-5 pb-6 pt-7"
-        style={{ backgroundColor: brand[50], borderWidth: 1, borderColor: brand[100] }}
-      >
-        {/*
-         * A HALO, NOT A DISC.
-         *
-         * The obvious fix for the mascot dissolving into a pale card is to put
-         * it in a filled circle — which is what the header avatars do, and
-         * there it is right. At hero size it is not: the bust includes a
-         * raised waving arm, and a circle clips it, so the one moment the
-         * character is shown at full size is the one where its arm is cut off.
-         *
-         * The halo sits BEHIND and smaller than the mascot. It gives the body
-         * the contrast it needs against brand-50, and the arm and the heart
-         * carry on past it onto the card, whole.
-         */}
-        <TapToWiggle>
-          <View className="items-center justify-center">
-            <View
-              pointerEvents="none"
-              style={{
-                position: "absolute",
-                width: 92,
-                height: 92,
-                borderRadius: 999,
-                backgroundColor: brand[100],
-                marginTop: 10,
-              }}
-            />
-            {/*
-             * The mascot is positioned too, with a zIndex above the halo.
-             *
-             * Without it the halo covered the face: CSS paints positioned
-             * elements above static siblings regardless of source order, so
-             * the "behind" circle rendered in front on web while looking
-             * correct on native. Giving both a stacking context makes the
-             * order mean the same thing in both renderers.
-             */}
-            <View style={{ zIndex: 1 }}>
-              <MascotBust size={124} />
-            </View>
+    <View style={{ flex: 1, backgroundColor: surface.canvas }}>
+      <RevealScroll contentContainerStyle={{ paddingBottom: insets.bottom + 40 }} showsVerticalScrollIndicator={false}>
+        {/* ------------------------------------------------------------ hero */}
+        <View style={{ overflow: "hidden", paddingTop: insets.top + 8, paddingBottom: 30 }}>
+          <Gradient from="#e4dcff" to="#fafafe" angle="vertical" glow="#ffffff" />
+          <View style={{ paddingHorizontal: 16 }}>
+            <GlassCircle label="Go back" onPress={() => (router.canGoBack() ? router.back() : router.replace("/settings"))}>
+              <ChevronLeft size={21} color={ink[900]} />
+            </GlassCircle>
           </View>
-        </TapToWiggle>
 
-        <Text
-          className="mt-4 text-[11px] font-bold uppercase text-ink-300"
-          style={{ letterSpacing: 1.4 }}
-        >
-          About <Brand ai />
-        </Text>
-
-        {/*
-         * "It doesn't guess" is the whole positioning in three words, and it
-         * is a claim about MECHANISM rather than quality. Everyone in this
-         * category says accurate, personal, trusted. Almost none of them can
-         * tell you where a given sentence came from.
-         */}
-        <Text
-          className="mt-2 text-center text-[24px] font-bold leading-[29px] text-ink-900"
-          style={{ letterSpacing: -0.6 }}
-        >
-          It doesn&apos;t guess.{"\n"}
-          <Text className="text-brand-600">It reads your records.</Text>
-        </Text>
-        <Text className="mt-2.5 max-w-[300px] text-center text-[13px] leading-[19px] text-ink-700">
-          Your family&apos;s health documents in one place, remembered, and read back in plain
-          language — naming the record every answer came from.
-        </Text>
-      </View>
-
-      {/*
-       * Four traits as one strip, divided by hairlines.
-       *
-       * As four separate cards this was the page's structure rather than its
-       * content; as one strip with no dividers the labels drifted into each
-       * other. The rules are what make four equal columns read as a set.
-       *
-       * The colours are deliberately all brand: green and amber carry health
-       * meaning everywhere else in this app, and spending them on words like
-       * "Personal" teaches the reader that the palette means nothing.
-       */}
-      <View
-        className="mx-5 mt-3 flex-row overflow-hidden rounded-card bg-surface py-3.5"
-        style={{ borderWidth: 1, borderColor: surface.line }}
-      >
-        {(
-          [
-            [Lock, "Private"],
-            [Sliders, "Personal"],
-            [MessageCircle, "Grounded"],
-            [LayoutList, "Organised"],
-          ] as const
-        ).map(([Icon, label], i) => (
-          <PopIn key={label} index={i} style={{ flex: 1 }}>
-            <View
-              className="items-center gap-2 px-1"
-              style={i > 0 ? { borderLeftWidth: 1, borderLeftColor: surface.line } : undefined}
-            >
-              <Icon size={17} color={brand[600]} />
-              <Text className="text-[10.5px] font-semibold text-ink-700">{label}</Text>
+          <View style={{ height: 300, alignItems: "center", justifyContent: "center", marginTop: 4 }}>
+            <Spin seconds={40} style={{ position: "absolute", width: 260, height: 260, zIndex: 0 }}>
+              <View style={{ flex: 1, borderRadius: 130, borderWidth: 1.5, borderStyle: "dashed", borderColor: brand[200] }} />
+            </Spin>
+            <View style={{ position: "absolute", width: 170, height: 170, borderRadius: 85, backgroundColor: "rgba(255,255,255,0.7)", zIndex: 0 }} />
+            <View style={{ position: "absolute", zIndex: 0, alignItems: "center", justifyContent: "center", width: 170, height: 170 }}>
+              <PulseRing size={170} />
             </View>
-          </PopIn>
+            <View style={{ zIndex: 2 }}>
+              <Bob>
+                <MascotFigure size={168} wave />
+              </Bob>
+            </View>
+
+            <Floating label="Bilirubin 11.0" note="day 3" icon={FlaskConical} style={{ left: 14, top: 26 }} delay={0} />
+            <Floating label="BP 132/84" note="home monitor" icon={Activity} style={{ right: 10, top: 64 }} delay={0.6} />
+            <Floating label="Vitamin D3 drops" note="400 IU" icon={PillBottle} style={{ left: 6, bottom: 54 }} delay={1.2} />
+            <Floating label="Follow-up" note="in 6 days" icon={History} style={{ right: 18, bottom: 22 }} delay={1.8} />
+          </View>
+
+          <View style={{ paddingHorizontal: 24, alignItems: "center" }}>
+            <Text style={{ fontFamily: font.semibold, fontSize: 11.5, letterSpacing: 1.2, textTransform: "uppercase", color: brand[600] }}>
+              About <Brand ai size={12} style={{ textTransform: "none", letterSpacing: 0.2 }} />
+            </Text>
+            <Text accessibilityRole="header" style={{ fontFamily: font.semibold, fontSize: 32, lineHeight: 37, letterSpacing: -1, color: ink[900], textAlign: "center", marginTop: 8 }}>
+              Your family&apos;s health,{"\n"}
+              <Text style={{ fontFamily: font.italic, color: brand[600] }}>remembered.</Text>
+            </Text>
+            <Text style={{ fontFamily: font.regular, fontSize: 15.5, lineHeight: 23, color: ink[700], textAlign: "center", marginTop: 12, maxWidth: 330 }}>
+              <Brand /> keeps every report, every reading and every conversation, for every person in your family. So when something isn&apos;t right, the answer starts from everything that came before.
+            </Text>
+          </View>
+        </View>
+
+        {/* ------------------------------------------------------ how it works */}
+        <Reveal style={{ paddingHorizontal: 20, marginTop: 6 }}>
+          <Eyebrow>How it works</Eyebrow>
+          <Title>From a photo of a report to knowing what to do</Title>
+        </Reveal>
+        {STEPS.map((s, i) => (
+          <Reveal key={s.title} delay={i * 60} style={{ paddingHorizontal: 20 }}>
+            <Step n={i + 1} last={i === STEPS.length - 1} {...s} />
+          </Reveal>
         ))}
-      </View>
 
-      {/* ------------------------------------------- how an answer is built */}
-      {/*
-       * THE SECTION THAT DOES THE WORK.
-       *
-       * A competitor can claim to know you. What it cannot do is show the
-       * chain. Three steps, each one a thing the reader can watch happen in
-       * the app, ending at the citation — which is the single feature that
-       * separates this from a confident stranger with a search engine.
-       */}
-      <View className="mt-6">
-        <View className="px-5">
-          <Text className="text-[17px] font-bold leading-[21px] tracking-tight text-ink-900">
-            Where every answer{"\n"}
-            <Text className="text-brand-600">actually comes from.</Text>
-          </Text>
-          <Text className="mt-1.5 text-[12.5px] leading-[18px] text-ink-500">
-            Not the internet. Not a guess about people like you. Your own documents, quoted back.
-          </Text>
-        </View>
-
-        <View className="mx-5 mt-3 overflow-hidden rounded-card bg-surface" style={shadow.e1}>
-          {(
-            [
-              [
-                "1",
-                "You add a document",
-                "A photo, a scan or a PDF. Photos are stripped of location data on your device before anything is uploaded.",
-              ],
-              [
-                "2",
-                "Cheeku reads it, you confirm it",
-                "Values, dates, doctors and medicines are pulled out. Anything it is unsure of is flagged for you to check against the original page.",
-              ],
-              [
-                "3",
-                "Answers name their source",
-                "Ask a question and the reply points at the exact record it came from, so you can open it and see for yourself.",
-              ],
-            ] as const
-          ).map(([step, title, body], i) => (
-            <StaggerItem key={step} index={i}>
-              <View
-                className="flex-row items-start gap-3 p-3.5"
-                style={i > 0 ? { borderTopWidth: 1, borderTopColor: surface.line } : undefined}
-              >
-                <View
-                  className="h-7 w-7 items-center justify-center rounded-pill"
-                  style={{ backgroundColor: brand[600] }}
-                >
-                  <Text className="text-[12px] font-bold text-white">{step}</Text>
-                </View>
-                <View className="min-w-0 flex-1">
-                  <Text className="text-[13.5px] font-semibold text-ink-900">{title}</Text>
-                  <Text className="mt-0.5 text-[11.5px] leading-[16px] text-ink-500">{body}</Text>
-                </View>
-              </View>
-            </StaggerItem>
-          ))}
-        </View>
-
-        <View className="mx-5 mt-2 flex-row items-start gap-2">
-          <Quote size={13} color={ink[300]} style={{ marginTop: 2 }} />
-          <Text className="flex-1 text-[11.5px] leading-[16px] text-ink-500">
-            If <Brand /> cannot point at a record, it says so rather than filling the gap.
-          </Text>
-        </View>
-      </View>
-
-      {/* ------------------------------------------------- what you can ask */}
-      {/*
-       * The four things people actually open this app to do.
-       *
-       * Everything above explains the mechanism; this is the only section that
-       * says what a Tuesday night with Cheeku looks like, and it is the one a
-       * reader recognises themselves in.
-       *
-       * ┌─ THE LINE, DRAWN EXACTLY ────────────────────────────────────────┐
-       * │                                                                  │
-       * │ "Understand what is happening" is inside it. "Here is what you   │
-       * │ have" and "here is what to take for it" are outside it, and no   │
-       * │ wording on this page may imply otherwise, however much softer it │
-       * │ would make the pitch. What Cheeku genuinely removes at 2am is    │
-       * │ not the diagnosis — it is the not-knowing-what-the-words-mean    │
-       * │ and the not-knowing-whether-this-is-worth-a-call.                │
-       * │                                                                  │
-       * └──────────────────────────────────────────────────────────────────┘
-       */}
-      <View className="mt-6">
-        <View className="px-5">
-          <Text className="text-[17px] font-bold leading-[21px] tracking-tight text-ink-900">
-            Bring it anything{"\n"}
-            <Text className="text-brand-600">that&apos;s worrying you.</Text>
-          </Text>
-          <Text className="mt-1.5 text-[12.5px] leading-[18px] text-ink-500">
-            At 2am, in a pharmacy aisle, or in the ten minutes before an appointment.
-          </Text>
-        </View>
-
-        <View className="mx-5 mt-3 gap-2">
-          {(
-            [
-              [
-                Moon,
-                "A symptom, at midnight",
-                "\u201cMy ears have been blocked since I caught a cold.\u201d Cheeku explains what that usually involves in plain words, reads it next to what your own records already say, and tells you honestly when it is worth seeing someone rather than waiting.",
-              ],
-              [
-                FileText,
-                "A report you can\u2019t read",
-                "Photograph it and ask what a line means. Cheeku explains the term and the range the laboratory printed, and shows you the page it is reading from.",
-              ],
-              [
-                ScanSearch,
-                "A product, before you buy it",
-                "A lotion, a supplement, a snack. Cheeku checks its ingredients against the conditions and allergies recorded in your own profile, and says plainly when something is worth avoiding.",
-              ],
-              [
-                Stethoscope,
-                "An appointment, both ends of it",
-                "What to ask before you go, and what was actually said afterwards \u2014 kept with the documents rather than in your head.",
-              ],
-            ] as const
-          ).map(([Icon, title, body], i) => (
-            <StaggerItem key={title} index={i}>
-              <View className="flex-row items-start gap-3 rounded-card bg-surface p-3.5" style={shadow.e1}>
-                <View className="h-10 w-10 items-center justify-center rounded-tile bg-brand-50">
-                  <Icon size={18} color={brand[600]} />
-                </View>
-                <View className="min-w-0 flex-1">
-                  <Text className="text-[13.5px] font-semibold text-ink-900">{title}</Text>
-                  <Text className="mt-1 text-[12px] leading-[17px] text-ink-500">{body}</Text>
-                </View>
-              </View>
-            </StaggerItem>
-          ))}
-        </View>
-
-        <View className="mx-5 mt-2.5 flex-row items-start gap-2 rounded-tile bg-brand-50 px-3.5 py-3">
-          <Info size={14} color={brand[500]} style={{ marginTop: 1 }} />
-          <Text className="flex-1 text-[11.5px] leading-[16px] text-ink-700">
-            <Brand /> will not tell you what you have or what to take for it. It explains what things
-            mean, keeps the history straight, and is candid about when a person should look at this
-            instead.
-          </Text>
-        </View>
-      </View>
-
-      {/* ------------------------------------------------------ the family */}
-      {/*
-       * "You first, your family too" — not "family, not user".
-       *
-       * The first version of this section led with "Built for a family, not a
-       * user", which reads as though somebody managing only their own health
-       * has the wrong app. Most people arrive alone, and many stay alone; the
-       * family capability is what they grow into, not the entry requirement.
-       * The offer is one file for you, and room for whoever you look after.
-       */}
-      <View
-        className="mx-5 mt-6 overflow-hidden rounded-card bg-brand-50 p-4"
-        style={{ borderWidth: 1, borderColor: brand[100] }}
-      >
-        <View className="flex-row items-start gap-3">
-          <View className="h-10 w-10 items-center justify-center rounded-tile bg-surface">
-            <Users size={19} color={brand[600]} />
-          </View>
-          <View className="min-w-0 flex-1">
-            <Text className="text-[16px] font-bold leading-[20px] text-ink-900">
-              Yours first. Your family&apos;s when you need it.
-            </Text>
-            <Text className="mt-1 text-[12.5px] leading-[18px] text-ink-700">
-              Start with just your own file — that is the whole app for most people. When you begin
-              carrying somebody else&apos;s paperwork too, add them, and their history stays theirs
-              rather than blurring into yours.
+        {/* ------------------------------------------------------- four levels */}
+        <Reveal style={{ marginHorizontal: 20, marginTop: 30 }}>
+          <View style={[glassShadow, { borderRadius: 30, overflow: "hidden", padding: 20 }]}>
+            <Gradient from="#ffffff" to="#f3f0ff" angle="diagonal" />
+            <Eyebrow>One clear answer</Eyebrow>
+            <Title>Every worry lands on one of four levels</Title>
+            <Body>
+              <Brand /> understands a symptom the way a sensible nurse on the phone would: what usually causes it at this age, what this person&apos;s own numbers say, and what would change the picture. Then it tells you plainly how urgent it looks.
+            </Body>
+            <View style={{ marginTop: 16, gap: 10 }}>
+              {LEVELS.map((l) => (
+                <Level key={l.title} {...l} />
+              ))}
+            </View>
+            <Text style={{ fontFamily: font.regular, fontSize: 12.5, lineHeight: 18, color: ink[500], marginTop: 14 }}>
+              Some things skip the reasoning entirely: fewer movements late in pregnancy, a fever in a baby under three months. Those go straight to &quot;go now&quot;, every time.
             </Text>
           </View>
-        </View>
-        <View className="mt-3 gap-2">
-          {[
-            "A complete file for you alone, with nothing extra to set up",
-            "Add a parent, a partner or a child whenever that day comes",
-            "Separate records, timeline and health file per person",
-            `Up to ${PLANS.family.seats} people on the Family plan`,
-          ].map((line) => (
-            <View key={line} className="flex-row items-start gap-2.5">
-              <View className="mt-px h-5 w-5 items-center justify-center rounded-pill bg-brand-600">
-                <Check size={12} color="#fff" strokeWidth={3} />
-              </View>
-              <Text className="flex-1 text-[12.5px] leading-[18px] text-ink-700">{line}</Text>
-            </View>
-          ))}
-        </View>
-      </View>
+        </Reveal>
 
-      {/* -------------------------------------------------------- journeys */}
-      {/*
-       * Who it is for, said out loud and early. The same JOURNEYS the welcome
-       * carousel offers, from one source, so the promise made before signup and
-       * the promise repeated here cannot drift apart.
-       */}
-      <View className="mt-6">
-        <View className="px-5">
-          <Text className="text-[17px] font-bold leading-[21px] tracking-tight text-ink-900">
-            Whatever you&apos;re carrying{"\n"}
-            <Text className="text-brand-600">right now.</Text>
-          </Text>
-          <Text className="mt-1.5 text-[12.5px] leading-[18px] text-ink-500">
-            The same memory underneath, shaped around the season you&apos;re in.
-          </Text>
-        </View>
+        {/* ------------------------------------------------------------ inside */}
+        <Reveal style={{ paddingHorizontal: 20, marginTop: 34 }}>
+          <Eyebrow>What makes it different</Eyebrow>
+          <Title>A memory, not a search box</Title>
+          <Body>Search engines know medicine. They don&apos;t know that Imaad is 22 days old, that his last bilirubin was 11.0, or that two of his drops both contain vitamin D.</Body>
+        </Reveal>
+        <Reveal style={{ paddingHorizontal: 20, marginTop: 14 }}>
+          <View style={{ flexDirection: "row", gap: 10 }}>
+            <Feature icon={Stethoscope} title="Briefs your doctor" text="When a call is needed, it writes out exactly what to say, with the numbers and dates." />
+            <Feature icon={PillBottle} title="Catches overlaps" text="Two products, one ingredient. It adds them up across every prescription." />
+          </View>
+        </Reveal>
+        <Reveal style={{ paddingHorizontal: 20, marginTop: 10 }} delay={80}>
+          <View style={{ flexDirection: "row", gap: 10 }}>
+            <Feature icon={ClipboardList} title="Chases the loose ends" text="A test that was billed but never reported. A follow-up that's due. It notices." />
+            <Feature icon={History} title="Corrects itself" text="Tell it a number was wrong and it says what changed in its earlier answer." />
+          </View>
+        </Reveal>
 
-        <View className="mx-5 mt-3 overflow-hidden rounded-card bg-surface" style={shadow.e1}>
-          {JOURNEYS.map((journey, i) => (
-            <StaggerItem key={journey.id} index={i}>
-              <View
-                className="flex-row items-center gap-3 p-3.5"
-                style={i > 0 ? { borderTopWidth: 1, borderTopColor: surface.line } : undefined}
-              >
-                <View className="h-10 w-10 overflow-hidden rounded-pill bg-canvas">
-                  <SvgXml xml={faces[i] ?? ""} width={40} height={40} />
+        {/* ---------------------------------------------------------- families */}
+        <Reveal style={{ marginHorizontal: 20, marginTop: 34 }}>
+          <View style={[glassShadow, { borderRadius: 30, overflow: "hidden", padding: 20 }]}>
+            <Gradient from="#ddd3ff" to="#f6f3ff" angle="diagonal" glow="#ffffff" />
+            <View style={{ flexDirection: "row", marginBottom: 14 }}>
+              {faces.map((svg, i) => (
+                <View key={i} style={{ marginLeft: i ? -12 : 0, width: 52, height: 52, borderRadius: 26, borderWidth: 3, borderColor: "#fff", overflow: "hidden", backgroundColor: "#fff" }}>
+                  <SvgXml xml={svg} width={46} height={46} />
                 </View>
-                <View className="min-w-0 flex-1">
-                  <Text className="text-[13.5px] font-semibold text-ink-900">{journey.label}</Text>
-                  <Text className="mt-0.5 text-[11.5px] leading-[16px] text-ink-500">
-                    {journey.problem}
-                  </Text>
-                </View>
-              </View>
-            </StaggerItem>
-          ))}
-        </View>
-      </View>
-
-      {/* ---------------------------------------------------- 2am spiral -- */}
-      <View className="mx-5 mt-6 overflow-hidden rounded-card bg-brand-50" style={shadow.e1}>
-        <View className="p-4">
-          <Text className="text-[17px] font-bold leading-[21px] tracking-tight text-ink-900">
-            2am. Something feels off.{"\n"}
-            <Text className="text-brand-600">You start searching.</Text>
-          </Text>
-          <Text className="mt-1.5 text-[12.5px] leading-[18px] text-ink-500">
-            Ten tabs later you know less than when you started, and you are more frightened.
-          </Text>
-        </View>
-
-        <View
-          className="flex-row items-start gap-2.5 bg-surface px-4 py-3.5"
-          style={{ borderTopWidth: 1, borderTopColor: surface.line }}
-        >
-          <ShieldCheck size={16} color={brand[600]} style={{ marginTop: 1 }} />
-          <Text className="flex-1 text-[12.5px] leading-[18px] text-ink-700">
-            <Text className="font-bold text-brand-700"><Brand /> breaks the loop.</Text> It reads what
-            your own report says, names the document it came from, and leaves what it means to your
-            doctor.
-          </Text>
-        </View>
-      </View>
-
-      {/* ------------------------------------------------------- remembers */}
-      <View
-        className="mx-5 mt-4 overflow-hidden rounded-card bg-surface p-4"
-        style={shadow.e1}
-      >
-        <Text className="text-[16px] font-bold leading-[20px] text-ink-900">
-          It remembers, so you don&apos;t have to hold it all.
-        </Text>
-        <View className="mt-3 gap-2">
-          {[
-            "Reports, scans, prescriptions and doctor visits",
-            "Conditions, allergies and current medications",
-            "Which family member each record belongs to",
-            "What changed since the last reading",
-          ].map((line) => (
-            <View key={line} className="flex-row items-start gap-2.5">
-              <View className="mt-px h-5 w-5 items-center justify-center rounded-pill bg-brand-600">
-                <Check size={12} color="#fff" strokeWidth={3} />
-              </View>
-              <Text className="flex-1 text-[12.5px] leading-[18px] text-ink-700">{line}</Text>
+              ))}
             </View>
-          ))}
-        </View>
-        <View className="mt-3 flex-row items-start gap-2.5 rounded-tile bg-brand-50 px-3.5 py-3">
-          <Brain size={15} color={brand[500]} style={{ marginTop: 1 }} />
-          <Text className="flex-1 text-[12px] leading-[17px] text-ink-500">
-            The more you add, the more it can answer — and every answer still points back at the
-            document it came from.
-          </Text>
-        </View>
-      </View>
-
-      {/* ------------------------------------------------------ comparison */}
-      {/*
-       * Compared against a general AI assistant, not a search engine.
-       *
-       * Search was the honest comparison two years ago. It is not the thing a
-       * reader is weighing this against today, and a comparison aimed at the
-       * wrong rival reads as evasion. Every line here is a factual difference
-       * in what the two systems have access to — not a claim that one is
-       * cleverer than the other.
-       */}
-      <View className="mx-5 mt-4">
-        <Text className="text-[16px] font-bold leading-[20px] text-ink-900">
-          Why not just ask{"\n"}
-          <Text className="text-brand-600">a general AI assistant?</Text>
-        </Text>
-
-        <View className="mt-3 flex-row gap-2">
-          <View
-            className="flex-1 overflow-hidden rounded-card bg-surface"
-            style={{ borderWidth: 1, borderColor: surface.line }}
-          >
-            <View className="flex-row items-center gap-1.5 bg-canvas px-3 py-2">
-              <X size={13} color={ink[500]} />
-              <Text className="text-[11.5px] font-semibold text-ink-500">A general assistant</Text>
+            <Eyebrow>Made for families</Eyebrow>
+            <Title>Mum&apos;s thyroid, your baby&apos;s jaundice, your own blood pressure</Title>
+            <Body>Up to four people on one plan, each with a file of their own that never mixes with anyone else&apos;s. A new baby can even start life with the details of the pregnancy already on file.</Body>
+            <View style={{ marginTop: 14, gap: 8 }}>
+              <Tick text="Separate files, switched with one tap" />
+              <Tick text="Age-aware answers, from day 1 of life to 80 and beyond" />
+              <Tick text="Pregnancy tracked by scan dating, week by week" />
             </View>
-            <View className="gap-1.5 p-3">
-              {[
-                "Has never seen your reports",
-                "Answers about people in general",
-                "Cannot show you a source",
-                "Forgets between conversations",
-              ].map((line) => (
-                <View key={line} className="flex-row items-start gap-1.5">
-                  <X size={11} color={ink[300]} style={{ marginTop: 2 }} />
-                  <Text className="flex-1 text-[11.5px] leading-[16px] text-ink-500">{line}</Text>
+          </View>
+        </Reveal>
+
+        {/* ------------------------------------------------------------- trust */}
+        <Reveal style={{ paddingHorizontal: 20, marginTop: 34 }}>
+          <Eyebrow>Your data</Eyebrow>
+          <Title>Private by design, yours to take or delete</Title>
+        </Reveal>
+        <Reveal style={{ paddingHorizontal: 20, marginTop: 12 }}>
+          <View style={{ flexDirection: "row", gap: 10 }}>
+            <Trust icon={Lock} title="Encrypted" text="In transit and at rest" />
+            <Trust icon={Download} title="Exportable" text="Everything, any time" />
+            <Trust icon={Trash2} title="Deletable" text="Gone, for good" />
+          </View>
+        </Reveal>
+        <Reveal style={{ marginHorizontal: 20, marginTop: 12 }}>
+          <View style={{ borderRadius: 24, borderWidth: 1, borderColor: surface.line, backgroundColor: "#fff", padding: 18 }}>
+            <Text style={{ fontFamily: font.semibold, fontSize: 16, color: ink[900] }}>
+              What <Brand /> will never do
+            </Text>
+            <View style={{ marginTop: 12, gap: 10 }}>
+              {NEVER.map((n) => (
+                <View key={n} style={{ flexDirection: "row", gap: 10 }}>
+                  <View style={{ width: 22, height: 22, borderRadius: 11, backgroundColor: surface.tint, alignItems: "center", justifyContent: "center", marginTop: 1 }}>
+                    <X size={12} color={ink[500]} strokeWidth={2.6} />
+                  </View>
+                  <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 14, lineHeight: 20, color: ink[700] }}>{n}</Text>
                 </View>
               ))}
             </View>
           </View>
+        </Reveal>
 
-          <View
-            className="flex-1 overflow-hidden rounded-card bg-surface"
-            style={{ borderWidth: 2, borderColor: brand[500] }}
-          >
-            <View
-              className="flex-row items-center gap-1.5 px-3 py-2"
-              style={{ backgroundColor: brand[600] }}
+        {/* --------------------------------------------------------- questions */}
+        <Reveal style={{ paddingHorizontal: 20, marginTop: 34 }}>
+          <Eyebrow>Good questions</Eyebrow>
+          <Title>The ones people ask before they trust it</Title>
+        </Reveal>
+        <Reveal style={{ marginHorizontal: 20, marginTop: 12 }}>
+          <View style={[glassShadow, { borderRadius: 24, backgroundColor: glass.fillStrong, borderWidth: 1, borderColor: glass.rim, overflow: "hidden" }]}>
+            {FAQ.map((f, i) => (
+              <Question key={f.q} q={f.q} a={f.a} first={i === 0} />
+            ))}
+          </View>
+        </Reveal>
+
+        {/* ---------------------------------------------------------------- CTA */}
+        <Reveal style={{ marginHorizontal: 20, marginTop: 30 }}>
+          <View style={{ borderRadius: 30, overflow: "hidden", padding: 22, alignItems: "center" }}>
+            <Gradient from={brand[700]} to={brand[500]} angle="diagonal" glow="#8a82f5" />
+            <Text style={{ fontFamily: font.semibold, fontSize: 24, lineHeight: 29, letterSpacing: -0.6, color: "#fff", textAlign: "center" }}>
+              Something on your mind?
+            </Text>
+            <Text style={{ fontFamily: font.regular, fontSize: 14.5, lineHeight: 21, color: "rgba(255,255,255,0.85)", textAlign: "center", marginTop: 6 }}>
+              Tell <Brand onDark /> what&apos;s going on. It already knows the background.
+            </Text>
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => router.push("/ask")}
+              style={({ pressed }) => ({ marginTop: 16, height: 50, paddingHorizontal: 22, borderRadius: 999, backgroundColor: "#fff", flexDirection: "row", alignItems: "center", gap: 8, transform: [{ scale: pressed ? 0.97 : 1 }] })}
             >
-              <Check size={13} color="#fff" strokeWidth={3} />
-              <Text className="text-[11.5px] font-semibold text-white"><Brand /></Text>
-            </View>
-            <View className="gap-1.5 p-3">
-              {[
-                "Reads your own documents",
-                "Answers from your history",
-                "Names the exact record",
-                "Remembers across years",
-              ].map((line) => (
-                <View key={line} className="flex-row items-start gap-1.5">
-                  <Check size={11} color={semantic.safe} strokeWidth={3} style={{ marginTop: 2 }} />
-                  <Text className="flex-1 text-[11.5px] leading-[16px] text-ink-700">{line}</Text>
-                </View>
-              ))}
-            </View>
+              <MessageCircleHeart size={18} color={brand[700]} />
+              <Text style={{ fontFamily: font.semibold, fontSize: 15, color: brand[700] }}>Start a chat</Text>
+            </Pressable>
           </View>
-        </View>
-      </View>
+        </Reveal>
 
-      {/* ----------------------------------------------------- privacy trio */}
-      <View className="mx-5 mt-4 rounded-card bg-surface p-4" style={shadow.e1}>
-        <View className="flex-row items-center gap-2.5">
-          <View className="h-9 w-9 items-center justify-center rounded-tile bg-brand-50">
-            <ShieldCheck size={17} color={brand[600]} />
-          </View>
-          <Text className="flex-1 text-[15px] font-bold leading-[19px] text-ink-900">
-            Your health. Your story. Your call.
+        <Reveal style={{ alignItems: "center", marginTop: 24, gap: 4 }}>
+          <Text style={{ fontFamily: font.medium, fontSize: 12.5, color: ink[500] }}>
+            <Brand ai size={13} /> · Version {APP_VERSION}
           </Text>
-        </View>
-        <View
-          className="mt-3 flex-row gap-2 pt-3"
-          style={{ borderTopWidth: 1, borderTopColor: surface.line }}
-        >
-          {(
-            [
-              [Lock, "Private by design", "Encrypted, never sold"],
-              [Sliders, "You're in control", "Export or delete anytime"],
-              [Heart, "Always by your side", "Judgement-free, 24/7"],
-            ] as const
-          ).map(([Icon, title, body]: readonly [LucideIcon, string, string]) => (
-            <View key={title} className="flex-1 items-center">
-              <View className="h-9 w-9 items-center justify-center rounded-pill bg-brand-50">
-                <Icon size={16} color={brand[600]} />
-              </View>
-              <Text className="mt-1.5 text-center text-[11px] font-semibold leading-[14px] text-ink-900">
-                {title}
-              </Text>
-              <Text className="mt-0.5 text-center text-[10px] leading-[13px] text-ink-500">
-                {body}
-              </Text>
-            </View>
-          ))}
-        </View>
-      </View>
-
-      {/* ------------------------------------------------ what it never does */}
-      <View
-        className="mx-5 mt-4 rounded-card bg-surface p-4"
-        style={{ borderWidth: 1, borderColor: surface.line }}
-      >
-        <Text className="text-[14px] font-bold text-ink-900">What <Brand /> will never do</Text>
-        <View className="mt-2 gap-1.5">
-          {[
-            "Name a diagnosis, or decide what a result means for treatment",
-            "Suggest a medicine, change a dose, or tell anyone to stop one",
-            "Show one family member's records under another's name",
-            "Answer an emergency with analysis instead of sending you to help",
-            "Sell your data, or share it outside your family",
-          ].map((line) => (
-            <View key={line} className="flex-row items-start gap-2">
-              <X size={12} color={ink[300]} style={{ marginTop: 2 }} />
-              <Text className="flex-1 text-[12px] leading-[17px] text-ink-500">{line}</Text>
-            </View>
-          ))}
-        </View>
-        <Text className="mt-2.5 text-[11.5px] leading-[16px] text-ink-500">
-          What it does instead: reads what you describe against everything it remembers, tells you how urgent it looks, and hands the doctor the whole story.
-        </Text>
-      </View>
-
-      {/* -------------------------------------------------------------- FAQ */}
-      <Faq />
-
-      {/* -------------------------------------------------------------- CTA */}
-      <View
-        className="mx-5 mt-5 overflow-hidden rounded-card p-4"
-        style={{ backgroundColor: brand[600] }}
-      >
-        <View className="flex-row items-start gap-3">
-          <View
-            className="h-10 w-10 items-center justify-center rounded-pill"
-            style={{ backgroundColor: "rgba(255,255,255,0.15)" }}
-          >
-            <MessageCircle size={19} color="#fff" />
-          </View>
-          <Text className="min-w-0 flex-1 text-[13px] leading-[18px] text-white">
-            I&apos;m here to listen and help you keep track, every step of the way. Let&apos;s take
-            better care of you, together.
+          <Text style={{ fontFamily: font.regular, fontSize: 11.5, color: ink[300], textAlign: "center", paddingHorizontal: 40 }}>
+            General health guidance, not a diagnosis. In an emergency, call 112.
           </Text>
-        </View>
-        <Pressable
-          accessibilityRole="button"
-          onPress={() => router.push("/ask")}
-          className="mt-3 h-12 flex-row items-center justify-center gap-2 rounded-pill bg-white"
-        >
-          <MessageCircle size={16} color={brand[700]} />
-          <Text className="text-[14px] font-semibold" style={{ color: brand[700] }}>
-            Chat with <Brand />
-          </Text>
-        </Pressable>
-      </View>
-
-      <View className="mx-5 mt-4 overflow-hidden rounded-card bg-surface" style={shadow.e1}>
-        <View
-          className="flex-row items-center justify-between p-3.5"
-          style={{ borderBottomWidth: 1, borderBottomColor: surface.line }}
-        >
-          <Text className="text-[13.5px] font-semibold text-ink-900">Version</Text>
-          <Text className="text-[13px] text-ink-500">{APP_VERSION}</Text>
-        </View>
-        <Pressable
-          accessibilityRole="button"
-          onPress={() => router.push("/settings/security")}
-          className="flex-row items-center justify-between p-3.5"
-        >
-          <Text className="text-[13.5px] font-semibold text-ink-900">Security &amp; privacy</Text>
-          <Text className="text-[12px] font-medium text-brand-600">View</Text>
-        </Pressable>
-      </View>
-
-      <View className="mx-5 mt-4 flex-row items-start gap-2">
-        <ShieldCheck size={14} color={ink[300]} style={{ marginTop: 1 }} />
-        <Text className="flex-1 text-[11px] leading-[16px] text-ink-500">
-          <Brand /> is not a replacement for professional medical advice. For emergencies, contact your
-          doctor or local emergency services.
-        </Text>
-      </View>
-    </SettingsScreen>
+        </Reveal>
+      </RevealScroll>
+    </View>
   );
 }
 
-/*
- * The questions nobody puts on a marketing page.
- *
- * The strongest thing this section can do is answer the awkward ones plainly
- * and FIRST — can it replace my doctor, what happens when I stop paying, what
- * do you do with my documents. A reader who finds the uncomfortable question
- * already answered stops looking for the catch; a reader who finds only
- * flattering questions starts hunting for it.
- *
- * The first answer is "No, and it is not built to." That is the most important
- * sentence on the page, and it is deliberately not softened.
- */
-const FAQ: readonly { q: string; a: string }[] = [
+// ------------------------------------------------------------------ content --
+
+const STEPS: { icon: LucideIcon; title: string; text: string }[] = [
+  { icon: ScanLine, title: "Add anything", text: "Snap a lab report, a prescription, a bill, even a medicine box. Or just type a reading: \"BP 128/82 this morning\"." },
+  { icon: FileHeart, title: "It remembers", text: "Filed to the right person and date, with the numbers pulled out and lined up against last time." },
+  { icon: MessageCircleHeart, title: "Tell it what's going on", text: "\"He's sleepy and gassy today.\" It reads that against his age, his history and his medicines." },
+  { icon: CircleCheck, title: "Know what to do", text: "One clear level of urgency, what usually helps, and the exact words for the doctor if a call is needed." },
+];
+
+const LEVELS: { tier: "reassure" | "monitor" | "contact_today" | "go_now"; icon: LucideIcon; title: string; text: string }[] = [
+  { tier: "reassure", icon: CircleCheck, title: "Fits the usual pattern", text: "What it is, why it happens, and what helps at home." },
+  { tier: "monitor", icon: Eye, title: "Keep an eye on it", text: "The exact signs that would change the answer." },
+  { tier: "contact_today", icon: PhoneCall, title: "Call the doctor today", text: "A ready-made script, with the numbers." },
+  { tier: "go_now", icon: Siren, title: "Go now", text: "Where to go and who to call. No analysis to read past." },
+];
+
+const NEVER = [
+  "Name a diagnosis, or decide what a result means for treatment",
+  "Start, stop or change a medicine dose",
+  "Answer an emergency with analysis instead of sending you to help",
+  "Show one family member's records under another's name",
+  "Sell your data, or share it outside your family",
+];
+
+const FAQ: { q: string; a: string }[] = [
   {
-    q: "Can Cheeku replace my doctor?",
-    a: "No, and it is not built to. It is a memory: every report, reading and conversation, kept in order and read against each other. That lets it say how urgent something looks and what to tell the doctor, with the numbers. Examining, diagnosing and treating stay with your doctor.",
+    q: "Is Cheeku a doctor?",
+    a: "No. It is a health memory with good judgement about urgency. It uses general health knowledge to understand a symptom up to a point, reads it against your own records, and tells you how urgent it looks. Examining, diagnosing and treating stay with your doctor, and Cheeku makes that conversation better.",
   },
   {
     q: "Where do the answers come from?",
-    a: "Your own memory first: the documents you added, the readings you mentioned, and what you talked about before, each with its date. Symptoms are read using general health knowledge, against limits that fit the person's age or stage (a newborn's day of life, a pregnancy's trimester). Every answer shows what it read, and when there is nothing to go on it says so instead of guessing.",
+    a: "Your own memory first: the reports you added, the readings you mentioned and what you talked about before, each with its date. Symptoms are read with general health knowledge, against limits that fit the person's age or stage. Every answer shows what it read.",
   },
   {
-    q: "Does it use my results to decide what to show me?",
-    a: "In the chat, yes, because that is the point of a memory: a starter might be a result that is still pending or a number that changed. It never suggests you have a condition. Articles are still chosen only from what you told us about yourself, the journey you picked and the conditions you typed in.",
+    q: "What if I tell it something wrong?",
+    a: "Correct it in the chat (\"sorry, his weight is 3.3, not 3.7\") and Cheeku replaces the old number and tells you which earlier answer it changed. You can also see, correct or forget every remembered reading on the Memory page.",
   },
   {
-    q: "Who can see my records?",
-    a: "You, and only within your own account. Records are private to the family account they were added to, they are never sold, and they are not used to advertise to you. Every read is checked on the server, not just hidden in the app.",
+    q: "Can my family see each other's records?",
+    a: "Everyone on a family plan lives in one account, but each person's file is separate. Answers about one person only ever use that person's records.",
   },
   {
-    q: "What if I ask about something urgent?",
-    a: "Cheeku checks every message before it goes anywhere. If what you describe could be an emergency, it stops and points you to emergency services rather than answering. It will also flag when something sounds worth seeing someone about sooner rather than later.",
-  },
-  {
-    q: "What does it cost?",
-    a: `Free includes ${FREE_CHAT_LIMIT} chats a day and unlimited storage of your own records. Paid plans raise the chat allowance and add family seats. Your documents are yours either way.`,
-  },
-  {
-    q: "What happens to my records if I stop paying?",
-    a: "Nothing is deleted. Chat allowance and the number of members you can open return to the free plan's, but every document stays exactly where it is, and any family member's file is preserved rather than removed.",
-  },
-  {
-    q: "Can I take my data out, or delete it?",
-    a: "Both, from Settings, without asking anyone. Export gives you your records and their extracted details; delete removes your account data. Neither is buried behind a support request.",
+    q: "Who can see my data?",
+    a: "Only you, inside your own account. It isn't sold and isn't used for advertising. You can export everything or delete your account from the bottom of your Profile screen.",
   },
 ];
 
-function Faq() {
-  const [open, setOpen] = useState<string | null>(FAQ[0]?.q ?? null);
+// -------------------------------------------------------------------- parts --
 
+function Floating({ label, note, icon: Icon, style, delay }: { label: string; note: string; icon: LucideIcon; style: object; delay: number }) {
   return (
-    <View className="mt-6">
-      <View className="px-5">
-        <Text className="text-[17px] font-bold leading-[21px] tracking-tight text-ink-900">
-          The questions worth{"\n"}
-          <Text className="text-brand-600">asking us first.</Text>
-        </Text>
+    <Drift delay={delay} style={[{ position: "absolute", zIndex: 3 }, style]}>
+      <View style={[glassShadow, { flexDirection: "row", alignItems: "center", gap: 7, paddingVertical: 7, paddingLeft: 7, paddingRight: 11, borderRadius: 999, backgroundColor: "#fff" }]}>
+        <View style={{ width: 24, height: 24, borderRadius: 12, backgroundColor: brand[50], alignItems: "center", justifyContent: "center" }}>
+          <Icon size={13} color={brand[600]} />
+        </View>
+        <View>
+          <Text style={{ fontFamily: font.semibold, fontSize: 11.5, color: ink[900] }}>{label}</Text>
+          <Text style={{ fontFamily: font.regular, fontSize: 10, color: ink[500] }}>{note}</Text>
+        </View>
       </View>
+    </Drift>
+  );
+}
 
-      <View className="mx-5 mt-3 overflow-hidden rounded-card bg-surface" style={shadow.e1}>
-        {FAQ.map((item, i) => {
-          const expanded = open === item.q;
-          return (
-            <View
-              key={item.q}
-              style={i > 0 ? { borderTopWidth: 1, borderTopColor: surface.line } : undefined}
-            >
-              <Pressable
-                accessibilityRole="button"
-                accessibilityState={{ expanded }}
-                accessibilityLabel={item.q}
-                onPress={() => setOpen(expanded ? null : item.q)}
-                className="flex-row items-center gap-3 px-3.5 py-3.5"
-              >
-                <Text className="min-w-0 flex-1 text-[13px] font-semibold leading-[18px] text-ink-900">
-                  {item.q}
-                </Text>
-                {/*
-                 * The chevron rotates rather than swapping to a minus: one
-                 * shape moving reads as the same control in two states, two
-                 * shapes read as two controls.
-                 */}
-                <ChevronDown
-                  size={16}
-                  color={expanded ? brand[600] : ink[300]}
-                  style={{ transform: [{ rotate: expanded ? "180deg" : "0deg" }] }}
-                />
-              </Pressable>
-              {expanded ? (
-                <View className="px-3.5 pb-3.5">
-                  <Text className="text-[12.5px] leading-[18px] text-ink-500">{item.a}</Text>
-                </View>
-              ) : null}
-            </View>
-          );
-        })}
+function Step({ n, last, icon: Icon, title, text }: { n: number; last: boolean; icon: LucideIcon; title: string; text: string }) {
+  return (
+    <View style={{ flexDirection: "row", gap: 14, marginTop: n === 1 ? 18 : 0 }}>
+      <View style={{ alignItems: "center", width: 44 }}>
+        <View style={[glassShadow, { width: 44, height: 44, borderRadius: 15, backgroundColor: "#fff", alignItems: "center", justifyContent: "center" }]}>
+          <Icon size={20} color={brand[600]} />
+        </View>
+        {last ? null : <View style={{ width: 2, flex: 1, minHeight: 24, marginVertical: 6, borderRadius: 1, backgroundColor: brand[100] }} />}
       </View>
+      <View style={{ flex: 1, paddingBottom: last ? 0 : 18 }}>
+        <Text style={{ fontFamily: font.semibold, fontSize: 11, letterSpacing: 0.8, color: brand[500] }}>STEP {n}</Text>
+        <Text style={{ fontFamily: font.semibold, fontSize: 16.5, color: ink[900], marginTop: 2 }}>{title}</Text>
+        <Text style={{ fontFamily: font.regular, fontSize: 14, lineHeight: 20, color: ink[700], marginTop: 3 }}>{text}</Text>
+      </View>
+    </View>
+  );
+}
 
-      <View className="mx-5 mt-2 flex-row items-start gap-2">
-        <FileText size={13} color={ink[300]} style={{ marginTop: 2 }} />
-        <Text className="flex-1 text-[11.5px] leading-[16px] text-ink-500">
-          Articles in <Brand ai /> cite the guidance they draw on. Nothing here is written to persuade you
-          out of seeing someone.
-        </Text>
+const LEVEL_TONE = {
+  reassure: { bg: semantic.safeBg, fg: semantic.safeText },
+  monitor: { bg: semantic.cautionBg, fg: semantic.cautionText },
+  contact_today: { bg: semantic.dangerBg, fg: semantic.dangerText },
+  go_now: { bg: semantic.dangerStrong, fg: "#ffffff" },
+} as const;
+
+function Level({ tier, icon: Icon, title, text }: (typeof LEVELS)[number]) {
+  const t = LEVEL_TONE[tier];
+  return (
+    <View style={{ flexDirection: "row", alignItems: "center", gap: 12, padding: 12, borderRadius: 18, backgroundColor: "#fff", borderWidth: 1, borderColor: surface.line }}>
+      <View style={{ width: 36, height: 36, borderRadius: 12, backgroundColor: t.bg, alignItems: "center", justifyContent: "center" }}>
+        <Icon size={17} color={t.fg} strokeWidth={2.2} />
       </View>
+      <View style={{ flex: 1 }}>
+        <Text style={{ fontFamily: font.semibold, fontSize: 14.5, color: ink[900] }}>{title}</Text>
+        <Text style={{ fontFamily: font.regular, fontSize: 12.5, lineHeight: 17, color: ink[500], marginTop: 1 }}>{text}</Text>
+      </View>
+    </View>
+  );
+}
+
+function Feature({ icon: Icon, title, text }: { icon: LucideIcon; title: string; text: string }) {
+  return (
+    <View style={[glassShadow, { flex: 1, borderRadius: 24, backgroundColor: "#fff", padding: 14, gap: 8 }]}>
+      <View style={{ width: 38, height: 38, borderRadius: 13, backgroundColor: brand[50], alignItems: "center", justifyContent: "center" }}>
+        <Icon size={18} color={brand[600]} />
+      </View>
+      <Text style={{ fontFamily: font.semibold, fontSize: 14.5, color: ink[900] }}>{title}</Text>
+      <Text style={{ fontFamily: font.regular, fontSize: 12.5, lineHeight: 18, color: ink[700] }}>{text}</Text>
+    </View>
+  );
+}
+
+function Tick({ text }: { text: string }) {
+  return (
+    <View style={{ flexDirection: "row", gap: 8, alignItems: "flex-start" }}>
+      <HeartHandshake size={15} color={brand[600]} style={{ marginTop: 2 }} />
+      <Text style={{ flex: 1, fontFamily: font.medium, fontSize: 13.5, lineHeight: 19, color: ink[900] }}>{text}</Text>
+    </View>
+  );
+}
+
+function Trust({ icon: Icon, title, text }: { icon: LucideIcon; title: string; text: string }) {
+  return (
+    <View style={[glassShadow, { flex: 1, alignItems: "center", borderRadius: 22, backgroundColor: "#fff", paddingVertical: 16, paddingHorizontal: 8, gap: 6 }]}>
+      <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: brand[50], alignItems: "center", justifyContent: "center" }}>
+        <Icon size={18} color={brand[600]} />
+      </View>
+      <Text style={{ fontFamily: font.semibold, fontSize: 13.5, color: ink[900] }}>{title}</Text>
+      <Text style={{ fontFamily: font.regular, fontSize: 11.5, color: ink[500], textAlign: "center" }}>{text}</Text>
     </View>
   );
 }

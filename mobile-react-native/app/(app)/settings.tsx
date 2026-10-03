@@ -57,7 +57,7 @@ import { refreshRoster } from "@/lib/profiles/family";
 import { forgetThisDevice } from "@/lib/notifications/push";
 import { supabase } from "@/lib/supabase/client";
 import { brand, ink, semantic, shadow, surface } from "@/theme/tokens";
-import { Brand } from "@/components/ui/brand";
+import { Brand, brandify } from "@/components/ui/brand";
 
 /**
  * I1 — profile and settings.
@@ -602,7 +602,7 @@ function Row({
         <Icon size={18} color={brand[600]} strokeWidth={1.9} />
       </View>
       <View className="min-w-0 flex-1">
-        <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{title}</Text>
+        <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{brandify(title)}</Text>
         <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 12.5, color: ink[500], marginTop: 1 }}>
           {body}
         </Text>
