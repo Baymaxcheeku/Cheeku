@@ -1,9 +1,10 @@
 import { useRouter } from "expo-router";
 import { ChevronLeft, type LucideIcon } from "lucide-react-native";
-import { ActivityIndicator, Pressable, ScrollView, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Glass, GlassCircle, glass, glassShadow } from "@/components/ui/glass";
+import { RevealScroll } from "@/components/ui/reveal";
 import { Backdrop } from "@/components/ui/screen";
 import { brand, ink } from "@/theme/tokens";
 import { font } from "@/theme/type";
@@ -54,7 +55,8 @@ export function SettingsScreen({
         </GlassCircle>
       </View>
 
-      <ScrollView
+      {/* Reveal-aware, so a page can let its sections rise in as they scroll into view. */}
+      <RevealScroll
         contentContainerStyle={{ paddingBottom: footer ? 16 : insets.bottom + 32 }}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
@@ -77,7 +79,7 @@ export function SettingsScreen({
         </View>
 
         {children}
-      </ScrollView>
+      </RevealScroll>
 
       {footer ? (
         <View

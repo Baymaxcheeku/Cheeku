@@ -3,13 +3,10 @@ import {
   CalendarClock,
   Check,
   CheckCircle2,
-  Infinity as InfinityIcon,
   Lock,
-  ShieldCheck,
   UserRound,
   Users,
   X,
-  Zap,
   type LucideIcon,
 } from "lucide-react-native";
 import { useEffect, useState } from "react";
@@ -23,6 +20,8 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { Brand } from "@/components/ui/brand";
+import { Gradient, glassShadow } from "@/components/ui/glass";
 import { StaggerItem } from "@/components/ui/motion";
 import {
   DAILY_PASS_HOURS,
@@ -35,7 +34,8 @@ import {
   type Tier,
 } from "@/lib/billing/plans";
 import { subscribeDemo } from "@/lib/billing/subscribe";
-import { brand, ink, semantic, shadow, surface } from "@/theme/tokens";
+import { brand, ink, shadow, surface } from "@/theme/tokens";
+import { font } from "@/theme/type";
 
 /*
  * H1 / H2 — the paywall and its checkout, ported from the web build.
@@ -69,24 +69,24 @@ export type Reason = "quota" | "upgrade" | "family" | "onboarding";
 
 const REASON_COPY: Record<Reason, { eyebrow: string; title: string; body: string }> = {
   quota: {
-    eyebrow: "Free limit reached",
-    title: "You've used your free chats",
-    body: `Free gives you ${FREE_CHAT_LIMIT} chats a day. A plan removes the ceiling.`,
+    eyebrow: "Today's free chats are used",
+    title: "Keep the conversation going",
+    body: `Free includes ${FREE_CHAT_LIMIT} chats a day. Any plan below makes it unlimited, starting right now.`,
   },
   upgrade: {
-    eyebrow: "Upgrade",
-    title: "Unlock everything in Cheeku AI",
-    body: `Free gives you ${FREE_CHAT_LIMIT} chats a day. A plan removes the ceiling.`,
+    eyebrow: "Go unlimited",
+    title: "Your health memory, without limits",
+    body: "Ask as often as you need, about everyone you look after. Cancel any time.",
   },
   family: {
-    eyebrow: "Family access",
-    title: "Add your loved ones",
-    body: "The Family plan covers up to 4 members with shared records and insights.",
+    eyebrow: "Family",
+    title: "Bring your family in",
+    body: "One plan for up to 4 people, each with a file of their own that never mixes.",
   },
   onboarding: {
     eyebrow: "You chose family",
-    title: "Set up family access",
-    body: "Family access needs a plan. You can also start free with just your own profile.",
+    title: "Look after everyone in one place",
+    body: "Family needs a plan. You can also start free with just your own profile and add people later.",
   },
 };
 
@@ -241,9 +241,9 @@ const ROW_ORDER: readonly Plan[] = [PLANS.micro, PLANS.solo, PLANS.family];
 
 /** What every paid tier unlocks, as outcomes. Three, because four is a list. */
 const UNLOCKS: readonly string[] = [
-  "Ask as much as you need, at any hour",
-  "Answers that name the record they came from",
-  "A separate file for everyone you look after",
+  "Ask as much as you need, at 3 am or 3 pm",
+  "Answers read against your own reports and readings",
+  "Clear urgency, and the exact words for the doctor",
 ];
 
 function PlanChooser({
@@ -267,10 +267,13 @@ function PlanChooser({
 
   return (
     <View className="px-6">
+      <View pointerEvents="none" style={{ position: "absolute", top: -16, left: 0, right: 0, height: 240, borderTopLeftRadius: 32, borderTopRightRadius: 32, overflow: "hidden" }}>
+        <Gradient from="#e3dcff" to="#fafafe" angle="vertical" />
+      </View>
       {/* A grabber, and the close control as far from the CTA as it can be. */}
       <View className="flex-row items-start">
         <View className="min-w-0 flex-1">
-          <Text className="text-[11px] font-bold uppercase text-ink-300" style={{ letterSpacing: 1.4 }}>
+          <Text style={{ fontFamily: font.semibold, fontSize: 11.5, letterSpacing: 1.2, textTransform: "uppercase", color: brand[600] }}>
             {copy.eyebrow}
           </Text>
           {/*
@@ -322,8 +325,10 @@ function PlanChooser({
         {UNLOCKS.map((line, i) => (
           <StaggerItem key={line} index={i}>
             <View className="flex-row items-start gap-2.5">
-              <Check size={15} color={brand[600]} strokeWidth={2.5} style={{ marginTop: 1 }} />
-              <Text className="flex-1 text-[13.5px] leading-[19px] text-ink-900">{line}</Text>
+              <View style={{ width: 22, height: 22, borderRadius: 11, backgroundColor: brand[600], alignItems: "center", justifyContent: "center" }}>
+                <Check size={12} color="#fff" strokeWidth={3} />
+              </View>
+              <Text className="flex-1 text-[14px] leading-[21px] text-ink-900">{line}</Text>
             </View>
           </StaggerItem>
         ))}
@@ -333,8 +338,8 @@ function PlanChooser({
       {/* One container, hairlines between. Three separate cards is three
           objects to compare before you compare the prices inside them. */}
       <View
-        className="mt-6 overflow-hidden rounded-card"
-        style={{ borderWidth: 1, borderColor: surface.line, backgroundColor: surface.base }}
+        className="mt-6 overflow-hidden"
+        style={[glassShadow, { borderRadius: 24, backgroundColor: surface.base }]}
       >
         {ROW_ORDER.map((plan, i) => (
           <PlanRow
@@ -415,9 +420,11 @@ function PlanRow({
         perDay ? `, ${perDay}` : ""
       }${saving ? `, ${saving} percent less than separate plans` : ""}`}
       onPress={onSelect}
-      className="flex-row items-center gap-3 px-4 py-3.5"
+      className="flex-row items-center gap-3 px-4 py-4"
       style={{
         backgroundColor: selected ? brand[50] : surface.base,
+        borderLeftWidth: 3,
+        borderLeftColor: selected ? brand[600] : "transparent",
         ...(first ? null : { borderTopWidth: 1, borderTopColor: surface.line }),
       }}
     >
@@ -440,9 +447,9 @@ function PlanRow({
             {plan.name.replace(" Plan", "")}
           </Text>
           {saving ? (
-            <Text className="text-[10.5px] font-bold uppercase" style={{ color: brand[600], letterSpacing: 0.6 }}>
-              Save {saving}%
-            </Text>
+            <View style={{ paddingHorizontal: 8, height: 20, borderRadius: 999, justifyContent: "center", backgroundColor: brand[600] }}>
+              <Text style={{ fontFamily: font.semibold, fontSize: 10.5, color: "#fff" }}>Best value · save {saving}%</Text>
+            </View>
           ) : null}
         </View>
         <Text className="mt-0.5 text-[11.5px] text-ink-500">
@@ -581,24 +588,15 @@ function Checkout({
           </View>
         </View>
 
-        <View
-          className="mt-3 flex-row flex-wrap gap-2 pt-3"
-          style={{ borderTopWidth: 1, borderTopColor: brand[200] }}
-        >
-          {[
-            {
-              icon: InfinityIcon,
-              label: isDaily ? `Unlimited for ${DAILY_PASS_HOURS}h` : "Unlimited Ask Cheeku",
-            },
-            { icon: Zap, label: "Health insights" },
-            { icon: ShieldCheck, label: "Unlimited storage" },
-            { icon: Users, label: `${plan.seats} member${plan.seats === 1 ? "" : "s"}` },
-          ].map(({ icon: FeatureIcon, label }) => (
-            <View key={label} className="w-[47%] flex-row items-center gap-2">
-              <View className="h-7 w-7 items-center justify-center rounded-pill bg-surface">
-                <FeatureIcon size={14} color={brand[600]} />
+        {/* The plan's own feature list, so checkout promises exactly what the
+            plan cards did and nothing vaguer. */}
+        <View className="mt-3 gap-2 pt-3" style={{ borderTopWidth: 1, borderTopColor: brand[200] }}>
+          {plan.features.map((label) => (
+            <View key={label} className="flex-row items-start gap-2.5">
+              <View className="h-5 w-5 items-center justify-center rounded-pill bg-surface" style={{ marginTop: 1 }}>
+                <Check size={11} color={brand[600]} strokeWidth={3} />
               </View>
-              <Text className="flex-1 text-[11px] font-medium text-ink-700">{label}</Text>
+              <Text className="flex-1 text-[12.5px] leading-[18px] text-ink-700">{label}</Text>
             </View>
           ))}
         </View>
@@ -606,10 +604,10 @@ function Checkout({
 
       <View
         className="mt-3 flex-row items-start gap-2 rounded-card px-3.5 py-3"
-        style={{ backgroundColor: semantic.safeBg }}
+        style={{ backgroundColor: "rgba(255,255,255,0.8)", borderWidth: 1, borderColor: surface.line }}
       >
-        <ShieldCheck size={15} color={semantic.safeText} style={{ marginTop: 1 }} />
-        <Text className="flex-1 text-[12px] leading-[17px]" style={{ color: semantic.safeText }}>
+        <CalendarClock size={15} color={brand[600]} style={{ marginTop: 1 }} />
+        <Text className="flex-1 text-[12px] leading-[17px] text-ink-700">
           {isDaily
             ? `${formatPrice(plan.priceInPaise)} charged once. Nothing renews. The pass ends after ${DAILY_PASS_HOURS} hours.`
             : `${formatPrice(plan.priceInPaise)} will be charged every month on the date you subscribe.`}
@@ -647,7 +645,7 @@ function Checkout({
         </View>
 
         <View
-          className="mt-2.5 flex-row flex-wrap gap-1.5 pt-2.5"
+          className="mt-2.5 flex-row gap-1.5 pt-2.5"
           style={{ borderTopWidth: 1, borderTopColor: surface.line }}
         >
           {RAZORPAY_METHODS.map((label) => (
@@ -702,7 +700,7 @@ function Checkout({
          * is not charging anybody. The second line goes when payment is real.
          */}
         <Text className="mt-2 text-center text-[11px] leading-[16px] text-ink-500">
-          You&apos;ll confirm in Razorpay&apos;s secure screen. Cheeku never sees your UPI PIN or
+          You&apos;ll confirm in Razorpay&apos;s secure screen. <Brand /> never sees your UPI PIN or
           card details.
         </Text>
         <Text className="mt-1.5 text-center text-[11px] font-medium text-ink-300">
@@ -729,12 +727,12 @@ function Success({
       <View className="mt-4 items-center">
         <View
           className="h-16 w-16 items-center justify-center rounded-pill"
-          style={{ backgroundColor: semantic.safeBg }}
+          style={{ backgroundColor: brand[50] }}
         >
-          <CheckCircle2 size={34} color={semantic.safe} />
+          <CheckCircle2 size={34} color={brand[600]} />
         </View>
         <Text className="mt-3 text-[24px] font-bold tracking-tight text-ink-900">
-          You&apos;re all set
+          You&apos;re in
         </Text>
         <Text className="mt-1.5 max-w-[280px] text-center text-[13px] leading-[18px] text-ink-500">
           {plan.name} is active.{" "}
@@ -753,9 +751,9 @@ function Success({
           >
             <View
               className="h-7 w-7 items-center justify-center rounded-pill"
-              style={{ backgroundColor: semantic.safeBg }}
+              style={{ backgroundColor: brand[50] }}
             >
-              <Check size={14} color={semantic.safe} />
+              <Check size={14} color={brand[600]} />
             </View>
             <Text className="flex-1 text-[13px] text-ink-700">{feature}</Text>
           </View>
@@ -769,7 +767,7 @@ function Success({
         style={{ backgroundColor: brand[600] }}
       >
         <Text className="text-[16px] font-semibold text-white">
-          {pendingQuestion ? "Send my question" : "Start using Cheeku AI"}
+          {pendingQuestion ? "Send my question" : "Start a chat"}
         </Text>
       </Pressable>
 

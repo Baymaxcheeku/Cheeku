@@ -1,13 +1,17 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { HeartPulse, Info } from "lucide-react-native";
+import { HeartPulse, Info, Pill, ShieldAlert, ShieldCheck, Stethoscope, type LucideIcon } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, Text, View } from "react-native";
 
 import { HealthEditor } from "@/components/family/health-editor";
 import { SaveButton, SettingsScreen } from "@/components/settings/chrome";
+import { Eyebrow, PersonHero, Reason, Title } from "@/components/settings/editorial";
+import { brandify } from "@/components/ui/brand";
+import { glassShadow } from "@/components/ui/glass";
+import { Reveal } from "@/components/ui/reveal";
 import { activeProfile } from "@/lib/profiles/context";
 import { ageFrom, EMPTY_HEALTH, loadMemberHealth, saveMemberHealth, type MemberHealth } from "@/lib/profiles/health";
-import { brand, ink } from "@/theme/tokens";
+import { brand, ink, semantic } from "@/theme/tokens";
 import { font } from "@/theme/type";
 
 /*
@@ -83,31 +87,79 @@ export default function HealthProfile() {
   }
 
   const first = active.name.split(" ")[0] ?? active.name;
+  const age = ageFrom(active.dob);
+  const stats: { icon: LucideIcon; n: number; one: string; many: string }[] = [
+    { icon: Stethoscope, n: value.conditions.length, one: "condition", many: "conditions" },
+    { icon: ShieldAlert, n: value.allergies.length, one: "allergy", many: "allergies" },
+    { icon: Pill, n: value.medications.length, one: "medicine", many: "medicines" },
+  ];
 
   return (
     <SettingsScreen
       title="Health profile"
       eyebrow={active.isPrimary ? "Your conditions, allergies and medicines" : `${first}'s conditions, allergies and medicines`}
       icon={HeartPulse}
+      bare
       footer={<SaveButton onPress={() => void save()} pending={pending} saved={saved} />}
     >
-      <View className="mx-5 mt-4 flex-row items-start gap-2.5 rounded-[18px] px-4 py-3" style={{ backgroundColor: brand[50] }}>
-        <Info size={16} color={brand[600]} style={{ marginTop: 1 }} />
-        <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[700] }}>
-          {active.isPrimary ? "Yours" : `${first}'s`}, in your own words. Cheeku reads every report and every symptom you mention against this, and
-          never guesses at a diagnosis.
-        </Text>
-      </View>
+      <Reveal>
+        <PersonHero
+          eyebrow={active.isPrimary ? "Your health profile" : `${first}'s health profile`}
+          name={active.name}
+          sub={[age !== null ? (age === 0 ? "Under a year old" : `${age} years old`) : null, value.bloodGroup ? `Blood group ${value.bloodGroup}` : null].filter(Boolean).join("  ·  ") || "The basics Cheeku reads against"}
+          avatar={{ svg: active.avatar, photo: active.photo, image: active.avatarImage, background: active.avatarBackground }}
+        >
+          <View style={{ flexDirection: "row", gap: 8, marginTop: 16 }}>
+            {stats.map((st) => (
+              <View key={st.one} style={{ flex: 1, padding: 12, borderRadius: 18, backgroundColor: "rgba(255,255,255,0.85)" }}>
+                <st.icon size={16} color={brand[600]} />
+                <Text style={{ fontFamily: font.semibold, fontSize: 20, letterSpacing: -0.4, color: ink[900], marginTop: 6 }}>{st.n}</Text>
+                <Text style={{ fontFamily: font.regular, fontSize: 12, color: ink[500] }}>{st.n === 1 ? st.one : st.many}</Text>
+              </View>
+            ))}
+          </View>
+        </PersonHero>
+      </Reveal>
 
-      <View style={{ marginHorizontal: 20, marginTop: 22 }}>
-        <HealthEditor value={value} onChange={setValue} age={ageFrom(active.dob)} name={active.isPrimary ? undefined : active.name} />
-      </View>
+      <Reveal style={{ marginHorizontal: 20, marginTop: 12 }}>
+        <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 10, padding: 14, borderRadius: 20, backgroundColor: brand[50] }}>
+          <Info size={16} color={brand[600]} style={{ marginTop: 2 }} />
+          <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 13, lineHeight: 19, color: ink[700] }}>
+            {brandify(`In ${active.isPrimary ? "your" : `${first}'s`} own words. Cheeku reads every report and every symptom against this, and never guesses at a diagnosis.`)}
+          </Text>
+        </View>
+      </Reveal>
+
+      {/* Full width, not in a card: the editor's medicine and height rows are
+          laid out for the screen's own margins and overflow inside padding. */}
+      <Reveal style={{ marginHorizontal: 20, marginTop: 22 }}>
+        <HealthEditor value={value} onChange={setValue} age={age} name={active.isPrimary ? undefined : active.name} />
+      </Reveal>
 
       {error ? (
-        <Text accessibilityRole="alert" style={{ marginHorizontal: 20, marginTop: 14, fontFamily: font.medium, fontSize: 13, color: "#c00a1c" }}>
+        <Text accessibilityRole="alert" style={{ marginHorizontal: 20, marginTop: 14, fontFamily: font.medium, fontSize: 13, color: semantic.dangerText }}>
           {error}
         </Text>
       ) : null}
+
+      <Reveal style={{ paddingHorizontal: 20, marginTop: 32 }}>
+        <Eyebrow>How it&apos;s used</Eyebrow>
+        <Title>A few lines that change every answer</Title>
+      </Reveal>
+      <Reveal style={{ marginHorizontal: 20, marginTop: 14 }}>
+        <View style={[glassShadow, { borderRadius: 24, backgroundColor: "#fff", padding: 18, gap: 16 }]}>
+          <Reason icon={Stethoscope} lead="Conditions" text="A sugar reading means something different for someone with diabetes. Cheeku reads results with that in mind." />
+          <Reason icon={ShieldAlert} lead="Allergies" text="Kept in mind on every answer and written into every doctor note, so nobody has to remember them under pressure." />
+          <Reason icon={Pill} lead="Medicines" text="Checked against each other for overlaps, like two products with the same ingredient. Cheeku never changes a dose." />
+        </View>
+      </Reveal>
+
+      <Reveal style={{ marginHorizontal: 20, marginTop: 18, flexDirection: "row", gap: 8, alignItems: "flex-start" }}>
+        <ShieldCheck size={14} color={ink[300]} style={{ marginTop: 2 }} />
+        <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 12.5, lineHeight: 18, color: ink[500] }}>
+          Kept in {active.isPrimary ? "your" : `${first}'s`} file only, never mixed with anyone else&apos;s and never shared outside your account.
+        </Text>
+      </Reveal>
     </SettingsScreen>
   );
 }

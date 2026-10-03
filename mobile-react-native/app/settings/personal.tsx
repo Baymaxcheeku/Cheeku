@@ -1,17 +1,20 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
-import { ChevronRight, HeartPulse, Mail, UserCog } from "lucide-react-native";
+import { CalendarHeart, ChevronRight, Dna, HeartPulse, IdCard, Mail, ShieldCheck, UserCog } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
 
-import { Avatar } from "@/components/ui/avatar";
-import { Panel, SaveButton, SettingsScreen } from "@/components/settings/chrome";
+import { SaveButton, SettingsScreen } from "@/components/settings/chrome";
+import { Eyebrow, PersonHero, Reason, Title } from "@/components/settings/editorial";
 import { ChipSelect, Field } from "@/components/ui/field";
+import { glassShadow } from "@/components/ui/glass";
 import { Meter } from "@/components/ui/motion";
+import { Reveal } from "@/components/ui/reveal";
 import { activeProfile } from "@/lib/profiles/context";
 import { updatePersonalInfo } from "@/lib/settings/actions";
 import { accountEmail, profileDetail } from "@/lib/settings/queries";
-import { brand } from "@/theme/tokens";
+import { brand, ink, semantic, surface } from "@/theme/tokens";
+import { font } from "@/theme/type";
 
 const SEXES = [
   ["female", "Female"],
@@ -40,7 +43,7 @@ export default function PersonalInfo() {
       const active = await activeProfile();
       if (!active) return null;
       const [detail, email] = await Promise.all([profileDetail(active.id), accountEmail()]);
-      return detail ? { detail, email, avatar: active.avatar, photo: active.photo, background: active.avatarBackground } : null;
+      return detail ? { detail, email, avatar: active.avatar, photo: active.photo, image: active.avatarImage, background: active.avatarBackground } : null;
     },
   });
 
@@ -119,106 +122,116 @@ export default function PersonalInfo() {
    */
   const filled = [detail.name, detail.dob, detail.sex].filter(Boolean).length;
 
+  const first = detail.name.split(" ")[0] ?? detail.name;
+
   return (
     <SettingsScreen
       title="Personal information"
       eyebrow="Name, date of birth and contact"
       icon={UserCog}
+      bare
       footer={<SaveButton onPress={() => void save()} pending={pending} saved={saved} />}
     >
-      <View className="mt-4">
-        <Panel>
-          <View className="flex-row items-center gap-3">
-            <Avatar svg={context.data?.avatar ?? ""} photo={context.data?.photo} background={context.data?.background} size={56} />
-            <View className="min-w-0 flex-1">
-              <Text className="text-[15px] font-semibold text-ink-900" numberOfLines={1}>
-                {detail.name}
-              </Text>
-              <Text className="text-[12px] text-ink-500">
-                {detail.isPrimary ? "Your own profile" : (detail.relationship ?? "Family member")}
-              </Text>
+      <Reveal>
+        <PersonHero
+          eyebrow={detail.isPrimary ? "Your details" : `${first}'s details`}
+          name={detail.name}
+          sub={detail.isPrimary ? "Your own profile" : (detail.relationship ?? "Family member")}
+          avatar={{ svg: context.data?.avatar ?? "", photo: context.data?.photo, image: context.data?.image, background: context.data?.background }}
+        >
+          <View style={{ marginTop: 16, padding: 14, borderRadius: 20, backgroundColor: "rgba(255,255,255,0.85)" }}>
+            <View style={{ flexDirection: "row", alignItems: "baseline", justifyContent: "space-between" }}>
+              <Text style={{ fontFamily: font.semibold, fontSize: 13.5, color: ink[900] }}>{filled === 3 ? "All the basics are in" : "The basics"}</Text>
+              <Text style={{ fontFamily: font.medium, fontSize: 12.5, color: ink[500] }}>{filled} of 3</Text>
+            </View>
+            <View style={{ marginTop: 8 }}>
+              <Meter value={filled} total={3} />
             </View>
           </View>
-        </Panel>
-      </View>
+        </PersonHero>
+      </Reveal>
 
       {/* The sign-in email belongs to the account holder, so it only shows on
           their own profile. On a family member's it would read as theirs. */}
       {!detail.isPrimary ? (
-        <Pressable
-          accessibilityRole="button"
-          onPress={() => router.push({ pathname: "/family/[id]", params: { id: detail.id } })}
-          className="mx-5 mt-3 flex-row items-center gap-3 rounded-card bg-brand-50 px-4 py-3"
-        >
-          <HeartPulse size={16} color={brand[500]} />
-          <Text className="min-w-0 flex-1 text-[13px] text-ink-700">
-            Photo, health basics and past reports for {detail.name.split(" ")[0]} are on their page.
-          </Text>
-          <ChevronRight size={16} color={brand[500]} />
-        </Pressable>
+        <Reveal style={{ marginHorizontal: 20, marginTop: 12 }}>
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => router.push({ pathname: "/family/[id]", params: { id: detail.id } })}
+            style={({ pressed }) => ({ flexDirection: "row", alignItems: "center", gap: 12, padding: 14, borderRadius: 20, backgroundColor: pressed ? brand[100] : brand[50] })}
+          >
+            <HeartPulse size={17} color={brand[600]} />
+            <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 13.5, lineHeight: 19, color: ink[700] }}>
+              {first}&apos;s photo, health basics and past reports live on their page.
+            </Text>
+            <ChevronRight size={17} color={brand[600]} />
+          </Pressable>
+        </Reveal>
       ) : context.data?.email ? (
-        <View className="mx-5 mt-3 flex-row items-center gap-3 rounded-card bg-brand-50 px-4 py-3">
-          <Mail size={16} color={brand[500]} />
-          <Text className="min-w-0 flex-1 text-[13px] text-ink-700" numberOfLines={1}>
-            {context.data.email}
-          </Text>
-          <Text className="text-[11px] text-ink-500">Sign-in email</Text>
-        </View>
+        <Reveal style={{ marginHorizontal: 20, marginTop: 12 }}>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 12, padding: 14, borderRadius: 20, backgroundColor: "rgba(255,255,255,0.75)", borderWidth: 1, borderColor: surface.line }}>
+            <Mail size={17} color={brand[600]} />
+            <View style={{ flex: 1, minWidth: 0 }}>
+              <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 14, color: ink[900] }}>{context.data.email}</Text>
+              <Text style={{ fontFamily: font.regular, fontSize: 12, color: ink[500], marginTop: 1 }}>Sign-in email. Only you see this.</Text>
+            </View>
+          </View>
+        </Reveal>
       ) : null}
 
-      <View className="mx-5 mt-4 gap-1.5">
-        <View className="flex-row items-baseline justify-between">
-          <Text className="text-[12.5px] font-semibold text-ink-700">Profile details</Text>
-          <Text className="text-[11.5px] text-ink-300">{filled} of 3</Text>
-        </View>
-        <Meter value={filled} total={3} />
-        <Text className="text-[11.5px] leading-[16px] text-ink-300">
-          Age and sex let Cheeku read a lab&apos;s reference range the way your lab intends it.
-        </Text>
-      </View>
+      <Reveal style={{ marginHorizontal: 20, marginTop: 16 }}>
+        <View style={[glassShadow, { borderRadius: 28, backgroundColor: "#fff", padding: 18, gap: 16 }]}>
+          <Field label="Full name" required value={name} onChangeText={setName} error={errors.name} autoCapitalize="words" />
 
-      <View className="mx-5 mt-5 gap-4">
-        <Field
-          label="Full name"
-          required
-          value={name}
-          onChangeText={setName}
-          error={errors.name}
-          autoCapitalize="words"
-        />
-
-        <Field
-          label="Date of birth"
-          placeholder="YYYY-MM-DD"
-          value={dob}
-          onChangeText={setDob}
-          error={errors.dob}
-          keyboardType="numbers-and-punctuation"
-          autoCapitalize="none"
-          hint="Used to read reference ranges. Nothing else."
-        />
-
-        <ChipSelect label="Sex" options={SEXES} value={sex} onChange={setSex} />
-
-        {!detail.isPrimary ? (
           <Field
-            label="Relationship to you"
-            placeholder="e.g. Mother, Son, Spouse"
-            value={relationship}
-            onChangeText={setRelationship}
-            error={errors.relationship}
+            label="Date of birth"
+            placeholder="YYYY-MM-DD"
+            value={dob}
+            onChangeText={setDob}
+            error={errors.dob}
+            keyboardType="numbers-and-punctuation"
+            autoCapitalize="none"
+            hint="Used to read normal ranges. Nothing else."
           />
-        ) : null}
-      </View>
+
+          <ChipSelect label="Sex" options={SEXES} value={sex} onChange={setSex} />
+
+          {!detail.isPrimary ? (
+            <Field
+              label="Relationship to you"
+              placeholder="e.g. Mother, Son, Spouse"
+              value={relationship}
+              onChangeText={setRelationship}
+              error={errors.relationship}
+            />
+          ) : null}
+        </View>
+      </Reveal>
 
       {message ? (
-        <Text
-          accessibilityRole="alert"
-          className="mx-5 mt-3 text-[13px] font-medium text-danger-text"
-        >
+        <Text accessibilityRole="alert" style={{ marginHorizontal: 20, marginTop: 12, fontFamily: font.medium, fontSize: 13, color: semantic.dangerText }}>
           {message}
         </Text>
       ) : null}
+
+      <Reveal style={{ paddingHorizontal: 20, marginTop: 32 }}>
+        <Eyebrow>Why we ask</Eyebrow>
+        <Title>Three details, better answers</Title>
+      </Reveal>
+      <Reveal style={{ marginHorizontal: 20, marginTop: 14 }}>
+        <View style={[glassShadow, { borderRadius: 24, backgroundColor: "#fff", padding: 18, gap: 16 }]}>
+          <Reason icon={CalendarHeart} lead="Date of birth" text="Normal changes with age. A 3-week-old and a 40-year-old read the same lab value very differently." />
+          <Reason icon={Dna} lead="Sex" text="Labs set different ranges for haemoglobin, iron and hormones. Cheeku uses the same ones your lab does." />
+          <Reason icon={IdCard} lead="Name" text="So every answer and every doctor note says clearly who it's about." />
+        </View>
+      </Reveal>
+
+      <Reveal style={{ marginHorizontal: 20, marginTop: 18, flexDirection: "row", gap: 8, alignItems: "flex-start" }}>
+        <ShieldCheck size={14} color={ink[300]} style={{ marginTop: 2 }} />
+        <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 12.5, lineHeight: 18, color: ink[500] }}>
+          These stay inside your account. They&apos;re never sold, never shown to anyone else, and you can change them any time.
+        </Text>
+      </Reveal>
     </SettingsScreen>
   );
 }
