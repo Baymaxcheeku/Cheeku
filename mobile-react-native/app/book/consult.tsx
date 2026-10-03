@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { ArrowRight, ArrowUp, Building2, ChevronLeft, MonitorPlay, RotateCcw, Stethoscope } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from "react-native";
@@ -77,6 +77,10 @@ export default function Consult() {
   const insets = useSafeAreaInsets();
   const still = useReducedMotion();
   const draft = useBookingDraft();
+  // Set when the chat's "Doctors nearby" or "Online consultation" opened this:
+  // the person already said how they want to meet, so it is not asked again.
+  const { mode: modeParam } = useLocalSearchParams<{ mode?: string }>();
+  const presetMode: Mode | null = modeParam === "online" || modeParam === "clinic" ? modeParam : null;
   const scroll = useRef<ScrollView>(null);
   const chosenSpecialty = useRef<SpecialtyId>("gp");
   // The result that stopped the flow, so the emergency screen can be reopened.
@@ -123,6 +127,19 @@ export default function Consult() {
         }
       }, beat * (i + 1));
     });
+  }
+
+  function finish(mode: Mode) {
+    draft.choose(chosenSpecialty.current, mode);
+    const sp = SPECIALTIES[chosenSpecialty.current];
+    say(
+      [
+        mode === "online"
+          ? `Lovely. Here are ${sp.plural.toLowerCase()} you can see on a video call. I'll send your note ahead.`
+          : `Lovely. Here are ${sp.plural.toLowerCase()} with clinics near you. I'll send your note ahead.`,
+      ],
+      "done",
+    );
   }
 
   function reply(text: string) {
@@ -230,22 +247,16 @@ export default function Consult() {
         const sp = Object.values(SPECIALTIES).find((s) => s.label === value);
         reply(value);
         chosenSpecialty.current = sp?.id ?? "gp";
+        if (presetMode) {
+          finish(presetMode);
+          return;
+        }
         say([QUESTION.mode], "mode");
         return;
       }
       case "mode": {
-        const mode: Mode = value.startsWith("Online") ? "online" : "clinic";
         reply(value);
-        draft.choose(chosenSpecialty.current, mode);
-        const sp = SPECIALTIES[chosenSpecialty.current];
-        say(
-          [
-            mode === "online"
-              ? `Lovely. Here are ${sp.plural.toLowerCase()} you can see on a video call. I'll send your note ahead.`
-              : `Lovely. Here are ${sp.plural.toLowerCase()} with clinics near you. I'll send your note ahead.`,
-          ],
-          "done",
-        );
+        finish(value.startsWith("Online") ? "online" : "clinic");
         return;
       }
       default:

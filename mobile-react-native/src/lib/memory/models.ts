@@ -33,6 +33,7 @@ function readReply(v: unknown): (ModelReply & { modelId?: string }) | null {
     followUps: Array.isArray(o.followUps) ? o.followUps.filter((f): f is string => typeof f === "string").slice(0, 4) : [],
     tier: TIERS.includes(o.tier as Tier) ? (o.tier as Tier) : null,
     basis: o.basis === "grounded" || o.basis === "silent" ? o.basis : "general",
+    careOffer: o.careOffer === true,
     modelId: typeof o.modelId === "string" ? o.modelId : undefined,
   };
 }

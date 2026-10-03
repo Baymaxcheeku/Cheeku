@@ -42,6 +42,8 @@ export type SymptomModel = {
   analytes: string[];
   mechanism: Partial<Record<Population, string>> & { default: string };
   homeCare: string[];
+  /** Home care that differs by age: what helps a 3-week-old is not what helps an adult. */
+  homeCareBy?: Partial<Record<Population, string[]>>;
   watchFor: Partial<Record<Population, string[]>> & { default: string[] };
   askDoctor: string[];
   /** How far back a reading still bears on it. A fever is about this week; tiredness about this year. */
@@ -260,9 +262,166 @@ export const SYMPTOMS: readonly SymptomModel[] = [
     watchFor: { default: ["Fewer movements than usual, or a change in the pattern", "No movements at all"] },
     askDoctor: ["Do you want me to come in for monitoring?"],
   },
+  // ------------------------------------------------- babies' everyday worries
+  {
+    id: "gas",
+    label: "Gas and colic",
+    windowDays: 7,
+    patterns: [/\bfart(s|ing|y)?\b/i, /\bgas(sy)?\b/i, /\bwindy?\b/i, /\bbloat(ed|ing)?\b/i, /\bcolic(ky)?\b/i, /\bburp(s|ing)?\b/i, /\bhawa\b/i],
+    base: { default: "reassure", neonate: "reassure", infant: "reassure" },
+    analytes: [],
+    mechanism: {
+      neonate:
+        "At {age}, gas is one of the most common things parents notice. Babies swallow air while feeding and crying, and their gut is still learning to move things along, so a lot of farting is usually a sign the gut is working, not that something is wrong. Gassiness and fussy spells often pick up from around 2 to 3 weeks, which is also when colic (long bouts of crying in a baby who is otherwise feeding and growing well) can start. It usually peaks around 6 weeks and eases by 3 to 4 months.",
+      infant:
+        "At {age}, gas is very common. Babies swallow air while feeding and crying, and their gut is still maturing. Colic, if it was there, usually eases by 3 to 4 months. New foods, once solids start, can also bring more gas for a while.",
+      default: "Gas usually comes from swallowed air and from how food is broken down in the gut. Beans, onions, fizzy drinks and eating quickly are the usual culprits, and it settles on its own.",
+    },
+    homeCare: ["Eat slowly, and go easy on fizzy drinks and beans for a few days.", "A short walk after meals helps things move along."],
+    homeCareBy: {
+      neonate: [
+        "Burp {him} during and after every feed: upright on your shoulder, or sitting on your lap with a hand supporting the chin.",
+        "Bicycle legs: with {him} on {his} back, gently move the legs in a slow cycling motion for a minute or two.",
+        "Knees to tummy: gently fold both knees up towards the tummy, hold for a few seconds, release, and repeat a few times.",
+        "Tummy massage: warm hands, slow clockwise circles around the belly button, a few minutes at a time.",
+        "Tummy time while {he}'s awake and you're watching, a few minutes several times a day.",
+        "Keep {him} upright for 15 to 20 minutes after feeds.",
+        "If bottle feeding, keep the bottle tilted so the teat stays full of milk, and check the teat isn't flowing too fast.",
+      ],
+      infant: [
+        "Burp {him} during and after feeds.",
+        "Bicycle legs and knees-to-tummy, a minute or two at a time.",
+        "Gentle clockwise tummy massage with warm hands.",
+        "Plenty of tummy time while awake and watched.",
+        "Keep {him} upright for a little while after feeds.",
+      ],
+    },
+    watchFor: {
+      neonate: ["Hard to wake for feeds, or feeding much less than usual", "A swollen, hard or tender tummy", "Green vomit, or vomiting after every feed", "Blood in the poo", "Fewer than 6 wet nappies a day", "A temperature of 38°C or more", "Crying that sounds different (high-pitched) or won't settle at all"],
+      infant: ["A swollen, hard tummy", "Green vomit, or blood in the poo", "Fever", "Not feeding, or far fewer wet nappies"],
+      default: ["Severe or constant tummy pain", "Blood in the stool", "Weight loss without trying"],
+    },
+    askDoctor: ["Is this ordinary gas or colic, or worth examining?", "Is the feeding (latch or bottle flow) worth checking?"],
+  },
+  {
+    id: "sleepy",
+    label: "Sleepiness",
+    windowDays: 7,
+    patterns: [/\bsleepy\b/i, /\bsleeping (a lot|more|all day|too much)\b/i, /\bdrowsy\b/i, /\blethargic\b/i, /\bneend\b/i],
+    base: { default: "reassure", neonate: "monitor", infant: "monitor", child: "monitor" },
+    analytes: ["temperature", "weight", "bilirubin_total"],
+    mechanism: {
+      neonate:
+        "At {age}, babies sleep most of the day, often 14 to 17 hours, in short stretches. A sleepier day can follow a growth spurt, a busy day or a vaccine. What matters is not how much {he} sleeps but that {he} still wakes for feeds, feeds well, and has plenty of wet nappies.",
+      infant: "At {age}, sleep needs are still high and patterns change week to week. A sleepier day is usually fine if {he} wakes for feeds, is alert in between and has the usual wet nappies.",
+      default: "Feeling sleepier than usual mostly comes down to sleep itself, a recent illness, stress or a new medicine. It is worth paying attention to if it goes on for weeks.",
+    },
+    homeCare: ["Keep a regular bedtime and wake time for a week.", "Check whether any new medicine started around the same time."],
+    homeCareBy: {
+      neonate: ["Don't let a daytime gap between feeds go much past 3 hours: wake {him} gently for a feed.", "To help {him} wake: unwrap, change the nappy, or hold {him} skin-to-skin.", "Count today's wet nappies. Around 6 or more is reassuring."],
+      infant: ["Offer feeds at the usual times, even if {he} seems happy to sleep through.", "Count today's wet nappies."],
+    },
+    watchFor: {
+      neonate: ["Hard to wake, or too sleepy to feed", "Floppy or limp when you pick {him} up", "Skin or eyes getting more yellow", "A temperature of 38°C or more, or feeling cold to touch", "Fewer wet nappies than usual"],
+      infant: ["Hard to wake, or floppy", "Fever", "Not feeding, or far fewer wet nappies"],
+      default: ["Sleepiness that makes it hard to stay awake in the day", "Confusion, or new weakness"],
+    },
+    askDoctor: ["Is this much sleep normal for {his} age?"],
+  },
+  {
+    id: "crying",
+    label: "Crying and fussiness",
+    windowDays: 7,
+    patterns: [/\bcry(ing)?\b|\bcries\b/i, /\bfussy\b|\bfussing\b/i, /\birritable\b/i, /\bwon'?t settle\b|\bnot settling\b/i, /\brona\b|\bro raha\b/i],
+    base: { default: "reassure", neonate: "monitor", infant: "reassure" },
+    analytes: ["temperature"],
+    mechanism: {
+      neonate: "At {age}, crying is how babies say almost everything: hungry, tired, wet, too warm, wants holding, or gas. Crying often builds from about 2 weeks and peaks around 6 weeks, usually more in the evenings, then eases.",
+      infant: "At {age}, crying usually has an ordinary cause: hunger, tiredness, teething later on, or wanting company. Evening fussiness is common.",
+      default: "Being irritable or tearful often follows poor sleep, stress or feeling unwell.",
+    },
+    homeCare: ["Rest, food and a calmer evening."],
+    homeCareBy: {
+      neonate: ["Go through the basics: hungry, wet nappy, too warm or too cold, needs a burp.", "Hold {him} close, skin-to-skin or in a sling, and walk or rock gently.", "Steady 'shushing' or white noise, and a dim, quiet room.", "A warm bath can help on fussy evenings.", "If you feel overwhelmed, put {him} down safely on {his} back and take a few minutes. It's okay."],
+      infant: ["Check the basics: hungry, tired, nappy, temperature.", "Gentle rocking, a walk, or white noise.", "A regular wind-down routine in the evening."],
+    },
+    watchFor: { neonate: ["A high-pitched or weak cry that sounds different", "Crying that won't settle with anything for hours", "Fever, vomiting or feeding poorly with it"], default: ["Crying with fever, vomiting or a rash", "Crying that sounds different, or won't settle at all"] },
+    askDoctor: ["Could this be colic, or reflux, or something else?"],
+  },
+  {
+    id: "spit_up",
+    label: "Spitting up",
+    windowDays: 7,
+    patterns: [/\bspit(ting|s)? up\b/i, /\bposset/i, /\breflux\b/i, /\bmilk (comes|coming) (back|out)\b/i],
+    base: { default: "reassure", neonate: "reassure", infant: "reassure" },
+    analytes: ["weight"],
+    mechanism: {
+      default: "At {age}, small spit-ups after feeds are very common. The valve at the top of a baby's stomach is still loose, so a little milk comes back up, especially with wind. Most babies grow out of it by around a year.",
+    },
+    homeCare: ["Keep {him} upright for 20 to 30 minutes after feeds.", "Smaller, more frequent feeds rather than big ones.", "Burp {him} partway through and after each feed.", "Always put {him} down to sleep flat on {his} back, even with reflux."],
+    watchFor: { default: ["Forceful (projectile) vomiting", "Green or yellow vomit, or blood in it", "Not gaining weight, or fewer wet nappies", "Arching and screaming during every feed"] },
+    askDoctor: ["Is the weight gain on track for this much spit-up?"],
+  },
+  {
+    id: "constipation",
+    label: "Constipation",
+    windowDays: 7,
+    patterns: [/\bconstipat/i, /\bhard (stool|poo|potty)/i, /\bnot (pooed|pooped|passed (stool|motion))\b/i, /\bno (poo|potty|motion)\b/i, /\bstraining\b/i],
+    base: { default: "reassure", neonate: "monitor", infant: "reassure" },
+    analytes: [],
+    mechanism: {
+      neonate: "At {age}, poo patterns vary a lot. Breastfed babies can go several days without a poo and still be fine, as long as it is soft when it comes. Going red in the face and straining is normal too; it's hard, pellet-like poo that points to constipation.",
+      infant: "At {age}, how often a baby poos varies a lot. Soft poo every few days is normal; hard, dry pellets are what counts as constipation, and it often shows up with starting solids.",
+      default: "Constipation usually comes from too little water or fibre, less movement, or some medicines (iron tablets are a common one).",
+    },
+    homeCare: ["More water, fruit, vegetables and whole grains.", "A daily walk.", "Check whether a new medicine, like iron, started recently."],
+    homeCareBy: {
+      neonate: ["Bicycle legs and a gentle clockwise tummy massage.", "A warm bath to relax {his} tummy.", "If formula feeding, make sure it's mixed exactly as the tin says."],
+      infant: ["Bicycle legs and tummy massage.", "A warm bath.", "If {he} has started solids, offer more fruit purées and sips of water."],
+    },
+    watchFor: { neonate: ["No poo at all in the first days, or a swollen tummy", "Vomiting, especially green", "Blood in the poo", "Feeding poorly"], default: ["Blood in the stool", "Severe tummy pain or a swollen tummy", "Vomiting", "Going on for more than two weeks"] },
+    askDoctor: ["Is this pattern normal for {his} age and feeding?"],
+  },
+
 ];
 
-export type SymptomMatch = { model: SymptomModel; population: Population; tier: Tier; mechanism: string; watchFor: string[] };
+export type SymptomMatch = {
+  model: SymptomModel;
+  population: Population;
+  tier: Tier;
+  mechanism: string;
+  homeCare: string[];
+  watchFor: string[];
+  askDoctor: string[];
+};
+
+/** "22 days old", "7 weeks old", "4 months old": how old, said the way parents say it. */
+export function ageWords(clock: ResolvedClock): string {
+  if (clock.relative?.kind === "day_of_life") return `${clock.relative.day} days old`;
+  const d = clock.ageDays;
+  if (d === null) return "this age";
+  if (d < 7 * 13) return `${Math.floor(d / 7)} weeks old`;
+  if (d < 730) return `${Math.floor(d / 30.44)} months old`;
+  return clock.ageYears !== null ? `${clock.ageYears}` : "this age";
+}
+
+/*
+ * {he} {him} {his} follow the sex on the profile; "they" when it is not set,
+ * never a guess. {age} is ageWords().
+ */
+function fill(text: string, clock: ResolvedClock): string {
+  const male = clock.modifiers.includes("male");
+  const female = clock.modifiers.includes("female");
+  const he = male ? "he" : female ? "she" : "they";
+  const him = male ? "him" : female ? "her" : "them";
+  const his = male ? "his" : female ? "her" : "their";
+  return text
+    .replace(/\{age\}/g, ageWords(clock))
+    .replace(/\{he\}'s/g, male || female ? `${he}'s` : "they're")
+    .replace(/\{he\}/g, he)
+    .replace(/\{him\}/g, him)
+    .replace(/\{his\}/g, his);
+}
 
 /** Every symptom a message mentions, read for this person. */
 export function matchSymptoms(text: string, clock: ResolvedClock): SymptomMatch[] {
@@ -271,7 +430,9 @@ export function matchSymptoms(text: string, clock: ResolvedClock): SymptomMatch[
     model,
     population,
     tier: model.base[population] ?? model.base.default,
-    mechanism: model.mechanism[population] ?? model.mechanism.default,
-    watchFor: model.watchFor[population] ?? model.watchFor.default,
+    mechanism: fill(model.mechanism[population] ?? model.mechanism.default, clock),
+    homeCare: (model.homeCareBy?.[population] ?? model.homeCare).map((t) => fill(t, clock)),
+    watchFor: (model.watchFor[population] ?? model.watchFor.default).map((t) => fill(t, clock)),
+    askDoctor: model.askDoctor.map((t) => fill(t, clock)),
   }));
 }

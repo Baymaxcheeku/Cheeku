@@ -10,7 +10,8 @@
 // and what it expects back is one ModelReply:
 //
 //   { paragraphs: string[], citations: {documentId,label}[], followUps: string[],
-//     tier?: "reassure"|"monitor"|"contact_today"|"go_now", basis, modelId? }
+//     tier?: "reassure"|"monitor"|"contact_today"|"go_now", basis,
+//     careOffer?: boolean, modelId? }
 //
 // THE FLOOR IS NOT A SUGGESTION. The app takes the higher of the model's tier
 // and the floor, so a model can make an answer more careful and never less.
@@ -66,6 +67,7 @@ Deno.serve(async (req) => {
       followUps: Array.isArray(out.followUps) ? out.followUps : [],
       tier: TIERS.includes(out.tier as string) ? out.tier : null,
       basis: out.basis ?? "general",
+      careOffer: out.careOffer === true,
       modelId: typeof out.modelId === "string" ? out.modelId : "cheeku-ft",
     });
   } catch {

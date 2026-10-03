@@ -189,3 +189,48 @@ export function ArticleRow({ card, showCategory = true }: { card: ArticleCard; /
     </Pressable>
   );
 }
+
+/**
+ * The compact pill for Home: emblem, title, minutes. Two rows of these take
+ * about half the height of one row of rail cards, and still say the category
+ * at a glance through its colour.
+ */
+export function ArticlePill({ card, width = 268 }: { card: ArticleCard; width?: number }) {
+  const router = useRouter();
+  const s = CATEGORY_STYLE[card.category];
+  const finished = card.read?.finished;
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={`${card.title}. ${CATEGORY_LABEL[card.category]}. ${readLabel(card)}`}
+      onPress={() => router.push(`/article/${card.slug}`)}
+      style={({ pressed }) => ({
+        width,
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 10,
+        paddingVertical: 8,
+        paddingLeft: 8,
+        paddingRight: 16,
+        borderRadius: 999,
+        backgroundColor: s.field,
+        borderWidth: 1,
+        borderColor: s.soft,
+        transform: [{ scale: pressed ? 0.97 : 1 }],
+      })}
+    >
+      <Emblem icon={card.icon} category={card.category} size={44} />
+      <View style={{ flex: 1, gap: 2 }}>
+        <Text numberOfLines={2} style={{ fontFamily: font.semibold, fontSize: 13.5, lineHeight: 17, letterSpacing: -0.1, color: s.deep }}>
+          {card.title}
+        </Text>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+          {finished ? <Check size={11} color={s.accent} strokeWidth={2.6} /> : card.forYou ? <Sparkles size={11} color={s.accent} /> : null}
+          <Text numberOfLines={1} style={{ fontFamily: font.medium, fontSize: 11.5, color: finished || card.forYou ? s.accent : s.body }}>
+            {[card.forYou && !finished ? "For you" : null, readLabel(card)].filter(Boolean).join(" · ")}
+          </Text>
+        </View>
+      </View>
+    </Pressable>
+  );
+}

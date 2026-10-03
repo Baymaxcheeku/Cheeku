@@ -295,21 +295,20 @@ export function CheekuCard({
         ? { dot: semantic.safe, text: "All in range" }
         : { dot: semantic.danger, text: `${needsReview} to review` };
 
+  // One line, read at a glance. The full promise lives in the chat itself.
   const memory =
     remembered > 0
-      ? `I remember ${remembered} ${remembered === 1 ? "report" : "reports"} ${
-          isSelf ? "of yours" : `of ${name}'s`
-        }, and everything we've talked about. Tell me what's going on and I'll read it against all of it.`
-      : "Send me one report and I'll keep it for good. Every chat after that builds on it.";
+      ? `Read against ${isSelf ? "your" : `${name}'s`} ${remembered} ${remembered === 1 ? "report" : "reports"}.`
+      : "Send one report. I'll keep it for good.";
 
   return (
-    <View className="overflow-hidden rounded-[32px]" style={[glassShadow, { minHeight: 318 }]}>
+    <View className="overflow-hidden rounded-[32px]" style={[glassShadow, { minHeight: 236 }]}>
       <Gradient from="#f1edff" to="#d8cffd" glow="#ffffff" />
 
       {/* Cheeku, large and alive, anchored to the card's bottom-right corner. */}
-      <View pointerEvents="none" style={{ position: "absolute", right: -18, bottom: -14 }}>
+      <View pointerEvents="none" style={{ position: "absolute", right: -14, bottom: -12 }}>
         <Bob>
-          <MascotFigure size={190} wave />
+          <MascotFigure size={150} wave />
         </Bob>
       </View>
 
@@ -329,17 +328,17 @@ export function CheekuCard({
           </Glass>
         </View>
 
-        <View className="mt-5 pr-[38%]">
+        <View className="mt-4 pr-[34%]">
           <View className="flex-row items-center gap-1.5">
             <MessageCircleHeart size={15} color={brand[600]} strokeWidth={1.9} />
             <Text style={{ fontFamily: font.medium, fontSize: 13, color: brand[700] }}>Ask <Brand /></Text>
           </View>
           <Text
-            style={{ fontFamily: font.semibold, fontSize: 24, lineHeight: 29, letterSpacing: -0.6, color: ink[900], marginTop: 6 }}
+            style={{ fontFamily: font.semibold, fontSize: 22, lineHeight: 27, letterSpacing: -0.5, color: ink[900], marginTop: 4 }}
           >
-            Tell me what&apos;s going on
+            What&apos;s going on?
           </Text>
-          <Text style={{ fontFamily: font.regular, fontSize: 13.5, lineHeight: 19, color: ink[700], marginTop: 8 }}>
+          <Text numberOfLines={1} style={{ fontFamily: font.medium, fontSize: 13, color: ink[500], marginTop: 6 }}>
             {memory}
           </Text>
         </View>
@@ -351,7 +350,7 @@ export function CheekuCard({
           onPress={() => router.push("/ask")}
           style={({ pressed }) => ({
             marginTop: "auto",
-            paddingTop: 20,
+            paddingTop: 16,
             alignSelf: "flex-start",
             flexDirection: "row",
             alignItems: "center",

@@ -14,6 +14,7 @@ import {
   Share2,
   Sparkles,
   Stethoscope,
+  Video,
 } from "lucide-react-native";
 import { useState } from "react";
 import { Linking, Pressable, ScrollView, Share, Text, View } from "react-native";
@@ -78,6 +79,7 @@ export function AssistantTurn({
   onSend,
   onOpenRecord,
   onOpenMemory,
+  onBook,
 }: {
   message: ThreadMessage;
   /** The member's first name, for labels. */
@@ -85,6 +87,8 @@ export function AssistantTurn({
   onSend?: (text: string) => void;
   onOpenRecord: (id: string) => void;
   onOpenMemory: () => void;
+  /** "Doctors nearby" or "Online consultation", under an answer that offers them. */
+  onBook?: (mode: "clinic" | "online") => void;
 }) {
   const m = message.memory;
   if (m?.hardStop) return <HardStopCard memory={m} />;
@@ -107,9 +111,7 @@ export function AssistantTurn({
 
           <View style={[glassShadow, { backgroundColor: glass.fillStrong, borderWidth: 1, borderColor: glass.rim, borderRadius: 22, borderTopLeftRadius: 6, paddingHorizontal: 16, paddingVertical: 14, gap: 10 }]}>
             {paragraphs.map((p, i) => (
-              <Text key={i} style={{ fontFamily: font.regular, fontSize: 14.5, lineHeight: 22, color: ink[900] }}>
-                {p}
-              </Text>
+              <Paragraph key={i} text={p} />
             ))}
             {m?.notes.map((n) => (
               <Callout key={n} icon={Info} text={n} />
@@ -131,6 +133,7 @@ export function AssistantTurn({
             ) : null}
           </View>
 
+          {onBook && m?.careOffer ? <CareOffer onBook={onBook} /> : null}
           {m?.reading.length ? <ReadingStrip memory={m} onOpenRecord={onOpenRecord} /> : null}
           {m?.script ? <ScriptCard script={m.script} /> : null}
           {m?.watchFor.length ? <WatchFor items={m.watchFor} tierIsLow={m.tier === "reassure"} /> : null}
@@ -161,6 +164,54 @@ export function AssistantTurn({
 }
 
 // ------------------------------------------------------------------ parts --
+
+/*
+ * A paragraph, or a list. The model writes lists as a heading line followed
+ * by "• " lines, so the stored prose reads fine anywhere; here they are drawn
+ * as a proper list inside the answer, in the order they were written.
+ */
+function Paragraph({ text }: { text: string }) {
+  const lines = text.split("\n");
+  const items = lines.filter((l) => l.startsWith("• "));
+  if (!items.length) return <Text style={{ fontFamily: font.regular, fontSize: 14.5, lineHeight: 22, color: ink[900] }}>{text}</Text>;
+  const head = lines.filter((l) => !l.startsWith("• ")).join(" ").trim();
+  return (
+    <View style={{ gap: 8, borderRadius: 16, backgroundColor: surface.tint, padding: 12 }}>
+      {head ? <Text style={{ fontFamily: font.semibold, fontSize: 14, color: ink[900] }}>{head}</Text> : null}
+      {items.map((l, i) => (
+        <View key={i} style={{ flexDirection: "row", gap: 10 }}>
+          <View style={{ width: 20, height: 20, borderRadius: 10, backgroundColor: "#fff", alignItems: "center", justifyContent: "center", marginTop: 1 }}>
+            <Text style={{ fontFamily: font.semibold, fontSize: 11, color: brand[600] }}>{i + 1}</Text>
+          </View>
+          <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 14, lineHeight: 21, color: ink[700] }}>{l.slice(2)}</Text>
+        </View>
+      ))}
+    </View>
+  );
+}
+
+function CareOffer({ onBook }: { onBook: (mode: "clinic" | "online") => void }) {
+  return (
+    <View style={{ flexDirection: "row", gap: 8 }}>
+      <Pressable
+        accessibilityRole="button"
+        onPress={() => onBook("clinic")}
+        style={({ pressed }) => ({ flex: 1, height: 46, borderRadius: 999, backgroundColor: ink[900], flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, transform: [{ scale: pressed ? 0.98 : 1 }] })}
+      >
+        <MapPin size={15} color="#fff" />
+        <Text style={{ fontFamily: font.semibold, fontSize: 13.5, color: "#fff" }}>Doctors nearby</Text>
+      </Pressable>
+      <Pressable
+        accessibilityRole="button"
+        onPress={() => onBook("online")}
+        style={({ pressed }) => [glassShadow, { flex: 1, height: 46, borderRadius: 999, backgroundColor: "#fff", borderWidth: 1, borderColor: surface.line, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, transform: [{ scale: pressed ? 0.98 : 1 }] }]}
+      >
+        <Video size={15} color={brand[600]} />
+        <Text style={{ fontFamily: font.semibold, fontSize: 13.5, color: ink[900] }}>Online consultation</Text>
+      </Pressable>
+    </View>
+  );
+}
 
 function Callout({ icon: Icon, title, text }: { icon: typeof Info; title?: string; text: string }) {
   return (

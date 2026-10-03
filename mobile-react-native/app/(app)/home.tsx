@@ -67,7 +67,7 @@ export default function Home() {
 
   // Both follow the member: "for you" depends on whose profile is in view,
   // and the file is theirs.
-  const knowledge = useQuery({ queryKey: ["knowledge-feed", profileId], queryFn: () => knowledgeFeed(profileId, 6), enabled: Boolean(profileId), placeholderData: (prev) => prev });
+  const knowledge = useQuery({ queryKey: ["knowledge-feed", profileId], queryFn: () => knowledgeFeed(profileId, 8), enabled: Boolean(profileId), placeholderData: (prev) => prev });
   const file = useHealthFile(profileId);
 
   const records = useQuery({

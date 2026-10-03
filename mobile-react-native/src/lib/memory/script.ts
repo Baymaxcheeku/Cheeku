@@ -99,7 +99,7 @@ export function buildScript(input: {
   for (const l of input.loops.slice(0, 2)) lines.push(`Still open: ${l.title}${l.daysOpen ? `, ${l.daysOpen} days` : ""}.`);
   for (const n of input.notes.slice(0, 2)) lines.push(n);
 
-  const asks = [...new Set(input.symptoms.flatMap((s) => s.model.askDoctor))].slice(0, 2);
+  const asks = [...new Set(input.symptoms.flatMap((s) => s.askDoctor))].slice(0, 2);
   if (!asks.length) asks.push("Does this need to be seen today?");
 
   const to = input.doctor?.name ?? null;

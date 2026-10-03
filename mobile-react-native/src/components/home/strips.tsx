@@ -2,7 +2,7 @@ import { useRouter } from "expo-router";
 import { CalendarClock, ChevronRight, FolderHeart, ShieldAlert, Sparkles } from "lucide-react-native";
 import { Pressable, ScrollView, Text, View } from "react-native";
 
-import { RailCard } from "@/components/learn/parts";
+import { ArticlePill } from "@/components/learn/parts";
 import { Avatar } from "@/components/ui/avatar";
 import { Glass } from "@/components/ui/glass";
 import { whenLabel, type HealthFile } from "@/lib/health/file";
@@ -15,10 +15,10 @@ import { font } from "@/theme/type";
 /*
  * The two blocks at the bottom of Home, which point elsewhere.
  *
- * WORTH KNOWING is the editorial side of the app, so it looks editorial: a
- * rail of pastel cards in each category's own colour, with the article's
- * emblem, rather than a row of identical grey pills. "See all" opens the
- * library.
+ * WORTH KNOWING is two rows of pills that scroll together, each in its
+ * category's own colour with the article's emblem. Tall rail cards took a
+ * third of the screen for two titles; pills show six in less room. The full
+ * editorial cards stay in the library, behind "See all".
  *
  * THE HEALTH FILE card is the member's file at a glance: whose it is, three
  * counts, and the one thing most worth knowing right now (the next dated
@@ -36,20 +36,34 @@ export function ReadsStrip({ articles }: { articles: readonly ArticleCard[] }) {
           <Text accessibilityRole="header" style={{ fontFamily: font.semibold, fontSize: 21, letterSpacing: -0.4, color: ink[900] }}>
             Worth knowing
           </Text>
-          <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 2 }}>Explainers from the Cheeku health desk</Text>
         </View>
         <Pressable accessibilityRole="link" onPress={() => router.push("/learn")} hitSlop={8} style={{ flexDirection: "row", alignItems: "center", gap: 2, paddingBottom: 2 }}>
           <Text style={{ fontFamily: font.semibold, fontSize: 14, color: brand[600] }}>See all</Text>
           <ChevronRight size={16} color={brand[600]} />
         </Pressable>
       </View>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} decelerationRate="fast" snapToInterval={248} contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 14, paddingBottom: 10, gap: 12 }}>
-        {articles.map((a) => (
-          <RailCard key={a.id} card={a} />
+      {/* Columns of two, so both rows move as one shelf. Built by hand, no wrapping. */}
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} decelerationRate="fast" snapToInterval={278} contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 12, paddingBottom: 6, gap: 10 }}>
+        {pairs(articles.slice(0, 8)).map((col) => (
+          <View key={col[0].id} style={{ gap: 10 }}>
+            {col.map((a) => (
+              <ArticlePill key={a.id} card={a} />
+            ))}
+          </View>
         ))}
       </ScrollView>
     </View>
   );
+}
+
+function pairs<T>(items: readonly T[]): [T, ...T[]][] {
+  const out: [T, ...T[]][] = [];
+  for (let i = 0; i < items.length; i += 2) {
+    const a = items[i] as T;
+    const b = items[i + 1];
+    out.push(b === undefined ? [a] : [a, b]);
+  }
+  return out;
 }
 
 type Highlight = { icon: typeof Sparkles; text: string; tint: string; bg: string };
