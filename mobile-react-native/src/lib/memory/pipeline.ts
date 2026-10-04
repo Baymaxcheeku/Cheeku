@@ -3,10 +3,12 @@ import { detect, type SafetyResult } from "@/lib/safety/detect";
 import { daysBetween } from "./clock";
 import { buildContext, type MemoryBundle, type MemoryContext } from "./context";
 import { findCorrections, parseFacts, type ParsedFact, type Revision } from "./facts";
+import { bookingIntent, withoutTestNames, type BookingIntent } from "./intent";
 import { decideTier, hardStopFor, type TierDecision } from "./ladder";
 import type { LedgerFlag } from "./ledger";
 import { relevantLoops, type LoopView } from "./loops";
 import { digest, type ChatModel, type ModelReply } from "./model";
+import { BOOKING_REPLY } from "./thread";
 import { buildScript, type Script } from "./script";
 import { describeChange, notableChanges, type Series } from "./series";
 import { matchSymptoms } from "./symptoms";
@@ -61,6 +63,8 @@ export type TurnPlan = {
   notes: string[];
   usedFactIds: string[];
   modelId: string | null;
+  /** Something they asked to book, read against their memory. */
+  booking: BookingIntent | null;
   context: MemoryContext;
 };
 
@@ -154,6 +158,7 @@ export async function planTurn(args: {
     notes: [],
     usedFactIds: [],
     modelId: null,
+    booking: null,
     context: base,
   });
 
@@ -170,7 +175,10 @@ export async function planTurn(args: {
   const facts: Fact[] = parsed.map((p) => ({ ...p, id: args.newId(), messageId: null, documentId: null, supersededBy: null }));
   const ctx = buildContext(args.bundle, args.today, facts, revisions.map((r) => r.supersedes));
 
-  const symptoms = matchSymptoms(text, ctx.clock);
+  // Asked to book something? Test names in a booking are not symptoms:
+  // "book the bilirubin test" says nothing about how the baby looks.
+  const booking = bookingIntent(text, ctx);
+  const symptoms = matchSymptoms(booking?.service === "lab" ? withoutTestNames(text) : text, ctx.clock);
   // A symptom only pulls in readings recent enough to bear on it: last
   // month's temperature says nothing about tonight's fever.
   const recent = (key: string, days: number) => {
@@ -227,7 +235,16 @@ export async function planTurn(args: {
     .map((p) => (p.key === "bp_systolic" && p.valueText ? `Blood pressure ${p.valueText} mmHg` : `${p.label} ${fmt(p.value ?? 0)}${p.unit ? ` ${p.unit}` : ""}`) + (p.observedOn === args.today ? ", today" : `, on ${p.observedOn}`));
 
   const floor = decideTier({ gate, hardStop: null, symptoms, reads, changes, flags, clock: ctx.clock, extra: labFlags });
-  const reply = await args.model.respond({
+
+  /*
+   * A booking. With nothing worrying described alongside it ("book test
+   * again"), the rules answer and no model is called: there is nothing to
+   * interpret, only something to arrange. With a symptom alongside it ("book
+   * a doctor, Imaad has a fever"), the model answers the symptom as usual and
+   * the booking card rides under the answer.
+   */
+  const bookingOnly = booking !== null && parsed.length === 0 && symptoms.length === 0;
+  const reply = bookingOnly ? bookingReply(booking, ctx) : await args.model.respond({
     question: text,
     history: args.history.slice(-12),
     memory: digest(ctx, {
@@ -277,7 +294,62 @@ export async function planTurn(args: {
     alerts,
     notes,
     usedFactIds,
-    modelId: args.model.id,
+    modelId: bookingOnly ? BOOKING_REPLY : args.model.id,
+    booking,
     context: ctx,
+  };
+}
+
+const SERVICE_SOON: Record<"fitness" | "medicine", string> = {
+  fitness: "Fitness classes",
+  medicine: "Medicine delivery",
+};
+
+/** What Cheeku says when asked to book something. Rules, in plain words. */
+export function bookingReply(b: BookingIntent, ctx: MemoryContext): ModelReply {
+  const name = ctx.subject.firstName;
+  if (b.service === "fitness" || b.service === "medicine") {
+    return {
+      paragraphs: [`${SERVICE_SOON[b.service]} isn't open in Cheeku yet. Tap below and I'll tell you the day it is, with ${name}'s details ready to go.`],
+      citations: [],
+      followUps: [],
+      basis: "grounded",
+    };
+  }
+  if (b.service === "doctor") {
+    return {
+      paragraphs: [
+        `Let's get ${name} in front of the right doctor.`,
+        `I'll ask a few quick questions and write them up as a note the doctor reads before you meet, with ${name}'s recent readings and medicines from memory. No repeating yourself.`,
+      ],
+      citations: [],
+      followUps: [],
+      basis: "grounded",
+    };
+  }
+  if (!b.tests.length) {
+    return {
+      paragraphs: [
+        b.again
+          ? `I couldn't tell which test you mean from ${name}'s memory. Pick it below, or tell me its name (HbA1c, thyroid, vitamin D) and I'll set it up.`
+          : `Happy to book a test for ${name}. Pick it below, or tell me which one and I'll set it up.`,
+      ],
+      citations: [],
+      followUps: ["Book HbA1c", "Book a thyroid test", "Book a full body checkup"],
+      basis: "grounded",
+    };
+  }
+  const names = b.tests.map((t) => t.label);
+  const list = names.length > 1 ? `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}` : (names[0] ?? "");
+  const why = b.tests.filter((t) => t.because);
+  return {
+    paragraphs: [
+      `${b.again ? "Booking" : "Let's book"} ${list} for ${name}${b.again ? " again" : ""}. Home collection, and the result comes straight back into ${name}'s memory.`,
+      ...(why.length ? [`Why now, from ${name}'s memory:\n${why.map((t) => `• ${t.label}: ${t.because}`).join("\n")}`] : []),
+      `When it's back I'll put it next to the last one and tell you what moved.`,
+    ],
+    citations: [],
+    followUps: [],
+    basis: "grounded",
   };
 }

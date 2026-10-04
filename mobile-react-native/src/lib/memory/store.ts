@@ -8,7 +8,7 @@ import { todayIso } from "./clock";
 import type { MemoryBundle } from "./context";
 import { chatModel } from "./models";
 import { planTurn, type TurnPlan } from "./pipeline";
-import { factUsage, readThreadRow, replyText, sittingFor, toTurnMemory, type ThreadMessage } from "./thread";
+import { BOOKING_REPLY, eventMemory, factUsage, readThreadRow, replyText, SITTING_GAP_MS, sittingFor, toTurnMemory, type BookedEvent, type ThreadMessage } from "./thread";
 import type { Fact, Tier } from "./types";
 
 /*
@@ -205,6 +205,39 @@ export async function sendTurn(args: {
   const asMessage = (row: typeof userRow | NonNullable<typeof assistantRow>): ThreadMessage =>
     readThreadRow({ ...row, created_at: now, memory: "memory" in row ? row.memory : null, tier: "tier" in row ? row.tier : null });
   return { ok: true, plan, user: asMessage(userRow), assistant: assistantRow ? asMessage(assistantRow) : null };
+}
+
+/**
+ * Files a booking in the person's own thread, wherever it was made: the
+ * chat's card, the marketplace, the doctor flow. It lands as one assistant
+ * entry with a "Booked" card, in the open sitting or a new one, so the memory
+ * knows a result is coming or a doctor has the note. Assistant rows are never
+ * charged against the free allowance (0022 counts only the person's own).
+ * Best effort: the booking itself already succeeded.
+ */
+export async function recordBooking(profileId: string, event: BookedEvent, text: string): Promise<boolean> {
+  try {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    const userId = session?.user.id;
+    if (!userId) return false;
+
+    const recent = await supabase.from("conversations").select("id, created_at, last_message_at").eq("profile_id", profileId).order("created_at", { ascending: false }).limit(1).maybeSingle();
+    const last = recent.data as { id: string; created_at: string; last_message_at?: string | null } | null;
+    let conversationId = last && Date.now() - Date.parse(last.last_message_at ?? last.created_at) < SITTING_GAP_MS ? last.id : null;
+    if (!conversationId) {
+      const { data, error } = await supabase.from("conversations").insert({ profile_id: profileId, user_id: userId, title: event.title.slice(0, 80) }).select("id").single();
+      if (error || !data) return false;
+      conversationId = data.id as string;
+    }
+    const row = { conversation_id: conversationId, user_id: userId, role: "assistant", content: text, citations: [], safety_status: "clear" };
+    let { error } = await supabase.from("messages").insert({ ...row, tier: null, memory: eventMemory(event), model_id: BOOKING_REPLY });
+    if (error && missing(error.message)) ({ error } = await supabase.from("messages").insert(row));
+    return !error;
+  } catch {
+    return false;
+  }
 }
 
 export function refreshMemory(qc: QueryClient, profileId: string) {

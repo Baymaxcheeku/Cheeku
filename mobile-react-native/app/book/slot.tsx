@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Building2, ChevronLeft, Clock3, MapPin, MonitorPlay, Ticket } from "lucide-react-native";
 import { useMemo, useState } from "react";
@@ -14,6 +15,7 @@ import { SPECIALTIES, addDays, dayName, doctorById, slotsFor, type Mode, type Sl
 import { useAppointmentList } from "@/lib/booking/appointments";
 import { useBookingDraft } from "@/lib/booking/draft";
 import { doctorFace } from "@/lib/booking/faces";
+import { recordBooking, threadKey } from "@/lib/memory/store";
 import { useFamily } from "@/lib/profiles/family";
 import { brand, ink } from "@/theme/tokens";
 import { font } from "@/theme/type";
@@ -43,6 +45,7 @@ export default function SlotScreen() {
   const appointments = useAppointmentList();
   const { mode, setMode, intake, book } = useBookingDraft();
   const family = useFamily();
+  const qc = useQueryClient();
   const doctor = doctorById(id);
 
   const days = useMemo(() => Array.from({ length: 7 }, (_, i) => addDays(new Date(), i)), []);
@@ -93,6 +96,21 @@ export default function SlotScreen() {
       profileId: memberFor(intake?.forName ?? "Me"),
     });
     book({ doctorId: doctor.id, mode: m, day: day.toISOString(), slotLabel: slot.label, appointmentId: appt.id });
+
+    // Filed in that person's chat thread, with the note the doctor gets.
+    const pid = memberFor(intake?.forName ?? "Me");
+    if (pid) {
+      const when = `${day.toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "short" })} · ${slot.label}`;
+      const where = m === "online" ? "Video call" : `${doctor.clinic.name}, ${doctor.clinic.area}`;
+      const note = intake
+        ? [`About: ${intake.concern}`, intake.details ? `In their words: ${intake.details}` : "", `Since: ${intake.since}`, `Getting in the way: ${intake.impact}`, `Tried: ${intake.tried}`].filter(Boolean)
+        : undefined;
+      void recordBooking(
+        pid,
+        { kind: "doctor", title: `${doctor.name}, ${SPECIALTIES[doctor.specialty].label.toLowerCase()}`, when, where, route: `/appointments/${appt.id}`, note },
+        `Booked ${doctor.name} for ${intake?.forName === "Me" ? "you" : (intake?.forName ?? "you")}: ${when}, ${m === "online" ? "on a video call" : `at ${doctor.clinic.name}`}. The doctor gets the pre-consultation note before you meet.`,
+      ).then(() => qc.invalidateQueries({ queryKey: threadKey(pid) }));
+    }
     router.replace("/book/confirmed");
   }
 

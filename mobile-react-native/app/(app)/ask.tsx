@@ -3,6 +3,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import {
   ArrowUp,
   ArrowUpRight,
+  ArrowLeftRight,
   BookOpen,
   Brain,
   Camera,
@@ -36,9 +37,11 @@ import { profileSignalsFor } from "@/lib/knowledge/queries";
 import { todayIso } from "@/lib/memory/clock";
 import { buildContext, memoryLine } from "@/lib/memory/context";
 import { memoryStarters, type Starter } from "@/lib/memory/starters";
-import { refreshMemory, sendTurn, threadKey, useMemory, useThread } from "@/lib/memory/store";
-import { inOrder, sittingFor, withDayBreaks, type ThreadMessage } from "@/lib/memory/thread";
-import { useFamily } from "@/lib/profiles/family";
+import { memberIntent } from "@/lib/memory/intent";
+import { fetchMemory, fetchThread, memoryKey, refreshMemory, sendTurn, threadKey, useMemory, useThread } from "@/lib/memory/store";
+import { inOrder, sittingFor, withDayBreaks, type ThreadMessage, type TurnMemory } from "@/lib/memory/thread";
+import { useLabCart } from "@/lib/labs/queries";
+import { useFamily, useSwitchMember } from "@/lib/profiles/family";
 import { shortDate } from "@/lib/records/details";
 import { detect, type SafetyResult } from "@/lib/safety/detect";
 import { brand, ink, surface } from "@/theme/tokens";
@@ -64,6 +67,18 @@ import { font } from "@/theme/type";
  *      The answer carries an urgency tier, what it read, the signs to watch,
  *      and a script for the doctor when the tier calls for one.
  *
+ * ONE MEMORY, EVERY DOOR (2026-10-04). This screen, Home's ask bar and the
+ * booking flows all write to the same per-person thread:
+ *
+ *   - "Book test again", "see a gynaecologist", "order my medicines": the
+ *     answer carries a booking card read against the memory (which test, why
+ *     now), and one tap runs the marketplace flow already filled in. The
+ *     booking comes back into this thread as a "Booked" card.
+ *   - Name another family member ("Imaad has a cough", "my wife's thyroid
+ *     test") and the turn goes to THEIR memory: the screen switches to them
+ *     first, says so, and offers the way back. Two people named, or someone
+ *     the plan doesn't cover, and it stays put and says why.
+ *
  * It does not diagnose. It understands a symptom to a point using general
  * health models, cuts the noise, says how urgent it looks and why, and makes
  * the conversation with the doctor better.
@@ -88,6 +103,8 @@ export default function Ask() {
   const { q, upload, record } = useLocalSearchParams<{ q?: string; upload?: string; record?: string }>();
 
   const family = useFamily();
+  const switchMember = useSwitchMember();
+  const cart = useLabCart();
   const member = family.data?.profile ?? null;
   const memberId = member?.id;
   const name = member?.name.split(/\s+/)[0] ?? "them";
@@ -113,11 +130,17 @@ export default function Ask() {
   const scroller = useRef<ScrollView>(null);
   const stickToEnd = useRef(true);
   const sentInitial = useRef(false);
+  /** Set when the chat itself switched member, so the switch doesn't wipe the turn in flight. */
+  const chatSwitch = useRef<string | null>(null);
+  const [switched, setSwitched] = useState<{ fromId: string; fromName: string; toName: string; because: string } | null>(null);
 
   // A different member is a different thread: clear what was being typed.
   const lastMember = useRef(memberId);
   useEffect(() => {
-    if (lastMember.current && memberId && lastMember.current !== memberId) {
+    if (lastMember.current && memberId && lastMember.current !== memberId && chatSwitch.current === memberId) {
+      chatSwitch.current = null;
+    } else if (lastMember.current && memberId && lastMember.current !== memberId) {
+      setSwitched(null);
       setDraft("");
       setError(null);
       setAboutId(null);
@@ -135,8 +158,8 @@ export default function Ask() {
   }, [aboutId, memory.data]);
 
   /** Puts a just-saved turn into the cached thread without a refetch. */
-  function appendToThread(rows: ThreadMessage[]) {
-    qc.setQueryData<InfiniteData<ThreadMessage[], string | null>>(threadKey(memberId), (old) => {
+  function appendToThread(rows: ThreadMessage[], profileId: string | undefined = memberId) {
+    qc.setQueryData<InfiniteData<ThreadMessage[], string | null>>(threadKey(profileId), (old) => {
       if (!old) return { pages: [rows.slice().reverse()], pageParams: [null] };
       const [first = [], ...rest] = old.pages;
       return { ...old, pages: [[...rows.slice().reverse(), ...first], ...rest] };
@@ -159,12 +182,51 @@ export default function Ask() {
       return;
     }
 
+    // WHOSE MEMORY. A message about another family member goes to theirs.
+    let profileId = memberId;
+    let bundle = memory.data;
+    let thread = messages;
+    const everyone = family.data?.access.all ?? [];
+    const target = memberIntent(text, everyone, memberId);
+    if (target) {
+      if (!family.data?.access.selectable.some((p) => p.id === target.id)) {
+        setError(`${target.name} is paused on your plan, so I can't open their memory. Nothing was sent.`);
+        return;
+      }
+      setDraft("");
+      setPendingText(text);
+      try {
+        // Their memory and thread first, so the screen never flashes empty.
+        const theirs = await qc.fetchQuery({ queryKey: memoryKey(target.id), queryFn: () => fetchMemory(target.id), staleTime: 30_000 });
+        const pages = await qc.fetchInfiniteQuery({
+          queryKey: threadKey(target.id),
+          queryFn: ({ pageParam }) => fetchThread(target.id, pageParam),
+          initialPageParam: null as string | null,
+          staleTime: 15_000,
+        });
+        if (!theirs) throw new Error("no memory");
+        chatSwitch.current = target.id;
+        setSwitched({ fromId: memberId, fromName: name, toName: target.name, because: target.because });
+        await switchMember(target.id);
+        profileId = target.id;
+        bundle = theirs;
+        thread = inOrder(pages.pages.flat());
+        setAboutId(null);
+      } catch {
+        chatSwitch.current = null;
+        setPendingText(null);
+        setDraft(text);
+        setError(`Couldn't open ${target.name}'s memory. Check your connection and try again.`);
+        return;
+      }
+    }
+
     stickToEnd.current = true;
     setError(null);
     setDraft("");
     setPendingText(text);
     try {
-      const res = await sendTurn({ text, profileId: memberId, thread: messages, bundle: memory.data, about });
+      const res = await sendTurn({ text, profileId, thread, bundle, about: profileId === memberId ? about : null });
       if (!res.ok) {
         if (res.quota) {
           setPaywallFor(text);
@@ -177,12 +239,32 @@ export default function Ask() {
         }
         return;
       }
-      appendToThread(res.assistant ? [res.user, res.assistant] : [res.user]);
+      appendToThread(res.assistant ? [res.user, res.assistant] : [res.user], profileId);
       setAboutId(null);
-      if (res.plan.facts.length || res.plan.revisions.length) refreshMemory(qc, memberId);
-      void qc.invalidateQueries({ queryKey: ["ask-context", memberId, "quota"] });
+      if (res.plan.facts.length || res.plan.revisions.length) refreshMemory(qc, profileId);
+      void qc.invalidateQueries({ queryKey: ["ask-context", profileId, "quota"] });
     } finally {
       setPendingText(null);
+    }
+  }
+
+  /** The booking card's button: the same flows the marketplace uses, filled in. */
+  function startBooking(b: NonNullable<TurnMemory["booking"]>) {
+    if (b.service === "lab") {
+      if (!b.tests.length) {
+        router.push("/labs");
+        return;
+      }
+      cart.clear();
+      cart.add(b.tests.map((t) => t.id));
+      router.push("/labs/choose");
+      return;
+    }
+    if (b.service === "doctor") {
+      router.push({
+        pathname: "/book/consult",
+        params: { who: b.forName, ...(b.mode ? { mode: b.mode } : {}), ...(b.specialty ? { specialty: b.specialty } : {}) },
+      });
     }
   }
 
@@ -400,7 +482,9 @@ export default function Ask() {
                     onSend={last ? (t) => void send(t) : undefined}
                     onOpenRecord={(id) => router.push(`/records/${id}`)}
                     onOpenMemory={() => router.push("/memory")}
-                    onBook={(mode) => router.push({ pathname: "/book/consult", params: { mode } })}
+                    onBook={(mode) => router.push({ pathname: "/book/consult", params: { mode, who: name } })}
+                    onStartBooking={startBooking}
+                    onOpenRoute={(route) => router.push(route as never)}
                   />
                 );
               })}
@@ -428,6 +512,26 @@ export default function Ask() {
         </ScrollView>
 
         <View className="px-4 pt-2" style={{ paddingBottom: 6, gap: 6 }}>
+          {switched && switched.toName === name ? (
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 8, paddingLeft: 12, paddingRight: 4, paddingVertical: 4, borderRadius: 999, backgroundColor: ink[900], alignSelf: "flex-start" }}>
+              <ArrowLeftRight size={13} color="#fff" />
+              <Text numberOfLines={1} style={{ maxWidth: 200, fontFamily: font.medium, fontSize: 12.5, color: "#fff" }}>
+                Now in {switched.toName}&apos;s memory
+              </Text>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={`Back to ${switched.fromName}`}
+                onPress={() => {
+                  const back = switched.fromId;
+                  setSwitched(null);
+                  void switchMember(back);
+                }}
+                style={({ pressed }) => ({ height: 28, paddingHorizontal: 10, borderRadius: 999, justifyContent: "center", backgroundColor: pressed ? "rgba(255,255,255,0.28)" : "rgba(255,255,255,0.16)" })}
+              >
+                <Text style={{ fontFamily: font.semibold, fontSize: 12, color: "#fff" }}>Back to {switched.fromName}</Text>
+              </Pressable>
+            </View>
+          ) : null}
           {about ? (
             <View style={{ flexDirection: "row", alignItems: "center", gap: 8, alignSelf: "flex-start", paddingLeft: 12, paddingRight: 6, paddingVertical: 6, borderRadius: 999, backgroundColor: brand[50] }}>
               <FileText size={13} color={brand[600]} />

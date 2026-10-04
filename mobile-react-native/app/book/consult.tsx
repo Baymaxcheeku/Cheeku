@@ -79,8 +79,14 @@ export default function Consult() {
   const draft = useBookingDraft();
   // Set when the chat's "Doctors nearby" or "Online consultation" opened this:
   // the person already said how they want to meet, so it is not asked again.
-  const { mode: modeParam } = useLocalSearchParams<{ mode?: string }>();
+  //
+  // From the chat's booking card, it also knows WHO (the person whose thread
+  // it came from) and, when they named one, the kind of doctor. Neither is
+  // asked again: the chat already heard it.
+  const { mode: modeParam, who: whoParam, specialty: specialtyParam } = useLocalSearchParams<{ mode?: string; who?: string; specialty?: string }>();
   const presetMode: Mode | null = modeParam === "online" || modeParam === "clinic" ? modeParam : null;
+  const presetSpecialty: SpecialtyId | null = specialtyParam && specialtyParam in SPECIALTIES ? (specialtyParam as SpecialtyId) : null;
+  const presetWho = typeof whoParam === "string" && whoParam.trim() ? whoParam.trim() : null;
   const scroll = useRef<ScrollView>(null);
   const chosenSpecialty = useRef<SpecialtyId>("gp");
   // The result that stopped the flow, so the emergency screen can be reopened.
@@ -102,6 +108,19 @@ export default function Consult() {
   // The opening: a greeting, then the first question, each after a "typing" beat.
   useEffect(() => {
     draft.reset();
+    if (presetSpecialty) chosenSpecialty.current = presetSpecialty;
+    if (presetWho) {
+      setAnswers((a) => ({ ...a, forName: presetWho }));
+      say(
+        [
+          presetSpecialty ? `Let's get ${presetWho} booked with a ${SPECIALTIES[presetSpecialty].label.toLowerCase()}.` : `Let's find ${presetWho} the right doctor.`,
+          `A few quick questions and I'll write them up with what I already remember about ${presetWho}, so the doctor knows the story before you meet.`,
+          QUESTION.concern,
+        ],
+        "concern",
+      );
+      return;
+    }
     say(
       [
         "Let's find you the right doctor.",
@@ -234,6 +253,15 @@ export default function Consult() {
           return;
         }
         reply(value);
+        // The kind of doctor was named in the chat: straight to how to meet.
+        if (presetSpecialty) {
+          if (presetMode) {
+            finish(presetMode);
+            return;
+          }
+          say([QUESTION.mode], "mode");
+          return;
+        }
         const depts = (concern?.departments ?? ["gp"]).map((d) => SPECIALTIES[d]);
         const area = (concern?.label ?? "this").toLowerCase();
         const line =

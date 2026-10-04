@@ -1,5 +1,6 @@
 import type { ProductAssessment } from "@/lib/ai/mock/scenarios";
 
+import type { BookingIntent } from "./intent";
 import { loopWhen } from "./loops";
 import type { ReadingChip, TurnPlan } from "./pipeline";
 import type { Script } from "./script";
@@ -20,6 +21,9 @@ import type { Tier } from "./types";
  * (messages.memory) so a reply reads the same a year later: the tier, what was
  * read, the script, the loops it raised, and what it corrected.
  */
+
+/** The model id stored on a reply the booking rules wrote, with no model call. */
+export const BOOKING_REPLY = "rules:booking";
 
 export const SITTING_GAP_MS = 6 * 60 * 60 * 1000;
 
@@ -43,6 +47,28 @@ export type TurnMemory = {
   hardStop: { title: string; text: string; where: string } | null;
   /** The person's clock when it was said: "Day 6 of life". */
   clock: string;
+  /** Something to book, offered right under the answer ("book test again"). */
+  booking?: (BookingIntent & { forName: string }) | null;
+  /** A booking that was made, written into the thread by the booking flows. */
+  event?: BookedEvent | null;
+};
+
+/**
+ * A booking made anywhere in the app (the chat's card, the marketplace, the
+ * doctor flow), filed in the person's own thread so the memory knows a test
+ * is coming or a doctor has the note.
+ */
+export type BookedEvent = {
+  kind: "lab" | "doctor";
+  title: string;
+  /** "Tue, 8 Oct · 6-8 am" */
+  when: string;
+  /** Lab or doctor, and where. */
+  where: string;
+  /** Where a tap goes: the booking's own page. */
+  route: string;
+  /** The pre-consultation note's lines, for doctor bookings. */
+  note?: string[];
 };
 
 export type ThreadMessage = {
@@ -74,11 +100,37 @@ export function toTurnMemory(plan: TurnPlan): TurnMemory {
     contradictions: plan.contradictions.map((c) => ({ label: c.label, text: c.text })),
     notes: plan.notes,
     usedFactIds: plan.usedFactIds,
-    basis: plan.reply?.basis ?? "rules",
+    basis: plan.modelId === BOOKING_REPLY ? "rules" : (plan.reply?.basis ?? "rules"),
     followUps: plan.reply?.followUps ?? [],
     careOffer: Boolean(plan.reply?.careOffer),
     hardStop: plan.decision.hardStop ? { title: plan.decision.hardStop.title, text: plan.decision.hardStop.text, where: plan.decision.hardStop.where } : null,
     clock: plan.context.clock.label,
+    booking: plan.booking ? { ...plan.booking, forName: plan.context.subject.firstName } : null,
+  };
+}
+
+/** The stored half of a "Booked" entry: nothing but the event. */
+export function eventMemory(event: BookedEvent, clock = ""): TurnMemory {
+  return {
+    v: 1,
+    tier: null,
+    reasons: [],
+    watchFor: [],
+    reading: [],
+    script: null,
+    loops: [],
+    alerts: [],
+    revisions: [],
+    contradictions: [],
+    notes: [],
+    usedFactIds: [],
+    basis: "rules",
+    followUps: [],
+    careOffer: false,
+    hardStop: null,
+    clock,
+    booking: null,
+    event,
   };
 }
 
@@ -116,6 +168,8 @@ function readMemory(v: unknown): TurnMemory | null {
     careOffer: o.careOffer === true,
     hardStop: o.hardStop ?? null,
     clock: typeof o.clock === "string" ? o.clock : "",
+    booking: o.booking && typeof o.booking === "object" ? o.booking : null,
+    event: o.event && typeof o.event === "object" ? o.event : null,
   };
 }
 

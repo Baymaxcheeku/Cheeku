@@ -326,3 +326,26 @@ describe("the answer shape for everyday baby worries", () => {
     expect(plan.reply?.careOffer).toBe(true);
   });
 });
+
+describe("booking from the chat", () => {
+  it("'book test again' is answered by the rules, with a booking card, and never reaches the model", async () => {
+    const plan = await run("Book the bilirubin test again", imaad(), "2026-09-08", noModel);
+    expect(plan.status).toBe("answered");
+    expect(plan.modelId).toBe("rules:booking");
+    expect(plan.booking?.service).toBe("lab");
+    expect(plan.booking?.tests.map((t) => t.id)).toEqual(["lft"]);
+    expect(plan.reply?.paragraphs[0]).toMatch(/for Imaad again/);
+  });
+
+  it("a booking with a symptom still gets the model's answer, with the card under it", async () => {
+    const plan = await run("Book a doctor, he has a cough", imaad(), "2027-06-01", mockModel);
+    expect(plan.booking?.service).toBe("doctor");
+    expect(plan.modelId).not.toBe("rules:booking");
+  });
+
+  it("an emergency is never turned into a booking", async () => {
+    const plan = await run("book a doctor, I have chest pain", imaad(), "2026-09-08", noModel);
+    expect(plan.status).toBe("escalate");
+    expect(plan.booking).toBeNull();
+  });
+});
