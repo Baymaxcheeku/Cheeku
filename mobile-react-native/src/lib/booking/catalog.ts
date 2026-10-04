@@ -19,19 +19,44 @@
 
 export type Mode = "online" | "clinic";
 
-export type SpecialtyId = "gp" | "derm" | "gynae" | "paeds" | "ent" | "gastro" | "ortho" | "diet";
+export type SpecialtyId =
+  | "gp"
+  | "derm"
+  | "gynae"
+  | "paeds"
+  | "ent"
+  | "gastro"
+  | "ortho"
+  | "diet"
+  | "psych"
+  | "psychiatry"
+  | "dental"
+  | "eye"
+  | "cardio"
+  | "endo"
+  | "neuro";
 
-export type Specialty = { id: SpecialtyId; label: string; plural: string };
+/** Which shelf of the Doctors hub a specialty sits on. */
+export type SpecialtyGroup = "everyday" | "mind" | "specialist";
+
+export type Specialty = { id: SpecialtyId; label: string; plural: string; group: SpecialtyGroup; line: string };
 
 export const SPECIALTIES: Record<SpecialtyId, Specialty> = {
-  gp: { id: "gp", label: "General physician", plural: "General physicians" },
-  derm: { id: "derm", label: "Dermatologist", plural: "Dermatologists" },
-  gynae: { id: "gynae", label: "Gynaecologist", plural: "Gynaecologists" },
-  paeds: { id: "paeds", label: "Paediatrician", plural: "Paediatricians" },
-  ent: { id: "ent", label: "ENT specialist", plural: "ENT specialists" },
-  gastro: { id: "gastro", label: "Gastroenterologist", plural: "Gastroenterologists" },
-  ortho: { id: "ortho", label: "Orthopaedist", plural: "Orthopaedists" },
-  diet: { id: "diet", label: "Dietician", plural: "Dieticians" },
+  gp: { id: "gp", label: "General physician", plural: "General physicians", group: "everyday", line: "Fever, cough, anything to start with" },
+  paeds: { id: "paeds", label: "Paediatrician", plural: "Paediatricians", group: "everyday", line: "Babies and children" },
+  gynae: { id: "gynae", label: "Gynaecologist", plural: "Gynaecologists", group: "everyday", line: "Periods, pregnancy, PCOS" },
+  derm: { id: "derm", label: "Dermatologist", plural: "Dermatologists", group: "everyday", line: "Skin, hair and nails" },
+  ent: { id: "ent", label: "ENT specialist", plural: "ENT specialists", group: "everyday", line: "Ear, nose and throat" },
+  dental: { id: "dental", label: "Dentist", plural: "Dentists", group: "everyday", line: "Teeth and gums" },
+  eye: { id: "eye", label: "Eye specialist", plural: "Eye specialists", group: "everyday", line: "Vision and eye care" },
+  psych: { id: "psych", label: "Clinical psychologist", plural: "Clinical psychologists", group: "mind", line: "Talk therapy for stress, anxiety, low mood" },
+  psychiatry: { id: "psychiatry", label: "Psychiatrist", plural: "Psychiatrists", group: "mind", line: "When medicines may help, sleep, mood" },
+  diet: { id: "diet", label: "Dietician", plural: "Dieticians", group: "specialist", line: "A plan that starts from your reports" },
+  cardio: { id: "cardio", label: "Cardiologist", plural: "Cardiologists", group: "specialist", line: "Heart and blood pressure" },
+  endo: { id: "endo", label: "Endocrinologist", plural: "Endocrinologists", group: "specialist", line: "Diabetes, thyroid, hormones" },
+  gastro: { id: "gastro", label: "Gastroenterologist", plural: "Gastroenterologists", group: "specialist", line: "Stomach, gut and liver" },
+  ortho: { id: "ortho", label: "Orthopaedist", plural: "Orthopaedists", group: "specialist", line: "Bones, joints and back" },
+  neuro: { id: "neuro", label: "Neurologist", plural: "Neurologists", group: "specialist", line: "Headaches, nerves, seizures" },
 };
 
 /*
@@ -54,6 +79,11 @@ export const CONCERNS: readonly Concern[] = [
   { id: "child", label: "My child's health", departments: ["paeds", "gp"] },
   { id: "bones", label: "Joints, back or bones", departments: ["gp", "ortho"] },
   { id: "diet", label: "Weight or diet", departments: ["gp", "diet"] },
+  { id: "mind", label: "Stress, mood or sleep", departments: ["psych", "psychiatry", "gp"] },
+  { id: "teeth", label: "Teeth or gums", departments: ["dental", "gp"] },
+  { id: "eyes", label: "Eyes or vision", departments: ["eye", "gp"] },
+  { id: "sugar", label: "Sugar, thyroid or BP", departments: ["gp", "endo", "cardio"] },
+  { id: "head", label: "Headaches or nerves", departments: ["gp", "neuro"] },
   { id: "checkup", label: "A routine check-up", departments: ["gp"] },
   { id: "other", label: "Something else", departments: ["gp"] },
 ];
@@ -84,6 +114,13 @@ export const DOCTORS: readonly Doctor[] = [
   D({ id: "d9", name: "Dr. Vikram Shetty", specialty: "gastro", qualifications: "MBBS, MD, DM (Gastro)", years: 18, languages: ["English", "Kannada", "Tulu"], fee: { online: 899, clinic: 1100 }, clinic: { name: "Digestive Health Centre", area: "Malleshwaram", km: 8.3, opd: "10 am – 2 pm" } }),
   D({ id: "d10", name: "Dr. Imran Qureshi", specialty: "ortho", qualifications: "MBBS, MS (Ortho)", years: 13, languages: ["English", "Hindi", "Urdu"], fee: { online: 599, clinic: 800 }, clinic: { name: "Joint & Spine Clinic", area: "Hebbal", km: 9.1, opd: "5 – 9 pm" } }),
   D({ id: "d11", name: "Priya Nair, RD", specialty: "diet", qualifications: "MSc (Nutrition), Registered Dietitian", years: 6, languages: ["English", "Malayalam", "Hindi"], fee: { online: 449 }, clinic: { name: "NourishWell", area: "Koramangala", km: 3.1, opd: "10 am – 6 pm" } }),
+  D({ id: "d12", name: "Dr. Ritika Sen", specialty: "psych", qualifications: "M.Phil (Clinical Psychology), RCI registered", years: 9, languages: ["English", "Hindi", "Bengali"], fee: { online: 899, clinic: 1200 }, clinic: { name: "Quiet Mind Practice", area: "Indiranagar", km: 2.5, opd: "10 am – 7 pm" } }),
+  D({ id: "d13", name: "Dr. Karan Malhotra", specialty: "psychiatry", qualifications: "MBBS, MD (Psychiatry)", years: 12, languages: ["English", "Hindi", "Punjabi"], fee: { online: 999, clinic: 1300 }, clinic: { name: "Mindspace Clinic", area: "Koramangala", km: 3.6, opd: "11 am – 2 pm · 5 – 8 pm" } }),
+  D({ id: "d14", name: "Dr. Sana Sheikh", specialty: "dental", qualifications: "BDS, MDS (Conservative Dentistry)", years: 8, languages: ["English", "Hindi", "Urdu"], fee: { clinic: 500 }, clinic: { name: "Bright Smile Dental", area: "HSR Layout", km: 4.2, opd: "10 am – 1 pm · 4 – 8 pm" } }),
+  D({ id: "d15", name: "Dr. Ashok Pillai", specialty: "eye", qualifications: "MBBS, MS (Ophthalmology)", years: 15, languages: ["English", "Malayalam", "Tamil"], fee: { online: 499, clinic: 700 }, clinic: { name: "ClearView Eye Centre", area: "Jayanagar", km: 5.9, opd: "9 am – 1 pm" } }),
+  D({ id: "d16", name: "Dr. Neha Agarwal", specialty: "cardio", qualifications: "MBBS, MD, DM (Cardiology)", years: 14, languages: ["English", "Hindi"], fee: { online: 999, clinic: 1200 }, clinic: { name: "HeartFirst Clinic", area: "MG Road", km: 4.0, opd: "10 am – 2 pm" } }),
+  D({ id: "d17", name: "Dr. Rahul Bhat", specialty: "endo", qualifications: "MBBS, MD, DM (Endocrinology)", years: 11, languages: ["English", "Kannada", "Hindi"], fee: { online: 799, clinic: 1000 }, clinic: { name: "Hormone & Diabetes Care", area: "Malleshwaram", km: 7.7, opd: "9 am – 1 pm · 5 – 7 pm" } }),
+  D({ id: "d18", name: "Dr. Leena Thomas", specialty: "neuro", qualifications: "MBBS, MD, DM (Neurology)", years: 13, languages: ["English", "Malayalam"], fee: { online: 999, clinic: 1200 }, clinic: { name: "NeuroCare Clinic", area: "Hebbal", km: 8.8, opd: "11 am – 3 pm" } }),
 ];
 
 export function doctorsFor(specialty: SpecialtyId, mode: Mode): Doctor[] {

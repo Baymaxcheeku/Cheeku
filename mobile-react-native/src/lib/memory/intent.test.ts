@@ -105,3 +105,18 @@ describe("member intent", () => {
     expect(memberIntent("Nisha and Imaad both have colds", members, "a", today)).toBeNull();
   });
 });
+
+describe("services from the chat", () => {
+  it("routes specialised care to its service page", () => {
+    expect(bookingIntent("book a physio at home for my back", empty)).toMatchObject({ service: "care", careId: "physio" });
+    expect(bookingIntent("need a nurse at home for dressing", empty)).toMatchObject({ service: "care", careId: "homecare" });
+    expect(bookingIntent("book an ambulance to take dad home from hospital", empty)).toMatchObject({ service: "care", careId: "ambulance" });
+    expect(bookingIntent("book an eye test", empty)).toMatchObject({ service: "care", careId: "eye" });
+  });
+
+  it("a named specialist is a doctor booking, with the pre-consultation note", () => {
+    expect(bookingIntent("book a psychologist online", empty)).toMatchObject({ service: "doctor", specialty: "psych", mode: "online" });
+    expect(bookingIntent("I need to see a psychiatrist", empty)).toMatchObject({ service: "doctor", specialty: "psychiatry" });
+    expect(bookingIntent("book a dentist for Saturday", empty)).toMatchObject({ service: "doctor", specialty: "dental" });
+  });
+});

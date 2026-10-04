@@ -2201,3 +2201,53 @@ booking, the Booked card, and the consult flow opened from the chat.
 worth trying on a device with the demo family: "Book test again" as Athar,
 "Imaad has been sleepy" (should switch), then book the test and check it
 appears in Athar's thread.
+
+## Book services: one marketplace, open from day one · 2026-10-04
+
+The marketplace will run on a partner network reached over one API
+(diagnostics, consultations, pharmacy, and specialised care: ambulance, vision,
+dental, mental health, physio, home care), so every category is open now
+instead of "soon". The API docs aren't in yet; the structure is.
+
+- **Catalogue** (`src/lib/services/catalog.ts`): Doctors, Lab tests, Medicines,
+  Health insurance (fourth, still locked), then Mental health, Dental, Eye
+  care, Physiotherapy, Home care, Ambulance; Fitness stays "soon" (not in the
+  partner network). Each service lists what you can book inside it, how it
+  works, and the words people search for.
+- **Doctors are one segment.** Gynaecologist, dietician and the rest are no
+  longer tiles; `/services/doctors` holds every specialty (new: clinical
+  psychologist, psychiatrist, dentist, eye specialist, cardiologist,
+  endocrinologist, neurologist, with sample doctors) and all of them run
+  through the pre-consultation flow. New concerns in that flow: stress, mood or
+  sleep; teeth; eyes; sugar, thyroid or BP; headaches.
+- **The access point** (`src/lib/services/provider.ts`): one
+  `MarketplaceProvider` interface (availability, quote, book, status, cancel).
+  Today `marketplace()` returns a preview provider that confirms everything and
+  charges nothing, and the screens say "Partner network · preview". When the
+  API lands, a real implementation goes in and no screen changes. Nothing from
+  records or chat crosses this line; only who, where, when and their own note.
+- **Workflows:** `/services` (search, your open requests, shelves),
+  `/services/[id]` (offerings, how it works, safety strip), `/services/request`
+  (who, how, when, where, note; the note runs through the safety gate and an
+  emergency stops the booking), `/services/booking/[id]` (status timeline,
+  details, cancel). Every request is filed in the person's chat thread as a
+  Booked card.
+- **Safety:** Ambulance opens with "Is this an emergency? Call 108", and its
+  emergency option is a call, never a form. Mental health opens with Tele-MANAS
+  14416. Those red strips are health meaning (PLAN.md rule 3); tiles stay pastel.
+- **Home:** "Book services" replaces "Book care": a dark "just tell Cheeku what
+  you need" card, the four core services as big two-up tiles, and a "More care"
+  row. Layout taken from the competitor's Explore screen (dark prompt card,
+  two-up tiles with art in the corner), with our own shape-built art instead of
+  stock renders.
+- **Chat:** "book a physio", "need a nurse at home", "book an ambulance", "eye
+  test" open the matching service; "a psychologist", "a dentist" are doctor
+  bookings with the note. Medicines are live in the chat card now.
+
+**Verified here:** typecheck, lint, 283 tests (9 services, 5 new intent).
+Web preview of Home, the hub, Doctors, Mental health, Ambulance, the request
+form and the status page. **Not seen on a device.** Worth checking on iOS: the
+two-up tile heights, the request form's keyboard, and the swipe rows.
+**To do when the partner API docs arrive:** implement `MarketplaceProvider`,
+swap `marketplace()`, map service and offering ids to theirs, and move service
+requests from the phone to the server.

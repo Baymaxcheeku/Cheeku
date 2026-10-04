@@ -28,7 +28,7 @@ import type { Series } from "./series";
  * the pre-consultation flow lets them choose.
  */
 
-export type ServiceId = "lab" | "doctor" | "fitness" | "medicine";
+export type ServiceId = "lab" | "doctor" | "fitness" | "medicine" | "care";
 
 export type LabPick = {
   /** The catalogue id (`lab_tests.id`, migration 0027). */
@@ -45,6 +45,8 @@ export type BookingIntent = {
   /** Doctor bookings: a `SPECIALTIES` id, only when the person named one. */
   specialty: string | null;
   mode: "online" | "clinic" | null;
+  /** "care" bookings: which service page (`lib/services/catalog` id): physio, homecare, eye, dental, ambulance, mental. */
+  careId?: string | null;
 };
 
 /** The lab catalogue as words: what people type, and what the result is filed as. */
@@ -69,12 +71,26 @@ export function withoutTestNames(text: string): string {
   return LAB_WORDS.reduce((t, w) => t.replace(new RegExp(w.match.source, "gi"), " "), text);
 }
 
-const BOOK = /\b(book|booking|schedule|arrange|set up|order|repeat|redo|re-?do|re-?test)\b|\b(get|need|want|fix)\b[^.?!]{0,30}\b(tests?|checked|check-?up|done|doctor|appointment|consult(ation)?|specialist|dietician|dietitian|gyn\w*|paediatrician|pediatrician|class(es)?|trainer)\b/i;
+const BOOK = /\b(book|booking|schedule|arrange|set up|order|repeat|redo|re-?do|re-?test)\b|\b(get|need|want|fix)\b[^.?!]{0,30}\b(tests?|checked|check-?up|done|doctor|appointment|consult(ation)?|specialist|dietician|dietitian|gyn\w*|paediatrician|pediatrician|class(es)?|trainer|physio\w*|nurse|caregiver|therap\w*|counsell?\w*|dentist|ambulance|eye test|glasses|psych\w*|specialist)\b/i;
 const AGAIN = /\b(again|repeat|redo|re-?do|follow[- ]?up test|retest|re-?test|next one)\b/i;
 const LAB = /\b(tests?|lab|labs|blood ?work|blood test|sample|home collection|check-?up|diagnostics?|investigations?)\b/i;
-const DOCTOR = /\b(doctor|dr\.?|physician|paediatrician|pediatrician|specialist|consult(ation)?|appointment|gyn(a)?ecologist|gynae|gyno|dermatologist|skin doctor|ent\b|cardiologist|orthop(a)?edi[cs]t?|dietician|dietitian|nutritionist|gastro(enterologist)?)\b/i;
+const DOCTOR = /\b(doctor|dr\.?|physician|paediatrician|pediatrician|specialist|consult(ation)?|appointment|gyn(a)?ecologist|gynae|gyno|dermatologist|skin doctor|ent\b|cardiologist|orthop(a)?edi[cs]t?|dietician|dietitian|nutritionist|gastro(enterologist)?|psychologist|psychiatrist|therapist|counsell?or|dentist|eye (doctor|specialist)|ophthalmologist|endocrinologist|neurologist)\b/i;
 const FITNESS = /\b(fitness|yoga|gym|trainer|workout|exercise class|pilates|zumba|prenatal class)\b/i;
 const MEDICINE = /\b(order|refill|deliver|delivery|buy)\b.*\b(medicine|medicines|meds|tablets?|syrup|prescription)\b|\b(medicine|medicines|meds)\b.*\b(delivery|refill|order)\b/i;
+/*
+ * Specialised care with its own service page. Checked after medicines and
+ * before doctors, but a named specialist ("a dentist", "a psychologist") is
+ * still a doctor booking: that's the flow with the pre-consultation note.
+ */
+const CARE: [RegExp, string][] = [
+  [/\bambulance\b|patient transport|stretcher/i, "ambulance"],
+  [/\bphysio\w*|rehab(ilitation)?\b/i, "physio"],
+  [/\bnurse\b|home ?care|caregiver|caretaker|attendant|elder care|injection at home|dressing at home/i, "homecare"],
+  [/eye test|eye check|glasses|spectacles|contact lens/i, "eye"],
+  [/teeth cleaning|dental clean|scaling/i, "dental"],
+  [/\b(therapy|counsell?ing|couples counsell?ing)\b/i, "mental"],
+];
+
 // A question about a result is not a booking: "what was my HbA1c last time?"
 const QUESTION = /^(what|why|how|is|was|are|were|does|did|do|should|can|could|when|which)\b/i;
 
@@ -86,6 +102,13 @@ const SPECIALTY_WORDS: [RegExp, string][] = [
   [/gastro|stomach specialist/i, "gastro"],
   [/orthop|bone doctor|joint specialist/i, "ortho"],
   [/dietician|dietitian|nutritionist|diet plan/i, "diet"],
+  [/psychiatrist/i, "psychiatry"],
+  [/psychologist|therapist|counsell?or/i, "psych"],
+  [/dentist|tooth doctor/i, "dental"],
+  [/eye (doctor|specialist)|ophthalmolog/i, "eye"],
+  [/cardiolog|heart specialist/i, "cardio"],
+  [/endocrinolog|diabetes specialist|thyroid specialist/i, "endo"],
+  [/neurolog/i, "neuro"],
   [/general physician|\bgp\b|family doctor/i, "gp"],
 ];
 
@@ -143,6 +166,8 @@ export function bookingIntent(
 
   if (MEDICINE.test(t)) return { service: "medicine", again, tests: [], specialty: null, mode: null };
   if (FITNESS.test(t)) return { service: "fitness", again, tests: [], specialty: null, mode: null };
+  const care = DOCTOR.test(t) && !/\b(ambulance|nurse|physio\w*)\b/i.test(t) ? null : CARE.find(([re]) => re.test(t))?.[1];
+  if (care) return { service: "care", again, tests: [], specialty: null, mode: null, careId: care };
 
   // A doctor wins over a test when both are named ("book a doctor to read my test").
   if (DOCTOR.test(t) && !(named.length && !/\b(doctor|dr\.?|consult|appointment|specialist)\b/i.test(t))) {

@@ -24,6 +24,13 @@ const LOOK: Record<string, FaceTraits & { bg: string }> = {
   d9: { bg: "e3dcff", hair: ["dannyPhantom"], hairColor: ["9e9e9e"], baseColor: ["77311d"], facialHairProbability: 0, earringsProbability: 0, glassesProbability: 100 },
   d10: { bg: "dcecff", hair: ["fonze"], hairColor: ["000000"], baseColor: ["f9c9b6"], facialHair: ["beard"], facialHairProbability: 100, earringsProbability: 0, glassesProbability: 0 },
   d11: { bg: "f0e2ff", hair: ["full"], hairColor: ["2c1b18"], baseColor: ["ac6651"], earringsProbability: 100, facialHairProbability: 0, glassesProbability: 0 },
+  d12: { bg: "ffe3ef", hair: ["full"], hairColor: ["2c1b18"], baseColor: ["f9c9b6"], earringsProbability: 100, facialHairProbability: 0, glassesProbability: 100 },
+  d13: { bg: "dcecff", hair: ["dougFunny"], hairColor: ["2c1b18"], baseColor: ["ac6651"], facialHair: ["scruff"], facialHairProbability: 100, earringsProbability: 0, glassesProbability: 0 },
+  d14: { bg: "f3e9fd", hair: ["pixie"], hairColor: ["000000"], baseColor: ["ac6651"], earringsProbability: 100, facialHairProbability: 0, glassesProbability: 0 },
+  d15: { bg: "e6f1fd", hair: ["mrClean"], hairColor: ["9e9e9e"], baseColor: ["77311d"], facialHairProbability: 0, earringsProbability: 0, glassesProbability: 100 },
+  d16: { bg: "ffe8dc", hair: ["full"], hairColor: ["000000"], baseColor: ["f9c9b6"], earringsProbability: 100, facialHairProbability: 0, glassesProbability: 0 },
+  d17: { bg: "e0e7ff", hair: ["fonze"], hairColor: ["000000"], baseColor: ["ac6651"], facialHair: ["beard"], facialHairProbability: 100, earringsProbability: 0, glassesProbability: 0 },
+  d18: { bg: "fde0f0", hair: ["full"], hairColor: ["6a4e35"], baseColor: ["ac6651"], earringsProbability: 0, facialHairProbability: 0, glassesProbability: 100 },
 };
 
 const cache = new Map<string, { svg: string; background: string }>();
