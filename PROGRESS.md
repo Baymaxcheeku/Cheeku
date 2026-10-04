@@ -2194,7 +2194,7 @@ read from and write to the same per-person thread.
   aren't charged against the free allowance. No migration: it uses the
   `messages.memory` column from 0030.
 
-**Verified here:** typecheck, lint, 274 tests (11 intent, 3 pipeline booking).
+**Verified here:** typecheck, lint, 272 tests (11 intent, 3 pipeline booking).
 Web preview of the real pipeline output for "Book test again" and a doctor
 booking, the Booked card, and the consult flow opened from the chat.
 **Not verified:** the member switch and write-back need a signed-in session;
