@@ -2163,3 +2163,41 @@ The inbox stacked up and it was hard to see what still needed a look. Now:
 **Verified here:** typecheck, lint, tests (two new for the read split), web
 preview screenshots. **Not seen on a device:** the swipe gesture feel and the
 Undo bar position above the home indicator are worth a look on iOS.
+
+## One memory behind every chat and booking · 2026-10-04
+
+Ask Cheeku (nav), Home's ask bar and the marketplace booking flows now all
+read from and write to the same per-person thread.
+
+- **Booking from the chat.** `src/lib/memory/intent.ts` reads "book", "repeat",
+  "schedule" plus a service word. "Book test again" works out WHICH test from
+  the memory (open loops first, then the latest lab panel) and why ("Due in 10
+  weeks, last 5.9% on 12 Jul"). A booking with nothing worrying alongside is
+  answered by rules with no model call (`rules:booking`); with a symptom, the
+  model answers as usual and the card rides under it. Emergencies and
+  hard-stops still win: no booking card on those. Test names are stripped
+  before symptom matching, so "book the bilirubin test" is not read as
+  jaundice.
+- **The card** (`src/components/chat/booking.tsx`): lab (tests, from-price,
+  fasting and sample, three steps, "Choose a lab" fills the lab cart and opens
+  the chooser), doctor ("Start pre-consultation" opens the consult flow with
+  who, mode and any named specialty already set, so those aren't asked
+  again), and fitness/medicine (not live: joins the waitlist).
+- **Member auto-switch.** A message naming another member ("Imaad has a
+  cough", "my wife's thyroid test", "the baby") loads their memory and thread,
+  switches the app to them, and sends the turn there, with a "Now in Imaad's
+  memory · Back to Athar" chip. Two people named: no switch. A member the plan
+  doesn't cover: nothing is sent, and it says why. PLAN.md rule 4.
+- **Write-back.** `recordBooking` files every lab booking and doctor
+  appointment, from the chat or the marketplace, in that person's thread as a
+  "Booked" card (with the pre-consultation note for doctors). Assistant rows
+  aren't charged against the free allowance. No migration: it uses the
+  `messages.memory` column from 0030.
+
+**Verified here:** typecheck, lint, 274 tests (11 intent, 3 pipeline booking).
+Web preview of the real pipeline output for "Book test again" and a doctor
+booking, the Booked card, and the consult flow opened from the chat.
+**Not verified:** the member switch and write-back need a signed-in session;
+worth trying on a device with the demo family: "Book test again" as Athar,
+"Imaad has been sleepy" (should switch), then book the test and check it
+appears in Athar's thread.

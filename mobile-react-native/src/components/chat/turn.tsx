@@ -27,6 +27,7 @@ import { shortDate } from "@/lib/records/details";
 import { brand, ink, semantic, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
 
+import { BookedCard, BookingCard } from "./booking";
 import { TIER_STYLE, TierBadge } from "./tier";
 
 /*
@@ -80,6 +81,8 @@ export function AssistantTurn({
   onOpenRecord,
   onOpenMemory,
   onBook,
+  onStartBooking,
+  onOpenRoute,
 }: {
   message: ThreadMessage;
   /** The member's first name, for labels. */
@@ -89,6 +92,10 @@ export function AssistantTurn({
   onOpenMemory: () => void;
   /** "Doctors nearby" or "Online consultation", under an answer that offers them. */
   onBook?: (mode: "clinic" | "online") => void;
+  /** Starts the booking a card offers: the lab chooser, or the doctor flow. */
+  onStartBooking?: (booking: NonNullable<TurnMemory["booking"]>) => void;
+  /** Opens a booked lab test or appointment. */
+  onOpenRoute?: (route: string) => void;
 }) {
   const m = message.memory;
   if (m?.hardStop) return <HardStopCard memory={m} />;
@@ -133,7 +140,9 @@ export function AssistantTurn({
             ) : null}
           </View>
 
-          {onBook && m?.careOffer ? <CareOffer onBook={onBook} /> : null}
+          {m?.booking ? <BookingCard booking={m.booking} onStart={onStartBooking} /> : null}
+          {m?.event ? <BookedCard event={m.event} onOpen={onOpenRoute} /> : null}
+          {onBook && m?.careOffer && !m.booking ? <CareOffer onBook={onBook} /> : null}
           {m?.reading.length ? <ReadingStrip memory={m} onOpenRecord={onOpenRecord} /> : null}
           {m?.script ? <ScriptCard script={m.script} /> : null}
           {m?.watchFor.length ? <WatchFor items={m.watchFor} tierIsLow={m.tier === "reassure"} /> : null}

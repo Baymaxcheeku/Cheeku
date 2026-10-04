@@ -11,6 +11,7 @@ import { Glass, glass, glassShadow } from "@/components/ui/glass";
 import { Backdrop, PillButton, ScreenHeader } from "@/components/ui/screen";
 import { fastingFor, quote, windowsFor, type SlotWindow } from "@/lib/labs/logic";
 import { BOOKINGS_KEY, bookLab, useCatalog, useLabCart } from "@/lib/labs/queries";
+import { recordBooking, threadKey } from "@/lib/memory/store";
 import { useFamily } from "@/lib/profiles/family";
 import { kv } from "@/lib/storage";
 import { brand, ink, surface } from "@/theme/tokens";
@@ -27,6 +28,10 @@ import { font } from "@/theme/type";
  *
  * The total shown is computed the same way the database computes it, and the
  * database's number is the one booked (create_lab_booking, 0027).
+ *
+ * Once booked, it is filed in that person's chat thread as a "Booked" card,
+ * whether it started in the chat ("book test again") or the marketplace, so
+ * the memory knows a result is on its way.
  */
 
 const ADDRESS_KEY = "cheeku.labAddress";
@@ -114,6 +119,14 @@ export default function BookLab() {
       return;
     }
     void kv.set(ADDRESS_KEY, address.trim());
+    const names = (catalog.data?.tests ?? []).filter((t) => cart.tests.includes(t.id)).map((t) => t.name);
+    const when = `${dayLabel(days[dayIdx] as Date, dayIdx)} · ${chosenWindow}`;
+    const whoFirst = who.name.split(" ")[0] ?? who.name;
+    void recordBooking(
+      who.id,
+      { kind: "lab", title: names.join(" + ") || "Lab tests", when, where: `${partner.name} · home collection`, route: `/labs/booking/${res.id}` },
+      `Booked ${names.join(", ") || "the tests"} for ${whoFirst}: ${when}, home collection by ${partner.name}. I'll file the result here when it's ready and put it next to the last one.`,
+    ).then(() => qc.invalidateQueries({ queryKey: threadKey(who.id) }));
     cart.clear();
     void qc.invalidateQueries({ queryKey: BOOKINGS_KEY });
     void qc.invalidateQueries({ queryKey: ["notifications"] });
