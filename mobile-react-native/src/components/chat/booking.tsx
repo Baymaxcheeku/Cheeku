@@ -8,13 +8,13 @@ import {
   Dumbbell,
   FlaskConical,
   Hourglass,
-  Pill,
   Stethoscope,
   type LucideIcon,
 } from "lucide-react-native";
 import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
 
+import { SERVICE_ICON } from "@/components/services/parts";
 import { glass, glassShadow } from "@/components/ui/glass";
 import { SPECIALTIES, type SpecialtyId } from "@/lib/booking/catalog";
 import { fromPrice } from "@/lib/labs/logic";
@@ -22,6 +22,7 @@ import { useCatalog } from "@/lib/labs/queries";
 import type { BookingIntent } from "@/lib/memory/intent";
 import type { BookedEvent } from "@/lib/memory/thread";
 import { fetchWaitlist, setWaitlisted } from "@/lib/notifications/queries";
+import { serviceById } from "@/lib/services/catalog";
 import { brand, ink, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
 
@@ -40,12 +41,38 @@ import { font } from "@/theme/type";
 
 type Booking = BookingIntent & { forName: string };
 
-const WAITLIST_ID: Record<"fitness" | "medicine", string> = { fitness: "fitness", medicine: "medicines" };
+const WAITLIST_ID: Record<string, string> = { fitness: "fitness" };
 
 export function BookingCard({ booking, onStart }: { booking: Booking; onStart?: (b: Booking) => void }) {
   if (booking.service === "lab") return <LabCard booking={booking} onStart={onStart} />;
   if (booking.service === "doctor") return <DoctorCard booking={booking} onStart={onStart} />;
+  if (booking.service === "medicine" || booking.service === "care") return <ServiceLinkCard booking={booking} onStart={onStart} />;
   return <SoonCard booking={booking} />;
+}
+
+/** Medicines and specialised care: straight to that service, with what's inside it. */
+function ServiceLinkCard({ booking, onStart }: { booking: Booking; onStart?: (b: Booking) => void }) {
+  const svc = serviceById(booking.service === "medicine" ? "medicines" : booking.careId);
+  if (!svc) return null;
+  const Icon = SERVICE_ICON[svc.icon] ?? Stethoscope;
+  const offerings = svc.offerings.filter((o) => !o.call).slice(0, 3);
+  return (
+    <Shell icon={Icon} eyebrow="Book a service" title={svc.title} sub={`For ${booking.forName} · ${svc.line.toLowerCase()}`}>
+      {svc.urgent?.length ? (
+        <Text style={{ fontFamily: font.semibold, fontSize: 13, lineHeight: 18, color: "#c00a1c" }}>{svc.urgent[0]?.title} {svc.urgent[0]?.label}.</Text>
+      ) : null}
+      <View style={{ gap: 6 }}>
+        {offerings.map((o) => (
+          <View key={o.id} style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+            <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: brand[400] }} />
+            <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 13.5, color: ink[700] }}>{o.title}</Text>
+          </View>
+        ))}
+      </View>
+      <Steps items={svc.steps.length ? svc.steps : ["Pick what you need", "When and where", `Filed in ${booking.forName}'s memory`]} />
+      <Cta label={`Open ${svc.title.toLowerCase()}`} onPress={onStart ? () => onStart(booking) : undefined} />
+    </Shell>
+  );
 }
 
 function Shell({ icon: Icon, eyebrow, title, sub, children }: { icon: LucideIcon; eyebrow: string; title: string; sub: string; children: React.ReactNode }) {
@@ -164,11 +191,11 @@ function DoctorCard({ booking, onStart }: { booking: Booking; onStart?: (b: Book
 
 function SoonCard({ booking }: { booking: Booking }) {
   const qc = useQueryClient();
-  const id = WAITLIST_ID[booking.service as "fitness" | "medicine"];
+  const id = WAITLIST_ID[booking.service] ?? booking.service;
   const list = useQuery({ queryKey: ["waitlist"], queryFn: fetchWaitlist });
   const [busy, setBusy] = useState(false);
   const on = Boolean(list.data?.includes(id));
-  const label = booking.service === "fitness" ? "Fitness classes" : "Medicine delivery";
+  const label = "Fitness classes";
 
   async function join() {
     setBusy(true);
@@ -182,7 +209,7 @@ function SoonCard({ booking }: { booking: Booking }) {
   }
 
   return (
-    <Shell icon={booking.service === "fitness" ? Dumbbell : Pill} eyebrow="Coming soon" title={label} sub={`For ${booking.forName}`}>
+    <Shell icon={Dumbbell} eyebrow="Coming soon" title={label} sub={`For ${booking.forName}`}>
       <Pressable
         accessibilityRole="button"
         disabled={on || busy}
@@ -198,7 +225,7 @@ function SoonCard({ booking }: { booking: Booking }) {
 
 /** A booking made somewhere in the app, filed in this person's thread. */
 export function BookedCard({ event, onOpen }: { event: BookedEvent; onOpen?: (route: string) => void }) {
-  const Icon = event.kind === "lab" ? FlaskConical : Stethoscope;
+  const Icon = event.kind === "lab" ? FlaskConical : event.kind === "service" ? CalendarCheck2 : Stethoscope;
   return (
     <Pressable
       accessibilityRole="button"

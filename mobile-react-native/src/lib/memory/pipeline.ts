@@ -8,6 +8,8 @@ import { decideTier, hardStopFor, type TierDecision } from "./ladder";
 import type { LedgerFlag } from "./ledger";
 import { relevantLoops, type LoopView } from "./loops";
 import { digest, type ChatModel, type ModelReply } from "./model";
+import { serviceById } from "@/lib/services/catalog";
+
 import { BOOKING_REPLY } from "./thread";
 import { buildScript, type Script } from "./script";
 import { describeChange, notableChanges, type Series } from "./series";
@@ -300,17 +302,39 @@ export async function planTurn(args: {
   };
 }
 
-const SERVICE_SOON: Record<"fitness" | "medicine", string> = {
-  fitness: "Fitness classes",
-  medicine: "Medicine delivery",
-};
+
 
 /** What Cheeku says when asked to book something. Rules, in plain words. */
 export function bookingReply(b: BookingIntent, ctx: MemoryContext): ModelReply {
   const name = ctx.subject.firstName;
-  if (b.service === "fitness" || b.service === "medicine") {
+  if (b.service === "fitness") {
     return {
-      paragraphs: [`${SERVICE_SOON[b.service]} isn't open in Cheeku yet. Tap below and I'll tell you the day it is, with ${name}'s details ready to go.`],
+      paragraphs: [`Fitness classes aren't open in Cheeku yet. Tap below and I'll tell you the day they are, with ${name}'s details ready to go.`],
+      citations: [],
+      followUps: [],
+      basis: "grounded",
+    };
+  }
+  if (b.service === "medicine") {
+    return {
+      paragraphs: [`Let's get ${name}'s medicines ordered. Pick a prescription from ${name}'s records or refill what they already take, and it comes to the door. The order stays in ${name}'s memory.`],
+      citations: [],
+      followUps: [],
+      basis: "grounded",
+    };
+  }
+  if (b.service === "care") {
+    const svc = serviceById(b.careId);
+    if (svc?.id === "ambulance") {
+      return {
+        paragraphs: ["If this is an emergency, call 108 now. Don't wait on a booking.", `For a planned hospital transfer or a ride home after discharge, book it below and I'll keep it in ${name}'s memory.`],
+        citations: [],
+        followUps: [],
+        basis: "grounded",
+      };
+    }
+    return {
+      paragraphs: [`Let's book ${svc ? svc.title.toLowerCase() : "that"} for ${name}. Pick what you need, when, and where, and it goes into ${name}'s memory once it's booked.`],
       citations: [],
       followUps: [],
       basis: "grounded",
