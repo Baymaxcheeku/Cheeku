@@ -51,14 +51,13 @@ export default function DoctorsHub() {
       <Backdrop />
       <ScreenHeader title="Doctors" subtitle="Every specialty, online or at a clinic" fallback="/services" />
       <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: insets.bottom + 32, gap: 12 }} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
-        <Pressable accessibilityRole="button" onPress={() => book()} style={({ pressed }) => [glassShadow, { borderRadius: 28, overflow: "hidden", marginTop: 6, transform: [{ scale: pressed ? 0.985 : 1 }] }]}>
+        <Pressable accessibilityRole="button" onPress={() => book()} style={({ pressed }) => [glassShadow, { borderRadius: 28, overflow: "hidden", marginTop: 6, borderWidth: 1, borderColor: "#e4defd", transform: [{ scale: pressed ? 0.985 : 1 }] }]}>
           {/*
-           * Warm and light, not dark violet: the mascot is lilac, and on a
-           * violet card it disappeared. Peach to blush keeps it friendly and
-           * makes the character the brightest-contrast thing on the card.
-           * Not green, amber or red (PLAN.md rule 3).
+           * Clean white, not dark violet: the mascot is lilac, and on a
+           * violet card it disappeared. On white it is the most colourful
+           * thing on the card, with a faint lilac halo to sit on.
            */}
-          <Gradient from="#fff3ea" to="#ffe4ef" glow="#ffffff" />
+          <Gradient from="#ffffff" to="#f7f6ff" glow="#ffffff" />
           <View style={{ flexDirection: "row", alignItems: "center", paddingVertical: 16, paddingLeft: 18, paddingRight: 8, gap: 6 }}>
             <View style={{ flex: 1 }}>
               <Text style={{ fontFamily: font.semibold, fontSize: 19, lineHeight: 24, letterSpacing: -0.3, color: ink[900] }}>Not sure who to see?</Text>
@@ -71,7 +70,7 @@ export default function DoctorsHub() {
               </View>
             </View>
             <View style={{ width: 104, height: 112, alignItems: "center", justifyContent: "flex-end" }}>
-              <View style={{ position: "absolute", bottom: 6, width: 92, height: 92, borderRadius: 46, backgroundColor: "rgba(255,255,255,0.75)" }} />
+              <View style={{ position: "absolute", bottom: 6, width: 92, height: 92, borderRadius: 46, backgroundColor: "#efeaff" }} />
               <MascotFigure size={100} wave />
             </View>
           </View>
