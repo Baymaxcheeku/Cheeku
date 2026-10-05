@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { MascotBust } from "@/components/illustrations/sprout";
+import { MascotFigure } from "@/components/illustrations/sprout";
 import { Grid2, SPECIALTY_ICON } from "@/components/services/parts";
 import { Brand } from "@/components/ui/brand";
 import { Gradient, glass, glassShadow } from "@/components/ui/glass";
@@ -52,19 +52,28 @@ export default function DoctorsHub() {
       <ScreenHeader title="Doctors" subtitle="Every specialty, online or at a clinic" fallback="/services" />
       <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: insets.bottom + 32, gap: 12 }} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
         <Pressable accessibilityRole="button" onPress={() => book()} style={({ pressed }) => [glassShadow, { borderRadius: 28, overflow: "hidden", marginTop: 6, transform: [{ scale: pressed ? 0.985 : 1 }] }]}>
-          <Gradient from="#1b1a3f" to="#3b2bc9" glow="#5b4ef0" />
-          <View style={{ flexDirection: "row", alignItems: "center", padding: 18, gap: 10 }}>
+          {/*
+           * Warm and light, not dark violet: the mascot is lilac, and on a
+           * violet card it disappeared. Peach to blush keeps it friendly and
+           * makes the character the brightest-contrast thing on the card.
+           * Not green, amber or red (PLAN.md rule 3).
+           */}
+          <Gradient from="#fff3ea" to="#ffe4ef" glow="#ffffff" />
+          <View style={{ flexDirection: "row", alignItems: "center", paddingVertical: 16, paddingLeft: 18, paddingRight: 8, gap: 6 }}>
             <View style={{ flex: 1 }}>
-              <Text style={{ fontFamily: font.semibold, fontSize: 19, lineHeight: 24, color: "#fff" }}>Not sure who to see?</Text>
-              <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: "rgba(255,255,255,0.8)", marginTop: 5 }}>
-                Tell <Brand onDark /> what&apos;s going on. You pick the area, it names the right department and writes the doctor a note.
+              <Text style={{ fontFamily: font.semibold, fontSize: 19, lineHeight: 24, letterSpacing: -0.3, color: ink[900] }}>Not sure who to see?</Text>
+              <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[700], marginTop: 5 }}>
+                Tell <Brand /> what&apos;s going on. You pick the area, it names the right department and writes the doctor a note.
               </Text>
-              <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginTop: 10 }}>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 6, alignSelf: "flex-start", marginTop: 12, height: 38, paddingHorizontal: 14, borderRadius: 999, backgroundColor: brand[600] }}>
                 <Text style={{ fontFamily: font.semibold, fontSize: 13.5, color: "#fff" }}>Start pre-consultation</Text>
                 <ArrowRight size={15} color="#fff" />
               </View>
             </View>
-            <MascotBust size={74} mood="happy" pose="wave" motion="wave" interactive={false} />
+            <View style={{ width: 104, height: 112, alignItems: "center", justifyContent: "flex-end" }}>
+              <View style={{ position: "absolute", bottom: 6, width: 92, height: 92, borderRadius: 46, backgroundColor: "rgba(255,255,255,0.75)" }} />
+              <MascotFigure size={100} wave />
+            </View>
           </View>
         </Pressable>
 
