@@ -2295,3 +2295,38 @@ is a soft wide pool plus a contact shadow. Under 64 px the blurs fall back to
 gentle gradients for speed. **Check on device:** filter rendering on Android
 (FeGaussianBlur inside ClipPath) and scroll smoothness with several large
 mascots on screen.
+
+## Mascot: the Lottie character, in brand colours · 2026-10-05
+
+The drawn mascot is gone. Cheeku is now four Lottie animations of one
+character (supplied as free LottieFiles downloads; check each licence before
+release), recoloured from the artist's yellow into the app's lilac and violet.
+
+- **Files.** `assets/mascot/source/` holds the downloads untouched;
+  `scripts/recolor-mascot.mjs` writes the branded `assets/mascot/*.json`. Re-run
+  it to change the palette. Exact colour table first (with snapping for the
+  rounding variants exports carry), then a hue rule for anything missed. Body
+  yellows to lilacs, orange outline to brand violet 500, the faint magenta
+  cheek tint to a stronger rose blush (some files fade it on the layer, some on
+  the fill: both handled), sparks to pink, the teal desk set to deep ink
+  indigo. Never green, amber or red (rule 3).
+- **Moments.** wave (greet), working (at a desk with a phone: reading,
+  typing, scanning), celebrate (arms up with sparks: booked, bought, sent),
+  shrug (empty states, not sure, Help). `components/mascot/lottie.tsx` crops
+  each canvas to the character's measured box, so `size` is the character's
+  height whichever file it is.
+- **Stills.** Transparent PNGs of a good frame per moment, plus a head crop.
+  Marks under 64 px (one per chat message) and Reduce motion always use these.
+- **Screens keep their wording.** `MascotFigure` / `MascotBust` still take
+  mood, pose and motion; `momentFor` picks the animation. Calm or still
+  requests show the still.
+- **Web.** The player is dotLottie's WebAssembly build; its `.wasm` is served
+  from `public/` instead of a CDN (`components/mascot/wasm.web.ts`). Re-copy it
+  from `@lottiefiles/dotlottie-web` when that package is upgraded.
+
+**Verified here:** typecheck, lint, tests; web preview of all four
+animations, the stills, About, Help, Sign in and Doctors. **Needs a native
+rebuild** (`lottie-react-native` is a native module; Expo Go includes it, a dev
+client needs `npx expo run:ios` / `run:android`). Not seen on a device: check
+smoothness with two animations on one screen (Home), and Android hardware
+rendering.
