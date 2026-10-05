@@ -21,7 +21,7 @@ import {
 import { Pressable, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { MascotBust } from "@/components/illustrations/sprout";
+import { MascotFigure } from "@/components/illustrations/sprout";
 import { Glass, GlassCircle } from "@/components/ui/glass";
 import { PillButton } from "@/components/ui/screen";
 import { formatEventDate } from "@/lib/records/grouping";
@@ -91,12 +91,14 @@ export function RecordsHeader({ title, subtitle }: { title: string; subtitle: st
   return (
     <View className="px-5" style={{ paddingTop: insets.top + 12 }}>
       <View className="flex-row items-center gap-3">
-        <Text
-          accessibilityRole="header"
-          style={{ flex: 1, fontFamily: font.semibold, fontSize: 28, lineHeight: 33, letterSpacing: -0.8, color: ink[900] }}
-        >
-          {title}
-        </Text>
+        <View style={{ flex: 1 }}>
+          <Text accessibilityRole="header" style={{ fontFamily: font.semibold, fontSize: 28, lineHeight: 33, letterSpacing: -0.8, color: ink[900] }}>
+            {title}
+          </Text>
+          <Text style={{ fontFamily: font.regular, fontSize: 14, color: ink[500], marginTop: 4 }}>{subtitle}</Text>
+        </View>
+        {/* The filing clerk: Cheeku at his desk, typing away. Tap him. */}
+        <MascotFigure size={72} moment="working" hop />
         <GlassCircle label="Add a health record" onPress={() => router.push("/scan")}>
           <Plus size={21} color={ink[900]} />
         </GlassCircle>
@@ -107,7 +109,6 @@ export function RecordsHeader({ title, subtitle }: { title: string; subtitle: st
          * that looks identical to a working one and does nothing.
          */}
       </View>
-      <Text style={{ fontFamily: font.regular, fontSize: 14, color: ink[500], marginTop: 4 }}>{subtitle}</Text>
     </View>
   );
 }
@@ -280,7 +281,7 @@ export function EmptyRecords({ filtered }: { filtered: boolean }) {
           <FileText size={22} color="#5b4ef0" />
         </View>
       ) : (
-        <MascotBust size={88} moment="present" />
+        <MascotFigure size={96} moment="present" move="sway" hop />
       )}
       <Text style={{ fontFamily: font.semibold, fontSize: 18, color: ink[900], marginTop: 10, textAlign: "center" }}>
         {filtered ? "Nothing matches those filters" : "Your health file is empty"}

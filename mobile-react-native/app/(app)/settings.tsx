@@ -37,6 +37,7 @@ import {
   exportAccount,
   shareExport,
 } from "@/lib/account/actions";
+import { MascotFigure } from "@/components/illustrations/sprout";
 import { Avatar } from "@/components/ui/avatar";
 import { Glass, Gradient, glass, glassShadow } from "@/components/ui/glass";
 import { Backdrop } from "@/components/ui/screen";
@@ -133,9 +134,15 @@ export default function Settings() {
       contentContainerStyle={{ paddingTop: insets.top + 12, paddingBottom: 24 }}
       showsVerticalScrollIndicator={false}
     >
-      <Text accessibilityRole="header" style={{ paddingHorizontal: 20, fontFamily: font.semibold, fontSize: 28, letterSpacing: -0.8, color: ink[900] }}>
-        Profile
-      </Text>
+      <View style={{ flexDirection: "row", alignItems: "flex-end", paddingHorizontal: 20 }}>
+        <Text accessibilityRole="header" style={{ flex: 1, fontFamily: font.semibold, fontSize: 28, letterSpacing: -0.8, color: ink[900] }}>
+          Profile
+        </Text>
+        {/* Waves hello when the tab opens, then stays with you. Tap him. */}
+        <View style={{ marginBottom: -18 }}>
+          <MascotFigure size={74} moment="hello" move="float" hop />
+        </View>
+      </View>
 
       {/*
        * Who, and on what plan, in one glass card. The plan row is the upgrade

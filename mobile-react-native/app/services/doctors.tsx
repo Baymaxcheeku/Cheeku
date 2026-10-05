@@ -71,7 +71,7 @@ export default function DoctorsHub() {
             </View>
             <View style={{ width: 104, height: 112, alignItems: "center", justifyContent: "flex-end" }}>
               <View style={{ position: "absolute", bottom: 6, width: 92, height: 92, borderRadius: 46, backgroundColor: "#efeaff" }} />
-              <MascotFigure size={100} moment="think" />
+              <MascotFigure size={100} moment="think" hop />
             </View>
           </View>
         </Pressable>

@@ -154,7 +154,7 @@ export function AppLockGate({ children }: { children: React.ReactNode }) {
             paddingHorizontal: 32,
           }}
         >
-          <MascotBust size={148} mood="calm" motion="breathe" interactive={false} />
+          <MascotBust size={148} moment="idle" move="float" />
 
           {locked ? (
             <>

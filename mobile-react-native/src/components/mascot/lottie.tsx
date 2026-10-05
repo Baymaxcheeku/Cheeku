@@ -166,7 +166,12 @@ export function Cheeku({
   accessibilityLabel = "Cheeku",
 }: CheekuProps) {
   const still = useReducedMotion();
-  const plan = PLAY[moment];
+  // A tap makes him react for a moment (the game in it): cheers if standing,
+  // laughs if at the desk. The layout stays the base moment's, so he does not
+  // jump; both families share a canvas, so the reaction lines up.
+  const [reaction, setReaction] = useState<Moment | null>(null);
+  const shown = reaction ?? moment;
+  const plan = PLAY[shown];
   const f = FRAME[moment];
   const [x1, y1, x2, y2] = f.box;
   const canvasH = size / (y2 - y1);
@@ -175,7 +180,13 @@ export function Cheeku({
 
   // Opening first (if any), then the loop. Resets when the moment changes.
   const [phase, setPhase] = useState<"intro" | "loop">(plan.intro ? "intro" : "loop");
-  useEffect(() => setPhase(PLAY[moment].intro ? "intro" : "loop"), [moment]);
+  useEffect(() => setPhase(PLAY[shown].intro ? "intro" : "loop"), [shown]);
+  useEffect(() => {
+    if (!reaction) return;
+    const t = setTimeout(() => setReaction(null), 2600);
+    return () => clearTimeout(t);
+  }, [reaction]);
+  const react = () => setReaction(reactionFor(moment));
   const clip = CLIPS[phase === "intro" && plan.intro ? plan.intro : plan.loop];
 
   const body =
@@ -189,7 +200,7 @@ export function Cheeku({
     ) : (
       <View style={{ position: "absolute", left: -x1 * canvasW, top: -y1 * canvasH, width: canvasW, height: canvasH }} pointerEvents="none">
         <LottieView
-          key={phase}
+          key={`${shown}-${phase}`}
           source={clip.source}
           autoPlay
           loop={phase === "loop" ? loop : false}
@@ -217,14 +228,22 @@ export function Cheeku({
   );
 
   return (
-    <Moves move={still ? "none" : move} hop={!still && (hop || Boolean(onPress))} onPress={onPress} label={accessibilityLabel}>
+    <Moves move={still ? "none" : move} hop={!still && (hop || Boolean(onPress))} onPress={onPress} onTap={react} label={accessibilityLabel}>
       {box}
     </Moves>
   );
 }
 
 /** Whole-body motion on top of the animation, and the hop on tap. */
-function Moves({ move, hop, onPress, label, children }: { move: Move; hop: boolean; onPress?: () => void; label: string; children: React.ReactNode }) {
+const DESK_MOMENTS: readonly Moment[] = ["working", "think", "worried", "joy"];
+
+/** What he does when tapped: same family as the moment, so it lines up. */
+function reactionFor(m: Moment): Moment {
+  if (DESK_MOMENTS.includes(m)) return m === "joy" ? "think" : "joy";
+  return m === "cheer" || m === "celebrate" ? "present" : "cheer";
+}
+
+function Moves({ move, hop, onPress, onTap, label, children }: { move: Move; hop: boolean; onPress?: () => void; onTap?: () => void; label: string; children: React.ReactNode }) {
   const t = useSharedValue(0);
   const enter = useSharedValue(move === "pop" ? 0 : 1);
   const jump = useSharedValue(0);
@@ -255,6 +274,7 @@ function Moves({ move, hop, onPress, label, children }: { move: Move; hop: boole
       accessibilityLabel={label}
       onPress={() => {
         jump.value = withSequence(withSpring(1, { damping: 7, stiffness: 320 }), withSpring(0, { damping: 9, stiffness: 180 }));
+        onTap?.();
         onPress?.();
       }}
     >
@@ -264,17 +284,20 @@ function Moves({ move, hop, onPress, label, children }: { move: Move; hop: boole
 }
 
 /**
- * The square mark for avatars and speech bubbles: head and shoulders, always
- * a still (there can be one per message). From 64 px up it can animate, as the
- * whole character fitted into the square.
+ * The square mark for avatars and speech bubbles. Under 64 px it is his face
+ * (there can be one per chat message, and a Lottie each would be wasteful),
+ * but never a frozen one: it breathes and glances about, ponders with a slow
+ * tilt when he is thinking, and bounces when he is pleased. From 64 px up it
+ * is the whole animated character fitted into the square.
  */
 export function CheekuMark({ size = 40, moment = "wave", animate, move }: { size?: number; moment?: Moment; animate?: boolean; move?: Move }) {
   const reduced = useReducedMotion();
-  if (size < 64 || reduced || animate === false) {
+  if (size < 64) return <FaceMark size={size} moment={moment} still={reduced || animate === false} />;
+  if (reduced || animate === false) {
     return (
       <Image
         alt="Cheeku"
-        source={size < 64 ? FACE : CLIPS[PLAY[moment].still].still}
+        source={CLIPS[PLAY[moment].still].still}
         style={{ width: size, height: size }}
         resizeMode="contain"
         accessibilityRole="image"
@@ -286,6 +309,63 @@ export function CheekuMark({ size = 40, moment = "wave", animate, move }: { size
     <View style={{ width: size, height: size, alignItems: "center", justifyContent: "center", overflow: "visible" }}>
       <Cheeku moment={moment} size={size * 0.94} move={move} />
     </View>
+  );
+}
+
+let markCount = 0;
+
+/** The face, alive. Each one starts at its own offset so a column of them never moves in step. */
+function FaceMark({ size, moment, still }: { size: number; moment: Moment; still: boolean }) {
+  const kind = DESK_MOMENTS.includes(moment) && moment !== "joy" ? "ponder" : moment === "joy" || moment === "cheer" || moment === "celebrate" ? "bounce" : "alive";
+  const [offset] = useState(() => (markCount++ % 5) * 380);
+  const breath = useSharedValue(0);
+  const look = useSharedValue(0);
+
+  useEffect(() => {
+    if (still) return;
+    if (kind === "bounce") {
+      breath.value = withDelay(offset / 3, withRepeat(withTiming(1, { duration: 520, easing: Easing.inOut(Easing.quad) }), -1, true));
+      return;
+    }
+    breath.value = withDelay(offset, withRepeat(withTiming(1, { duration: kind === "ponder" ? 1700 : 2600, easing: Easing.inOut(Easing.sin) }), -1, true));
+    if (kind === "alive") {
+      // Every few seconds: a quick glance to one side and back.
+      look.value = withDelay(
+        1800 + offset,
+        withRepeat(
+          withSequence(
+            withTiming(1, { duration: 220, easing: Easing.out(Easing.quad) }),
+            withDelay(700, withTiming(-0.6, { duration: 300 })),
+            withDelay(400, withTiming(0, { duration: 240 })),
+            withDelay(3600, withTiming(0, { duration: 1 })),
+          ),
+          -1,
+          false,
+        ),
+      );
+    }
+  }, [still, kind, offset, breath, look]);
+
+  const style = useAnimatedStyle(() => {
+    if (kind === "bounce") {
+      return { transform: [{ translateY: -size * 0.1 * breath.value }, { scaleY: 1 - 0.04 * (1 - breath.value) }] };
+    }
+    if (kind === "ponder") {
+      return { transform: [{ rotate: `${interpolate(breath.value, [0, 1], [-7, 7])}deg` }, { translateY: -size * 0.03 * breath.value }] };
+    }
+    return {
+      transform: [
+        { scale: 1 + 0.05 * breath.value },
+        { rotate: `${look.value * 8}deg` },
+        { translateX: look.value * size * 0.04 },
+      ],
+    };
+  });
+
+  return (
+    <Animated.View style={[{ width: size, height: size, transformOrigin: "center bottom" }, style]} accessibilityRole="image" accessibilityLabel="Cheeku">
+      <Image alt="" source={FACE} style={{ width: size, height: size }} resizeMode="contain" />
+    </Animated.View>
   );
 }
 

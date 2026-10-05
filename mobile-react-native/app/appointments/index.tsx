@@ -6,7 +6,7 @@ import Animated, { FadeInDown } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AppointmentCard } from "@/components/booking/appointment-card";
-import { MascotBust } from "@/components/illustrations/sprout";
+import { MascotFigure } from "@/components/illustrations/sprout";
 import { Glass, GlassCircle, glass, glassShadow } from "@/components/ui/glass";
 import { useReducedMotion } from "@/components/ui/motion";
 import { Backdrop, PageTitle, PillButton, ScreenHeader } from "@/components/ui/screen";
@@ -112,7 +112,7 @@ export default function Appointments() {
 
         {loaded && list.length === 0 ? (
           <Glass strong className="mt-2 items-center rounded-[28px] px-6 py-8">
-            <MascotBust size={84} mood="curious" />
+            <MascotFigure size={84} moment="shrug" move="float" hop />
             <Text style={{ fontFamily: font.semibold, fontSize: 18, color: ink[900], marginTop: 10, textAlign: "center" }}>
               {tab === "upcoming" ? "Nothing booked yet" : "No past appointments"}
             </Text>
