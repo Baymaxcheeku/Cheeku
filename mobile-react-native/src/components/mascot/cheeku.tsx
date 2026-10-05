@@ -12,7 +12,7 @@ import Animated, {
   withTiming,
   type SharedValue,
 } from "react-native-reanimated";
-import Svg, { Circle, Defs, Ellipse, G, LinearGradient, Path, RadialGradient, Rect, Stop } from "react-native-svg";
+import Svg, { Circle, ClipPath, Defs, Ellipse, FeGaussianBlur, Filter, G, LinearGradient, Path, RadialGradient, Rect, Stop } from "react-native-svg";
 
 import { useReducedMotion } from "@/components/ui/motion";
 
@@ -21,14 +21,19 @@ import { useReducedMotion } from "@/components/ui/motion";
  * a soft, sapodilla-coloured pebble with a purple sprout, big glossy eyes,
  * blush cheeks, tiny arms and feet. Warm, friendly, reassuring, intelligent.
  *
- * ┌─ HOW IT LOOKS 3D WITHOUT IMAGES ─────────────────────────────────────────┐
+ * ┌─ HOW IT LOOKS LIKE SOFT CLAY, WITHOUT IMAGES ────────────────────────────┐
  * │                                                                          │
- * │ Clay-style shading in plain SVG, so it stays crisp at 28px and at 200px  │
- * │ and costs no bundle weight: a key light from the top left (radial base), │
- * │ ambient occlusion pooling at the bottom, a cool rim light on the right,  │
- * │ a soft specular, and a sprinkle of darker and lighter specks for the     │
- * │ fine clay texture. Eyes are glossy with two catchlights. Every part has  │
- * │ its own gradient so arms and feet sit in the same light as the body.     │
+ * │ REWORKED 2026-10-05 after the first pass read as a shiny balloon (hard   │
+ * │ dark rim, glossy highlight, visible specks). Every part is now matte:    │
+ * │ a flat mid tone, then, clipped inside the shape, a Gaussian-blurred pool │
+ * │ of light from the top left and a blurred form shadow toward the bottom   │
+ * │ right, a warm bounce light on the far edge, occlusion pooling at the     │
+ * │ base, and a near-invisible grain. No specular anywhere. Eyes have white  │
+ * │ sclera with a soft lid shadow and deep brown irises, the mouth is        │
+ * │ recessed, the blush is blurred into the skin, the leaf is matte.         │
+ * │                                                                          │
+ * │ Under 64 px the blurs are swapped for two gentle gradients: invisible    │
+ * │ at that size, and a chat thread can hold dozens of marks.                │
  * │                                                                          │
  * └──────────────────────────────────────────────────────────────────────────┘
  *
@@ -58,48 +63,55 @@ export type Pose = "stand" | "wave" | "sit" | "heart" | "listen" | "curl" | "pho
 export type Motion = "idle" | "bounce" | "hop" | "wave" | "breathe" | "none";
 
 export const PALETTE = {
-  bodyLight: "#FCE7D6",
-  bodyBase: "#F7D7C4",
-  bodyShadow: "#EDC2A3",
-  bodyDeep: "#D69E78",
-  blush: "#FFB3C1",
-  eye: "#1F1B2E",
-  sprout: "#A78BFA",
-  sproutDeep: "#7C5CEB",
+  clay: "#EDC6A4",
+  clayLight: "#FAE2CC",
+  clayShade: "#D29A73",
+  clayDeep: "#B97E59",
+  clayBounce: "#F6D6BC",
+  blush: "#F6A2AE",
+  iris: "#2A1A16",
+  line: "#3A2622",
+  sprout: "#B39BF7",
+  sproutLight: "#D9CEFF",
+  sproutDeep: "#8C6FE9",
   lilac: "#C4B5FD",
   lavender: "#EDE9FE",
   navy: "#0F0B2D",
-  stem: "#7A4A2B",
+  stem: "#6E4127",
 } as const;
 
 // ------------------------------------------------------------------ ids --
 
 /*
- * Per-instance gradient ids. On web every SVG shares the document's id space,
- * and Expo Router keeps hidden screens mounted, so two mascots with the same
- * ids would paint with each other's gradients. One prefix per character.
+ * Per-instance ids, plus the detail level. On web every SVG shares the
+ * document's id space, and Expo Router keeps hidden screens mounted, so two
+ * mascots with the same ids would paint with each other's filters. One prefix
+ * per character. `hi` is false for small marks (under 64 px): they skip the
+ * blur filters, which nobody could see at that size and which would cost real
+ * time on a thread full of them.
  */
-const Ids = createContext("ck");
+const Ids = createContext<{ p: string; hi: boolean }>({ p: "ck", hi: true });
 function useU() {
-  const p = useContext(Ids);
+  const { p } = useContext(Ids);
   return (name: string) => `${p}-${name}`;
+}
+function useHi() {
+  return useContext(Ids).hi;
 }
 
 // ------------------------------------------------------------- geometry --
 
-const BODY = "M100 60 C135 60 161 85 162 117 C163 149 139 173 100 173 C61 173 37 149 38 117 C39 85 65 60 100 60 Z";
+const BODY = "M100 59 C135 59 160 85 162 118 C164 151 140 174 100 174 C60 174 36 151 38 118 C40 85 65 59 100 59 Z";
 
-/** Clay specks: fixed, so the texture never shimmers between renders. */
-const SPECKS: [number, number, number, number][] = (() => {
-  const out: [number, number, number, number][] = [];
-  let s = 7;
+/** Fine clay grain: fixed, so it never shimmers between renders. */
+const GRAIN: [number, number, number][] = (() => {
+  const out: [number, number, number][] = [];
+  let s = 11;
   const rnd = () => ((s = (s * 9301 + 49297) % 233280) / 233280);
-  for (let i = 0; i < 46; i++) {
+  for (let i = 0; i < 240; i++) {
     const a = rnd() * Math.PI * 2;
     const r = Math.sqrt(rnd());
-    const x = 100 + Math.cos(a) * r * 54;
-    const y = 117 + Math.sin(a) * r * 48;
-    out.push([x, y, 0.6 + rnd() * 0.8, rnd() < 0.7 ? 0 : 1]);
+    out.push([100 + Math.cos(a) * r * 58, 117 + Math.sin(a) * r * 53, rnd() < 0.55 ? 0 : 1]);
   }
   return out;
 })();
@@ -114,135 +126,213 @@ function Layer({ children }: { children: React.ReactNode }) {
   );
 }
 
-function ClayGradient({ id, cx = "36%", cy = "30%" }: { id: string; cx?: string; cy?: string }) {
+/** A Gaussian blur, sized so the soft edge is never clipped by the filter box. */
+function Blur({ id, amount }: { id: string; amount: number }) {
   return (
-    <RadialGradient id={id} cx={cx} cy={cy} rx="78%" ry="78%" fx={cx} fy={cy}>
-      <Stop offset="0" stopColor={PALETTE.bodyLight} />
-      <Stop offset="0.42" stopColor={PALETTE.bodyBase} />
-      <Stop offset="0.78" stopColor={PALETTE.bodyShadow} />
-      <Stop offset="1" stopColor={PALETTE.bodyDeep} />
-    </RadialGradient>
+    <Filter id={id} x="-60%" y="-60%" width="220%" height="220%">
+      <FeGaussianBlur stdDeviation={amount} />
+    </Filter>
+  );
+}
+
+type Oval = [number, number, number, number];
+
+/*
+ * One soft clay part. A flat mid tone, then, clipped inside the shape, a
+ * blurred pool of light from the top left and a blurred form shadow toward the
+ * bottom right. That is the whole trick behind the matte, squeezable look: no
+ * hard rim, no gloss, the light wraps.
+ *
+ * Small sizes get the same light from two gentle gradients instead of blurs.
+ */
+function ClayPart({
+  name,
+  d,
+  oval,
+  light,
+  shade,
+  base = PALETTE.clay,
+  lightColor = PALETTE.clayLight,
+  shadeColor = PALETTE.clayShade,
+  soft = 12,
+  extra,
+}: {
+  name: string;
+  d?: string;
+  oval?: Oval;
+  light: Oval;
+  shade: Oval;
+  base?: string;
+  lightColor?: string;
+  shadeColor?: string;
+  soft?: number;
+  extra?: React.ReactNode;
+}) {
+  const u = useU();
+  const hi = useHi();
+  const shape = (props: Record<string, unknown>) =>
+    d ? <Path d={d} {...props} /> : <Ellipse cx={oval?.[0]} cy={oval?.[1]} rx={oval?.[2]} ry={oval?.[3]} {...props} />;
+  if (!hi) {
+    return (
+      <>
+        <Defs>
+          <RadialGradient id={u(`${name}-l`)} cx="34%" cy="28%" rx="80%" ry="80%" fx="34%" fy="28%">
+            <Stop offset="0" stopColor={lightColor} />
+            <Stop offset="0.5" stopColor={base} />
+            <Stop offset="1" stopColor={shadeColor} />
+          </RadialGradient>
+        </Defs>
+        {shape({ fill: `url(#${u(`${name}-l`)})` })}
+      </>
+    );
+  }
+  return (
+    <>
+      <Defs>
+        <ClipPath id={u(`${name}-c`)}>{shape({})}</ClipPath>
+        <Blur id={u(`${name}-b`)} amount={soft} />
+        <Blur id={u(`${name}-b2`)} amount={soft * 0.6} />
+      </Defs>
+      {shape({ fill: base })}
+      <G clipPath={`url(#${u(`${name}-c`)})`}>
+        <Ellipse cx={shade[0]} cy={shade[1]} rx={shade[2]} ry={shade[3]} fill={shadeColor} opacity={0.8} filter={`url(#${u(`${name}-b`)})`} />
+        <Ellipse cx={light[0]} cy={light[1]} rx={light[2]} ry={light[3]} fill={lightColor} opacity={0.85} filter={`url(#${u(`${name}-b`)})`} />
+        {extra}
+      </G>
+    </>
   );
 }
 
 function ShadowLayer() {
   const u = useU();
+  const hi = useHi();
   return (
     <Layer>
       <Defs>
-        <RadialGradient id={u("ground")} cx="50%" cy="50%" rx="50%" ry="50%">
-          <Stop offset="0" stopColor="#2f2578" stopOpacity="0.28" />
-          <Stop offset="1" stopColor="#2f2578" stopOpacity="0" />
+        <Blur id={u("gs")} amount={5} />
+        <Blur id={u("gc")} amount={2.5} />
+        <RadialGradient id={u("gl")} cx="50%" cy="50%" rx="50%" ry="50%">
+          <Stop offset="0" stopColor="#4b3c7a" stopOpacity="0.22" />
+          <Stop offset="1" stopColor="#4b3c7a" stopOpacity="0" />
         </RadialGradient>
       </Defs>
-      <Ellipse cx="100" cy="184" rx="56" ry="9" fill={`url(#${u("ground")})`} />
+      {hi ? (
+        <>
+          <Ellipse cx="100" cy="184" rx="58" ry="8" fill="#4b3c7a" opacity={0.14} filter={`url(#${u("gs")})`} />
+          <Ellipse cx="100" cy="181" rx="40" ry="4" fill="#4b3c7a" opacity={0.2} filter={`url(#${u("gc")})`} />
+        </>
+      ) : (
+        <Ellipse cx="100" cy="183" rx="56" ry="9" fill={`url(#${u("gl")})`} />
+      )}
     </Layer>
   );
 }
 
 function Feet({ pose }: { pose: Pose }) {
-  const u = useU();
   if (pose === "curl") return null;
   const sit = pose === "sit";
+  const y = sit ? 172 : 169;
+  const rx = sit ? 21 : 18;
   return (
     <Layer>
-      <Defs>
-        <ClayGradient id={u("foot")} cx="40%" cy="20%" />
-      </Defs>
-      <Ellipse cx={sit ? 76 : 78} cy={sit ? 172 : 170} rx={sit ? 20 : 17} ry={sit ? 11 : 10} fill={`url(#${u("foot")})`} />
-      <Ellipse cx={sit ? 124 : 122} cy={sit ? 172 : 170} rx={sit ? 20 : 17} ry={sit ? 11 : 10} fill={`url(#${u("foot")})`} />
+      {[sit ? 75 : 78, sit ? 125 : 122].map((x, i) => (
+        <ClayPart key={i} name={`foot${i}`} oval={[x, y, rx, 11]} light={[x - 6, y - 9, rx, 7]} shade={[x + 6, y + 9, rx + 4, 9]} soft={4} />
+      ))}
     </Layer>
   );
 }
 
-/** One arm, drawn at rest beside the body; the rig turns it around the shoulder. */
+/** One arm: a soft round mitt beside the body; the rig turns it around the shoulder. */
 function Arm({ side, front = false, raised = false }: { side: "left" | "right"; front?: boolean; raised?: boolean }) {
-  const u = useU();
-  if (raised) {
-    // Up beside the head, clear of the body, so a wave reads at any size.
-    const rx = side === "left" ? 30 : 170;
-    return (
-      <Layer>
-        <Defs>
-          <ClayGradient id={u(`armup${side}`)} cx="40%" cy="25%" />
-        </Defs>
-        <Ellipse cx={rx} cy="88" rx="14" ry="20" fill={`url(#${u(`armup${side}`)})`} transform={`rotate(${side === "left" ? -32 : 32} ${rx} 88)`} />
-      </Layer>
-    );
-  }
-  const x = side === "left" ? 37 : 163;
-  const rot = side === "left" ? 28 : -28;
+  const s = side === "left" ? -1 : 1;
+  const [x, y, rot] = raised ? [100 + s * 64, 94, s * 30] : front ? [100 + s * 30, 150, s * 40] : [100 + s * 64, 124, s * -26];
+  const transform = `rotate(${rot} ${x} ${y})`;
   return (
     <Layer>
-      <Defs>
-        <ClayGradient id={u(`arm${side}`)} cx={side === "left" ? "30%" : "45%"} cy="25%" />
-      </Defs>
-      <Ellipse cx={front ? (side === "left" ? 70 : 130) : x} cy={front ? 150 : 126} rx="15" ry="19.5" fill={`url(#${u(`arm${side}`)})`} transform={`rotate(${front ? (side === "left" ? -40 : 40) : rot} ${front ? (side === "left" ? 70 : 130) : x} ${front ? 150 : 126})`} />
+      <G transform={transform}>
+        <ClayPart name={`arm${side}${raised ? "u" : front ? "f" : ""}`} oval={[x, y, 16.5, 21]} light={[x - 7, y - 10, 13, 13]} shade={[x + 8, y + 10, 16, 16]} soft={5} />
+      </G>
     </Layer>
   );
 }
 
 function Body({ glow }: { glow: boolean }) {
   const u = useU();
+  const hi = useHi();
   return (
     <Layer>
       <Defs>
-        <ClayGradient id={u("body")} />
-        <LinearGradient id={u("ao")} x1="0" y1="0" x2="0" y2="1">
-          <Stop offset="0.55" stopColor="#8a4f2a" stopOpacity="0" />
-          <Stop offset="1" stopColor="#8a4f2a" stopOpacity="0.28" />
-        </LinearGradient>
-        <RadialGradient id={u("rim")} cx="96%" cy="62%" rx="34%" ry="44%">
-          <Stop offset="0" stopColor="#e9e2ff" stopOpacity="0.55" />
-          <Stop offset="1" stopColor="#e9e2ff" stopOpacity="0" />
-        </RadialGradient>
-        <RadialGradient id={u("spec")} cx="50%" cy="50%" rx="50%" ry="50%">
-          <Stop offset="0" stopColor="#ffffff" stopOpacity="0.85" />
-          <Stop offset="1" stopColor="#ffffff" stopOpacity="0" />
-        </RadialGradient>
-        <RadialGradient id={u("core")} cx="50%" cy="50%" rx="50%" ry="50%">
-          <Stop offset="0" stopColor="#fff2f7" stopOpacity="0.7" />
-          <Stop offset="0.5" stopColor="#ff9ec4" stopOpacity="0.32" />
-          <Stop offset="1" stopColor="#ff9ec4" stopOpacity="0" />
-        </RadialGradient>
+        <Blur id={u("bd")} amount={9} />
+        <Blur id={u("bb")} amount={6} />
+        <Blur id={u("core")} amount={8} />
       </Defs>
-      <Path d={BODY} fill={`url(#${u("body")})`} />
-      <Path d={BODY} fill={`url(#${u("ao")})`} />
-      <Path d={BODY} fill={`url(#${u("rim")})`} />
-      <G>
-        {SPECKS.map(([x, y, r, light], i) => (
-          <Circle key={i} cx={x} cy={y} r={r} fill={light ? "#ffffff" : "#a8683f"} opacity={light ? 0.35 : 0.16} />
-        ))}
-      </G>
-      <Ellipse cx="74" cy="82" rx="24" ry="13" fill={`url(#${u("spec")})`} transform="rotate(-28 74 82)" />
-      {glow ? <Ellipse cx="100" cy="150" rx="22" ry="18" fill={`url(#${u("core")})`} /> : null}
+      <ClayPart
+        name="body"
+        d={BODY}
+        light={[80, 88, 60, 44]}
+        shade={[128, 152, 78, 58]}
+        soft={17}
+        extra={
+          hi ? (
+            <>
+              <Ellipse cx="100" cy="184" rx="68" ry="18" fill={PALETTE.clayDeep} opacity={0.55} filter={`url(#${u("bd")})`} />
+              <Ellipse cx="164" cy="128" rx="11" ry="34" fill={PALETTE.clayBounce} opacity={0.5} filter={`url(#${u("bb")})`} />
+              {GRAIN.map(([x, y, light], i) => (
+                <Circle key={i} cx={x} cy={y} r={0.5} fill={light ? "#ffffff" : "#9a6646"} opacity={light ? 0.1 : 0.07} />
+              ))}
+            </>
+          ) : null
+        }
+      />
+      {glow ? <Path d="M100 168 C88 160 84 153 84 147 C84 142 88 139 92 139 C95.5 139 98.5 141 100 144 C101.5 141 104.5 139 108 139 C112 139 116 142 116 147 C116 153 112 160 100 168 Z" fill="#ffb3cf" opacity={0.75} filter={hi ? `url(#${u("core")})` : undefined} /> : null}
     </Layer>
   );
 }
 
 function Blush() {
   const u = useU();
+  const hi = useHi();
   return (
     <Layer>
       <Defs>
-        <RadialGradient id={u("blush")} cx="50%" cy="50%" rx="50%" ry="50%">
-          <Stop offset="0" stopColor={PALETTE.blush} stopOpacity="0.95" />
+        <Blur id={u("bl")} amount={4.5} />
+        <RadialGradient id={u("blg")} cx="50%" cy="50%" rx="50%" ry="50%">
+          <Stop offset="0" stopColor={PALETTE.blush} stopOpacity="0.9" />
           <Stop offset="1" stopColor={PALETTE.blush} stopOpacity="0" />
         </RadialGradient>
       </Defs>
-      <Ellipse cx="58" cy="133" rx="15" ry="9" fill={`url(#${u("blush")})`} />
-      <Ellipse cx="142" cy="133" rx="15" ry="9" fill={`url(#${u("blush")})`} />
+      {[56, 144].map((x) =>
+        hi ? (
+          <Ellipse key={x} cx={x} cy={135} rx="14" ry="9" fill={PALETTE.blush} opacity={0.85} filter={`url(#${u("bl")})`} />
+        ) : (
+          <Ellipse key={x} cx={x} cy={135} rx="15" ry="10" fill={`url(#${u("blg")})`} />
+        ),
+      )}
     </Layer>
   );
 }
 
-function OpenEye({ cx, cy, look }: { cx: number; cy: number; look: [number, number] }) {
+/** A white-sclera eye: soft lid shadow, a deep brown iris, two catchlights. */
+function OpenEye({ cx, cy, look, n }: { cx: number; cy: number; look: [number, number]; n: number }) {
   const u = useU();
+  const hi = useHi();
   return (
     <G>
-      <Ellipse cx={cx} cy={cy} rx="13" ry="15.5" fill={`url(#${u("iris")})`} />
-      <Circle cx={cx + 4 + look[0]} cy={cy - 5.5 + look[1]} r="5.2" fill="#fff" />
-      <Circle cx={cx - 4.5 + look[0]} cy={cy + 6 + look[1]} r="2.2" fill="#fff" opacity="0.9" />
+      <Defs>
+        <ClipPath id={u(`sc${n}`)}>
+          <Ellipse cx={cx} cy={cy} rx="15.5" ry="17" />
+        </ClipPath>
+      </Defs>
+      <Ellipse cx={cx} cy={cy} rx="15.5" ry="17" fill="#ffffff" />
+      {hi ? (
+        <G clipPath={`url(#${u(`sc${n}`)})`}>
+          <Ellipse cx={cx} cy={cy - 15} rx="18" ry="9" fill="#d8cdd3" opacity={0.75} filter={`url(#${u("lid")})`} />
+        </G>
+      ) : null}
+      <Ellipse cx={cx + 1 + look[0]} cy={cy + 2 + look[1]} rx="11.5" ry="12.5" fill={`url(#${u("iris")})`} />
+      <Circle cx={cx + 5 + look[0]} cy={cy - 2.5 + look[1]} r="4.6" fill="#fff" />
+      <Circle cx={cx - 2.5 + look[0]} cy={cy + 7 + look[1]} r="1.8" fill="#fff" opacity={0.85} />
+      <Ellipse cx={cx} cy={cy} rx="15.5" ry="17" fill="none" stroke="#c9a589" strokeOpacity={0.45} strokeWidth="0.9" />
     </G>
   );
 }
@@ -253,36 +343,37 @@ const CLOSED_SLEEPY = (cx: number, cy: number) => `M${cx - 11} ${cy - 1} Q${cx} 
 /** The eyes on their own layer, so a blink can squash just them. */
 function Eyes({ mood }: { mood: Mood }) {
   const u = useU();
-  const stroke = { stroke: PALETTE.eye, strokeWidth: 4, strokeLinecap: "round" as const, fill: "none" };
-  const look: [number, number] = mood === "thinking" ? [-2.5, -3] : mood === "curious" ? [1.5, -1] : [0, 0];
+  const stroke = { stroke: PALETTE.line, strokeWidth: 4, strokeLinecap: "round" as const, fill: "none" };
+  const look: [number, number] = mood === "thinking" ? [-3, -4] : mood === "curious" ? [1.5, -1] : [0, 0];
   return (
     <Layer>
       <Defs>
-        <RadialGradient id={u("iris")} cx="40%" cy="35%" rx="70%" ry="70%">
-          <Stop offset="0" stopColor="#4a4466" />
-          <Stop offset="0.6" stopColor={PALETTE.eye} />
-          <Stop offset="1" stopColor="#0d0a1a" />
+        <RadialGradient id={u("iris")} cx="45%" cy="30%" rx="70%" ry="70%">
+          <Stop offset="0" stopColor="#5a3a32" />
+          <Stop offset="0.55" stopColor={PALETTE.iris} />
+          <Stop offset="1" stopColor="#140b09" />
         </RadialGradient>
+        <Blur id={u("lid")} amount={3} />
       </Defs>
       {mood === "calm" ? (
         <>
-          <Path d={CLOSED_HAPPY(76, 111)} {...stroke} />
-          <Path d={CLOSED_HAPPY(124, 111)} {...stroke} />
+          <Path d={CLOSED_HAPPY(74, 113)} {...stroke} />
+          <Path d={CLOSED_HAPPY(126, 113)} {...stroke} />
         </>
       ) : mood === "sleepy" ? (
         <>
-          <Path d={CLOSED_SLEEPY(76, 113)} {...stroke} />
-          <Path d={CLOSED_SLEEPY(124, 113)} {...stroke} />
+          <Path d={CLOSED_SLEEPY(74, 115)} {...stroke} />
+          <Path d={CLOSED_SLEEPY(126, 115)} {...stroke} />
         </>
       ) : mood === "reassuring" ? (
         <>
-          <Path d={CLOSED_HAPPY(76, 111)} {...stroke} />
-          <OpenEye cx={124} cy={110} look={look} />
+          <Path d={CLOSED_HAPPY(74, 113)} {...stroke} />
+          <OpenEye cx={126} cy={111} look={look} n={1} />
         </>
       ) : (
         <>
-          <OpenEye cx={76} cy={mood === "curious" ? 109 : 110} look={look} />
-          <OpenEye cx={124} cy={mood === "curious" ? 108 : 110} look={look} />
+          <OpenEye cx={74} cy={mood === "curious" ? 109 : 111} look={look} n={0} />
+          <OpenEye cx={126} cy={mood === "curious" ? 108 : 111} look={look} n={1} />
         </>
       )}
     </Layer>
@@ -290,27 +381,38 @@ function Eyes({ mood }: { mood: Mood }) {
 }
 
 function Mouth({ mood }: { mood: Mood }) {
-  const line = { stroke: "#3a1f2b", strokeWidth: 3.2, strokeLinecap: "round" as const, fill: "none" };
+  const u = useU();
+  const line = { stroke: PALETTE.line, strokeWidth: 3.4, strokeLinecap: "round" as const, fill: "none" };
+  const OPEN = "M86 131 C87 149 113 149 114 131 C106 134 94 134 86 131 Z";
+  const SMALL = "M89 131 C91 143 109 143 111 131 C104 133.5 96 133.5 89 131 Z";
+  const open = mood === "happy" || mood === "reassuring";
+  const d = mood === "happy" ? OPEN : SMALL;
   return (
     <Layer>
-      {mood === "happy" ? (
-        <G>
-          <Path d="M85 129 C87 146 113 146 115 129 C106 132.5 94 132.5 85 129 Z" fill="#3a1f2b" />
-          <Ellipse cx="100" cy="139.5" rx="7.5" ry="4" fill="#ff8fa3" />
-        </G>
-      ) : mood === "reassuring" ? (
-        <G>
-          <Path d="M89 128 C92 139 108 139 111 128 C104 130.5 96 130.5 89 128 Z" fill="#3a1f2b" />
-          <Ellipse cx="100" cy="134.5" rx="4.6" ry="2.4" fill="#ff8fa3" />
-        </G>
+      {open ? (
+        <>
+          <Defs>
+            <ClipPath id={u("mc")}>
+              <Path d={d} />
+            </ClipPath>
+            <LinearGradient id={u("mg")} x1="0" y1="0" x2="0" y2="1">
+              <Stop offset="0" stopColor="#3a161d" />
+              <Stop offset="1" stopColor="#5e2630" />
+            </LinearGradient>
+          </Defs>
+          <Path d={d} fill={`url(#${u("mg")})`} />
+          <G clipPath={`url(#${u("mc")})`}>
+            <Ellipse cx="100" cy={mood === "happy" ? 146 : 142} rx={mood === "happy" ? 12 : 8} ry="7" fill="#F2919F" />
+          </G>
+        </>
       ) : mood === "curious" ? (
-        <Ellipse cx="101" cy="133" rx="4.4" ry="5.2" fill="#3a1f2b" />
+        <Ellipse cx="101" cy="135" rx="4.6" ry="5.4" fill="#4a1f27" />
       ) : mood === "thinking" ? (
-        <Path d="M93 134 Q101 130.5 109 133.5" {...line} />
+        <Path d="M93 136 Q101 132.5 109 135.5" {...line} />
       ) : mood === "sleepy" ? (
-        <Ellipse cx="100" cy="134" rx="3.4" ry="2.4" fill="#3a1f2b" />
+        <Ellipse cx="100" cy="136" rx="3.4" ry="2.4" fill="#4a1f27" />
       ) : (
-        <Path d="M91 130 Q100 138 109 130" {...line} />
+        <Path d="M91 132 Q100 140 109 132" {...line} />
       )}
     </Layer>
   );
@@ -321,40 +423,39 @@ function Sprout() {
   return (
     <Layer>
       <Defs>
-        <LinearGradient id={u("leaf")} x1="0" y1="1" x2="1" y2="0">
-          <Stop offset="0" stopColor={PALETTE.sproutDeep} />
-          <Stop offset="0.6" stopColor={PALETTE.sprout} />
-          <Stop offset="1" stopColor={PALETTE.lilac} />
+        <LinearGradient id={u("stem")} x1="0" y1="0" x2="1" y2="0">
+          <Stop offset="0" stopColor="#8a5634" />
+          <Stop offset="1" stopColor={PALETTE.stem} />
         </LinearGradient>
       </Defs>
-      <Path d="M100 63 C99 55 101 49 106 44" stroke={PALETTE.stem} strokeWidth="5" strokeLinecap="round" fill="none" />
-      <Path d="M105 45 C108 27 130 15 152 18 C148 37 128 51 105 45 Z" fill={`url(#${u("leaf")})`} />
-      <Path d="M107 44 C120 35 133 27 147 21" stroke="#ffffff" strokeOpacity="0.5" strokeWidth="1.6" strokeLinecap="round" fill="none" />
-      <Ellipse cx="128" cy="26" rx="8" ry="3" fill="#ffffff" opacity="0.28" transform="rotate(-24 128 26)" />
+      <Path d="M99 64 C97 55 100 47 107 42" stroke={`url(#${u("stem")})`} strokeWidth="8" strokeLinecap="round" fill="none" />
+      <Path d="M97.5 60 C96.5 54 98.5 49 102 46" stroke="#a87150" strokeOpacity={0.6} strokeWidth="2" strokeLinecap="round" fill="none" />
+      <ClayPart
+        name="leaf"
+        d="M105 45 C106 22 133 9 161 15 C158 38 133 54 105 45 Z"
+        light={[132, 18, 28, 11]}
+        shade={[124, 52, 34, 11]}
+        base={PALETTE.sprout}
+        lightColor={PALETTE.sproutLight}
+        shadeColor={PALETTE.sproutDeep}
+        soft={5}
+        extra={<Path d="M109 44 C123 35 138 26 154 19" stroke={PALETTE.sproutDeep} strokeOpacity={0.35} strokeWidth="1.6" strokeLinecap="round" fill="none" />}
+      />
     </Layer>
   );
 }
 
 function HeldHeart() {
   const u = useU();
+  const hi = useHi();
+  const HEART = "M100 176 C76 162 69 148 69 137 C69 127 77 120 86 120 C93 120 97 125 100 130 C103 125 107 120 114 120 C123 120 131 127 131 137 C131 148 124 162 100 176 Z";
   return (
     <Layer>
       <Defs>
-        <RadialGradient id={u("heart")} cx="38%" cy="30%" rx="75%" ry="75%">
-          <Stop offset="0" stopColor="#ffe3ee" />
-          <Stop offset="0.5" stopColor="#ffa9c8" />
-          <Stop offset="1" stopColor="#ff7fae" />
-        </RadialGradient>
-        <RadialGradient id={u("hglow")} cx="50%" cy="50%" rx="50%" ry="50%">
-          <Stop offset="0" stopColor="#ffb6d2" stopOpacity="0.6" />
-          <Stop offset="1" stopColor="#ffb6d2" stopOpacity="0" />
-        </RadialGradient>
+        <Blur id={u("hg")} amount={9} />
       </Defs>
-      <Ellipse cx="100" cy="150" rx="48" ry="38" fill={`url(#${u("hglow")})`} />
-      <G transform="translate(100 148) scale(1.3) translate(-100 -148)">
-      <Path d="M100 172 C80 160 74 148 74 139 C74 130 81 124 88 124 C94 124 98 128 100 132 C102 128 106 124 112 124 C119 124 126 130 126 139 C126 148 120 160 100 172 Z" fill={`url(#${u("heart")})`} />
-      <Ellipse cx="86" cy="133" rx="5" ry="3.2" fill="#fff" opacity="0.7" transform="rotate(-30 86 133)" />
-      </G>
+      {hi ? <Ellipse cx="100" cy="150" rx="40" ry="30" fill="#ffb3cf" opacity={0.45} filter={`url(#${u("hg")})`} /> : null}
+      <ClayPart name="heart" d={HEART} light={[88, 128, 22, 14]} shade={[112, 166, 30, 18]} base="#FF9FBE" lightColor="#FFE1EC" shadeColor="#F07A9F" soft={7} />
     </Layer>
   );
 }
@@ -363,8 +464,8 @@ function Phone() {
   return (
     <Layer>
       <G transform="rotate(-14 140 124)">
-        <Rect x="124" y="98" width="34" height="52" rx="7" fill={PALETTE.sproutDeep} />
-        <Rect x="127.5" y="102" width="27" height="42" rx="4.5" fill={PALETTE.lavender} />
+        <Rect x="124" y="98" width="34" height="52" rx="8" fill={PALETTE.sproutDeep} />
+        <Rect x="127.5" y="102" width="27" height="42" rx="5" fill={PALETTE.lavender} />
         <Rect x="131" y="108" width="18" height="3" rx="1.5" fill={PALETTE.sprout} />
         <Rect x="131" y="115" width="14" height="3" rx="1.5" fill={PALETTE.lilac} />
         <Rect x="131" y="122" width="16" height="3" rx="1.5" fill={PALETTE.lilac} />
@@ -546,7 +647,7 @@ export function Cheeku({
 
   const content = (
     <View style={[{ width: size, height: size }, style]} accessibilityRole="image" accessibilityLabel={accessibilityLabel}>
-      <Ids.Provider value={ctx}>
+      <Ids.Provider value={{ p: ctx, hi: size >= 64 }}>
         <Animated.View style={[StyleSheet.absoluteFill, shadow]}>
           <ShadowLayer />
         </Animated.View>

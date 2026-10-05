@@ -2283,3 +2283,15 @@ pose sheet, a motion capture of all six motion styles, and About, Help,
 Doctors and Sign in. **Not seen on a device:** check transformOrigin pivots on
 iOS and Android (arm wave, sprout sway, blink), and frame rate on a long chat
 thread.
+
+**Rework, same day.** The first pass read as a shiny balloon: a dark rim from
+a high-contrast radial gradient, a glossy specular, visible specks. Every part
+now renders as matte clay: flat mid tone, Gaussian-blurred light and form
+shadow clipped inside the shape (react-native-svg 15 filters), warm bounce
+light, base occlusion, near-invisible grain, no specular. Eyes now have white
+sclera and deep brown irises, the mouth is recessed with a tongue, the blush
+is blurred into the skin, the leaf is matte and wider, and the ground shadow
+is a soft wide pool plus a contact shadow. Under 64 px the blurs fall back to
+gentle gradients for speed. **Check on device:** filter rendering on Android
+(FeGaussianBlur inside ClipPath) and scroll smoothness with several large
+mascots on screen.
