@@ -26,7 +26,6 @@ import { SvgXml } from "react-native-svg";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { MascotFigure } from "@/components/illustrations/sprout";
-import { Bob } from "@/components/onboarding/motion";
 import { Brand } from "@/components/ui/brand";
 import { GlassCircle, Gradient, glass, glassShadow } from "@/components/ui/glass";
 import { Drift, PulseRing } from "@/components/ui/motion";
@@ -86,9 +85,7 @@ export default function About() {
               <PulseRing size={170} />
             </View>
             <View style={{ zIndex: 2 }}>
-              <Bob>
-                <MascotFigure size={168} wave />
-              </Bob>
+              <MascotFigure size={176} wave glow />
             </View>
 
             <Floating label="Bilirubin 11.0" note="day 3" icon={FlaskConical} style={{ left: 14, top: 26 }} delay={0} />

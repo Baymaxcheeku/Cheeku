@@ -280,7 +280,7 @@ export function EmptyRecords({ filtered }: { filtered: boolean }) {
           <FileText size={22} color="#5b4ef0" />
         </View>
       ) : (
-        <MascotBust size={88} />
+        <MascotBust size={88} mood="curious" pose="phone" />
       )}
       <Text style={{ fontFamily: font.semibold, fontSize: 18, color: ink[900], marginTop: 10, textAlign: "center" }}>
         {filtered ? "Nothing matches those filters" : "Your health file is empty"}

@@ -18,7 +18,7 @@ import { CastAvatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { MascotBust } from "@/components/illustrations/sprout";
 import { CtaLabel, ReassuranceStrip } from "@/components/onboarding/chrome";
-import { Bob, BubblePop, FillBar, TypingDots, useTypedReveal } from "@/components/onboarding/motion";
+import { BubblePop, FillBar, TypingDots, useTypedReveal } from "@/components/onboarding/motion";
 import { PANELS } from "@/lib/onboarding/panels";
 import { castFaces } from "@/lib/profiles/avatar";
 import { brand, ink, shadow, surface } from "@/theme/tokens";
@@ -240,9 +240,7 @@ function SceneMeet({ compact }: { compact: boolean }) {
 
       <View className="mt-1 flex-row items-end gap-2">
         <BubblePop delay={0.1} from="left">
-          <Bob>
-            <MascotBust size={compact ? 78 : 96} />
-          </Bob>
+          <MascotBust size={compact ? 78 : 96} mood="happy" motion="bounce" />
         </BubblePop>
         <BubblePop delay={replyAt - 0.9} from="left" style={{ flexShrink: 1, marginBottom: 10 }}>
           <View

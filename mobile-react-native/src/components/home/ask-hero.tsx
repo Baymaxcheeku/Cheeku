@@ -5,7 +5,7 @@ import { Pressable, Text, TextInput, View } from "react-native";
 import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 
 import { MascotBust, MascotFigure } from "@/components/illustrations/sprout";
-import { Bob, BubblePop } from "@/components/onboarding/motion";
+import { BubblePop } from "@/components/onboarding/motion";
 import { Avatar } from "@/components/ui/avatar";
 import { Glass, GlassCircle, Gradient, glass, glassShadow } from "@/components/ui/glass";
 import { useReducedMotion } from "@/components/ui/motion";
@@ -191,7 +191,7 @@ export function AskBar() {
           {/* Cheeku himself, small, where a generic AI sparkle used to be: the
               bar is a conversation with him, not with "AI". */}
           <View style={{ width: 34, height: 34, marginLeft: -6, alignItems: "center", justifyContent: "center" }}>
-            <MascotBust size={34} />
+            <MascotBust size={34} mood="happy" />
           </View>
           <View className="min-w-0 flex-1 justify-center" style={{ height: 44 }}>
             <TextInput
@@ -307,9 +307,7 @@ export function CheekuCard({
 
       {/* Cheeku, large and alive, anchored to the card's bottom-right corner. */}
       <View pointerEvents="none" style={{ position: "absolute", right: -18, bottom: -14 }}>
-        <Bob>
-          <MascotFigure size={190} wave />
-        </Bob>
+        <MascotFigure size={190} wave />
       </View>
 
       <View className="flex-1 p-4">

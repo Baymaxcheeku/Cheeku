@@ -26,7 +26,6 @@ import {
 import { Pressable, Text, View } from "react-native";
 
 import { MascotFigure } from "@/components/illustrations/sprout";
-import { Bob } from "@/components/onboarding/motion";
 import { Brand } from "@/components/ui/brand";
 import { Gradient, glass, glassShadow } from "@/components/ui/glass";
 import type { SpecialtyId } from "@/lib/booking/catalog";
@@ -213,9 +212,7 @@ export function AskToBook({ onPress, line }: { onPress: () => void; line?: strin
             <ArrowRight size={15} color="#fff" />
           </View>
         </View>
-        <Bob>
-          <MascotFigure size={92} />
-        </Bob>
+        <MascotFigure size={92} pose="listen" mood="happy" interactive={false} />
       </View>
     </Pressable>
   );

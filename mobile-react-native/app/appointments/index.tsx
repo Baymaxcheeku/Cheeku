@@ -112,7 +112,7 @@ export default function Appointments() {
 
         {loaded && list.length === 0 ? (
           <Glass strong className="mt-2 items-center rounded-[28px] px-6 py-8">
-            <MascotBust size={84} />
+            <MascotBust size={84} mood="calm" />
             <Text style={{ fontFamily: font.semibold, fontSize: 18, color: ink[900], marginTop: 10, textAlign: "center" }}>
               {tab === "upcoming" ? "Nothing booked yet" : "No past appointments"}
             </Text>

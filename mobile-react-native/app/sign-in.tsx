@@ -28,7 +28,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { MascotBust } from "@/components/illustrations/sprout";
 import { CtaLabel } from "@/components/onboarding/chrome";
-import { Bob, BubblePop, FillBar } from "@/components/onboarding/motion";
+import { BubblePop, FillBar } from "@/components/onboarding/motion";
 import { useReducedMotion } from "@/components/ui/motion";
 import { createAccountSchema, signInSchema } from "@/lib/auth/schemas";
 import { resolveLanding } from "@/lib/auth/landing";
@@ -211,9 +211,7 @@ export default function SignIn() {
                 <Text style={{ fontFamily: font.bold, fontSize: 12.5, color: "#ffffff" }}>{copy.greet}</Text>
               </View>
             </BubblePop>
-            <Bob>
-              <MascotBust size={104} />
-            </Bob>
+            <MascotBust size={104} mood="happy" pose="wave" motion="wave" />
           </View>
         </View>
 

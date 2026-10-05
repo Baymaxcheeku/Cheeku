@@ -143,7 +143,7 @@ export default function Confirmed() {
 
         <View className="mt-5 flex-row items-end gap-2.5">
           <View style={{ flexShrink: 0 }}>
-            <MascotBust size={52} />
+            <MascotBust size={52} mood="reassuring" pose="heart" motion="idle" />
           </View>
           <BubblePop delay={0.5} from="left" style={{ flexShrink: 1, marginBottom: 6 }}>
             <Glass strong className="rounded-[18px] px-3.5 py-2.5" style={{ borderBottomLeftRadius: 6 }}>

@@ -69,7 +69,7 @@ export function UserBubble({ message }: { message: ThreadMessage }) {
 function Mark() {
   return (
     <View style={{ width: 28, flexShrink: 0, marginTop: 2 }}>
-      <MascotBust size={28} />
+      <MascotBust size={28} mood="calm" />
     </View>
   );
 }

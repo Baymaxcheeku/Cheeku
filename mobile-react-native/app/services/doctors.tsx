@@ -64,7 +64,7 @@ export default function DoctorsHub() {
                 <ArrowRight size={15} color="#fff" />
               </View>
             </View>
-            <MascotBust size={74} />
+            <MascotBust size={74} mood="happy" pose="wave" motion="wave" interactive={false} />
           </View>
         </Pressable>
 
