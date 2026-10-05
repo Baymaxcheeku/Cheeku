@@ -1,11 +1,13 @@
 /*
- * A2 — the three panels before any account exists.
+ * A2 — the four panels before any account exists.
  *
  * ┌─ THE ARC ────────────────────────────────────────────────────────────────┐
  * │                                                                          │
  * │  1. Ask me anything, in your own words.       (the invitation)           │
  * │  2. Give me the paperwork once; I'll keep it. (the mechanism)            │
  * │  3. And not only yours — the whole family's.  (the reach)                │
+ * │  4. When it's time to act, I'll help you      (the action)               │
+ * │     choose care that fits your history.                                  │
  * │                                                                          │
  * │ Each panel's last idea is the next panel's first. The voice is FIRST     │
  * │ PERSON throughout, one character start to finish, because the thing      │
@@ -29,7 +31,7 @@
  * props: each panel is laid out differently on purpose.
  */
 export type Panel = {
-  kind: "meet" | "memory" | "family";
+  kind: "meet" | "memory" | "family" | "care";
   /**
    * One word for what the panel is about, above the headline.
    *
@@ -66,6 +68,25 @@ export const PANELS: readonly Panel[] = [
     lead: "Mummy, Papa, the kids and you.",
     accent: "One app.",
     body: "Switch between family members in a tap. Every person's history stays separate, private and never sold.",
+    cta: "And when we need a doctor?",
+  },
+  /*
+   * Panel 4, added 2026-10-05: the marketplace, sold as judgement rather than
+   * a catalogue. Every Indian family has been talked into a "full body
+   * package" with forty tests nobody asked for, and has repeated a test
+   * because the old report was somewhere in the almirah. Memory is what fixes
+   * both, so this panel is the first three paying off, not a new topic.
+   *
+   * Same limits as the rest: Cheeku says what is DUE (because a doctor's note
+   * said so) and what was ALREADY DONE (because the report is on file). It
+   * never decides a test is needed on its own say-so.
+   */
+  {
+    kind: "care",
+    eyebrow: "Book smarter",
+    lead: "The right test, the right doctor.",
+    accent: "Not the biggest package.",
+    body: "Consults, lab tests at home and medicines, picked from your own history. I'll tell you what's due, skip what you just did, and file every report back into your memory.",
     cta: "Let's get started",
   },
 ];

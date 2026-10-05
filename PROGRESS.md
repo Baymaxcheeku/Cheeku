@@ -2330,3 +2330,30 @@ rebuild** (`lottie-react-native` is a native module; Expo Go includes it, a dev
 client needs `npx expo run:ios` / `run:android`). Not seen on a device: check
 smoothness with two animations on one screen (Home), and Android hardware
 rendering.
+
+## Welcome: a fourth panel for booking · 2026-10-05
+
+The carousel now ends on the marketplace, told as judgement rather than a
+catalogue: "The right test, the right doctor. Not the biggest package."
+
+- **Arc.** Ask me, I remember, the whole family, and now: when it is time to
+  act, I pick care from your history. Panel 3's button became "And when we
+  need a doctor?" so the hand-off reads as one conversation.
+- **Scene.** A shelf of four 3D icons (Doctors, Lab tests, Medicines,
+  Therapy), then one card for Papa: HbA1c due because his doctor asked for it
+  every three months, a follow-up with the same doctor, and the lipid profile
+  skipped because last month's report is on file. That last line is the
+  "smart choice" and the reason memory matters to booking.
+- **Icons.** Microsoft Fluent Emoji 3D, MIT licensed, in
+  `mobile-react-native/assets/icons3d` with the licence beside them. Only
+  onboarding uses them; working screens keep the flat icon set.
+- **Small phones.** Under 760 pt the shelf loses its labels, the card loses
+  the home collection chip and the doctor row, and the footer drops to one
+  line. Checked at 375 x 667 in the web preview.
+- Same rules as the other panels: Cheeku says what is due (from a doctor's
+  note) and what is already done (from a report). It never decides a test is
+  needed. No green, amber or red.
+
+**Verified here:** typecheck, lint, web preview at 393 x 852 and 375 x 667.
+**Not seen on a device:** check the shelf's float and the card's pop-in on
+iOS and Android, and that the 3D PNGs look sharp at 3x.

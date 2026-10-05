@@ -1,6 +1,6 @@
 import { useRouter } from "expo-router";
 import { useMemo, useRef, useState } from "react";
-import { PanResponder, Pressable, Text, useWindowDimensions, View } from "react-native";
+import { Image, PanResponder, Pressable, Text, useWindowDimensions, View } from "react-native";
 import Animated, { FadeIn, FadeInLeft, FadeInRight } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
@@ -8,6 +8,7 @@ import {
   FileText,
   FolderCheck,
   Image as ImageIcon,
+  Lightbulb,
   Mail,
   MessageCircle,
   Plus,
@@ -17,12 +18,22 @@ import {
 import { CastAvatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { MascotBust } from "@/components/illustrations/sprout";
+import { CheekuMark } from "@/components/mascot/lottie";
 import { CtaLabel, ReassuranceStrip } from "@/components/onboarding/chrome";
 import { BubblePop, FillBar, TypingDots, useTypedReveal } from "@/components/onboarding/motion";
+import { Drift } from "@/components/ui/motion";
+import { doctorById } from "@/lib/booking/catalog";
+import { doctorFace } from "@/lib/booking/faces";
 import { PANELS } from "@/lib/onboarding/panels";
 import { castFaces } from "@/lib/profiles/avatar";
 import { brand, ink, shadow, surface } from "@/theme/tokens";
 import { font, type } from "@/theme/type";
+
+import brain3d from "../assets/icons3d/brain.png";
+import house3d from "../assets/icons3d/house.png";
+import pill3d from "../assets/icons3d/pill.png";
+import stethoscope3d from "../assets/icons3d/stethoscope.png";
+import testTube3d from "../assets/icons3d/test-tube.png";
 
 /*
  * The eyebrow tints, one per chapter.
@@ -32,17 +43,18 @@ import { font, type } from "@/theme/type";
  * come from the journey palette so the carousel and the picker that follows
  * sign-up belong to the same world.
  */
-const CHAPTER: Record<"meet" | "memory" | "family", { bg: string; fg: string }> = {
+const CHAPTER: Record<"meet" | "memory" | "family" | "care", { bg: string; fg: string }> = {
   meet: { bg: brand[50], fg: brand[600] },
   memory: { bg: "#e6f1fd", fg: "#1a6fc2" },
   family: { bg: "#fdeaf0", fg: "#c22a6b" },
+  care: { bg: "#e2f3fb", fg: "#0b6f99" },
 };
 
 /*
  * A2 — the value carousel, before any account exists.
  *
- * Three panels, each with its OWN composition: a conversation, a round trip
- * from paperwork to answer, and a family. Panels sharing one hero with swapped
+ * Four panels, each with its OWN composition: a conversation, a round trip
+ * from paperwork to answer, a family, and a booking picked from memory. Panels sharing one hero with swapped
  * copy is a slideshow, not a story.
  *
  * SWIPE AND TAP BOTH WORK. People swipe onboarding carousels by reflex, and a
@@ -160,6 +172,7 @@ export default function Welcome() {
           {panel.kind === "meet" ? <SceneMeet compact={compact} /> : null}
           {panel.kind === "memory" ? <SceneMemory compact={compact} /> : null}
           {panel.kind === "family" ? <SceneFamily faces={faces} compact={compact} /> : null}
+          {panel.kind === "care" ? <SceneCare faces={faces} compact={compact} /> : null}
         </View>
 
         <View className="px-6 pt-4">
@@ -405,6 +418,118 @@ function SceneFamily({ faces, compact }: { faces: readonly string[]; compact: bo
           <Text style={{ fontFamily: font.regular, fontSize: 12.5, color: ink[700] }}>
             <Text style={{ fontFamily: font.bold, color: ink[900] }}>Private by default.</Text> Never sold, never shared.
           </Text>
+        </View>
+      </BubblePop>
+    </View>
+  );
+}
+
+/*
+ * Panel 4 — care, picked from memory.
+ *
+ * Top: the shelf, as four 3D icons (Microsoft's Fluent Emoji 3D set, MIT
+ * licensed, licence in assets/icons3d). They are the one place in the app
+ * that uses rendered 3D art: onboarding is a poster, and a poster can carry
+ * richer pictures than a screen people work in every day.
+ *
+ * Below: what makes it different from every other booking app, shown on one
+ * family member. Papa's HbA1c is DUE because his doctor asked for it every
+ * three months (a note on file, not Cheeku's judgement), the follow-up is
+ * with the same doctor, and the lipid profile is SKIPPED because the report
+ * from three weeks ago is already in his memory. That last line is the
+ * "smart choice": the test you were about to pay for twice.
+ *
+ * Tints are pastel and never green, amber or red (PLAN.md rule 3).
+ */
+const SHELF = [
+  { label: "Doctors", image: stethoscope3d, tint: "#efeaff" },
+  { label: "Lab tests", image: testTube3d, tint: "#e6f1fd" },
+  { label: "Medicines", image: pill3d, tint: "#fdeaf0" },
+  { label: "Therapy", image: brain3d, tint: "#fff1e6" },
+] as const;
+
+function SceneCare({ faces, compact }: { faces: readonly string[]; compact: boolean }) {
+  // Small phones keep every idea but lose the extras: shelf labels, the home
+  // collection chip and the doctor row, in that order of how little they add.
+  const well = compact ? 42 : 64;
+  const doctor = doctorById("d17");
+  const doc = doctor ? doctorFace(doctor) : null;
+
+  return (
+    <View className="flex-1 justify-center px-6" style={{ gap: compact ? 8 : 16 }}>
+      <View className="flex-row justify-between">
+        {SHELF.map((s, i) => (
+          <Drift key={s.label} delay={0.1 + i * 0.12} style={{ alignItems: "center", width: well + 12 }}>
+            {/* The label is the accessible name whether or not it is drawn. */}
+            <View
+              className="items-center justify-center"
+              accessible
+              accessibilityLabel={s.label}
+              style={[
+                shadow.e1,
+                { width: well, height: well, borderRadius: well * 0.34, backgroundColor: s.tint, borderWidth: 2, borderColor: "#ffffff" },
+              ]}
+            >
+              <Image alt="" source={s.image} style={{ width: well * 0.7, height: well * 0.7 }} resizeMode="contain" />
+            </View>
+            {compact ? null : (
+              <Text style={{ fontFamily: font.semibold, fontSize: 11.5, color: ink[700], marginTop: 6 }}>{s.label}</Text>
+            )}
+          </Drift>
+        ))}
+      </View>
+
+      <BubblePop delay={0.65} from="left">
+        <View className="rounded-[24px] bg-surface p-3.5" style={[shadow.e2, { borderWidth: 1, borderColor: surface.line, gap: compact ? 10 : 12 }]}>
+          <View className="flex-row items-center gap-2.5">
+            <View style={{ borderRadius: 999, borderWidth: 2, borderColor: "#fff" }}>
+              <CastAvatar svg={faces[1] ?? ""} size={34} />
+            </View>
+            <View className="flex-1">
+              <Text style={{ fontFamily: font.bold, fontSize: 14, color: ink[900] }}>For Papa</Text>
+              <Text style={{ fontFamily: font.regular, fontSize: 11.5, color: ink[500] }}>Based on his records</Text>
+            </View>
+            <View className="flex-row items-center gap-1 rounded-pill py-1 pl-1 pr-2.5" style={{ backgroundColor: brand[50] }}>
+              <CheekuMark size={20} />
+              <Text style={{ fontFamily: font.bold, fontSize: 11, color: brand[700] }}>Cheeku&apos;s picks</Text>
+            </View>
+          </View>
+
+          <View className="flex-row items-center gap-3">
+            <View className="items-center justify-center" style={{ width: 44, height: 44, borderRadius: 15, backgroundColor: "#e6f1fd" }}>
+              <Image alt="" source={testTube3d} style={{ width: 30, height: 30 }} resizeMode="contain" />
+            </View>
+            <View className="flex-1">
+              <Text style={{ fontFamily: font.bold, fontSize: 14, color: ink[900] }}>HbA1c is due this week</Text>
+              <Text style={{ fontFamily: font.regular, fontSize: 12, color: ink[500], marginTop: 1 }}>Every 3 months, as Dr. Bhat asked</Text>
+              {compact ? null : (
+                <View className="mt-1.5 flex-row items-center gap-1 self-start rounded-pill py-0.5 pl-1 pr-2" style={{ backgroundColor: surface.tint }}>
+                  <Image alt="" source={house3d} style={{ width: 14, height: 14 }} resizeMode="contain" />
+                  <Text style={{ fontFamily: font.semibold, fontSize: 11, color: ink[700] }}>Home collection, Sat 7 am</Text>
+                </View>
+              )}
+            </View>
+          </View>
+
+          {!compact && doc ? (
+            <View className="flex-row items-center gap-3">
+              <View style={{ width: 44, height: 44, borderRadius: 15, overflow: "hidden" }}>
+                <CastAvatar svg={doc.svg} background={doc.background} size={44} />
+              </View>
+              <View className="flex-1">
+                <Text style={{ fontFamily: font.bold, fontSize: 14, color: ink[900] }}>Follow-up with Dr. Bhat</Text>
+                <Text style={{ fontFamily: font.regular, fontSize: 12, color: ink[500], marginTop: 1 }}>Same doctor, new report sent ahead</Text>
+              </View>
+            </View>
+          ) : null}
+
+          <View className="flex-row items-center gap-2.5 rounded-[16px] px-3" style={{ backgroundColor: brand[50], paddingVertical: compact ? 8 : 10 }}>
+            <Lightbulb size={16} color={brand[600]} />
+            <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 12, lineHeight: 16, color: ink[700] }}>
+              <Text style={{ fontFamily: font.bold, color: ink[900] }}>Lipid profile skipped.</Text>
+              {compact ? " Already on file." : " Done 3 weeks ago, already on file."}
+            </Text>
+          </View>
         </View>
       </BubblePop>
     </View>
