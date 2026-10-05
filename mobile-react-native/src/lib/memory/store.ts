@@ -282,13 +282,17 @@ export async function addReminder(profileId: string, title: string, dueBy: strin
 // ------------------------------------------------------------------ facts --
 
 /** Corrects a remembered reading by hand: the old one is kept, superseded. */
-export async function correctFact(profileId: string, old: Fact, value: number): Promise<boolean> {
+/**
+ * Replaces a reading with a corrected one. `id` is the new fact's id: passing
+ * the same one again (a Retry after a failed save) upserts rather than adding
+ * a second copy.
+ */
+export async function correctFact(profileId: string, old: Fact, value: number, id: string = randomUUID()): Promise<boolean> {
   const {
     data: { session },
   } = await supabase.auth.getSession();
   if (!session) return false;
-  const id = randomUUID();
-  const ins = await supabase.from("memory_facts").insert({
+  const ins = await supabase.from("memory_facts").upsert({
     id,
     user_id: session.user.id,
     profile_id: profileId,

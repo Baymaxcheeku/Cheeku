@@ -45,36 +45,32 @@ export default function Journey() {
   const insets = useSafeAreaInsets();
 
   const [journey, setJourney] = useState<JourneyId | null>(null);
-  const [pending, setPending] = useState(false);
 
-  async function submit() {
-    setPending(true);
-    try {
-      /*
-       * Written to the PRIMARY profile — the account holder's own — not to
-       * whichever profile happens to be active. This is a statement about the
-       * person setting the app up, and at this point in onboarding theirs is
-       * the only profile that exists anyway.
-       *
-       * A failure here is swallowed on purpose. Losing a content hint is not
-       * worth trapping somebody inside onboarding, and it is recoverable from
-       * Settings later. Nothing downstream breaks without it.
-       */
-      if (journey) {
+  /*
+   * Straight on to the next step; the hint saves behind it.
+   *
+   * Written to the PRIMARY profile — the account holder's own — not to
+   * whichever profile happens to be active. This is a statement about the
+   * person setting the app up, and at this point in onboarding theirs is
+   * the only profile that exists anyway.
+   *
+   * A failure here is swallowed on purpose. Losing a content hint is not
+   * worth trapping somebody inside onboarding, and it is recoverable from
+   * Settings later. Nothing downstream breaks without it, and nothing on
+   * screen showed it, so there is nothing to roll back.
+   */
+  function submit() {
+    router.push("/first-upload");
+    if (!journey) return;
+    void (async () => {
+      try {
         const { data } = await supabase.auth.getUser();
         const user = data.user;
-        if (user) {
-          await supabase
-            .from("profiles")
-            .update({ journey })
-            .eq("user_id", user.id)
-            .eq("is_primary", true);
-        }
+        if (user) await supabase.from("profiles").update({ journey }).eq("user_id", user.id).eq("is_primary", true);
+      } catch {
+        // See above: a lost hint is not worth an error.
       }
-      router.push("/first-upload");
-    } finally {
-      setPending(false);
-    }
+    })();
   }
 
   const picked = JOURNEYS.find((j) => j.id === journey);
@@ -168,7 +164,7 @@ export default function Journey() {
 
       <View className="gap-4 px-6 pt-3" style={{ paddingBottom: insets.bottom + 12 }}>
         <CheekuSays>{picked?.reaction ?? "Pick whatever fits. Or skip it, no pressure."}</CheekuSays>
-        <Button onPress={submit} disabled={pending}>
+        <Button onPress={submit}>
           {/*
            * "Continue" either way. Labelling the primary button "Skip" when
            * nothing is selected paints the loudest control with the word for

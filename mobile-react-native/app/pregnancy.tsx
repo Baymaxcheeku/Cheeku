@@ -10,6 +10,7 @@ import { Backdrop, PageTitle, PillButton, ScreenHeader } from "@/components/ui/s
 import { eddFromLmp, formatGa, gestationalAge, todayIso } from "@/lib/memory/clock";
 import { promotePregnancy, refreshMemory, savePregnancy, useMemory } from "@/lib/memory/store";
 import { readPregnancy } from "@/lib/memory/subjects";
+import { runOptimistic } from "@/lib/optimistic";
 import { refreshRoster, useFamily, useSwitchMember } from "@/lib/profiles/family";
 import { shortDate } from "@/lib/records/details";
 import { brand, ink } from "@/theme/tokens";
@@ -70,32 +71,37 @@ export default function PregnancyScreen() {
   const isBirth = birth === "1" && existing;
   const predicted = existing && valid(dob) ? gestationalAge(existing.pregnancy, dob) : null;
 
-  async function saveTracking() {
+  function saveTracking() {
     setError(null);
     for (const [label, v] of [["Last period", lmp], ["Due date", edd], ["Scan date", scanDate]] as const) {
       if (v && !valid(v)) return setError(`${label} should look like 2026-03-05.`);
     }
     const w = scanWeeks ? Number(scanWeeks) : null;
     if (scanDate && (w === null || !Number.isInteger(w) || w < 4 || w > 42)) return setError("Add the weeks the scan gave, between 4 and 42.");
-    setSaving(true);
-    const res = await savePregnancy(
-      member?.id ?? "",
-      {
-        lmp: lmp || existing?.pregnancy.lmp || null,
-        edd: edd || existing?.pregnancy.edd || (lmp ? eddFromLmp(lmp) : null),
-        scanDate: scanDate || null,
-        scanWeeks: w,
-        scanDays: scanDays ? Math.min(6, Math.max(0, Number(scanDays))) : 0,
-        scanLabel: scanLabel || null,
-        babyName: babyName || existing?.pregnancy.babyName || null,
-      },
-      existing?.pregnancy.id ?? null,
-      Array.isArray(existing?.raw.datings) ? (existing.raw.datings as unknown[]) : [],
-    );
-    setSaving(false);
-    if (!res.ok) return setError(res.message);
-    if (member) refreshMemory(qc, member.id);
-    router.back();
+    /*
+     * INSTANT: back to Memory at once, saving behind it. If the save fails
+     * the save bar says so and Retry sends the same dates again, so nothing
+     * typed is lost. Memory refreshes itself when the save lands.
+     */
+    const profileId = member?.id ?? "";
+    const input = {
+      lmp: lmp || existing?.pregnancy.lmp || null,
+      edd: edd || existing?.pregnancy.edd || (lmp ? eddFromLmp(lmp) : null),
+      scanDate: scanDate || null,
+      scanWeeks: w,
+      scanDays: scanDays ? Math.min(6, Math.max(0, Number(scanDays))) : 0,
+      scanLabel: scanLabel || null,
+      babyName: babyName || existing?.pregnancy.babyName || null,
+    };
+    const pregnancyId = existing?.pregnancy.id ?? null;
+    const datings = Array.isArray(existing?.raw.datings) ? (existing.raw.datings as unknown[]) : [];
+    void runOptimistic({
+      apply: () => router.back(),
+      revert: () => undefined,
+      write: () => savePregnancy(profileId, input, pregnancyId, datings),
+      message: "Couldn't save the pregnancy dates. Check your connection.",
+      onSaved: () => refreshMemory(qc, profileId),
+    });
   }
 
   async function saveBirth() {

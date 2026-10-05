@@ -1,7 +1,8 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient, type QueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { create } from "zustand";
 
+import { optimisticQueries } from "@/lib/optimistic";
 import { supabase } from "@/lib/supabase/client";
 
 import type { BookingStatus, Catalog, LabOffer, LabPartner, LabTest, SlotWindow } from "./logic";
@@ -238,6 +239,26 @@ export async function submitReview(input: { kind: "doctor" | "lab"; id: string; 
   );
   if (error) return { ok: false, message: "That didn't post. Try again." };
   return { ok: true };
+}
+
+/**
+ * Posts a review instantly: it shows at the top of the list now and comes
+ * back out, with Retry in the save bar, if the save fails. Returns a message
+ * when the review cannot be posted at all (too short), otherwise null.
+ */
+export function postReview(qc: QueryClient, input: { kind: "doctor" | "lab"; id: string; rating: number; body: string; author: string }): string | null {
+  const body = input.body.trim();
+  if (body.length < 3) return "Say a few words about it.";
+  const mine: Review = { id: `mine-${input.kind}-${input.id}`, author: input.author.slice(0, 40) || "Cheeku user", city: null, rating: input.rating, body: body.slice(0, 600), createdAt: new Date().toISOString(), isSample: false, mine: true };
+  void optimisticQueries(qc, [{ key: ["reviews", input.kind, input.id], update: (old) => [mine, ...(old as Review[]).filter((r) => !r.mine)] }], {
+    write: () => submitReview(input),
+    message: "Couldn't post your review. Check your connection.",
+    onSaved: () => {
+      void qc.invalidateQueries({ queryKey: ["reviews", input.kind, input.id] });
+      void qc.invalidateQueries({ queryKey: ["ratings", input.kind] });
+    },
+  });
+  return null;
 }
 
 // ------------------------------------------------------------------- cart --

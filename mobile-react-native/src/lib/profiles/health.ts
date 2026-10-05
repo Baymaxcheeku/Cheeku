@@ -68,7 +68,8 @@ export async function loadMemberHealth(profileId: string): Promise<MemberHealth>
 export type HealthResult = { ok: true } | { ok: false; message: string; field?: "heightCm" | "weightKg" };
 
 /** Validates the two numbers, then writes everything in one update. */
-export async function saveMemberHealth(profileId: string, h: MemberHealth): Promise<HealthResult> {
+/** The checks a save makes before it writes, so a screen can run them first. */
+export function checkMemberHealth(h: MemberHealth): Extract<HealthResult, { ok: false }> | null {
   const height = h.heightCm.trim() ? Number(h.heightCm) : null;
   const weight = h.weightKg.trim() ? Number(h.weightKg) : null;
   if (height !== null && (!Number.isFinite(height) || height < 30 || height > 260)) {
@@ -77,6 +78,14 @@ export async function saveMemberHealth(profileId: string, h: MemberHealth): Prom
   if (weight !== null && (!Number.isFinite(weight) || weight < 1 || weight > 400)) {
     return { ok: false, message: "Weight should be in kilograms, between 1 and 400.", field: "weightKg" };
   }
+  return null;
+}
+
+export async function saveMemberHealth(profileId: string, h: MemberHealth): Promise<HealthResult> {
+  const invalid = checkMemberHealth(h);
+  if (invalid) return invalid;
+  const height = h.heightCm.trim() ? Number(h.heightCm) : null;
+  const weight = h.weightKg.trim() ? Number(h.weightKg) : null;
 
   const clean = (xs: string[]) => [...new Set(xs.map((x) => x.trim()).filter(Boolean))].slice(0, 30);
   const patch = {

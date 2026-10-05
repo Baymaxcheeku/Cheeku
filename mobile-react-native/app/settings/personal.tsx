@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { CalendarHeart, ChevronRight, Dna, HeartPulse, IdCard, Mail, ShieldCheck, UserCog } from "lucide-react-native";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
 
 import { SaveButton, SettingsScreen } from "@/components/settings/chrome";
@@ -10,9 +10,11 @@ import { ChipSelect, Field } from "@/components/ui/field";
 import { glassShadow } from "@/components/ui/glass";
 import { Meter } from "@/components/ui/motion";
 import { Reveal } from "@/components/ui/reveal";
+import { optimisticQueries } from "@/lib/optimistic";
 import { activeProfile } from "@/lib/profiles/context";
 import { updatePersonalInfo } from "@/lib/settings/actions";
 import { accountEmail, profileDetail } from "@/lib/settings/queries";
+import { personalInfoSchema } from "@/lib/settings/schemas";
 import { brand, ink, semantic, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
 
@@ -53,46 +55,67 @@ export default function PersonalInfo() {
   const [relationship, setRelationship] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [message, setMessage] = useState<string | null>(null);
-  const [pending, setPending] = useState(false);
   const [saved, setSaved] = useState(false);
 
   const detail = context.data?.detail;
 
   // Seeded once the row arrives. Keyed on the id so switching profile reseeds
   // rather than leaving the previous member's name in the box.
+  const seeded = useRef<string | null>(null);
   useEffect(() => {
-    if (!detail) return;
+    // Once per person: a rolled-back save must not wipe what was typed.
+    if (!detail || seeded.current === detail.id) return;
+    seeded.current = detail.id;
     setName(detail.name);
     setDob(detail.dob ?? "");
     setSex((detail.sex as Sex | null) ?? "");
     setRelationship(detail.relationship ?? "");
   }, [detail?.id, detail]);
 
-  async function save() {
+  /*
+   * INSTANT SAVE. The fields are checked here first, so a typo still shows
+   * against its field before anything is "saved". Then the screen says Saved
+   * at once and the write runs behind it; if it fails, the saved copy goes
+   * back to how it was, the typed values stay in the boxes, and the save bar
+   * offers Retry (lib/optimistic.ts).
+   */
+  function save() {
     if (!detail) return;
-    setPending(true);
-    setSaved(false);
     setErrors({});
     setMessage(null);
-    try {
-      const result = await updatePersonalInfo({
-        profileId: detail.id,
-        name,
-        dob,
-        sex,
-        relationship,
-      });
-      if (!result.ok) {
-        setErrors(result.fieldErrors ?? {});
-        setMessage(result.message);
-        return;
+    const input = { profileId: detail.id, name, dob, sex, relationship };
+    const checked = personalInfoSchema.safeParse(input);
+    if (!checked.success) {
+      const fields: Record<string, string> = {};
+      for (const issue of checked.error.issues) {
+        const key = String(issue.path[0] ?? "");
+        if (key && !fields[key]) fields[key] = issue.message;
       }
-      setSaved(true);
-      // The name shows in the greeting, the switcher and the record headers.
-      await queryClient.invalidateQueries();
-    } finally {
-      setPending(false);
+      setErrors(fields);
+      setMessage("Check the fields below.");
+      return;
     }
+    setSaved(true);
+    void optimisticQueries(
+      queryClient,
+      [
+        {
+          key: ["settings-personal"],
+          update: (old) => {
+            const o = old as NonNullable<typeof context.data>;
+            return { ...o, detail: { ...o.detail, name: name.trim(), dob: dob || null, sex: sex || null, relationship: relationship || null } };
+          },
+        },
+      ],
+      {
+        write: () => updatePersonalInfo(input),
+        message: "Couldn't save your details. Check your connection.",
+        // The name shows in the greeting, the switcher and the record headers.
+        onSaved: () => void queryClient.invalidateQueries(),
+      },
+    ).then((ok) => {
+      if (!ok) setSaved(false);
+    });
   }
 
   if (context.isPending) {
@@ -130,7 +153,7 @@ export default function PersonalInfo() {
       eyebrow="Name, date of birth and contact"
       icon={UserCog}
       bare
-      footer={<SaveButton onPress={() => void save()} pending={pending} saved={saved} />}
+      footer={<SaveButton onPress={save} pending={false} saved={saved} />}
     >
       <Reveal>
         <PersonHero

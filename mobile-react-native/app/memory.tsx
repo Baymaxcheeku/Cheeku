@@ -1,4 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
+import { randomUUID } from "expo-crypto";
 import { useRouter } from "expo-router";
 import {
   Baby,
@@ -24,11 +25,12 @@ import { TIER_STYLE } from "@/components/chat/tier";
 import { Gradient, glassShadow } from "@/components/ui/glass";
 import { Backdrop, PillButton, ScreenHeader } from "@/components/ui/screen";
 import { formatGa, todayIso } from "@/lib/memory/clock";
-import { buildContext, memoryLine } from "@/lib/memory/context";
+import { buildContext, memoryLine, type MemoryBundle } from "@/lib/memory/context";
 import type { LedgerEntry } from "@/lib/memory/ledger";
 import { loopWhen, type LoopType, type LoopView } from "@/lib/memory/loops";
 import { correctFact, forgetFact, memoryKey, refreshMemory, setLoopStatus, useMemory } from "@/lib/memory/store";
 import type { Fact } from "@/lib/memory/types";
+import { optimisticQueries } from "@/lib/optimistic";
 import { useFamily } from "@/lib/profiles/family";
 import { shortDate } from "@/lib/records/details";
 import { brand, ink, surface } from "@/theme/tokens";
@@ -189,8 +191,14 @@ export default function MemoryScreen() {
                   loop={l}
                   first={i === 0}
                   onAsk={() => router.push({ pathname: "/ask", params: { q: `What's the latest on ${l.title.toLowerCase()}?` } })}
-                  onSet={async (status) => {
-                    if (await setLoopStatus(member.id, l, status)) refresh();
+                  onSet={(status) => {
+                    // Gone from "Still open" at once; back, with Retry, if the save fails.
+                    const row = { key: l.key, type: l.type, title: l.title, detail: l.detail, opened_on: l.openedOn, due_by: l.dueBy, status, source_document_id: l.sourceDocumentId };
+                    void optimisticQueries(
+                      qc,
+                      [{ key: memoryKey(member.id), update: (old) => ({ ...(old as MemoryBundle), loops: [...(old as MemoryBundle).loops.filter((r) => r.key !== l.key), row] }) }],
+                      { write: () => setLoopStatus(member.id, l, status), message: "Couldn't update that. Check your connection.", onSaved: refresh },
+                    );
                   }}
                 />
               ))}
@@ -208,8 +216,23 @@ export default function MemoryScreen() {
                   key={f.id}
                   fact={f}
                   first={i === 0}
-                  onCorrect={async (v) => {
-                    if (await correctFact(member.id, f, v)) refresh();
+                  onCorrect={(v) => {
+                    // The corrected reading shows at once; the old one comes back, with Retry, if the save fails.
+                    const id = randomUUID();
+                    const row = { id, key: f.key, label: f.label, value: v, value_text: null, unit: f.unit, observed_on: f.observedOn, source: "chat" };
+                    void optimisticQueries(
+                      qc,
+                      [
+                        {
+                          key: memoryKey(member.id),
+                          update: (old) => {
+                            const b = old as MemoryBundle;
+                            return { ...b, facts: [...b.facts.map((r) => (r.id === f.id ? { ...r, superseded_by: id } : r)), row] };
+                          },
+                        },
+                      ],
+                      { write: () => correctFact(member.id, f, v, id), message: "Couldn't save the correction. Check your connection.", onSaved: refresh },
+                    );
                   }}
                   onForget={async () => {
                     if (await forgetFact(f.id)) {

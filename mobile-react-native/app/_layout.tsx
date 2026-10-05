@@ -21,6 +21,7 @@ import { SafeAreaProvider, type Metrics } from "react-native-safe-area-context";
 
 import { AppLock } from "@/components/app/app-lock-gate";
 import { ToastHost } from "@/components/notifications/toast";
+import { SaveBar } from "@/components/ui/save-bar";
 import { persistOptions } from "@/lib/offline/cache";
 import { startOnlineManager } from "@/lib/offline/status";
 import { DeviceFrame } from "@/components/ui/device-frame";
@@ -131,6 +132,7 @@ export default function RootLayout() {
             <Stack.Screen name="notifications" options={{ animationDuration: 240 }} />
           </Stack>
           <ToastHost />
+          <SaveBar />
           </AppLock>
           </DeviceFrame>
         </PersistQueryClientProvider>

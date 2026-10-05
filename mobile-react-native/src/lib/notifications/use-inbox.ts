@@ -5,6 +5,7 @@ import { AppState } from "react-native";
 
 import type { ActiveProfile } from "@/lib/profiles/context";
 import { useSwitchMember } from "@/lib/profiles/family";
+import { optimisticQueries } from "@/lib/optimistic";
 import { supabase } from "@/lib/supabase/client";
 
 import { readIds, unreadCount } from "./inbox";
@@ -37,16 +38,15 @@ function patch(qc: QueryClient, fn: (items: InboxItem[]) => InboxItem[]) {
   qc.setQueryData<InboxItem[]>(INBOX_KEY, (old) => (old ? fn(old) : old));
 }
 
-/** Optimistic, and rolled back if the write does not land. */
-async function optimistic(qc: QueryClient, change: (items: InboxItem[]) => InboxItem[], write: () => Promise<void>) {
-  await qc.cancelQueries({ queryKey: INBOX_KEY });
-  const before = qc.getQueryData<InboxItem[]>(INBOX_KEY);
-  patch(qc, change);
-  try {
-    await write();
-  } catch {
-    qc.setQueryData(INBOX_KEY, before);
-  }
+/**
+ * Optimistic, rolled back if the write does not land, and then the save bar
+ * offers Retry (lib/optimistic.ts).
+ */
+function optimistic(qc: QueryClient, change: (items: InboxItem[]) => InboxItem[], write: () => Promise<void>) {
+  return optimisticQueries(qc, [{ key: INBOX_KEY, update: (old) => change(old as InboxItem[]) }], {
+    write,
+    message: "Couldn't update your notifications. Check your connection.",
+  });
 }
 
 export function useInboxActions() {

@@ -10,6 +10,7 @@ import { GlassCircle, glass, glassShadow } from "@/components/ui/glass";
 import { PillButton } from "@/components/ui/screen";
 import { relatedTo, type ArticleBlock } from "@/lib/knowledge/catalog";
 import { allArticles, articleBySlug, recordRead, setSaved } from "@/lib/knowledge/queries";
+import { runOptimistic } from "@/lib/optimistic";
 import { useFamily } from "@/lib/profiles/family";
 import { shortDate } from "@/lib/records/details";
 import { brand, ink, surface } from "@/theme/tokens";
@@ -101,13 +102,17 @@ export default function ArticleReader() {
   const isSaved = saved ?? data.read?.saved ?? false;
   const related = relatedTo(data, library.data ?? [], 3);
 
-  async function toggleSave() {
+  function toggleSave() {
     if (!data) return;
+    const id = data.id;
     const next = !isSaved;
-    setSavedState(next);
-    const ok = await setSaved(data.id, next);
-    if (!ok) setSavedState(!next);
-    void qc.invalidateQueries({ queryKey: ["learn"] });
+    void runOptimistic({
+      apply: () => setSavedState(next),
+      revert: () => setSavedState(!next),
+      write: () => setSaved(id, next),
+      message: next ? "Couldn't save this article. Check your connection." : "Couldn't remove it from saved. Check your connection.",
+      onSaved: () => void qc.invalidateQueries({ queryKey: ["learn"] }),
+    });
   }
 
   return (
@@ -200,7 +205,7 @@ export default function ArticleReader() {
             <ChevronLeft size={21} color={ink[900]} />
           </GlassCircle>
           <View style={{ flex: 1 }} />
-          <GlassCircle label={isSaved ? "Saved. Tap to remove" : "Save for later"} onPress={() => void toggleSave()}>
+          <GlassCircle label={isSaved ? "Saved. Tap to remove" : "Save for later"} onPress={toggleSave}>
             {isSaved ? <BookmarkCheck size={19} color={s.accent} /> : <Bookmark size={19} color={ink[900]} />}
           </GlassCircle>
           <GlassCircle label="Share" onPress={() => void Share.share({ title: data.title, message: `${data.title}\n\n${data.standfirst}\n\nFrom the Cheeku health desk.` }).catch(() => undefined)}>

@@ -13,7 +13,7 @@ import { isUpcoming, useAppointmentList } from "@/lib/booking/appointments";
 import { doctorById, nextFree, SPECIALTIES, type Mode } from "@/lib/booking/catalog";
 import { useBookingDraft } from "@/lib/booking/draft";
 import { doctorFace } from "@/lib/booking/faces";
-import { fetchReviews, submitReview, useRatings } from "@/lib/labs/queries";
+import { fetchReviews, postReview, useRatings } from "@/lib/labs/queries";
 import { useFamily } from "@/lib/profiles/family";
 import { brand, ink } from "@/theme/tokens";
 import { font } from "@/theme/type";
@@ -177,13 +177,9 @@ export default function DoctorProfile() {
         open={writing}
         title={`How was your visit with ${firstName}?`}
         onClose={() => setWriting(false)}
-        onSubmit={async (r, body) => {
+        onSubmit={(r, body) => {
           const me = family.data?.access.all.find((m) => m.isPrimary)?.name.split(" ")[0] ?? "Cheeku user";
-          const res = await submitReview({ kind: "doctor", id: d.id, rating: r, body, author: me });
-          if (!res.ok) return res.message ?? "That didn't post.";
-          void qc.invalidateQueries({ queryKey: ["reviews", "doctor", d.id] });
-          void qc.invalidateQueries({ queryKey: ["ratings", "doctor"] });
-          return null;
+          return postReview(qc, { kind: "doctor", id: d.id, rating: r, body, author: me });
         }}
       />
     </View>

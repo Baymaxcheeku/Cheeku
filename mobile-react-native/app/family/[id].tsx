@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ArrowLeftRight, Check, ChevronRight, FileText, Lock, Plus, Trash2, UserCog } from "lucide-react-native";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, View } from "react-native";
 import Animated, { ZoomIn } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -15,9 +15,10 @@ import { Field } from "@/components/ui/field";
 import { Glass, Gradient, glass, glassShadow } from "@/components/ui/glass";
 import { useReducedMotion } from "@/components/ui/motion";
 import { Backdrop, PillButton, ScreenHeader } from "@/components/ui/screen";
+import { optimisticQueries } from "@/lib/optimistic";
 import { generatedAvatar } from "@/lib/profiles/avatar";
 import { isChild } from "@/lib/profiles/face-pool";
-import { ageFrom, EMPTY_HEALTH, loadMemberHealth, saveMemberHealth, type MemberHealth } from "@/lib/profiles/health";
+import { ageFrom, checkMemberHealth, EMPTY_HEALTH, loadMemberHealth, saveMemberHealth, type MemberHealth } from "@/lib/profiles/health";
 import { clearProfilePhoto, pickPhoto, setProfilePhoto } from "@/lib/profiles/photo";
 import { uploadQueue, type QueueItem } from "@/lib/records/bulk-upload";
 import { formatEventDate } from "@/lib/records/grouping";
@@ -32,6 +33,7 @@ import {
   useFamily,
   useSwitchMember,
 } from "@/lib/profiles/family";
+import { addMemberSchema } from "@/lib/settings/schemas";
 import { brand, ink, semantic } from "@/theme/tokens";
 import { font } from "@/theme/type";
 import { Brand } from "@/components/ui/brand";
@@ -101,16 +103,23 @@ export default function Member() {
   // Same key Home uses, so this list and Home's are one cache entry.
   const records = useQuery({ queryKey: ["records", id], queryFn: () => listProfileRecords(id), enabled: Boolean(id) && !member?.locked });
 
+  // Each form is filled in once per person: a rolled-back instant save must
+  // never wipe what was typed (lib/optimistic.ts).
+  const seededHealth = useRef<string | null>(null);
   useEffect(() => {
-    if (savedHealth.data) setHealth(savedHealth.data);
-  }, [savedHealth.data]);
+    if (!savedHealth.data || seededHealth.current === id) return;
+    seededHealth.current = id;
+    setHealth(savedHealth.data);
+  }, [savedHealth.data, id]);
   const healthDirty = useMemo(
     () => Boolean(savedHealth.data) && JSON.stringify(health) !== JSON.stringify(savedHealth.data),
     [health, savedHealth.data],
   );
 
+  const seededMember = useRef<string | null>(null);
   useEffect(() => {
-    if (!member) return;
+    if (!member || seededMember.current === member.id) return;
+    seededMember.current = member.id;
     setName(member.name);
     setRelationship(member.relationship ?? "");
     setDob(member.dob ?? "");
@@ -146,8 +155,91 @@ export default function Member() {
       sex !== (member.sex ?? "") ||
       seed !== (member.avatarSeed ?? ""));
 
+  /*
+   * INSTANT SAVE for details, face and health: checked here first, then Saved
+   * shows and the roster changes at once while the writes run behind it. A
+   * failure puts the saved copy back, keeps what was typed, and the save bar
+   * offers Retry. A new or removed PHOTO is an upload, so that path keeps the
+   * spinner below and waits for the server.
+   */
+  function saveInstant() {
+    if (!member) return;
+    setErrors({});
+    setMessage(null);
+    const patch = { name, relationship, dob, sex, avatarSeed: seed };
+    if (!member.isPrimary) {
+      const checked = addMemberSchema.safeParse(patch);
+      if (!checked.success) {
+        const fields: Record<string, string> = {};
+        for (const issue of checked.error.issues) fields[String(issue.path[0] ?? "form")] ??= issue.message;
+        setErrors(fields);
+        setMessage("Check the fields below.");
+        return;
+      }
+    }
+    if (healthDirty) {
+      const invalid = checkMemberHealth(health);
+      if (invalid) {
+        setMessage(invalid.message);
+        return;
+      }
+    }
+    const memberId = member.id;
+    const primary = member.isPrimary;
+    const nextHealth = health;
+    const withHealth = healthDirty;
+    setSaved(true);
+    setTimeout(() => setSaved(false), 1600);
+    void optimisticQueries(
+      qc,
+      [
+        {
+          key: ["family-members"],
+          update: (old) => {
+            const o = old as NonNullable<typeof members.data>;
+            return {
+              ...o,
+              members: o.members.map((m) =>
+                m.id !== memberId
+                  ? m
+                  : primary
+                    ? { ...m, avatarSeed: seed || null }
+                    : { ...m, name: name.trim(), relationship: relationship || null, dob: dob || null, sex: sex || null, avatarSeed: seed || null },
+              ),
+            };
+          },
+        },
+        ...(withHealth ? [{ key: ["member-health", memberId], update: () => nextHealth }] : []),
+      ],
+      {
+        write: async () => {
+          const r = primary ? await updateAvatar(memberId, seed || null) : await updateMember(memberId, patch);
+          if (!r.ok) return { ok: false, message: r.message };
+          if (withHealth) return saveMemberHealth(memberId, nextHealth);
+          return { ok: true };
+        },
+        message: `Couldn't save ${firstName(member.name)}'s details. Check your connection.`,
+        onSaved: () => {
+          refreshRoster(qc);
+          if (withHealth) {
+            void qc.invalidateQueries({ queryKey: ["member-health", memberId] });
+            // Ask grounds itself in these, so it hears about the change too.
+            void qc.invalidateQueries({ queryKey: ["ask-context"] });
+            void qc.invalidateQueries({ queryKey: ["settings-health"] });
+          }
+        },
+      },
+    ).then((ok) => {
+      if (!ok) setSaved(false);
+    });
+  }
+
   async function save() {
     if (!member) return;
+    if (!photoDirty) {
+      saveInstant();
+      return;
+    }
     setSaving(true);
     setErrors({});
     setMessage(null);

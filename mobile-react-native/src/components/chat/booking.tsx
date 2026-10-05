@@ -1,4 +1,4 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import {
   ArrowRight,
   BellRing,
@@ -11,7 +11,6 @@ import {
   Stethoscope,
   type LucideIcon,
 } from "lucide-react-native";
-import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
 
 import { SERVICE_ICON } from "@/components/services/parts";
@@ -21,7 +20,8 @@ import { fromPrice } from "@/lib/labs/logic";
 import { useCatalog } from "@/lib/labs/queries";
 import type { BookingIntent } from "@/lib/memory/intent";
 import type { BookedEvent } from "@/lib/memory/thread";
-import { fetchWaitlist, setWaitlisted } from "@/lib/notifications/queries";
+import { fetchWaitlist } from "@/lib/notifications/queries";
+import { useJoinWaitlist } from "@/lib/notifications/waitlist";
 import { serviceById } from "@/lib/services/catalog";
 import { brand, ink, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
@@ -190,30 +190,22 @@ function DoctorCard({ booking, onStart }: { booking: Booking; onStart?: (b: Book
 }
 
 function SoonCard({ booking }: { booking: Booking }) {
-  const qc = useQueryClient();
   const id = WAITLIST_ID[booking.service] ?? booking.service;
   const list = useQuery({ queryKey: ["waitlist"], queryFn: fetchWaitlist });
-  const [busy, setBusy] = useState(false);
   const on = Boolean(list.data?.includes(id));
   const label = "Fitness classes";
 
-  async function join() {
-    setBusy(true);
-    qc.setQueryData<string[]>(["waitlist"], (old = []) => [...old, id]);
-    try {
-      await setWaitlisted(id, true);
-    } catch {
-      qc.setQueryData<string[]>(["waitlist"], (old = []) => old.filter((x) => x !== id));
-    }
-    setBusy(false);
+  const joinWaitlist = useJoinWaitlist();
+  function join() {
+    void joinWaitlist(id);
   }
 
   return (
     <Shell icon={Dumbbell} eyebrow="Coming soon" title={label} sub={`For ${booking.forName}`}>
       <Pressable
         accessibilityRole="button"
-        disabled={on || busy}
-        onPress={() => void join()}
+        disabled={on}
+        onPress={join}
         style={({ pressed }) => ({ height: 46, borderRadius: 999, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, backgroundColor: on ? brand[50] : ink[900], transform: [{ scale: pressed ? 0.98 : 1 }] })}
       >
         {on ? <Check size={16} color={brand[700]} /> : <BellRing size={16} color="#fff" />}
