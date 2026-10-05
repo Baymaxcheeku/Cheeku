@@ -277,7 +277,7 @@ export default function Scan() {
       >
         <Backdrop />
         <View className="items-center">
-          <MascotFigure size={132} pose="phone" mood="thinking" />
+          <MascotFigure size={132} moment="working" move="float" hop />
         </View>
         <Text style={{ fontFamily: font.semibold, fontSize: 26, letterSpacing: -0.7, color: ink[900], textAlign: "center", marginTop: 6 }}>
           Reading it now
@@ -359,10 +359,14 @@ export default function Scan() {
       contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 8, paddingBottom: insets.bottom + 24 }}
       showsVerticalScrollIndicator={false}
     >
-      <Text accessibilityRole="header" style={{ fontFamily: font.medium, fontSize: 30, lineHeight: 36, letterSpacing: -1, color: ink[900] }}>
-        What are we{"\n"}
-        <Text style={{ fontFamily: font.italic, color: brand[600] }}>filing today?</Text>
-      </Text>
+      <View style={{ flexDirection: "row", alignItems: "flex-end" }}>
+        <Text accessibilityRole="header" style={{ flex: 1, fontFamily: font.medium, fontSize: 30, lineHeight: 36, letterSpacing: -1, color: ink[900] }}>
+          What are we{"\n"}
+          <Text style={{ fontFamily: font.italic, color: brand[600] }}>filing today?</Text>
+        </Text>
+        {/* Open arms: "hand it over". Worried at his desk if the last try failed. */}
+        <MascotFigure size={92} moment={phase === "error" ? "worried" : "present"} move={phase === "error" ? undefined : "sway"} hop />
+      </View>
       <Text style={{ fontFamily: font.regular, fontSize: 14, lineHeight: 20, color: ink[500], marginTop: 8 }}>
         I&apos;ll read it and pull out the key details. You check everything before it&apos;s saved.
       </Text>

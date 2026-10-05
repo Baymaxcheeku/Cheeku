@@ -284,7 +284,7 @@ function LoadFailed({ topInset, onRetry }: { topInset: number; onRetry: () => vo
     <View className="flex-1 justify-center bg-canvas px-8" style={{ paddingTop: topInset }}>
       {/* Worried with you, at his desk; never about anyone's health here. */}
       <View className="mb-4 items-center">
-        <MascotFigure size={120} moment="worried" />
+        <MascotFigure size={120} moment="worried" hop />
       </View>
       <Text className="text-center text-[20px] font-bold text-ink-900">
         Could not load your records

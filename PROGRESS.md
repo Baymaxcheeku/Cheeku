@@ -2444,3 +2444,31 @@ placements in the web preview (temporary harness, deleted), and Doctors,
 About, Sign in and Help as real screens. **Not seen on a device:** several
 animations at once on Home (hero, Book services, peek) on a mid-range
 Android; the desk cuts add about 540 KB of JSON to the bundle.
+
+## No still Cheeku anywhere · 2026-10-05
+
+Every mascot now moves, and each main page has its own version.
+
+- **Records tab:** Cheeku at his desk, typing (filing), beside the title. The
+  empty state opens its arms and sways.
+- **Upload:** open arms beside "What are we filing today?"; worried at his
+  desk when the last try failed; typing at the desk, floating, while a file
+  is read.
+- **Ask Cheeku:** the header, every message mark and the typing row are small
+  faces, which used to be a frozen PNG. Under 64 px a face now breathes and
+  glances about; a thinking face ponders with a slow tilt; a happy one
+  bounces. Each starts at its own offset so a column of them never moves in
+  step.
+- **Profile tab:** waves hello beside the title, then floats.
+- **Calm is not still.** "calm" and "breathe" requests (chat header, app
+  lock) now get idle with a slow float instead of a frozen frame.
+- **The game.** Any standalone Cheeku hops when tapped and reacts for a few
+  seconds: cheers if standing, laughs if at the desk (a laughing one goes
+  back to thinking). The reaction keeps the base moment's layout, so he does
+  not jump. Mascots inside a tappable card do not take the tap.
+- **Reduce motion** is the only place stills remain, on purpose.
+
+**Verified here:** typecheck, lint, 289 tests; Records header on the real
+screen; Profile, Upload and Ask pieces, the moving small faces (every frame
+differs) and tap reactions in a temporary harness (deleted). **Not seen on a
+device:** a long chat thread with many moving faces on a mid-range Android.
