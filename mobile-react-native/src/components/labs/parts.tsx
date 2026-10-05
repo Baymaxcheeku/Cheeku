@@ -180,7 +180,7 @@ export function ReviewSheet({
   open: boolean;
   title: string;
   onClose: () => void;
-  onSubmit: (rating: number, body: string) => Promise<string | null>;
+  onSubmit: (rating: number, body: string) => string | null | Promise<string | null>;
 }) {
   const insets = useSafeAreaInsets();
   const [rating, setRating] = useState(5);

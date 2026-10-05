@@ -2369,3 +2369,42 @@ The carousel now ends on the marketplace: "The right care, picked for you."
 **Not seen on a device:** check the motion's smoothness on a mid-range
 Android (several looping animations at once), and that the avatars look sharp
 at 3x (they are 240 px).
+
+## Instant saves with a way back · 2026-10-05
+
+Quick actions now change the screen first and save in the background. If the
+save fails, the screen goes back to exactly how it was and a dark bar at the
+bottom says so, with Retry.
+
+- **One helper, one bar.** `src/lib/optimistic.ts` (`runOptimistic` for local
+  state, `optimisticQueries` for TanStack Query caches: snapshot, cancel
+  in-flight fetches, patch, roll back on failure) and
+  `src/components/ui/save-bar.tsx`, mounted once in the root layout. The bar
+  is neutral ink, never the semantic red (rule 3), sits above the tab bar on
+  tab screens, and goes away after 9 s. A throw, `false` or `{ ok: false }`
+  all count as failures; a server reason, when there is one, is shown.
+- **Already instant, now with Retry:** inbox read, unread, mark all, dismiss
+  and restore; notification switches; "Tell me when it's open"; saving an
+  article.
+- **Now instant:** record "Looks right", change type, move to another member
+  (the screen's own effect follows `profileId`, so a rollback switches back
+  too); memory follow-ups done or not needed; correcting a reading (the new
+  fact id is made once so a Retry upserts instead of duplicating); reviews on
+  doctor and lab pages; Personal info, Health profile and Edit member saves
+  (fields are checked on the phone first; forms now fill in once per person,
+  so a rollback never wipes what was typed); pregnancy dates (closes at once,
+  saves behind); the onboarding journey pick (moves on at once; a failure stays
+  silent, as before).
+- **Deliberately still waiting for the server:** subscribe and cancel plan,
+  every delete (record, member, account, forgetting a reading), cancelling a
+  lab booking, lab and doctor bookings, uploads and profile photos (an edit
+  with a new photo keeps the spinner), adding a member and recording a birth
+  (both create a profile the server can refuse), password reset, app lock.
+
+**Verified here:** typecheck, lint, 289 tests (6 new for the helper:
+apply-before-save, rollback, `false` and `{ ok: false }`, Retry, exact cache
+restore). In the web preview with a temporary harness (deleted): Save changed
+the screen in 68 ms with no spinner; offline it rolled back and showed the bar;
+Retry back online saved and cleared it. **Not checked against the live
+database or on a device:** turn on airplane mode in the app and try a switch,
+a record type change and a form save.

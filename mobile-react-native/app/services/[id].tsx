@@ -1,7 +1,6 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { BellRing, Check, ChevronRight, FileHeart, Lock, Phone, ShieldCheck, Stethoscope, type LucideIcon } from "lucide-react-native";
-import { useState } from "react";
 import { Linking, Pressable, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -10,7 +9,8 @@ import { Brand } from "@/components/ui/brand";
 import { Gradient, glass, glassShadow } from "@/components/ui/glass";
 import { Reveal, RevealScroll } from "@/components/ui/reveal";
 import { Backdrop, ScreenHeader } from "@/components/ui/screen";
-import { fetchWaitlist, setWaitlisted } from "@/lib/notifications/queries";
+import { fetchWaitlist } from "@/lib/notifications/queries";
+import { useJoinWaitlist } from "@/lib/notifications/waitlist";
 import { MODE_LABEL, serviceById, type Offering } from "@/lib/services/catalog";
 import { marketplace } from "@/lib/services/provider";
 import { brand, ink, semantic, surface } from "@/theme/tokens";
@@ -167,22 +167,14 @@ function Assurance({ icon: Icon, text }: { icon: LucideIcon; text: string }) {
 }
 
 function Waitlist({ id }: { id: string }) {
-  const qc = useQueryClient();
   const list = useQuery({ queryKey: ["waitlist"], queryFn: fetchWaitlist });
-  const [busy, setBusy] = useState(false);
   const on = Boolean(list.data?.includes(id));
-  async function join() {
-    setBusy(true);
-    qc.setQueryData<string[]>(["waitlist"], (old = []) => [...old, id]);
-    try {
-      await setWaitlisted(id, true);
-    } catch {
-      qc.setQueryData<string[]>(["waitlist"], (old = []) => old.filter((x) => x !== id));
-    }
-    setBusy(false);
+  const joinWaitlist = useJoinWaitlist();
+  function join() {
+    void joinWaitlist(id);
   }
   return (
-    <Pressable accessibilityRole="button" disabled={on || busy} onPress={() => void join()} style={({ pressed }) => ({ height: 54, borderRadius: 999, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, backgroundColor: on ? "#fff" : ink[900], borderWidth: on ? 1.5 : 0, borderColor: brand[200], transform: [{ scale: pressed ? 0.98 : 1 }] })}>
+    <Pressable accessibilityRole="button" disabled={on} onPress={join} style={({ pressed }) => ({ height: 54, borderRadius: 999, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, backgroundColor: on ? "#fff" : ink[900], borderWidth: on ? 1.5 : 0, borderColor: brand[200], transform: [{ scale: pressed ? 0.98 : 1 }] })}>
       {on ? <Check size={18} color={brand[700]} strokeWidth={3} /> : <BellRing size={18} color="#fff" />}
       <Text style={{ fontFamily: font.semibold, fontSize: 15.5, color: on ? brand[700] : "#fff" }}>{on ? "You're on the list" : "Tell me when it's open"}</Text>
     </Pressable>

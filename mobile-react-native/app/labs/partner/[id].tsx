@@ -8,7 +8,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { PartnerBadge, ReviewList, ReviewSheet, rupees, SampleNote, Stars, TestArt } from "@/components/labs/parts";
 import { Glass, Gradient, glassShadow } from "@/components/ui/glass";
 import { ScreenHeader } from "@/components/ui/screen";
-import { fetchReviews, submitReview, useCatalog, useLabBookings, useLabCart, useRatings } from "@/lib/labs/queries";
+import { fetchReviews, postReview, useCatalog, useLabBookings, useLabCart, useRatings } from "@/lib/labs/queries";
 import { useFamily } from "@/lib/profiles/family";
 import { brand, ink } from "@/theme/tokens";
 import { font } from "@/theme/type";
@@ -137,12 +137,8 @@ export default function LabPartner() {
         open={writing}
         title={`How was ${p.name}?`}
         onClose={() => setWriting(false)}
-        onSubmit={async (r, body) => {
-          const res = await submitReview({ kind: "lab", id: p.id, rating: r, body, author: me });
-          if (!res.ok) return res.message ?? "That didn't post.";
-          void qc.invalidateQueries({ queryKey: ["reviews", "lab", p.id] });
-          void qc.invalidateQueries({ queryKey: ["ratings", "lab"] });
-          return null;
+        onSubmit={(r, body) => {
+          return postReview(qc, { kind: "lab", id: p.id, rating: r, body, author: me });
         }}
       />
     </View>

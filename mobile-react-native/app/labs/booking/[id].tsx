@@ -12,7 +12,7 @@ import { Glass, Gradient, glassShadow } from "@/components/ui/glass";
 import { useReducedMotion } from "@/components/ui/motion";
 import { Backdrop, PillButton, ScreenHeader } from "@/components/ui/screen";
 import { stageIndex, STAGES } from "@/lib/labs/logic";
-import { advanceLabDemo, BOOKINGS_KEY, cancelLab, submitReview, useCatalog, useLabBookings } from "@/lib/labs/queries";
+import { advanceLabDemo, BOOKINGS_KEY, cancelLab, postReview, useCatalog, useLabBookings } from "@/lib/labs/queries";
 import { useFamily, useSwitchMember } from "@/lib/profiles/family";
 import { formatEventDate } from "@/lib/records/grouping";
 import { brand, ink } from "@/theme/tokens";
@@ -215,13 +215,9 @@ export default function LabBooking() {
         open={rating}
         title={`How was ${partner.name}?`}
         onClose={() => setRating(false)}
-        onSubmit={async (r, body) => {
+        onSubmit={(r, body) => {
           const me = family.data?.access.all.find((m) => m.isPrimary)?.name.split(" ")[0] ?? "Cheeku user";
-          const res = await submitReview({ kind: "lab", id: partner.id, rating: r, body, author: me });
-          if (!res.ok) return res.message ?? "That didn't post.";
-          void qc.invalidateQueries({ queryKey: ["reviews", "lab", partner.id] });
-          void qc.invalidateQueries({ queryKey: ["ratings", "lab"] });
-          return null;
+          return postReview(qc, { kind: "lab", id: partner.id, rating: r, body, author: me });
         }}
       />
     </View>

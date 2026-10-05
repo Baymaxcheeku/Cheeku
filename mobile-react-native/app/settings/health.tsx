@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { HeartPulse, Info, Pill, ShieldAlert, ShieldCheck, Stethoscope, type LucideIcon } from "lucide-react-native";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Text, View } from "react-native";
 
 import { HealthEditor } from "@/components/family/health-editor";
@@ -9,8 +9,9 @@ import { Eyebrow, PersonHero, Reason, Title } from "@/components/settings/editor
 import { brandify } from "@/components/ui/brand";
 import { glassShadow } from "@/components/ui/glass";
 import { Reveal } from "@/components/ui/reveal";
+import { optimisticQueries } from "@/lib/optimistic";
 import { activeProfile } from "@/lib/profiles/context";
-import { ageFrom, EMPTY_HEALTH, loadMemberHealth, saveMemberHealth, type MemberHealth } from "@/lib/profiles/health";
+import { ageFrom, checkMemberHealth, EMPTY_HEALTH, loadMemberHealth, saveMemberHealth, type MemberHealth } from "@/lib/profiles/health";
 import { brand, ink, semantic } from "@/theme/tokens";
 import { font } from "@/theme/type";
 
@@ -40,29 +41,45 @@ export default function HealthProfile() {
   });
 
   const [value, setValue] = useState<MemberHealth>(EMPTY_HEALTH);
-  const [pending, setPending] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Filled in once per person, so a rolled-back save never wipes what was typed.
+  const seeded = useRef<string | null>(null);
   useEffect(() => {
-    if (context.data) setValue(context.data.health);
+    if (!context.data || seeded.current === context.data.active.id) return;
+    seeded.current = context.data.active.id;
+    setValue(context.data.health);
   }, [context.data]);
 
-  async function save() {
+  /*
+   * INSTANT SAVE. Checked here first (height and weight ranges), then Saved
+   * shows at once and the write runs behind it. A failed write puts the saved
+   * copy back, keeps the typed values, and the save bar offers Retry.
+   */
+  function save() {
     if (!context.data) return;
-    setPending(true);
+    const id = context.data.active.id;
     setError(null);
-    const result = await saveMemberHealth(context.data.active.id, value);
-    setPending(false);
-    if (!result.ok) {
-      setError(result.message);
+    const invalid = checkMemberHealth(value);
+    if (invalid) {
+      setError(invalid.message);
       return;
     }
+    const next = value;
     setSaved(true);
     setTimeout(() => setSaved(false), 1600);
-    void qc.invalidateQueries({ queryKey: ["settings-health"] });
-    void qc.invalidateQueries({ queryKey: ["member-health", context.data.active.id] });
-    void qc.invalidateQueries({ queryKey: ["ask-context"] });
+    void optimisticQueries(qc, [{ key: ["settings-health"], update: (old) => ({ ...(old as NonNullable<typeof context.data>), health: next }) }], {
+      write: () => saveMemberHealth(id, next),
+      message: "Couldn't save the health profile. Check your connection.",
+      onSaved: () => {
+        void qc.invalidateQueries({ queryKey: ["settings-health"] });
+        void qc.invalidateQueries({ queryKey: ["member-health", id] });
+        void qc.invalidateQueries({ queryKey: ["ask-context"] });
+      },
+    }).then((ok) => {
+      if (!ok) setSaved(false);
+    });
   }
 
   if (context.isPending) {
@@ -100,7 +117,7 @@ export default function HealthProfile() {
       eyebrow={active.isPrimary ? "Your conditions, allergies and medicines" : `${first}'s conditions, allergies and medicines`}
       icon={HeartPulse}
       bare
-      footer={<SaveButton onPress={() => void save()} pending={pending} saved={saved} />}
+      footer={<SaveButton onPress={save} pending={false} saved={saved} />}
     >
       <Reveal>
         <PersonHero

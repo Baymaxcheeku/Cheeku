@@ -22,6 +22,7 @@ import { Panel, Section, SettingsScreen } from "@/components/settings/chrome";
 import { SpringSwitch } from "@/components/ui/motion";
 import { PillButton } from "@/components/ui/screen";
 import { enablePush, pushPermission } from "@/lib/notifications/push";
+import { runOptimistic } from "@/lib/optimistic";
 import { updateNotificationPrefs } from "@/lib/settings/actions";
 import { DEFAULT_PREFS, ownFamily } from "@/lib/settings/queries";
 import type { NotificationPrefs } from "@/lib/settings/schemas";
@@ -116,7 +117,6 @@ export default function NotificationSettings() {
   const permission = useQuery({ queryKey: ["push-permission"], queryFn: pushPermission });
 
   const [prefs, setPrefs] = useState<NotificationPrefs>(DEFAULT_PREFS);
-  const [error, setError] = useState<string | null>(null);
   const [asking, setAsking] = useState(false);
 
   useEffect(() => {
@@ -134,17 +134,22 @@ export default function NotificationSettings() {
    */
   function toggle(key: Key) {
     const next = !prefs[key];
-    setPrefs((p) => ({ ...p, [key]: next }));
-    setError(null);
-    qc.setQueryData(["own-family"], (old: { id: string; prefs: NotificationPrefs } | null | undefined) =>
-      old ? { ...old, prefs: { ...old.prefs, [key]: next } } : old,
-    );
-    void updateNotificationPrefs({ [key]: next }).then((result) => {
-      if (!result.ok) {
+    const patchFamily = (value: boolean) =>
+      qc.setQueryData(["own-family"], (old: { id: string; prefs: NotificationPrefs } | null | undefined) =>
+        old ? { ...old, prefs: { ...old.prefs, [key]: value } } : old,
+      );
+    // On failure the switch flips back and the save bar offers Retry.
+    void runOptimistic({
+      apply: () => {
+        setPrefs((p) => ({ ...p, [key]: next }));
+        patchFamily(next);
+      },
+      revert: () => {
         setPrefs((p) => ({ ...p, [key]: !next }));
-        void qc.invalidateQueries({ queryKey: ["own-family"] });
-        setError(result.message);
-      }
+        patchFamily(!next);
+      },
+      write: () => updateNotificationPrefs({ [key]: next }),
+      message: "Couldn't save that setting. Check your connection.",
     });
   }
 
@@ -263,12 +268,6 @@ export default function NotificationSettings() {
             <Text style={{ fontFamily: font.semibold, fontSize: 14, color: brand[700] }}>Open your inbox</Text>
             <ChevronRight size={16} color={brand[700]} />
           </Pressable>
-
-          {error ? (
-            <Text accessibilityRole="alert" style={{ marginHorizontal: 20, marginTop: 8, fontFamily: font.medium, fontSize: 13, color: "#c00a1c" }}>
-              {error}
-            </Text>
-          ) : null}
         </>
       )}
     </SettingsScreen>

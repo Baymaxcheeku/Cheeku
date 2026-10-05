@@ -18,6 +18,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { ConfirmSheet } from "@/components/ui/confirm-sheet";
 import { Glass, GlassCircle, Gradient, glassShadow } from "@/components/ui/glass";
 import { Backdrop, PillButton, ScreenHeader } from "@/components/ui/screen";
+import { optimisticQueries } from "@/lib/optimistic";
 import { selectableProfiles } from "@/lib/profiles/context";
 import { useFamily, useSwitchMember } from "@/lib/profiles/family";
 import { readDetails, shortDate, type RecordDetails } from "@/lib/records/details";
@@ -26,7 +27,7 @@ import { buildInsight } from "@/lib/records/insight";
 import { confirmRecord, getRecord, signedDocumentUrl } from "@/lib/records/queries";
 import { deleteRecord, moveRecord, refreshRecords, setRecordType } from "@/lib/records/record-actions";
 import { DOC_TYPE_LABEL, DOC_TYPES, type DocType, type RecordDetail as Detail } from "@/lib/records/types";
-import { brand, ink, semantic } from "@/theme/tokens";
+import { brand, ink } from "@/theme/tokens";
 import { font } from "@/theme/type";
 
 /**
@@ -72,10 +73,7 @@ export default function RecordDetailScreen() {
   const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
   const qc = useQueryClient();
-  const [confirming, setConfirming] = useState(false);
-  const [confirmError, setConfirmError] = useState(false);
   const [sheet, setSheet] = useState<Sheet>(null);
-  const [busyKey, setBusyKey] = useState<string | null>(null);
   const [sheetError, setSheetError] = useState<string | null>(null);
 
   const query = useQuery({
@@ -117,16 +115,31 @@ export default function RecordDetailScreen() {
     if (owner && viewingId && owner !== viewingId) void switchMember(owner);
   }, [owner, viewingId, switchMember]);
 
-  async function confirm() {
-    setConfirming(true);
-    setConfirmError(false);
-    const ok = await confirmRecord(id);
-    setConfirming(false);
-    if (!ok) {
-      setConfirmError(true);
-      return;
-    }
-    refreshRecords(qc, id);
+  /*
+   * INSTANT EDITS. Confirming, changing the type and moving to another member
+   * all change this screen at once and save in the background. A failed save
+   * puts the record back as it was and the save bar offers Retry
+   * (lib/optimistic.ts). Moving also moves the context: the effect above
+   * follows `profileId`, so the rollback switches back on its own too.
+   */
+  function editRecord(change: Partial<Detail>, write: () => Promise<{ ok: boolean; message?: string } | boolean>, message: string) {
+    void optimisticQueries(
+      qc,
+      [
+        {
+          key: ["record", id],
+          update: (old) => {
+            const o = old as { record: Detail | null; url: string | null };
+            return o.record ? { ...o, record: { ...o.record, ...change } } : o;
+          },
+        },
+      ],
+      { write, message, onSaved: () => refreshRecords(qc, id) },
+    );
+  }
+
+  function confirm() {
+    editRecord({ status: "filed" }, () => confirmRecord(id), "Couldn't file this record. Check your connection.");
   }
 
   if (query.isPending) {
@@ -161,18 +174,6 @@ export default function RecordDetailScreen() {
   const first = rec.profileName.split(" ")[0] ?? rec.profileName;
   const noun = NOUN[rec.docType];
 
-  async function run(key: string, action: () => Promise<{ ok: boolean; message?: string }>, after: () => void) {
-    setBusyKey(key);
-    setSheetError(null);
-    const res = await action();
-    setBusyKey(null);
-    if (!res.ok) {
-      setSheetError(res.message ?? "That didn't work. Try again.");
-      return;
-    }
-    setSheet(null);
-    after();
-  }
 
   return (
     <View className="flex-1 bg-canvas">
@@ -234,12 +235,7 @@ export default function RecordDetailScreen() {
                 </Text>
               </View>
             </View>
-            {confirmError ? (
-              <Text accessibilityRole="alert" style={{ fontFamily: font.medium, fontSize: 13, color: semantic.dangerText, marginTop: 10 }}>
-                That didn&apos;t save. Check your connection and try again.
-              </Text>
-            ) : null}
-            <PillButton tone="brand" loading={confirming} onPress={() => void confirm()} icon={<BadgeCheck size={17} color="#fff" />} style={{ marginTop: 14, height: 48 }}>
+            <PillButton tone="brand" onPress={confirm} icon={<BadgeCheck size={17} color="#fff" />} style={{ marginTop: 14, height: 48 }}>
               Looks right, file it
             </PillButton>
           </Card>
@@ -299,7 +295,6 @@ export default function RecordDetailScreen() {
         title="Whose record is it?"
         body="It moves with everything read from it, and only the person you pick will see it in their file."
         error={sheetError}
-        busyKey={busyKey}
         onClose={() => setSheet(null)}
         options={members.map((m) => ({
           key: m.id,
@@ -309,10 +304,8 @@ export default function RecordDetailScreen() {
           leading: <Avatar svg={m.avatar} photo={m.photo} image={m.avatarImage} background={m.avatarBackground} size={40} />,
           onPress: () => {
             if (m.id === rec.profileId) return setSheet(null);
-            void run(m.id, () => moveRecord(rec.id, m.id), () => {
-              refreshRecords(qc, rec.id);
-              void switchMember(m.id);
-            });
+            setSheet(null);
+            editRecord({ profileId: m.id, profileName: m.name }, () => moveRecord(rec.id, m.id), `Couldn't move it to ${m.name.split(" ")[0]}. It's back where it was.`);
           },
         }))}
       />
@@ -322,7 +315,6 @@ export default function RecordDetailScreen() {
         title="What kind of record is it?"
         body="The page changes to suit it. Anything I couldn't read for the new kind stays on the original page."
         error={sheetError}
-        busyKey={busyKey}
         onClose={() => setSheet(null)}
         options={DOC_TYPES.map((t) => ({
           key: t,
@@ -332,7 +324,8 @@ export default function RecordDetailScreen() {
           selected: t === rec.docType,
           onPress: () => {
             if (t === rec.docType) return setSheet(null);
-            void run(t, () => setRecordType(rec.id, t), () => refreshRecords(qc, rec.id));
+            setSheet(null);
+            editRecord({ docType: t }, () => setRecordType(rec.id, t), "Couldn't change the record type. Check your connection.");
           },
         }))}
       />
