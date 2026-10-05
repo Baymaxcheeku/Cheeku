@@ -1,6 +1,6 @@
 import { useRouter } from "expo-router";
 import { useMemo, useRef, useState } from "react";
-import { Image, PanResponder, Pressable, Text, useWindowDimensions, View } from "react-native";
+import { PanResponder, Pressable, Text, useWindowDimensions, View } from "react-native";
 import Animated, { FadeIn, FadeInLeft, FadeInRight } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
@@ -18,18 +18,13 @@ import { CastAvatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { MascotBust } from "@/components/illustrations/sprout";
 import { CtaLabel, ReassuranceStrip } from "@/components/onboarding/chrome";
+import { CareOrbit } from "@/components/onboarding/care-orbit";
 import { BubblePop, FillBar, TypingDots, useTypedReveal } from "@/components/onboarding/motion";
-import { Drift } from "@/components/ui/motion";
 import { PANELS } from "@/lib/onboarding/panels";
 import { castFaces } from "@/lib/profiles/avatar";
 import { brand, ink, shadow, surface } from "@/theme/tokens";
 import { font, type } from "@/theme/type";
 
-import careDoctor from "../assets/care/doctor.png";
-import careLab from "../assets/care/lab.png";
-import careMedicines from "../assets/care/medicines.png";
-import careSpecialist from "../assets/care/specialist.png";
-import careTherapy from "../assets/care/therapy.png";
 
 /*
  * The eyebrow tints, one per chapter.
@@ -168,7 +163,7 @@ export default function Welcome() {
           {panel.kind === "meet" ? <SceneMeet compact={compact} /> : null}
           {panel.kind === "memory" ? <SceneMemory compact={compact} /> : null}
           {panel.kind === "family" ? <SceneFamily faces={faces} compact={compact} /> : null}
-          {panel.kind === "care" ? <SceneCare compact={compact} /> : null}
+          {panel.kind === "care" ? <CareOrbit compact={compact} /> : null}
         </View>
 
         <View className="px-6 pt-4">
@@ -416,85 +411,6 @@ function SceneFamily({ faces, compact }: { faces: readonly string[]; compact: bo
           </Text>
         </View>
       </BubblePop>
-    </View>
-  );
-}
-
-/*
- * Panel 4 — care, around one person.
- *
- * Four people the app can book (a doctor, a lab technician for home
- * collection, a therapist, a senior specialist) sit on one quiet ring around
- * the medicines bag, each with a name tag in the same style as panel 3's
- * family. The ring is the idea: one circle of care, and you at the middle of
- * it. Nothing else on the screen, on purpose: the headline carries the
- * "picked for you", the picture only has to say what can be booked.
- *
- * Fixed-size box with absolute children: the positions are fractions of one
- * square, so nothing drifts apart when the screen is taller or shorter.
- *
- * Art: avatars and the medicines bag are illustrations the owner supplied
- * (assets/care). Tags are neutral white, never green, amber or red.
- */
-const RING = [
-  { label: "Doctors", image: careDoctor, angle: -145 },
-  { label: "Lab tests", image: careLab, angle: -35 },
-  { label: "Therapy", image: careTherapy, angle: 35 },
-  { label: "Specialists", image: careSpecialist, angle: 145 },
-] as const;
-
-function SceneCare({ compact }: { compact: boolean }) {
-  const box = compact ? 260 : 340;
-  const c = box / 2;
-  const ring = box * 0.42;
-  const disc = box * 0.56;
-  const face = compact ? 58 : 76;
-
-  return (
-    <View className="flex-1 items-center justify-center">
-      <View style={{ width: box, height: box }}>
-        <View
-          style={{
-            position: "absolute",
-            left: c - ring,
-            top: c - ring,
-            width: ring * 2,
-            height: ring * 2,
-            borderRadius: ring,
-            borderWidth: 1.5,
-            borderColor: brand[100],
-          }}
-        />
-        <BubblePop delay={0.1} style={{ position: "absolute", left: c - disc / 2, top: c - disc / 2 }}>
-          <View
-            className="items-center justify-center"
-            style={{ width: disc, height: disc, borderRadius: disc / 2, backgroundColor: "#efebff" }}
-          >
-            <Image alt="" source={careMedicines} style={{ width: disc * 0.74, height: disc * 0.76, marginTop: -4 }} resizeMode="contain" />
-          </View>
-          <View className="-mt-4 self-center rounded-pill bg-surface px-3 py-1" style={shadow.e1}>
-            <Text style={{ fontFamily: font.bold, fontSize: 11.5, color: ink[700] }}>Medicines</Text>
-          </View>
-        </BubblePop>
-
-        {RING.map((r, i) => {
-          const a = (r.angle * Math.PI) / 180;
-          return (
-            <Drift
-              key={r.label}
-              delay={0.25 + i * 0.12}
-              style={{ position: "absolute", left: c + ring * Math.cos(a) - face / 2 - 12, top: c + ring * Math.sin(a) - face / 2, width: face + 24, alignItems: "center" }}
-            >
-              <View style={[shadow.e2, { borderRadius: face, borderWidth: 3, borderColor: "#fff", backgroundColor: "#fff" }]}>
-                <Image alt="" source={r.image} style={{ width: face, height: face, borderRadius: face / 2 }} />
-              </View>
-              <View className="-mt-2.5 rounded-pill bg-surface px-2.5 py-1" style={shadow.e1}>
-                <Text style={{ fontFamily: font.bold, fontSize: 11, color: ink[700] }}>{r.label}</Text>
-              </View>
-            </Drift>
-          );
-        })}
-      </View>
     </View>
   );
 }

@@ -2357,5 +2357,15 @@ The carousel now ends on the marketplace: "The right care, picked for you."
   on its own say-so; "No extra tests" means it will not repeat one already on
   file.
 
-**Not seen on a device:** check the float and pop-in on iOS and Android, and
-that the avatars look sharp at 3x (they are 240 px).
+- **Motion** (`components/onboarding/care-orbit.tsx`). The ring opens and the
+  bag pops in with soft ripples; the four people fly out of the centre to
+  their places; a small light orbits the ring; then a violet highlight moves
+  from one service to the next every 1.6 s (the "picked for you" idea, shown
+  rather than said), with a ping on each face. Tapping a face or the bag
+  picks it and the cycle carries on from there. Plus marks twinkle outside
+  the ring and a soft radial glow lifts the picture off the page. All on the
+  UI thread; Reduce motion gets the finished picture, still.
+
+**Not seen on a device:** check the motion's smoothness on a mid-range
+Android (several looping animations at once), and that the avatars look sharp
+at 3x (they are 240 px).
