@@ -71,22 +71,18 @@ export const PANELS: readonly Panel[] = [
     cta: "And when we need a doctor?",
   },
   /*
-   * Panel 4, added 2026-10-05: the marketplace, sold as judgement rather than
-   * a catalogue. Every Indian family has been talked into a "full body
-   * package" with forty tests nobody asked for, and has repeated a test
-   * because the old report was somewhere in the almirah. Memory is what fixes
-   * both, so this panel is the first three paying off, not a new topic.
-   *
-   * Same limits as the rest: Cheeku says what is DUE (because a doctor's note
-   * said so) and what was ALREADY DONE (because the report is on file). It
-   * never decides a test is needed on its own say-so.
+   * Panel 4, added 2026-10-05: the marketplace. Short on purpose; the picture
+   * names the services, so the words only have to say why booking here is
+   * different: it starts from your history. "No extra tests" is the line an
+   * Indian family hears loudest, after years of forty-test "full body
+   * packages". Cheeku never decides a test is needed on its own say-so.
    */
   {
     kind: "care",
-    eyebrow: "Book smarter",
-    lead: "The right test, the right doctor.",
-    accent: "Not the biggest package.",
-    body: "Consults, lab tests at home and medicines, picked from your own history. I'll tell you what's due, skip what you just did, and file every report back into your memory.",
+    eyebrow: "Book care",
+    lead: "The right care,",
+    accent: "picked for you.",
+    body: "Doctors, lab tests and medicines, booked around your health history. No extra tests, no running around.",
     cta: "Let's get started",
   },
 ];
