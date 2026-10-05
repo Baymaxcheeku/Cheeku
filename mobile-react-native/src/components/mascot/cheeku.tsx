@@ -68,7 +68,7 @@ export const PALETTE = {
   clayShade: "#D29A73",
   clayDeep: "#B97E59",
   clayBounce: "#F6D6BC",
-  blush: "#F6A2AE",
+  blush: "#F598A6",
   iris: "#2A1A16",
   line: "#3A2622",
   sprout: "#B39BF7",
@@ -295,19 +295,24 @@ function Blush() {
   return (
     <Layer>
       <Defs>
-        <Blur id={u("bl")} amount={4.5} />
+        <Blur id={u("bl")} amount={3} />
+        <ClipPath id={u("blc")}>
+          <Path d={BODY} />
+        </ClipPath>
         <RadialGradient id={u("blg")} cx="50%" cy="50%" rx="50%" ry="50%">
           <Stop offset="0" stopColor={PALETTE.blush} stopOpacity="0.9" />
           <Stop offset="1" stopColor={PALETTE.blush} stopOpacity="0" />
         </RadialGradient>
       </Defs>
-      {[56, 144].map((x) =>
+      <G clipPath={`url(#${u("blc")})`}>
+      {[53, 147].map((x) =>
         hi ? (
-          <Ellipse key={x} cx={x} cy={135} rx="14" ry="9" fill={PALETTE.blush} opacity={0.85} filter={`url(#${u("bl")})`} />
+          <Ellipse key={x} cx={x} cy={141} rx="15" ry="10" fill={PALETTE.blush} opacity={0.95} filter={`url(#${u("bl")})`} />
         ) : (
-          <Ellipse key={x} cx={x} cy={135} rx="15" ry="10" fill={`url(#${u("blg")})`} />
+          <Ellipse key={x} cx={x} cy={141} rx="16" ry="11" fill={`url(#${u("blg")})`} />
         ),
       )}
+      </G>
     </Layer>
   );
 }
@@ -320,25 +325,25 @@ function OpenEye({ cx, cy, look, n }: { cx: number; cy: number; look: [number, n
     <G>
       <Defs>
         <ClipPath id={u(`sc${n}`)}>
-          <Ellipse cx={cx} cy={cy} rx="15.5" ry="17" />
+          <Ellipse cx={cx} cy={cy} rx="18" ry="20" />
         </ClipPath>
       </Defs>
-      <Ellipse cx={cx} cy={cy} rx="15.5" ry="17" fill="#ffffff" />
+      <Ellipse cx={cx} cy={cy} rx="18" ry="20" fill="#ffffff" />
       {hi ? (
         <G clipPath={`url(#${u(`sc${n}`)})`}>
-          <Ellipse cx={cx} cy={cy - 15} rx="18" ry="9" fill="#d8cdd3" opacity={0.75} filter={`url(#${u("lid")})`} />
+          <Ellipse cx={cx} cy={cy - 18} rx="21" ry="10" fill="#d8cdd3" opacity={0.75} filter={`url(#${u("lid")})`} />
         </G>
       ) : null}
-      <Ellipse cx={cx + 1 + look[0]} cy={cy + 2 + look[1]} rx="11.5" ry="12.5" fill={`url(#${u("iris")})`} />
-      <Circle cx={cx + 5 + look[0]} cy={cy - 2.5 + look[1]} r="4.6" fill="#fff" />
-      <Circle cx={cx - 2.5 + look[0]} cy={cy + 7 + look[1]} r="1.8" fill="#fff" opacity={0.85} />
-      <Ellipse cx={cx} cy={cy} rx="15.5" ry="17" fill="none" stroke="#c9a589" strokeOpacity={0.45} strokeWidth="0.9" />
+      <Ellipse cx={cx + 1.5 + look[0]} cy={cy + 3 + look[1]} rx="13" ry="14.5" fill={`url(#${u("iris")})`} />
+      <Circle cx={cx + 6 + look[0]} cy={cy - 2.5 + look[1]} r="5.4" fill="#fff" />
+      <Circle cx={cx - 3 + look[0]} cy={cy + 9 + look[1]} r="2" fill="#fff" opacity={0.85} />
+      <Ellipse cx={cx} cy={cy} rx="18" ry="20" fill="none" stroke="#c9a589" strokeOpacity={0.45} strokeWidth="0.9" />
     </G>
   );
 }
 
-const CLOSED_HAPPY = (cx: number, cy: number) => `M${cx - 11} ${cy + 3} Q${cx} ${cy - 9} ${cx + 11} ${cy + 3}`;
-const CLOSED_SLEEPY = (cx: number, cy: number) => `M${cx - 11} ${cy - 1} Q${cx} ${cy + 9} ${cx + 11} ${cy - 1}`;
+const CLOSED_HAPPY = (cx: number, cy: number) => `M${cx - 13} ${cy + 3} Q${cx} ${cy - 10} ${cx + 13} ${cy + 3}`;
+const CLOSED_SLEEPY = (cx: number, cy: number) => `M${cx - 13} ${cy - 1} Q${cx} ${cy + 10} ${cx + 13} ${cy - 1}`;
 
 /** The eyes on their own layer, so a blink can squash just them. */
 function Eyes({ mood }: { mood: Mood }) {
@@ -357,23 +362,23 @@ function Eyes({ mood }: { mood: Mood }) {
       </Defs>
       {mood === "calm" ? (
         <>
-          <Path d={CLOSED_HAPPY(74, 113)} {...stroke} />
-          <Path d={CLOSED_HAPPY(126, 113)} {...stroke} />
+          <Path d={CLOSED_HAPPY(72, 114)} {...stroke} />
+          <Path d={CLOSED_HAPPY(128, 114)} {...stroke} />
         </>
       ) : mood === "sleepy" ? (
         <>
-          <Path d={CLOSED_SLEEPY(74, 115)} {...stroke} />
-          <Path d={CLOSED_SLEEPY(126, 115)} {...stroke} />
+          <Path d={CLOSED_SLEEPY(72, 116)} {...stroke} />
+          <Path d={CLOSED_SLEEPY(128, 116)} {...stroke} />
         </>
       ) : mood === "reassuring" ? (
         <>
-          <Path d={CLOSED_HAPPY(74, 113)} {...stroke} />
-          <OpenEye cx={126} cy={111} look={look} n={1} />
+          <Path d={CLOSED_HAPPY(72, 114)} {...stroke} />
+          <OpenEye cx={128} cy={110} look={look} n={1} />
         </>
       ) : (
         <>
-          <OpenEye cx={74} cy={mood === "curious" ? 109 : 111} look={look} n={0} />
-          <OpenEye cx={126} cy={mood === "curious" ? 108 : 111} look={look} n={1} />
+          <OpenEye cx={72} cy={mood === "curious" ? 108 : 110} look={look} n={0} />
+          <OpenEye cx={128} cy={mood === "curious" ? 107 : 110} look={look} n={1} />
         </>
       )}
     </Layer>
@@ -383,8 +388,8 @@ function Eyes({ mood }: { mood: Mood }) {
 function Mouth({ mood }: { mood: Mood }) {
   const u = useU();
   const line = { stroke: PALETTE.line, strokeWidth: 3.4, strokeLinecap: "round" as const, fill: "none" };
-  const OPEN = "M86 131 C87 149 113 149 114 131 C106 134 94 134 86 131 Z";
-  const SMALL = "M89 131 C91 143 109 143 111 131 C104 133.5 96 133.5 89 131 Z";
+  const OPEN = "M84 136 C85 157 115 157 116 136 C107 139.5 93 139.5 84 136 Z";
+  const SMALL = "M88 137 C90 150 110 150 112 137 C104 140 96 140 88 137 Z";
   const open = mood === "happy" || mood === "reassuring";
   const d = mood === "happy" ? OPEN : SMALL;
   return (
@@ -402,17 +407,17 @@ function Mouth({ mood }: { mood: Mood }) {
           </Defs>
           <Path d={d} fill={`url(#${u("mg")})`} />
           <G clipPath={`url(#${u("mc")})`}>
-            <Ellipse cx="100" cy={mood === "happy" ? 146 : 142} rx={mood === "happy" ? 12 : 8} ry="7" fill="#F2919F" />
+            <Ellipse cx="100" cy={mood === "happy" ? 153 : 149} rx={mood === "happy" ? 13 : 9} ry="8" fill="#F2919F" />
           </G>
         </>
       ) : mood === "curious" ? (
-        <Ellipse cx="101" cy="135" rx="4.6" ry="5.4" fill="#4a1f27" />
+        <Ellipse cx="101" cy="140" rx="5" ry="6" fill="#4a1f27" />
       ) : mood === "thinking" ? (
-        <Path d="M93 136 Q101 132.5 109 135.5" {...line} />
+        <Path d="M93 141 Q101 137.5 109 140.5" {...line} />
       ) : mood === "sleepy" ? (
-        <Ellipse cx="100" cy="136" rx="3.4" ry="2.4" fill="#4a1f27" />
+        <Ellipse cx="100" cy="140" rx="3.6" ry="2.6" fill="#4a1f27" />
       ) : (
-        <Path d="M91 132 Q100 140 109 132" {...line} />
+        <Path d="M90 137 Q100 146 110 137" {...line} />
       )}
     </Layer>
   );
