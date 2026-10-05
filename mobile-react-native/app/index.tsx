@@ -44,7 +44,7 @@ export default function Splash() {
   return (
     <View className="flex-1 items-center justify-center bg-canvas">
       <Settle delay={0}>
-        <MascotFigure size={200} wave glow />
+        <MascotFigure size={200} moment="hello" move="float" />
       </Settle>
       <Settle delay={0.25}>
         <Text style={[type.hero, { marginTop: 14, fontSize: 36, lineHeight: 40, textAlign: "center" }]}>

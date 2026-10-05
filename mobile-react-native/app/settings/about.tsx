@@ -85,7 +85,7 @@ export default function About() {
               <PulseRing size={170} />
             </View>
             <View style={{ zIndex: 2 }}>
-              <MascotFigure size={176} wave glow />
+              <MascotFigure size={176} moment="joy" hop />
             </View>
 
             <Floating label="Bilirubin 11.0" note="day 3" icon={FlaskConical} style={{ left: 14, top: 26 }} delay={0} />

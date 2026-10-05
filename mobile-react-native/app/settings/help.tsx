@@ -215,7 +215,7 @@ export default function Help() {
     return (
       <SettingsScreen title="Help & support" eyebrow="Answers, guides and our team" icon={CircleHelp} bare>
         <Reveal style={{ alignItems: "center", paddingHorizontal: 32, marginTop: 40 }}>
-          <MascotFigure size={120} pose="heart" mood="reassuring" motion="hop" />
+          <MascotFigure size={120} moment="present" move="sway" hop />
           <Text style={{ fontFamily: font.semibold, fontSize: 24, letterSpacing: -0.6, color: ink[900], marginTop: 18 }}>Got it, thank you</Text>
           <Text style={{ fontFamily: font.regular, fontSize: 14.5, lineHeight: 21, color: ink[700], textAlign: "center", marginTop: 8 }}>
             A real person on our team will read this and reply by email, usually within two working days.

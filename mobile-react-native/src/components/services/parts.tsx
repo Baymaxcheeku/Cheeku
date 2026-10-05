@@ -212,7 +212,7 @@ export function AskToBook({ onPress, line }: { onPress: () => void; line?: strin
             <ArrowRight size={15} color="#fff" />
           </View>
         </View>
-        <MascotFigure size={92} wave />
+        <MascotFigure size={92} moment="present" move="sway" />
       </View>
     </Pressable>
   );
