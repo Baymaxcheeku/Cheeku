@@ -281,7 +281,7 @@ export default function Profile() {
               intends.
             </Lede>
             <View className="absolute -right-3 -top-1" pointerEvents="none">
-              <MascotBust size={112} />
+              <MascotBust size={112} mood="happy" pose="wave" />
             </View>
           </View>
 

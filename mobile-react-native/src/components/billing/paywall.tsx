@@ -2,7 +2,6 @@ import {
   ArrowLeft,
   CalendarClock,
   Check,
-  CheckCircle2,
   Lock,
   UserRound,
   Users,
@@ -20,6 +19,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { MascotFigure } from "@/components/illustrations/sprout";
 import { Brand } from "@/components/ui/brand";
 import { Gradient, glassShadow } from "@/components/ui/glass";
 import { StaggerItem } from "@/components/ui/motion";
@@ -725,12 +725,7 @@ function Success({
   return (
     <View className="px-5 pb-2">
       <View className="mt-4 items-center">
-        <View
-          className="h-16 w-16 items-center justify-center rounded-pill"
-          style={{ backgroundColor: brand[50] }}
-        >
-          <CheckCircle2 size={34} color={brand[600]} />
-        </View>
+        <MascotFigure size={128} pose="heart" mood="reassuring" motion="hop" />
         <Text className="mt-3 text-[24px] font-bold tracking-tight text-ink-900">
           You&apos;re in
         </Text>

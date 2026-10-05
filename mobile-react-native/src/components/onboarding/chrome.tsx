@@ -4,7 +4,7 @@ import { Pressable, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { MascotBust } from "@/components/illustrations/sprout";
-import { BubblePop, Bob, FillBar } from "@/components/onboarding/motion";
+import { BubblePop, FillBar } from "@/components/onboarding/motion";
 import { brand, ink, shadow, surface } from "@/theme/tokens";
 import { font, type } from "@/theme/type";
 
@@ -220,9 +220,7 @@ export function CtaLabel({ children, arrow = true }: { children: string; arrow?:
 export function CheekuSays({ children, size = 46 }: { children: string; size?: number }) {
   return (
     <View className="flex-row items-end gap-2">
-      <Bob>
-        <MascotBust size={size} />
-      </Bob>
+      <MascotBust size={size} mood="reassuring" motion="idle" />
       <BubblePop key={children} from="left" style={{ flexShrink: 1 }}>
         <View
           accessibilityLiveRegion="polite"

@@ -4,7 +4,6 @@ import { Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { MascotFigure } from "@/components/illustrations/sprout";
-import { Bob } from "@/components/onboarding/motion";
 import { Brand } from "@/components/ui/brand";
 import { Gradient, glassShadow } from "@/components/ui/glass";
 import { Backdrop, PillButton, ScreenHeader } from "@/components/ui/screen";
@@ -57,9 +56,7 @@ export default function ServiceBooking() {
               <Text style={{ fontFamily: font.regular, fontSize: 14, color: ink[700], marginTop: 4 }}>For {r.forName} · {whenText(r)}</Text>
             </View>
             {fresh && !cancelled ? (
-              <Bob>
-                <MascotFigure size={84} wave />
-              </Bob>
+              <MascotFigure size={92} pose="heart" mood="reassuring" motion="hop" />
             ) : null}
           </View>
           {fresh && !cancelled ? (

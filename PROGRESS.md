@@ -2251,3 +2251,82 @@ two-up tile heights, the request form's keyboard, and the swipe rows.
 **To do when the partner API docs arrive:** implement `MarketplaceProvider`,
 swap `marketplace()`, map service and offering ids to theirs, and move service
 requests from the phone to the server.
+
+## New mascot: Cheeku, the chikoo pebble · 2026-10-05
+
+The Sprout character is replaced by the finalised Mascot Playbook design: a
+soft sapodilla pebble with a purple sprout, glossy eyes, blush, tiny arms and
+feet. `src/components/mascot/cheeku.tsx`.
+
+- **3D in plain SVG.** Clay shading per part (key light top left, ambient
+  occlusion at the bottom, a cool rim light, soft specular, fixed clay specks),
+  glossy eyes with two catchlights, playbook palette (#F7D7C4 body, #A78BFA
+  sprout, #FFB3C1 blush, #1F1B2E eyes). Crisp from 28 px to 240 px, no images.
+- **Six expressions** (happy, calm, curious, reassuring, thinking, sleepy) and
+  **seven poses** (stand, wave, sit, holding heart, listening, cozy curl, with
+  phone/report), plus the optional glowing core.
+- **Motion rig.** Stacked layers turning around real pivots (shoulder, stem
+  base, eye line) on the UI thread: idle (bob, breathing, blinks, sprout sway),
+  gentle bounce, tiny hop, micro-wave, slow breathing, still. Floating extras:
+  hearts, zzz, a question mark, motion lines. Tap an interactive Cheeku for a
+  reaction (hop, cheek lift, sprout wiggle). Reduce motion: a still drawing.
+- **Which Cheeku where.** `MascotFigure` / `MascotBust` keep their names and
+  now take mood, pose and motion. Greeting and sign-in wave; chat marks stay
+  still and calm (there can be dozens); typing and report reading are
+  thinking, the scan screen holds a report; Help and the push primer listen;
+  bookings, purchases and a sent ticket hold a heart; the empty inbox is a
+  sleepy curl; the app lock breathes slowly. The extra `Bob` wrappers are gone,
+  since the rig moves on its own.
+
+**Verified here:** typecheck, lint, tests; web preview of the expression and
+pose sheet, a motion capture of all six motion styles, and About, Help,
+Doctors and Sign in. **Not seen on a device:** check transformOrigin pivots on
+iOS and Android (arm wave, sprout sway, blink), and frame rate on a long chat
+thread.
+
+**Rework, same day.** The first pass read as a shiny balloon: a dark rim from
+a high-contrast radial gradient, a glossy specular, visible specks. Every part
+now renders as matte clay: flat mid tone, Gaussian-blurred light and form
+shadow clipped inside the shape (react-native-svg 15 filters), warm bounce
+light, base occlusion, near-invisible grain, no specular. Eyes now have white
+sclera and deep brown irises, the mouth is recessed with a tongue, the blush
+is blurred into the skin, the leaf is matte and wider, and the ground shadow
+is a soft wide pool plus a contact shadow. Under 64 px the blurs fall back to
+gentle gradients for speed. **Check on device:** filter rendering on Android
+(FeGaussianBlur inside ClipPath) and scroll smoothness with several large
+mascots on screen.
+
+## Mascot: the Lottie character, in brand colours · 2026-10-05
+
+The drawn mascot is gone. Cheeku is now four Lottie animations of one
+character (supplied as free LottieFiles downloads; check each licence before
+release), recoloured from the artist's yellow into the app's lilac and violet.
+
+- **Files.** `assets/mascot/source/` holds the downloads untouched;
+  `scripts/recolor-mascot.mjs` writes the branded `assets/mascot/*.json`. Re-run
+  it to change the palette. Exact colour table first (with snapping for the
+  rounding variants exports carry), then a hue rule for anything missed. Body
+  yellows to lilacs, orange outline to brand violet 500, the faint magenta
+  cheek tint to a stronger rose blush (some files fade it on the layer, some on
+  the fill: both handled), sparks to pink, the teal desk set to deep ink
+  indigo. Never green, amber or red (rule 3).
+- **Moments.** wave (greet), working (at a desk with a phone: reading,
+  typing, scanning), celebrate (arms up with sparks: booked, bought, sent),
+  shrug (empty states, not sure, Help). `components/mascot/lottie.tsx` crops
+  each canvas to the character's measured box, so `size` is the character's
+  height whichever file it is.
+- **Stills.** Transparent PNGs of a good frame per moment, plus a head crop.
+  Marks under 64 px (one per chat message) and Reduce motion always use these.
+- **Screens keep their wording.** `MascotFigure` / `MascotBust` still take
+  mood, pose and motion; `momentFor` picks the animation. Calm or still
+  requests show the still.
+- **Web.** The player is dotLottie's WebAssembly build; its `.wasm` is served
+  from `public/` instead of a CDN (`components/mascot/wasm.web.ts`). Re-copy it
+  from `@lottiefiles/dotlottie-web` when that package is upgraded.
+
+**Verified here:** typecheck, lint, tests; web preview of all four
+animations, the stills, About, Help, Sign in and Doctors. **Needs a native
+rebuild** (`lottie-react-native` is a native module; Expo Go includes it, a dev
+client needs `npx expo run:ios` / `run:android`). Not seen on a device: check
+smoothness with two animations on one screen (Home), and Android hardware
+rendering.

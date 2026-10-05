@@ -34,7 +34,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { MascotBust } from "@/components/illustrations/sprout";
+import { MascotBust, MascotFigure } from "@/components/illustrations/sprout";
 import { Avatar } from "@/components/ui/avatar";
 import { Glass, glass } from "@/components/ui/glass";
 import { useReducedMotion } from "@/components/ui/motion";
@@ -300,7 +300,7 @@ export function PushPrimer({ onEnable, onLater, busy }: { onEnable: () => void; 
     <Glass strong className="mt-4 overflow-hidden rounded-[26px] p-4">
       <View className="flex-row items-start gap-3">
         <View style={{ width: 56, height: 56, borderRadius: 18, backgroundColor: brand[50], alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
-          <MascotBust size={60} />
+          <MascotBust size={60} mood="curious" pose="listen" />
         </View>
         <View className="flex-1">
           <Text style={{ fontFamily: font.semibold, fontSize: 16, color: ink[900] }}>Want a tap on the shoulder?</Text>
@@ -437,7 +437,7 @@ export function RowMenu({
 export function InboxEmpty({ filterLabel }: { filterLabel: string | null }) {
   return (
     <Glass strong className="mt-4 items-center rounded-[28px] px-6 py-9">
-      <MascotBust size={88} />
+      <MascotFigure size={96} pose="curl" mood="sleepy" />
       <Text style={{ fontFamily: font.semibold, fontSize: 18, color: ink[900], marginTop: 10, textAlign: "center" }}>
         {filterLabel ? `Nothing in ${filterLabel.toLowerCase()} yet` : "You're all caught up"}
       </Text>

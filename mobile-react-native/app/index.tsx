@@ -3,7 +3,6 @@ import { useEffect } from "react";
 import { Text, View } from "react-native";
 
 import { MascotFigure } from "@/components/illustrations/sprout";
-import { Bob } from "@/components/onboarding/motion";
 import { Settle } from "@/components/ui/motion";
 import { brand } from "@/theme/tokens";
 import { font, type } from "@/theme/type";
@@ -45,9 +44,7 @@ export default function Splash() {
   return (
     <View className="flex-1 items-center justify-center bg-canvas">
       <Settle delay={0}>
-        <Bob>
-          <MascotFigure size={200} wave />
-        </Bob>
+        <MascotFigure size={200} wave glow />
       </Settle>
       <Settle delay={0.25}>
         <Text style={[type.hero, { marginTop: 14, fontSize: 36, lineHeight: 40, textAlign: "center" }]}>

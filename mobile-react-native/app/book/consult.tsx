@@ -346,7 +346,7 @@ export default function Consult() {
           {typing ? (
             <View className="flex-row items-end gap-2">
               <View style={{ width: 34, flexShrink: 0 }}>
-                <MascotBust size={34} />
+                <MascotBust size={34} mood="calm" />
               </View>
               <Glass strong className="rounded-[18px] px-4 py-3" style={{ borderBottomLeftRadius: 6 }}>
                 <TypingDots color={brand[400]} />
@@ -505,7 +505,7 @@ function CheekuLine({ text }: { text: string }) {
     <View className="flex-row items-end gap-2 pr-10">
       {/* Fixed width: in a row with a growing bubble the mascot would shrink. */}
       <View style={{ width: 34, flexShrink: 0 }}>
-        <MascotBust size={34} />
+        <MascotBust size={34} mood="thinking" motion="idle" />
       </View>
       <Glass strong className="flex-shrink rounded-[20px] px-4 py-3" style={{ borderBottomLeftRadius: 6 }}>
         <Text style={{ fontFamily: font.regular, fontSize: 15, lineHeight: 21, color: ink[900] }}>{text}</Text>

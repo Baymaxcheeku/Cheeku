@@ -2,7 +2,6 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import {
   BookOpenCheck,
-  CheckCircle2,
   CircleHelp,
   CreditCard,
   FileStack,
@@ -20,7 +19,6 @@ import { useState } from "react";
 import { Linking, Pressable, Text, TextInput, View } from "react-native";
 
 import { MascotFigure } from "@/components/illustrations/sprout";
-import { Bob } from "@/components/onboarding/motion";
 import { SettingsScreen } from "@/components/settings/chrome";
 import { Body, Eyebrow, Questions, Title, type QA } from "@/components/settings/editorial";
 import { Brand, brandify } from "@/components/ui/brand";
@@ -217,9 +215,7 @@ export default function Help() {
     return (
       <SettingsScreen title="Help & support" eyebrow="Answers, guides and our team" icon={CircleHelp} bare>
         <Reveal style={{ alignItems: "center", paddingHorizontal: 32, marginTop: 40 }}>
-          <View style={{ width: 72, height: 72, borderRadius: 36, alignItems: "center", justifyContent: "center", backgroundColor: brand[50] }}>
-            <CheckCircle2 size={34} color={brand[600]} />
-          </View>
+          <MascotFigure size={120} pose="heart" mood="reassuring" motion="hop" />
           <Text style={{ fontFamily: font.semibold, fontSize: 24, letterSpacing: -0.6, color: ink[900], marginTop: 18 }}>Got it, thank you</Text>
           <Text style={{ fontFamily: font.regular, fontSize: 14.5, lineHeight: 21, color: ink[700], textAlign: "center", marginTop: 8 }}>
             A real person on our team will read this and reply by email, usually within two working days.
@@ -251,9 +247,7 @@ export default function Help() {
             <Text style={{ fontFamily: font.semibold, fontSize: 27, lineHeight: 32, letterSpacing: -0.8, color: ink[900], marginTop: 6 }}>How can we help?</Text>
             <Text style={{ fontFamily: font.regular, fontSize: 14, lineHeight: 20, color: ink[700], marginTop: 6 }}>Quick answers first. A real person if you need one.</Text>
           </View>
-          <Bob>
-            <MascotFigure size={88} />
-          </Bob>
+          <MascotFigure size={96} pose="listen" mood="curious" />
         </View>
         <View style={{ marginTop: 16, flexDirection: "row", alignItems: "center", gap: 10, height: 50, paddingHorizontal: 16, borderRadius: 999, backgroundColor: "#fff", borderWidth: 1, borderColor: surface.line }}>
           <Search size={18} color={ink[500]} />

@@ -26,7 +26,7 @@ import { ProductPicker } from "@/components/ai/product-picker";
 import { Paywall } from "@/components/billing/paywall";
 import { AssistantTurn, UserBubble } from "@/components/chat/turn";
 import { MascotBust, MascotFigure } from "@/components/illustrations/sprout";
-import { Bob, TypingDots } from "@/components/onboarding/motion";
+import { TypingDots } from "@/components/onboarding/motion";
 import { EmergencyEscalation } from "@/components/safety/emergency-escalation";
 import { Brand } from "@/components/ui/brand";
 import { Glass, GlassCircle, glass, glassShadow } from "@/components/ui/glass";
@@ -338,7 +338,7 @@ export default function Ask() {
         <View className="flex-row items-center gap-3 px-4 pb-1 pt-2">
           <Glass strong className="h-12 w-12 items-center justify-center overflow-hidden rounded-pill">
             <View style={{ marginTop: 8 }}>
-              <MascotBust size={40} />
+              <MascotBust size={40} mood="calm" motion="breathe" />
             </View>
           </Glass>
           <View className="flex-1">
@@ -381,9 +381,7 @@ export default function Ask() {
           {empty ? (
             <View className="flex-1 justify-center py-4">
               <View className="items-center">
-                <Bob>
-                  <MascotFigure size={120} wave />
-                </Bob>
+                <MascotFigure size={132} wave />
                 <Text style={{ fontFamily: font.semibold, fontSize: 25, letterSpacing: -0.7, color: ink[900], marginTop: 6, textAlign: "center" }}>
                   Hi, I&apos;m{" "}
                   <Text style={{ fontFamily: font.italic, color: brand[600] }}>
@@ -501,7 +499,7 @@ export default function Ask() {
                 <>
                   {pendingText !== "Checking a product…" ? <UserBubble message={{ id: "pending", conversationId: "", role: "user", content: pendingText, createdAt: "", tier: null, memory: null, citations: [], safety: "clear", attachment: null, assessment: null }} /> : null}
                   <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-                    <MascotBust size={28} />
+                    <MascotBust size={28} mood="thinking" motion="idle" />
                     <Glass strong className="rounded-[20px] px-4 py-3.5" style={{ borderTopLeftRadius: 6 }}>
                       <TypingDots color={brand[400]} />
                     </Glass>

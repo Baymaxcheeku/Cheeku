@@ -21,7 +21,6 @@ import { ActivityIndicator, Alert, Pressable, ScrollView, Text, View } from "rea
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { MascotFigure } from "@/components/illustrations/sprout";
-import { Bob } from "@/components/onboarding/motion";
 import { Avatar } from "@/components/ui/avatar";
 import { Glass, Gradient, glass, glassShadow } from "@/components/ui/glass";
 import { Backdrop, ScreenHeader } from "@/components/ui/screen";
@@ -278,9 +277,7 @@ export default function Scan() {
       >
         <Backdrop />
         <View className="items-center">
-          <Bob>
-            <MascotFigure size={120} />
-          </Bob>
+          <MascotFigure size={132} pose="phone" mood="thinking" />
         </View>
         <Text style={{ fontFamily: font.semibold, fontSize: 26, letterSpacing: -0.7, color: ink[900], textAlign: "center", marginTop: 6 }}>
           Reading it now
