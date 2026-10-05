@@ -2330,3 +2330,42 @@ rebuild** (`lottie-react-native` is a native module; Expo Go includes it, a dev
 client needs `npx expo run:ios` / `run:android`). Not seen on a device: check
 smoothness with two animations on one screen (Home), and Android hardware
 rendering.
+
+## Welcome: a fourth panel for booking · 2026-10-05
+
+The carousel now ends on the marketplace: "The right care, picked for you."
+
+- **Arc.** Ask me, I remember, the whole family, and now the care around you.
+  Panel 3's button became "And when we need a doctor?" so the hand-off reads
+  as one conversation.
+- **Scene, second version.** The first try (a shelf of 3D emoji plus a busy
+  "Cheeku's picks" card) was rejected by the owner as cluttered and off-brand.
+  Now: one thin ring, four people on it with name tags in panel 3's style
+  (Doctors, Lab tests, Therapy, Specialists), and the medicines bag in a
+  lavender disc at the centre. Copy cut to a two-line headline and one short
+  sentence.
+- **Art.** The avatars and the medicines bag are illustrations the owner
+  supplied, cut out here (avatars masked to circles, the bag lifted off its
+  background, the half-white syringe dropped). They live in
+  `mobile-react-native/assets/care`. **Licence:** these look like stock
+  illustrations; confirm a licence that allows use in a paid app before
+  release. A third reference the owner sent carried a "Magnific" watermark
+  and was not used.
+- **Small phones.** Under 760 pt the picture shrinks (box 260, faces 58).
+  Checked at 375 x 667 and 393 x 852 in the web preview.
+- No green, amber or red in the tags. Cheeku never decides a test is needed
+  on its own say-so; "No extra tests" means it will not repeat one already on
+  file.
+
+- **Motion** (`components/onboarding/care-orbit.tsx`). The ring opens and the
+  bag pops in with soft ripples; the four people fly out of the centre to
+  their places; a small light orbits the ring; then a violet highlight moves
+  from one service to the next every 1.6 s (the "picked for you" idea, shown
+  rather than said), with a ping on each face. Tapping a face or the bag
+  picks it and the cycle carries on from there. Plus marks twinkle outside
+  the ring and a soft radial glow lifts the picture off the page. All on the
+  UI thread; Reduce motion gets the finished picture, still.
+
+**Not seen on a device:** check the motion's smoothness on a mid-range
+Android (several looping animations at once), and that the avatars look sharp
+at 3x (they are 240 px).

@@ -18,11 +18,13 @@ import { CastAvatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { MascotBust } from "@/components/illustrations/sprout";
 import { CtaLabel, ReassuranceStrip } from "@/components/onboarding/chrome";
+import { CareOrbit } from "@/components/onboarding/care-orbit";
 import { BubblePop, FillBar, TypingDots, useTypedReveal } from "@/components/onboarding/motion";
 import { PANELS } from "@/lib/onboarding/panels";
 import { castFaces } from "@/lib/profiles/avatar";
 import { brand, ink, shadow, surface } from "@/theme/tokens";
 import { font, type } from "@/theme/type";
+
 
 /*
  * The eyebrow tints, one per chapter.
@@ -32,17 +34,18 @@ import { font, type } from "@/theme/type";
  * come from the journey palette so the carousel and the picker that follows
  * sign-up belong to the same world.
  */
-const CHAPTER: Record<"meet" | "memory" | "family", { bg: string; fg: string }> = {
+const CHAPTER: Record<"meet" | "memory" | "family" | "care", { bg: string; fg: string }> = {
   meet: { bg: brand[50], fg: brand[600] },
   memory: { bg: "#e6f1fd", fg: "#1a6fc2" },
   family: { bg: "#fdeaf0", fg: "#c22a6b" },
+  care: { bg: "#e2f3fb", fg: "#0b6f99" },
 };
 
 /*
  * A2 — the value carousel, before any account exists.
  *
- * Three panels, each with its OWN composition: a conversation, a round trip
- * from paperwork to answer, and a family. Panels sharing one hero with swapped
+ * Four panels, each with its OWN composition: a conversation, a round trip
+ * from paperwork to answer, a family, and the circle of care around you. Panels sharing one hero with swapped
  * copy is a slideshow, not a story.
  *
  * SWIPE AND TAP BOTH WORK. People swipe onboarding carousels by reflex, and a
@@ -160,6 +163,7 @@ export default function Welcome() {
           {panel.kind === "meet" ? <SceneMeet compact={compact} /> : null}
           {panel.kind === "memory" ? <SceneMemory compact={compact} /> : null}
           {panel.kind === "family" ? <SceneFamily faces={faces} compact={compact} /> : null}
+          {panel.kind === "care" ? <CareOrbit compact={compact} /> : null}
         </View>
 
         <View className="px-6 pt-4">

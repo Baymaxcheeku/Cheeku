@@ -1,11 +1,13 @@
 /*
- * A2 — the three panels before any account exists.
+ * A2 — the four panels before any account exists.
  *
  * ┌─ THE ARC ────────────────────────────────────────────────────────────────┐
  * │                                                                          │
  * │  1. Ask me anything, in your own words.       (the invitation)           │
  * │  2. Give me the paperwork once; I'll keep it. (the mechanism)            │
  * │  3. And not only yours — the whole family's.  (the reach)                │
+ * │  4. When it's time to act, I'll help you      (the action)               │
+ * │     choose care that fits your history.                                  │
  * │                                                                          │
  * │ Each panel's last idea is the next panel's first. The voice is FIRST     │
  * │ PERSON throughout, one character start to finish, because the thing      │
@@ -29,7 +31,7 @@
  * props: each panel is laid out differently on purpose.
  */
 export type Panel = {
-  kind: "meet" | "memory" | "family";
+  kind: "meet" | "memory" | "family" | "care";
   /**
    * One word for what the panel is about, above the headline.
    *
@@ -66,6 +68,21 @@ export const PANELS: readonly Panel[] = [
     lead: "Mummy, Papa, the kids and you.",
     accent: "One app.",
     body: "Switch between family members in a tap. Every person's history stays separate, private and never sold.",
+    cta: "And when we need a doctor?",
+  },
+  /*
+   * Panel 4, added 2026-10-05: the marketplace. Short on purpose; the picture
+   * names the services, so the words only have to say why booking here is
+   * different: it starts from your history. "No extra tests" is the line an
+   * Indian family hears loudest, after years of forty-test "full body
+   * packages". Cheeku never decides a test is needed on its own say-so.
+   */
+  {
+    kind: "care",
+    eyebrow: "Book care",
+    lead: "The right care,",
+    accent: "picked for you.",
+    body: "Doctors, lab tests and medicines, booked around your health history. No extra tests, no running around.",
     cta: "Let's get started",
   },
 ];
