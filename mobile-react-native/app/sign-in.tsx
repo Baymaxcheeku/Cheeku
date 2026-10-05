@@ -211,7 +211,7 @@ export default function SignIn() {
                 <Text style={{ fontFamily: font.bold, fontSize: 12.5, color: "#ffffff" }}>{copy.greet}</Text>
               </View>
             </BubblePop>
-            <MascotBust size={104} mood="happy" pose="wave" motion="wave" />
+            <MascotBust size={104} moment="present" />
           </View>
         </View>
 

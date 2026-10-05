@@ -381,7 +381,7 @@ export default function Ask() {
           {empty ? (
             <View className="flex-1 justify-center py-4">
               <View className="items-center">
-                <MascotFigure size={132} wave />
+                <MascotFigure size={132} moment="present" move="float" hop />
                 <Text style={{ fontFamily: font.semibold, fontSize: 25, letterSpacing: -0.7, color: ink[900], marginTop: 6, textAlign: "center" }}>
                   Hi, I&apos;m{" "}
                   <Text style={{ fontFamily: font.italic, color: brand[600] }}>

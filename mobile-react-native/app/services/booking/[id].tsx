@@ -56,7 +56,7 @@ export default function ServiceBooking() {
               <Text style={{ fontFamily: font.regular, fontSize: 14, color: ink[700], marginTop: 4 }}>For {r.forName} · {whenText(r)}</Text>
             </View>
             {fresh && !cancelled ? (
-              <MascotFigure size={92} pose="heart" mood="reassuring" motion="hop" />
+              <MascotFigure size={92} moment="celebrate" move="pop" />
             ) : null}
           </View>
           {fresh && !cancelled ? (

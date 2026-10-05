@@ -13,6 +13,7 @@ import { CareSection } from "@/components/home/care";
 import { AppointmentCard } from "@/components/booking/appointment-card";
 import { isUpcoming, startsAt, useAppointmentList } from "@/lib/booking/appointments";
 import { FileCard, ReadsStrip } from "@/components/home/strips";
+import { MascotFigure } from "@/components/illustrations/sprout";
 import { Gradient } from "@/components/ui/glass";
 import { knowledgeFeed } from "@/lib/knowledge/queries";
 import { NotificationsBell } from "@/components/app/notifications-bell";
@@ -281,6 +282,10 @@ export default function Home() {
 function LoadFailed({ topInset, onRetry }: { topInset: number; onRetry: () => void }) {
   return (
     <View className="flex-1 justify-center bg-canvas px-8" style={{ paddingTop: topInset }}>
+      {/* Worried with you, at his desk; never about anyone's health here. */}
+      <View className="mb-4 items-center">
+        <MascotFigure size={120} moment="worried" />
+      </View>
       <Text className="text-center text-[20px] font-bold text-ink-900">
         Could not load your records
       </Text>

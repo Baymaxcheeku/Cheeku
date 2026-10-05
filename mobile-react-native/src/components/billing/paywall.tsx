@@ -725,7 +725,7 @@ function Success({
   return (
     <View className="px-5 pb-2">
       <View className="mt-4 items-center">
-        <MascotFigure size={128} pose="heart" mood="reassuring" motion="hop" />
+        <MascotFigure size={128} moment="celebrate" move="pop" />
         <Text className="mt-3 text-[24px] font-bold tracking-tight text-ink-900">
           You&apos;re in
         </Text>

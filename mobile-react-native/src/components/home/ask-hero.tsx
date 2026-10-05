@@ -305,9 +305,16 @@ export function CheekuCard({
     <View className="overflow-hidden rounded-[32px]" style={[glassShadow, { minHeight: 318 }]}>
       <Gradient from="#f1edff" to="#d8cffd" glow="#ffffff" />
 
-      {/* Cheeku, large and alive, anchored to the card's bottom-right corner. */}
-      <View pointerEvents="none" style={{ position: "absolute", right: -18, bottom: -14 }}>
-        <MascotFigure size={190} wave />
+      {/*
+       * Cheeku, large and alive, anchored to the card's bottom-right corner.
+       * His pose follows the person's state: open arms when there is nothing
+       * yet ("snap one report"), thinking at his desk when reports wait for a
+       * check, otherwise a hello that settles into glancing about. Tap him and
+       * he hops.
+       */}
+      <View pointerEvents="box-none" style={{ position: "absolute", right: remembered === 0 ? -2 : -18, bottom: -14 }}>
+        {/* Open arms are wider, so that pose sits further in and a touch smaller. */}
+        <MascotFigure size={remembered === 0 ? 176 : 190} moment={remembered === 0 ? "present" : needsReview > 0 ? "think" : "hello"} hop />
       </View>
 
       <View className="flex-1 p-4">

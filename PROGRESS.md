@@ -2408,3 +2408,39 @@ the screen in 68 ms with no spinner; offline it rolled back and showed the bar;
 Retry back online saved and cleared it. **Not checked against the live
 database or on a device:** turn on airplane mode in the app and try a switch,
 a record type change and a form save.
+
+## Cheeku comes alive: eleven moments, moves and peeks · 2026-10-05
+
+The owner noticed one wave on every early screen. The four files hold far
+more than they played, so the mascot now has eleven moments, and each screen
+gets the one that fits.
+
+- **Hidden in the files.** `working.json` stops at frame 272 but its layers
+  run to 1039, with the artist's markers for three more moods at the desk:
+  steady (thinking), sad (worried), happy (joy). The standing three share one
+  rig, so parts can be swapped. `scripts/mascot-variants.mjs` cuts them out,
+  trimming keyframes and layers to each window (a single remaining keyframe
+  becomes a static value; a lone keyframe blanks the player). The desk's last
+  segment has a badge with Turkish text and is left out.
+- **New moments.** `idle` (wave's tail: standing, glancing about), `cheer`
+  (celebrate's held arms-up), `think`, `worried`, `joy` (desk), and one
+  genuinely new pose, `present`: shrug's open arms with celebrate's smile.
+  Plus sequences: `hello` waves once then idles; `celebrate` jumps once then
+  cheers; `present` opens its arms once then holds them.
+- **Moves.** `float`, `sway`, `pop`, `flip`, hop on tap, and `CheekuPeek`:
+  head and shoulders rise over a card's edge every few seconds, glance about,
+  and duck back. Reduce motion gets stills (new PNGs for every moment).
+- **Where.** Home hero follows the person's state (hello when all is in
+  range, present when there are no reports, think when reports wait for a
+  check) and hops when tapped; "Just tell Cheeku" presents and sways; the
+  health file card has the peek; Home's load failure is worried. Splash
+  hello + float, sign-in present, profile idle + float, chat empty present +
+  float, Doctors think, About joy, Help present + sway, paywall and booked
+  service celebrate + pop, records empty present. The welcome carousel keeps
+  the looping wave.
+
+**Verified here:** typecheck, lint, 289 tests; every moment, move and the Home
+placements in the web preview (temporary harness, deleted), and Doctors,
+About, Sign in and Help as real screens. **Not seen on a device:** several
+animations at once on Home (hero, Book services, peek) on a mid-range
+Android; the desk cuts add about 540 KB of JSON to the bundle.

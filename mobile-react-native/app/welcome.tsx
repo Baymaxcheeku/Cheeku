@@ -244,7 +244,7 @@ function SceneMeet({ compact }: { compact: boolean }) {
 
       <View className="mt-1 flex-row items-end gap-2">
         <BubblePop delay={0.1} from="left">
-          <MascotBust size={compact ? 78 : 96} mood="happy" motion="bounce" />
+          <MascotBust size={compact ? 78 : 96} moment="wave" />
         </BubblePop>
         <BubblePop delay={replyAt - 0.9} from="left" style={{ flexShrink: 1, marginBottom: 10 }}>
           <View
