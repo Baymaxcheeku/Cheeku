@@ -178,6 +178,25 @@ export async function switchProfile(profileId: string, known?: readonly ActivePr
   return true;
 }
 
+/**
+ * Throws when there is no session.
+ *
+ * WHY THIS EXISTS. With no session, row level security answers every profile
+ * query with zero rows, which is indistinguishable from "this account has no
+ * profile". Sign-out clears the query cache while Home and Profile are still
+ * mounted; they refetch at once, signed out, and cached "no profile" (to disk
+ * too, because the persister writes a beat after the cache was wiped). The
+ * next sign-in then opened on "Set up a profile first" for a second or two
+ * before the real family arrived. A signed-out read is an error, and errors
+ * are never cached as data.
+ */
+export async function assertSignedIn(): Promise<void> {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+  if (!session) throw new Error("signed out");
+}
+
 /** Cleared on sign-out, so the next account does not inherit a selection. */
 export async function clearActiveProfile(): Promise<void> {
   await kv.remove(KEY);

@@ -2472,3 +2472,36 @@ Every mascot now moves, and each main page has its own version.
 screen; Profile, Upload and Ask pieces, the moving small faces (every frame
 differs) and tap reactions in a temporary harness (deleted). **Not seen on a
 device:** a long chat thread with many moving faces on a mid-range Android.
+
+## Sign-in no longer flashes "Set up a profile first" · 2026-10-06
+
+Signing in to an account with a family (Athar, Nisha, Imaad) showed "Set up a
+profile first" for a second or two before Home loaded.
+
+**Root cause.** Signed out, row level security answers every profile query
+with zero rows, which the app could not tell apart from an account with no
+profile. Sign-out cleared the query cache while Home and Profile were still
+mounted; they refetched at once with no session and cached `profile: null`
+as the family. The disk persister, throttled to 2 s, then wrote that empty
+family AFTER `clearOfflineCache` had run. On the next sign-in Home found a
+cached "no profile", rendered `NoProfile`, and only replaced it when its
+background refetch returned.
+
+**Fix, in layers.**
+- `assertSignedIn()` (profiles/context): `loadFamily` and the Profile tab's
+  query throw when there is no session, so a signed-out read is an error and
+  is never cached as data. Regression test in `signed-in.test.ts`.
+- Home, Profile and Ask only show "set up a profile" from a settled, fresh
+  answer; a cached empty one being refreshed keeps the loader up.
+- Sign-in starts from a clean cache (memory and disk), then loads the family
+  before opening Home, so Home opens complete.
+- Persisted cache `buster` v1 -> v2 throws away copies already poisoned on
+  people's phones.
+
+**Profile mascot.** The floating figure beside the title read as clutter.
+Cheeku now peeks over the top edge of the person's card instead (head and
+shoulders only, every few seconds), the same peek as Home's health file.
+
+**Verified here:** typecheck, lint, 291 tests; the peek in the web preview
+(temporary harness, deleted). **Needs the live app:** sign out, sign back in
+as the family account, and confirm Home opens straight on the family.
