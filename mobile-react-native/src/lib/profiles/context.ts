@@ -4,6 +4,7 @@ import { seatsFor } from "@/lib/billing/plans";
 import { getEntitlement } from "@/lib/billing/quota";
 import { kv } from "@/lib/storage";
 import { supabase } from "@/lib/supabase/client";
+import { sessionUser, shared } from "@/lib/supabase/session";
 import { generatedAvatar } from "./avatar";
 import { signPhotos } from "./photo";
 
@@ -59,6 +60,13 @@ export type ActiveProfile = {
  * validate the stored id.
  */
 export async function familyProfiles(): Promise<ActiveProfile[]> {
+  // Shared while in flight: the family load, the switcher and the active
+  // profile used to fetch this list separately, often in the same instant.
+  const user = await sessionUser();
+  return shared(`profiles:${user?.id ?? "none"}`, readFamilyProfiles);
+}
+
+async function readFamilyProfiles(): Promise<ActiveProfile[]> {
   const { data, error } = await supabase
     .from("profiles")
     .select("id, name, relationship, is_primary, avatar_ring, avatar_seed, avatar_url, dob, sex")
@@ -151,7 +159,11 @@ export async function profileAccess(): Promise<{
  * records", never to someone else's and never to a crash.
  */
 export async function activeProfile(): Promise<ActiveProfile | null> {
-  const profiles = await selectableProfiles();
+  return activeProfileFrom(await selectableProfiles());
+}
+
+/** The stored choice, validated against a selectable list the caller already has. */
+export async function activeProfileFrom(profiles: readonly ActiveProfile[]): Promise<ActiveProfile | null> {
   if (profiles.length === 0) return null;
 
   const requested = await kv.get(KEY);

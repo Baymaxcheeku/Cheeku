@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase/client";
+import { sessionUser, shared } from "@/lib/supabase/session";
 import { FREE_CHAT_LIMIT, isUnlimited, type Tier } from "./plans";
 
 /*
@@ -82,26 +83,32 @@ function freeEntitlement(): Entitlement {
  * server render. The equivalent here is react-query's cache, which the screens
  * own — so this stays a plain function and callers key it as `["entitlement"]`.
  */
-export async function getEntitlement(): Promise<Entitlement> {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return freeEntitlement();
+export function getEntitlement(): Promise<Entitlement> {
+  return sessionUser().then((user) => (user ? shared(`entitlement:${user.id}`, () => readEntitlement(user.id)) : freeEntitlement()));
+}
 
+/*
+ * ONE QUERY. This was three in a row (who am I on the auth server, my
+ * family, its subscription) and ran three to six times per screen. The user
+ * id now comes from the session on the phone, and the family and its
+ * subscription come back together through the foreign key
+ * (subscriptions.family_id references families.id, unique), as a nested
+ * select.
+ */
+async function readEntitlement(userId: string): Promise<Entitlement> {
   const { data: family } = await supabase
     .from("families")
-    .select("id")
-    .eq("owner_id", user.id)
+    .select("id, subscriptions(tier, chats_used_this_month, period_start, expires_at)")
+    .eq("owner_id", userId)
     .maybeSingle();
 
-  const familyId = (family?.id as string | undefined) ?? null;
-  if (!familyId) return freeEntitlement();
-
-  const { data } = await supabase
-    .from("subscriptions")
-    .select("tier, chats_used_this_month, period_start, expires_at")
-    .eq("family_id", familyId)
-    .maybeSingle();
+  if (!family?.id) return freeEntitlement();
+  // A one-to-one embed can come back as an object or a one-row array.
+  const nested = (family as { subscriptions?: unknown }).subscriptions;
+  const data = (Array.isArray(nested) ? nested[0] : nested) as
+    | { tier: string; chats_used_this_month: number | null; period_start: string; expires_at: string | null }
+    | null
+    | undefined;
 
   if (!data) return freeEntitlement();
 

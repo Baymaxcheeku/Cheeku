@@ -2505,3 +2505,58 @@ shoulders only, every few seconds), the same peek as Home's health file.
 **Verified here:** typecheck, lint, 291 tests; the peek in the web preview
 (temporary harness, deleted). **Needs the live app:** sign out, sign back in
 as the family account, and confirm Home opens straight on the family.
+
+## Fewer database calls per screen · 2026-10-06
+
+Asked to find N+1 queries. There was no classic loop of one query per list
+item; the cost was the same data fetched again and again on every screen.
+
+**Measured, not guessed.** Each screen was opened cold in the web build
+against a fake Supabase (a three-person family, 4 records, Family plan) that
+counted every call. Same fixture before and after; every screen's visible
+text compared word for word (identical, apart from Home's rotating ask-bar
+hint, which is on a 3.2 s timer and was caught mid-fade).
+
+| Screen | Calls before | After |
+|---|---|---|
+| Home | 25 | 14 |
+| Records | 28 | 9 |
+| Ask Cheeku | 25 | 12 |
+| Profile | 20 | 9 |
+| Upload | 19 | 2 |
+| Health file | 12 | 3 |
+| Family | 16 | 3 |
+| Personal info | 7 | 3 |
+| Subscription | 7 | 2 |
+| Notifications | 1 | 1 |
+| **All ten** | **160** | **58** |
+
+**What changed.**
+- `getEntitlement` was three calls in a row (auth server, `families`,
+  `subscriptions`) and ran 3 to 6 times per screen. Now one nested select
+  (`families?select=id,subscriptions(...)`) over the existing unique foreign
+  key, with the user id from the local session. Handles the embed as an
+  object or a one-row array.
+- `loadFamily` asked for the profile list twice and the plan three times;
+  now once each, with the active person chosen from the list already loaded
+  (`activeProfileFrom`).
+- `shared()` (lib/supabase/session.ts): identical asks made while one is in
+  flight share that request. Nothing is kept after it settles, keys carry the
+  user id. Used for the profile list and the plan.
+- `sessionUser()` replaces `auth.getUser()` on read paths that only need the
+  id (plan, personal info, notification prefs, reviews, inbox realtime).
+  Writes and the launch check keep getUser so a revoked session is caught;
+  row level security checks the token on every query either way.
+- Indexes: every column these lookups filter on is already indexed (owner,
+  family, user and profile keys, notifications by user and date, primary
+  keys on article_reads and open_loops). No migration needed.
+
+**Left as is, on purpose.** The lab catalogue is three small tables cached
+for an hour; the two `families` reads (plan, and notification prefs for the
+reminder scheduler) serve different consumers.
+
+**Verified here:** typecheck, lint, 296 tests (5 new for `shared` and
+`sessionUser`), the before/after count and text comparison above. **Needs
+the live database:** open Home, Records and Profile and confirm the plan name
+and family look right (the nested select is the one query shape the fake
+backend had to imitate).
