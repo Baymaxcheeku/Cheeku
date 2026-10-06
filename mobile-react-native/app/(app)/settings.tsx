@@ -37,7 +37,7 @@ import {
   exportAccount,
   shareExport,
 } from "@/lib/account/actions";
-import { MascotFigure } from "@/components/illustrations/sprout";
+import { CheekuPeek } from "@/components/mascot/lottie";
 import { Avatar } from "@/components/ui/avatar";
 import { Glass, Gradient, glass, glassShadow } from "@/components/ui/glass";
 import { Backdrop } from "@/components/ui/screen";
@@ -48,6 +48,7 @@ import { Paywall } from "@/components/billing/paywall";
 import { allowsFamily, planFor, seatsFor } from "@/lib/billing/plans";
 import { getEntitlement } from "@/lib/billing/quota";
 import {
+  assertSignedIn,
   clearActiveProfile,
   profileAccess,
   activeProfile,
@@ -78,6 +79,7 @@ export default function Settings() {
   const context = useQuery({
     queryKey: ["settings-context"],
     queryFn: async () => {
+      await assertSignedIn();
       const [access, profile, entitlement] = await Promise.all([
         profileAccess(),
         activeProfile(),
@@ -113,6 +115,14 @@ export default function Settings() {
   }
 
   const data = context.data;
+  if (!data?.profile && context.isFetching) {
+    // A cached "no profile" being refreshed is not an answer yet.
+    return (
+      <View className="flex-1 items-center justify-center bg-canvas">
+        <ActivityIndicator color={brand[600]} />
+      </View>
+    );
+  }
   if (!data?.profile) {
     return (
       <View className="flex-1 items-center justify-center bg-canvas px-10">
@@ -134,22 +144,23 @@ export default function Settings() {
       contentContainerStyle={{ paddingTop: insets.top + 12, paddingBottom: 24 }}
       showsVerticalScrollIndicator={false}
     >
-      <View style={{ flexDirection: "row", alignItems: "flex-end", paddingHorizontal: 20 }}>
-        <Text accessibilityRole="header" style={{ flex: 1, fontFamily: font.semibold, fontSize: 28, letterSpacing: -0.8, color: ink[900] }}>
-          Profile
-        </Text>
-        {/* Waves hello when the tab opens, then stays with you. Tap him. */}
-        <View style={{ marginBottom: -18 }}>
-          <MascotFigure size={74} moment="hello" move="float" hop />
-        </View>
-      </View>
+      <Text accessibilityRole="header" style={{ paddingHorizontal: 20, fontFamily: font.semibold, fontSize: 28, letterSpacing: -0.8, color: ink[900] }}>
+        Profile
+      </Text>
 
       {/*
        * Who, and on what plan, in one glass card. The plan row is the upgrade
        * entry point for people who came looking for one; on Family it says
        * "Manage", because someone on the top tier still needs a way to cancel.
        */}
-      <View className="mx-5 mt-4 overflow-hidden rounded-[30px] p-4" style={glassShadow}>
+      {/*
+       * Cheeku peeks over the top edge of the person's card, in the space
+       * beside the title, every few seconds: glances about, ducks back. He
+       * sits behind the card so only his head and shoulders ever show.
+       */}
+      <View className="mx-5 mt-4">
+        <CheekuPeek size={80} moment="idle" style={{ position: "absolute", right: 22, top: -44 }} />
+      <View className="overflow-hidden rounded-[30px] p-4" style={glassShadow}>
         <Gradient from="#ffffff" to="#efeaff" glow="#ffffff" />
         <View className="flex-row items-center gap-3.5">
           <Avatar svg={profile.avatar} photo={profile.photo} image={profile.avatarImage} background={profile.avatarBackground ?? undefined} size={68} />
@@ -199,6 +210,7 @@ export default function Settings() {
           <Text style={{ fontFamily: font.semibold, fontSize: 13.5, color: brand[600] }}>{canUpgrade ? "Upgrade" : "Manage"}</Text>
           <ChevronRight size={15} color={brand[600]} />
         </Pressable>
+      </View>
       </View>
 
       {/* Your care: the two places people come back to, as tiles. */}

@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
@@ -32,6 +33,8 @@ import { BubblePop, FillBar } from "@/components/onboarding/motion";
 import { useReducedMotion } from "@/components/ui/motion";
 import { createAccountSchema, signInSchema } from "@/lib/auth/schemas";
 import { resolveLanding } from "@/lib/auth/landing";
+import { clearOfflineCache } from "@/lib/offline/cache";
+import { FAMILY_KEY, loadFamily } from "@/lib/profiles/family";
 import { supabase } from "@/lib/supabase/client";
 import { brand, ink, semantic, shadow, surface } from "@/theme/tokens";
 import { font, type } from "@/theme/type";
@@ -79,6 +82,7 @@ type Tab = "signIn" | "create";
  */
 export default function SignIn() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const insets = useSafeAreaInsets();
 
   const [tab, setTab] = useState<Tab>("signIn");
@@ -159,7 +163,17 @@ export default function SignIn() {
        * is not the fix either: that lands on the splash, which used to bounce
        * to the welcome carousel they had just finished.
        */
-      router.replace(await resolveLanding());
+      /*
+       * A fresh session starts from a clean cache: whatever the last session
+       * left (another account's family, or a "no profile" cached while signed
+       * out) must never be what Home opens on. Then the family is loaded
+       * BEFORE Home is shown, so it opens complete instead of on a loader.
+       */
+      queryClient.clear();
+      await clearOfflineCache();
+      const landing = await resolveLanding();
+      if (landing === "/home") await queryClient.prefetchQuery({ queryKey: FAMILY_KEY, queryFn: loadFamily });
+      router.replace(landing);
     } catch {
       // A throw is a transport failure. Saying "wrong password" to someone with
       // no signal sends them to reset a password that was never the problem.

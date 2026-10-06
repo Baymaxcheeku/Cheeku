@@ -121,6 +121,16 @@ export default function Home() {
   const profile = data?.profile;
 
   if (!data || !profile) {
+    // Only a settled, fresh answer may say there is no profile. A cached "no
+    // profile" that is being refreshed (an old session's, say) keeps the
+    // loader up instead of flashing onboarding at someone with a family.
+    if (context.isFetching) {
+      return (
+        <View className="flex-1 items-center justify-center bg-canvas">
+          <ActivityIndicator color={brand[600]} />
+        </View>
+      );
+    }
     return <NoProfile topInset={insets.top} />;
   }
 

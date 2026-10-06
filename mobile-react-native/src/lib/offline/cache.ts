@@ -90,7 +90,9 @@ export const persistOptions = {
    * Change it whenever a record's shape changes, or an old cache will be
    * rendered by new code that expects fields it does not have.
    */
-  buster: "v1",
+  // v2 (2026-10-06): drops caches that saved a signed-out "no profile" as the
+  // family, which made sign-in flash "Set up a profile first".
+  buster: "v2",
   dehydrateOptions: { shouldDehydrateQuery: shouldPersistQuery },
 } as const;
 

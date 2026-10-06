@@ -9,7 +9,7 @@ import { prefetchHealthFile } from "@/lib/health/queries";
 import { supabase } from "@/lib/supabase/client";
 import { addMemberSchema } from "@/lib/settings/schemas";
 
-import { activeProfile, familyProfiles, profileAccess, switchProfile, type ActiveProfile } from "./context";
+import { activeProfile, assertSignedIn, familyProfiles, profileAccess, switchProfile, type ActiveProfile } from "./context";
 
 /*
  * The family, as one query the whole app shares.
@@ -37,6 +37,7 @@ export type FamilyContext = {
 };
 
 export async function loadFamily(): Promise<FamilyContext> {
+  await assertSignedIn();
   const [access, profile, entitlement] = await Promise.all([profileAccess(), activeProfile(), getEntitlement()]);
   return { access, profile, entitlement };
 }

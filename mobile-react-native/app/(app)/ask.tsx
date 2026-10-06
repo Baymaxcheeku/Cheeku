@@ -315,6 +315,14 @@ export default function Ask() {
     );
   }
 
+  if (!member && family.isFetching) {
+    return (
+      <View className="flex-1 items-center justify-center bg-canvas">
+        <ActivityIndicator color={brand[600]} />
+      </View>
+    );
+  }
+
   if (!member) {
     return (
       <View className="flex-1 items-center justify-center bg-canvas px-10">
