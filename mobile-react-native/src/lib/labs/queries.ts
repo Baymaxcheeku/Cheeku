@@ -4,6 +4,7 @@ import { create } from "zustand";
 
 import { optimisticQueries } from "@/lib/optimistic";
 import { supabase } from "@/lib/supabase/client";
+import { sessionUser } from "@/lib/supabase/session";
 
 import type { BookingStatus, Catalog, LabOffer, LabPartner, LabTest, SlotWindow } from "./logic";
 
@@ -202,9 +203,9 @@ export function useRatings(kind: "doctor" | "lab") {
 }
 
 export async function fetchReviews(kind: "doctor" | "lab", id: string): Promise<Review[]> {
-  const [{ data, error }, { data: me }] = await Promise.all([
+  const [{ data, error }, me] = await Promise.all([
     supabase.from("provider_reviews").select("*").eq("provider_kind", kind).eq("provider_id", id).order("created_at", { ascending: false }).limit(30),
-    supabase.auth.getUser(),
+    sessionUser(),
   ]);
   if (error) throw new Error(`fetchReviews: ${error.message}`);
   return (data ?? []).map((r) => ({
@@ -215,7 +216,7 @@ export async function fetchReviews(kind: "doctor" | "lab", id: string): Promise<
     body: r.body,
     createdAt: r.created_at,
     isSample: r.is_sample,
-    mine: Boolean(me.user && r.user_id === me.user.id),
+    mine: Boolean(me && r.user_id === me.id),
   }));
 }
 

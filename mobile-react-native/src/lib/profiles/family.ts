@@ -9,7 +9,7 @@ import { prefetchHealthFile } from "@/lib/health/queries";
 import { supabase } from "@/lib/supabase/client";
 import { addMemberSchema } from "@/lib/settings/schemas";
 
-import { activeProfile, assertSignedIn, familyProfiles, profileAccess, switchProfile, type ActiveProfile } from "./context";
+import { activeProfileFrom, assertSignedIn, familyProfiles, profileAccess, switchProfile, type ActiveProfile } from "./context";
 
 /*
  * The family, as one query the whole app shares.
@@ -36,9 +36,16 @@ export type FamilyContext = {
   entitlement: Entitlement;
 };
 
+/*
+ * One profile list and one plan check per load. This used to ask for the
+ * list twice (once for the switcher, once to pick the active person) and
+ * the plan three times; now `profileAccess` reads both once and the active
+ * person is chosen from the list it already has.
+ */
 export async function loadFamily(): Promise<FamilyContext> {
   await assertSignedIn();
-  const [access, profile, entitlement] = await Promise.all([profileAccess(), activeProfile(), getEntitlement()]);
+  const [access, entitlement] = await Promise.all([profileAccess(), getEntitlement()]);
+  const profile = await activeProfileFrom(access.selectable);
   return { access, profile, entitlement };
 }
 

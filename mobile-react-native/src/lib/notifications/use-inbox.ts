@@ -7,6 +7,7 @@ import type { ActiveProfile } from "@/lib/profiles/context";
 import { useSwitchMember } from "@/lib/profiles/family";
 import { optimisticQueries } from "@/lib/optimistic";
 import { supabase } from "@/lib/supabase/client";
+import { sessionUser } from "@/lib/supabase/session";
 
 import { readIds, unreadCount } from "./inbox";
 import { dismiss, fetchInbox, markAllRead, restore, setRead, toItem } from "./queries";
@@ -108,7 +109,7 @@ export function useInboxLive(onNew?: (item: InboxItem) => void) {
     let channel: ReturnType<typeof supabase.channel> | null = null;
     let cancelled = false;
 
-    void supabase.auth.getUser().then(({ data: { user } }) => {
+    void sessionUser().then((user) => {
       if (cancelled || !user) return;
       channel = supabase
         .channel(`inbox:${user.id}`)

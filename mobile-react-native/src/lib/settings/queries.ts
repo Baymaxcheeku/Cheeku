@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase/client";
+import { sessionUser } from "@/lib/supabase/session";
 import type { NotificationPrefs } from "./schemas";
 
 /*
@@ -26,9 +27,7 @@ export type ProfileDetail = {
 
 /** The full row behind a profile — more than `ActiveProfile` carries. */
 export async function profileDetail(profileId: string): Promise<ProfileDetail | null> {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await sessionUser();
   if (!user) return null;
 
   const { data, error } = await supabase
@@ -86,9 +85,7 @@ export const DEFAULT_PREFS: NotificationPrefs = {
 
 /** The signed-in user's own family row, with its stored notification prefs. */
 export async function ownFamily(): Promise<{ id: string; prefs: NotificationPrefs } | null> {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await sessionUser();
   if (!user) return null;
 
   const { data } = await supabase
@@ -108,8 +105,5 @@ export async function ownFamily(): Promise<{ id: string; prefs: NotificationPref
 
 /** The account's sign-in address, shown on the Personal information screen. */
 export async function accountEmail(): Promise<string | null> {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  return user?.email ?? null;
+  return (await sessionUser())?.email ?? null;
 }
