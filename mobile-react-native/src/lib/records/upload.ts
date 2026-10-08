@@ -1,6 +1,7 @@
 import { randomUUID } from "expo-crypto";
 import { File } from "expo-file-system";
 
+import { CONSENT_PAUSED, reportIfConsentRefused } from "@/lib/legal/consent";
 import { extractFromFile, routeFor } from "@/lib/ai/mock/extract";
 import { selectableProfiles } from "@/lib/profiles/context";
 import { supabase } from "@/lib/supabase/client";
@@ -166,6 +167,7 @@ export async function uploadDocument(
      * entirely. Say the same thing the check would have said rather than
      * "try again", which invites someone to retry something that cannot work.
      */
+    if (reportIfConsentRefused(insertError)) return { ok: false, message: CONSENT_PAUSED };
     if (insertError?.message?.includes("not covered by the current plan")) {
       return {
         ok: false,

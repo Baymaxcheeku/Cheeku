@@ -1,6 +1,7 @@
 import { useInfiniteQuery, useQuery, type QueryClient } from "@tanstack/react-query";
 import { randomUUID } from "expo-crypto";
 
+import { CONSENT_PAUSED, reportIfConsentRefused } from "@/lib/legal/consent";
 import { chatQuota } from "@/lib/ai/chat";
 import { supabase } from "@/lib/supabase/client";
 
@@ -176,6 +177,7 @@ export async function sendTurn(args: {
     ({ error } = await supabase.from("messages").insert(plain));
   }
   if (error?.message?.includes("free chat allowance exhausted")) return { ok: false, quota: true, message: QUOTA_SPENT };
+  if (reportIfConsentRefused(error)) return { ok: false, message: CONSENT_PAUSED };
   if (error) return { ok: false, message: "Couldn't save that. Check your connection and try again." };
 
   // Readings said in the message, then corrections. Best effort: the answer is

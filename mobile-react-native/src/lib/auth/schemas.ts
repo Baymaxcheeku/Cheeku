@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { LEGAL_DOCUMENTS } from "@/lib/legal/documents";
+
 /*
  * Every auth and onboarding boundary validates through these. The same schema
  * is used by the client form and the server action, so a bypassed client
@@ -22,14 +24,15 @@ export const signInSchema = z.object({
   password: z.string().min(1, "Enter your password"),
 });
 
-export const CONSENT_VERSION = "1.1.0";
+/** The Health Data Consent version the sign-up box agrees to. Never typed by hand. */
+export const CONSENT_VERSION = LEGAL_DOCUMENTS.health_consent.version;
 
 export const createAccountSchema = z.object({
   email: emailSchema,
   password: passwordSchema,
   // DPDP Act: consent must be explicit and unticked by default. Rejecting the
   // literal `true` is what makes an unticked box fail validation.
-  consent: z.literal(true, { message: "Please accept the privacy terms to continue" }),
+  consent: z.literal(true, { message: "Tick the box to agree to the terms before creating your account" }),
 });
 
 export const audienceSchema = z.object({

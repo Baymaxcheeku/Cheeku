@@ -16,7 +16,6 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   AlertCircle,
   Apple,
-  Check,
   ChevronLeft,
   Eye,
   EyeOff,
@@ -31,9 +30,12 @@ import { MascotBust } from "@/components/illustrations/sprout";
 import { CtaLabel } from "@/components/onboarding/chrome";
 import { BubblePop, FillBar } from "@/components/onboarding/motion";
 import { useReducedMotion } from "@/components/ui/motion";
+import { ConsentBox } from "@/components/legal/consent-box";
 import { createAccountSchema, signInSchema } from "@/lib/auth/schemas";
 import { resolveLanding } from "@/lib/auth/landing";
+import { ensureSignupConsent, signupConsentPayload } from "@/lib/legal/consent";
 import { clearOfflineCache } from "@/lib/offline/cache";
+import { logActivity } from "@/lib/privacy/activity";
 import { FAMILY_KEY, loadFamily } from "@/lib/profiles/family";
 import { supabase } from "@/lib/supabase/client";
 import { brand, ink, semantic, shadow, surface } from "@/theme/tokens";
@@ -134,10 +136,17 @@ export default function SignIn() {
     setBusy(true);
     try {
       const credentials = { email: parsed.data.email, password: parsed.data.password };
-      const { error: authError } =
+      /*
+       * The consent travels WITH the sign-up, in the new user's metadata, and
+       * a database trigger writes it to the ledger inside the same insert that
+       * creates the account (migration 0031). So an account never exists
+       * without its consent record, even when email confirmation means there
+       * is no session yet to write one from here.
+       */
+      const { data: authData, error: authError } =
         tab === "signIn"
           ? await supabase.auth.signInWithPassword(credentials)
-          : await supabase.auth.signUp(credentials);
+          : await supabase.auth.signUp({ ...credentials, options: { data: { consent: signupConsentPayload() } } });
 
       if (authError) {
         /*
@@ -171,6 +180,11 @@ export default function SignIn() {
        */
       queryClient.clear();
       await clearOfflineCache();
+      if (authData.session) {
+        // Belt and braces for the trigger, then the account's own history.
+        if (tab === "create") await ensureSignupConsent();
+        void logActivity("sign_in");
+      }
       const landing = await resolveLanding();
       if (landing === "/home") await queryClient.prefetchQuery({ queryKey: FAMILY_KEY, queryFn: loadFamily });
       router.replace(landing);
@@ -289,34 +303,13 @@ export default function SignIn() {
                 </Text>
               </Pressable>
             ) : (
-              /* DPDP Act: unticked by default, and the copy names what is being
-                 consented to rather than linking away to find out. */
-              <Pressable
-                accessibilityRole="checkbox"
-                accessibilityState={{ checked: consent }}
-                onPress={() => setConsent((v) => !v)}
-                className="flex-row gap-3 rounded-[18px] px-4 py-3.5"
-                style={{
-                  backgroundColor: consent ? brand[50] : surface.canvas,
-                  borderWidth: 1.5,
-                  borderColor: consent ? brand[300] : surface.line,
-                }}
-              >
-                <View
-                  className="mt-0.5 h-[22px] w-[22px] items-center justify-center rounded-[7px]"
-                  style={{
-                    borderWidth: 2,
-                    borderColor: consent ? brand[600] : brand[200],
-                    backgroundColor: consent ? brand[600] : surface.base,
-                  }}
-                >
-                  {consent ? <Check size={14} color="#ffffff" strokeWidth={3.2} /> : null}
-                </View>
-                <Text style={[type.bodySmall, { flex: 1, color: ink[700] }]}>
-                  I agree that Cheeku AI may store and process my family&apos;s health records to
-                  give me insights. I can export or delete everything, any time.
-                </Text>
-              </Pressable>
+              /* DPDP Act: unticked by default, one box for the uses the service
+                 needs, each itemised one tap away, optional uses never here. */
+              <ConsentBox
+                checked={consent}
+                onToggle={() => setConsent((v) => !v)}
+                onOpenDocument={(kind) => router.push({ pathname: "/legal/[doc]", params: { doc: kind } })}
+              />
             )}
 
             {error ? (
@@ -370,7 +363,7 @@ export default function SignIn() {
           <View className="mt-5 flex-row items-center justify-center gap-2">
             <ShieldCheck size={14} color={brand[400]} />
             <Text style={[type.caption, { color: ink[500] }]}>
-              Encrypted end to end. Never sold, never shared.
+              Encrypted in transit and at rest. Never sold.
             </Text>
           </View>
         </ScrollView>

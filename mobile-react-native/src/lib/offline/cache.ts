@@ -1,6 +1,9 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createAsyncStoragePersister } from "@tanstack/query-async-storage-persister";
 import type { Query } from "@tanstack/react-query";
+import type { Persister } from "@tanstack/react-query-persist-client";
+
+import { loadOfflinePrefs, offlinePrefs, withinWindow } from "./prefs";
 
 /*
  * Offline reads. Phase 5 item 4.
@@ -35,12 +38,36 @@ const CACHE_KEY = "baymax.offline.v1";
 /** A week. Long enough for a holiday, short enough that a stale record expires. */
 const MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 
-export const persister = createAsyncStoragePersister({
+const base = createAsyncStoragePersister({
   storage: AsyncStorage,
   key: CACHE_KEY,
   // Written at most every 2s rather than on every keystroke-driven refetch.
   throttleTime: 2000,
 });
+
+/*
+ * The person's offline setting, applied at the persister.
+ *
+ * Switched off: nothing is written, and nothing is restored even if an old
+ * snapshot survived. A shorter window: a snapshot older than it is ignored on
+ * the next launch, whatever the 7-day `maxAge` below would allow. Checked on
+ * every write and restore, so changing the setting takes effect at once
+ * without restarting the app.
+ */
+export const persister: Persister = {
+  persistClient: async (client) => {
+    if (!offlinePrefs().enabled) return;
+    await base.persistClient(client);
+  },
+  restoreClient: async () => {
+    const prefs = await loadOfflinePrefs();
+    if (!prefs.enabled) return undefined;
+    const client = await base.restoreClient();
+    if (client && !withinWindow(client.timestamp, prefs)) return undefined;
+    return client;
+  },
+  removeClient: () => base.removeClient(),
+};
 
 /**
  * WHICH QUERIES ARE ALLOWED TO PERSIST.
@@ -104,6 +131,17 @@ export const persistOptions = {
  * a cache that outlives the session is a copy of someone's medical history
  * sitting on a device they have logged out of.
  */
+/** Bytes the offline copy takes, for the Storage and cache screen. */
+export async function offlineCacheBytes(): Promise<number> {
+  try {
+    const raw = await AsyncStorage.getItem(CACHE_KEY);
+    // UTF-16 in memory, but stored as UTF-8: the string length is a fair floor.
+    return raw ? raw.length : 0;
+  } catch {
+    return 0;
+  }
+}
+
 export async function clearOfflineCache(): Promise<void> {
   try {
     await AsyncStorage.removeItem(CACHE_KEY);

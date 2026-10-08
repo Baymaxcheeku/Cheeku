@@ -2560,3 +2560,102 @@ reminder scheduler) serve different consumers.
 the live database:** open Home, Records and Profile and confirm the plan name
 and family look right (the nested select is the one query shape the fake
 backend had to imitate).
+
+## Consent, privacy, storage and security · 2026-10-08
+
+Asked for a consent layer that does not add friction, the backend behind it,
+cache and cookie handling, a proper privacy policy and stronger security
+settings.
+
+**Consent, the person's side.** Sign-up keeps one unticked box ("I'm 18 or
+older, and I agree to the Terms of Use, Privacy Policy and Health Data
+Consent"), with the three names as links and a "What this covers" line that
+opens to the five required uses in plain words. Nobody has to read anything
+to sign up; anyone who later asks what they agreed to gets the exact text and
+version. Optional uses (product improvement, research, marketing) are never in
+the box: they are off-by-default switches in Privacy & consent.
+
+`ConsentGate` (mounted in the signed-in shell) shows a full-screen sheet when
+the database says consent is missing, with three versions of the copy: never
+recorded (people who signed up before this), a material update (names which
+document changed and what), and withdrawn by the person. It cannot be
+dismissed, because the database would refuse every save behind it, but the
+sheet itself offers Download my data and Sign out, so not agreeing never costs
+anyone their records.
+
+**Consent, the backend (migration 0031).**
+- `legal_documents`: version, effective date, `material` flag and SHA-256 of
+  each text. The app bundles the same texts; `documents.test.ts` fails if a
+  hash or version is missing from a migration.
+- `consent_log` gains method, bundle id, versions, text fingerprint, platform,
+  app version, locale and an ordering `seq`. Still append-only.
+- `record_consent()` is the only write: required uses are granted together or
+  not at all, out-of-date texts are refused (`stale_terms`), optional uses need
+  core consent first (`consent_required`). `my_consent_state()` is the only
+  read and answers missing, stale and why.
+- A trigger on `auth.users` writes the sign-up decision from the form's
+  metadata inside the insert that creates the account. It never blocks a
+  sign-up; the app re-checks and records it if the trigger could not.
+- `enforce_core_consent()` refuses new documents, messages, memory facts and
+  lab bookings without consent, behind `app_flags.enforce_consent`. Upload and
+  chat catch the refusal and open the sheet at once.
+- `privacy_requests` (access, correction, erasure, grievance, nomination,
+  withdrawal; due 90 days out, status forced to `received` on insert) and
+  `account_activity` (sign-ins, security and consent changes; never health
+  data, detail capped at 200 characters).
+
+Verified on a local Postgres 16 with a Supabase stub (auth schema, roles):
+all migrations through 0031 applied in order, 23 scenarios in
+`supabase/manual/local-check/0031-consent-scenarios.sql` behave as expected
+(sign-up trigger, partial and stale grants refused, optional before core
+refused, withdrawal pauses writes, RLS isolation between two users, forced
+request status, material vs wording-only updates, guard switch), and
+re-applying 0031 is a no-op.
+
+**Privacy policy and documents.** Terms of Use, Privacy Policy, Health Data
+Consent and a Cookie and Storage Notice, written for DPDP (purposes, data
+categories, processors, retention, rights, grievance officer, Data Protection
+Board). Readable at `/legal/[doc]` without an account. Company details are
+placeholders in `src/lib/legal/entity.ts` and every document shows a neutral
+draft banner until they are filled. Two claims were removed rather than
+written because nothing in the code backs them ("staff access is logged" and
+deletion of inactive accounts). The sign-in footer said "Encrypted end to
+end", which this app is not; it now says "Encrypted in transit and at rest".
+
+**Privacy & consent screen.** Status, the required uses, optional switches,
+the four documents, rights (download, correction, access, nomination,
+grievance requests with their status), consent history grouped per decision,
+withdraw and pause, and the grievance officer.
+
+**Cache and cookies.** No cookies exist, so there is no banner; Storage &
+cache says so and lists everything the app does keep, from one registry that
+sign-out also uses. A test scans the source for storage keys and fails on any
+that are not in the registry. Offline copies can be switched off or kept for
+1, 3 or 7 days (the persister checks on every write and restore), and Clear
+cache removes the offline copy and the app's own temporary files.
+
+**Found and fixed: sign-out left personal data on the phone.** Saved
+addresses, appointments (with the concern typed into them), scheduled
+reminders and picked or cropped photos all survived a sign-out. Every
+sign-out path (Settings, the lock screen escape, the consent sheet) now goes
+through `signOutAndWipe`.
+
+**Security screen.** Moved onto the shared settings chrome. New: auto-lock
+delay (immediately, 1 minute, 5 minutes; a longer delay needs the biometric
+check, a shorter one does not), sign out of other devices (refresh tokens
+revoked; the copy says open phones lose access "within the hour" because an
+access token lives that long), recent account activity, and links to Privacy
+and Storage. The app-switcher shield still goes up the moment the app goes
+inactive whatever the delay, and a cold start always locks.
+
+**Found and fixed: the app lock did not arm until a restart.** The gate read
+the setting once at launch, so turning the lock on in Settings protected
+nothing until the app was next killed. Settings changes now notify the gate.
+Also: an offline snapshot dated in the future (phone clock moved back) was
+treated as fresh forever; it is now dropped.
+
+**Verified here:** typecheck, eslint on every touched file, 351 tests; root
+`rls.test.ts` shows the same 14 failures as before this change, none on 0031's
+tables. **Not verified, needs a phone:** the sign-up box and links, the
+consent sheet in all three states, the Privacy, Storage and Security screens,
+the auto-lock delay on real backgrounding, and sign-out wiping reminders.
