@@ -36,7 +36,11 @@ nothing lies about having data.
 | `/plan` | done — opens the real chooser | `billing/paywall.tsx` |
 | `/home` `/records` `/records/[id]` `/scan` `/ask` | done | — |
 | `/settings` hub, export, delete | done | — |
-| `/settings/security` | done | `settings/security` (134) |
+| `/settings/security` | done, rebuilt 2026-10-08 (auto-lock delay, other devices, activity) | `settings/security` (134) |
+| `/settings/privacy` | done 2026-10-08, needs migration 0031 | — |
+| `/settings/storage` | done 2026-10-08 | — |
+| `/legal/[doc]` (terms, privacy, health consent, storage notice) | done 2026-10-08 | — |
+| Consent sheet (sign-up box, re-consent gate) | done 2026-10-08, needs migration 0031 | — |
 | `/settings/personal` | done | `personal-info-form.tsx` (149) |
 | `/settings/health` | done | `health-profile-form.tsx` (170) |
 | `/settings/notifications` | done, rewritten 2026-09-30 | `notification-toggles.tsx` (210) |
@@ -272,5 +276,19 @@ haptics has to be seen on a simulator or a device before it counts as done.
 - **Migration 0030** (memory layer) must be applied for chat memory,
   readings, open loops, pregnancy and birth promotion. The chat still works
   before it, without remembering readings or tiers.
+- **Migration 0031** (consent and privacy) must be applied. Until then the
+  sign-up box still works and decisions land in the old `consent_log`
+  columns, but there is no re-consent gate, no write guard, no activity log
+  and no privacy requests. **Once applied, every existing user sees the
+  consent sheet once**, and new health data is refused without consent
+  (`app_flags.enforce_consent`; set it false to switch the guard off).
+- **Legal texts are drafts.** Company name, address, grievance officer and
+  emails are [placeholders] in `src/lib/legal/entity.ts`, and the documents
+  show a draft banner until they are filled. A lawyer should read all four
+  before launch. Any change to a text changes its hash: bump the version,
+  add a `legal_documents` row in a new migration, and set `material` if
+  people must agree again.
+- **`privacy_requests` has no one working it.** Needs an admin view or an
+  email to the grievance officer.
 - Rate limiting on auth and AI endpoints.
 - Untested: sign-out then sign-in, and a session revoked server-side.

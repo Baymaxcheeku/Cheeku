@@ -4,6 +4,8 @@ vi.mock("@react-native-async-storage/async-storage", () => ({ default: {} }));
 vi.mock("@tanstack/query-async-storage-persister", () => ({
   createAsyncStoragePersister: () => ({}),
 }));
+// The offline setting lives in the keychain, which needs a phone.
+vi.mock("@/lib/storage", () => ({ kv: { get: async () => null, set: async () => undefined, remove: async () => undefined } }));
 
 const { shouldPersistQuery } = await import("./cache");
 

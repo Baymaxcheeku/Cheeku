@@ -48,7 +48,15 @@ export async function exportAccount(): Promise<
     "service_waitlist",
     "lab_bookings",
     "provider_reviews",
+    "account_activity",
+    "privacy_requests",
   ] as const;
+
+  /*
+   * Added by migration 0031. Until it is applied these tables do not exist,
+   * and an export must not fail over a table that has never held anything.
+   */
+  const addedLater = new Set<string>(["account_activity", "privacy_requests"]);
 
   const bundle: ExportBundle = {
     exportedAt: new Date().toISOString(),
@@ -67,6 +75,10 @@ export async function exportAccount(): Promise<
     const base = supabase.from(table).select("*");
     const { data, error } = table === "provider_reviews" ? await base.eq("user_id", user.id) : await base;
     if (error) {
+      if (addedLater.has(table) && /does not exist|schema cache|could not find/i.test(error.message)) {
+        bundle[table] = [];
+        continue;
+      }
       return { ok: false, message: "Could not gather all of your data. Nothing was exported." };
     }
     bundle[table] = data ?? [];
@@ -201,8 +213,10 @@ export async function deleteAccountData(confirmation: string): Promise<DeleteRes
    */
   // Reviews the reader wrote go too; lab bookings cascade with their member,
   // and are removed here as well in case a member was removed earlier.
-  for (const table of ["notifications", "service_waitlist", "push_devices", "lab_bookings", "provider_reviews"] as const) {
+  for (const table of ["notifications", "service_waitlist", "push_devices", "lab_bookings", "provider_reviews", "account_activity"] as const) {
     const { error } = await supabase.from(table).delete().eq("user_id", user.id);
+    // account_activity arrives with migration 0031; a missing table is nothing to delete.
+    if (error && table === "account_activity" && /does not exist|schema cache|could not find/i.test(error.message)) continue;
     if (error) {
       return {
         ok: false,
@@ -213,7 +227,9 @@ export async function deleteAccountData(confirmation: string): Promise<DeleteRes
 
   // consent_log hangs off the user, not the family, and is kept deliberately:
   // it is the record that consent was given and withdrawn, which is the thing
-  // a regulator asks for. It carries no health data.
+  // a regulator asks for. It carries no health data. privacy_requests stay
+  // for the same reason: a grievance or erasure request is the record that
+  // the person's rights were asked for and answered.
 
   return { ok: true, removedDocuments: paths.length };
 }

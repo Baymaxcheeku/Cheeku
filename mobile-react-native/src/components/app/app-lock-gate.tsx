@@ -5,11 +5,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { AppState, type AppStateStatus, Platform, Pressable, Text, View } from "react-native";
 
 import { MascotBust } from "@/components/illustrations/sprout";
-import { authenticate, isLockEnabled } from "@/lib/security/app-lock";
-import { clearOfflineCache } from "@/lib/offline/cache";
-import { clearActiveProfile } from "@/lib/profiles/context";
-import { forgetThisDevice } from "@/lib/notifications/push";
-import { supabase } from "@/lib/supabase/client";
+import { signOutAndWipe } from "@/lib/privacy/local-data";
+import { authenticate, isLockEnabled, lockDelay, onLockSettingsChanged } from "@/lib/security/app-lock";
+import { DEFAULT_LOCK_DELAY, shouldLock, type LockDelay } from "@/lib/security/lock-timing";
 import { brand, ink, surface } from "@/theme/tokens";
 import { Brand } from "@/components/ui/brand";
 
@@ -51,23 +49,48 @@ export function AppLockGate({ children }: { children: React.ReactNode }) {
    */
   const enabledRef = useRef(false);
   const lockedRef = useRef(false);
+  const delayRef = useRef<LockDelay>(DEFAULT_LOCK_DELAY);
+  /** When the app last stopped being active. Null while it is in front. */
+  const awayAtRef = useRef<number | null>(null);
 
   useEffect(() => {
     let alive = true;
     void (async () => {
-      const on = await isLockEnabled();
+      const [on, delay] = await Promise.all([isLockEnabled(), lockDelay()]);
       if (!alive) return;
       enabledRef.current = on;
+      delayRef.current = delay;
       setEnabled(on);
       // A cold start with the lock on is locked. The app was not "away", it was
-      // not running, which is strictly further away.
+      // not running, which is strictly further away. The delay does not apply.
       if (on) {
         lockedRef.current = true;
         setLocked(true);
       }
     })();
+
+    /*
+     * Changes made in Settings while the app is open. The person changing them
+     * has just passed the challenge to do it, so this never locks on the spot;
+     * it only makes the next departure count.
+     */
+    const off = onLockSettingsChanged(() => {
+      void Promise.all([isLockEnabled(), lockDelay()]).then(([on, delay]) => {
+        if (!alive) return;
+        enabledRef.current = on;
+        delayRef.current = delay;
+        setEnabled(on);
+        if (!on) {
+          lockedRef.current = false;
+          setLocked(false);
+          setShielded(false);
+        }
+      });
+    });
+
     return () => {
       alive = false;
+      off();
     };
   }, []);
 
@@ -91,20 +114,33 @@ export function AppLockGate({ children }: { children: React.ReactNode }) {
       if (!enabledRef.current) return;
 
       if (next === "active") {
+        const awayAt = awayAtRef.current;
+        awayAtRef.current = null;
+        if (awayAt !== null && !lockedRef.current && shouldLock(Date.now() - awayAt, delayRef.current)) {
+          lockedRef.current = true;
+          setLocked(true);
+        }
         setShielded(false);
         return;
       }
 
       /*
-       * Both `inactive` and `background` raise the shield and arm the lock.
-       * `inactive` alone covers the switcher snapshot and the notification
-       * shade; `background` is the actual departure. Arming on the earlier of
-       * the two costs a challenge after a dismissed control centre, which is
-       * the correct side to err on.
+       * Both `inactive` and `background` raise the shield, always, whatever
+       * the delay: the switcher snapshot is taken now, not when the delay runs
+       * out. `inactive` alone covers the snapshot and the notification shade;
+       * `background` is the actual departure.
+       *
+       * With no delay the lock arms here too, on the earlier of the two, which
+       * costs a challenge after a dismissed control centre: the correct side to
+       * err on. With a delay, the clock starts on the first of the two and the
+       * lock is decided on the way back in.
        */
       setShielded(true);
-      lockedRef.current = true;
-      setLocked(true);
+      if (awayAtRef.current === null) awayAtRef.current = Date.now();
+      if (delayRef.current === 0) {
+        lockedRef.current = true;
+        setLocked(true);
+      }
     });
     return () => sub.remove();
   }, []);
@@ -118,12 +154,9 @@ export function AppLockGate({ children }: { children: React.ReactNode }) {
    * records, and people in that position are usually the ones who need them.
    */
   async function escapeBySigningOut() {
-    await clearActiveProfile();
-    // Before the session goes: removing this phone's push token needs it.
-    await forgetThisDevice();
-    await supabase.auth.signOut();
-    queryClient.clear();
-    await clearOfflineCache();
+    // The same full sign-out as Settings: session, push token, and everything
+    // on the phone that is about this person.
+    await signOutAndWipe(queryClient);
     lockedRef.current = false;
     setLocked(false);
     router.replace("/welcome");

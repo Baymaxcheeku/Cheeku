@@ -3,6 +3,8 @@ import { Platform } from "react-native";
 
 import { kv } from "@/lib/storage";
 
+import { parseLockDelay, type LockDelay } from "./lock-timing";
+
 /*
  * The biometric app lock. Phase 5 item 2.
  *
@@ -21,6 +23,23 @@ import { kv } from "@/lib/storage";
  */
 
 const ENABLED_KEY = "baymax.app-lock.enabled";
+const GRACE_KEY = "cheeku.lock.grace";
+
+/*
+ * The gate reads the switch once at launch. Without this, turning the lock on
+ * in Settings did nothing until the next cold start, which is exactly the
+ * window in which someone believes they are protected and is not.
+ */
+const listeners = new Set<() => void>();
+
+export function onLockSettingsChanged(listener: () => void): () => void {
+  listeners.add(listener);
+  return () => listeners.delete(listener);
+}
+
+function changed() {
+  for (const l of listeners) l();
+}
 
 export type LockCapability =
   /** Hardware present and something is enrolled. The only state that can lock. */
@@ -87,6 +106,7 @@ export async function setLockEnabled(enabled: boolean): Promise<boolean> {
     const passed = await authenticate("Confirm it's you to turn on the app lock");
     if (!passed) return false;
     await kv.set(ENABLED_KEY, "1");
+    changed();
     return true;
   }
 
@@ -98,6 +118,27 @@ export async function setLockEnabled(enabled: boolean): Promise<boolean> {
   const passed = await authenticate("Confirm it's you to turn off the app lock");
   if (!passed) return false;
   await kv.remove(ENABLED_KEY);
+  changed();
+  return true;
+}
+
+export async function lockDelay(): Promise<LockDelay> {
+  return parseLockDelay(await kv.get(GRACE_KEY));
+}
+
+/**
+ * A longer delay is a weaker lock, so it has to pass the challenge like the
+ * switch does. A shorter one only makes the lock stricter and goes straight
+ * through.
+ */
+export async function setLockDelay(next: LockDelay): Promise<boolean> {
+  const current = await lockDelay();
+  if (next > current) {
+    const passed = await authenticate("Confirm it's you to change the auto-lock");
+    if (!passed) return false;
+  }
+  await kv.set(GRACE_KEY, String(next));
+  changed();
   return true;
 }
 

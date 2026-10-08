@@ -1,6 +1,7 @@
 import { Tabs } from "expo-router";
 
 import { TabBar } from "@/components/app/tab-bar";
+import { ConsentGate } from "@/components/legal/consent-gate";
 import { useToast } from "@/components/notifications/toast";
 import { useInboxLive } from "@/lib/notifications/use-inbox";
 import { usePushSetup } from "@/lib/notifications/use-push";
@@ -27,7 +28,15 @@ export default function AppLayout() {
   useInboxLive(show);
   usePushSetup();
 
+  /*
+   * The consent gate sits beside the tabs rather than in front of a route:
+   * it is about the account, not a screen, and it must cover whichever tab
+   * the person lands on. It renders nothing unless the database says this
+   * account has to agree (again).
+   */
   return (
+    <>
+    <ConsentGate />
     <Tabs
       tabBar={(props) => <TabBar {...props} />}
       screenOptions={{ headerShown: false }}
@@ -39,5 +48,6 @@ export default function AppLayout() {
       <Tabs.Screen name="ask" />
       <Tabs.Screen name="settings" />
     </Tabs>
+    </>
   );
 }

@@ -9,7 +9,9 @@ import {
   Crown,
   Download,
   Globe,
+  HardDrive,
   HeartPulse,
+  LockKeyhole,
   Info,
   LogOut,
   ShieldCheck,
@@ -43,21 +45,19 @@ import { Glass, Gradient, glass, glassShadow } from "@/components/ui/glass";
 import { Backdrop } from "@/components/ui/screen";
 import { font } from "@/theme/type";
 import { ConfirmSheet } from "@/components/ui/confirm-sheet";
-import { clearOfflineCache } from "@/lib/offline/cache";
+import { logActivity } from "@/lib/privacy/activity";
+import { signOutAndWipe } from "@/lib/privacy/local-data";
 import { Paywall } from "@/components/billing/paywall";
 import { allowsFamily, planFor, seatsFor } from "@/lib/billing/plans";
 import { getEntitlement } from "@/lib/billing/quota";
 import {
   assertSignedIn,
-  clearActiveProfile,
   profileAccess,
   activeProfile,
   type ActiveProfile,
 } from "@/lib/profiles/context";
 import { listProfileRecords, statsFrom } from "@/lib/records/queries";
 import { refreshRoster } from "@/lib/profiles/family";
-import { forgetThisDevice } from "@/lib/notifications/push";
-import { supabase } from "@/lib/supabase/client";
 import { brand, ink, semantic, shadow, surface } from "@/theme/tokens";
 import { Brand, brandify } from "@/components/ui/brand";
 
@@ -91,18 +91,14 @@ export default function Settings() {
   });
 
   async function signOut() {
-    // The active profile is cleared with the session. Leaving it would hand the
-    // next account that signs in on this device a stale selection pointing at
-    // someone else's profile id.
-    await clearActiveProfile();
-    // Before the session goes: removing this phone's push token needs it.
-    await forgetThisDevice();
-    await supabase.auth.signOut();
-    queryClient.clear();
-    // The in-memory cache is not the copy that matters. `queryClient.clear()`
-    // empties RAM; the records are also on disk, and a device being signed out
-    // of is a device that may be about to change hands.
-    await clearOfflineCache();
+    /*
+     * One function for every way out (here, the lock screen, the consent
+     * sheet). It removes this phone's push token while the session still
+     * exists, ends the session, then wipes everything on the phone that is
+     * about this person: offline records, saved addresses, appointments,
+     * scheduled reminders, picked photos. See lib/privacy/local-data.ts.
+     */
+    await signOutAndWipe(queryClient);
     router.replace("/welcome");
   }
 
@@ -242,13 +238,15 @@ export default function Settings() {
       <Group label="Account">
         <Row icon={UserCog} title="Personal information" body="Name, date of birth and contact" href="/settings/personal" />
         <Row icon={HeartPulse} title="Health profile" body="Conditions, allergies and medicines" href="/settings/health" />
-        <Row icon={ShieldCheck} title="Security & privacy" body="Password, privacy and permissions" href="/settings/security" />
+        <Row icon={ShieldCheck} title="Security" body="App lock, password, devices and activity" href="/settings/security" />
+        <Row icon={LockKeyhole} title="Privacy & consent" body="Your choices, documents and data rights" href="/settings/privacy" />
         <Row icon={Crown} title="Subscription" body="Your plan, seats and billing" href="/settings/subscription" />
       </Group>
 
       <Group label="Preferences">
         <Row icon={Bell} title="Notifications" body="Your inbox and phone alerts" href="/notifications" />
         <Row icon={Globe} title="Language" body="English" href="/settings/language" />
+        <Row icon={HardDrive} title="Storage & cache" body="Offline copies and what's on this phone" href="/settings/storage" />
       </Group>
 
       <Group label="Support">
@@ -410,6 +408,7 @@ function AccountData({ onDeleted }: { onDeleted: () => void }) {
         setMessage(result.message);
         return;
       }
+      void logActivity("data_exported");
       await shareExport(result.uri);
       // Removed as soon as the share sheet is done with it: the bundle is the
       // whole family's medical history in plaintext, and it has no reason to
