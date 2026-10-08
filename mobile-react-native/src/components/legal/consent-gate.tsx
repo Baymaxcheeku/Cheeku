@@ -141,7 +141,9 @@ function ConsentSheet({ state }: { state: ConsentState }) {
                     <Text style={{ fontFamily: font.regular, fontSize: 12.5, lineHeight: 18, color: ink[500], marginTop: 4 }}>
                       {doc.changes[0] ?? doc.summary}
                     </Text>
-                    <Text style={{ fontFamily: font.semibold, fontSize: 12.5, color: brand[600], marginTop: 8 }}>Read what changed</Text>
+                    <Text style={{ fontFamily: font.semibold, fontSize: 12.5, color: brand[600], marginTop: 8 }}>
+                      {doc.changes.length ? "Read what changed" : `Read the ${doc.title}`}
+                    </Text>
                   </Pressable>
                 );
               })}
@@ -167,7 +169,9 @@ function ConsentSheet({ state }: { state: ConsentState }) {
                 setError(null);
               }}
               onOpenDocument={setReading}
-              startOpen={state.reason !== "updated"}
+              // Open only for someone who has never seen it. "Updated" has its own
+              // cards above, and "withdrawn" already lists the paused uses.
+              startOpen={state.reason === "never"}
             />
           </View>
 

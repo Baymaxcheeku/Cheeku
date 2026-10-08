@@ -407,7 +407,7 @@ function SceneFamily({ faces, compact }: { faces: readonly string[]; compact: bo
             <ShieldCheck size={16} color={brand[600]} />
           </View>
           <Text style={{ fontFamily: font.regular, fontSize: 12.5, color: ink[700] }}>
-            <Text style={{ fontFamily: font.bold, color: ink[900] }}>Private by default.</Text> Never sold, never shared.
+            <Text style={{ fontFamily: font.bold, color: ink[900] }}>Private by default.</Text> Never sold, never used for ads.
           </Text>
         </View>
       </BubblePop>

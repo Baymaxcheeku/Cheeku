@@ -238,8 +238,8 @@ export default function Settings() {
       <Group label="Account">
         <Row icon={UserCog} title="Personal information" body="Name, date of birth and contact" href="/settings/personal" />
         <Row icon={HeartPulse} title="Health profile" body="Conditions, allergies and medicines" href="/settings/health" />
-        <Row icon={ShieldCheck} title="Security" body="App lock, password, devices and activity" href="/settings/security" />
-        <Row icon={LockKeyhole} title="Privacy & consent" body="Your choices, documents and data rights" href="/settings/privacy" />
+        <Row icon={ShieldCheck} title="Security" body="App lock, password and sign-ins" href="/settings/security" />
+        <Row icon={LockKeyhole} title="Privacy & consent" body="Your choices, documents and rights" href="/settings/privacy" />
         <Row icon={Crown} title="Subscription" body="Your plan, seats and billing" href="/settings/subscription" />
       </Group>
 
@@ -299,7 +299,7 @@ export default function Settings() {
       <View className="mx-5 mt-6 flex-row items-start gap-2">
         <ShieldCheck size={14} color={ink[300]} style={{ marginTop: 2 }} />
         <Text className="flex-1 text-[11.5px] leading-[17px] text-ink-300">
-          <Brand /> never sells your data and never shares it outside your family. It gives helpful
+          <Brand /> never sells your data or uses it for ads. It gives helpful
           information, not medical advice.
         </Text>
       </View>

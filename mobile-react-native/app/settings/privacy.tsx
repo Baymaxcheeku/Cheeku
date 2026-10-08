@@ -298,7 +298,6 @@ export default function PrivacySettings() {
         body="Cheeku will stop answering, reading and saving until you agree again. Nothing is deleted, and you can download or delete your data at any time."
         confirmLabel="Withdraw and pause"
         cancelLabel="Keep using Cheeku"
-        destructive
         onConfirm={pause}
         onClose={() => setPauseOpen(false)}
       />
