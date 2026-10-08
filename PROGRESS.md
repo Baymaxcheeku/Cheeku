@@ -2659,3 +2659,37 @@ treated as fresh forever; it is now dropped.
 tables. **Not verified, needs a phone:** the sign-up box and links, the
 consent sheet in all three states, the Privacy, Storage and Security screens,
 the auto-lock delay on real backgrounding, and sign-out wiping reminders.
+
+## Old accounts and the consent switches · 2026-10-08
+
+Reported: on an account from before the consent layer, the optional switches
+in Privacy & consent did nothing but show "Agree to the required uses first".
+
+**Why.** Three things together.
+- The app's sign-up before 0031 required ticking a box and never saved the
+  tick (only the legacy web build wrote `dpdp_processing`). 0031 therefore saw
+  every older account as never having agreed: the write guard would refuse
+  their uploads and chats, and the switches refused to move.
+- The switch's "not agreed" branch only set a note: a dead end.
+- The consent sheet was mounted in the tab shell, so a screen opened directly
+  (a reload on web at /settings/privacy) had no sheet at all.
+
+**Fix.**
+- Migration 0032 carries the old tick over: one granted row per required use,
+  dated at account creation, method `carried_over` (accepted only from the
+  migration; `record_consent` still refuses it), old wording as fingerprint,
+  versions `{"signup_agreement": "1.1.0"}`. These accounts read as `updated`,
+  so they get a one-tap notice with its own wording, not three "what changed"
+  cards. Optional uses are not carried over: owner's decision, they stay off.
+- The sheet now lives in the root layout and re-checks on sign-in and
+  sign-out. Tapping a switch without consent opens it; before 0031 is live the
+  switches are dimmed and say why.
+
+**Verified here:** typecheck, lint, 352 tests (one new for the carried-over
+state); 0032 on local Postgres with four accounts (old app, legacy web, new,
+withdrawn), 15 checks in `supabase/manual/local-check/0032-carry-over-scenarios.sql`:
+old account blocked before and uploading after, `updated` with nothing
+missing, optional uses untouched, withdrawn and new accounts unchanged, a
+client cannot write `carried_over`, second run adds nothing. Web preview
+screenshots of the notice, the sheet over a directly opened Privacy screen, a
+saved switch and the pre-update state. **Needs a phone:** the same on device.

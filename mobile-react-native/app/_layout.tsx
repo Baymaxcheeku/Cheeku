@@ -20,6 +20,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider, type Metrics } from "react-native-safe-area-context";
 
 import { AppLock } from "@/components/app/app-lock-gate";
+import { ConsentGate } from "@/components/legal/consent-gate";
 import { ToastHost } from "@/components/notifications/toast";
 import { SaveBar } from "@/components/ui/save-bar";
 import { persistOptions } from "@/lib/offline/cache";
@@ -131,6 +132,12 @@ export default function RootLayout() {
                 touch quicker: it is a glance, not a destination. */}
             <Stack.Screen name="notifications" options={{ animationDuration: 240 }} />
           </Stack>
+          {/*
+           * Here rather than in the signed-in tab shell, so it also covers a
+           * screen opened directly (a link, or a reload on web, straight into
+           * /settings/privacy). It renders nothing while signed out.
+           */}
+          <ConsentGate />
           <ToastHost />
           <SaveBar />
           </AppLock>

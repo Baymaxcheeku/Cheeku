@@ -249,10 +249,15 @@ export function onConsentRefused(listener: () => void): () => void {
   return () => refusedListeners.delete(listener);
 }
 
+/** Brings up the consent sheet now, from a screen that found consent missing. */
+export function askForConsent(): void {
+  for (const l of refusedListeners) l();
+}
+
 /** Call with the error from a refused write. Returns true when it was a consent refusal. */
 export function reportIfConsentRefused(error: unknown): boolean {
   if (!isConsentError(error)) return false;
-  for (const l of refusedListeners) l();
+  askForConsent();
   return true;
 }
 

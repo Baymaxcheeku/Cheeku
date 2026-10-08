@@ -22,7 +22,7 @@ import { Panel, Section, SettingsScreen } from "@/components/settings/chrome";
 import { ConfirmSheet } from "@/components/ui/confirm-sheet";
 import { SpringSwitch } from "@/components/ui/motion";
 import { discardExport, exportAccount, shareExport } from "@/lib/account/actions";
-import { CONSENT_KEY, optionalOn, recordConsent, useConsentState } from "@/lib/legal/consent";
+import { CONSENT_KEY, askForConsent, optionalOn, recordConsent, useConsentState } from "@/lib/legal/consent";
 import { LEGAL_DOCUMENTS, LEGAL_ORDER, type LegalKind } from "@/lib/legal/documents";
 import { LEGAL_ENTITY } from "@/lib/legal/entity";
 import { ALL_PURPOSES, OPTIONAL_PURPOSES, PURPOSE_COPY, REQUIRED_PURPOSES, isPurpose, type OptionalPurpose } from "@/lib/legal/purposes";
@@ -39,6 +39,7 @@ const METHOD_LABEL: Record<string, string> = {
   reconsent_sheet: "In the app",
   privacy_settings: "In Privacy settings",
   withdrawal: "Withdrawn in the app",
+  carried_over: "Carried over from sign-up",
 };
 
 const shortDate = (iso: string) =>
@@ -95,6 +96,25 @@ export default function PrivacySettings() {
     queryClient.setQueryData(CONSENT_KEY, result.state);
     void queryClient.invalidateQueries({ queryKey: ["consent-history"] });
     setNote(`${PURPOSE_COPY[p].title} is ${next ? "on" : "off"}.`);
+  }
+
+  /*
+   * A switch never answers with a dead end. With consent in place it saves.
+   * Without it, the agreement sheet opens right away (the gate listens), and
+   * the choice can be made straight after. Before the server has the consent
+   * functions at all, the switches are dimmed and say why.
+   */
+  function onSwitch(p: OptionalPurpose) {
+    if (active) {
+      void toggle(p);
+      return;
+    }
+    if (!state?.available) {
+      setNote("These switches start working once the latest server update is live. Nothing is shared in the meantime.");
+      return;
+    }
+    setNote(null);
+    askForConsent();
   }
 
   async function download() {
@@ -179,7 +199,9 @@ export default function PrivacySettings() {
                 {pending === p ? (
                   <ActivityIndicator size="small" color={brand[600]} />
                 ) : (
-                  <SpringSwitch checked={on} onChange={() => (active ? void toggle(p) : setNote("Agree to the required uses first, then you can change these."))} label={PURPOSE_COPY[p].title} />
+                  <View style={{ opacity: state?.available ? 1 : 0.45 }}>
+                    <SpringSwitch checked={on} onChange={() => onSwitch(p)} label={PURPOSE_COPY[p].title} />
+                  </View>
                 )}
               </View>
             );
