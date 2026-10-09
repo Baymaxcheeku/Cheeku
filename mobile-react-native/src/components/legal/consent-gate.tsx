@@ -14,6 +14,7 @@ import { LEGAL_DOCUMENTS, type LegalKind } from "@/lib/legal/documents";
 import { PURPOSE_COPY, REQUIRED_PURPOSES } from "@/lib/legal/purposes";
 import { logActivity } from "@/lib/privacy/activity";
 import { signOutAndWipe } from "@/lib/privacy/local-data";
+import { supabase } from "@/lib/supabase/client";
 import { brand, ink, shadow, surface } from "@/theme/tokens";
 import { font, type } from "@/theme/type";
 
@@ -37,9 +38,11 @@ import { font, type } from "@/theme/type";
  * and sign out are on the sheet itself, and deletion is in Settings after
  * signing back in. Withholding consent never withholds a person's own data.
  *
- * Mounted once in the signed-in shell. Checks again whenever the app comes
+ * Mounted once, in the root layout, so it covers every signed-in screen
+ * including one opened directly by a link. Checks again whenever the app comes
  * back to the foreground, so a withdrawal on another phone or a policy update
- * mid-session is caught without a restart.
+ * mid-session is caught without a restart, and on every sign-in and sign-out,
+ * so the answer for a signed-out visitor is never reused for the account.
  */
 export function ConsentGate() {
   const queryClient = useQueryClient();
@@ -50,9 +53,15 @@ export function ConsentGate() {
       if (next === "active") void queryClient.invalidateQueries({ queryKey: CONSENT_KEY });
     });
     const off = onConsentRefused(() => void queryClient.invalidateQueries({ queryKey: CONSENT_KEY }));
+    const { data: auth } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_IN" || event === "SIGNED_OUT" || event === "USER_UPDATED") {
+        void queryClient.invalidateQueries({ queryKey: CONSENT_KEY });
+      }
+    });
     return () => {
       sub.remove();
       off();
+      auth.subscription.unsubscribe();
     };
   }, [queryClient]);
 
@@ -72,6 +81,10 @@ function ConsentSheet({ state }: { state: ConsentState }) {
   const [reading, setReading] = useState<LegalKind | null>(null);
 
   const copy = copyFor(state);
+  // Joined before consent was saved; their sign-up tick was carried over
+  // (migration 0032). They never saw these documents, so "what changed" cards
+  // would be noise: one line and the box is the whole ask.
+  const carried = state.decisions.health_records?.method === "carried_over";
 
   async function agree() {
     if (!checked) {
@@ -124,7 +137,7 @@ function ConsentSheet({ state }: { state: ConsentState }) {
           </Text>
           <Text style={[type.body, { textAlign: "center", marginTop: 8 }]}>{copy.body}</Text>
 
-          {state.reason === "updated" ? (
+          {state.reason === "updated" && !carried ? (
             <View className="mt-5 gap-2.5">
               {state.stale.map((k) => {
                 const doc = LEGAL_DOCUMENTS[k as LegalKind];
@@ -141,7 +154,9 @@ function ConsentSheet({ state }: { state: ConsentState }) {
                     <Text style={{ fontFamily: font.regular, fontSize: 12.5, lineHeight: 18, color: ink[500], marginTop: 4 }}>
                       {doc.changes[0] ?? doc.summary}
                     </Text>
-                    <Text style={{ fontFamily: font.semibold, fontSize: 12.5, color: brand[600], marginTop: 8 }}>Read what changed</Text>
+                    <Text style={{ fontFamily: font.semibold, fontSize: 12.5, color: brand[600], marginTop: 8 }}>
+                      {doc.changes.length ? "Read what changed" : `Read the ${doc.title}`}
+                    </Text>
                   </Pressable>
                 );
               })}
@@ -167,7 +182,9 @@ function ConsentSheet({ state }: { state: ConsentState }) {
                 setError(null);
               }}
               onOpenDocument={setReading}
-              startOpen={state.reason !== "updated"}
+              // Open only for someone who has never seen it. "Updated" has its own
+              // cards above, and "withdrawn" already lists the paused uses.
+              startOpen={state.reason === "never"}
             />
           </View>
 
@@ -230,6 +247,13 @@ function ConsentSheet({ state }: { state: ConsentState }) {
 }
 
 function copyFor(state: ConsentState): { title: string; body: string; cta: string } {
+  if (state.reason === "updated" && state.decisions.health_records?.method === "carried_over") {
+    return {
+      title: "We've updated our terms",
+      body: "When you joined, you agreed to Cheeku keeping your family's health records. Our terms now explain each use in plain words. Nothing about your records changes; tick once to keep going.",
+      cta: "Agree and continue",
+    };
+  }
   if (state.reason === "updated") {
     return {
       title: "We've updated our terms",

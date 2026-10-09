@@ -51,6 +51,12 @@ Write the change, run the typecheck and the tests, and hand the verification
 back explicitly: name the screen, say what should be looked at, and say that
 you could not look at it yourself.
 
+**After any dev work, share screenshots of what was built.** The owner asked
+for this on every change. Export the web build, open the changed screens in
+Playwright (Chromium is preinstalled) against a fake Supabase, look at each
+shot yourself first, fix what is wrong, then send them. They show layout and
+copy only; they still do not count as device verification.
+
 ## Handing work back to a local session
 
 Push a branch and open a PR rather than committing to `main`, so the local

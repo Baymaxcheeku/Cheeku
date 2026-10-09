@@ -54,6 +54,24 @@ describe("evaluateConsent mirrors my_consent_state()", () => {
     expect(evaluateConsent(rows, V).reason).toBe("never");
   });
 
+  it("asks a carried-over account to agree to the update once, without blocking it", () => {
+    // Migration 0032: the old sign-up tick, recorded against the old agreement.
+    const rows = REQUIRED_PURPOSES.map((p, i) => ({
+      consent_type: p,
+      granted: true,
+      granted_at: "2026-08-01T10:00:00Z",
+      method: "carried_over",
+      document_versions: { signup_agreement: "1.1.0" },
+      seq: i + 1,
+    }));
+    const s = evaluateConsent(rows, V);
+    expect(s.reason).toBe("updated");
+    expect(s.missing).toEqual([]);
+    expect(s.stale.sort()).toEqual(["health_consent", "privacy", "terms"]);
+    expect(s.decisions.product_improvement).toBeUndefined();
+    expect(evaluateConsent([...rows, ...grantAll("2026-10-08T10:00:00Z", V, 10)], V).reason).toBeNull();
+  });
+
   it("optional uses never satisfy the required ones", () => {
     const rows = [{ consent_type: "marketing", granted: true, granted_at: "2026-10-08T10:00:00Z" }];
     expect(evaluateConsent(rows, V).reason).toBe("never");

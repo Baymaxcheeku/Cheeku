@@ -66,8 +66,16 @@ account and records stay; the app stops reading, answering and saving until
 the person agrees again. The sheet they then see offers "Download my data" and
 "Sign out" next to "Agree", so not agreeing never costs anyone their records.
 
-**People who signed up before this** see the same box once, framed as "one
-quick thing", the next time they open the app.
+**People who signed up before this.** The app's earlier sign-up required a
+ticked box ("I agree that Cheeku AI may store and process my family's health
+records to give me insights", version 1.1.0) but never saved it. Migration
+0032 records that tick for every account with no decision on the required
+uses: one row per required use, dated when the account was created, method
+`carried_over`, the old wording as the fingerprint. It counts as agreement to
+the old wording only, so these people see a one-tap "we've updated our terms"
+notice once; their records keep working meanwhile. Optional uses are never
+carried over: they stay off until switched on, because DPDP consent needs a
+clear affirmative action. Accounts that withdrew are left as they are.
 
 ## What never leaves the device
 

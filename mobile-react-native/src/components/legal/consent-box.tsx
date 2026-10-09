@@ -111,24 +111,34 @@ export function ConsentBox({
         <Animated.View
           entering={still ? undefined : FadeIn.duration(180)}
           exiting={still ? undefined : FadeOut.duration(120)}
-          className="mx-3 mb-3 gap-2.5 rounded-[14px] px-3 py-3"
-          style={{ backgroundColor: surface.base, borderWidth: 1, borderColor: surface.line }}
+          // Layout in `style`, not `className`: NativeWind does not reach a
+          // Reanimated view, and the panel lost all its spacing on web.
+          style={{
+            marginHorizontal: 12,
+            marginBottom: 12,
+            gap: 12,
+            borderRadius: 14,
+            padding: 14,
+            backgroundColor: surface.base,
+            borderWidth: 1,
+            borderColor: surface.line,
+          }}
         >
           {REQUIRED_PURPOSES.map((p) => {
             const Icon = ICON[p];
             return (
-              <View key={p} className="flex-row gap-2.5">
+              <View key={p} className="flex-row items-start gap-3">
                 <View className="h-7 w-7 items-center justify-center rounded-[9px]" style={{ backgroundColor: brand[50] }}>
                   <Icon size={14} color={brand[600]} />
                 </View>
                 <View className="min-w-0 flex-1">
                   <Text style={{ fontFamily: font.semibold, fontSize: 12.5, color: ink[900] }}>{PURPOSE_COPY[p].title}</Text>
-                  <Text style={{ fontFamily: font.regular, fontSize: 12, lineHeight: 17, color: ink[500] }}>{PURPOSE_COPY[p].line}</Text>
+                  <Text style={{ fontFamily: font.regular, fontSize: 12, lineHeight: 17, color: ink[500], marginTop: 1 }}>{PURPOSE_COPY[p].line}</Text>
                 </View>
               </View>
             );
           })}
-          <Text style={{ fontFamily: font.regular, fontSize: 11.5, lineHeight: 16.5, color: ink[500], marginTop: 2 }}>
+          <Text style={{ fontFamily: font.regular, fontSize: 11.5, lineHeight: 16.5, color: ink[500], marginTop: 2, paddingTop: 10, borderTopWidth: 1, borderTopColor: surface.line }}>
             Research, product improvement and offers stay off unless you turn them on in Settings, Privacy. Your data is
             never sold. You can withdraw, download or delete everything at any time.
           </Text>

@@ -282,6 +282,11 @@ haptics has to be seen on a simulator or a device before it counts as done.
   and no privacy requests. **Once applied, every existing user sees the
   consent sheet once**, and new health data is refused without consent
   (`app_flags.enforce_consent`; set it false to switch the guard off).
+- **Migration 0032** (carry over old sign-ups) must be applied with 0031. The
+  app's sign-up before 0031 made people tick a box and never saved it; 0032
+  records that tick, dated at account creation, so those accounts keep
+  uploading and chatting and see a one-tap "we've updated our terms" notice
+  once. Optional uses are not carried over and stay off.
 - **Legal texts are drafts.** Company name, address, grievance officer and
   emails are [placeholders] in `src/lib/legal/entity.ts`, and the documents
   show a draft banner until they are filled. A lawyer should read all four

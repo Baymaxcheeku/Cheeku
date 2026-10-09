@@ -174,7 +174,7 @@ export default function HealthProfile() {
       <Reveal style={{ marginHorizontal: 20, marginTop: 18, flexDirection: "row", gap: 8, alignItems: "flex-start" }}>
         <ShieldCheck size={14} color={ink[300]} style={{ marginTop: 2 }} />
         <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 12.5, lineHeight: 18, color: ink[500] }}>
-          Kept in {active.isPrimary ? "your" : `${first}'s`} file only, never mixed with anyone else&apos;s and never shared outside your account.
+          Kept in {active.isPrimary ? "your" : `${first}'s`} file only, never mixed with anyone else&apos;s, and shared only when you book care that needs it.
         </Text>
       </Reveal>
     </SettingsScreen>
