@@ -3,7 +3,6 @@ import { useRouter } from "expo-router";
 import {
   Activity,
   BadgeCheck,
-  Brain,
   CalendarClock,
   Check,
   Footprints,
@@ -22,6 +21,7 @@ import { Image, Pressable, Text, View } from "react-native";
 
 import { MealReadCard } from "@/components/today/sheets";
 import { glassShadow } from "@/components/ui/glass";
+import { BreathIcon, MindIcon, type AppIcon } from "@/components/ui/icons";
 import { WINDOW_LABEL } from "@/lib/home/catalog";
 import type { Area, Pillar } from "@/lib/home/content";
 import { addDailyLog, usePhotoUrl } from "@/lib/home/logs";
@@ -30,9 +30,9 @@ import type { DailyLog, PlanTask } from "@/lib/home/plan";
 import { brand, ink, semantic, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
 
-export const PILLAR_ICON: Record<Pillar, LucideIcon> = { move: Footprints, eat: Salad, sleep: Moon, mind: Brain, check: Stethoscope };
+export const PILLAR_ICON: Record<Pillar, AppIcon> = { move: Footprints, eat: Salad, sleep: Moon, mind: MindIcon, check: Stethoscope };
 
-const KIND_ICON: Partial<Record<PlanTask["kind"], LucideIcon>> = { steps: Footprints, meal: Utensils, reading: Activity, rating: Moon, timer: Timer };
+const KIND_ICON: Partial<Record<PlanTask["kind"], AppIcon>> = { steps: Footprints, meal: Utensils, reading: Activity, rating: Moon, timer: BreathIcon };
 
 export const SLEEP_LABELS = ["Badly", "Restless", "Okay", "Well", "Great"] as const;
 

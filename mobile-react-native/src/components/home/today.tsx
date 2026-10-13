@@ -2,7 +2,6 @@ import { useRouter } from "expo-router";
 import {
   ArrowRight,
   BellRing,
-  Brain,
   CalendarClock,
   Check,
   ChevronRight,
@@ -28,6 +27,7 @@ import { LIVE } from "@/components/home/care";
 import { MascotFigure } from "@/components/illustrations/sprout";
 import { Avatar } from "@/components/ui/avatar";
 import { Glass, Gradient, glassShadow } from "@/components/ui/glass";
+import { BreathIcon, MindIcon, type AppIcon } from "@/components/ui/icons";
 import { Meter, PopIn } from "@/components/ui/motion";
 import { PILLARS, UNLOCK_COPY, unlockRows, viaLine, type Pillar, type UnlockRow } from "@/lib/home/content";
 import type { HomeSignals, UnlockedVia } from "@/lib/home/rules";
@@ -55,7 +55,7 @@ import { font } from "@/theme/type";
  * about health: an overdue test. The streak and pillars are violet and lime.
  */
 
-const PILLAR_ICON: Record<Pillar, typeof Footprints> = { move: Footprints, eat: Salad, sleep: Moon, mind: Brain, check: Stethoscope };
+const PILLAR_ICON: Record<Pillar, AppIcon> = { move: Footprints, eat: Salad, sleep: Moon, mind: MindIcon, check: Stethoscope };
 
 // ------------------------------------------------------------- starter --
 
@@ -305,7 +305,7 @@ export function ProgressStrip({ streak, week, pillars, onPillar }: { streak: Str
   );
 }
 
-function Chip({ children, icon: Icon }: { children: string; icon?: typeof Footprints }) {
+function Chip({ children, icon: Icon }: { children: string; icon?: AppIcon }) {
   return (
     <Glass className="flex-row items-center gap-1.5 rounded-pill px-3 py-1.5">
       {Icon ? <Icon size={13} color={brand[700]} strokeWidth={2.2} /> : null}
@@ -552,7 +552,7 @@ export function DueThisWeek({ rows, onPress }: { rows: DueRow[]; onPress: (r: Du
   );
 }
 
-const KIND_ICON: Partial<Record<PlanTask["kind"], typeof Footprints>> = { steps: Footprints, meal: Salad, reading: Stethoscope, rating: Moon, timer: Brain };
+const KIND_ICON: Partial<Record<PlanTask["kind"], AppIcon>> = { steps: Footprints, meal: Salad, reading: Stethoscope, rating: Moon, timer: BreathIcon };
 
 /**
  * Today's action plan, in brief: how much of the day is done, and the next

@@ -4,7 +4,6 @@ import {
   ArrowRight,
   Baby,
   Bone,
-  Brain,
   ChevronRight,
   Dumbbell,
   Ear,
@@ -21,12 +20,12 @@ import {
   Stethoscope,
   Waves,
   Zap,
-  type LucideIcon,
 } from "lucide-react-native";
 import { Pressable, Text, View } from "react-native";
 
 import { MascotFigure } from "@/components/illustrations/sprout";
 import { Brand } from "@/components/ui/brand";
+import { NerveIcon, WellbeingIcon, type AppIcon } from "@/components/ui/icons";
 import { Gradient, glass, glassShadow } from "@/components/ui/glass";
 import type { SpecialtyId } from "@/lib/booking/catalog";
 import type { Service } from "@/lib/services/catalog";
@@ -49,12 +48,12 @@ import { font } from "@/theme/type";
  * Colour: pastel tints per service, never green, amber or red (PLAN.md rule 3).
  */
 
-export const SERVICE_ICON: Record<string, LucideIcon> = {
+export const SERVICE_ICON: Record<string, AppIcon> = {
   Stethoscope,
   FlaskConical,
   Pill,
   ShieldCheck,
-  Brain,
+  WellbeingIcon,
   Smile,
   Eye,
   Activity,
@@ -63,7 +62,7 @@ export const SERVICE_ICON: Record<string, LucideIcon> = {
   Dumbbell,
 };
 
-export const SPECIALTY_ICON: Record<SpecialtyId, LucideIcon> = {
+export const SPECIALTY_ICON: Record<SpecialtyId, AppIcon> = {
   gp: Stethoscope,
   paeds: Baby,
   gynae: HeartHandshake,
@@ -72,13 +71,13 @@ export const SPECIALTY_ICON: Record<SpecialtyId, LucideIcon> = {
   dental: Smile,
   eye: Eye,
   psych: MessagesSquare,
-  psychiatry: Brain,
+  psychiatry: WellbeingIcon,
   diet: Salad,
   cardio: HeartPulse,
   endo: Zap,
   gastro: Activity,
   ortho: Bone,
-  neuro: Brain,
+  neuro: NerveIcon,
 };
 
 /** Lays children out two to a row, by hand. */
@@ -101,7 +100,7 @@ export function Grid2({ children, gap = 12 }: { children: React.ReactNode[]; gap
 }
 
 /** Layered art: a soft disc, a tilted white card, the icon on top, a small accent. */
-export function ServiceArt({ icon: Icon, fg, size = 92 }: { icon: LucideIcon; fg: string; size?: number }) {
+export function ServiceArt({ icon: Icon, fg, size = 92 }: { icon: AppIcon; fg: string; size?: number }) {
   const card = size * 0.62;
   return (
     <View style={{ width: size, height: size }}>

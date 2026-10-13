@@ -5,7 +5,6 @@ import {
   ArrowUpRight,
   ArrowLeftRight,
   BookOpen,
-  Brain,
   Camera,
   CalendarClock,
   FileText,
@@ -17,6 +16,7 @@ import {
   X,
   type LucideIcon,
 } from "lucide-react-native";
+import { MemoryIcon, ReadsIcon, type AppIcon } from "@/components/ui/icons";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -361,7 +361,7 @@ export default function Ask() {
             <History size={19} color={ink[900]} />
           </GlassCircle>
           <GlassCircle label={`What Cheeku remembers about ${name}`} onPress={() => router.push("/memory")}>
-            <Brain size={19} color={ink[900]} />
+            <MemoryIcon size={20} color={ink[900]} />
           </GlassCircle>
         </View>
 
@@ -441,7 +441,7 @@ export default function Ask() {
               </View>
 
               <View className="mt-4 gap-2.5 rounded-[22px] p-4" style={{ backgroundColor: "rgba(241,240,254,0.85)" }}>
-                <How icon={Brain} text={`Reads what you describe against ${name}'s own reports, readings and medicines`} />
+                <How icon={ReadsIcon} text={`Reads what you describe against ${name}'s own reports, readings and medicines`} />
                 <How icon={ShieldCheck} text="Tells you how urgent it looks: fits the pattern, keep an eye on it, call today, or go now" />
                 <How icon={Stethoscope} text="Writes out exactly what to tell the doctor, with the numbers" />
                 <Text style={{ fontFamily: font.regular, fontSize: 11.5, lineHeight: 16, color: ink[500], marginTop: 2 }}>
@@ -630,7 +630,7 @@ function MemoryChip({ label, strong, onPress }: { label: string; strong?: boolea
   );
 }
 
-function How({ icon: Icon, text }: { icon: LucideIcon; text: string }) {
+function How({ icon: Icon, text }: { icon: AppIcon; text: string }) {
   return (
     <View style={{ flexDirection: "row", gap: 10, alignItems: "flex-start" }}>
       <Icon size={15} color={brand[600]} style={{ marginTop: 1 }} />
