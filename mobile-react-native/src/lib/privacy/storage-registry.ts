@@ -126,6 +126,15 @@ export const STORAGE_REGISTRY: readonly StoredItem[] = [
     lasts: "Until you sign out or switch notifications off",
   },
   {
+    key: "cheeku.home",
+    label: "Which Home you see",
+    why: "Opens straight on Today once it's unlocked, without a flash of the starter screen.",
+    where: "keychain",
+    contains: "preference",
+    scope: "account",
+    lasts: "Until you sign out",
+  },
+  {
     key: "cheeku.pushPrimer",
     label: "Notification prompt seen",
     why: "So we only explain notifications once.",
