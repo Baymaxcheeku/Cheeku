@@ -15,6 +15,7 @@ import {
   MessageCircle,
   Moon,
   Salad,
+  Sparkles,
   Stethoscope,
   Syringe,
   Undo2,
@@ -30,7 +31,8 @@ import { Glass, Gradient, glassShadow } from "@/components/ui/glass";
 import { Meter, PopIn } from "@/components/ui/motion";
 import { PILLARS, UNLOCK_COPY, unlockRows, viaLine, type Pillar, type UnlockRow } from "@/lib/home/content";
 import type { HomeSignals, UnlockedVia } from "@/lib/home/rules";
-import type { DueRow, Step, Streak, WeekDay } from "@/lib/home/today";
+import type { Plan, PlanTask } from "@/lib/home/plan";
+import type { DueRow, Streak, WeekDay } from "@/lib/home/today";
 import type { ActiveProfile } from "@/lib/profiles/context";
 import { brand, ink, semantic, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
@@ -212,7 +214,7 @@ export function TodayHeadline({ name, isSelf }: { name: string; isSelf: boolean 
 }
 
 /** The long game, at a glance: streak, this week, and the pillars it touched. */
-export function ProgressStrip({ streak, week, pillars }: { streak: Streak; week: WeekDay[]; pillars: Set<Pillar> }) {
+export function ProgressStrip({ streak, week, pillars, onPillar }: { streak: Streak; week: WeekDay[]; pillars: Set<Pillar>; onPillar?: (p: Pillar) => void }) {
   const balanced = pillars.size === PILLARS.length;
   const sub = streak.todayDone ? "Today's done. See you tomorrow." : streak.count > 0 ? "Keep it going today" : "Do today's step to start one";
   return (
@@ -270,17 +272,35 @@ export function ProgressStrip({ streak, week, pillars }: { streak: Streak; week:
           const on = pillars.has(p.key);
           const Icon = PILLAR_ICON[p.key];
           return (
-            <View
+            <Pressable
               key={p.key}
-              className="h-8 flex-1 flex-row items-center justify-center gap-1 rounded-pill"
-              style={{ backgroundColor: on ? brand[600] : "transparent", borderWidth: on ? 0 : 1, borderColor: brand[100] }}
+              accessibilityRole="button"
+              accessibilityLabel={`${p.label}: today's actions${on ? ", trained this week" : ""}`}
+              onPress={onPillar ? () => onPillar(p.key) : undefined}
+              hitSlop={{ top: 6, bottom: 6 }}
+              style={({ pressed }) => ({
+                flex: 1,
+                height: 36,
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 4,
+                borderRadius: 999,
+                backgroundColor: on ? brand[600] : pressed ? brand[50] : "transparent",
+                borderWidth: on ? 0 : 1,
+                borderColor: brand[100],
+                transform: [{ scale: pressed ? 0.95 : 1 }],
+              })}
             >
               <Icon size={12} color={on ? "#fff" : brand[400]} strokeWidth={2.2} />
               <Text style={{ fontFamily: font.semibold, fontSize: 11, color: on ? "#fff" : brand[700] }}>{p.label}</Text>
-            </View>
+            </Pressable>
           );
         })}
       </View>
+      {onPillar ? (
+        <Text style={{ fontFamily: font.regular, fontSize: 11.5, color: ink[500], marginTop: 8, textAlign: "center" }}>Tap a pillar for today&apos;s actions under it</Text>
+      ) : null}
     </Glass>
   );
 }
@@ -310,16 +330,16 @@ export function StepCard({
   onUndo,
   onMore,
 }: {
-  step: Step | null;
+  step: PlanTask | null;
   /** The step just done, while the card celebrates it. */
-  doneStep: Step | null;
+  doneStep: PlanTask | null;
   streak: Streak;
   milestone: string | null;
   /** Whose step it is, when it is not your own. */
   forName: string | null;
-  onDone: (s: Step) => void;
-  onLater: (s: Step) => void;
-  onUndo: (s: Step) => void;
+  onDone: (s: PlanTask) => void;
+  onLater: (s: PlanTask) => void;
+  onUndo: (s: PlanTask) => void;
   onMore: (() => void) | null;
 }) {
   const router = useRouter();
@@ -375,7 +395,9 @@ export function StepCard({
   }
 
   const PillarIcon = PILLAR_ICON[step.pillar];
-  const due = step.kind === "due";
+  const due = Boolean(step.due);
+  // A task that needs more than a tap (steps, a meal, a reading) opens its sheet in the plan.
+  const action = step.cta ?? (step.kind !== "habit" ? { label: ACTION_LABEL[step.kind], route: `/today?task=${encodeURIComponent(step.key)}` } : null);
   return (
     <View className="overflow-hidden rounded-[32px]" style={[glassShadow, { minHeight: 300 }]}>
       <Gradient from="#f1edff" to="#d8cffd" glow="#ffffff" />
@@ -385,9 +407,9 @@ export function StepCard({
       <View className="flex-1 p-4">
         <View className="flex-row gap-2">
           {due ? (
-            <View className="flex-row items-center gap-1.5 rounded-pill px-3 py-1.5" style={{ backgroundColor: step.chip === "Overdue" ? semantic.dangerBg : semantic.cautionBg }}>
-              <CalendarClock size={13} color={step.chip === "Overdue" ? semantic.dangerText : semantic.cautionText} strokeWidth={2.2} />
-              <Text style={{ fontFamily: font.semibold, fontSize: 12.5, color: step.chip === "Overdue" ? semantic.dangerText : semantic.cautionText }}>{step.chip}</Text>
+            <View className="flex-row items-center gap-1.5 rounded-pill px-3 py-1.5" style={{ backgroundColor: step.dueLabel === "Overdue" ? semantic.dangerBg : semantic.cautionBg }}>
+              <CalendarClock size={13} color={step.dueLabel === "Overdue" ? semantic.dangerText : semantic.cautionText} strokeWidth={2.2} />
+              <Text style={{ fontFamily: font.semibold, fontSize: 12.5, color: step.dueLabel === "Overdue" ? semantic.dangerText : semantic.cautionText }}>{step.dueLabel}</Text>
             </View>
           ) : (
             <Chip icon={PillarIcon}>{step.chip}</Chip>
@@ -400,14 +422,20 @@ export function StepCard({
         </Text>
         <View style={{ paddingRight: "38%" }}>
           <Text style={{ fontFamily: font.semibold, fontSize: 24, lineHeight: 29, letterSpacing: -0.6, color: ink[900], marginTop: 6 }}>{step.title}</Text>
-          <Text style={{ fontFamily: font.regular, fontSize: 13.5, lineHeight: 19.5, color: ink[700], marginTop: 8 }}>{step.why}</Text>
+          {step.reason ? (
+            <View className="mt-2 flex-row items-center gap-1.5">
+              <Sparkles size={13} color={brand[600]} />
+              <Text style={{ flex: 1, fontFamily: font.semibold, fontSize: 12.5, color: brand[700] }}>{step.reason}</Text>
+            </View>
+          ) : null}
+          <Text numberOfLines={4} style={{ fontFamily: font.regular, fontSize: 13.5, lineHeight: 19.5, color: ink[700], marginTop: 8 }}>{step.why}</Text>
         </View>
 
         <View className="mt-auto flex-row items-center gap-2 pt-5">
-          {step.cta ? (
-            <Pressable accessibilityRole="button" onPress={() => router.push(step.cta?.route as never)} style={({ pressed }) => ({ transform: [{ scale: pressed ? 0.97 : 1 }] })}>
+          {action ? (
+            <Pressable accessibilityRole="button" onPress={() => router.push(action.route as never)} style={({ pressed }) => ({ transform: [{ scale: pressed ? 0.97 : 1 }] })}>
               <View className="h-[46px] flex-row items-center gap-1.5 rounded-pill px-4" style={{ backgroundColor: ink[900] }}>
-                <Text style={{ fontFamily: font.semibold, fontSize: 14, color: "#fff" }}>{step.cta.label}</Text>
+                <Text style={{ fontFamily: font.semibold, fontSize: 14, color: "#fff" }}>{action.label}</Text>
               </View>
             </Pressable>
           ) : (
@@ -426,7 +454,7 @@ export function StepCard({
             </Glass>
           </Pressable>
         </View>
-        {step.cta ? (
+        {due ? (
           // Booked somewhere else, or already done: it still counts.
           <Pressable accessibilityRole="button" accessibilityLabel={`Mark done: ${step.title}`} onPress={() => onDone(step)} hitSlop={8} style={{ alignSelf: "flex-start", marginTop: 10 }}>
             <Text style={{ fontFamily: font.semibold, fontSize: 13, color: brand[700] }}>Already done? Mark it</Text>
@@ -436,6 +464,8 @@ export function StepCard({
     </View>
   );
 }
+
+const ACTION_LABEL: Record<PlanTask["kind"], string> = { habit: "Done", steps: "Log steps", meal: "Add a photo", reading: "Log reading", rating: "Rate last night", timer: "Start" };
 
 const DUE_ICON: Record<string, typeof FlaskConical> = {
   test_ordered: FlaskConical,
@@ -518,6 +548,62 @@ export function DueThisWeek({ rows, onPress }: { rows: DueRow[]; onPress: (r: Du
           })}
         </View>
       )}
+    </View>
+  );
+}
+
+const KIND_ICON: Partial<Record<PlanTask["kind"], typeof Footprints>> = { steps: Footprints, meal: Salad, reading: Stethoscope, rating: Moon, timer: Brain };
+
+/**
+ * Today's action plan, in brief: how much of the day is done, and the next
+ * few things, each one tap from its place in the full plan.
+ */
+export function PlanPreview({ plan, skip, onOpen }: { plan: Plan; skip: string | null; onOpen: (href: string) => void }) {
+  const nextUp = plan.tasks.filter((t) => t.status === "open" && t.key !== skip).slice(0, 3);
+  return (
+    <View className="rounded-[26px] bg-white p-4" style={[glassShadow, { borderWidth: 1, borderColor: surface.line }]}>
+      <View className="flex-row items-center justify-between">
+        <View>
+          <Text style={{ fontFamily: font.semibold, fontSize: 17, letterSpacing: -0.3, color: ink[900] }}>Today&apos;s action plan</Text>
+          <Text style={{ fontFamily: font.regular, fontSize: 12.5, color: ink[500], marginTop: 1 }}>
+            {plan.done} of {plan.total} done{plan.areas.length ? " · made for your numbers" : ""}
+          </Text>
+        </View>
+        <Pressable accessibilityRole="button" accessibilityLabel="See the full plan" onPress={() => onOpen("/today")} hitSlop={8} className="flex-row items-center gap-1">
+          <Text style={{ fontFamily: font.semibold, fontSize: 13.5, color: brand[600] }}>See all</Text>
+          <ChevronRight size={15} color={brand[600]} />
+        </Pressable>
+      </View>
+      <View className="mt-3">
+        <Meter value={plan.done} total={Math.max(1, plan.total)} />
+      </View>
+      <View className="mt-2">
+        {nextUp.map((t, i) => {
+          const Icon = t.due ? CalendarClock : (KIND_ICON[t.kind] ?? PILLAR_ICON[t.pillar]);
+          return (
+            <Pressable
+              key={t.key}
+              accessibilityRole="button"
+              accessibilityLabel={t.title}
+              onPress={() => onOpen(t.kind === "habit" ? `/today?pillar=${t.pillar}` : `/today?task=${encodeURIComponent(t.key)}`)}
+              style={({ pressed }) => ({ flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 11, borderTopWidth: i === 0 ? 0 : 1, borderTopColor: surface.line, opacity: pressed ? 0.7 : 1 })}
+            >
+              <View className="h-9 w-9 items-center justify-center rounded-[12px]" style={{ backgroundColor: brand[50] }}>
+                <Icon size={17} color={brand[600]} strokeWidth={1.9} />
+              </View>
+              <View className="min-w-0 flex-1">
+                <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 14, color: ink[900] }}>
+                  {t.title}
+                </Text>
+                <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 12, color: t.personal ? brand[700] : ink[500], marginTop: 1 }}>
+                  {t.personal ? (t.reason ?? "For you") : `Healthy living · ${PILLARS.find((p) => p.key === t.pillar)?.label}`}
+                </Text>
+              </View>
+              <ChevronRight size={16} color={ink[300]} />
+            </Pressable>
+          );
+        })}
+      </View>
     </View>
   );
 }

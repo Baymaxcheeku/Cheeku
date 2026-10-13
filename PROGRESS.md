@@ -2743,3 +2743,52 @@ screenshots of starter, building, the unlock moment, Today, Today after Done
 and Today on a parent. **Needs a phone:** all of it on device, and the stage
 re-check when returning to Home after the first upload.
 
+## Today's action plan: five pillars, the whole day · 2026-10-13
+
+Owner's report from the phone: the Move, Eat, Sleep, Mind and Check chips on
+Today could not be tapped, and the day needed to be more than one step. Asked
+for: every pillar opens its tasks; Move logs steps with a watch screenshot as
+proof until wearables connect; Eat asks for a photo of every meal and drink
+and says what works for their health; sleep and calm suggestions; one
+personalised "today's action plan" mixing their own tasks with general
+healthy-living ones.
+
+**The engine** (`src/lib/home/plan.ts`, pure and tested). In: readings and
+flags, conditions, medicines, what is due, age and life stage, pregnancy, the
+week's logs, preferences, the hour. Out: a plan in a fixed shape. Due items
+first; the daily spine (steps, four meals, last night's sleep, two minutes of
+breathing); their own checks (BP, fasting sugar on alternate days, weekly
+weight, medicines with their names); up to four personal habits aimed at what
+their numbers say, each carrying the reason ("Your HbA1c came back high
+(6.1%)"); general habits in every pillar so the plan is never only about what
+is wrong. Sorted for the hour it is. Babies get due items only; children get
+active play, not a step count; pregnancy and children get the gentle set and
+nothing aimed at a reading; kidney flags drop every water task; the thyroid
+task only appears for someone on a thyroid tablet.
+
+**Steps.** Goal by age (10,000; 7,000 from 60; 5,000 from 75; 6,000 in
+pregnancy "or what your doctor is happy with"), or the person's own. When the
+week is well below the goal, today's target ramps from the week's average
+plus 15%, so the target is reachable.
+
+**Meals.** A photo per meal and the taps on what is on the plate. Version
+one reads the taps, not the photo, so every line is explainable: a balanced
+plate is praised, and at most two tips tied to their own areas (fast carbs
+with high sugar, salt with high BP, fried and bakery with high LDL). The day
+gets a one-line plate summary. `daily_logs.analysis` is kept for a model's
+reading later and the app cannot write it.
+
+**Backend (migration 0034).** `daily_logs` (own rows, own members, plan
+scope, consent guard, 80 a day, photo keys that can only point into the
+member's own daily folder, analysis stripped from app writes) and
+`profiles.daily_prefs`. Readings also go into `memory_facts`, so they are on
+the chart and in the next answer. Export and account deletion include the
+logs and their photos.
+
+**Verified here:** typecheck, lint, 400 tests (17 new for the plan, steps
+and meals); 0034 on local Postgres, eight checks in
+`supabase/manual/local-check/0034-daily-logs-scenarios.sql`; editor steps
+run clean. Web preview screenshots of Home, the plan in every pillar, and
+each sheet. **Needs a phone:** the camera and gallery pickers, photo upload
+and thumbnails, the breathing animation, and the keyboard over the sheets.
+

@@ -36,6 +36,7 @@ nothing lies about having data.
 | `/plan` | done — opens the real chooser | `billing/paywall.tsx` |
 | `/home` `/records` `/records/[id]` `/scan` `/ask` | done | — |
 | `/home` stages: starter, building, Today (step, streak, due, family alerts, unlock moment) | done 2026-10-13, needs migration 0033 | — |
+| `/today` action plan: five pillar switches, steps with screenshot, meal photos with plate read, readings, sleep rating, guided breathing, plan settings | done 2026-10-13, needs migration 0034 | — |
 | `/settings` hub, export, delete | done | — |
 | `/settings/security` | done, rebuilt 2026-10-08 (auto-lock delay, other devices, activity) | `settings/security` (134) |
 | `/settings/privacy` | done 2026-10-08, needs migration 0031 | — |
@@ -303,6 +304,14 @@ haptics has to be seen on a simulator or a device before it counts as done.
   (40 habits) and the marker and condition matching in `src/lib/home/today.ts`.
   Habits only, never a medicine change; kidney flags drop the water step,
   babies get no habits, children and pregnancy get a gentle subset.
+- **Migration 0034** (daily logs) must be applied for steps, meals,
+  readings and sleep ratings to be kept. Before it they last for the
+  session, and readings still reach memory.
+- **Meal photos are not read by a model yet.** The plate is read from the
+  taps (`src/lib/home/meals.ts`); `daily_logs.analysis` is reserved for the
+  server's reading of the photo and the app cannot write it.
+- **Wearables.** Steps are typed with a screenshot as proof. Apple Health and
+  Google Fit (Health Connect) are the next step and need a native build.
 - **No morning nudge yet.** The step is on Home only. A push at the person's
   chosen time, respecting `families.home_stage`, is the next piece.
 - **`privacy_requests` has no one working it.** Needs an admin view or an
