@@ -16,6 +16,7 @@ India's DPDP Act. It describes what the code does — not what a policy page say
 | Extracted values | What makes documents searchable | Derived |
 | Chat transcripts | Continuity, and a safety audit trail | Derived |
 | Consent record | Proof under DPDP | No |
+| Daily steps done or put off (`today_actions`) | The streak and week on Home's Today | User-initiated |
 
 Every field on the profile intake screen **except the name is genuinely
 optional**, and the screen says so. This is health data; collecting it because a
@@ -116,6 +117,9 @@ list, so the screen cannot fall behind the code.
   switched off (the copy is deleted at once) or shortened to 1 or 3 days.
 - **Clear cache** removes the offline copy and temporary files without signing
   out. Nothing on the server is touched.
+- **Which Home you see** (`cheeku.home`) holds the last Home stage and whether
+  the "Today is here" moment was shown, tagged with the account id so another
+  account's stage is never used. No health data. Wiped on sign-out.
 
 ## What the AI does and does not see
 

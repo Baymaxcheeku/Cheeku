@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
-import { useRouter } from "expo-router";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useFocusEffect, useRouter } from "expo-router";
 import { ActivityIndicator, RefreshControl, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -10,6 +10,7 @@ import { Paywall } from "@/components/billing/paywall";
 import { OfflineBanner } from "@/components/app/offline-banner";
 import { AskBar, CheekuCard, HomeHeadline, ProfileChip, firstName } from "@/components/home/ask-hero";
 import { CareSection } from "@/components/home/care";
+import { AskRow, DueThisWeek, FamilyAlertCard, LockedPreview, ProgressStrip, StepCard, TodayHeadline, UnlockCard, UnlockMoment } from "@/components/home/today";
 import { AppointmentCard } from "@/components/booking/appointment-card";
 import { isUpcoming, startsAt, useAppointmentList } from "@/lib/booking/appointments";
 import { FileCard, ReadsStrip } from "@/components/home/strips";
@@ -23,6 +24,17 @@ import { seatsFor } from "@/lib/billing/plans";
 import { familyMode, prefetchMembers, refreshRoster, useFamily, useSwitchMember } from "@/lib/profiles/family";
 import { useHealthFile } from "@/lib/health/queries";
 import { listProfileRecords, statsFrom } from "@/lib/records/queries";
+import { milestoneFor } from "@/lib/home/content";
+import { logStep, markUnlockSeen, recheckHomeStage, unlogStep, useHomeStage, useTodayLog } from "@/lib/home/stage";
+import { buildSteps, currentStep, dueRows, familyAlerts, pillarsThisWeek, routeFor, streakOf, weekOf, type DueRow, type Step } from "@/lib/home/today";
+import { todayIso } from "@/lib/memory/clock";
+import { buildContext } from "@/lib/memory/context";
+import { useMemory } from "@/lib/memory/store";
+import type { MemoryBundle } from "@/lib/memory/context";
+import type { LoopView } from "@/lib/memory/loops";
+import type { DueItem } from "@/lib/home/rules";
+import type { TodayAction } from "@/lib/home/today";
+import type { ActiveProfile } from "@/lib/profiles/context";
 import { brand } from "@/theme/tokens";
 import { Brand } from "@/components/ui/brand";
 
@@ -65,6 +77,27 @@ export default function Home() {
   const switchMember = useSwitchMember();
 
   const profileId = context.data?.profile?.id;
+
+  /*
+   * WHICH HOME. Starter and building ask for the latest record; Today is the
+   * daily plan. The server decides (migration 0033) and the phone remembers
+   * its last answer, so a returning family lands on the right one with no
+   * flash. Re-checked whenever Home comes back into view while still locked,
+   * which is the moment after a first upload.
+   */
+  const home = useHomeStage();
+  const stage = home.stage;
+  const onToday = stage === "today";
+  const { refetch: recheck } = home;
+  useFocusEffect(
+    useCallback(() => {
+      if (stage && stage !== "today") void recheck();
+    }, [stage, recheck]),
+  );
+  const memory = useMemory(onToday ? profileId : undefined);
+  const log = useTodayLog(onToday);
+  const [celebrating, setCelebrating] = useState<Step | null>(null);
+  useEffect(() => setCelebrating(null), [profileId]);
 
   // Both follow the member: "for you" depends on whose profile is in view,
   // and the file is theirs.
@@ -150,6 +183,7 @@ export default function Home() {
           refreshing={records.isFetching && !records.isPending}
           onRefresh={() => {
             refreshRoster(queryClient);
+            recheckHomeStage(queryClient);
           }}
           tintColor={brand[600]}
         />
@@ -193,54 +227,95 @@ export default function Home() {
       <SwitchPulse />
       <OfflineBanner updatedAt={context.dataUpdatedAt} />
 
-      <StaggerItem index={1}>
-        <View className="mt-6 px-5">
-          <HomeHeadline name={firstName(profile.name)} isSelf={profile.isPrimary} />
-        </View>
-      </StaggerItem>
+      {onToday ? (
+        <TodayBody
+          profile={profile}
+          members={access.selectable}
+          memory={memory.data ?? null}
+          serverDue={home.state?.due ?? []}
+          serverDone={home.state?.doneDays ?? []}
+          log={log.data ?? []}
+          celebrating={celebrating}
+          setCelebrating={setCelebrating}
+          next={next ? <AppointmentCard appt={next} hero /> : null}
+          onOpenRow={(r) => {
+            // Someone else's item opens on them, so a booking lands on the right person.
+            if (!r.mine) void switchMember(r.profileId);
+            router.push(routeFor(r) as never);
+          }}
+        />
+      ) : (
+        <>
+          <StaggerItem index={1}>
+            <View className="mt-6 px-5">
+              <HomeHeadline name={firstName(profile.name)} isSelf={profile.isPrimary} />
+            </View>
+          </StaggerItem>
 
-      <StaggerItem index={2}>
-        <View className="mt-5 px-5">
-          <AskBar />
-        </View>
-      </StaggerItem>
+          <StaggerItem index={2}>
+            <View className="mt-5 px-5">
+              <AskBar />
+            </View>
+          </StaggerItem>
 
-      {/*
-       * An upcoming appointment outranks everything below the ask bar: on the
-       * day, it is the reason the app was opened. Absent when there is none,
-       * with no empty state — Home is not the place to sell booking twice.
-       */}
-      {next ? (
-        <StaggerItem index={3}>
-          <View className="mt-4 px-5">
-            <AppointmentCard appt={next} hero />
-          </View>
-        </StaggerItem>
-      ) : null}
+          {/*
+           * An upcoming appointment outranks everything below the ask bar: on the
+           * day, it is the reason the app was opened. Absent when there is none,
+           * with no empty state — Home is not the place to sell booking twice.
+           */}
+          {next ? (
+            <StaggerItem index={3}>
+              <View className="mt-4 px-5">
+                <AppointmentCard appt={next} hero />
+              </View>
+            </StaggerItem>
+          ) : null}
 
-      <StaggerItem index={3}>
-        <View className="mt-4 px-5">
-          <CheekuCard
-            name={firstName(profile.name)}
-            isSelf={profile.isPrimary}
-            remembered={stats.total}
-            needsReview={needsReview}
-            onStatus={() => {
-              const top = list.find((r) => r.severity !== "normal")?.id;
-              router.push((stats.total === 0 ? "/scan" : top ? `/records/${top}` : "/records") as never);
-            }}
-          />
-        </View>
-      </StaggerItem>
+          {/*
+           * Not on Today yet: the hero asks for the latest record, because one
+           * record is what turns this screen into the daily plan. Until the
+           * stage is known (the very first launch only) the old hero holds the
+           * space, so nothing jumps.
+           */}
+          <StaggerItem index={3}>
+            <View className="mt-4 px-5">
+              {stage === "starter" || stage === "building" ? (
+                <UnlockCard stage={stage} signals={home.state?.signals ?? {}} />
+              ) : (
+                <CheekuCard
+                  name={firstName(profile.name)}
+                  isSelf={profile.isPrimary}
+                  remembered={stats.total}
+                  needsReview={needsReview}
+                  onStatus={() => {
+                    const top = list.find((r) => r.severity !== "normal")?.id;
+                    router.push((stats.total === 0 ? "/scan" : top ? `/records/${top}` : "/records") as never);
+                  }}
+                />
+              )}
+            </View>
+          </StaggerItem>
 
-      <StaggerItem index={4}>
+          {stage === "starter" || stage === "building" ? (
+            <StaggerItem index={4}>
+              <View className="mt-6 px-5">
+                <LockedPreview />
+              </View>
+            </StaggerItem>
+          ) : null}
+        </>
+      )}
+
+      <StaggerItem index={onToday ? 6 : 5}>
         <CareSection />
       </StaggerItem>
 
-      <StaggerItem index={5}>
+      <StaggerItem index={onToday ? 7 : 6}>
         <ReadsStrip articles={knowledge.data ?? []} />
         <FileCard file={file.data} member={profile} loading={file.isPending} />
       </StaggerItem>
+
+      <UnlockMoment open={onToday && home.unlockOwed} via={home.state?.via ?? null} onClose={() => void markUnlockSeen(queryClient)} />
 
       <FamilyTray
         open={trayOpen}
@@ -326,5 +401,146 @@ function NoProfile({ topInset }: { topInset: number }) {
         </Button>
       </View>
     </View>
+  );
+}
+
+
+/**
+ * Home on Today: the step, the streak, what is due across the family, and an
+ * alert when someone else's test has slipped. Everything is for the member in
+ * view, except the due list and alerts, which are the family's.
+ */
+function TodayBody({
+  profile,
+  members,
+  memory,
+  serverDue,
+  serverDone,
+  log,
+  celebrating,
+  setCelebrating,
+  next,
+  onOpenRow,
+}: {
+  profile: ActiveProfile;
+  members: readonly ActiveProfile[];
+  memory: MemoryBundle | null;
+  serverDue: readonly DueItem[];
+  serverDone: readonly string[];
+  log: readonly TodayAction[];
+  celebrating: Step | null;
+  setCelebrating: (s: Step | null) => void;
+  next: React.ReactNode;
+  onOpenRow: (r: DueRow) => void;
+}) {
+  const queryClient = useQueryClient();
+  const today = todayIso();
+  const ctx = useMemo(() => (memory ? buildContext(memory, today) : null), [memory, today]);
+
+  const names = useMemo(() => new Map(members.map((m) => [m.id, m.isPrimary ? "You" : firstName(m.name)])), [members]);
+  const rows = useMemo(() => dueRows({ server: serverDue, loops: ctx?.loops ?? [], activeId: profile.id, names, today }), [serverDue, ctx, profile.id, names, today]);
+
+  // This member's dated items from the server count as loops too, so a test
+  // Cheeku stored (not derived from a record) can still be Today's step.
+  const loops = useMemo(() => {
+    const own = ctx?.loops ?? [];
+    const known = new Set(own.map((l) => l.title.trim().toLowerCase()));
+    const extra: LoopView[] = rows
+      .filter((r) => r.mine && r.source === "loop" && !known.has(r.title.trim().toLowerCase()))
+      .map((r) => ({ key: r.id, type: r.type as LoopView["type"], title: r.title, detail: r.detail, openedOn: today, dueBy: r.dueBy, status: "open", closedBy: null, sourceDocumentId: null, relatesTo: [], daysOpen: 0, daysToDue: r.daysToDue, overdue: r.overdue }));
+    return [...extra, ...own].sort((a, b) => (a.daysToDue ?? 999) - (b.daysToDue ?? 999));
+  }, [ctx, rows, today]);
+
+  const steps = useMemo(
+    () =>
+      buildSteps(
+        {
+          loops,
+          series: ctx?.series ?? new Map(),
+          ledger: ctx?.ledger ?? [],
+          conditions: ctx?.subject.conditions ?? [],
+          lifeStage: ctx?.clock.stage ?? "adult",
+          pregnant: ctx?.clock.modifiers.includes("pregnant") ?? false,
+        },
+        profile.id,
+        today,
+        log,
+      ),
+    [ctx, loops, profile.id, today, log],
+  );
+  const step = currentStep(steps);
+
+  const doneDays = useMemo(() => new Set([...serverDone, ...log.filter((a) => a.status === "done").map((a) => a.day)]), [serverDone, log]);
+  const streak = streakOf(doneDays, today);
+  const week = weekOf(doneDays, today);
+  const pillars = pillarsThisWeek(log, today);
+
+  const alerts = familyAlerts(rows);
+  const byId = new Map(members.map((m) => [m.id, m]));
+
+  async function mark(s: Step, status: "done" | "later") {
+    if (status === "done") setCelebrating(s);
+    const r = await logStep(queryClient, { profileId: profile.id, stepKey: s.key, status });
+    if (!r.ok && status === "done") setCelebrating(null);
+  }
+
+  return (
+    <>
+      <StaggerItem index={1}>
+        <View className="mt-6 px-5">
+          <TodayHeadline name={firstName(profile.name)} isSelf={profile.isPrimary} />
+        </View>
+      </StaggerItem>
+
+      <StaggerItem index={2}>
+        <View className="mt-5 px-5">
+          <StepCard
+            step={step}
+            doneStep={celebrating}
+            streak={streak}
+            milestone={celebrating ? (milestoneFor(streak.count)?.line ?? null) : null}
+            forName={profile.isPrimary ? null : firstName(profile.name)}
+            onDone={(s) => void mark(s, "done")}
+            onLater={(s) => void mark(s, "later")}
+            onUndo={(s) => {
+              setCelebrating(null);
+              void unlogStep(queryClient, { profileId: profile.id, stepKey: s.key });
+            }}
+            onMore={celebrating && step ? () => setCelebrating(null) : null}
+          />
+        </View>
+      </StaggerItem>
+
+      <StaggerItem index={3}>
+        <View className="mt-4 px-5">
+          <ProgressStrip streak={streak} week={week} pillars={pillars} />
+        </View>
+      </StaggerItem>
+
+      {alerts.length ? (
+        <StaggerItem index={4}>
+          <View className="mt-4 gap-3 px-5">
+            {alerts.map((a) => (
+              <FamilyAlertCard key={a.id} row={a} member={byId.get(a.profileId) ?? null} onPress={() => onOpenRow(a)} />
+            ))}
+          </View>
+        </StaggerItem>
+      ) : null}
+
+      {next ? (
+        <StaggerItem index={4}>
+          <View className="mt-4 px-5">{next}</View>
+        </StaggerItem>
+      ) : null}
+
+      <StaggerItem index={5}>
+        <View className="mt-6 px-5">
+          <DueThisWeek rows={rows} onPress={onOpenRow} />
+        </View>
+        <View className="mt-4 px-5">
+          <AskRow />
+        </View>
+      </StaggerItem>
+    </>
   );
 }

@@ -2693,3 +2693,53 @@ missing, optional uses untouched, withdrawn and new accounts unchanged, a
 client cannot write `carried_over`, second run adds nothing. Web preview
 screenshots of the notice, the sheet over a directly opened Privacy screen, a
 saved switch and the pre-update state. **Needs a phone:** the same on device.
+
+## Home stages: starter, building, Today · 2026-10-13
+
+Owner's call: a new family with no history should not see a Today screen with
+nothing on it. Home drives them to add records first and switches to Today once
+there is something to plan from.
+
+**The rule.** One real record unlocks Today: a lab report or discharge summary,
+a prescription, medicines typed into a profile, a dated test or follow-up, or a
+booked lab visit. **Chat alone never unlocks it** (owner, 2026-10-13: "No" to a
+chat-volume unlock). A chat that saves a medicine or a due test counts, because
+that is a record. The chat-volume path exists in `app_config` switched off, so
+turning it on later is a config change, not a release.
+
+**Why it scales.** The stage lives on `families.home_stage` and only moves
+forward. `home_state()` evaluates signals only while a family is not on Today,
+with EXISTS probes on indexed columns; once on Today it costs one family row,
+a 14-day due query and a 35-day step log. The rules are config, not code.
+
+**Backend (migration 0033).** `app_config` (deny-all), `families.home_stage`,
+`home_stage_at`, `today_unlocked_via`, `today_actions` (RLS: own rows and own
+profiles only), `home_signals` (not callable by users), `home_decide` (pure,
+mirrored in `src/lib/home/rules.ts`), `home_state()`, and a backfill that puts
+existing families with data straight on Today.
+
+**App.** `src/lib/home/` holds the rule, the step picker, streaks and the
+content. Starter and building show an unlock card whose copy pushes the latest
+record, however old ("a WhatsApp forward or a PDF from your email all work"),
+and a checklist of what each kind of record opens. Today shows one step chosen
+from what Cheeku knows (an overdue test first, then a habit aimed at a flagged
+reading or a condition, then medicines, then a rotating longevity habit), a
+streak, a Monday-to-Sunday week, the five pillars (move, eat, sleep, mind,
+check), family alerts for someone else's overdue test, and what is due across
+the family. The stage is remembered on the phone (`cheeku.home`) so a returning
+family never sees the starter screen flash first.
+
+**Longevity as the game, kept quiet.** No points or confetti on medical data.
+A streak that survives until the day is over, milestones at 3, 7, 14 and 30
+days in Cheeku's words, and a "balanced week" when all five pillars are
+touched. Semantic colour appears only on overdue and due-soon items.
+
+**Verified here:** typecheck, lint, 33 new tests (decision parity with the
+SQL, ratchet, step priority, kidney and thyroid guards, baby and pregnancy
+sets, streak edges, due merging, alerts, copy rules); 0033 on local Postgres
+with seven accounts, 15 checks in
+`supabase/manual/local-check/0033-home-stage-scenarios.sql`. Web preview
+screenshots of starter, building, the unlock moment, Today, Today after Done
+and Today on a parent. **Needs a phone:** all of it on device, and the stage
+re-check when returning to Home after the first upload.
+

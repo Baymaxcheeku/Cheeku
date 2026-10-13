@@ -35,6 +35,7 @@ nothing lies about having data.
 | `/welcome` `/sign-in` `/who` `/profile` `/first-upload` | done | — |
 | `/plan` | done — opens the real chooser | `billing/paywall.tsx` |
 | `/home` `/records` `/records/[id]` `/scan` `/ask` | done | — |
+| `/home` stages: starter, building, Today (step, streak, due, family alerts, unlock moment) | done 2026-10-13, needs migration 0033 | — |
 | `/settings` hub, export, delete | done | — |
 | `/settings/security` | done, rebuilt 2026-10-08 (auto-lock delay, other devices, activity) | `settings/security` (134) |
 | `/settings/privacy` | done 2026-10-08, needs migration 0031 | — |
@@ -293,6 +294,17 @@ haptics has to be seen on a simulator or a device before it counts as done.
   before launch. Any change to a text changes its hash: bump the version,
   add a `legal_documents` row in a new migration, and set `material` if
   people must agree again.
+- **Migration 0033** (Home stages) must be applied for Today to be decided
+  by the server and for steps to be kept. Before it, the app decides the stage
+  itself from documents, medicines and messages (same rule as `home_decide`)
+  and Done works for the session only. Existing families with records land on
+  Today straight away (backfill) and see "Home is now Today" once.
+- **Today's daily steps need a clinician's read.** `src/lib/home/content.ts`
+  (40 habits) and the marker and condition matching in `src/lib/home/today.ts`.
+  Habits only, never a medicine change; kidney flags drop the water step,
+  babies get no habits, children and pregnancy get a gentle subset.
+- **No morning nudge yet.** The step is on Home only. A push at the person's
+  chosen time, respecting `families.home_stage`, is the next piece.
 - **`privacy_requests` has no one working it.** Needs an admin view or an
   email to the grievance officer.
 - Rate limiting on auth and AI endpoints.
