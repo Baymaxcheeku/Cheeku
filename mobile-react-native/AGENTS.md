@@ -74,3 +74,9 @@ you make completes, starts or blocks one of its tasks, update that task in
 the same session with the `ArtifactData` tool and add a `log` entry, as
 described in `../docs/launch-tracker/README.md`, which also lists every
 task id. Device verification is part of "done" for app work.
+
+The LabStack marketplace work has its own internal tracker,
+https://claude.ai/artifact/47jpFQDfdqQLKUPdNeatV1, kept in step with the
+launch tracker by hand. Changes to the partner gateway, partner orders,
+lab, consult or medicine integrations update it too, as described in
+`../docs/labstack-tracker/README.md`.

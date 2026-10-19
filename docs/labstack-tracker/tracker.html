@@ -1,0 +1,631 @@
+<title>LabStack Partnership Tracker</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Instrument+Serif:ital@1&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: brand bar; a phase rail from "prepare now" to go-live; three service readiness cards;
+   then tabs for the plan, the API inventory and the questions for the partner, with the
+   linked launch tasks and activity alongside. One column on phones. */
+:root {
+  --bg: #f4f5fb;
+  --surface: #ffffff;
+  --surface-2: #f0f1fa;
+  --ink: #0f1030;
+  --ink-2: #3a3b57;
+  --muted: #6b6c8a;
+  --line: #e4e5f2;
+  --brand: #4a2ade;
+  --brand-soft: #ebe8ff;
+  --partner: #0b7a6c;
+  --partner-soft: #def5f0;
+  --lime: #e4ff7a;
+  --lime-ink: #2f3d00;
+  --done: #157a43; --done-bg: #e3f6ec;
+  --doing: #4a2ade; --doing-bg: #ebe8ff;
+  --blocked: #a83a06; --blocked-bg: #fff0e3;
+  --todo: #5d5e7c; --todo-bg: #eeeef6;
+  --p0: #b8091a; --p0-bg: #fdecef;
+  --p1: #8f5400; --p1-bg: #fff3dc;
+  --p2: #4f5070; --p2-bg: #eeeef6;
+  --shadow: 0 1px 2px rgba(20, 16, 70, .05), 0 8px 24px rgba(42, 31, 107, .06);
+  --font-ui: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-brand: "Instrument Serif", "Iowan Old Style", Georgia, serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0b0c20; --surface: #14152e; --surface-2: #1b1c3b; --ink: #f1f0ff; --ink-2: #cfcee9; --muted: #9b9bb8; --line: #2a2b4f;
+    --brand: #9a93ff; --brand-soft: #25224f; --partner: #5fd8c5; --partner-soft: #0f302c; --lime: #e4ff7a; --lime-ink: #2f3d00;
+    --done: #6fdc9d; --done-bg: #12321f; --doing: #b3adff; --doing-bg: #25224f; --blocked: #ffab73; --blocked-bg: #3a2210;
+    --todo: #b3b3cc; --todo-bg: #23244a; --p0: #ff8a95; --p0-bg: #3b1520; --p1: #ffc46b; --p1-bg: #36260b; --p2: #b8b8d4; --p2-bg: #23244a;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 28px rgba(0,0,0,.28); color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0b0c20; --surface: #14152e; --surface-2: #1b1c3b; --ink: #f1f0ff; --ink-2: #cfcee9; --muted: #9b9bb8; --line: #2a2b4f;
+  --brand: #9a93ff; --brand-soft: #25224f; --partner: #5fd8c5; --partner-soft: #0f302c; --lime: #e4ff7a; --lime-ink: #2f3d00;
+  --done: #6fdc9d; --done-bg: #12321f; --doing: #b3adff; --doing-bg: #25224f; --blocked: #ffab73; --blocked-bg: #3a2210;
+  --todo: #b3b3cc; --todo-bg: #23244a; --p0: #ff8a95; --p0-bg: #3b1520; --p1: #ffc46b; --p1-bg: #36260b; --p2: #b8b8d4; --p2-bg: #23244a;
+  --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 28px rgba(0,0,0,.28); color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-ui); font-size: 14px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+button, select, input, textarea { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; border-radius: 8px; }
+.num { font-variant-numeric: tabular-nums; }
+.mono { font-family: var(--font-mono); font-size: 12px; }
+
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--surface); }
+.bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 9; background: color-mix(in srgb, var(--surface) 90%, transparent); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+.bar-in, .wrap { max-width: 1240px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.bar-in { display: flex; align-items: center; gap: 12px; padding-block: 12px; flex-wrap: wrap; }
+.brand { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.wordmark { font-family: var(--font-brand); font-style: italic; font-size: 28px; line-height: 1; color: var(--brand); }
+.x { color: var(--muted); font-size: 16px; }
+.partner-name { font-weight: 700; font-size: 17px; letter-spacing: -.2px; color: var(--partner); }
+.brand-sub { font-weight: 600; font-size: 15px; color: var(--ink); margin-left: 4px; }
+.bar-meta { margin-left: auto; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 12.5px; color: var(--muted); }
+.bar-meta a { color: var(--brand); font-weight: 600; text-decoration: none; }
+.bar-meta a:hover { text-decoration: underline; }
+.sync { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--line); }
+.sync i { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); }
+.sync[data-state="live"] i { background: var(--done); box-shadow: 0 0 0 3px color-mix(in srgb, var(--done) 25%, transparent); }
+.sync[data-state="off"] i { background: var(--blocked); }
+
+.wrap { padding-block: 22px 56px; display: grid; gap: 20px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 20px; box-shadow: var(--shadow); }
+.eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 1.1px; text-transform: uppercase; color: var(--partner); }
+
+/* Agreement + phases */
+.top { display: grid; grid-template-columns: 1fr 2fr; gap: 16px; }
+.deal { padding: 20px; display: grid; gap: 12px; align-content: start; }
+.deal h1 { margin: 0; font-size: 20px; line-height: 1.25; letter-spacing: -.3px; text-wrap: balance; }
+.deal p { margin: 0; color: var(--ink-2); font-size: 13.5px; max-width: 60ch; }
+.facts { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 6px 12px; font-size: 12.5px; }
+.facts dt { color: var(--muted); }
+.facts dd { margin: 0; color: var(--ink); font-weight: 500; }
+.phases { padding: 20px; display: grid; gap: 14px; grid-template-rows: auto 1fr; }
+.rail { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.ph { border: 1px solid var(--line); border-radius: 14px; padding: 12px; display: flex; flex-direction: column; align-items: stretch; gap: 6px; background: var(--surface); cursor: pointer; text-align: left; font: inherit; color: inherit; }
+.ph .ph-foot { margin-top: auto; display: grid; gap: 6px; padding-top: 8px; }
+.ph .ph-counts { display: flex; flex-wrap: wrap; gap: 4px; }
+.ph .ph-counts span { font-size: 10.5px; font-weight: 600; padding: 1px 7px; border-radius: 6px; background: var(--surface-2); color: var(--muted); }
+.ph.qs { background: color-mix(in srgb, var(--partner) 7%, var(--surface)); border-style: dashed; }
+.ph.qs .big { font-size: 22px; font-weight: 700; color: var(--partner); line-height: 1; }
+.ph[aria-pressed="true"] { border-color: var(--partner); box-shadow: 0 0 0 2px color-mix(in srgb, var(--partner) 30%, transparent); }
+.ph .n { font-size: 11px; font-weight: 700; color: var(--muted); }
+.ph b { font-size: 13px; font-weight: 600; line-height: 1.25; overflow-wrap: anywhere; }
+.ph small { font-size: 11px; color: var(--muted); }
+.ph .now { align-self: flex-start; font-size: 10.5px; font-weight: 700; padding: 1px 7px; border-radius: 6px; background: var(--lime); color: var(--lime-ink); }
+.track { height: 6px; border-radius: 999px; background: var(--surface-2); overflow: hidden; border: 1px solid var(--line); }
+.track > i { display: block; height: 100%; background: var(--partner); border-radius: 999px; }
+
+/* Services */
+.services { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.svc { padding: 18px; display: grid; gap: 12px; align-content: start; }
+.svc-head { display: flex; align-items: center; gap: 12px; }
+.svc-ic { width: 40px; height: 40px; border-radius: 13px; display: grid; place-items: center; background: var(--partner-soft); color: var(--partner); flex: none; }
+.svc-head h3 { margin: 0; font-size: 15.5px; }
+.svc-head p { margin: 0; font-size: 12px; color: var(--muted); }
+.svc-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.svc-stats div { background: var(--surface-2); border-radius: 12px; padding: 8px 10px; }
+.svc-stats b { display: block; font-size: 17px; font-weight: 600; }
+.svc-stats span { font-size: 11px; color: var(--muted); }
+.svc ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 4px; font-size: 12.5px; color: var(--ink-2); }
+.svc li { display: flex; gap: 8px; align-items: baseline; }
+.svc li::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: var(--partner); flex: none; transform: translateY(-2px); }
+
+/* Main */
+.main { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 20px; align-items: start; }
+.tabs { display: inline-flex; padding: 3px; background: var(--surface-2); border: 1px solid var(--line); border-radius: 12px; gap: 2px; flex-wrap: wrap; }
+.tabs button { border: 0; background: transparent; padding: 8px 14px; border-radius: 9px; cursor: pointer; font-weight: 500; color: var(--ink-2); display: inline-flex; align-items: center; gap: 6px; }
+.tabs button[aria-selected="true"] { background: var(--surface); color: var(--ink); font-weight: 600; box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+.tabs .n { font-size: 11px; color: var(--muted); }
+.toolbar { padding: 14px; display: grid; gap: 12px; }
+.row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.chip { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 5px 11px; cursor: pointer; font-size: 12.5px; font-weight: 500; color: var(--ink-2); display: inline-flex; gap: 6px; align-items: center; }
+.chip[aria-pressed="true"] { background: var(--ink); color: var(--surface); border-color: var(--ink); }
+.search { flex: 1 1 220px; min-width: 0; display: flex; align-items: center; gap: 8px; background: var(--surface-2); border: 1px solid var(--line); border-radius: 12px; padding: 0 12px; }
+.search input { border: 0; background: transparent; outline: none; padding: 9px 0; width: 100%; min-width: 0; }
+
+.groups { display: grid; gap: 16px; }
+.group { overflow: hidden; }
+.group-head { display: flex; align-items: center; gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--line); }
+.group-head h3 { margin: 0; font-size: 14.5px; }
+.group-head p { margin: 0; font-size: 12px; color: var(--muted); }
+.group-head .mini { margin-left: auto; font-size: 12px; color: var(--muted); display: flex; gap: 8px; align-items: center; }
+.group-head .mini .track { width: 80px; }
+.task { border-bottom: 1px solid var(--line); }
+.task:last-child { border-bottom: 0; }
+.task-row { display: grid; grid-template-columns: 128px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 11px 16px; }
+.task[data-status="done"] .t-title { color: var(--muted); text-decoration: line-through; }
+.status-wrap { position: relative; display: block; }
+.status-wrap::before { content: ""; position: absolute; left: 10px; top: 50%; width: 7px; height: 7px; margin-top: -3.5px; border-radius: 50%; background: currentColor; pointer-events: none; }
+.status-wrap::after { content: ""; position: absolute; right: 11px; top: 50%; width: 6px; height: 6px; margin-top: -5px; border-right: 1.6px solid currentColor; border-bottom: 1.6px solid currentColor; transform: rotate(45deg); pointer-events: none; }
+.status-wrap[data-v="todo"] { color: var(--todo); } .status-wrap[data-v="doing"] { color: var(--doing); } .status-wrap[data-v="blocked"] { color: var(--blocked); } .status-wrap[data-v="done"] { color: var(--done); }
+.status { appearance: none; -webkit-appearance: none; border: 0; border-radius: 999px; padding: 5px 26px 5px 23px; font-size: 12px; font-weight: 600; cursor: pointer; width: 100%; color: inherit; }
+.status[data-v="todo"] { background: var(--todo-bg); } .status[data-v="doing"] { background: var(--doing-bg); } .status[data-v="blocked"] { background: var(--blocked-bg); } .status[data-v="done"] { background: var(--done-bg); }
+.status:disabled { cursor: default; }
+.t-main { min-width: 0; display: grid; gap: 4px; }
+.t-title { font-weight: 500; cursor: pointer; background: none; border: 0; padding: 0; text-align: left; line-height: 1.35; color: var(--ink); }
+.t-title:hover { color: var(--brand); }
+.t-meta { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.tag { font-size: 11px; font-weight: 600; padding: 1px 7px; border-radius: 6px; background: var(--surface-2); color: var(--muted); white-space: nowrap; }
+.tag.p0 { background: var(--p0-bg); color: var(--p0); } .tag.p1 { background: var(--p1-bg); color: var(--p1); } .tag.p2 { background: var(--p2-bg); color: var(--p2); }
+.tag.link { background: var(--brand-soft); color: var(--brand); }
+.tag.svc { background: var(--partner-soft); color: var(--partner); }
+.who { width: 26px; height: 26px; border-radius: 9px; display: grid; place-items: center; font-size: 11px; font-weight: 700; color: #fff; flex: none; }
+.who.athar { background: var(--brand); } .who.suraj { background: #0f1030; color: var(--lime); } .who.founder { background: #c2410c; } .who.labstack { background: var(--partner); }
+:root:not([data-theme="light"]) .who.suraj { border: 1px solid var(--line); }
+.t-side { display: flex; align-items: center; gap: 10px; }
+.expand { width: 28px; height: 28px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); cursor: pointer; display: grid; place-items: center; color: var(--muted); }
+.expand svg { transition: transform .2s ease; }
+.task[data-open="true"] .expand svg { transform: rotate(180deg); }
+.t-detail { padding: 0 16px 14px 156px; display: grid; gap: 10px; font-size: 13px; color: var(--ink-2); }
+.t-detail p { margin: 0; max-width: 72ch; }
+.kv { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 4px 12px; font-size: 12.5px; margin: 0; }
+.kv dt { color: var(--muted); }
+.kv dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+
+/* API inventory */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 720px; }
+th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: var(--muted); font-weight: 600; padding: 10px 12px; border-bottom: 1px solid var(--line); background: var(--surface); position: sticky; top: 0; }
+td { padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+tr:last-child td { border-bottom: 0; }
+td .cap { font-weight: 500; color: var(--ink); }
+td small { display: block; color: var(--muted); font-size: 12px; }
+.ep { font-family: var(--font-mono); font-size: 12px; }
+.ep.unknown { color: var(--muted); font-family: var(--font-ui); font-style: italic; }
+.api-state { appearance: none; -webkit-appearance: none; border: 1px solid var(--line); border-radius: 8px; padding: 3px 8px; font-size: 12px; font-weight: 600; background: var(--surface-2); cursor: pointer; }
+.api-state[data-v="confirm"] { color: var(--muted); }
+.api-state[data-v="documented"] { color: var(--p1); background: var(--p1-bg); border-color: transparent; }
+.api-state[data-v="built"] { color: var(--doing); background: var(--doing-bg); border-color: transparent; }
+.api-state[data-v="tested"] { color: var(--partner); background: var(--partner-soft); border-color: transparent; }
+.api-state[data-v="live"] { color: var(--done); background: var(--done-bg); border-color: transparent; }
+.api-state[data-v="gap"] { color: var(--p0); background: var(--p0-bg); border-color: transparent; }
+
+/* Questions */
+.qs { display: grid; gap: 12px; padding: 14px; }
+.q { border: 1px solid var(--line); border-radius: 16px; padding: 14px; display: grid; gap: 8px; background: var(--surface); }
+.q[data-answered="true"] { background: var(--surface-2); }
+.q-head { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+.q-head b { font-weight: 600; font-size: 13.5px; flex: 1 1 280px; min-width: 0; }
+.q textarea { width: 100%; min-height: 54px; resize: vertical; border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; background: var(--surface); font-size: 13px; }
+.q .why { font-size: 12.5px; color: var(--muted); margin: 0; }
+.q label.check { display: inline-flex; gap: 6px; align-items: center; font-size: 12.5px; color: var(--ink-2); cursor: pointer; }
+.q input[type="checkbox"] { accent-color: var(--partner); }
+
+/* Side */
+.side { display: grid; gap: 16px; position: sticky; top: calc(env(safe-area-inset-top, 0px) + 72px); }
+.panel { padding: 16px; display: grid; gap: 10px; }
+.panel h2 { margin: 0; font-size: 15px; }
+.panel .sub { margin: -4px 0 0; color: var(--muted); font-size: 12px; }
+.panel .sub a { color: var(--brand); }
+.linked { display: grid; gap: 6px; }
+.lk { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: center; padding: 6px 8px; border-radius: 10px; }
+.lk:hover { background: var(--surface-2); }
+.lk b { font-weight: 500; font-size: 13px; }
+.lk small { display: block; font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
+.st { font-size: 10.5px; font-weight: 600; padding: 1px 7px; border-radius: 6px; }
+.st.todo { background: var(--todo-bg); color: var(--todo); } .st.doing { background: var(--doing-bg); color: var(--doing); } .st.blocked { background: var(--blocked-bg); color: var(--blocked); } .st.done { background: var(--done-bg); color: var(--done); }
+.feed { display: grid; gap: 10px; max-height: 320px; overflow: auto; }
+.ev { display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 10px; font-size: 12.5px; }
+.ev .ic { width: 28px; height: 28px; border-radius: 9px; display: grid; place-items: center; background: var(--surface-2); font-size: 11px; font-weight: 700; color: var(--brand); }
+.ev .ic.claude { background: var(--lime); color: var(--lime-ink); }
+.ev p { margin: 0; color: var(--ink-2); }
+.ev time { color: var(--muted); font-size: 11.5px; }
+.state-msg { padding: 28px; text-align: center; color: var(--muted); display: grid; gap: 6px; justify-items: center; }
+.state-msg strong { color: var(--ink); font-size: 15px; }
+.toast { position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom, 0px) + 20px); transform: translateX(-50%); background: var(--ink); color: var(--surface); padding: 10px 16px; border-radius: 12px; font-size: 13px; z-index: 20; }
+.foot { color: var(--muted); font-size: 12px; text-align: center; }
+
+@media (max-width: 1080px) {
+  .top { grid-template-columns: 1fr; }
+  .rail { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .main { grid-template-columns: 1fr; }
+  .side { position: static; }
+}
+@media (max-width: 760px) {
+  .services { grid-template-columns: 1fr; }
+  .rail { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .task-row { grid-template-columns: minmax(0, 1fr) auto; }
+  .task-row .status-cell { grid-column: 1 / -1; max-width: 150px; }
+  .t-detail { padding-left: 16px; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<header class="bar">
+  <div class="bar-in">
+    <div class="brand"><span class="wordmark">Cheeku</span><span class="x">×</span><span class="partner-name">LabStack</span><span class="brand-sub">Partnership tracker</span></div>
+    <div class="bar-meta">
+      <span>Internal</span>
+      <a href="https://claude.ai/artifact/FWQhpm3j1KJWiNrCgpraHe" target="_blank" rel="noopener">Launch tracker</a>
+      <span class="sync" id="sync" data-state="wait"><i></i><span id="sync-text">Connecting</span></span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="top">
+    <div class="card deal">
+      <div class="eyebrow">Where the partnership stands</div>
+      <h1 id="deal-title">Loading the agreement</h1>
+      <p id="deal-body"></p>
+      <dl class="facts" id="deal-facts"></dl>
+    </div>
+    <div class="card phases">
+      <div class="row" style="justify-content:space-between">
+        <div class="eyebrow">Phases</div>
+        <span class="num" id="overall" style="font-size:12.5px;color:var(--muted)"></span>
+      </div>
+      <div class="rail" id="rail"></div>
+    </div>
+  </section>
+
+  <section class="services" id="services" aria-label="Services"></section>
+
+  <div class="main">
+    <section style="display:grid;gap:16px;min-width:0">
+      <div class="card toolbar">
+        <div class="row">
+          <div class="tabs" role="tablist" id="tabs"></div>
+        </div>
+        <div class="row" id="filters">
+          <label class="search" for="q"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="q" type="search" placeholder="Search" autocomplete="off"></label>
+        </div>
+        <div class="chips" id="owner-chips"></div>
+        <div class="chips" id="svc-chips"></div>
+      </div>
+      <div id="view"><div class="card state-msg"><strong>Loading the tracker</strong><span>Tasks appear once the store answers.</span></div></div>
+    </section>
+    <aside class="side">
+      <div class="card panel">
+        <h2>Linked launch tasks</h2>
+        <p class="sub">The same work in the <a href="https://claude.ai/artifact/FWQhpm3j1KJWiNrCgpraHe" target="_blank" rel="noopener">launch tracker</a>, as of the last sync.</p>
+        <div class="linked" id="linked"></div>
+      </div>
+      <div class="card panel">
+        <h2>Activity</h2>
+        <div class="feed" id="feed"><p class="sub">No changes yet.</p></div>
+      </div>
+    </aside>
+  </div>
+  <p class="foot">Internal to Cheeku. Endpoint details stay marked "to confirm" until they are checked against LabStack's documentation.</p>
+</main>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(() => {
+  const OWNERS = {
+    athar: { name: "Athar", role: "App and backend", i: "A" },
+    suraj: { name: "Suraj", role: "AI integration", i: "S" },
+    founder: { name: "Founder", role: "Commercials, legal, partner", i: "F" },
+    labstack: { name: "LabStack", role: "Partner deliverable", i: "L" },
+  };
+  const PHASES = [
+    ["p0", "Prepare now", "While we build the app"],
+    ["p1", "Access and docs", "Agreement, sandbox, review"],
+    ["p2", "Lab tests", "Catalogue to report"],
+    ["p3", "Consultations", "Doctors, video, e-Rx"],
+    ["p4", "Medicines", "Search, Rx, delivery"],
+    ["p5", "Payments", "Collect, settle, refund"],
+    ["p6", "Go-live", "UAT, monitoring, rollout"],
+  ];
+  const SERVICES = {
+    labs: { name: "Lab tests at home", sub: "Labs API", icon: '<path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 1.7 3h10.6a2 2 0 0 0 1.7-3l-5-9V3"/><path d="M7.5 15h9"/>' },
+    consult: { name: "Doctor consultations", sub: "Consultation API", icon: '<path d="M5 3v6a5 5 0 0 0 10 0V3"/><path d="M10 14v2a4 4 0 0 0 8 0v-3"/><circle cx="18" cy="11" r="2"/>' },
+    pharma: { name: "Medicine delivery", sub: "Pharma API", icon: '<rect x="3" y="9" width="18" height="7" rx="3.5" transform="rotate(-45 12 12.5)"/><path d="m9.5 10 5 5"/>' },
+    common: { name: "Platform", sub: "Shared across all three" },
+  };
+  const STATUS = [["todo", "To do"], ["doing", "In progress"], ["blocked", "Blocked"], ["done", "Done"]];
+  const API_STATES = [["confirm", "To confirm"], ["documented", "Documented"], ["gap", "Gap"], ["built", "Built"], ["tested", "Tested"], ["live", "Live"]];
+  const PRIO = { P0: 0, P1: 1, P2: 2 };
+
+  const $ = (id) => document.getElementById(id);
+  const el = (t, c, x) => { const n = document.createElement(t); if (c) n.className = c; if (x != null) n.textContent = x; return n; };
+  const pct = (d, t) => (t ? Math.round((d / t) * 100) : 0);
+  const fmt = (iso) => { if (!iso) return ""; const d = new Date(iso); return isNaN(d) ? "" : d.toLocaleDateString("en-IN", { day: "numeric", month: "short" }) + ", " + d.toLocaleTimeString("en-IN", { hour: "numeric", minute: "2-digit" }); };
+  const load = (k, d) => { try { return localStorage.getItem(k) ?? d; } catch { return d; } };
+  const save = (k, v) => { try { localStorage.setItem(k, v); } catch {} };
+  function toast(m) { const t = $("toast"); t.textContent = m; t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => (t.hidden = true), 2600); }
+
+  const S = {
+    tasks: [], apis: [], questions: [], linked: [], log: [], deal: null,
+    tab: load("ls.tab", "plan"), phase: load("ls.phase", "all"), owner: "all", svc: "all", q: "",
+    open: new Set(), db: null, user: null, me: null, canWrite: null,
+  };
+
+  // ---------------------------------------------------------------- top
+  function renderDeal() {
+    const d = S.deal;
+    $("deal-title").textContent = d?.title || "Agreement not loaded";
+    $("deal-body").textContent = d?.summary || "";
+    const f = $("deal-facts"); f.replaceChildren();
+    for (const [k, v] of d?.facts || []) { f.append(el("dt", null, k), el("dd", null, v)); }
+  }
+  function renderRail() {
+    const r = $("rail"); r.replaceChildren();
+    const cur = S.deal?.currentPhase || "p0";
+    PHASES.forEach(([k, name, sub], i) => {
+      const ts = S.tasks.filter((t) => t.phase === k); const d = ts.filter((t) => t.status === "done").length;
+      const b = el("button", "ph"); b.type = "button"; b.setAttribute("aria-pressed", String(S.phase === k));
+      b.append(el("span", "n", "Phase " + i), el("b", null, name), el("small", null, sub));
+      if (k === cur) b.appendChild(el("span", "now", "Now"));
+      const foot = el("div", "ph-foot"), counts = el("div", "ph-counts");
+      const p0 = ts.filter((t) => t.priority === "P0" && t.status !== "done").length, ask = ts.filter((t) => t.partnerAsk && t.status !== "done").length;
+      if (p0) counts.appendChild(el("span", null, `${p0} P0 open`));
+      if (ask) counts.appendChild(el("span", null, `${ask} need LabStack`));
+      const tr = el("div", "track"); const bar = el("i"); bar.style.width = pct(d, ts.length) + "%"; tr.appendChild(bar);
+      foot.append(counts, tr, el("small", "num", `${d} of ${ts.length} done`)); b.appendChild(foot);
+      b.addEventListener("click", () => { S.phase = S.phase === k ? "all" : k; save("ls.phase", S.phase); S.tab = "plan"; save("ls.tab", "plan"); renderAll(); });
+      r.appendChild(b);
+    });
+    const qa = S.questions.filter((q) => q.answered).length;
+    const qb = el("button", "ph qs"); qb.type = "button";
+    qb.append(el("span", "n", "Before the deep dive"), el("b", null, "Questions for LabStack"), el("small", null, "Answers decide the gateway, payments and consent design."));
+    const qf = el("div", "ph-foot"); qf.append(el("span", "big num", `${S.questions.length - qa}`), el("small", "num", `open of ${S.questions.length}, ${qa} answered`)); qb.appendChild(qf);
+    qb.addEventListener("click", () => { S.tab = "questions"; save("ls.tab", "questions"); renderAll(); $("tabs").scrollIntoView({ behavior: "smooth", block: "start" }); });
+    r.appendChild(qb);
+    const d = S.tasks.filter((t) => t.status === "done").length;
+    $("overall").textContent = `${d} of ${S.tasks.length} tasks done${S.phase !== "all" ? " · showing one phase, tap it again for all" : ""}`;
+  }
+  function renderServices() {
+    const host = $("services"); host.replaceChildren();
+    for (const k of ["labs", "consult", "pharma"]) {
+      const s = SERVICES[k];
+      const ts = S.tasks.filter((t) => t.service === k); const d = ts.filter((t) => t.status === "done").length;
+      const apis = S.apis.filter((a) => a.service === k);
+      const known = apis.filter((a) => a.state !== "confirm").length;
+      const live = apis.filter((a) => a.state === "live").length;
+      const c = el("div", "card svc");
+      const h = el("div", "svc-head");
+      const ic = el("div", "svc-ic"); ic.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${s.icon}</svg>`;
+      const tx = el("div"); tx.append(el("h3", null, s.name), el("p", null, s.sub));
+      h.append(ic, tx);
+      const st = el("div", "svc-stats");
+      const stat = (n, l) => { const b = el("div"); b.append(el("b", "num", n), el("span", null, l)); return b; };
+      st.append(stat(`${d}/${ts.length}`, "Tasks done"), stat(`${known}/${apis.length}`, "APIs documented"), stat(`${live}`, "Live"));
+      const ul = el("ul");
+      for (const a of apis.slice(0, 4)) ul.appendChild(el("li", null, a.capability));
+      if (apis.length > 4) ul.appendChild(el("li", null, `and ${apis.length - 4} more in the API inventory`));
+      c.append(h, st, ul); host.appendChild(c);
+    }
+  }
+
+  // ---------------------------------------------------------------- tabs
+  function renderTabs() {
+    const t = $("tabs"); t.replaceChildren();
+    const openQ = S.questions.filter((q) => !q.answered).length;
+    for (const [k, label, n] of [["plan", "Plan", S.tasks.filter((x) => x.status !== "done").length], ["apis", "API inventory", S.apis.length], ["questions", "Questions for LabStack", openQ]]) {
+      const b = el("button"); b.type = "button"; b.setAttribute("role", "tab"); b.setAttribute("aria-selected", String(S.tab === k));
+      b.append(document.createTextNode(label), el("span", "n num", String(n)));
+      b.addEventListener("click", () => { S.tab = k; save("ls.tab", k); renderAll(); });
+      t.appendChild(b);
+    }
+    const oc = $("owner-chips"); oc.replaceChildren();
+    oc.hidden = S.tab !== "plan";
+    for (const [k, o] of [["all", { name: "Everyone" }], ...Object.entries(OWNERS)]) {
+      const c = el("button", "chip"); c.type = "button"; c.setAttribute("aria-pressed", String(S.owner === k));
+      if (k !== "all") c.appendChild(el("span", "who " + k, o.i));
+      c.appendChild(document.createTextNode(o.name));
+      c.addEventListener("click", () => { S.owner = k; renderAll(); });
+      oc.appendChild(c);
+    }
+    const sc = $("svc-chips"); sc.replaceChildren();
+    sc.hidden = S.tab === "questions" && false;
+    for (const [k, label] of [["all", "All services"], ["labs", "Lab tests"], ["consult", "Consultations"], ["pharma", "Medicines"], ["common", "Platform"]]) {
+      const c = el("button", "chip", label); c.type = "button"; c.setAttribute("aria-pressed", String(S.svc === k));
+      c.addEventListener("click", () => { S.svc = k; renderAll(); });
+      sc.appendChild(c);
+    }
+  }
+
+  function matches(obj, fields) {
+    const q = S.q.trim().toLowerCase(); if (!q) return true;
+    return fields.map((f) => obj[f] ?? "").join(" ").toLowerCase().includes(q);
+  }
+
+  // ---------------------------------------------------------------- plan
+  const sortT = (a, b) => (a.status === "done") - (b.status === "done") || (PRIO[a.priority] ?? 9) - (PRIO[b.priority] ?? 9) || (a.order ?? 0) - (b.order ?? 0);
+  function renderPlan(host) {
+    const ts = S.tasks.filter((t) => (S.phase === "all" || t.phase === S.phase) && (S.owner === "all" || t.owner === S.owner) && (S.svc === "all" || t.service === S.svc) && matches(t, ["title", "detail", "plugsInto", "partnerAsk", "id"])).sort(sortT);
+    if (!ts.length) { host.appendChild(msg(S.tasks.length ? "Nothing matches" : "No tasks yet", S.tasks.length ? "Clear a filter to see more." : "Claude writes the plan here; it appears as soon as it is saved.")); return; }
+    const g = el("div", "groups");
+    for (const [k, name, sub] of PHASES) {
+      const list = ts.filter((t) => t.phase === k); if (!list.length) continue;
+      const all = S.tasks.filter((t) => t.phase === k); const d = all.filter((t) => t.status === "done").length;
+      const card = el("section", "card group");
+      const head = el("div", "group-head"); const ht = el("div"); ht.append(el("h3", null, name), el("p", null, sub));
+      const mini = el("div", "mini num"); const tr = el("div", "track"); const bar = el("i"); bar.style.width = pct(d, all.length) + "%"; tr.appendChild(bar); mini.append(tr, document.createTextNode(`${d}/${all.length}`));
+      head.append(ht, mini); card.appendChild(head);
+      for (const t of list) card.appendChild(taskNode(t));
+      g.appendChild(card);
+    }
+    host.appendChild(g);
+  }
+  function taskNode(t) {
+    const w = el("div", "task"); w.dataset.status = t.status; w.dataset.open = String(S.open.has(t.id)); w.dataset.id = t.id;
+    const row = el("div", "task-row");
+    const sc = el("div", "status-cell"); const sw = el("span", "status-wrap"); sw.dataset.v = t.status;
+    const sel = el("select", "status"); sel.id = "st-" + t.id; sel.dataset.v = t.status; sel.setAttribute("aria-label", "Status of " + t.title);
+    for (const [v, l] of STATUS) { const o = el("option", null, l); o.value = v; if (v === t.status) o.selected = true; sel.appendChild(o); }
+    sel.disabled = !S.db || S.canWrite === false;
+    sel.addEventListener("change", () => { sw.dataset.v = sel.value; sel.dataset.v = sel.value; setTaskStatus(t, sel.value, sel, sw); });
+    sw.appendChild(sel); sc.appendChild(sw);
+    const main = el("div", "t-main");
+    const title = el("button", "t-title", t.title); title.type = "button"; title.setAttribute("aria-expanded", String(S.open.has(t.id)));
+    title.addEventListener("click", () => toggle(t, w));
+    const meta = el("div", "t-meta");
+    meta.appendChild(el("span", "tag " + String(t.priority).toLowerCase(), t.priority));
+    meta.appendChild(el("span", "tag svc", SERVICES[t.service]?.name ?? t.service));
+    for (const m of t.mainTaskIds || []) meta.appendChild(el("span", "tag link", "Launch: " + m));
+    if (t.partnerAsk) meta.appendChild(el("span", "tag", "Needs LabStack"));
+    main.append(title, meta);
+    const side = el("div", "t-side");
+    const who = el("span", "who " + t.owner, OWNERS[t.owner]?.i ?? "?"); who.title = OWNERS[t.owner]?.name ?? "";
+    const ex = el("button", "expand"); ex.type = "button"; ex.setAttribute("aria-label", "Details for " + t.title);
+    ex.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>';
+    ex.addEventListener("click", () => toggle(t, w));
+    side.append(who, ex);
+    row.append(sc, main, side); w.appendChild(row);
+    if (S.open.has(t.id)) w.appendChild(detailNode(t));
+    return w;
+  }
+  function detailNode(t) {
+    const d = el("div", "t-detail");
+    if (t.detail) d.appendChild(el("p", null, t.detail));
+    const kv = el("dl", "kv");
+    const add = (k, v, mono) => { if (!v) return; kv.append(el("dt", null, k), el("dd", mono ? "mono" : null, v)); };
+    add("Owner", `${OWNERS[t.owner]?.name}, ${OWNERS[t.owner]?.role}`);
+    add("Plugs into", t.plugsInto, true);
+    add("Ask of LabStack", t.partnerAsk);
+    add("Launch tracker", (t.mainTaskIds || []).join(", "), true);
+    add("Updated", fmt(t.updatedAt));
+    d.appendChild(kv); return d;
+  }
+  function toggle(t, w) {
+    const o = !S.open.has(t.id); o ? S.open.add(t.id) : S.open.delete(t.id);
+    w.dataset.open = String(o); w.querySelector(".t-title").setAttribute("aria-expanded", String(o));
+    w.querySelector(".t-detail")?.remove(); if (o) w.appendChild(detailNode(t));
+  }
+  async function setTaskStatus(t, next, sel, sw) {
+    const prev = t.status; if (prev === next) return;
+    const at = new Date().toISOString();
+    try {
+      await S.db.doc("tasks/" + t.id).update({ status: next, updatedAt: at, completedAt: next === "done" ? at : null });
+      await S.db.collection("log").add({ at, kind: "task", ref: t.id, title: t.title, from: prev, to: next, by: "team", userId: S.me });
+      toast(next === "done" ? "Marked done" : "Status updated");
+    } catch (e) {
+      sel.value = prev; sel.dataset.v = prev; sw.dataset.v = prev;
+      if (e?.code === "invalid_argument") { S.canWrite = false; toast("You can view this tracker but not change it."); renderAll(); }
+      else toast("Couldn't save. Try again.");
+    }
+  }
+
+  // ---------------------------------------------------------------- APIs
+  function renderApis(host) {
+    const rows = S.apis.filter((a) => (S.svc === "all" || a.service === S.svc) && matches(a, ["capability", "why", "plugsInto", "endpoint", "notes"])).sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+    if (!rows.length) { host.appendChild(msg("Nothing matches", "Clear the search or pick another service.")); return; }
+    const card = el("div", "card");
+    const wrap = el("div", "table-wrap"); const tb = el("table");
+    const thead = el("thead"); const hr = el("tr");
+    for (const h of ["Capability we need", "Plugs into", "LabStack endpoint", "State"]) hr.appendChild(el("th", null, h));
+    thead.appendChild(hr); tb.appendChild(thead);
+    const body = el("tbody");
+    for (const a of rows) {
+      const tr = el("tr");
+      const c1 = el("td"); c1.append(el("span", "cap", a.capability), el("small", null, (SERVICES[a.service]?.sub ?? "") + (a.why ? " · " + a.why : "")));
+      const c2 = el("td", "mono", a.plugsInto || "");
+      const c3 = el("td"); c3.appendChild(el("span", "ep" + (a.endpoint ? "" : " unknown"), a.endpoint || "To confirm from the docs")); if (a.notes) c3.appendChild(el("small", null, a.notes));
+      const c4 = el("td");
+      const s = el("select", "api-state"); s.id = "api-" + a.id; s.dataset.v = a.state; s.setAttribute("aria-label", "State of " + a.capability);
+      for (const [v, l] of API_STATES) { const o = el("option", null, l); o.value = v; if (v === a.state) o.selected = true; s.appendChild(o); }
+      s.disabled = !S.db || S.canWrite === false;
+      s.addEventListener("change", async () => {
+        const prev = a.state, next = s.value; s.dataset.v = next; const at = new Date().toISOString();
+        try { await S.db.doc("apis/" + a.id).update({ state: next, updatedAt: at }); await S.db.collection("log").add({ at, kind: "api", ref: a.id, title: a.capability, from: prev, to: next, by: "team", userId: S.me }); toast("Saved"); }
+        catch { s.value = prev; s.dataset.v = prev; toast("Couldn't save. Try again."); }
+      });
+      c4.appendChild(s);
+      tr.append(c1, c2, c3, c4); body.appendChild(tr);
+    }
+    tb.appendChild(body); wrap.appendChild(tb); card.appendChild(wrap); host.appendChild(card);
+  }
+
+  // ---------------------------------------------------------------- questions
+  function renderQuestions(host) {
+    const qs = S.questions.filter((q) => (S.svc === "all" || q.service === S.svc) && matches(q, ["question", "why", "answer", "topic"])).sort((a, b) => (a.answered === b.answered ? (a.order ?? 0) - (b.order ?? 0) : a.answered ? 1 : -1));
+    if (!qs.length) { host.appendChild(msg("Nothing matches", "Clear the search or pick another service.")); return; }
+    const card = el("div", "card qs");
+    for (const q of qs) {
+      const box = el("div", "q"); box.dataset.answered = String(!!q.answered);
+      const head = el("div", "q-head"); head.append(el("b", null, q.question), el("span", "tag svc", q.topic || ""));
+      if (q.service && q.service !== "common") head.appendChild(el("span", "tag", SERVICES[q.service]?.name ?? ""));
+      box.appendChild(head);
+      if (q.why) box.appendChild(el("p", "why", q.why));
+      const ta = el("textarea"); ta.id = "ans-" + q.id; ta.placeholder = "Answer from LabStack, with the date"; ta.value = q.answer || ""; ta.setAttribute("aria-label", "Answer: " + q.question);
+      ta.disabled = !S.db || S.canWrite === false;
+      ta.addEventListener("blur", async () => {
+        if ((q.answer || "") === ta.value) return;
+        try { await S.db.doc("questions/" + q.id).update({ answer: ta.value, updatedAt: new Date().toISOString() }); toast("Answer saved"); }
+        catch { toast("Couldn't save the answer. Copy it before leaving."); }
+      });
+      const lab = el("label", "check"); lab.setAttribute("for", "qa-" + q.id);
+      const cb = el("input"); cb.type = "checkbox"; cb.id = "qa-" + q.id; cb.checked = !!q.answered; cb.disabled = ta.disabled;
+      cb.addEventListener("change", async () => {
+        try { await S.db.doc("questions/" + q.id).update({ answered: cb.checked, updatedAt: new Date().toISOString() }); }
+        catch { cb.checked = !cb.checked; toast("Couldn't save. Try again."); }
+      });
+      lab.append(cb, document.createTextNode("Answered"));
+      box.append(ta, lab); card.appendChild(box);
+    }
+    host.appendChild(card);
+  }
+
+  function msg(a, b) { const m = el("div", "card state-msg"); m.append(el("strong", null, a), el("span", null, b)); return m; }
+
+  // ---------------------------------------------------------------- side
+  function renderLinked() {
+    const h = $("linked"); h.replaceChildren();
+    if (!S.linked.length) { h.appendChild(el("p", "sub", "Nothing linked yet.")); return; }
+    for (const l of [...S.linked].sort((a, b) => (a.order ?? 0) - (b.order ?? 0))) {
+      const r = el("div", "lk"); const t = el("div"); t.append(el("b", null, l.title), el("small", null, l.id + (l.syncedAt ? " · " + fmt(l.syncedAt) : "")));
+      r.append(t, el("span", "st " + (l.status || "todo"), (STATUS.find((s) => s[0] === l.status) || STATUS[0])[1]));
+      h.appendChild(r);
+    }
+  }
+  async function renderFeed() {
+    const h = $("feed"); h.replaceChildren();
+    const items = [...S.log].sort((a, b) => String(b.at).localeCompare(String(a.at))).slice(0, 50);
+    if (!items.length) { h.appendChild(el("p", "sub", "No changes yet.")); return; }
+    let names = {}; const ids = [...new Set(items.map((i) => i.userId).filter(Boolean))];
+    if (ids.length && S.user) { try { names = await S.user.profiles(ids); } catch {} }
+    const lbl = (v) => (STATUS.find((s) => s[0] === v) || API_STATES.find((s) => s[0] === v) || [v, v])[1];
+    for (const i of items) {
+      const ev = el("div", "ev"); const claude = i.by === "claude";
+      ev.appendChild(el("div", "ic" + (claude ? " claude" : ""), claude ? "C" : ((names[i.userId]?.name || "T")[0] || "T").toUpperCase()));
+      const b = el("div"); const who = claude ? "Claude" : names[i.userId]?.name || "Someone on the team";
+      b.appendChild(el("p", null, i.to ? `${who} moved "${i.title}"${i.from ? " from " + lbl(i.from) : ""} to ${lbl(i.to)}.` : `${who}: ${i.title}.`));
+      if (i.note) b.appendChild(el("p", null, i.note));
+      b.appendChild(el("time", null, fmt(i.at)));
+      ev.appendChild(b); h.appendChild(ev);
+    }
+  }
+
+  function renderView() {
+    const host = $("view"); host.replaceChildren();
+    if (!S.db && !S.tasks.length) { host.appendChild(msg("Tracker data is not available in this view", "Open this page in Claude, signed in, to see and update it.")); return; }
+    if (S.tab === "apis") renderApis(host); else if (S.tab === "questions") renderQuestions(host); else renderPlan(host);
+  }
+  function renderAll() { renderDeal(); renderRail(); renderServices(); renderTabs(); renderView(); renderLinked(); renderFeed(); }
+
+  $("q").addEventListener("input", (e) => { S.q = e.target.value; renderView(); });
+  renderAll();
+
+  async function boot() {
+    const c = window.claude;
+    const setSync = (k, t) => { $("sync").dataset.state = k; $("sync-text").textContent = t; };
+    if (!c?.use) { setSync("off", "Offline view"); return; }
+    const [db, user] = await Promise.all([c.use("db"), c.use("user")]);
+    S.db = db; S.user = user;
+    if (!db) { setSync("off", "Read only, no data"); renderAll(); return; }
+    if (user) { try { S.me = await user.id(); } catch {} try { const w = await user.can("data.write"); S.canWrite = w; } catch {} }
+    setSync("wait", "Syncing");
+    let pending = 5; const ready = () => { if (--pending === 0) setSync("live", S.canWrite === false ? "Live, view only" : "Live"); };
+    const err = () => setSync("off", "Sync paused, reload to retry");
+    const sub = (path, key, after) => { let first = true; db.collection(path).onSnapshot((s) => { S[key] = s.docs.map((d) => ({ id: d.id, ...d.data() })); after(); if (first) { first = false; ready(); } }, err); };
+    sub("tasks", "tasks", renderAll);
+    sub("apis", "apis", () => { renderServices(); renderTabs(); if (S.tab === "apis") renderView(); });
+    sub("questions", "questions", () => { renderTabs(); renderRail(); if (S.tab === "questions" && !document.activeElement?.matches?.("textarea")) renderView(); });
+    sub("linked", "linked", renderLinked);
+    let first = true;
+    db.collection("log").orderBy("at", "desc").limit(60).onSnapshot((s) => { S.log = s.docs.map((d) => ({ id: d.id, ...d.data() })); renderFeed(); if (first) { first = false; ready(); } }, err);
+    db.doc("meta/deal").onSnapshot((s) => { S.deal = s.exists ? s.data() : null; renderDeal(); renderRail(); }, () => {});
+  }
+  boot();
+})();
+</script>
