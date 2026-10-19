@@ -11,8 +11,12 @@
  *    demonstration that a health companion exists rather than a trial of one —
  *    a person with a worrying result spends all five in an evening and has no
  *    reason to return for four weeks. The number itself is unchanged; the
- *    period is. `enforce_chat_quota` (migration 0022) is the authority and
- *    duplicates the 5, so the two must be changed together.
+ *    period is.
+ *
+ *    CHANGED 2026-10-19: twenty a day (launch tracker rl-free-20). The
+ *    authority is now chat_limits() ->> free_daily in the database (migration
+ *    0035, a row in app_config); this constant mirrors it for display and the
+ *    pre-check, so change the row and this together.
  *
  * 2. THE PRICES. The frames disagree with each other. The profile screen and
  *    both paywall screens say Solo ₹99/month and Family ₹249/month — and the
@@ -48,7 +52,10 @@ export type Plan = {
   highlight?: string;
 };
 
-export const FREE_CHAT_LIMIT = 5;
+export const FREE_CHAT_LIMIT = 20;
+
+/** From here down, the chat shows a gentle "N left today" line. */
+export const FREE_CHAT_SOFT_LINE = 5;
 
 export const PLANS: Record<Exclude<Tier, "free">, Plan> = {
   /*

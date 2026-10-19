@@ -9,8 +9,8 @@ import {
   FlaskConical,
   Hourglass,
   Stethoscope,
-  type LucideIcon,
 } from "lucide-react-native";
+import type { AppIcon } from "@/components/ui/icons";
 import { Pressable, Text, View } from "react-native";
 
 import { SERVICE_ICON } from "@/components/services/parts";
@@ -75,7 +75,7 @@ function ServiceLinkCard({ booking, onStart }: { booking: Booking; onStart?: (b:
   );
 }
 
-function Shell({ icon: Icon, eyebrow, title, sub, children }: { icon: LucideIcon; eyebrow: string; title: string; sub: string; children: React.ReactNode }) {
+function Shell({ icon: Icon, eyebrow, title, sub, children }: { icon: AppIcon; eyebrow: string; title: string; sub: string; children: React.ReactNode }) {
   return (
     <View style={[glassShadow, { borderRadius: 24, backgroundColor: "#fff", borderWidth: 1, borderColor: glass.rim, overflow: "hidden" }]}>
       <View style={{ flexDirection: "row", alignItems: "center", gap: 12, padding: 14, backgroundColor: brand[50] }}>

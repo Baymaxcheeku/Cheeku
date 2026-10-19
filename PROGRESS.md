@@ -2743,3 +2743,109 @@ screenshots of starter, building, the unlock moment, Today, Today after Done
 and Today on a parent. **Needs a phone:** all of it on device, and the stage
 re-check when returning to Home after the first upload.
 
+## Today's action plan: five pillars, the whole day · 2026-10-13
+
+Owner's report from the phone: the Move, Eat, Sleep, Mind and Check chips on
+Today could not be tapped, and the day needed to be more than one step. Asked
+for: every pillar opens its tasks; Move logs steps with a watch screenshot as
+proof until wearables connect; Eat asks for a photo of every meal and drink
+and says what works for their health; sleep and calm suggestions; one
+personalised "today's action plan" mixing their own tasks with general
+healthy-living ones.
+
+**The engine** (`src/lib/home/plan.ts`, pure and tested). In: readings and
+flags, conditions, medicines, what is due, age and life stage, pregnancy, the
+week's logs, preferences, the hour. Out: a plan in a fixed shape. Due items
+first; the daily spine (steps, four meals, last night's sleep, two minutes of
+breathing); their own checks (BP, fasting sugar on alternate days, weekly
+weight, medicines with their names); up to four personal habits aimed at what
+their numbers say, each carrying the reason ("Your HbA1c came back high
+(6.1%)"); general habits in every pillar so the plan is never only about what
+is wrong. Sorted for the hour it is. Babies get due items only; children get
+active play, not a step count; pregnancy and children get the gentle set and
+nothing aimed at a reading; kidney flags drop every water task; the thyroid
+task only appears for someone on a thyroid tablet.
+
+**Steps.** Goal by age (10,000; 7,000 from 60; 5,000 from 75; 6,000 in
+pregnancy "or what your doctor is happy with"), or the person's own. When the
+week is well below the goal, today's target ramps from the week's average
+plus 15%, so the target is reachable.
+
+**Meals.** A photo per meal and the taps on what is on the plate. Version
+one reads the taps, not the photo, so every line is explainable: a balanced
+plate is praised, and at most two tips tied to their own areas (fast carbs
+with high sugar, salt with high BP, fried and bakery with high LDL). The day
+gets a one-line plate summary. `daily_logs.analysis` is kept for a model's
+reading later and the app cannot write it.
+
+**Backend (migration 0034).** `daily_logs` (own rows, own members, plan
+scope, consent guard, 80 a day, photo keys that can only point into the
+member's own daily folder, analysis stripped from app writes) and
+`profiles.daily_prefs`. Readings also go into `memory_facts`, so they are on
+the chart and in the next answer. Export and account deletion include the
+logs and their photos.
+
+**Verified here:** typecheck, lint, 400 tests (17 new for the plan, steps
+and meals); 0034 on local Postgres, eight checks in
+`supabase/manual/local-check/0034-daily-logs-scenarios.sql`; editor steps
+run clean. Web preview screenshots of Home, the plan in every pillar, and
+each sheet. **Needs a phone:** the camera and gallery pickers, photo upload
+and thumbnails, the breathing animation, and the keyboard over the sheets.
+
+
+## Chat metering and 20 free chats a day · 2026-10-19
+
+Launch tracker tasks `rl-chat-edge` and `rl-free-20`.
+
+**The hole.** The daily allowance was spent by a trigger when the message row
+was saved, and the app calls the model before it saves. So the allowance never
+stood between an account and the model: a signed-in account could call
+`cheeku-chat` in a loop and get answers that were simply never saved, and the
+function checked nothing but the sign-in.
+
+**The fix: claim before forwarding.** `claim_model_call()` (migration 0035)
+runs as the caller, through their own JWT, so nobody can claim for someone
+else. Under a per-account advisory lock it refuses, in order: a spent free
+allowance (it reads the same counter the trigger spends), more than 6 calls a
+minute or 60 an hour, and a daily ceiling (free: the allowance plus 5 for
+answers whose save failed; paid: 300 as fair use). Otherwise it writes one
+`model_calls` row (who, when, tier, no content) and says yes. The function
+returns 429 with the reason and a `retry-after`, and nothing reaches the model.
+If the meter itself is unreachable the function answers 503 rather than make
+an unmetered call; the app already falls back to its on-device stand-in.
+
+**Two counters, on purpose.** `subscriptions.chats_used_this_month` stays the
+allowance people see: one per saved question, never for an emergency.
+`model_calls` is the meter and the base for `ai-cost-model`. Merging them
+would have meant charging at model-call time, which charges for answers that
+then fail to save.
+
+**Safety.** Emergencies never reach the model, so nothing here can delay a
+112 card. A pace refusal stops the turn with "give it a minute" only below
+contact-today; at contact-today or go-now the stand-in answers instead,
+because a careful answer now matters more than pacing.
+
+**The app.** The allowance is read before planning: when it is spent the turn
+is still planned (that is where an emergency is recognised, and an emergency
+is never refused) but on the stand-in, so a refused question costs no model
+call. `FREE_CHAT_LIMIT` is 20 and the chat shows "N free chats left today ·
+Unlimited with a plan" from 5 down. The authority for the number is now one
+row, `app_config('chat_limits')`, read by both the trigger and the claim;
+defaults inside `chat_limits()` mean a bad edit to the row cannot remove a
+limit.
+
+**Order matters.** Migration first, then redeploy `cheeku-chat`, then the app
+release. The new function before the migration answers 503 to everyone (the
+stand-in takes over); the new app before the migration says 20 while the
+trigger still refuses at 5.
+
+**Verified here:** 0035 on local Postgres, 14 checks in
+`supabase/manual/local-check/0035-chat-metering-scenarios.sql` (applied twice,
+burst refused at the 7th call in a minute, meter not writable or readable
+across accounts, free refused at 20 with the 21st save failing, an emergency
+still saved after the allowance, paid ceiling, signed-out, emptied config,
+anon); editor steps run clean; the edge function run under Node with stubbed
+services (no model call without a claim, 401 without sign-in, 503 when the
+meter is down, 429 with reason and retry-after); typecheck, lint, 406 tests
+(6 new for the adapter). **Not verified:** a deployed function against real
+Supabase, and the chat on a phone.

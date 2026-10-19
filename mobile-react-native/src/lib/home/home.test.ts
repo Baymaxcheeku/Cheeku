@@ -5,7 +5,10 @@ import type { Series } from "@/lib/memory/series";
 
 import { NUDGES, unlockRows, viaLine } from "./content";
 import { decideStage, forward, readHomeState } from "./rules";
-import { buildSteps, currentStep, dueRows, familyAlerts, pillarsThisWeek, streakOf, weekOf, type TodayInput } from "./today";
+import { CATALOG } from "./catalog";
+import { dayPlate, PLATE_TAGS, readPlate } from "./meals";
+import { buildPlan, stepsTarget, type DailyLog, type PlanInput } from "./plan";
+import { dueRows, familyAlerts, pillarsThisWeek, streakOf, weekOf } from "./today";
 
 const TODAY = "2026-10-14"; // a Wednesday
 
@@ -105,77 +108,166 @@ const loop = (over: Partial<LoopView> = {}): LoopView => ({
   ...over,
 });
 
-const input = (over: Partial<TodayInput> = {}): TodayInput => ({ loops: [], series: new Map(), ledger: [], conditions: [], lifeStage: "adult", pregnant: false, ...over });
 
-describe("buildSteps", () => {
-  it("puts an overdue test first, with a way to book it", () => {
-    const steps = buildSteps(input({ loops: [loop()], series: new Map([["hba1c", series("hba1c", "high")]]) }), "me", TODAY);
-    expect(steps[0]).toMatchObject({ kind: "due", chip: "Overdue", title: "Book your Kidney function test", cta: { route: "/labs" } });
-    expect(steps[1]?.area).toBe("sugar");
+const plan = (over: Partial<PlanInput> = {}) =>
+  buildPlan({ profileId: "me", today: TODAY, hour: 9, loops: [], series: new Map(), ledger: [], conditions: [], lifeStage: "adult", ageYears: 42, pregnant: false, actions: [], logs: [], prefs: {}, ...over });
+
+const log = (over: Partial<DailyLog>): DailyLog => ({ id: "x", profileId: "me", day: TODAY, taskKey: "steps", pillar: "move", kind: "steps", slot: null, value: null, valueText: null, unit: null, tags: [], photoPath: null, createdAt: "", ...over });
+
+describe("buildPlan", () => {
+  it("always carries the daily spine across all five pillars", () => {
+    const p = plan();
+    const keys = p.tasks.map((t) => t.key);
+    expect(keys).toEqual(expect.arrayContaining(["steps", "meal:breakfast", "meal:lunch", "meal:snacks", "meal:dinner", "sleep:rating", "mind:breathing"]));
+    for (const pillar of ["move", "eat", "sleep", "mind", "check"] as const) expect(p.byPillar[pillar].length, pillar).toBeGreaterThan(0);
+    expect(new Set(keys).size).toBe(keys.length);
   });
 
-  it("aims habits at a flagged reading before general ones", () => {
-    const steps = buildSteps(input({ series: new Map([["ldl_cholesterol", series("ldl_cholesterol", "high", "LDL Cholesterol")]]) }), "me", TODAY);
-    expect(steps[0]?.area).toBe("lipids");
-    expect(steps[0]?.chip).toBe("Heart health");
+  it("puts an overdue test first and makes it the hero, with a way to book it", () => {
+    const p = plan({ loops: [loop()] });
+    expect(p.tasks[0]).toMatchObject({ due: true, title: "Book your Kidney function test", cta: { route: "/labs" } });
+    expect(p.hero?.key).toBe(p.tasks[0]?.key);
   });
 
-  it("ignores readings in range", () => {
-    const steps = buildSteps(input({ series: new Map([["hba1c", series("hba1c", "normal")]]) }), "me", TODAY);
-    expect(steps.every((s) => s.area === "general")).toBe(true);
+  it("adds personal checks and habits with the reason in their own numbers", () => {
+    const p = plan({ series: new Map([["bp_systolic", series("bp_systolic", "high", "BP systolic")]]), today: "2026-10-14" });
+    const bp = p.tasks.find((t) => t.key === "reading:bp");
+    expect(bp).toMatchObject({ personal: true, kind: "reading" });
+    expect(bp?.reason).toMatch(/BP systolic came back high/);
+    expect(p.tasks.filter((t) => t.personal && t.kind === "habit" && t.area === "bp").length).toBeGreaterThan(0);
   });
 
-  it("reads conditions from the profile", () => {
-    expect(buildSteps(input({ conditions: ["Type 2 diabetes"] }), "me", TODAY)[0]?.area).toBe("sugar");
+  it("names the medicines behind the medicines task", () => {
+    const p = plan({ ledger: [{ name: "Telma 40", status: "active" }, { name: "Metformin 500", status: "active" }] });
+    expect(p.tasks.find((t) => t.key === "meds_taken")?.reason).toBe("You take Telma and Metformin");
+  });
+
+  it("caps personal habits at four", () => {
+    const p = plan({ conditions: ["diabetes", "hypertension", "high cholesterol", "fatty liver"] });
+    expect(p.tasks.filter((t) => t.personal && t.kind === "habit" && !t.due).length).toBe(4);
+  });
+
+  it("keeps one general habit per pillar alongside the personal ones", () => {
+    const p = plan({ conditions: ["diabetes"] });
+    for (const pillar of ["move", "eat", "sleep", "mind", "check"] as const) expect(p.byPillar[pillar].some((t) => !t.personal && t.kind === "habit"), pillar).toBe(true);
   });
 
   it("never offers more water to someone whose kidneys are flagged", () => {
-    for (let d = 0; d < 30; d++) {
-      const day = `2026-11-${String(d + 1).padStart(2, "0")}`;
-      const keys = buildSteps(input({ conditions: ["CKD stage 3"] }), "me", day).map((s) => s.key);
+    for (let d = 1; d <= 28; d++) {
+      const keys = plan({ conditions: ["CKD stage 3"], today: `2026-11-${String(d).padStart(2, "0")}` }).tasks.map((t) => t.key);
       expect(keys).not.toContain("water_before_meals");
+      expect(keys).not.toContain("water_glasses");
     }
   });
 
-  it("only gives the thyroid tablet step to someone on one", () => {
-    const off = buildSteps(input({ series: new Map([["tsh", series("tsh", "high")]]) }), "me", TODAY).map((s) => s.key);
-    expect(off).not.toContain("thyroid_same_time");
-    const on = buildSteps(input({ ledger: [{ name: "Thyronorm 50", status: "active" }] }), "me", TODAY).map((s) => s.key);
-    expect(on).toContain("thyroid_same_time");
+  it("only gives the thyroid tablet task to someone on one", () => {
+    expect(plan({ series: new Map([["tsh", series("tsh", "high")]]) }).tasks.map((t) => t.key)).not.toContain("thyroid_same_time");
+    expect(plan({ ledger: [{ name: "Thyronorm 50", status: "active" }] }).tasks.map((t) => t.key)).toContain("thyroid_same_time");
   });
 
-  it("gives a baby no habit steps, only what is due", () => {
-    expect(buildSteps(input({ lifeStage: "infant" }), "baby", TODAY)).toEqual([]);
-    expect(buildSteps(input({ lifeStage: "infant", loops: [loop({ type: "vaccine_due", title: "MMR vaccine" })] }), "baby", TODAY)).toHaveLength(1);
+  it("gives a baby only what is due", () => {
+    expect(plan({ lifeStage: "infant" }).tasks).toEqual([]);
+    expect(plan({ lifeStage: "infant", loops: [loop({ type: "vaccine_due", title: "MMR vaccine" })] }).tasks).toHaveLength(1);
   });
 
-  it("keeps pregnancy and children to the gentle set", () => {
-    const steps = buildSteps(input({ pregnant: true, conditions: ["diabetes"] }), "her", TODAY);
-    expect(steps.length).toBeGreaterThan(0);
-    expect(steps.map((s) => s.key)).not.toContain("no_alcohol_today");
-    expect(steps.every((s) => s.area === "general")).toBe(true);
+  it("gives a child active play instead of a step count, and nothing aimed at readings", () => {
+    const p = plan({ lifeStage: "child", ageYears: 8, conditions: ["diabetes"] });
+    const keys = p.tasks.map((t) => t.key);
+    expect(keys).toContain("active_play");
+    expect(keys).not.toContain("steps");
+    expect(p.tasks.every((t) => !t.personal || t.due)).toBe(true);
   });
 
-  it("moves past a step done or put off today, and comes back tomorrow", () => {
-    const first = currentStep(buildSteps(input(), "me", TODAY));
+  it("keeps pregnancy gentle, with a doctor's caveat on steps", () => {
+    const p = plan({ pregnant: true, conditions: ["diabetes"] });
+    expect(p.steps?.goal).toBe(6000);
+    expect(p.tasks.find((t) => t.key === "steps")?.why).toMatch(/doctor/);
+    expect(p.tasks.map((t) => t.key)).not.toContain("no_alcohol_today");
+  });
+
+  it("orders for the hour: morning tasks first in the morning, evening ones in the evening", () => {
+    const am = plan({ hour: 8 }).tasks.filter((t) => t.kind === "meal").map((t) => t.key);
+    expect(am[0]).toBe("meal:breakfast");
+    const pm = plan({ hour: 20 }).tasks.filter((t) => t.kind === "meal").map((t) => t.key);
+    expect(pm[0]).toBe("meal:dinner");
+  });
+
+  it("marks steps done once the count reaches today's target", () => {
+    const p = plan({ logs: [log({ value: 10200 })] });
+    expect(p.tasks.find((t) => t.key === "steps")).toMatchObject({ status: "done", progress: { value: 10200, target: 10000 } });
+    expect(plan({ logs: [log({ value: 4000 })] }).tasks.find((t) => t.key === "steps")?.status).toBe("open");
+  });
+
+  it("marks a meal done once its photo is in, and counts progress per pillar", () => {
+    const p = plan({ logs: [log({ taskKey: "meal:breakfast", pillar: "eat", kind: "meal", slot: "breakfast", tags: ["roti", "dal"] })] });
+    expect(p.tasks.find((t) => t.key === "meal:breakfast")?.status).toBe("done");
+    expect(p.pillarProgress.eat.done).toBe(1);
+    expect(p.done).toBe(1);
+  });
+
+  it("moves the hero past what is done or put off", () => {
+    const first = plan().hero;
     expect(first).not.toBeNull();
-    const log = [{ profileId: "me", day: TODAY, stepKey: first?.key ?? "", status: "later" as const }];
-    const next = currentStep(buildSteps(input(), "me", TODAY, log));
+    const next = plan({ actions: [{ profileId: "me", day: TODAY, stepKey: first?.key ?? "", status: "later" }] }).hero;
     expect(next?.key).not.toBe(first?.key);
-    // Another member's marks don't count.
-    expect(currentStep(buildSteps(input(), "me", TODAY, log.map((x) => ({ ...x, profileId: "papa" }))))?.key).toBe(first?.key);
   });
 
-  it("rotates the general step from day to day", () => {
-    const days = ["2026-10-14", "2026-10-15", "2026-10-16", "2026-10-17"].map((d) => currentStep(buildSteps(input(), "me", d))?.key);
+  it("rotates general habits from day to day", () => {
+    const days = ["2026-10-14", "2026-10-15", "2026-10-16", "2026-10-17"].map((d) => plan({ today: d }).byPillar.mind.map((t) => t.key).join());
     expect(new Set(days).size).toBeGreaterThan(1);
   });
 
-  it("keeps every step key inside the database's pattern", () => {
+  it("keeps every task key inside the database's pattern", () => {
     const re = /^[a-z0-9_:.-]{1,80}$/;
-    for (const n of NUDGES) expect(n.key).toMatch(re);
-    const s = buildSteps(input({ loops: [loop({ key: "Lipid Profile / 3 months!" })] }), "me", TODAY);
-    expect(s[0]?.key).toMatch(re);
+    for (const t of CATALOG) expect(t.key).toMatch(re);
+    expect(plan({ loops: [loop({ key: "Lipid Profile / 3 months!" })] }).tasks[0]?.key).toMatch(re);
+  });
+});
+
+describe("stepsTarget", () => {
+  it("uses the person's own goal when set", () => {
+    expect(stepsTarget({ ageYears: 40, pregnant: false, prefs: { steps_goal: 8000 }, recent: [] })).toMatchObject({ goal: 8000, target: 8000, ramping: false });
+  });
+
+  it("sets a gentler goal with age", () => {
+    expect(stepsTarget({ ageYears: 66, pregnant: false, prefs: {}, recent: [] }).goal).toBe(7000);
+    expect(stepsTarget({ ageYears: 80, pregnant: false, prefs: {}, recent: [] }).goal).toBe(5000);
+  });
+
+  it("ramps from where the week actually is", () => {
+    const t = stepsTarget({ ageYears: 40, pregnant: false, prefs: {}, recent: [4000, 5000, 4500] });
+    expect(t).toMatchObject({ goal: 10000, target: 5000, ramping: true });
+    expect(t.line).toMatch(/Building up to 10,000/);
+  });
+});
+
+describe("readPlate", () => {
+  it("praises a balanced plate", () => {
+    expect(readPlate(["roti", "dal", "sabzi", "curd"], []).tone).toBe("great");
+  });
+
+  it("ties the tip to the person's own area", () => {
+    const r = readPlate(["rice", "dal", "sabzi", "sweet"], ["sugar"]);
+    expect(r.tone).not.toBe("great");
+    expect(r.tips[0]).toMatch(/sugar/);
+    expect(readPlate(["rice", "dal", "sabzi", "pickle_papad"], ["bp"]).tips[0]).toMatch(/BP/);
+  });
+
+  it("asks for protein and vegetables when they're missing, at most two tips", () => {
+    const r = readPlate(["bakery", "chai_sugar"], ["sugar", "lipids", "weight"]);
+    expect(r.tone).toBe("watch");
+    expect(r.tips.length).toBeLessThanOrEqual(2);
+  });
+
+  it("sums up the day", () => {
+    expect(dayPlate([["roti", "dal", "sabzi"], ["rice", "curd", "salad"]])?.line).toMatch(/every meal/);
+    expect(dayPlate([["roti", "sabzi"], ["rice", "dal", "salad"]])?.line).toMatch(/Protein at 1 of 2/);
+    expect(dayPlate([])).toBeNull();
+  });
+
+  it("has nothing judgemental or with em dashes in it", () => {
+    for (const t of PLATE_TAGS) expect(t.label).not.toContain("\u2014");
+    for (const t of CATALOG) expect(`${t.title} ${t.why}`).not.toMatch(/\u2014|bad food|junk|cheat/i);
   });
 });
 

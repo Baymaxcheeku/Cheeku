@@ -17,6 +17,7 @@ India's DPDP Act. It describes what the code does — not what a policy page say
 | Chat transcripts | Continuity, and a safety audit trail | Derived |
 | Consent record | Proof under DPDP | No |
 | Daily steps done or put off (`today_actions`) | The streak and week on Home's Today | User-initiated |
+| Daily logs (`daily_logs`): step counts with a watch screenshot, meal photos and what was on the plate, readings, sleep ratings | Today's action plan and the feedback on each meal | User-initiated |
 
 Every field on the profile intake screen **except the name is genuinely
 optional**, and the screen says so. This is health data; collecting it because a
@@ -117,6 +118,13 @@ list, so the screen cannot fall behind the code.
   switched off (the copy is deleted at once) or shortened to 1 or 3 days.
 - **Clear cache** removes the offline copy and temporary files without signing
   out. Nothing on the server is touched.
+- **Meal photos and step screenshots** are re-encoded on the phone before
+  upload (scaled to 1280 px, saved as a fresh JPEG), which drops location and
+  device metadata. They sit in the private documents bucket under the
+  member's own `daily/` folder, which the database will not let a log point
+  outside of, and they go with the account on deletion and in the export.
+  Version one reads the plate from the taps, not the photo; no photo is sent
+  to a model yet.
 - **Which Home you see** (`cheeku.home`) holds the last Home stage and whether
   the "Today is here" moment was shown, tagged with the account id so another
   account's stage is never used. No health data. Wiped on sign-out.

@@ -14,10 +14,45 @@ import { TIER_RANK, type Tier } from "./types";
  * endpoint is down. The reply records which one actually answered.
  *
  * The model's keys and URL live in Edge Function secrets, never in the app.
+ *
+ * A 429 from the function is a refusal by the meter (migration 0035), not an
+ * outage, and is handled by its reason:
+ *   - "per_minute" / "per_hour": the person is sending faster than the limit.
+ *     The turn stops with ModelBusy so the chat can say "give it a minute",
+ *     UNLESS the floor already says contact a doctor today or go now: then the
+ *     stand-in answers, because a careful answer now beats a lecture on pace.
+ *   - "quota" / "daily" and anything else: the stand-in answers. For a spent
+ *     free allowance the send is refused right after by the same check the
+ *     database makes, so nothing extra is given away.
  */
 
 const MODE = process.env.EXPO_PUBLIC_CHAT_MODEL ?? "mock";
 const TIERS = Object.keys(TIER_RANK) as Tier[];
+
+/** The meter refused this turn for pace; the chat should ask them to wait. */
+export class ModelBusy extends Error {
+  constructor(readonly retryAfter: number) {
+    super("model_busy");
+  }
+}
+
+/** The refusal reason and wait from a 429, or null when the error is anything else. */
+async function refusalOf(error: unknown): Promise<{ reason: string; retryAfter: number } | null> {
+  const res = (error as { context?: unknown } | null)?.context;
+  if (!(res instanceof Response) || res.status !== 429) return null;
+  try {
+    const body = (await res.clone().json()) as Record<string, unknown>;
+    return { reason: typeof body.reason === "string" ? body.reason : "refused", retryAfter: typeof body.retryAfter === "number" ? body.retryAfter : 60 };
+  } catch {
+    return { reason: "refused", retryAfter: 60 };
+  }
+}
+
+/** Pace refusals stop the turn, except when the floor already asks for a doctor today or sooner. */
+export function stopsTurn(reason: string, floor: Tier | null): boolean {
+  if (reason !== "per_minute" && reason !== "per_hour") return false;
+  return !floor || TIER_RANK[floor] < TIER_RANK.contact_today;
+}
 
 function readReply(v: unknown): (ModelReply & { modelId?: string }) | null {
   if (!v || typeof v !== "object") return null;
@@ -48,13 +83,16 @@ function edgeModel(): ChatModel {
     async respond(req: ModelRequest) {
       try {
         const { data, error } = await supabase.functions.invoke("cheeku-chat", { body: req });
+        const refusal = error ? await refusalOf(error) : null;
+        if (refusal && stopsTurn(refusal.reason, req.floor.tier)) throw new ModelBusy(refusal.retryAfter);
         const reply = error ? null : readReply(data);
         if (reply) {
           lastId = reply.modelId ?? "cheeku-edge";
           return reply;
         }
-      } catch {
-        // Fall through to the stand-in.
+      } catch (e) {
+        if (e instanceof ModelBusy) throw e;
+        // Anything else falls through to the stand-in.
       }
       lastId = mockModel.id;
       return mockModel.respond(req);

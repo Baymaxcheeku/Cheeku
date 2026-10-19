@@ -51,13 +51,14 @@ export async function exportAccount(): Promise<
     "account_activity",
     "privacy_requests",
     "today_actions",
+    "daily_logs",
   ] as const;
 
   /*
-   * Added by migrations 0031 and 0033. Until it is applied these tables do not exist,
+   * Added by migrations 0031, 0033 and 0034. Until it is applied these tables do not exist,
    * and an export must not fail over a table that has never held anything.
    */
-  const addedLater = new Set<string>(["account_activity", "privacy_requests", "today_actions"]);
+  const addedLater = new Set<string>(["account_activity", "privacy_requests", "today_actions", "daily_logs"]);
 
   const bundle: ExportBundle = {
     exportedAt: new Date().toISOString(),
@@ -165,8 +166,12 @@ export async function deleteAccountData(confirmation: string): Promise<DeleteRes
     return { ok: false, message: "Could not read your profiles. Nothing was deleted." };
   }
 
+  // Meal photos and step screenshots (0034); absent before it, which is fine.
+  const { data: daily } = await supabase.from("daily_logs").select("photo_path").not("photo_path", "is", null);
+
   const paths = [
     ...(docs ?? []).map((d) => d.storage_path as string),
+    ...(daily ?? []).map((d) => d.photo_path as string | null).filter((x): x is string => Boolean(x)),
     ...(faces ?? []).map((f) => f.avatar_url as string | null).filter((x): x is string => Boolean(x)),
   ].filter(Boolean);
 

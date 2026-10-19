@@ -20,6 +20,12 @@
 // Until CHEEKU_MODEL_URL is set this answers 503 and the app uses its built-in
 // stand-in, so turning the model on is a secrets change, not a release.
 //
+// EVERY CALL IS CLAIMED FIRST. claim_model_call() (migration 0035) runs as the
+// caller, through their own JWT, and refuses a spent free allowance, bursts
+// (6 a minute, 60 an hour) and the daily ceiling. A refusal is a 429 with the
+// reason; nothing reaches the model. If the meter can't be reached the answer
+// is 503, never an unmetered call: the app falls back to its stand-in.
+//
 // Deploy:  supabase functions deploy cheeku-chat
 //          (JWT verification stays ON: only a signed-in member can call it)
 // Secrets: supabase secrets set CHEEKU_MODEL_URL=https://...  CHEEKU_MODEL_KEY=...
@@ -27,8 +33,30 @@
 
 const TIERS = ["reassure", "monitor", "contact_today", "go_now"];
 
-function json(body: unknown, status = 200): Response {
-  return new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json" } });
+function json(body: unknown, status = 200, headers: Record<string, string> = {}): Response {
+  return new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json", ...headers } });
+}
+
+type Claim = { ok: true } | { ok: false; reason: string; retry_after?: number };
+
+/** One metered model call for whoever signed this request, or null if the meter is unreachable. */
+async function claim(authorization: string): Promise<Claim | null> {
+  const base = Deno.env.get("SUPABASE_URL");
+  const anon = Deno.env.get("SUPABASE_ANON_KEY");
+  if (!base || !anon) return null;
+  try {
+    const res = await fetch(`${base}/rest/v1/rpc/claim_model_call`, {
+      method: "POST",
+      headers: { "content-type": "application/json", apikey: anon, authorization },
+      body: "{}",
+    });
+    if (!res.ok) return null;
+    const out = (await res.json()) as Record<string, unknown>;
+    if (out.ok === true) return { ok: true };
+    return { ok: false, reason: typeof out.reason === "string" ? out.reason : "refused", retry_after: typeof out.retry_after === "number" ? out.retry_after : undefined };
+  } catch {
+    return null;
+  }
 }
 
 Deno.serve(async (req) => {
@@ -46,6 +74,15 @@ Deno.serve(async (req) => {
   }
   if (typeof body.question !== "string" || !body.memory || typeof body.memory !== "object") return json({ error: "bad_request" }, 400);
   if ((body.question as string).length > 2000) return json({ error: "too_long" }, 413);
+
+  const authorization = req.headers.get("authorization");
+  if (!authorization) return json({ error: "signed_out" }, 401);
+  const claimed = await claim(authorization);
+  if (!claimed) return json({ error: "meter_unavailable" }, 503);
+  if (!claimed.ok) {
+    const retry = claimed.retry_after ?? 60;
+    return json({ error: "rate_limited", reason: claimed.reason, retryAfter: retry }, 429, { "retry-after": String(retry) });
+  }
 
   // Nothing about the request is logged: it is one person's health memory.
   const controller = new AbortController();

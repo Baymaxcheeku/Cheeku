@@ -10,7 +10,7 @@ import { Paywall } from "@/components/billing/paywall";
 import { OfflineBanner } from "@/components/app/offline-banner";
 import { AskBar, CheekuCard, HomeHeadline, ProfileChip, firstName } from "@/components/home/ask-hero";
 import { CareSection } from "@/components/home/care";
-import { AskRow, DueThisWeek, FamilyAlertCard, LockedPreview, ProgressStrip, StepCard, TodayHeadline, UnlockCard, UnlockMoment } from "@/components/home/today";
+import { AskRow, DueThisWeek, FamilyAlertCard, LockedPreview, PlanPreview, ProgressStrip, StepCard, TodayHeadline, UnlockCard, UnlockMoment } from "@/components/home/today";
 import { AppointmentCard } from "@/components/booking/appointment-card";
 import { isUpcoming, startsAt, useAppointmentList } from "@/lib/booking/appointments";
 import { FileCard, ReadsStrip } from "@/components/home/strips";
@@ -26,12 +26,10 @@ import { useHealthFile } from "@/lib/health/queries";
 import { listProfileRecords, statsFrom } from "@/lib/records/queries";
 import { milestoneFor } from "@/lib/home/content";
 import { logStep, markUnlockSeen, recheckHomeStage, unlogStep, useHomeStage, useTodayLog } from "@/lib/home/stage";
-import { buildSteps, currentStep, dueRows, familyAlerts, pillarsThisWeek, routeFor, streakOf, weekOf, type DueRow, type Step } from "@/lib/home/today";
+import type { PlanTask } from "@/lib/home/plan";
+import { dueRows, familyAlerts, pillarsThisWeek, routeFor, streakOf, weekOf, type DueRow } from "@/lib/home/today";
+import { usePlan } from "@/lib/home/use-plan";
 import { todayIso } from "@/lib/memory/clock";
-import { buildContext } from "@/lib/memory/context";
-import { useMemory } from "@/lib/memory/store";
-import type { MemoryBundle } from "@/lib/memory/context";
-import type { LoopView } from "@/lib/memory/loops";
 import type { DueItem } from "@/lib/home/rules";
 import type { TodayAction } from "@/lib/home/today";
 import type { ActiveProfile } from "@/lib/profiles/context";
@@ -94,9 +92,8 @@ export default function Home() {
       if (stage && stage !== "today") void recheck();
     }, [stage, recheck]),
   );
-  const memory = useMemory(onToday ? profileId : undefined);
   const log = useTodayLog(onToday);
-  const [celebrating, setCelebrating] = useState<Step | null>(null);
+  const [celebrating, setCelebrating] = useState<PlanTask | null>(null);
   useEffect(() => setCelebrating(null), [profileId]);
 
   // Both follow the member: "for you" depends on whose profile is in view,
@@ -231,7 +228,6 @@ export default function Home() {
         <TodayBody
           profile={profile}
           members={access.selectable}
-          memory={memory.data ?? null}
           serverDue={home.state?.due ?? []}
           serverDone={home.state?.doneDays ?? []}
           log={log.data ?? []}
@@ -406,14 +402,14 @@ function NoProfile({ topInset }: { topInset: number }) {
 
 
 /**
- * Home on Today: the step, the streak, what is due across the family, and an
- * alert when someone else's test has slipped. Everything is for the member in
- * view, except the due list and alerts, which are the family's.
+ * Home on Today: the step, today's action plan, the streak, what is due
+ * across the family, and an alert when someone else's test has slipped. The
+ * step and the plan are for the member in view; the due list and alerts are
+ * the family's.
  */
 function TodayBody({
   profile,
   members,
-  memory,
   serverDue,
   serverDone,
   log,
@@ -424,51 +420,22 @@ function TodayBody({
 }: {
   profile: ActiveProfile;
   members: readonly ActiveProfile[];
-  memory: MemoryBundle | null;
   serverDue: readonly DueItem[];
   serverDone: readonly string[];
   log: readonly TodayAction[];
-  celebrating: Step | null;
-  setCelebrating: (s: Step | null) => void;
+  celebrating: PlanTask | null;
+  setCelebrating: (s: PlanTask | null) => void;
   next: React.ReactNode;
   onOpenRow: (r: DueRow) => void;
 }) {
   const queryClient = useQueryClient();
+  const router = useRouter();
   const today = todayIso();
-  const ctx = useMemo(() => (memory ? buildContext(memory, today) : null), [memory, today]);
+  const { plan, ctx } = usePlan(profile.id, serverDue);
 
   const names = useMemo(() => new Map(members.map((m) => [m.id, m.isPrimary ? "You" : firstName(m.name)])), [members]);
   const rows = useMemo(() => dueRows({ server: serverDue, loops: ctx?.loops ?? [], activeId: profile.id, names, today }), [serverDue, ctx, profile.id, names, today]);
-
-  // This member's dated items from the server count as loops too, so a test
-  // Cheeku stored (not derived from a record) can still be Today's step.
-  const loops = useMemo(() => {
-    const own = ctx?.loops ?? [];
-    const known = new Set(own.map((l) => l.title.trim().toLowerCase()));
-    const extra: LoopView[] = rows
-      .filter((r) => r.mine && r.source === "loop" && !known.has(r.title.trim().toLowerCase()))
-      .map((r) => ({ key: r.id, type: r.type as LoopView["type"], title: r.title, detail: r.detail, openedOn: today, dueBy: r.dueBy, status: "open", closedBy: null, sourceDocumentId: null, relatesTo: [], daysOpen: 0, daysToDue: r.daysToDue, overdue: r.overdue }));
-    return [...extra, ...own].sort((a, b) => (a.daysToDue ?? 999) - (b.daysToDue ?? 999));
-  }, [ctx, rows, today]);
-
-  const steps = useMemo(
-    () =>
-      buildSteps(
-        {
-          loops,
-          series: ctx?.series ?? new Map(),
-          ledger: ctx?.ledger ?? [],
-          conditions: ctx?.subject.conditions ?? [],
-          lifeStage: ctx?.clock.stage ?? "adult",
-          pregnant: ctx?.clock.modifiers.includes("pregnant") ?? false,
-        },
-        profile.id,
-        today,
-        log,
-      ),
-    [ctx, loops, profile.id, today, log],
-  );
-  const step = currentStep(steps);
+  const step = plan?.hero ?? null;
 
   const doneDays = useMemo(() => new Set([...serverDone, ...log.filter((a) => a.status === "done").map((a) => a.day)]), [serverDone, log]);
   const streak = streakOf(doneDays, today);
@@ -478,7 +445,7 @@ function TodayBody({
   const alerts = familyAlerts(rows);
   const byId = new Map(members.map((m) => [m.id, m]));
 
-  async function mark(s: Step, status: "done" | "later") {
+  async function mark(s: PlanTask, status: "done" | "later") {
     if (status === "done") setCelebrating(s);
     const r = await logStep(queryClient, { profileId: profile.id, stepKey: s.key, status });
     if (!r.ok && status === "done") setCelebrating(null);
@@ -511,9 +478,17 @@ function TodayBody({
         </View>
       </StaggerItem>
 
+      {plan ? (
+        <StaggerItem index={3}>
+          <View className="mt-4 px-5">
+            <PlanPreview plan={plan} skip={step?.key ?? null} onOpen={(href) => router.push(href as never)} />
+          </View>
+        </StaggerItem>
+      ) : null}
+
       <StaggerItem index={3}>
         <View className="mt-4 px-5">
-          <ProgressStrip streak={streak} week={week} pillars={pillars} />
+          <ProgressStrip streak={streak} week={week} pillars={pillars} onPillar={(p) => router.push(`/today?pillar=${p}` as never)} />
         </View>
       </StaggerItem>
 

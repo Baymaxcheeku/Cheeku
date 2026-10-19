@@ -152,7 +152,7 @@ export const SERVICES: readonly Service[] = [
     shelf: "mindbody",
     network: "specialised",
     status: "live",
-    icon: "Brain",
+    icon: "WellbeingIcon",
     tint: { from: "#e9e4ff", to: "#f5f2ff", fg: "#5b3fd4" },
     offerings: [
       { id: "therapy", title: "Talk to a psychologist", line: "Stress, anxiety, low mood, relationships", modes: ["online", "centre"], specialty: "psych" },

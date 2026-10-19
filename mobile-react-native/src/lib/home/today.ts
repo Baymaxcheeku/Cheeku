@@ -2,52 +2,19 @@ import { daysBetween, dayNumber, isoOf } from "@/lib/memory/clock";
 import type { LoopView } from "@/lib/memory/loops";
 import type { Series } from "@/lib/memory/series";
 
-import { AREA_LABEL, NUDGES, nudgeByKey, type Area, type Nudge, type Pillar } from "./content";
+import { taskByKey } from "./catalog";
+import type { Area, Pillar } from "./content";
 import type { DueItem } from "./rules";
 
 /*
- * TODAY, BUILT FROM WHAT CHEEKU KNOWS.
+ * TODAY, AROUND THE PLAN.
  *
- * Pure functions: the step for today, what is due across the family, the
- * alert worth raising about someone else, and the streak. No React, no
- * network, so every rule here is tested in today.test.ts.
- *
- * THE STEP, IN ORDER OF WHAT MATTERS MOST:
- *   1. something of theirs that is overdue or due within a week
- *   2. a habit aimed at a reading that came back high or low
- *   3. a habit aimed at a condition on their profile
- *   4. a medicine habit, if they take any
- *   5. a general longevity habit, rotating daily
- * A step done or put off today drops out and the next one moves up.
+ * Pure functions: which areas a person's readings and conditions point at,
+ * the streak and the week, and what is due across the family. The plan
+ * itself (which tasks, in which order) is plan.ts.
  */
 
-export type StepStatus = "open" | "done" | "later";
-
-export type Step = {
-  key: string;
-  kind: "due" | "nudge";
-  pillar: Pillar;
-  area: Area;
-  chip: string;
-  title: string;
-  why: string;
-  minutes?: number;
-  cta?: { label: string; route: string };
-  status: StepStatus;
-};
-
 export type TodayAction = { profileId: string; day: string; stepKey: string; status: "done" | "later" };
-
-/** The slice of the memory context Today reads. */
-export type TodayInput = {
-  loops: readonly LoopView[];
-  series: ReadonlyMap<string, Series>;
-  ledger: readonly { name: string; status: string; ingredients?: readonly { key: string }[] }[];
-  conditions: readonly string[];
-  /** The clock's stage: babies get no habit steps, children and pregnancy a gentler set. */
-  lifeStage: string;
-  pregnant: boolean;
-};
 
 // ------------------------------------------------------------- matching --
 
@@ -78,11 +45,6 @@ const CONDITIONS: { area: Area; match: RegExp }[] = [
 
 const AREA_ORDER: Area[] = ["sugar", "bp", "kidney", "lipids", "liver", "iron", "vitamin_d", "b12", "thyroid", "weight"];
 
-const THYROID_MED = /levothyrox|thyroxine|thyronorm|eltroxin|thyrox/i;
-
-/** Steps that are fine for a child, a teenager or during pregnancy. */
-const GENTLE = new Set(["one_fruit", "walk_outside", "same_bedtime", "sleep_wind_down", "protein_each_meal", "five_slow_breaths", "call_someone", "morning_sun", "stand_hourly", "lemon_with_dal", "b12_dairy", "med_anchor", "med_stock"]);
-
 const flagOf = (s: Series) => (s.latest.flag ?? "").toLowerCase();
 
 /** Areas a reading points at, most important first. */
@@ -106,98 +68,31 @@ export function areasFromConditions(conditions: readonly string[]): Area[] {
   return AREA_ORDER.filter((a) => hit.has(a));
 }
 
-// ------------------------------------------------------------- the steps --
-
-/** Stable per person and day, different across people and days. */
-function seed(profileId: string, today: string): number {
-  let h = 0;
-  for (const ch of profileId) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
-  return (h + dayNumber(today)) >>> 0;
-}
-
-function rotate<T>(list: readonly T[], n: number): T[] {
-  if (!list.length) return [];
-  const k = n % list.length;
-  return [...list.slice(k), ...list.slice(0, k)];
-}
-
-export const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "").slice(0, 60) || "item";
-
-function dueStep(l: LoopView): Step | null {
-  if (l.type === "result_pending") return null;
-  if (l.daysToDue === null || l.daysToDue > 7) return null;
-  const when = l.overdue ? `It was due ${Math.abs(l.daysToDue)} day${Math.abs(l.daysToDue) === 1 ? "" : "s"} ago.` : l.daysToDue === 0 ? "It's due today." : `It's due in ${l.daysToDue} day${l.daysToDue === 1 ? "" : "s"}.`;
-  const test = l.type === "test_ordered";
-  return {
-    key: `due:${slug(l.key)}`,
-    kind: "due",
-    pillar: "check",
-    area: "general",
-    chip: l.overdue ? "Overdue" : "Due soon",
-    title: test ? `Book your ${l.title.toLowerCase().startsWith("your ") ? l.title.slice(5) : l.title}` : l.title,
-    why: `${when} ${l.detail ?? (test ? "Home collection takes ten minutes and the result comes back into Cheeku." : "Cheeku can help you plan it.")}`.trim(),
-    cta: test ? { label: "Book home collection", route: "/labs" } : { label: "Plan it with Cheeku", route: `/ask?q=${encodeURIComponent(`Help me plan: ${l.title}`)}` },
-    status: "open",
-  };
-}
-
-function nudgeStep(n: Nudge, area: Area): Step {
-  return { key: n.key, kind: "nudge", pillar: n.pillar, area, chip: AREA_LABEL[area], title: n.title, why: n.why, minutes: n.minutes, status: "open" };
-}
-
 /**
- * Every step on offer today for one member, in priority order, with today's
- * done and later marks applied. The first open one is Today's step.
+ * Why an area is in someone's plan, in their words: "Your HbA1c came back
+ * high (6.1 %)" or "For your hypertension". Readings win over conditions.
  */
-export function buildSteps(input: TodayInput, profileId: string, today: string, log: readonly TodayAction[] = []): Step[] {
-  const marks = new Map(log.filter((a) => a.profileId === profileId && a.day === today).map((a) => [a.stepKey, a.status] as const));
-  const out: Step[] = [];
-  const seen = new Set<string>();
-  const push = (s: Step | null) => {
-    if (!s || seen.has(s.key)) return;
-    seen.add(s.key);
-    out.push({ ...s, status: marks.get(s.key) ?? "open" });
-  };
-
-  // Babies: checkups and tests only, no habits.
-  const baby = ["neonate", "infant", "toddler"].includes(input.lifeStage);
-  const gentle = input.pregnant || ["child", "teen"].includes(input.lifeStage);
-
-  for (const l of input.loops) push(dueStep(l));
-  if (baby) return out;
-
-  const n = seed(profileId, today);
-  const onThyroidMed = input.ledger.some((e) => e.status === "active" && THYROID_MED.test(e.name));
-  const areas = gentle ? [] : [...new Set([...areasFromReadings(input.series), ...areasFromConditions(input.conditions)])];
-  const kidney = areas.includes("kidney");
-  const allowed = (x: Nudge) => (!gentle || GENTLE.has(x.key)) && !(kidney && x.key === "water_before_meals") && (x.area !== "thyroid" || onThyroidMed);
-
-  for (const area of areas) {
-    const pool = NUDGES.filter((x) => x.area === area && allowed(x));
-    for (const x of rotate(pool, n).slice(0, 2)) push(nudgeStep(x, area));
-  }
-
-  if (input.ledger.some((e) => e.status === "active")) {
-    const pool = NUDGES.filter((x) => x.area === "medicines" && allowed(x));
-    for (const x of rotate(pool, n).slice(0, 1)) push(nudgeStep(x, "medicines"));
-    if (onThyroidMed) {
-      const t = nudgeByKey("thyroid_same_time");
-      if (t) push(nudgeStep(t, "thyroid"));
+export function areaReasons(series: ReadonlyMap<string, Series>, conditions: readonly string[]): Map<Area, string> {
+  const out = new Map<Area, string>();
+  for (const s of series.values()) {
+    const f = flagOf(s);
+    if (!f || f === "normal") continue;
+    const id = `${s.key} ${s.name}`.toLowerCase().replace(/\s+/g, "_");
+    for (const m of MARKERS) {
+      if (out.has(m.area) || !m.key.test(id)) continue;
+      if (m.when === "any" || f.includes(m.when) || (m.when === "high" && f === "critical")) {
+        const value = `${s.latest.value}${s.unit ? (s.unit === "%" ? "%" : ` ${s.unit}`) : ""}`;
+        out.set(m.area, `Your ${s.name} came back ${f === "critical" ? "high" : f} (${value})`);
+      }
     }
   }
-
-  const general = NUDGES.filter((x) => x.area === "general" && allowed(x));
-  for (const x of rotate(general, n).slice(0, 4)) push(nudgeStep(x, "general"));
-
-  // Whatever was logged today but no longer offered (the data moved on) still
-  // counts as done, so the card does not offer it again.
+  for (const c of conditions) {
+    for (const m of CONDITIONS) if (!out.has(m.area) && m.match.test(c)) out.set(m.area, `For your ${c.trim().toLowerCase()}`);
+  }
   return out;
 }
 
-/** Today's step: the first one not done or put off, else null (all done). */
-export function currentStep(steps: readonly Step[]): Step | null {
-  return steps.find((s) => s.status === "open") ?? null;
-}
+export const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "").slice(0, 60) || "item";
 
 // --------------------------------------------------------------- streaks --
 
@@ -246,8 +141,8 @@ export function pillarsThisWeek(log: readonly TodayAction[], today: string): Set
     if (a.status !== "done" || !week.has(a.day)) continue;
     if (a.stepKey.startsWith("due:")) out.add("check");
     else {
-      const n = nudgeByKey(a.stepKey);
-      if (n) out.add(n.pillar);
+      const t = taskByKey(a.stepKey);
+      if (t) out.add(t.pillar);
     }
   }
   return out;

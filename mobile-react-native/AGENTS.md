@@ -64,3 +64,31 @@ session can pull, run it on the simulator, and fix what the browser could never
 have shown. Migrations are the exception worth flagging loudly in the PR body:
 they are inert until somebody runs `npm run db:migrate` from the repo root, and
 the app will behave as though the change never happened until they do.
+
+# Every change reaches `main` through a documented PR
+
+The team (app engineers and the data scientist) reads the PR, not the chat
+that produced it. So every piece of work goes to `main` through a pull request
+whose description follows `.github/pull_request_template.md`: what changed,
+why (with launch tracker ids), how it works, database and deploy steps in
+order, what it means for data and AI (new tables, what is and is never
+logged), what was tested and what was not. Merge commits, not squash, so the
+individual commit messages survive. In the same change, keep `PLAN.md`
+(Open/Rules), `../PROGRESS.md` (the reasoning) and the trackers current; a PR
+that changes behaviour without them is not finished.
+
+# Launch tracker: update it when work ships
+
+The team tracks launch work in a live page:
+https://claude.ai/artifact/FWQhpm3j1KJWiNrCgpraHe. Tasks are split
+between Athar (app and backend) and Suraj (AI integration). When a change
+you make completes, starts or blocks one of its tasks, update that task in
+the same session with the `ArtifactData` tool and add a `log` entry, as
+described in `../docs/launch-tracker/README.md`, which also lists every
+task id. Device verification is part of "done" for app work.
+
+The LabStack marketplace work has its own internal tracker,
+https://claude.ai/artifact/47jpFQDfdqQLKUPdNeatV1, kept in step with the
+launch tracker by hand. Changes to the partner gateway, partner orders,
+lab, consult or medicine integrations update it too, as described in
+`../docs/labstack-tracker/README.md`.
