@@ -197,7 +197,7 @@ td small { display: block; color: var(--muted); font-size: 12px; }
 .q[data-answered="true"] { background: var(--surface-2); }
 .q-head { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
 .q-head b { font-weight: 600; font-size: 13.5px; flex: 1 1 280px; min-width: 0; }
-.q textarea { width: 100%; min-height: 54px; resize: vertical; border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; background: var(--surface); font-size: 13px; }
+.q textarea { width: 100%; min-height: 54px; resize: vertical; overflow: hidden; line-height: 1.45; border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; background: var(--surface); font-size: 13px; }
 .q .why { font-size: 12.5px; color: var(--muted); margin: 0; }
 .q label.check { display: inline-flex; gap: 6px; align-items: center; font-size: 12.5px; color: var(--ink-2); cursor: pointer; }
 .q input[type="checkbox"] { accent-color: var(--partner); }
@@ -556,6 +556,8 @@ td small { display: block; color: var(--muted); font-size: 12px; }
       if (q.why) box.appendChild(el("p", "why", q.why));
       const ta = el("textarea"); ta.id = "ans-" + q.id; ta.placeholder = "Answer from LabStack, with the date"; ta.value = q.answer || ""; ta.setAttribute("aria-label", "Answer: " + q.question);
       ta.disabled = !S.db || S.canWrite === false;
+      const fit = () => { ta.style.height = "auto"; ta.style.height = ta.scrollHeight + 2 + "px"; };
+      ta.addEventListener("input", fit); requestAnimationFrame(fit);
       ta.addEventListener("blur", async () => {
         if ((q.answer || "") === ta.value) return;
         try { await S.db.doc("questions/" + q.id).update({ answer: ta.value, updatedAt: new Date().toISOString() }); toast("Answer saved"); }
