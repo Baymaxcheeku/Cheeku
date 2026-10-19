@@ -31,8 +31,12 @@ export type CatalogTask = {
   pillar: Pillar;
   kind: TaskKind;
   area: Area;
+  /** Card title, at most 30 characters. */
   title: string;
+  /** The card line, one sentence, at most 60 characters. */
   why: string;
+  /** The detail for the plan and its sheets, at most 200 characters. */
+  more: string;
   window: Window;
   minutes?: number;
   slot?: MealSlot;
@@ -78,6 +82,7 @@ const fromNudge = (n: Nudge): CatalogTask => ({
   area: n.area,
   title: n.title,
   why: n.why,
+  more: n.more,
   minutes: n.minutes,
   window: WINDOW[n.key] ?? "anytime",
   gentle: GENTLE.has(n.key),
@@ -91,7 +96,8 @@ export const STEPS_TASK: CatalogTask = {
   kind: "steps",
   area: "general",
   title: "Walk your steps",
-  why: "Walking is the cheapest longevity habit there is. Log your count and add a screenshot from your watch or phone.",
+  why: "The cheapest longevity habit there is.",
+  more: "Log your count and add a screenshot from your watch or phone, until your watch talks to Cheeku directly.",
   window: "anytime",
 };
 
@@ -110,7 +116,8 @@ export const MEALS: CatalogTask[] = (
   slot,
   window,
   title: label,
-  why: "Snap the plate and tap what's on it.",
+  why: "Snap the plate, tap what's on it.",
+  more: "Cheeku reads it against your own numbers and tells you what's working.",
   gentle: true,
 }));
 
@@ -120,8 +127,9 @@ export const READINGS: Record<"bp" | "sugar" | "weight", CatalogTask> = {
     pillar: "check",
     kind: "reading",
     area: "bp",
-    title: "Log a seated BP reading",
-    why: "Sit for five minutes first, arm at heart level. It goes straight onto your chart.",
+    title: "Log your BP",
+    why: "Sit five minutes first, arm at heart level.",
+    more: "Both numbers go straight onto your chart, so you and your doctor see the trend, not just today.",
     window: "evening",
     minutes: 5,
     fields: [
@@ -135,7 +143,8 @@ export const READINGS: Record<"bp" | "sugar" | "weight", CatalogTask> = {
     kind: "reading",
     area: "sugar",
     title: "Log your fasting sugar",
-    why: "Before breakfast, after at least eight hours without food. One number a few times a week shows the trend.",
+    why: "Before breakfast, after eight hours without food.",
+    more: "One number a few times a week is enough to show which way it's heading.",
     window: "morning",
     fields: [{ key: "glucose_fasting", label: "Fasting sugar", factLabel: "Fasting glucose", unit: "mg/dL", min: 30, max: 600, placeholder: "104" }],
   },
@@ -145,7 +154,8 @@ export const READINGS: Record<"bp" | "sugar" | "weight", CatalogTask> = {
     kind: "reading",
     area: "weight",
     title: "Weigh in",
-    why: "Same scale, before breakfast, once a week. Cheeku watches the trend so you don't have to.",
+    why: "Same scale, before breakfast.",
+    more: "Once a week is plenty. Cheeku watches the trend so you don't have to.",
     window: "morning",
     weekday: 1,
     fields: [{ key: "weight", label: "Weight", factLabel: "Weight", unit: "kg", min: 2, max: 300, placeholder: "72.5" }],
@@ -158,7 +168,8 @@ export const SLEEP_RATING: CatalogTask = {
   kind: "rating",
   area: "general",
   title: "How did you sleep?",
-  why: "One tap each morning. Over a few weeks it shows what helps you sleep and what doesn't.",
+  why: "One tap. Patterns show up within weeks.",
+  more: "Over a few weeks it shows what helps you sleep and what doesn't.",
   window: "morning",
   gentle: true,
 };
@@ -168,8 +179,9 @@ export const BREATHING: CatalogTask = {
   pillar: "mind",
   kind: "timer",
   area: "general",
-  title: "Two minutes of slow breathing",
-  why: "In for four, out for six, with Cheeku keeping time. It calms the system that sets pressure, sugar and sleep.",
+  title: "2 minutes of slow breathing",
+  why: "In for four, out for six. We'll count.",
+  more: "Slow breathing calms the system that sets your pressure, sugar and sleep.",
   window: "anytime",
   minutes: 2,
   gentle: true,
@@ -177,20 +189,20 @@ export const BREATHING: CatalogTask = {
 
 /** More habits than content.ts carries, so every pillar has real choice. */
 const EXTRA: CatalogTask[] = [
-  { key: "brisk_walk_30", pillar: "move", kind: "habit", area: "general", window: "morning", minutes: 30, title: "A 30-minute brisk walk", why: "Fast enough that talking takes a little effort. It is the dose most heart guidelines are built on." },
-  { key: "stretch_5", pillar: "move", kind: "habit", area: "general", window: "morning", minutes: 5, gentle: true, title: "Five minutes of stretching", why: "Neck, shoulders, back and hips. Stiffness is where most aches in later life begin." },
-  { key: "post_dinner_stroll", pillar: "move", kind: "habit", area: "general", window: "evening", minutes: 10, gentle: true, title: "A short stroll after dinner", why: "Ten minutes of walking after the biggest meal takes the edge off the sugar spike that follows it." },
-  { key: "active_play", pillar: "move", kind: "habit", area: "general", window: "anytime", minutes: 60, gentle: true, title: "An hour of active play", why: "Running, cycling, a game outside. Children need about an hour a day of moving that gets them out of breath." },
-  { key: "water_glasses", pillar: "eat", kind: "habit", area: "general", window: "anytime", gentle: true, title: "Water through the day", why: "A glass with every meal and one between. Thirst often feels like hunger or tiredness." },
-  { key: "home_cooked", pillar: "eat", kind: "habit", area: "general", window: "anytime", title: "Every meal home-cooked today", why: "Outside food carries more salt, oil and sugar than it tastes like it does." },
-  { key: "wake_same_time", pillar: "sleep", kind: "habit", area: "general", window: "morning", gentle: true, title: "Wake at your usual time", why: "A steady wake-up time sets the body clock more than bedtime does, weekends included." },
-  { key: "dark_cool_room", pillar: "sleep", kind: "habit", area: "general", window: "evening", gentle: true, title: "A dark, cool room tonight", why: "Curtains drawn, fan or AC on, phone face down. The body sleeps deeper a little cool and fully dark." },
-  { key: "short_nap", pillar: "sleep", kind: "habit", area: "general", window: "midday", title: "Keep any nap under 30 minutes", why: "A short nap refreshes. A long one steals from tonight's sleep." },
-  { key: "gratitude_line", pillar: "mind", kind: "habit", area: "general", window: "evening", gentle: true, title: "Note one good thing about today", why: "Small, specific and written down. People who do this daily report better mood and sleep within weeks." },
-  { key: "phone_free_meal", pillar: "mind", kind: "habit", area: "general", window: "midday", gentle: true, title: "One meal without your phone", why: "Eating slowly and paying attention helps digestion, fullness and a calmer mind." },
-  { key: "digital_sunset", pillar: "mind", kind: "habit", area: "general", window: "evening", title: "No news or social media after 9 pm", why: "Late scrolling keeps the mind switched on just when it needs to wind down." },
-  { key: "meds_taken", pillar: "check", kind: "habit", area: "medicines", window: "anytime", gentle: true, title: "Today's medicines, taken", why: "Tick it once every dose for today is in. Missed doses are the commonest reason treatment seems not to work." },
-  { key: "checkin_symptoms", pillar: "check", kind: "habit", area: "general", window: "evening", title: "Anything feel off today?", why: "A headache, poor sleep, a new pain. Tell Cheeku in a line and it keeps it with your history." },
+  { key: "brisk_walk_30", pillar: "move", kind: "habit", area: "general", window: "morning", minutes: 30, title: "A 30-minute brisk walk", why: "Talking should feel a little hard.", more: "Fast enough that talking takes a little effort. It is the dose most heart guidelines are built on." },
+  { key: "stretch_5", pillar: "move", kind: "habit", area: "general", window: "morning", minutes: 5, gentle: true, title: "5 minutes of stretching", why: "Neck, shoulders, back, hips.", more: "Neck, shoulders, back and hips. Stiffness is where most aches in later life begin." },
+  { key: "post_dinner_stroll", pillar: "move", kind: "habit", area: "general", window: "evening", minutes: 10, gentle: true, title: "A stroll after dinner", why: "Ten minutes softens the sugar spike.", more: "Ten minutes of walking after the biggest meal takes the edge off the sugar spike that follows it." },
+  { key: "active_play", pillar: "move", kind: "habit", area: "general", window: "anytime", minutes: 60, gentle: true, title: "An hour of active play", why: "Out of breath and grinning.", more: "Running, cycling, a game outside. Children need about an hour a day of moving that gets them out of breath." },
+  { key: "water_glasses", pillar: "eat", kind: "habit", area: "general", window: "anytime", gentle: true, title: "Water through the day", why: "Thirst often feels like hunger.", more: "A glass with every meal and one between. Thirst often feels like hunger or tiredness." },
+  { key: "home_cooked", pillar: "eat", kind: "habit", area: "general", window: "anytime", title: "Home food all day", why: "Less hidden salt, oil and sugar.", more: "Outside food carries more salt, oil and sugar than it tastes like it does." },
+  { key: "wake_same_time", pillar: "sleep", kind: "habit", area: "general", window: "morning", gentle: true, title: "Wake at your usual time", why: "Weekends too. Your clock notices.", more: "A steady wake-up time sets the body clock more than bedtime does, weekends included." },
+  { key: "dark_cool_room", pillar: "sleep", kind: "habit", area: "general", window: "evening", gentle: true, title: "Dark, cool room tonight", why: "Curtains drawn, phone face down.", more: "Curtains drawn, fan or AC on, phone face down. The body sleeps deeper a little cool and fully dark." },
+  { key: "short_nap", pillar: "sleep", kind: "habit", area: "general", window: "midday", title: "Naps under 30 minutes", why: "Refresh now, sleep fine tonight.", more: "A short nap refreshes. A long one steals from tonight's sleep." },
+  { key: "gratitude_line", pillar: "mind", kind: "habit", area: "general", window: "evening", gentle: true, title: "One good thing today", why: "Write it down. Small and specific.", more: "Small, specific and written down. People who do this daily report better mood and sleep within weeks." },
+  { key: "phone_free_meal", pillar: "mind", kind: "habit", area: "general", window: "midday", gentle: true, title: "One meal without your phone", why: "Slower eating, calmer mind.", more: "Eating slowly and paying attention helps digestion, fullness and a calmer mind." },
+  { key: "digital_sunset", pillar: "mind", kind: "habit", area: "general", window: "evening", title: "No scrolling after 9 pm", why: "Let your mind switch off.", more: "Late scrolling keeps the mind switched on just when it needs to wind down." },
+  { key: "meds_taken", pillar: "check", kind: "habit", area: "medicines", window: "anytime", gentle: true, title: "Today's medicines", why: "Tick once every dose is in.", more: "Tick it once every dose for today is in. Missed doses are the commonest reason treatment seems not to work." },
+  { key: "checkin_symptoms", pillar: "check", kind: "habit", area: "general", window: "evening", title: "Anything feel off today?", why: "One line is enough. I'll keep it.", more: "A headache, poor sleep, a new pain. Tell Cheeku in a line and it keeps it with your history." },
 ];
 
 export const HABITS: CatalogTask[] = [...NUDGES.filter((n) => !REPLACED.has(n.key)).map(fromNudge), ...EXTRA];

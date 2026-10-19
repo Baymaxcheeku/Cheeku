@@ -299,7 +299,7 @@ export function ProgressStrip({ streak, week, pillars, onPillar }: { streak: Str
         })}
       </View>
       {onPillar ? (
-        <Text style={{ fontFamily: font.regular, fontSize: 11.5, color: ink[500], marginTop: 8, textAlign: "center" }}>Tap a pillar for today&apos;s actions under it</Text>
+        <Text style={{ fontFamily: font.regular, fontSize: 11.5, color: ink[500], marginTop: 8, textAlign: "center" }}>Tap a pillar to see its steps</Text>
       ) : null}
     </Glass>
   );
@@ -362,13 +362,12 @@ export function StepCard({
             </Glass>
             {streak.count > 0 ? <Chip icon={Flame}>{`Day ${streak.count}`}</Chip> : null}
           </View>
-          <Text style={{ fontFamily: font.bold, fontSize: 11, letterSpacing: 1.2, color: brand[700], marginTop: 18 }}>{allDone ? "NOTHING LEFT TODAY" : "DONE FOR TODAY"}</Text>
-          <View style={{ paddingRight: "40%" }}>
-            <Text style={{ fontFamily: font.semibold, fontSize: 24, lineHeight: 29, letterSpacing: -0.6, color: ink[900], marginTop: 6 }}>
-              {milestone ?? (allDone ? "You've done every step for today." : streak.count > 1 ? `That's ${streak.count} days in a row.` : "First one done.")}
+          <View style={{ paddingRight: "40%", marginTop: 20 }}>
+            <Text style={{ fontFamily: font.semibold, fontSize: 24, lineHeight: 29, letterSpacing: -0.6, color: ink[900] }}>
+              {milestone ?? (allDone ? "All done for today." : streak.count > 1 ? `${streak.count} days in a row.` : "First one done.")}
             </Text>
-            <Text style={{ fontFamily: font.regular, fontSize: 13.5, lineHeight: 19, color: ink[700], marginTop: 6 }}>
-              {doneStep ? doneStep.title : "Come back tomorrow for the next one."}
+            <Text style={{ fontFamily: font.regular, fontSize: 14, lineHeight: 20, color: ink[700], marginTop: 8 }}>
+              {doneStep ? doneStep.title : "See you tomorrow."}
             </Text>
           </View>
           <View className="mt-auto flex-row items-center gap-2 pt-5">
@@ -402,7 +401,7 @@ export function StepCard({
     <View className="overflow-hidden rounded-[32px]" style={[glassShadow, { minHeight: 300 }]}>
       <Gradient from="#f1edff" to="#d8cffd" glow="#ffffff" />
       <View pointerEvents="box-none" style={{ position: "absolute", right: -4, bottom: -12 }}>
-        <MascotFigure size={160} moment={due ? "think" : "present"} hop />
+        <MascotFigure size={due ? 128 : 160} moment={due ? "think" : "present"} hop />
       </View>
       <View className="flex-1 p-4">
         <View className="flex-row gap-2">
@@ -414,21 +413,19 @@ export function StepCard({
           ) : (
             <Chip icon={PillarIcon}>{step.chip}</Chip>
           )}
-          <Chip>{step.minutes ? `${step.minutes} min` : "Today"}</Chip>
+          {forName ? <Chip>{`For ${forName}`}</Chip> : step.minutes ? <Chip>{`${step.minutes} min`}</Chip> : null}
         </View>
 
-        <Text style={{ fontFamily: font.bold, fontSize: 11, letterSpacing: 1.2, color: brand[700], marginTop: 18 }}>
-          {forName ? `${forName.toUpperCase()}'S STEP` : "TODAY'S STEP"}
-        </Text>
-        <View style={{ paddingRight: "38%" }}>
-          <Text style={{ fontFamily: font.semibold, fontSize: 24, lineHeight: 29, letterSpacing: -0.6, color: ink[900], marginTop: 6 }}>{step.title}</Text>
+        {/* Title, then at most two short lines: their reason and the payoff. */}
+        <View style={{ paddingRight: "36%", marginTop: 20 }}>
+          <Text style={{ fontFamily: font.semibold, fontSize: 25, lineHeight: 30, letterSpacing: -0.6, color: ink[900] }}>{step.title}</Text>
           {step.reason ? (
-            <View className="mt-2 flex-row items-center gap-1.5">
+            <View className="flex-row items-center gap-1.5" style={{ marginTop: 10 }}>
               <Sparkles size={13} color={brand[600]} />
-              <Text style={{ flex: 1, fontFamily: font.semibold, fontSize: 12.5, color: brand[700] }}>{step.reason}</Text>
+              <Text numberOfLines={1} style={{ flex: 1, fontFamily: font.semibold, fontSize: 13, color: brand[700] }}>{step.reason}</Text>
             </View>
           ) : null}
-          <Text numberOfLines={4} style={{ fontFamily: font.regular, fontSize: 13.5, lineHeight: 19.5, color: ink[700], marginTop: 8 }}>{step.why}</Text>
+          <Text numberOfLines={2} style={{ fontFamily: font.regular, fontSize: 14, lineHeight: 20, color: ink[700], marginTop: step.reason ? 4 : 10 }}>{step.why}</Text>
         </View>
 
         <View className="mt-auto flex-row items-center gap-2 pt-5">
@@ -479,9 +476,10 @@ const DUE_ICON: Record<string, typeof FlaskConical> = {
 export function FamilyAlertCard({ row, member, onPress }: { row: DueRow; member: ActiveProfile | null; onPress: () => void }) {
   const lab = row.type === "test_ordered" || row.source === "lab";
   const owner = row.who === "You" ? "Your" : `${row.who}'s`;
-  const sentence = row.overdue
-    ? `${owner} ${row.title.toLowerCase()} is ${Math.abs(row.daysToDue)} day${Math.abs(row.daysToDue) === 1 ? "" : "s"} overdue.`
-    : `${owner} ${row.title.toLowerCase()} is due ${row.daysToDue === 0 ? "today" : row.daysToDue === 1 ? "tomorrow" : `in ${row.daysToDue} days`}.`;
+  // What, then when and what to do, on its own short line.
+  const sentence = `${owner} ${row.title.toLowerCase()} is ${row.overdue ? "overdue" : "due"}`;
+  const late = Math.abs(row.daysToDue);
+  const when = row.overdue ? `${late} day${late === 1 ? "" : "s"} late` : row.daysToDue === 0 ? "Today" : row.daysToDue === 1 ? "Tomorrow" : `In ${row.daysToDue} days`;
   return (
     <Pressable accessibilityRole="button" accessibilityLabel={sentence} onPress={onPress} style={({ pressed }) => ({ transform: [{ scale: pressed ? 0.99 : 1 }] })}>
       <View className="flex-row items-center gap-3 rounded-[24px] bg-white p-3.5" style={[glassShadow, { borderWidth: 1, borderColor: surface.line }]}>
@@ -494,7 +492,7 @@ export function FamilyAlertCard({ row, member, onPress }: { row: DueRow; member:
         <View className="min-w-0 flex-1">
           <Text style={{ fontFamily: font.bold, fontSize: 10.5, letterSpacing: 1, color: row.overdue ? semantic.dangerText : semantic.cautionText }}>FAMILY ALERT</Text>
           <Text style={{ fontFamily: font.semibold, fontSize: 14.5, lineHeight: 19, color: ink[900], marginTop: 2 }}>{sentence}</Text>
-          <Text style={{ fontFamily: font.semibold, fontSize: 12.5, color: brand[600], marginTop: 4 }}>{lab ? "Book home collection" : "Plan it with Cheeku"}</Text>
+          <Text style={{ fontFamily: font.semibold, fontSize: 12.5, color: brand[600], marginTop: 4 }}>{`${when} · ${lab ? "Book collection" : "Plan it"}`}</Text>
         </View>
         <ChevronRight size={18} color={ink[300]} />
       </View>
@@ -633,9 +631,9 @@ export function UnlockMoment({ open, via, onClose }: { open: boolean; via: Unloc
   const insets = useSafeAreaInsets();
   const backfill = via === "backfill";
   const items = [
-    { icon: Footprints, title: "A step a day", sub: "Picked from your reports and goals" },
-    { icon: CalendarClock, title: "What's due", sub: "Tests and follow-ups for the whole family" },
-    { icon: Flame, title: "Your streak", sub: "Small steps add up to a longer, healthier life" },
+    { icon: Footprints, title: "A plan for every day", sub: "Picked from your own numbers" },
+    { icon: CalendarClock, title: "What's due", sub: "Tests and follow-ups, whole family" },
+    { icon: Flame, title: "Your streak", sub: "Small steps, longer life" },
   ];
   return (
     <Modal visible={open} transparent animationType="fade" onRequestClose={onClose}>
@@ -651,7 +649,7 @@ export function UnlockMoment({ open, via, onClose }: { open: boolean; via: Unloc
               {backfill ? "Home is now Today." : "Today is here."}
             </Text>
             <Text style={{ fontFamily: font.regular, fontSize: 14, lineHeight: 20, color: ink[700], marginTop: 8, textAlign: "center" }}>
-              {backfill ? "Cheeku already knows enough about your family to plan each day with you." : viaLine(via)}
+              {backfill ? "Built from what your family has shared." : viaLine(via)}
             </Text>
 
             <Glass strong className="mt-5 w-full rounded-[22px] px-3.5 py-1">

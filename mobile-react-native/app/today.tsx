@@ -39,11 +39,11 @@ import { font } from "@/theme/type";
 
 const INTRO: Record<Pillar | "all", string> = {
   all: "Everything for today, sorted for right now.",
-  move: "Steps, strength and balance. The body you'll have at 70 is built now.",
-  eat: "Snap every meal and drink. Cheeku reads each plate against your own numbers.",
-  sleep: "Sleep is when the body repairs. A steady rhythm matters more than long nights.",
-  mind: "Calm is a health number too: it moves pressure, sugar and sleep.",
-  check: "Readings, medicines and what's due, so nothing quietly slips.",
+  move: "Steps, strength, balance. Your 70-year-old self is built now.",
+  eat: "Snap every plate. Cheeku reads it against your numbers.",
+  sleep: "Sleep is repair time. Rhythm beats long lie-ins.",
+  mind: "Calm is a health number too.",
+  check: "Readings, medicines, what's due. Nothing slips.",
 };
 
 const isPillar = (v: unknown): v is Pillar => typeof v === "string" && PILLARS.some((p) => p.key === v);
@@ -143,7 +143,7 @@ export default function TodayPlan() {
                 <Meter value={plan.done} total={Math.max(1, plan.total)} />
               </View>
               <Text style={{ fontFamily: font.regular, fontSize: 12.5, lineHeight: 17, color: ink[700], marginTop: 10 }}>
-                {builtFrom.length ? `Built around your ${builtFrom.slice(0, 3).join(", ")}, plus the everyday habits of a long, healthy life.` : "The everyday habits of a long, healthy life. Add a report and Cheeku tailors it to your numbers."}
+                {builtFrom.length ? `Made for your ${builtFrom.slice(0, 3).join(", ")}.` : "Everyday longevity habits. Add a report to make it yours."}
               </Text>
             </View>
           </View>

@@ -77,7 +77,7 @@ export type PlanTask = CatalogTask & {
   status: TaskStatus;
   /** There because of this person's own data, not general advice. */
   personal: boolean;
-  /** "Your HbA1c came back high (6.1 %)", for personal tasks. */
+  /** "Your HbA1c is high (6.1%)", for personal tasks. */
   reason: string | null;
   chip: string;
   /** A test or follow-up that is due. */
@@ -138,9 +138,9 @@ export function stepsTarget(args: { ageYears: number | null; pregnant: boolean; 
   const avg = recent.length >= 3 ? recent.reduce((a, b) => a + b, 0) / recent.length : null;
   if (avg !== null && avg < goal * 0.8) {
     const target = Math.min(goal, Math.max(3000, round500(avg * 1.15)));
-    return { goal, target, ramping: true, line: `Building up to ${goal.toLocaleString("en-IN")}. Today's target is ${target.toLocaleString("en-IN")}, a little above your week.` };
+    return { goal, target, ramping: true, line: `${target.toLocaleString("en-IN")} today, on the way to ${goal.toLocaleString("en-IN")}.` };
   }
-  return { goal, target: goal, ramping: false, line: pregnant ? `${goal.toLocaleString("en-IN")} steps, or what your doctor is happy with.` : `Your goal is ${goal.toLocaleString("en-IN")} steps.` };
+  return { goal, target: goal, ramping: false, line: pregnant ? `${goal.toLocaleString("en-IN")} steps, or your doctor's number.` : `Your goal: ${goal.toLocaleString("en-IN")} steps.` };
 }
 
 // -------------------------------------------------------------- due items --
@@ -148,7 +148,7 @@ export function stepsTarget(args: { ageYears: number | null; pregnant: boolean; 
 function dueTask(l: LoopView): PlanTask | null {
   if (l.type === "result_pending" || l.daysToDue === null || l.daysToDue > 7) return null;
   const days = Math.abs(l.daysToDue);
-  const when = l.overdue ? `It was due ${days} day${days === 1 ? "" : "s"} ago.` : l.daysToDue === 0 ? "It's due today." : `It's due in ${days} day${days === 1 ? "" : "s"}.`;
+  const when = l.overdue ? `Due ${days} day${days === 1 ? "" : "s"} ago.` : l.daysToDue === 0 ? "Due today." : `Due in ${days} day${days === 1 ? "" : "s"}.`;
   const test = l.type === "test_ordered";
   return {
     key: `due:${slug(l.key)}`,
@@ -157,14 +157,15 @@ function dueTask(l: LoopView): PlanTask | null {
     area: "general",
     window: "anytime",
     title: test ? `Book your ${l.title}` : l.title,
-    why: `${when} ${l.detail ?? (test ? "Home collection takes ten minutes and the result comes back into Cheeku." : "Cheeku can help you plan it.")}`.trim(),
+    why: test ? `${when} Home collection takes ten minutes.` : `${when} Let's plan it.`,
+    more: l.detail ?? (test ? "The result comes straight back into Cheeku and onto your chart." : "Cheeku can help you plan it."),
     status: "open",
     personal: true,
     reason: null,
     chip: test ? "Test" : l.type === "vaccine_due" ? "Vaccine" : l.type === "followup_due" ? "Follow-up" : "Reminder",
     due: true,
     dueLabel: l.overdue ? "Overdue" : "Due soon",
-    cta: test ? { label: "Book home collection", route: "/labs" } : { label: "Plan it with Cheeku", route: `/ask?q=${encodeURIComponent(`Help me plan: ${l.title}`)}` },
+    cta: test ? { label: "Book collection", route: "/labs" } : { label: "Plan it", route: `/ask?q=${encodeURIComponent(`Help me plan: ${l.title}`)}` },
     logs: [],
   };
 }
@@ -213,7 +214,7 @@ export function buildPlan(input: PlanInput): Plan {
       .reduce((m, l) => m.set(l.day, Math.max(m.get(l.day) ?? 0, l.value as number)), new Map<string, number>());
     steps = stepsTarget({ ageYears: input.ageYears, pregnant: input.pregnant, prefs: input.prefs, recent: [...recent.values()] });
     const best = Math.max(0, ...todayLogs.filter((l) => l.taskKey === "steps").map((l) => l.value ?? 0));
-    add(STEPS_TASK, { progress: { value: best, target: steps.target }, why: `${steps.line} ${STEPS_TASK.why}` });
+    add(STEPS_TASK, { progress: { value: best, target: steps.target }, why: steps.line });
   }
   for (const m of MEALS) add(m);
   add(SLEEP_RATING);
@@ -224,12 +225,14 @@ export function buildPlan(input: PlanInput): Plan {
   if (areas.includes("sugar") && dayNumber(today) % 2 === 0) add(READINGS.sugar, { personal: true, reason: reasons.get("sugar") ?? null });
   if (!gentle && weekday(today) === READINGS.weight.weekday) add(READINGS.weight, areas.includes("weight") ? { personal: true, reason: reasons.get("weight") ?? null } : {});
   if (activeMeds.length) {
-    const names = activeMeds.slice(0, 2).map((e) => e.name.split(/\s+/)[0]).join(" and ");
+    // One name and a count: "Atorvastatin and 2 more". Two names ran long and
+    // cut brand names in half ("Vitamin" for "Vitamin D3").
+    const first = activeMeds[0]?.name.trim() ?? "";
     const meds = HABITS.find((h) => h.key === "meds_taken");
-    if (meds) add(meds, { personal: true, reason: `You take ${names}${activeMeds.length > 2 ? ` and ${activeMeds.length - 2} more` : ""}` });
+    if (meds) add(meds, { personal: true, reason: activeMeds.length > 1 ? `${first} and ${activeMeds.length - 1} more` : `For your ${first}` });
     if (onThyroid) {
       const t = HABITS.find((h) => h.key === "thyroid_same_time");
-      if (t) add(t, { personal: true, reason: "You take a thyroid tablet" });
+      if (t) add(t, { personal: true, reason: "For your thyroid tablet" });
     }
   }
 
