@@ -65,6 +65,18 @@ have shown. Migrations are the exception worth flagging loudly in the PR body:
 they are inert until somebody runs `npm run db:migrate` from the repo root, and
 the app will behave as though the change never happened until they do.
 
+# Every change reaches `main` through a documented PR
+
+The team (app engineers and the data scientist) reads the PR, not the chat
+that produced it. So every piece of work goes to `main` through a pull request
+whose description follows `.github/pull_request_template.md`: what changed,
+why (with launch tracker ids), how it works, database and deploy steps in
+order, what it means for data and AI (new tables, what is and is never
+logged), what was tested and what was not. Merge commits, not squash, so the
+individual commit messages survive. In the same change, keep `PLAN.md`
+(Open/Rules), `../PROGRESS.md` (the reasoning) and the trackers current; a PR
+that changes behaviour without them is not finished.
+
 # Launch tracker: update it when work ships
 
 The team tracks launch work in a live page:
