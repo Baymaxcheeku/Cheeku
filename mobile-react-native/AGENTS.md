@@ -64,3 +64,13 @@ session can pull, run it on the simulator, and fix what the browser could never
 have shown. Migrations are the exception worth flagging loudly in the PR body:
 they are inert until somebody runs `npm run db:migrate` from the repo root, and
 the app will behave as though the change never happened until they do.
+
+# Launch tracker: update it when work ships
+
+The team tracks launch work in a live page:
+https://claude.ai/artifact/FWQhpm3j1KJWiNrCgpraHe. Tasks are split
+between Athar (app and backend) and Suraj (AI integration). When a change
+you make completes, starts or blocks one of its tasks, update that task in
+the same session with the `ArtifactData` tool and add a `log` entry, as
+described in `../docs/launch-tracker/README.md`, which also lists every
+task id. Device verification is part of "done" for app work.

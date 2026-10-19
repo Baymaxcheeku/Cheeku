@@ -1,0 +1,718 @@
+<title>Cheeku Launch Tracker</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Instrument+Serif:ital@1&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a sticky brand bar, a readiness band (overall, milestones, the two owners), then the
+   task board on the left and the platform map plus activity on the right; one column on phones. */
+:root {
+  --bg: #f5f4fd;
+  --surface: #ffffff;
+  --surface-2: #f1f0fe;
+  --ink: #0f1030;
+  --ink-2: #3a3b57;
+  --muted: #6b6c8a;
+  --line: #e6e5f3;
+  --brand: #4a2ade;
+  --brand-2: #5b4ef0;
+  --brand-soft: #ebe8ff;
+  --lime: #e4ff7a;
+  --lime-ink: #2f3d00;
+  --done: #157a43;
+  --done-bg: #e3f6ec;
+  --doing: #4a2ade;
+  --doing-bg: #ebe8ff;
+  --blocked: #a83a06;
+  --blocked-bg: #fff0e3;
+  --todo: #5d5e7c;
+  --todo-bg: #eeeef6;
+  --p0: #b8091a;
+  --p0-bg: #fdecef;
+  --p1: #8f5400;
+  --p1-bg: #fff3dc;
+  --p2: #4f5070;
+  --p2-bg: #eeeef6;
+  --dummy: #8a4bd6;
+  --dummy-bg: #f4ecff;
+  --shadow: 0 1px 2px rgba(20, 16, 70, .05), 0 8px 24px rgba(42, 31, 107, .06);
+  --font-ui: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-brand: "Instrument Serif", "Iowan Old Style", Georgia, serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0b0c20; --surface: #14152e; --surface-2: #1b1c3b; --ink: #f1f0ff; --ink-2: #cfcee9; --muted: #9b9bb8;
+    --line: #2a2b4f; --brand: #9a93ff; --brand-2: #8a82f5; --brand-soft: #25224f; --lime: #e4ff7a; --lime-ink: #2f3d00;
+    --done: #6fdc9d; --done-bg: #12321f; --doing: #b3adff; --doing-bg: #25224f; --blocked: #ffab73; --blocked-bg: #3a2210;
+    --todo: #b3b3cc; --todo-bg: #23244a; --p0: #ff8a95; --p0-bg: #3b1520; --p1: #ffc46b; --p1-bg: #36260b; --p2: #b8b8d4; --p2-bg: #23244a;
+    --dummy: #d2a8ff; --dummy-bg: #2c1d45; --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 28px rgba(0,0,0,.28); color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0b0c20; --surface: #14152e; --surface-2: #1b1c3b; --ink: #f1f0ff; --ink-2: #cfcee9; --muted: #9b9bb8;
+  --line: #2a2b4f; --brand: #9a93ff; --brand-2: #8a82f5; --brand-soft: #25224f; --lime: #e4ff7a; --lime-ink: #2f3d00;
+  --done: #6fdc9d; --done-bg: #12321f; --doing: #b3adff; --doing-bg: #25224f; --blocked: #ffab73; --blocked-bg: #3a2210;
+  --todo: #b3b3cc; --todo-bg: #23244a; --p0: #ff8a95; --p0-bg: #3b1520; --p1: #ffc46b; --p1-bg: #36260b; --p2: #b8b8d4; --p2-bg: #23244a;
+  --dummy: #d2a8ff; --dummy-bg: #2c1d45; --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 28px rgba(0,0,0,.28); color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-ui); font-size: 14px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+button, select, input { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; border-radius: 8px; }
+.num { font-variant-numeric: tabular-nums; }
+.mono { font-family: var(--font-mono); font-size: 12px; }
+
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--surface); }
+.bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 9; background: color-mix(in srgb, var(--surface) 88%, transparent); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+.bar-in, .wrap { max-width: 1240px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.bar-in { display: flex; align-items: center; gap: 14px; padding-block: 12px; flex-wrap: wrap; }
+.brand { display: flex; align-items: baseline; gap: 10px; }
+.wordmark { font-family: var(--font-brand); font-style: italic; font-size: 28px; line-height: 1; color: var(--brand); letter-spacing: -.2px; }
+.brand-sub { font-weight: 600; font-size: 15px; color: var(--ink); }
+.bar-meta { margin-left: auto; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; color: var(--muted); font-size: 12.5px; }
+.sync { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--line); }
+.sync i { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); display: inline-block; }
+.sync[data-state="live"] i { background: var(--done); box-shadow: 0 0 0 3px color-mix(in srgb, var(--done) 25%, transparent); }
+.sync[data-state="off"] i { background: var(--blocked); }
+
+.wrap { padding-block: 22px 56px; display: grid; gap: 22px; }
+
+/* Readiness band */
+.band { display: grid; grid-template-columns: 1.15fr 1fr 1fr; gap: 16px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 20px; box-shadow: var(--shadow); }
+.ready { padding: 20px; display: grid; gap: 16px; position: relative; overflow: hidden; }
+.ready::after { content: ""; position: absolute; right: -60px; top: -60px; width: 220px; height: 220px; border-radius: 50%; background: radial-gradient(circle, var(--brand-soft), transparent 70%); pointer-events: none; }
+.eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 1.1px; text-transform: uppercase; color: var(--brand); }
+.big { display: flex; align-items: baseline; gap: 10px; }
+.big b { font-size: 46px; font-weight: 600; letter-spacing: -1.6px; line-height: 1; }
+.big span { color: var(--muted); font-size: 14px; }
+.ms { display: grid; gap: 10px; position: relative; z-index: 1; }
+.ms-row { display: grid; grid-template-columns: 112px 1fr 64px; gap: 10px; align-items: center; font-size: 12.5px; }
+.ms-row .label { color: var(--ink-2); font-weight: 500; }
+.ms-row .label small { display: block; color: var(--muted); font-weight: 400; font-size: 11px; }
+.track { height: 8px; border-radius: 999px; background: var(--surface-2); overflow: hidden; border: 1px solid var(--line); }
+.track > i { display: block; height: 100%; border-radius: 999px; background: var(--brand-2); }
+.track.lime > i { background: linear-gradient(90deg, var(--brand-2), var(--brand)); }
+.ms-row .pct { text-align: right; color: var(--muted); }
+
+.owner { padding: 18px 20px; display: grid; gap: 14px; align-content: start; }
+.owner-head { display: flex; align-items: center; gap: 12px; }
+.avatar { width: 42px; height: 42px; border-radius: 14px; display: grid; place-items: center; font-weight: 700; font-size: 16px; color: #fff; flex: none; }
+.avatar.athar { background: var(--brand); }
+.avatar.suraj { background: #0f1030; color: var(--lime); }
+:root[data-theme="dark"] .avatar.suraj, :root:not([data-theme="light"]) .avatar.suraj { border: 1px solid var(--line); }
+.owner-head h3 { margin: 0; font-size: 16px; }
+.owner-head p { margin: 0; color: var(--muted); font-size: 12.5px; }
+.ring { margin-left: auto; width: 54px; height: 54px; position: relative; flex: none; }
+.ring svg { width: 54px; height: 54px; transform: rotate(-90deg); }
+.ring circle { fill: none; stroke-width: 6; }
+.ring .bgc { stroke: var(--surface-2); }
+.ring .fgc { stroke: var(--brand-2); stroke-linecap: round; transition: stroke-dashoffset .5s ease; }
+.ring span { position: absolute; inset: 0; display: grid; place-items: center; font-size: 12px; font-weight: 600; }
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.stat { background: var(--surface-2); border-radius: 12px; padding: 8px 10px; }
+.stat b { display: block; font-size: 18px; font-weight: 600; }
+.stat span { font-size: 11px; color: var(--muted); }
+.stat.warn b { color: var(--p0); }
+.stat.block b { color: var(--blocked); }
+.next { display: grid; gap: 6px; }
+.next h4 { margin: 0; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.next button { all: unset; cursor: pointer; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px; align-items: baseline; font-size: 13px; color: var(--ink-2); padding: 3px 0; }
+.next button:hover span:last-child { color: var(--brand); text-decoration: underline; }
+.next button:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; border-radius: 6px; }
+
+/* Attention strip */
+.attention { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.att { padding: 16px 18px; display: grid; gap: 10px; align-content: start; }
+.att h2 { margin: 0; font-size: 15px; display: flex; align-items: center; gap: 8px; }
+.att h2 .count { font-size: 12px; font-weight: 600; padding: 1px 8px; border-radius: 999px; background: var(--surface-2); color: var(--muted); }
+.att ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+.att li { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: start; font-size: 13px; }
+.att li button { all: unset; cursor: pointer; color: var(--ink); font-weight: 500; }
+.att li button:hover { color: var(--brand); text-decoration: underline; }
+.att li small { display: block; color: var(--muted); font-size: 12px; }
+.att .empty { color: var(--muted); font-size: 13px; }
+
+/* Board */
+.main { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 22px; align-items: start; }
+.toolbar { display: grid; gap: 12px; padding: 14px; }
+.seg { display: inline-flex; padding: 3px; background: var(--surface-2); border: 1px solid var(--line); border-radius: 12px; gap: 2px; flex-wrap: wrap; }
+.seg button { border: 0; background: transparent; padding: 7px 12px; border-radius: 9px; cursor: pointer; font-weight: 500; color: var(--ink-2); display: inline-flex; gap: 6px; align-items: center; }
+.seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.08); font-weight: 600; }
+.seg button .n { font-size: 11px; color: var(--muted); }
+.tools-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.search { flex: 1 1 220px; min-width: 0; display: flex; align-items: center; gap: 8px; background: var(--surface-2); border: 1px solid var(--line); border-radius: 12px; padding: 0 12px; }
+.search input { border: 0; background: transparent; outline: none; padding: 9px 0; width: 100%; min-width: 0; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.chip { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 5px 11px; cursor: pointer; font-size: 12.5px; font-weight: 500; color: var(--ink-2); }
+.chip[aria-pressed="true"] { background: var(--ink); color: var(--surface); border-color: var(--ink); }
+.toggle { display: inline-flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--ink-2); cursor: pointer; user-select: none; }
+.toggle input { accent-color: var(--brand); }
+
+.groups { display: grid; gap: 16px; }
+.group { overflow: hidden; }
+.group-head { display: flex; align-items: center; gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--line); background: var(--surface); }
+.group-head h3 { margin: 0; font-size: 14.5px; font-weight: 600; }
+.group-head p { margin: 0; font-size: 12px; color: var(--muted); }
+.group-head .mini { margin-left: auto; display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); }
+.group-head .mini .track { width: 80px; }
+.task { border-bottom: 1px solid var(--line); }
+.task:last-child { border-bottom: 0; }
+.task-row { display: grid; grid-template-columns: 128px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 11px 16px; }
+.task[data-status="done"] .t-title { color: var(--muted); text-decoration: line-through; text-decoration-color: color-mix(in srgb, var(--muted) 60%, transparent); }
+.status-wrap { position: relative; display: block; }
+.status-wrap::before { content: ""; position: absolute; left: 10px; top: 50%; width: 7px; height: 7px; margin-top: -3.5px; border-radius: 50%; background: currentColor; pointer-events: none; }
+.status-wrap::after { content: ""; position: absolute; right: 11px; top: 50%; width: 6px; height: 6px; margin-top: -5px; border-right: 1.6px solid currentColor; border-bottom: 1.6px solid currentColor; transform: rotate(45deg); pointer-events: none; }
+.status-wrap[data-v="todo"] { color: var(--todo); } .status-wrap[data-v="doing"] { color: var(--doing); } .status-wrap[data-v="blocked"] { color: var(--blocked); } .status-wrap[data-v="done"] { color: var(--done); }
+.status { appearance: none; -webkit-appearance: none; border: 0; border-radius: 999px; padding: 5px 26px 5px 23px; font-size: 12px; font-weight: 600; cursor: pointer; width: 100%; }
+.status[data-v="todo"] { background-color: var(--todo-bg); color: var(--todo); }
+.status[data-v="doing"] { background-color: var(--doing-bg); color: var(--doing); }
+.status[data-v="blocked"] { background-color: var(--blocked-bg); color: var(--blocked); }
+.status[data-v="done"] { background-color: var(--done-bg); color: var(--done); }
+.status:disabled { cursor: default; opacity: .9; }
+.t-main { min-width: 0; display: grid; gap: 4px; }
+.t-title { font-weight: 500; color: var(--ink); cursor: pointer; background: none; border: 0; padding: 0; text-align: left; line-height: 1.35; }
+.t-title:hover { color: var(--brand); }
+.t-meta { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.tag { font-size: 11px; font-weight: 600; padding: 1px 7px; border-radius: 6px; background: var(--surface-2); color: var(--muted); white-space: nowrap; }
+.tag.p0 { background: var(--p0-bg); color: var(--p0); }
+.tag.p1 { background: var(--p1-bg); color: var(--p1); }
+.tag.p2 { background: var(--p2-bg); color: var(--p2); }
+.tag.decision { background: var(--blocked-bg); color: var(--blocked); }
+.tag.kind { background: transparent; border: 1px solid var(--line); font-weight: 500; }
+.who { width: 26px; height: 26px; border-radius: 9px; display: grid; place-items: center; font-size: 11px; font-weight: 700; color: #fff; }
+.who.athar { background: var(--brand); }
+.who.suraj { background: #0f1030; color: var(--lime); }
+.t-side { display: flex; align-items: center; gap: 10px; }
+.expand { width: 28px; height: 28px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); cursor: pointer; display: grid; place-items: center; color: var(--muted); }
+.expand svg { transition: transform .2s ease; }
+.task[data-open="true"] .expand svg { transform: rotate(180deg); }
+.t-detail { padding: 0 16px 14px 156px; display: grid; gap: 10px; color: var(--ink-2); font-size: 13px; }
+.t-detail p { margin: 0; max-width: 70ch; }
+.kv { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 4px 12px; font-size: 12.5px; }
+.kv dt { color: var(--muted); }
+.kv dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+.owner-pick { display: inline-flex; gap: 6px; align-items: center; font-size: 12.5px; }
+.owner-pick select { border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 3px 6px; }
+
+/* Side */
+.side { display: grid; gap: 16px; position: sticky; top: calc(env(safe-area-inset-top, 0px) + 72px); }
+.panel { padding: 16px; display: grid; gap: 12px; }
+.panel h2 { margin: 0; font-size: 15px; }
+.panel .sub { margin: -6px 0 0; color: var(--muted); font-size: 12px; }
+.legend { display: flex; gap: 10px; flex-wrap: wrap; font-size: 11.5px; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 5px; }
+.dot { width: 8px; height: 8px; border-radius: 3px; display: inline-block; }
+.dot.live { background: var(--done); } .dot.partial { background: var(--p1); } .dot.dummy { background: var(--dummy); } .dot.missing { background: var(--p0); }
+.layer { display: grid; gap: 6px; }
+.layer h4 { margin: 6px 0 2px; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); }
+.mod { display: grid; grid-template-columns: 10px minmax(0, 1fr) auto; gap: 8px; align-items: start; padding: 6px 8px; border-radius: 10px; }
+.mod:hover { background: var(--surface-2); }
+.mod .dot { margin-top: 6px; }
+.mod b { font-weight: 500; font-size: 13px; }
+.mod small { display: block; color: var(--muted); font-size: 11.5px; line-height: 1.4; }
+.mod .st { font-size: 10.5px; font-weight: 600; padding: 1px 7px; border-radius: 6px; text-transform: capitalize; }
+.st.live { background: var(--done-bg); color: var(--done); } .st.partial { background: var(--p1-bg); color: var(--p1); }
+.st.dummy { background: var(--dummy-bg); color: var(--dummy); } .st.missing { background: var(--p0-bg); color: var(--p0); }
+.feed { display: grid; gap: 10px; max-height: 360px; overflow: auto; }
+.ev { display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 10px; font-size: 12.5px; }
+.ev .ic { width: 28px; height: 28px; border-radius: 9px; display: grid; place-items: center; background: var(--surface-2); font-size: 11px; font-weight: 700; color: var(--brand); }
+.ev .ic.claude { background: var(--lime); color: var(--lime-ink); }
+.ev p { margin: 0; color: var(--ink-2); }
+.ev time { color: var(--muted); font-size: 11.5px; }
+
+.state-msg { padding: 28px; text-align: center; color: var(--muted); display: grid; gap: 6px; justify-items: center; }
+.state-msg strong { color: var(--ink); font-size: 15px; }
+.foot { color: var(--muted); font-size: 12px; text-align: center; }
+.toast { position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom, 0px) + 20px); transform: translateX(-50%); background: var(--ink); color: var(--surface); padding: 10px 16px; border-radius: 12px; font-size: 13px; box-shadow: var(--shadow); z-index: 20; }
+
+@media (max-width: 1080px) {
+  .band { grid-template-columns: 1fr 1fr; }
+  .ready { grid-column: 1 / -1; }
+  .main { grid-template-columns: 1fr; }
+  .side { position: static; }
+}
+@media (max-width: 680px) {
+  .band, .attention { grid-template-columns: 1fr; }
+  .task-row { grid-template-columns: minmax(0, 1fr) auto; }
+  .task-row .status-cell { grid-column: 1 / -1; max-width: 150px; }
+  .t-detail { padding-left: 16px; }
+  .stats { grid-template-columns: repeat(2, 1fr); }
+  .ms-row { grid-template-columns: 96px 1fr 52px; }
+  .group-head .mini .track { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<header class="bar">
+  <div class="bar-in">
+    <div class="brand"><span class="wordmark">Cheeku</span><span class="brand-sub">Launch tracker</span></div>
+    <div class="bar-meta">
+      <span id="audit-line" class="num">Audit: loading</span>
+      <span class="sync" id="sync" data-state="wait"><i></i><span id="sync-text">Connecting</span></span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="band" aria-label="Readiness">
+    <div class="card ready">
+      <div class="eyebrow">Launch readiness</div>
+      <div class="big num"><b id="overall-pct">0%</b><span id="overall-sub">0 of 0 tasks done</span></div>
+      <div class="ms" id="milestones"></div>
+    </div>
+    <div class="card owner" id="owner-athar"></div>
+    <div class="card owner" id="owner-suraj"></div>
+  </section>
+
+  <section class="attention" aria-label="Needs attention">
+    <div class="card att">
+      <h2>Blocked or waiting on a decision <span class="count num" id="blocked-count">0</span></h2>
+      <ul id="blocked-list"></ul>
+    </div>
+    <div class="card att">
+      <h2>Open launch blockers <span class="count num" id="p0-count">0</span></h2>
+      <ul id="p0-list"></ul>
+    </div>
+  </section>
+
+  <div class="main">
+    <section style="display:grid;gap:16px;min-width:0" aria-label="Tasks">
+      <div class="card toolbar">
+        <div class="tools-row">
+          <div class="seg" role="group" aria-label="Owner" id="owner-seg"></div>
+          <div class="seg" role="group" aria-label="Group by" id="group-seg">
+            <button type="button" data-g="area" aria-pressed="true">By area</button>
+            <button type="button" data-g="milestone" aria-pressed="false">By milestone</button>
+          </div>
+        </div>
+        <div class="tools-row">
+          <label class="search" for="q">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+            <input id="q" type="search" placeholder="Search tasks, files, decisions" autocomplete="off">
+          </label>
+          <label class="toggle" for="hide-done"><input type="checkbox" id="hide-done"> Hide done</label>
+        </div>
+        <div class="chips" id="status-chips" aria-label="Status filter"></div>
+        <div class="chips" id="prio-chips" aria-label="Priority filter"></div>
+      </div>
+      <div class="groups" id="groups">
+        <div class="card state-msg"><strong>Loading the tracker</strong><span>Tasks appear here once the store answers.</span></div>
+      </div>
+    </section>
+
+    <aside class="side" aria-label="Platform">
+      <div class="card panel">
+        <h2>Platform map</h2>
+        <p class="sub">What is live, partly built, running on stand-ins, or not started.</p>
+        <div class="legend"><span><i class="dot live"></i>Live</span><span><i class="dot partial"></i>Partial</span><span><i class="dot dummy"></i>Stand-in</span><span><i class="dot missing"></i>Missing</span></div>
+        <div id="modules"><p class="sub">Loading.</p></div>
+      </div>
+      <div class="card panel">
+        <h2>Activity</h2>
+        <p class="sub">Status changes, by the team or by Claude when work ships.</p>
+        <div class="feed" id="feed"><p class="sub">No changes yet.</p></div>
+      </div>
+    </aside>
+  </div>
+
+  <p class="foot" id="foot">Status changes save for everyone with access. Claude updates tasks here as they ship.</p>
+</main>
+
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(() => {
+  const OWNERS = {
+    athar: { name: "Athar", role: "App and backend", initial: "A" },
+    suraj: { name: "Suraj", role: "AI integration", initial: "S" },
+  };
+  const STATUS = [
+    { v: "todo", label: "To do" },
+    { v: "doing", label: "In progress" },
+    { v: "blocked", label: "Blocked" },
+    { v: "done", label: "Done" },
+  ];
+  const MILESTONES = {
+    M1: { label: "M1 Foundation", sub: "Before real users touch it" },
+    M2: { label: "M2 Closed beta", sub: "50 to 200 real families" },
+    M3: { label: "M3 Public launch", sub: "Play Store and App Store" },
+  };
+  const AREAS = [
+    ["ops", "Launch operations", "Environments, migrations, monitoring, CI"],
+    ["security", "Security and privacy", "Data, accounts, listings and DPDP"],
+    ["ratelimit", "Rate limits and abuse", "What a single account can cost us"],
+    ["payments", "Payments", "Subscriptions and care bookings"],
+    ["integrations", "Partner integrations", "Labs, doctors, services, devices"],
+    ["loop", "Daily loop", "The P0 product features still open"],
+    ["perf", "Data and performance", "Database calls, payloads, indexes"],
+    ["ai-ocr", "AI: reading reports and prescriptions", "Fine-tuned OCR and extraction"],
+    ["ai-memory", "AI: longitudinal memory", "The family health memory, server side"],
+    ["ai-model", "AI: longevity chat model", "The 15 to 22B India health model"],
+    ["ai-safety", "AI: safety and evals", "Guardrails, red-teaming, clinical sign-off"],
+    ["cost", "Cost efficiency", "Running the platform cheaply at scale"],
+    ["quality", "Quality and store readiness", "Device QA, analytics, store listings"],
+    ["clinical", "Clinical and content", "Sign-offs that no code can replace"],
+    ["shipped", "Shipped in v1", "Built and verified in this codebase"],
+  ];
+  const AREA = Object.fromEntries(AREAS.map(([k, t, s], i) => [k, { title: t, sub: s, i }]));
+  const PRIO = { P0: 0, P1: 1, P2: 2 };
+  const LAYERS = ["App", "Backend", "AI", "Integrations"];
+
+  const $ = (id) => document.getElementById(id);
+  const el = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; };
+
+  const state = {
+    tasks: [], modules: [], log: [], meta: null,
+    owner: (() => { try { return localStorage.getItem("ct.owner") || "all"; } catch { return "all"; } })(),
+    group: (() => { try { return localStorage.getItem("ct.group") || "area"; } catch { return "area"; } })(),
+    statuses: new Set(), prios: new Set(), q: "",
+    hideDone: (() => { try { return localStorage.getItem("ct.hideDone") === "1"; } catch { return false; } })(),
+    open: new Set(), canWrite: null, db: null, user: null, me: null,
+  };
+  const save = (k, v) => { try { localStorage.setItem(k, v); } catch {} };
+
+  function toast(msg) {
+    const t = $("toast"); t.textContent = msg; t.hidden = false;
+    clearTimeout(toast._t); toast._t = setTimeout(() => { t.hidden = true; }, 2600);
+  }
+  function setSync(kind, text) { $("sync").dataset.state = kind; $("sync-text").textContent = text; }
+  const pct = (d, t) => (t ? Math.round((d / t) * 100) : 0);
+  const fmtDate = (iso) => { if (!iso) return ""; const d = new Date(iso); if (isNaN(d)) return ""; return d.toLocaleDateString("en-IN", { day: "numeric", month: "short" }) + ", " + d.toLocaleTimeString("en-IN", { hour: "numeric", minute: "2-digit" }); };
+
+  // ---------------------------------------------------------------- filters
+  function visibleTasks() {
+    const q = state.q.trim().toLowerCase();
+    return state.tasks.filter((t) => {
+      if (state.owner !== "all" && t.owner !== state.owner) return false;
+      if (state.hideDone && t.status === "done") return false;
+      if (state.statuses.size && !state.statuses.has(t.status)) return false;
+      if (state.prios.size && !state.prios.has(t.priority)) return false;
+      if (q) {
+        const hay = [t.title, t.detail, t.evidence, t.decision, AREA[t.area]?.title, t.id].join(" ").toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
+      return true;
+    });
+  }
+  const sortTasks = (a, b) => (a.status === "done") - (b.status === "done") || (PRIO[a.priority] ?? 9) - (PRIO[b.priority] ?? 9) || String(a.milestone).localeCompare(String(b.milestone)) || (a.order ?? 999) - (b.order ?? 999);
+
+  // ------------------------------------------------------------- summaries
+  function ring(p) {
+    const r = 23, c = 2 * Math.PI * r;
+    const wrap = el("div", "ring");
+    wrap.innerHTML = `<svg viewBox="0 0 54 54" aria-hidden="true"><circle class="bgc" cx="27" cy="27" r="${r}"/><circle class="fgc" cx="27" cy="27" r="${r}" stroke-dasharray="${c.toFixed(2)}" stroke-dashoffset="${(c * (1 - p / 100)).toFixed(2)}"/></svg>`;
+    wrap.appendChild(el("span", "num", p + "%"));
+    return wrap;
+  }
+
+  function renderSummary() {
+    const all = state.tasks.filter((t) => t.area !== "shipped");
+    const done = all.filter((t) => t.status === "done").length;
+    $("overall-pct").textContent = pct(done, all.length) + "%";
+    const shipped = state.tasks.filter((t) => t.area === "shipped").length;
+    $("overall-sub").textContent = `${done} of ${all.length} launch tasks done` + (shipped ? `, plus ${shipped} shipped in v1` : "");
+
+    const ms = $("milestones"); ms.replaceChildren();
+    for (const [k, m] of Object.entries(MILESTONES)) {
+      const ts = all.filter((t) => t.milestone === k);
+      const d = ts.filter((t) => t.status === "done").length;
+      const row = el("div", "ms-row");
+      const lab = el("div", "label", m.label); lab.appendChild(el("small", null, m.sub));
+      const tr = el("div", "track lime"); const bar = el("i"); bar.style.width = pct(d, ts.length) + "%"; tr.appendChild(bar);
+      tr.setAttribute("role", "progressbar"); tr.setAttribute("aria-valuenow", String(pct(d, ts.length))); tr.setAttribute("aria-label", m.label);
+      row.append(lab, tr, el("div", "pct num", `${d}/${ts.length}`));
+      ms.appendChild(row);
+    }
+
+    for (const key of Object.keys(OWNERS)) {
+      const o = OWNERS[key];
+      const ts = all.filter((t) => t.owner === key);
+      const d = ts.filter((t) => t.status === "done").length;
+      const p0 = ts.filter((t) => t.priority === "P0" && t.status !== "done").length;
+      const blocked = ts.filter((t) => t.status === "blocked" || (t.decision && t.status !== "done")).length;
+      const doing = ts.filter((t) => t.status === "doing").length;
+      const box = $("owner-" + key); box.replaceChildren();
+      const head = el("div", "owner-head");
+      const av = el("div", "avatar " + key, o.initial);
+      const txt = el("div"); txt.append(el("h3", null, o.name), el("p", null, o.role));
+      head.append(av, txt, ring(pct(d, ts.length)));
+      const stats = el("div", "stats");
+      const s = (n, l, c) => { const b = el("div", "stat " + (c || "")); b.append(el("b", "num", String(n)), el("span", null, l)); return b; };
+      stats.append(s(ts.length - d, "Open"), s(p0, "Open P0", p0 ? "warn" : ""), s(doing, "In progress"), s(blocked, "Waiting", blocked ? "block" : ""));
+      const next = el("div", "next"); next.appendChild(el("h4", null, "Next up"));
+      const up = ts.filter((x) => x.status !== "done").sort(sortTasks).slice(0, 3);
+      if (!up.length) next.appendChild(el("span", "sub", "Everything here is done."));
+      for (const x of up) { const b = el("button"); b.type = "button"; b.append(el("span", "tag " + String(x.priority).toLowerCase(), x.priority), el("span", null, x.title)); b.addEventListener("click", () => focusTask(x.id)); next.appendChild(b); }
+      box.append(head, stats, next);
+    }
+
+    const waiting = all.filter((t) => t.status !== "done" && (t.status === "blocked" || t.decision)).sort(sortTasks);
+    $("blocked-count").textContent = String(waiting.length);
+    listInto($("blocked-list"), waiting, (t) => t.decision ? "Decision: " + t.decision : "Marked blocked", "Nothing is blocked right now.");
+
+    const p0 = all.filter((t) => t.priority === "P0" && t.status !== "done" && t.milestone === "M1").sort(sortTasks);
+    const p0all = all.filter((t) => t.priority === "P0" && t.status !== "done").length;
+    $("p0-count").textContent = String(p0all);
+    listInto($("p0-list"), p0.length ? p0 : all.filter((t) => t.priority === "P0" && t.status !== "done").sort(sortTasks).slice(0, 8), (t) => `${OWNERS[t.owner]?.name ?? ""} · ${MILESTONES[t.milestone]?.label ?? ""}`, "Every P0 is done.");
+  }
+
+  function listInto(ul, items, sub, emptyText) {
+    ul.replaceChildren();
+    if (!items.length) { const li = el("li"); li.appendChild(el("span", "empty", emptyText)); ul.appendChild(li); return; }
+    for (const t of items.slice(0, 8)) {
+      const li = el("li");
+      li.appendChild(el("span", "who " + t.owner, OWNERS[t.owner]?.initial ?? "?"));
+      const body = el("div");
+      const b = el("button", null, t.title); b.type = "button"; b.addEventListener("click", () => focusTask(t.id));
+      body.append(b, el("small", null, sub(t)));
+      li.appendChild(body); ul.appendChild(li);
+    }
+    if (items.length > 8) { const li = el("li"); li.appendChild(el("span")); li.appendChild(el("small", null, `and ${items.length - 8} more`)); ul.appendChild(li); }
+  }
+
+  function focusTask(id) {
+    state.open.add(id);
+    const t = state.tasks.find((x) => x.id === id);
+    if (t && state.owner !== "all" && t.owner !== state.owner) { state.owner = "all"; save("ct.owner", "all"); }
+    state.statuses.clear(); state.prios.clear(); state.q = ""; $("q").value = "";
+    if (t && t.status === "done") { state.hideDone = false; $("hide-done").checked = false; }
+    renderControls(); renderBoard();
+    const node = document.querySelector(`[data-id="${CSS.escape(id)}"]`);
+    if (node) { node.scrollIntoView({ behavior: "smooth", block: "center" }); node.querySelector(".t-title")?.focus({ preventScroll: true }); }
+  }
+
+  // --------------------------------------------------------------- controls
+  function renderControls() {
+    const seg = $("owner-seg"); seg.replaceChildren();
+    const base = state.tasks.filter((t) => t.area !== "shipped");
+    for (const [k, label] of [["all", "Everyone"], ["athar", "Athar"], ["suraj", "Suraj"]]) {
+      const open = base.filter((t) => (k === "all" || t.owner === k) && t.status !== "done").length;
+      const b = el("button"); b.type = "button"; b.setAttribute("aria-pressed", String(state.owner === k));
+      b.append(document.createTextNode(label), el("span", "n num", String(open)));
+      b.addEventListener("click", () => { state.owner = k; save("ct.owner", k); renderControls(); renderBoard(); });
+      seg.appendChild(b);
+    }
+    for (const b of $("group-seg").querySelectorAll("button")) b.setAttribute("aria-pressed", String(b.dataset.g === state.group));
+
+    const sc = $("status-chips"); sc.replaceChildren();
+    for (const s of STATUS) {
+      const n = base.filter((t) => t.status === s.v && (state.owner === "all" || t.owner === state.owner)).length;
+      const c = el("button", "chip", `${s.label} ${n}`); c.type = "button"; c.setAttribute("aria-pressed", String(state.statuses.has(s.v)));
+      c.addEventListener("click", () => { state.statuses.has(s.v) ? state.statuses.delete(s.v) : state.statuses.add(s.v); renderControls(); renderBoard(); });
+      sc.appendChild(c);
+    }
+    const pc = $("prio-chips"); pc.replaceChildren();
+    for (const p of ["P0", "P1", "P2"]) {
+      const c = el("button", "chip", p === "P0" ? "P0 launch blocker" : p === "P1" ? "P1 needed for beta" : "P2 can follow"); c.type = "button";
+      c.setAttribute("aria-pressed", String(state.prios.has(p)));
+      c.addEventListener("click", () => { state.prios.has(p) ? state.prios.delete(p) : state.prios.add(p); renderControls(); renderBoard(); });
+      pc.appendChild(c);
+    }
+  }
+
+  // ------------------------------------------------------------------ board
+  function renderBoard() {
+    const host = $("groups"); host.replaceChildren();
+    if (!state.tasks.length) {
+      const m = el("div", "card state-msg");
+      m.append(el("strong", null, state.db ? "No tasks yet" : "Tracker data is not available in this view"), el("span", null, state.db ? "Claude seeds the audit's tasks here; they appear as soon as they are written." : "Open this page in Claude, signed in, to see and update the tasks."));
+      host.appendChild(m); return;
+    }
+    const ts = visibleTasks().sort(sortTasks);
+    if (!ts.length) { const m = el("div", "card state-msg"); m.append(el("strong", null, "Nothing matches"), el("span", null, "Clear a filter or the search to see more tasks.")); host.appendChild(m); return; }
+
+    const keyOf = state.group === "milestone" ? (t) => t.area === "shipped" ? "shipped" : t.milestone : (t) => t.area;
+    const order = state.group === "milestone" ? ["M1", "M2", "M3", "shipped"] : AREAS.map((a) => a[0]);
+    const buckets = new Map();
+    for (const t of ts) { const k = keyOf(t); if (!buckets.has(k)) buckets.set(k, []); buckets.get(k).push(t); }
+
+    for (const k of order) {
+      const list = buckets.get(k); if (!list) continue;
+      const meta = state.group === "milestone" ? (k === "shipped" ? { title: "Shipped in v1", sub: "Built and verified in this codebase" } : { title: MILESTONES[k].label, sub: MILESTONES[k].sub }) : AREA[k];
+      const all = state.tasks.filter((t) => keyOf(t) === k && (state.owner === "all" || t.owner === state.owner));
+      const d = all.filter((t) => t.status === "done").length;
+      const card = el("section", "card group");
+      const head = el("div", "group-head");
+      const ht = el("div"); ht.append(el("h3", null, meta?.title ?? k), el("p", null, meta?.sub ?? ""));
+      const mini = el("div", "mini num"); const tr = el("div", "track"); const bar = el("i"); bar.style.width = pct(d, all.length) + "%"; tr.appendChild(bar);
+      mini.append(tr, document.createTextNode(`${d}/${all.length}`));
+      head.append(ht, mini); card.appendChild(head);
+      for (const t of list) card.appendChild(taskNode(t));
+      host.appendChild(card);
+    }
+  }
+
+  function taskNode(t) {
+    const wrap = el("div", "task"); wrap.dataset.id = t.id; wrap.dataset.status = t.status; wrap.dataset.open = String(state.open.has(t.id));
+    const row = el("div", "task-row");
+
+    const sc = el("div", "status-cell");
+    const sel = el("select", "status"); sel.id = "st-" + t.id; sel.dataset.v = t.status; sel.setAttribute("aria-label", "Status of " + t.title);
+    for (const s of STATUS) { const o = el("option", null, s.label); o.value = s.v; if (s.v === t.status) o.selected = true; sel.appendChild(o); }
+    sel.disabled = state.canWrite === false || !state.db;
+    const sw = el("span", "status-wrap"); sw.dataset.v = t.status;
+    sel.addEventListener("change", () => { sw.dataset.v = sel.value; changeStatus(t, sel.value, sel); });
+    sw.appendChild(sel); sc.appendChild(sw);
+
+    const main = el("div", "t-main");
+    const title = el("button", "t-title", t.title); title.type = "button"; title.setAttribute("aria-expanded", String(state.open.has(t.id)));
+    title.addEventListener("click", () => toggle(t.id, wrap));
+    const meta = el("div", "t-meta");
+    meta.appendChild(el("span", "tag " + String(t.priority).toLowerCase(), t.priority));
+    if (t.area !== "shipped") meta.appendChild(el("span", "tag", t.milestone));
+    if (t.effort) meta.appendChild(el("span", "tag", { S: "Small", M: "Medium", L: "Large" }[t.effort] ?? t.effort));
+    if (t.kind) meta.appendChild(el("span", "tag kind", t.kind));
+    if (t.decision && t.status !== "done") meta.appendChild(el("span", "tag decision", "Needs a decision"));
+    if (t.status === "done" && t.completedAt) meta.appendChild(el("span", "tag", "Done " + fmtDate(t.completedAt)));
+    main.append(title, meta);
+
+    const side = el("div", "t-side");
+    const who = el("span", "who " + t.owner, OWNERS[t.owner]?.initial ?? "?"); who.title = OWNERS[t.owner]?.name ?? "";
+    const ex = el("button", "expand"); ex.type = "button"; ex.setAttribute("aria-label", (state.open.has(t.id) ? "Hide" : "Show") + " details for " + t.title);
+    ex.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>';
+    ex.addEventListener("click", () => toggle(t.id, wrap));
+    side.append(who, ex);
+
+    row.append(sc, main, side);
+    wrap.appendChild(row);
+    if (state.open.has(t.id)) wrap.appendChild(detailNode(t));
+    return wrap;
+  }
+
+  function detailNode(t) {
+    const d = el("div", "t-detail");
+    if (t.detail) d.appendChild(el("p", null, t.detail));
+    const kv = el("dl", "kv");
+    const add = (k, v, mono) => { if (!v) return; kv.append(el("dt", null, k)); const dd = el("dd", mono ? "mono" : null, v); kv.appendChild(dd); };
+    add("Area", AREA[t.area]?.title);
+    add("Owner", `${OWNERS[t.owner]?.name ?? ""}, ${OWNERS[t.owner]?.role ?? ""}`);
+    add("Evidence", t.evidence, true);
+    add("Decision", t.decision);
+    if (Array.isArray(t.dependsOn) && t.dependsOn.length) add("Depends on", t.dependsOn.map((id) => state.tasks.find((x) => x.id === id)?.title ?? id).join("; "));
+    add("Updated", fmtDate(t.updatedAt));
+    d.appendChild(kv);
+    if (state.db && state.canWrite !== false && t.area !== "shipped") {
+      const op = el("label", "owner-pick"); op.setAttribute("for", "ow-" + t.id); op.textContent = "Reassign to ";
+      const s = el("select"); s.id = "ow-" + t.id;
+      for (const [k, o] of Object.entries(OWNERS)) { const opt = el("option", null, o.name); opt.value = k; if (k === t.owner) opt.selected = true; s.appendChild(opt); }
+      s.addEventListener("change", () => changeOwner(t, s.value));
+      op.appendChild(s); d.appendChild(op);
+    }
+    return d;
+  }
+
+  function toggle(id, node) {
+    const open = !state.open.has(id);
+    open ? state.open.add(id) : state.open.delete(id);
+    node.dataset.open = String(open);
+    node.querySelector(".t-title").setAttribute("aria-expanded", String(open));
+    const t = state.tasks.find((x) => x.id === id);
+    const old = node.querySelector(".t-detail"); if (old) old.remove();
+    if (open && t) node.appendChild(detailNode(t));
+  }
+
+  // ----------------------------------------------------------------- writes
+  async function changeStatus(t, next, sel) {
+    const prev = t.status; if (prev === next) return;
+    sel.dataset.v = next;
+    const now = new Date().toISOString();
+    const body = { status: next, updatedAt: now, completedAt: next === "done" ? now : null };
+    try {
+      await state.db.doc("tasks/" + t.id).update(body);
+      const by = state.me || null;
+      await state.db.collection("log").add({ at: now, taskId: t.id, title: t.title, from: prev, to: next, by: "team", userId: by });
+      toast(next === "done" ? "Marked done" : "Status updated");
+    } catch (e) {
+      sel.value = prev; sel.dataset.v = prev; if (sel.parentElement) sel.parentElement.dataset.v = prev;
+      if (e && e.code === "invalid_argument") { state.canWrite = false; toast("You can view this tracker but not change it."); renderBoard(); }
+      else toast("Couldn't save. Check your connection and try again.");
+    }
+  }
+  async function changeOwner(t, next) {
+    if (next === t.owner) return;
+    try { await state.db.doc("tasks/" + t.id).update({ owner: next, updatedAt: new Date().toISOString() }); toast("Reassigned to " + OWNERS[next].name); }
+    catch { toast("Couldn't reassign. Try again."); }
+  }
+
+  // ------------------------------------------------------------ side panels
+  function renderModules() {
+    const host = $("modules"); host.replaceChildren();
+    if (!state.modules.length) { host.appendChild(el("p", "sub", state.db ? "The platform map appears once Claude writes it." : "Not available in this view.")); return; }
+    for (const layer of LAYERS) {
+      const ms = state.modules.filter((m) => m.layer === layer).sort((a, b) => (a.order ?? 99) - (b.order ?? 99));
+      if (!ms.length) continue;
+      const box = el("div", "layer"); box.appendChild(el("h4", null, layer));
+      for (const m of ms) {
+        const r = el("div", "mod");
+        r.appendChild(el("i", "dot " + m.state));
+        const t = el("div"); t.append(el("b", null, m.name), el("small", null, m.note || ""));
+        r.append(t, el("span", "st " + m.state, m.state === "dummy" ? "stand-in" : m.state));
+        box.appendChild(r);
+      }
+      host.appendChild(box);
+    }
+  }
+
+  const STATUS_LABEL = Object.fromEntries(STATUS.map((s) => [s.v, s.label]));
+  async function renderFeed() {
+    const host = $("feed"); host.replaceChildren();
+    const items = [...state.log].sort((a, b) => String(b.at).localeCompare(String(a.at))).slice(0, 60);
+    if (!items.length) { host.appendChild(el("p", "sub", "No changes yet.")); return; }
+    let names = {};
+    const ids = [...new Set(items.map((i) => i.userId).filter(Boolean))];
+    if (ids.length && state.user) { try { names = await state.user.profiles(ids); } catch {} }
+    for (const i of items) {
+      const ev = el("div", "ev");
+      const claude = i.by === "claude";
+      ev.appendChild(el("div", "ic" + (claude ? " claude" : ""), claude ? "C" : ((names[i.userId]?.name || "T")[0] || "T").toUpperCase()));
+      const body = el("div");
+      const who = claude ? "Claude" : (names[i.userId]?.name || "Someone on the team");
+      const p = el("p"); p.textContent = `${who} moved "${i.title}" ${i.from ? "from " + (STATUS_LABEL[i.from] ?? i.from) + " " : ""}to ${STATUS_LABEL[i.to] ?? i.to}.`;
+      body.appendChild(p);
+      if (i.note) body.appendChild(el("p", null, i.note));
+      body.appendChild(el("time", null, fmtDate(i.at)));
+      ev.appendChild(body); host.appendChild(ev);
+    }
+  }
+
+  function renderMeta() {
+    const m = state.meta;
+    $("audit-line").textContent = m ? `Audited ${m.auditedOn || ""} · ${m.branch || ""} @ ${m.commit || ""}` : "Audit: not loaded";
+  }
+
+  function renderAll() { renderSummary(); renderControls(); renderBoard(); renderModules(); renderFeed(); renderMeta(); }
+
+  // ----------------------------------------------------------------- wiring
+  $("q").addEventListener("input", (e) => { state.q = e.target.value; renderBoard(); });
+  $("hide-done").checked = state.hideDone;
+  $("hide-done").addEventListener("change", (e) => { state.hideDone = e.target.checked; save("ct.hideDone", state.hideDone ? "1" : "0"); renderBoard(); });
+  for (const b of $("group-seg").querySelectorAll("button")) b.addEventListener("click", () => { state.group = b.dataset.g; save("ct.group", state.group); renderControls(); renderBoard(); });
+
+  renderAll();
+
+  async function boot() {
+    const c = window.claude;
+    if (!c || typeof c.use !== "function") { setSync("off", "Offline view"); renderAll(); return; }
+    const [db, user] = await Promise.all([c.use("db"), c.use("user")]);
+    state.db = db; state.user = user;
+    if (!db) { setSync("off", "Read only, no data"); renderAll(); return; }
+    if (user) {
+      try { state.me = await user.id(); } catch {}
+      try { const w = await user.can("data.write"); state.canWrite = w === null ? null : w; } catch {}
+    }
+    setSync("wait", "Syncing");
+    let first = 3;
+    const ready = () => { if (--first <= 0) setSync("live", state.canWrite === false ? "Live, view only" : "Live"); };
+    const err = () => setSync("off", "Sync paused, reload to retry");
+    let once1 = true, once2 = true, once3 = true;
+    db.collection("tasks").onSnapshot((s) => { state.tasks = s.docs.map((d) => ({ id: d.id, ...d.data() })); renderAll(); if (once1) { once1 = false; ready(); } }, err);
+    db.collection("modules").onSnapshot((s) => { state.modules = s.docs.map((d) => ({ id: d.id, ...d.data() })); renderModules(); if (once2) { once2 = false; ready(); } }, err);
+    db.collection("log").orderBy("at", "desc").limit(80).onSnapshot((s) => { state.log = s.docs.map((d) => ({ id: d.id, ...d.data() })); renderFeed(); if (once3) { once3 = false; ready(); } }, err);
+    db.doc("meta/audit").onSnapshot((s) => { state.meta = s.exists ? s.data() : null; renderMeta(); }, () => {});
+  }
+  boot();
+})();
+</script>
