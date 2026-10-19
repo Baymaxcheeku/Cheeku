@@ -31,8 +31,10 @@ with checks (step, looks_for, applied) as (values
     and exists (select 1 from pg_proc where proname = 'home_signals')),
   ('0033 step 3 of 4', 'home_state()',
     exists (select 1 from pg_proc where proname = 'home_state')),
-  ('0033 step 4 of 4', 'backfill of existing families (safe to run again)',
-    null::boolean),
+  ('0033 step 4 of 4', 'no family left on starter that has already earned a later stage',
+    not exists (select 1 from families f where f.home_stage = 'starter'
+      and home_decide(home_signals(f.owner_id, false),
+            coalesce((select value from app_config where key = 'home_stage'), '{"unlock_items": 1}'::jsonb)) ->> 'stage' <> 'starter')),
   ('0034 step 1 of 2', 'daily_logs table and its triggers',
     to_regclass('public.daily_logs') is not null
     and exists (select 1 from pg_trigger where tgname = 'daily_logs_cap_trigger')),
@@ -40,6 +42,6 @@ with checks (step, looks_for, applied) as (values
     exists (select 1 from information_schema.columns where table_schema = 'public' and table_name = 'profiles' and column_name = 'daily_prefs'))
 )
 select step, looks_for,
-       case when applied is null then 'run it if 3 of 4 just ran' when applied then 'yes' else 'NO' end as applied
+       case when applied then 'yes' else 'NO' end as applied
 from checks
 order by step;
