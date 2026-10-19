@@ -43,10 +43,10 @@ Phase `currentPhase` lives on `meta/deal`; move it when a phase starts.
 
 | id | phase | owner | priority | title | launch tracker |
 |---|---|---|---|---|---|
-| `pre-gateway` | p0 | Athar | P0 | Server-side partner gateway, so the app never calls LabStack directly | `int-lab-partner`, `int-services` |
+| `pre-gateway` | p0 | Athar | P0 | Server-side partner gateway, so the app never calls LabStack directly | `int-lab-partner`, `int-services`, `ops-envs`, `ops-monitoring` |
 | `pre-orders-table` | p0 | Athar | P0 | One partner_orders table for labs, consults and medicines | `int-server-bookings` |
 | `pre-status-model` | p0 | Athar | P0 | Our canonical order status model | - |
-| `pre-webhook-receiver` | p0 | Athar | P0 | Webhook receiver: verify, de-duplicate, then pull | `sec-lab-demo` |
+| `pre-webhook-receiver` | p0 | Athar | P0 | Webhook receiver: verify, de-duplicate, then pull | `sec-lab-demo`, `loop-cron` |
 | `pre-data-minimum` | p0 | Athar | P0 | Decide the minimum data each booking sends | - |
 | `pre-flags` | p0 | Athar | P0 | Keep preview providers behind a switch; remove real brand names | `sec-listings`, `sec-sample-data` |
 | `pre-results-ingest` | p0 | Suraj | P0 | Route partner lab results into memory | `ai-ocr-pipeline`, `ai-ocr-report` |
@@ -73,12 +73,12 @@ Phase `currentPhase` lives on `meta/deal`; move it when a phase starts.
 | `con-directory` | p3 | Athar | P0 | Replace sample doctors with LabStack's directory | `int-doctors`, `sec-sample-data` |
 | `con-book` | p3 | Athar | P0 | Book, pay and confirm a consult | `int-server-bookings` |
 | `con-video` | p3 | Athar | P0 | Join the video call | - |
-| `con-instant` | p3 | Athar | P1 | Instant consult from chat | `int-doctors` |
+| `con-instant` | p3 | Athar | P1 | Instant consult from chat | `int-doctors`, `loop-chat-chips` |
 | `con-preconsult` | p3 | Athar | P1 | Send the pre-consultation note with consent | - |
 | `con-erx` | p3 | Suraj | P0 | E-prescription back into memory | `ai-rx-score` |
 | `con-guidelines` | p3 | Founder | P0 | Telemedicine Practice Guidelines check | - |
 | `ph-search` | p4 | Suraj | P1 | Medicine search by brand or salt | `ai-brand-salt` |
-| `ph-rx-check` | p4 | Athar | P0 | Prescription upload and verification | - |
+| `ph-rx-check` | p4 | Athar | P0 | Prescription upload and verification | `ai-rx-score` |
 | `ph-order` | p4 | Athar | P0 | Cart, order, delivery tracking and cancellation | `int-services` |
 | `ph-refill` | p4 | Athar | P1 | Refill reminder to one-tap reorder | `loop-meds` |
 | `ph-generics` | p4 | Suraj | P1 | Generic options shown neutrally | - |

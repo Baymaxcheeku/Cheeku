@@ -18,7 +18,7 @@ def t(id, phase, service, owner, p, title, detail, plugs="", ask="", main=(), st
 # ---------------------------------------------------------------- p0 prepare now
 t("pre-gateway", "p0", "common", "athar", "P0", "Server-side partner gateway, so the app never calls LabStack directly",
   "One Edge Function (partner-gateway) owns every call to LabStack: keys stay in Supabase secrets, requests are logged without health data, retries and timeouts live in one place. The app keeps talking to our own RPCs and the MarketplaceProvider interface. Auth is the ls-api-key header on all three APIs. LabStack allows two live keys per store, so hold a current and a next key and rotate by swapping secrets; record each key's expiry and alert two weeks ahead; a 401 pauses booking with a clear message instead of failing halfway.",
-  "src/lib/services/provider.ts (MarketplaceProvider), supabase/functions/", main=["int-lab-partner", "int-services"])
+  "src/lib/services/provider.ts (MarketplaceProvider), supabase/functions/", main=["int-lab-partner", "int-services", "ops-envs", "ops-monitoring"])
 t("pre-orders-table", "p0", "common", "athar", "P0", "One partner_orders table for labs, consults and medicines",
   "Service, partner reference, our reference, member, status, amounts, slot, and the raw partner events, with RLS. Lab bookings, appointments and service requests move onto it, so caregivers and second phones see the same orders.",
   "supabase/migrations (new), lab_bookings (0027), src/lib/booking/appointments.ts, src/lib/services/requests.ts", main=["int-server-bookings"])
@@ -27,7 +27,7 @@ t("pre-status-model", "p0", "common", "athar", "P0", "Our canonical order status
   "supabase/migrations/0027 (lab_bookings.status), src/lib/services/provider.ts (RequestStatus)")
 t("pre-webhook-receiver", "p0", "common", "athar", "P0", "Webhook receiver: verify, de-duplicate, then pull",
   "A partner-webhook Edge Function that checks the signing secret we give LabStack, stores the raw event and de-duplicates it (Consult says delivery is at least once: key on requestId plus event). It then pulls the order's current state from LabStack before changing ours, because failed deliveries are retried for a while and then dropped. A scheduled sweep pulls every open order as the backstop. Pharma sends every order change; Consult sends instant consult events; Labs is not stated yet.",
-  "supabase/functions/ (new), apply_lab_status (0027)", main=["sec-lab-demo"])
+  "supabase/functions/ (new), apply_lab_status (0027)", main=["sec-lab-demo", "loop-cron"])
 t("pre-data-minimum", "p0", "common", "athar", "P0", "Decide the minimum data each booking sends",
   "Name, age band or date of birth, phone, address and slot for labs; plus the concern note for consults (only with consent); prescription image for medicines. Never records, lab values or chat unless the person shares them explicitly.",
   "src/lib/services/provider.ts (what never crosses this line), consent purpose care_bookings (0031)")
@@ -93,14 +93,14 @@ t("con-directory", "p3", "consult", "athar", "P0", "Replace sample doctors with 
   "Specialty, languages, fees, registration number and slots from the Consultation API.", "src/lib/booking/catalog.ts", main=["int-doctors", "sec-sample-data"])
 t("con-book", "p3", "consult", "athar", "P0", "Book, pay and confirm a consult", "Appointments move to the server orders table; confirmation lands in the thread and the inbox.", "src/lib/booking/appointments.ts", main=["int-server-bookings"])
 t("con-video", "p3", "consult", "athar", "P0", "Join the video call", "Video consultations are in the Consultation API. Use LabStack's room link or SDK; check whether a native SDK is needed before the next store build.", "app/appointments/*")
-t("con-instant", "p3", "consult", "athar", "P1", "Instant consult from chat", "When Cheeku's triage says a doctor should see this today, offer an instant consult in the thread. Track it with the instant consult webhooks and getInstantStatus, and fall back to a scheduled slot if no doctor picks up.", "src/lib/memory/intent.ts, src/components/chat/booking.tsx", main=["int-doctors"])
+t("con-instant", "p3", "consult", "athar", "P1", "Instant consult from chat", "When Cheeku's triage says a doctor should see this today, offer an instant consult in the thread. Track it with the instant consult webhooks and getInstantStatus, and fall back to a scheduled slot if no doctor picks up.", "src/lib/memory/intent.ts, src/components/chat/booking.tsx", main=["int-doctors", "loop-chat-chips"])
 t("con-preconsult", "p3", "consult", "athar", "P1", "Send the pre-consultation note with consent", "The note Cheeku drafts goes to the doctor only when the person agrees, and is not kept on the phone. The Consultation API has document management, so the note and any report the person picks can be attached to the appointment.", "src/lib/booking/draft.ts")
 t("con-erx", "p3", "consult", "suraj", "P0", "E-prescription back into memory", "Prescription record, ledger update, scorecard, and refill dates.", "src/lib/memory/ledger.ts", main=["ai-rx-score"])
 t("con-guidelines", "p3", "consult", "founder", "P0", "Telemedicine Practice Guidelines check", "Doctor registration shown, consent captured, prescription rules for teleconsults respected, records kept as required.")
 
 # ---------------------------------------------------------------- p4 medicines
 t("ph-search", "p4", "pharma", "suraj", "P1", "Medicine search by brand or salt", "Match what the ledger holds to LabStack's products, strength and pack size included.", "src/lib/memory/ledger.ts", main=["ai-brand-salt"])
-t("ph-rx-check", "p4", "pharma", "athar", "P0", "Prescription upload and verification", "Reuse the person's prescription records; schedule H and H1 medicines only with a valid prescription. Items LabStack flags notForSale (Schedule X, habit-forming) are never offered online.", "app/records/*")
+t("ph-rx-check", "p4", "pharma", "athar", "P0", "Prescription upload and verification", "Reuse the person's prescription records; schedule H and H1 medicines only with a valid prescription. Items LabStack flags notForSale (Schedule X, habit-forming) are never offered online.", "app/records/*", main=["ai-rx-score"])
 t("ph-order", "p4", "pharma", "athar", "P0", "Cart, order, delivery tracking and cancellation", "Get Estimate first for the chosen pharmacy; if an item is unavailable there, offer that pharmacy's alternatives (getAlternatives with lsPharmacyId) instead of failing the cart. Place Order sends only the drugMasterIds the person approved. Every order change arrives on the pharmacy webhook and shows in the thread.", "src/lib/services/*", main=["int-services"])
 t("ph-refill", "p4", "pharma", "athar", "P1", "Refill reminder to one-tap reorder", "When a strip is about to run out, reorder the same product.", "Your medicines (planned)", main=["loop-meds"])
 t("ph-generics", "p4", "pharma", "suraj", "P1", "Generic options shown neutrally", "getAlternatives gives other brands and packs of the same salt. Show them with salt, strength, pack and price, never switch without the person choosing (LabStack never substitutes on its own either), and hide notForSale items.", "GET /api/pharma/v1.0/catalog/getAlternatives")
@@ -243,6 +243,10 @@ LINKED = [
     ("ai-brand-salt", "Brand to salt resolver"),
     ("ai-rx-score", "Prescription scorecard engine"),
     ("loop-meds", "Your medicines: doses, Taken, refills"),
+    ("ops-envs", "Separate staging and production"),
+    ("ops-monitoring", "Crash and error reporting with health data scrubbed"),
+    ("loop-cron", "Scheduled jobs for the daily loop"),
+    ("loop-chat-chips", "Chat: context chips and one next-step chip"),
 ]
 
 DEAL = dict(
