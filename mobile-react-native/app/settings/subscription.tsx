@@ -106,7 +106,7 @@ const BILLING_FAQ: QA[] = [
   },
   {
     q: "What happens to my records if I downgrade?",
-    a: "Nothing is deleted. Your health file, reports and chats stay exactly where they are. On Free you simply get 5 chats a day instead of unlimited.",
+    a: `Nothing is deleted. Your health file, reports and chats stay exactly where they are. On Free you simply get ${FREE_CHAT_LIMIT} chats a day instead of unlimited.`,
   },
   {
     q: "What happens to family members if I leave Family?",
@@ -378,7 +378,7 @@ function Meter({ left }: { left: number }) {
           <View key={i} style={{ flex: 1, height: 6, borderRadius: 3, backgroundColor: i < used ? brand[100] : brand[500] }} />
         ))}
       </View>
-      <Text style={{ fontFamily: font.regular, fontSize: 12, color: ink[500], marginTop: 8 }}>A fresh 5 every day. Emergency guidance never counts.</Text>
+      <Text style={{ fontFamily: font.regular, fontSize: 12, color: ink[500], marginTop: 8 }}>A fresh {FREE_CHAT_LIMIT} every day. Emergency guidance never counts.</Text>
     </View>
   );
 }

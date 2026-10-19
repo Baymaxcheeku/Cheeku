@@ -32,6 +32,7 @@ import { Brand } from "@/components/ui/brand";
 import { Glass, GlassCircle, glass, glassShadow } from "@/components/ui/glass";
 import { Backdrop } from "@/components/ui/screen";
 import { askAboutProduct, chatQuota } from "@/lib/ai/chat";
+import { FREE_CHAT_SOFT_LINE } from "@/lib/billing/plans";
 import { promptEntriesFor } from "@/lib/ask/prompts";
 import { profileSignalsFor } from "@/lib/knowledge/queries";
 import { todayIso } from "@/lib/memory/clock";
@@ -112,6 +113,7 @@ export default function Ask() {
   const memory = useMemory(memberId);
   const thread = useThread(memberId);
   const quota = useQuery({ queryKey: ["ask-context", memberId, "quota"], queryFn: chatQuota, enabled: Boolean(memberId) });
+  const quotaLeft = quota.data?.remaining ?? null;
   const signals = useQuery({ queryKey: ["ask-context", memberId, "signals"], queryFn: () => profileSignalsFor(memberId), enabled: Boolean(memberId) });
 
   const ctx = useMemo(() => (memory.data ? buildContext(memory.data, todayIso()) : null), [memory.data]);
@@ -557,6 +559,20 @@ export default function Ask() {
                 <X size={14} color={brand[600]} />
               </Pressable>
             </View>
+          ) : null}
+          {quotaLeft !== null && quotaLeft > 0 && quotaLeft <= FREE_CHAT_SOFT_LINE ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={`${quotaLeft} free ${quotaLeft === 1 ? "chat" : "chats"} left today. See plans`}
+              onPress={() => setPaywallFor("")}
+              hitSlop={6}
+              style={{ alignSelf: "center", paddingHorizontal: 12, paddingVertical: 4 }}
+            >
+              <Text style={{ fontFamily: font.medium, fontSize: 12.5, color: ink[500] }}>
+                {quotaLeft} free {quotaLeft === 1 ? "chat" : "chats"} left today ·{" "}
+                <Text style={{ fontFamily: font.semibold, color: brand[600] }}>Unlimited with a plan</Text>
+              </Text>
+            </Pressable>
           ) : null}
           <View
             className="flex-row items-end gap-1.5 rounded-[26px] p-1.5 pl-4"

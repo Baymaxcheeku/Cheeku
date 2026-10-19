@@ -7,7 +7,8 @@ import { supabase } from "@/lib/supabase/client";
 
 import { todayIso } from "./clock";
 import type { MemoryBundle } from "./context";
-import { chatModel } from "./models";
+import { mockModel } from "./mock-model";
+import { chatModel, ModelBusy } from "./models";
 import { planTurn, type TurnPlan } from "./pipeline";
 import { BOOKING_REPLY, eventMemory, factUsage, readThreadRow, replyText, SITTING_GAP_MS, sittingFor, toTurnMemory, type BookedEvent, type ThreadMessage } from "./thread";
 import type { Fact, Tier } from "./types";
@@ -97,6 +98,7 @@ export type SendResult =
   | { ok: false; quota?: false; message: string };
 
 const QUOTA_SPENT = "You've used today's free chats. They reset tomorrow.";
+const BUSY = "That's a lot of messages in a short time. Give it a minute, then send it again.";
 
 export async function sendTurn(args: {
   text: string;
@@ -119,21 +121,33 @@ export async function sendTurn(args: {
   // The record it was asked from rides along for the model and the matcher;
   // the saved question stays in their own words.
   const about = args.about;
-  const plan = await planTurn({
-    text: about ? `About ${about.title}${about.date ? ` (${about.date})` : ""}: ${text}` : text,
-    bundle: args.bundle,
-    today: todayIso(),
-    history: args.thread.slice(-12).map((m) => ({ role: m.role, content: m.content })),
-    usage: factUsage(args.thread),
-    model: chatModel(),
-    newId: randomUUID,
-  });
+
+  /*
+   * The allowance is read BEFORE planning. With it spent, the turn is still
+   * planned (that is where an emergency is recognised, and an emergency is
+   * never refused) but on the on-device stand-in, so a refused question costs
+   * no model call. The server meter refuses it as well; this just avoids asking.
+   */
+  const quota = await chatQuota();
+  const spent = quota.remaining !== null && quota.remaining <= 0;
+  let plan: TurnPlan;
+  try {
+    plan = await planTurn({
+      text: about ? `About ${about.title}${about.date ? ` (${about.date})` : ""}: ${text}` : text,
+      bundle: args.bundle,
+      today: todayIso(),
+      history: args.thread.slice(-12).map((m) => ({ role: m.role, content: m.content })),
+      usage: factUsage(args.thread),
+      model: spent ? mockModel : chatModel(),
+      newId: randomUUID,
+    });
+  } catch (e) {
+    if (e instanceof ModelBusy) return { ok: false, message: BUSY };
+    throw e;
+  }
   const emergency = plan.status !== "answered";
 
-  if (!emergency) {
-    const quota = await chatQuota();
-    if (quota.remaining !== null && quota.remaining <= 0) return { ok: false, quota: true, message: QUOTA_SPENT };
-  }
+  if (!emergency && spent) return { ok: false, quota: true, message: QUOTA_SPENT };
 
   let conversationId = sittingFor(args.thread);
   if (!conversationId) {

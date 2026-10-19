@@ -2792,3 +2792,60 @@ run clean. Web preview screenshots of Home, the plan in every pillar, and
 each sheet. **Needs a phone:** the camera and gallery pickers, photo upload
 and thumbnails, the breathing animation, and the keyboard over the sheets.
 
+
+## Chat metering and 20 free chats a day · 2026-10-19
+
+Launch tracker tasks `rl-chat-edge` and `rl-free-20`.
+
+**The hole.** The daily allowance was spent by a trigger when the message row
+was saved, and the app calls the model before it saves. So the allowance never
+stood between an account and the model: a signed-in account could call
+`cheeku-chat` in a loop and get answers that were simply never saved, and the
+function checked nothing but the sign-in.
+
+**The fix: claim before forwarding.** `claim_model_call()` (migration 0035)
+runs as the caller, through their own JWT, so nobody can claim for someone
+else. Under a per-account advisory lock it refuses, in order: a spent free
+allowance (it reads the same counter the trigger spends), more than 6 calls a
+minute or 60 an hour, and a daily ceiling (free: the allowance plus 5 for
+answers whose save failed; paid: 300 as fair use). Otherwise it writes one
+`model_calls` row (who, when, tier, no content) and says yes. The function
+returns 429 with the reason and a `retry-after`, and nothing reaches the model.
+If the meter itself is unreachable the function answers 503 rather than make
+an unmetered call; the app already falls back to its on-device stand-in.
+
+**Two counters, on purpose.** `subscriptions.chats_used_this_month` stays the
+allowance people see: one per saved question, never for an emergency.
+`model_calls` is the meter and the base for `ai-cost-model`. Merging them
+would have meant charging at model-call time, which charges for answers that
+then fail to save.
+
+**Safety.** Emergencies never reach the model, so nothing here can delay a
+112 card. A pace refusal stops the turn with "give it a minute" only below
+contact-today; at contact-today or go-now the stand-in answers instead,
+because a careful answer now matters more than pacing.
+
+**The app.** The allowance is read before planning: when it is spent the turn
+is still planned (that is where an emergency is recognised, and an emergency
+is never refused) but on the stand-in, so a refused question costs no model
+call. `FREE_CHAT_LIMIT` is 20 and the chat shows "N free chats left today ·
+Unlimited with a plan" from 5 down. The authority for the number is now one
+row, `app_config('chat_limits')`, read by both the trigger and the claim;
+defaults inside `chat_limits()` mean a bad edit to the row cannot remove a
+limit.
+
+**Order matters.** Migration first, then redeploy `cheeku-chat`, then the app
+release. The new function before the migration answers 503 to everyone (the
+stand-in takes over); the new app before the migration says 20 while the
+trigger still refuses at 5.
+
+**Verified here:** 0035 on local Postgres, 14 checks in
+`supabase/manual/local-check/0035-chat-metering-scenarios.sql` (applied twice,
+burst refused at the 7th call in a minute, meter not writable or readable
+across accounts, free refused at 20 with the 21st save failing, an emergency
+still saved after the allowance, paid ceiling, signed-out, emptied config,
+anon); editor steps run clean; the edge function run under Node with stubbed
+services (no model call without a claim, 401 without sign-in, 503 when the
+meter is down, 429 with reason and retry-after); typecheck, lint, 406 tests
+(6 new for the adapter). **Not verified:** a deployed function against real
+Supabase, and the chat on a phone.

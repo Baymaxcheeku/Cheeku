@@ -278,35 +278,26 @@ haptics has to be seen on a simulator or a device before it counts as done.
 - **Migration 0030** (memory layer) must be applied for chat memory,
   readings, open loops, pregnancy and birth promotion. The chat still works
   before it, without remembering readings or tiers.
-- **Migration 0031** (consent and privacy) must be applied. Until then the
-  sign-up box still works and decisions land in the old `consent_log`
-  columns, but there is no re-consent gate, no write guard, no activity log
-  and no privacy requests. **Once applied, every existing user sees the
-  consent sheet once**, and new health data is refused without consent
-  (`app_flags.enforce_consent`; set it false to switch the guard off).
-- **Migration 0032** (carry over old sign-ups) must be applied with 0031. The
-  app's sign-up before 0031 made people tick a box and never saved it; 0032
-  records that tick, dated at account creation, so those accounts keep
-  uploading and chatting and see a one-tap "we've updated our terms" notice
-  once. Optional uses are not carried over and stay off.
+- **Migrations 0031 to 0034 are on production** (checked 2026-10-19 with
+  `supabase/manual/0031-0034-check.sql`, backfill included). Every existing
+  user sees the consent sheet once; `app_flags.enforce_consent` switches the
+  write guard off if needed.
+- **Migration 0035** (chat metering, 20 free chats a day) must be applied
+  BEFORE the `cheeku-chat` function is redeployed and BEFORE the app release
+  that says 20. Without it the new function answers 503 (the stand-in takes
+  over) and the trigger still refuses at 5 while the app says 20. Check with
+  `supabase/manual/0035-check.sql`. Limits are one row,
+  `app_config('chat_limits')`; `FREE_CHAT_LIMIT` mirrors `free_daily`.
 - **Legal texts are drafts.** Company name, address, grievance officer and
   emails are [placeholders] in `src/lib/legal/entity.ts`, and the documents
   show a draft banner until they are filled. A lawyer should read all four
   before launch. Any change to a text changes its hash: bump the version,
   add a `legal_documents` row in a new migration, and set `material` if
   people must agree again.
-- **Migration 0033** (Home stages) must be applied for Today to be decided
-  by the server and for steps to be kept. Before it, the app decides the stage
-  itself from documents, medicines and messages (same rule as `home_decide`)
-  and Done works for the session only. Existing families with records land on
-  Today straight away (backfill) and see "Home is now Today" once.
 - **Today's daily steps need a clinician's read.** `src/lib/home/content.ts`
   (40 habits) and the marker and condition matching in `src/lib/home/today.ts`.
   Habits only, never a medicine change; kidney flags drop the water step,
   babies get no habits, children and pregnancy get a gentle subset.
-- **Migration 0034** (daily logs) must be applied for steps, meals,
-  readings and sleep ratings to be kept. Before it they last for the
-  session, and readings still reach memory.
 - **Meal photos are not read by a model yet.** The plate is read from the
   taps (`src/lib/home/meals.ts`); `daily_logs.analysis` is reserved for the
   server's reading of the photo and the app cannot write it.
@@ -316,5 +307,5 @@ haptics has to be seen on a simulator or a device before it counts as done.
   chosen time, respecting `families.home_stage`, is the next piece.
 - **`privacy_requests` has no one working it.** Needs an admin view or an
   email to the grievance officer.
-- Rate limiting on auth and AI endpoints.
+- Rate limiting on auth (the chat model call is metered since 0035).
 - Untested: sign-out then sign-in, and a session revoked server-side.
