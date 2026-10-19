@@ -77,6 +77,15 @@ individual commit messages survive. In the same change, keep `PLAN.md`
 (Open/Rules), `../PROGRESS.md` (the reasoning) and the trackers current; a PR
 that changes behaviour without them is not finished.
 
+# Words follow the content system
+
+Any string a person reads on a card, in a notification or in a small line
+around them follows `../docs/content-system.md`: who Cheeku is, the five rules,
+the slot limits (card title 30, card line 60, notification title 40 and body
+90), the notification formulas and the never-list. `src/lib/content/copy.test.ts`
+enforces the limits on the plan tasks, chips, milestones, the unlock card and
+the latest notification migration; extend it when you add a new kind of copy.
+
 # How a merge reaches people
 
 - **Web (Vercel).** Two Vercel projects build from this repo: `cheeku-ai` (the

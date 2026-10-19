@@ -17,6 +17,7 @@ import {
   Utensils,
   type LucideIcon,
 } from "lucide-react-native";
+import { useState } from "react";
 import { Image, Pressable, Text, View } from "react-native";
 
 import { MealReadCard } from "@/components/today/sheets";
@@ -96,6 +97,7 @@ export function TaskCard({
 }) {
   const router = useRouter();
   const qc = useQueryClient();
+  const [showMore, setShowMore] = useState(false);
   const done = task.status === "done";
   const Icon = task.due ? CalendarClock : (KIND_ICON[task.kind] ?? PILLAR_ICON[task.pillar]);
   const proof = task.logs.some((l) => l.photoPath);
@@ -133,9 +135,17 @@ export function TaskCard({
         </View>
       ) : null}
       {!done || task.kind === "meal" ? (
-        <Text numberOfLines={3} style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 18.5, color: ink[700], marginTop: 8 }}>
+        <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 18.5, color: ink[700], marginTop: task.reason ? 4 : 8 }}>
           {task.why}
+          {task.more ? (
+            <Text accessibilityRole="button" onPress={() => setShowMore((v) => !v)} style={{ fontFamily: font.semibold, color: brand[600] }}>
+              {showMore ? "  Less" : "  Why this?"}
+            </Text>
+          ) : null}
         </Text>
+      ) : null}
+      {showMore && task.more ? (
+        <Text style={{ fontFamily: font.regular, fontSize: 12.5, lineHeight: 18, color: ink[500], marginTop: 6 }}>{task.more}</Text>
       ) : null}
 
       {/* steps: progress against today's target, and the proof */}

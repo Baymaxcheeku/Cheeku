@@ -69,8 +69,8 @@ export function areasFromConditions(conditions: readonly string[]): Area[] {
 }
 
 /**
- * Why an area is in someone's plan, in their words: "Your HbA1c came back
- * high (6.1 %)" or "For your hypertension". Readings win over conditions.
+ * Why an area is in someone's plan, in their words: "Your HbA1c is high
+ * (6.1%)" or "For your hypertension". Readings win over conditions.
  */
 export function areaReasons(series: ReadonlyMap<string, Series>, conditions: readonly string[]): Map<Area, string> {
   const out = new Map<Area, string>();
@@ -82,7 +82,7 @@ export function areaReasons(series: ReadonlyMap<string, Series>, conditions: rea
       if (out.has(m.area) || !m.key.test(id)) continue;
       if (m.when === "any" || f.includes(m.when) || (m.when === "high" && f === "critical")) {
         const value = `${s.latest.value}${s.unit ? (s.unit === "%" ? "%" : ` ${s.unit}`) : ""}`;
-        out.set(m.area, `Your ${s.name} came back ${f === "critical" ? "high" : f} (${value})`);
+        out.set(m.area, `Your ${s.name} is ${f === "critical" ? "high" : f} (${value})`);
       }
     }
   }

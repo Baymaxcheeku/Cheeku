@@ -288,6 +288,11 @@ haptics has to be seen on a simulator or a device before it counts as done.
   over) and the trigger still refuses at 5 while the app says 20. Check with
   `supabase/manual/0035-check.sql`. Limits are one row,
   `app_config('chat_limits')`; `FREE_CHAT_LIMIT` mirrors `free_daily`.
+- **Migration 0036** (notification wording, content system) must be applied
+  for the new inbox and push copy, and to fix "You get 5 chats a day" on
+  downgrade. Needs 0035. Steps `supabase/manual/0036-step-1-of-5.sql` to
+  `5-of-5`, then `0036-check.sql`. Until then the old wording shows; nothing
+  breaks.
 - **Legal texts are drafts.** Company name, address, grievance officer and
   emails are [placeholders] in `src/lib/legal/entity.ts`, and the documents
   show a draft banner until they are filled. A lawyer should read all four

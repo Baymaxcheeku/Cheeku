@@ -135,7 +135,7 @@ export function StepsSheet({ open, profileId, task, target, onClose }: { open: b
         <Text style={{ fontFamily: font.regular, fontSize: 12.5, color: ink[500], marginTop: 8 }}>So far today: {task.progress.value.toLocaleString("en-IN")}. Log the latest count; the highest one counts.</Text>
       ) : null}
       <View className="mt-4">
-        <PhotoPicker uri={photo} onPick={setPhoto} label="Add a screenshot as proof" hint="From your watch, fitness band or phone's health app. Until Cheeku connects to them directly, this is how the count is checked." />
+        <PhotoPicker uri={photo} onPick={setPhoto} label="Add a screenshot as proof" hint="A screenshot from your watch, band or phone's health app." />
       </View>
       <ErrorLine text={error} />
       <PillButton style={{ marginTop: 16 }} loading={busy} onPress={() => void save()}>
@@ -217,7 +217,7 @@ export function MealSheet({ open, profileId, task, areas, veg, onClose }: { open
   }
 
   return (
-    <Sheet open={open} title={task.title} line="Snap the plate, then tap what's on it. Cheeku reads it against your own numbers." onClose={onClose}>
+    <Sheet open={open} title={task.title} line="Snap the plate, tap what's on it." onClose={onClose}>
       <PhotoPicker uri={photo} onPick={setPhoto} label="Photo of the plate" hint="Everything you're eating or drinking. One photo is enough." />
       {GROUPS.map((g) => (
         <View key={g.key} className="mt-4">

@@ -2849,3 +2849,45 @@ services (no model call without a claim, 401 without sign-in, 503 when the
 meter is down, 429 with reason and retry-after); typecheck, lint, 406 tests
 (6 new for the adapter). **Not verified:** a deployed function against real
 Supabase, and the chat on a phone.
+
+## A content system for cards and notifications · 2026-10-19
+
+Asked for: the Today step card felt crowded ("Today's medicines, taken /
+Tick it once every dose for today is in. Missed doses are the commonest
+reason treatment seems not to work."), and a system so every card and
+notification is short, human and engaging.
+
+**The system** is `docs/content-system.md`: who Cheeku is (the friend in the
+family who knows health), five rules (one idea per card; action first, payoff
+second; specific beats general; their reason beats ours; cut until it hurts),
+hard limits per slot, notification formulas by kind (news, nudge, attention,
+win, account) and a never-list (shame, promises, medicine advice, "AI", em
+dashes). Fun is earned: playful on habits and wins, plain on results.
+
+**The split.** Every plan task now has `title` (the action, 30 characters),
+`why` (the payoff, one line, 60) and `more` (the science, 200). The card shows
+the first two; the plan shows a "Why this?" link that opens `more`. Nothing
+that was true was thrown away, it moved one tap deeper.
+
+**The card.** No eyebrow ("TODAY'S STEP" repeated the screen title), no filler
+"Today" chip (minutes only when there are some), "For Papa" as a chip when it
+is someone else's step, at most two short lines under the title, and a smaller
+mascot on due cards so it no longer sits behind the buttons. The medicines
+reason is one name and a count ("Atorvastatin 10 and 1 more"); two names ran
+long and cut "Vitamin D3" to "Vitamin".
+
+**Notifications.** Migration 0036 redefines the nine notification functions
+with only their wording changed (same logic, dedupe keys and routes). It also
+fixes a real bug: going back to Free said "You get 5 chats a day", wrong since
+0035; it now reads the number from `chat_limits()`.
+
+**Enforced.** `src/lib/content/copy.test.ts` checks every plan task, chip,
+milestone, the unlock card and every notification in the latest migration
+against the limits and the never-list. Pointed at the old 0024 wording it
+finds two bodies over the limit, so it catches what it should.
+
+**Verified here:** typecheck, lint, 411 tests (5 new); 0036 applied twice on
+local Postgres and every rewritten notification fired once
+(`supabase/manual/local-check/0036-notification-copy-scenarios.sql`; longest
+title 37, longest body 85); editor steps run clean. Web preview screenshots of
+Home and the plan. **Needs a phone:** the card on a small screen.

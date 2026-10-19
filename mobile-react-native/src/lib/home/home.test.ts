@@ -133,13 +133,13 @@ describe("buildPlan", () => {
     const p = plan({ series: new Map([["bp_systolic", series("bp_systolic", "high", "BP systolic")]]), today: "2026-10-14" });
     const bp = p.tasks.find((t) => t.key === "reading:bp");
     expect(bp).toMatchObject({ personal: true, kind: "reading" });
-    expect(bp?.reason).toMatch(/BP systolic came back high/);
+    expect(bp?.reason).toMatch(/Your BP systolic is high/);
     expect(p.tasks.filter((t) => t.personal && t.kind === "habit" && t.area === "bp").length).toBeGreaterThan(0);
   });
 
   it("names the medicines behind the medicines task", () => {
     const p = plan({ ledger: [{ name: "Telma 40", status: "active" }, { name: "Metformin 500", status: "active" }] });
-    expect(p.tasks.find((t) => t.key === "meds_taken")?.reason).toBe("You take Telma and Metformin");
+    expect(p.tasks.find((t) => t.key === "meds_taken")?.reason).toBe("Telma 40 and 1 more");
   });
 
   it("caps personal habits at four", () => {
@@ -237,7 +237,7 @@ describe("stepsTarget", () => {
   it("ramps from where the week actually is", () => {
     const t = stepsTarget({ ageYears: 40, pregnant: false, prefs: {}, recent: [4000, 5000, 4500] });
     expect(t).toMatchObject({ goal: 10000, target: 5000, ramping: true });
-    expect(t.line).toMatch(/Building up to 10,000/);
+    expect(t.line).toBe("5,000 today, on the way to 10,000.");
   });
 });
 
