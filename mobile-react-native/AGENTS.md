@@ -77,6 +77,27 @@ individual commit messages survive. In the same change, keep `PLAN.md`
 (Open/Rules), `../PROGRESS.md` (the reasoning) and the trackers current; a PR
 that changes behaviour without them is not finished.
 
+# How a merge reaches people
+
+- **Web (Vercel).** Two Vercel projects build from this repo: `cheeku-ai` (the
+  repo root) and `cheeku-ai-mobile` (`mobile-react-native`, the Expo web
+  export). Every push to a branch makes a **Preview**; a push to `main` makes
+  **Production** (`cheeku-ai-mobile.vercel.app`). Nothing else is needed.
+- **Vercel builds a commit once.** If the same commit lands on a branch and on
+  `main` at once, the branch can win and `main` gets no Production build. So
+  after a PR is merged, do NOT push the working branch at `main`'s merge commit
+  until `main`'s Production deployment shows Ready (this happened with PR #31,
+  2026-10-19). Starting the next branch from the first NEW commit is fine.
+  If it happens anyway: Vercel, project, Deployments, the "..." menu, Create
+  Deployment from `main`; or merge the next PR.
+- **Database and Edge Functions** are not deployed by a merge: migrations are
+  applied in the Supabase SQL editor (`supabase/manual/*-step-*.sql`, then the
+  matching `*-check.sql`), functions from the dashboard or
+  `supabase functions deploy <name>`. The PR body says which, in order.
+- **Native app.** `expo-updates` is not installed, so an installed build never
+  changes by itself: run from a computer, `git pull` on `main` and
+  `npx expo start -c`; an installed build needs a new `eas build`.
+
 # Launch tracker: update it when work ships
 
 The team tracks launch work in a live page:
