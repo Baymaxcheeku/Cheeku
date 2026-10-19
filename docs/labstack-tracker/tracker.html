@@ -78,15 +78,17 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 1.1px; text-transform: uppercase; color: var(--partner); }
 
 /* Agreement + phases */
-.top { display: grid; grid-template-columns: 1fr 2fr; gap: 16px; }
-.deal { padding: 20px; display: grid; gap: 12px; align-content: start; }
+.top { display: grid; grid-template-columns: 1fr; gap: 16px; }
+.deal { padding: 22px 24px; display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 12px 40px; align-items: start; }
+.deal-lead { display: grid; gap: 12px; align-content: start; }
+.deal .facts { padding-top: 26px; }
 .deal h1 { margin: 0; font-size: 20px; line-height: 1.25; letter-spacing: -.3px; text-wrap: balance; }
 .deal p { margin: 0; color: var(--ink-2); font-size: 13.5px; max-width: 60ch; }
 .facts { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 6px 12px; font-size: 12.5px; }
 .facts dt { color: var(--muted); }
 .facts dd { margin: 0; color: var(--ink); font-weight: 500; }
-.phases { padding: 20px; display: grid; gap: 14px; grid-template-rows: auto 1fr; }
-.rail { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.phases { padding: 20px; display: grid; gap: 14px; }
+.rail { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 8px; }
 .ph { border: 1px solid var(--line); border-radius: 14px; padding: 12px; display: flex; flex-direction: column; align-items: stretch; gap: 6px; background: var(--surface); cursor: pointer; text-align: left; font: inherit; color: inherit; }
 .ph .ph-foot { margin-top: auto; display: grid; gap: 6px; padding-top: 8px; }
 .ph .ph-counts { display: flex; flex-wrap: wrap; gap: 4px; }
@@ -176,11 +178,13 @@ th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacin
 td { padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
 tr:last-child td { border-bottom: 0; }
 td .cap { font-weight: 500; color: var(--ink); }
+th:first-child { width: 30%; } th:nth-child(2) { width: 20%; } th:last-child { width: 130px; }
 td small { display: block; color: var(--muted); font-size: 12px; }
 .ep { font-family: var(--font-mono); font-size: 12px; }
 .ep.unknown { color: var(--muted); font-family: var(--font-ui); font-style: italic; }
 .api-state { appearance: none; -webkit-appearance: none; border: 1px solid var(--line); border-radius: 8px; padding: 3px 8px; font-size: 12px; font-weight: 600; background: var(--surface-2); cursor: pointer; }
 .api-state[data-v="confirm"] { color: var(--muted); }
+.api-state[data-v="overview"] { color: var(--partner); background: transparent; border: 1px dashed var(--partner); }
 .api-state[data-v="documented"] { color: var(--p1); background: var(--p1-bg); border-color: transparent; }
 .api-state[data-v="built"] { color: var(--doing); background: var(--doing-bg); border-color: transparent; }
 .api-state[data-v="tested"] { color: var(--partner); background: var(--partner-soft); border-color: transparent; }
@@ -223,7 +227,8 @@ td small { display: block; color: var(--muted); font-size: 12px; }
 .foot { color: var(--muted); font-size: 12px; text-align: center; }
 
 @media (max-width: 1080px) {
-  .top { grid-template-columns: 1fr; }
+  .deal { grid-template-columns: 1fr; }
+  .deal .facts { padding-top: 4px; }
   .rail { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   .main { grid-template-columns: 1fr; }
   .side { position: static; }
@@ -252,9 +257,11 @@ td small { display: block; color: var(--muted); font-size: 12px; }
 <main class="wrap">
   <section class="top">
     <div class="card deal">
-      <div class="eyebrow">Where the partnership stands</div>
-      <h1 id="deal-title">Loading the agreement</h1>
-      <p id="deal-body"></p>
+      <div class="deal-lead">
+        <div class="eyebrow">Where the partnership stands</div>
+        <h1 id="deal-title">Loading the agreement</h1>
+        <p id="deal-body"></p>
+      </div>
       <dl class="facts" id="deal-facts"></dl>
     </div>
     <div class="card phases">
@@ -294,7 +301,7 @@ td small { display: block; color: var(--muted); font-size: 12px; }
       </div>
     </aside>
   </div>
-  <p class="foot">Internal to Cheeku. Endpoint details stay marked "to confirm" until they are checked against LabStack's documentation.</p>
+  <p class="foot">Internal to Cheeku. "In overview" means LabStack's API overview lists it; an endpoint is filled only once it is read in the full docs.</p>
 </main>
 <div class="toast" id="toast" hidden></div>
 
@@ -322,7 +329,7 @@ td small { display: block; color: var(--muted); font-size: 12px; }
     common: { name: "Platform", sub: "Shared across all three" },
   };
   const STATUS = [["todo", "To do"], ["doing", "In progress"], ["blocked", "Blocked"], ["done", "Done"]];
-  const API_STATES = [["confirm", "To confirm"], ["documented", "Documented"], ["gap", "Gap"], ["built", "Built"], ["tested", "Tested"], ["live", "Live"]];
+  const API_STATES = [["confirm", "To confirm"], ["overview", "In overview"], ["documented", "Documented"], ["gap", "Gap"], ["built", "Built"], ["tested", "Tested"], ["live", "Live"]];
   const PRIO = { P0: 0, P1: 1, P2: 2 };
 
   const $ = (id) => document.getElementById(id);
@@ -378,9 +385,9 @@ td small { display: block; color: var(--muted); font-size: 12px; }
     for (const k of ["labs", "consult", "pharma"]) {
       const s = SERVICES[k];
       const ts = S.tasks.filter((t) => t.service === k); const d = ts.filter((t) => t.status === "done").length;
-      const apis = S.apis.filter((a) => a.service === k);
-      const known = apis.filter((a) => a.state !== "confirm").length;
-      const live = apis.filter((a) => a.state === "live").length;
+      const apis = S.apis.filter((a) => a.service === k).sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+      const offered = apis.filter((a) => a.state !== "confirm" && a.state !== "gap").length;
+      const known = apis.filter((a) => ["documented", "built", "tested", "live"].includes(a.state)).length;
       const c = el("div", "card svc");
       const h = el("div", "svc-head");
       const ic = el("div", "svc-ic"); ic.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${s.icon}</svg>`;
@@ -388,7 +395,7 @@ td small { display: block; color: var(--muted); font-size: 12px; }
       h.append(ic, tx);
       const st = el("div", "svc-stats");
       const stat = (n, l) => { const b = el("div"); b.append(el("b", "num", n), el("span", null, l)); return b; };
-      st.append(stat(`${d}/${ts.length}`, "Tasks done"), stat(`${known}/${apis.length}`, "APIs documented"), stat(`${live}`, "Live"));
+      st.append(stat(`${d}/${ts.length}`, "Tasks done"), stat(`${offered}/${apis.length}`, "Confirmed in their API"), stat(`${known}`, "Endpoints known"));
       const ul = el("ul");
       for (const a of apis.slice(0, 4)) ul.appendChild(el("li", null, a.capability));
       if (apis.length > 4) ul.appendChild(el("li", null, `and ${apis.length - 4} more in the API inventory`));
@@ -520,7 +527,7 @@ td small { display: block; color: var(--muted); font-size: 12px; }
       const tr = el("tr");
       const c1 = el("td"); c1.append(el("span", "cap", a.capability), el("small", null, (SERVICES[a.service]?.sub ?? "") + (a.why ? " · " + a.why : "")));
       const c2 = el("td", "mono", a.plugsInto || "");
-      const c3 = el("td"); c3.appendChild(el("span", "ep" + (a.endpoint ? "" : " unknown"), a.endpoint || "To confirm from the docs")); if (a.notes) c3.appendChild(el("small", null, a.notes));
+      const c3 = el("td"); c3.appendChild(el("span", "ep" + (a.endpoint ? "" : " unknown"), a.endpoint || (a.state === "overview" ? "Path not read yet" : "To confirm from the docs"))); if (a.notes) c3.appendChild(el("small", null, a.notes));
       const c4 = el("td");
       const s = el("select", "api-state"); s.id = "api-" + a.id; s.dataset.v = a.state; s.setAttribute("aria-label", "State of " + a.capability);
       for (const [v, l] of API_STATES) { const o = el("option", null, l); o.value = v; if (v === a.state) o.selected = true; s.appendChild(o); }

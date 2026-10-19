@@ -4,16 +4,25 @@ The live tracker is **https://claude.ai/artifact/47jpFQDfdqQLKUPdNeatV1** (priva
 
 Varun, LabStack's founder, agreed on a call to open the LabStack network (lab tests, doctor consultations, medicine delivery) to Cheeku through LabStack's APIs, once the app and the longevity use case are ready. This tracker holds what we prepare before that and what each integration phase needs.
 
-`tracker.html` is the page source and `seed.py` writes the first data set (45 tasks, 33 API capabilities, 18 questions for LabStack). The page reads everything from the artifact's database, not from this folder.
+`tracker.html` is the page source and `seed.py` writes the data set (48 tasks, 36 API capabilities, 21 questions for LabStack). The page reads everything from the artifact's database, not from this folder.
 
 ## What is in it
 
 - **Plan**: tasks in seven phases, `p0` Prepare now, `p1` Access and docs, `p2` Lab tests, `p3` Consultations, `p4` Medicines, `p5` Payments, `p6` Go-live. Owners are `athar`, `suraj`, `founder` or `labstack`.
-- **API inventory** (`apis`): one row per capability we need from LabStack. Every `endpoint` is empty and `state` is `confirm` until someone reads LabStack's docs. States: `confirm`, `documented`, `gap`, `built`, `tested`, `live`.
+- **API inventory** (`apis`): one row per capability we need from LabStack. States: `confirm` (not known), `overview` (LabStack's overview lists it, path not read yet), `documented` (endpoint known), `gap`, `built`, `tested`, `live`.
 - **Questions for LabStack** (`questions`): what to settle with Varun before the deep dive. Answers are typed into the page.
 - **Linked launch tasks** (`linked`): a mirror of the launch tracker tasks this work feeds, with a `syncedAt` time.
 
-API docs to review (blocked from the cloud sessions so far; the hosts need adding under the environment's allowed domains):
+### What the API overviews told us (19 Oct)
+
+The full docs run to about 90 pages per API and wait until the integration starts. The overviews settled these points:
+
+- **Auth** (all three APIs): an API key in the `ls-api-key` header on every call. A store can hold two live keys, so rotate before revoking; keys can carry an expiry; an expired or revoked key gets unauthorized.
+- **Labs**: availability checks, package catalog, requests (enquiries), order management, report retrieval, health camps. Webhooks not mentioned.
+- **Consultation**: speciality discovery, provider search, appointment booking, document management, video consultations, instant consults (`getInstantStatus`). Instant consult webhooks go to a URL and signing secret we give; delivery is at least once (key on `requestId` plus `event`) and is dropped after retries, so a webhook is a prompt to pull.
+- **Pharma**: serviceability, catalogue search and prices, estimates, orders, prescriptions, cancellation; every order change goes to our pharmacy webhook. `GET /api/pharma/v1.0/catalog/getAlternatives` takes `drugMasterId` (and optionally `lsPharmacyId`) and returns same-salt brands and packs; nothing is substituted automatically; `notForSale: true` marks Schedule X and habit-forming drugs.
+
+API docs (blocked from the cloud sessions so far; the hosts need adding under the environment's allowed domains):
 - https://labstack.in/solutions/api-solutions
 - Labs: https://integration.labstack.in/api-docs/labs
 - Consultation: https://integration.labstack.in/api-docs/provider
@@ -37,7 +46,7 @@ Phase `currentPhase` lives on `meta/deal`; move it when a phase starts.
 | `pre-gateway` | p0 | Athar | P0 | Server-side partner gateway, so the app never calls LabStack directly | `int-lab-partner`, `int-services` |
 | `pre-orders-table` | p0 | Athar | P0 | One partner_orders table for labs, consults and medicines | `int-server-bookings` |
 | `pre-status-model` | p0 | Athar | P0 | Our canonical order status model | - |
-| `pre-webhook-receiver` | p0 | Athar | P1 | Webhook receiver skeleton with signature check and replay | `sec-lab-demo` |
+| `pre-webhook-receiver` | p0 | Athar | P0 | Webhook receiver: verify, de-duplicate, then pull | `sec-lab-demo` |
 | `pre-data-minimum` | p0 | Athar | P0 | Decide the minimum data each booking sends | - |
 | `pre-flags` | p0 | Athar | P0 | Keep preview providers behind a switch; remove real brand names | `sec-listings`, `sec-sample-data` |
 | `pre-results-ingest` | p0 | Suraj | P0 | Route partner lab results into memory | `ai-ocr-pipeline`, `ai-ocr-report` |
@@ -58,10 +67,13 @@ Phase `currentPhase` lives on `meta/deal`; move it when a phase starts.
 | `lab-reports` | p2 | Suraj | P0 | Reports land in the right member's records | `ai-ocr-pipeline` |
 | `lab-reschedule` | p2 | Athar | P1 | Reschedule and cancel with LabStack's rules | - |
 | `lab-phlebo` | p2 | Athar | P1 | Collector details in the booking card | - |
+| `lab-enquiry` | p2 | Athar | P2 | Lab requests for anything not bookable online | - |
+| `lab-camps` | p2 | Founder | P2 | Longevity camps for housing societies and offices | - |
 | `lab-chat-card` | p2 | Athar | P1 | Chat booking card uses the live catalogue | - |
 | `con-directory` | p3 | Athar | P0 | Replace sample doctors with LabStack's directory | `int-doctors`, `sec-sample-data` |
 | `con-book` | p3 | Athar | P0 | Book, pay and confirm a consult | `int-server-bookings` |
 | `con-video` | p3 | Athar | P0 | Join the video call | - |
+| `con-instant` | p3 | Athar | P1 | Instant consult from chat | `int-doctors` |
 | `con-preconsult` | p3 | Athar | P1 | Send the pre-consultation note with consent | - |
 | `con-erx` | p3 | Suraj | P0 | E-prescription back into memory | `ai-rx-score` |
 | `con-guidelines` | p3 | Founder | P0 | Telemedicine Practice Guidelines check | - |
@@ -69,7 +81,7 @@ Phase `currentPhase` lives on `meta/deal`; move it when a phase starts.
 | `ph-rx-check` | p4 | Athar | P0 | Prescription upload and verification | - |
 | `ph-order` | p4 | Athar | P0 | Cart, order, delivery tracking and cancellation | `int-services` |
 | `ph-refill` | p4 | Athar | P1 | Refill reminder to one-tap reorder | `loop-meds` |
-| `ph-generics` | p4 | Suraj | P2 | Generic options shown neutrally | - |
+| `ph-generics` | p4 | Suraj | P1 | Generic options shown neutrally | - |
 | `pay-collect` | p5 | Athar | P0 | Collect payment for partner orders | `pay-care`, `sec-payments-pci` |
 | `pay-recon` | p5 | Athar | P0 | Daily reconciliation | - |
 | `pay-refunds` | p5 | Athar | P1 | Refunds and cancellation fees | - |
