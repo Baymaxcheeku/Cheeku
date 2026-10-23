@@ -2920,3 +2920,16 @@ tracker.html` matches the published page.
 US (ChatGPT Health, 230M weekly health askers by OpenAI's count) and India
 beside China on population, density and payment rails. All figures are the
 companies' own or UN and World Bank data, sourced on the slide.
+
+## A second AQ report folded into the research note · 2026-10-23
+
+The owner shared three tables from a separate competitive report on AQ / Ant
+Afu. They are now in `docs/research/aq-ant-afu.md`, marked "(second report)"
+and not re-checked: the fourteen service families with where Cheeku stands
+on each, Ant's model stack (DeepSeek R1/V3, Qwen and BaiLing in March 2025,
+on-premises for hospitals) mapped to our AI tasks, and a copy or
+differentiate table. The report's main point became a proposal: pick five or
+six workflows and finish them end to end before adding more. The note lists
+six for the team to confirm. One tension is written down rather than
+settled: the report would add wellness goals only after retention is proven,
+and the tracker has goal cards at P1 in M2.

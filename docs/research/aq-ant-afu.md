@@ -2,7 +2,9 @@
 
 Research note, 23 October 2026. Sources are listed at the end. Most numbers
 are Ant's own claims, repeated by the press; few are independently verified.
-Where sources disagree, both figures are given.
+Where sources disagree, both figures are given. Sections marked "(second
+report)" come from a separate competitive report the owner shared the same
+day; they were folded in as given, not re-checked here.
 
 ## 1. In one paragraph
 
@@ -77,6 +79,31 @@ flow, staged flows with clear status. The screenshot the owner shared shows a
 3D mascot ("Hello"), swipeable goal cards with emoji, a progress bar, "My
 goals" and "Check-in tasks" chips, and a composer with voice and camera.
 
+### The service families (second report)
+
+Grouping the publicly evidenced capabilities, not Ant's own list:
+
+| Service family | Publicly evidenced examples | Cheeku today |
+|---|---|---|
+| Health questions | Medical knowledge, symptom guidance, conversational follow-ups | Ask Cheeku with memory (stand-in model) |
+| Medical documents | Lab tests, scans and reports, prescriptions, histories, PDF reading | Scan, 11 record types, report reader (stand-in) |
+| Visual AI | Skin concerns, medicine packaging, skin assessment | `ai-med-box`; skin not planned |
+| Doctor services | Doctor search, specialty matching, expert AI agents, online consults | Doctors hub, partner consults (`int-doctors`) |
+| Hospital services | Appointment booking, navigation, virtual visit help | Booking in chat; no hospital navigation |
+| Family healthcare | Family member profiles, shared histories | Family plan, member switching |
+| Long-term records | Health diary, trends, report comparisons | Memory layer, series, health file |
+| Medication | Drug information, schedules, reminders, purchase links | Your medicines (`loop-meds`), pharmacy via partner |
+| Wearables | Activity, heart rate, sleep, glucose from supported devices | `int-wearables` |
+| Preventive health | Exercise, nutrition, sleep, weight and lifestyle plans | Today's action plan, five pillars |
+| Health goals | Custom tasks, check-ins, reminders, progress | `loop-goal-cards` |
+| Insurance | Insurance questions, electronic insurance code at the counter | `v2-insurance-pay` |
+| Clinical collaboration | Doctor review of selected AI guidance | `ai-clinical-signoff` (rules), not per answer |
+| Doctor-facing AI | Pre-visit intake, follow-up summaries, literature search | Pre-consult summary; doctor side is `v2-doctor-twins` |
+
+The report's main point, and ours: **the decision is not whether to match 100
+features but which five or six workflows Cheeku completes end to end with
+exceptional reliability.** See "The five or six workflows" in section 6.
+
 ### What "100+ AI services" means
 
 It is marketing language from the June 2025 launch for the set of AI tools
@@ -121,6 +148,24 @@ gynaecology, ENT and others). There is no public list of exactly 100 services.
 - **Ling / Bailing**: Ant's general LLM family (Ling, Ring), the base.
 - Ant says it does **not train base models on hospital data** (in contracts).
 - **Trace-free photo mode (无痕拍):** photos are blurred throughout processing.
+
+### Models and infrastructure (second report)
+
+In March 2025 Ant said its healthcare model was built on **DeepSeek R1/V3,
+Alibaba Qwen and its own BaiLing (Ling) foundation models**, and described
+on-premises versions for hospitals. AntAngelMed came later on Ling-flash-2.0.
+The point for us: Ant routes across several models rather than one.
+
+| Component | What Ant uses or has disclosed | What it means for Cheeku | Task |
+|---|---|---|---|
+| Foundation LLMs | BaiLing/Ling, Qwen, DeepSeek R1/V3 | Route by task instead of one model for everything | `ai-routing` |
+| Medical specialisation | Ant's healthcare model, AntAngelMed | Test medical models against general ones on Indian data | `ai-moe-eval`, `ai-model-ft` |
+| Medical VLM | Vision-language models for reports, skin, medicine images | One reader for documents and photos | `ai-ocr-report`, `ai-ocr-rx`, `ai-med-box` |
+| Speech | Speech recognition, voice interaction | Hindi and regional-language access | `v2-elder-mode` |
+| Knowledge retrieval | Medical knowledge graphs, specialised RAG, evidence retrieval | Answers that cite their source | `ai-memory-tools` |
+| Clinical agents | Physician-trained agents with review and evaluation | Doctor-specific workflows, later | `v2-doctor-twins` |
+| Privacy | Privacy-preserving processing, hospital-side deployments | Strong access control, partner deployments | `sec-photo-privacy`, `sec-dpdp` |
+| Health memory | Structured histories, long-term contextual retrieval | Core Cheeku infrastructure | `ai-memory-server` |
 
 ## 5. Growth, money and trust
 
@@ -170,6 +215,51 @@ gynaecology, ENT and others). There is no public list of exactly 100 services.
    built around the family file and alerts for parents.
 3. **India specifics.** Food, labs, brands, languages, ABHA, Telemedicine
    Practice Guidelines. Afu's model is trained for China.
+
+### Copy or differentiate (second report)
+
+Strategy, not a claim about what Cheeku has built. Status column is ours.
+
+| Capability | AQ | Recommended | Where Cheeku stands |
+|---|---|---|---|
+| Conversational AI | Strong | Match the basic UX, lead with context | Chat with memory; real model pending |
+| Document reading | Strong | Prioritise extraction reliability and provenance | Reader is a stand-in; `ai-ocr-eval` is the gate |
+| Longitudinal memory | Strong focus | **Make it the primary differentiator** | Memory layer built; server side `ai-memory-server` |
+| Family profiles | Available | Build especially for family caregivers | Family plan built; `loop-caregiver` |
+| Pre-consult brief | Doctor-side feature | Make it central to the patient and doctor link | Pre-consult flow into booking built |
+| Clinician corrections | Doctor review workflows | Explicit, auditable memory updates | A person's own corrections in chat are handled (`memory/facts.ts`); clinician edits with an audit trail are not built |
+| Appointment booking | Large ecosystem | Partner rather than rebuild | Partner gateway (`int-lab-partner`, `int-doctors`) |
+| Wellness goals | Broad offering | Add selectively after core retention is proven | See note below |
+| Indian languages | Not AQ's focus | Voice and Indian languages as an advantage | `v2-elder-mode` |
+| ABHA | China's own equivalent | Integrate with ABDM when feasible | `v2-insurance-pay` (ABHA-linked records) |
+
+**A tension to decide.** The report says add wellness goals only after core
+retention is proven; the tracker has goal cards at P1 in M2. We kept it
+because the action plan engine already exists and goal cards are a thin
+entry onto it, not a new wellness product. If the team wants to follow the
+report strictly, move `loop-goal-cards` to M3 and put the effort into the
+five or six workflows below.
+
+### The five or six workflows (proposal)
+
+The ones Cheeku should finish end to end, reliably, before adding more. A
+proposal for the team to confirm, built from what already exists:
+
+1. **Ask with memory.** A question about any family member is answered with
+   their history, and the answer says what it used.
+2. **Report in, trend out.** Photo or PDF of a lab report becomes values in
+   the memory, compared with the last one, with one next step.
+3. **Prescription and medicines.** A prescription or medicine box becomes the
+   medicine list, with the scorecard and doses.
+4. **Family file and caregiver alerts.** Each member's file is complete, and
+   a flagged value for a parent reaches the caregiver.
+5. **Pre-consult brief to booking.** Symptoms or a flagged result lead to a
+   brief and a booked lab test or doctor, and the result files back.
+6. **Today.** One daily step that comes from the person's own data.
+
+Each needs a reliability bar before launch (extraction accuracy, the
+safety floor, booking success); `ai-ocr-eval`, `ai-evals` and `qa-e2e` are
+where those bars live.
 
 ### Ideas worth taking (ranked)
 
@@ -275,4 +365,5 @@ by OpenAI's count) set beside India on population, density and payment rails.
 - Caixin on the spend: https://www.caixinglobal.com/2026-02-05/in-depth-chinas-tech-giants-burn-cash-to-try-to-dominate-ai-health-care-102411854.html
 - Pandaily on competitors: https://pandaily.com/ai-healthcare-internet-giants-20260622
 - Hello China Tech, ChatGPT Health vs Afu: https://hellochinatech.com/p/when-chatgpt-health-became-americas-afu
+- Second competitive report (owner-shared screenshots, 23 Oct 2026): service families, models and infrastructure, copy or differentiate. Ant Group March 2025 statement on DeepSeek, Qwen and BaiLing as cited there.
 - China internet diagnosis rules (NHC, 2022): https://www.nhc.gov.cn/yzygj/c100068/202203/2072f0e8988249e59d942e1b2a933916.shtml
