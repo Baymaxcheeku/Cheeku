@@ -16,6 +16,8 @@ Never mark a task done that is only built in the web preview: device verificatio
 
 ## Task ids
 
+Milestone `V2` holds ideas saved for after launch. The page shows them in their own group and leaves them out of the readiness numbers. Ideas from research go to a launch milestone only when they can ship before launch; the rest go to `V2` (see `docs/research/aq-ant-afu.md`).
+
 | id | owner | priority | milestone | title |
 |---|---|---|---|---|
 | `ops-migrations` | Athar | P0 | M1 | Apply migrations 0031 to 0034 to production |
@@ -25,6 +27,7 @@ Never mark a task done that is only built in the web preview: device verificatio
 | `ops-ci` | Athar | P1 | M1 | CI on every pull request |
 | `ops-monitoring` | Athar | P0 | M2 | Crash and error reporting with health data scrubbed |
 | `ops-backups` | Athar | P0 | M2 | Backups, point-in-time recovery and a restore drill |
+| `ops-hosting-plans` | Athar | P0 | M3 | Move web hosting and Supabase off free plans before launch |
 | `ops-rename` | Athar | P0 | M2 | Rename bundle ids from baymax before store listings |
 | `sec-delete-auth` | Athar | P0 | M1 | Account deletion must remove the sign-in itself |
 | `sec-demo-billing` | Athar | P0 | M2 | Remove the free demo upgrade before launch |
@@ -37,6 +40,7 @@ Never mark a task done that is only built in the web preview: device verificatio
 | `sec-payments-pci` | Athar | P0 | M3 | Payments without touching card data |
 | `sec-signed-urls` | Athar | P2 | M3 | Tighten signed URL lifetimes and caching |
 | `sec-pentest` | Athar | P1 | M3 | External penetration test before public launch |
+| `sec-photo-privacy` | Athar | P1 | M3 | Privacy blur before a photo is sent |
 | `rl-chat-edge` | Athar | P0 | M1 | Rate-limit and meter the chat model call on the server |
 | `rl-free-20` | Athar | P0 | M1 | Raise free chats from 5 to 20 a day |
 | `rl-uploads` | Athar | P1 | M2 | Daily upload caps and storage quota per plan |
@@ -60,6 +64,9 @@ Never mark a task done that is only built in the web preview: device verificatio
 | `loop-reading-v2` | Athar | P0 | M3 | Report reading v2 and prescription scorecard screens |
 | `loop-chat-chips` | Athar | P1 | M3 | Chat: context chips and one next-step chip |
 | `loop-onboarding` | Athar | P1 | M3 | Onboarding goals and permission asks |
+| `loop-goal-cards` | Athar | P1 | M2 | Goal cards: pick a goal, get a check-in plan |
+| `loop-consult-room` | Athar | P1 | M3 | Staged symptom check in chat |
+| `loop-challenges` | Athar | P2 | M3 | Partner check-in challenges |
 | `perf-home-rpc` | Athar | P1 | M2 | One call for Home on Today |
 | `perf-bundle` | Athar | P1 | M2 | Stop shipping the whole memory to the phone |
 | `perf-indexes` | Athar | P1 | M2 | Index review on production-sized data |
@@ -84,13 +91,19 @@ Never mark a task done that is only built in the web preview: device verificatio
 | `ai-serving` | Suraj | P0 | M2 | Inference serving in India |
 | `ai-routing` | Suraj | P1 | M3 | Model routing and token budgets |
 | `ai-rx-score` | Suraj | P0 | M3 | Prescription scorecard engine |
-| `ai-meal-vision` | Suraj | P2 | M3 | Read meal photos |
+| `ai-meal-vision` | Suraj | P1 | M3 | Read meal photos |
+| `ai-med-box` | Suraj | P1 | M3 | Medicine box photo to the medicine list |
+| `ai-moe-eval` | Suraj | P1 | M2 | Benchmark an open medical MoE against our model plan |
 | `ai-guardrails` | Suraj | P0 | M2 | Output guard on every answer |
 | `ai-evals` | Suraj | P0 | M2 | Clinical eval harness and release gate |
 | `ai-injection` | Suraj | P0 | M2 | Prompt-injection defence |
 | `ai-data-governance` | Suraj | P0 | M2 | Training data governance |
 | `ai-clinical-signoff` | Suraj | P0 | M2 | Clinical sign-off on thresholds, hard stops and symptoms |
 | `ai-cost-model` | Suraj | P1 | M2 | Cost per chat and per page read |
+| `v2-doctor-twins` | Athar | P2 | V2 | Doctor AI twins and a doctor-side app |
+| `v2-elder-mode` | Athar | P2 | V2 | Elder mode and Indian languages |
+| `v2-insurance-pay` | Athar | P2 | V2 | Pay and claim with insurance and ABHA |
+| `v2-proof-counters` | Athar | P2 | V2 | Public proof counters |
 | `done-rls` | Athar | P0 | shipped | Row-level security on all 32 tables |
 | `done-consent` | Athar | P0 | shipped | Consent ledger, re-consent gate and privacy settings |
 | `done-family` | Athar | P0 | shipped | Family members, plans and switching |

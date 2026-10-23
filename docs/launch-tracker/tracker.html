@@ -340,6 +340,8 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
     M2: { label: "M2 Closed beta", sub: "50 to 200 real families" },
     M3: { label: "M3 Public launch", sub: "Play Store and App Store" },
   };
+  // Saved for after launch. Shown on the board, kept out of every readiness number.
+  const LATER = { V2: { label: "V2 After launch", sub: "Ideas saved for the next version" } };
   const AREAS = [
     ["ops", "Launch operations", "Environments, migrations, monitoring, CI"],
     ["security", "Security and privacy", "Data, accounts, listings and DPDP"],
@@ -409,11 +411,12 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
   }
 
   function renderSummary() {
-    const all = state.tasks.filter((t) => t.area !== "shipped");
+    const all = state.tasks.filter((t) => t.area !== "shipped" && !LATER[t.milestone]);
     const done = all.filter((t) => t.status === "done").length;
     $("overall-pct").textContent = pct(done, all.length) + "%";
     const shipped = state.tasks.filter((t) => t.area === "shipped").length;
-    $("overall-sub").textContent = `${done} of ${all.length} launch tasks done` + (shipped ? `, plus ${shipped} shipped in v1` : "");
+    const later = state.tasks.filter((t) => LATER[t.milestone]).length;
+    $("overall-sub").textContent = `${done} of ${all.length} launch tasks done` + (shipped ? `, plus ${shipped} shipped in v1` : "") + (later ? `, ${later} saved for V2` : "");
 
     const ms = $("milestones"); ms.replaceChildren();
     for (const [k, m] of Object.entries(MILESTONES)) {
@@ -525,13 +528,13 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
     if (!ts.length) { const m = el("div", "card state-msg"); m.append(el("strong", null, "Nothing matches"), el("span", null, "Clear a filter or the search to see more tasks.")); host.appendChild(m); return; }
 
     const keyOf = state.group === "milestone" ? (t) => t.area === "shipped" ? "shipped" : t.milestone : (t) => t.area;
-    const order = state.group === "milestone" ? ["M1", "M2", "M3", "shipped"] : AREAS.map((a) => a[0]);
+    const order = state.group === "milestone" ? ["M1", "M2", "M3", "V2", "shipped"] : AREAS.map((a) => a[0]);
     const buckets = new Map();
     for (const t of ts) { const k = keyOf(t); if (!buckets.has(k)) buckets.set(k, []); buckets.get(k).push(t); }
 
     for (const k of order) {
       const list = buckets.get(k); if (!list) continue;
-      const meta = state.group === "milestone" ? (k === "shipped" ? { title: "Shipped in v1", sub: "Built and verified in this codebase" } : { title: MILESTONES[k].label, sub: MILESTONES[k].sub }) : AREA[k];
+      const meta = state.group === "milestone" ? (k === "shipped" ? { title: "Shipped in v1", sub: "Built and verified in this codebase" } : { title: (MILESTONES[k] ?? LATER[k]).label, sub: (MILESTONES[k] ?? LATER[k]).sub }) : AREA[k];
       const all = state.tasks.filter((t) => keyOf(t) === k && (state.owner === "all" || t.owner === state.owner));
       const d = all.filter((t) => t.status === "done").length;
       const card = el("section", "card group");

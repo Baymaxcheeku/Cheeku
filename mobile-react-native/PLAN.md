@@ -318,4 +318,9 @@ haptics has to be seen on a simulator or a device before it counts as done.
 - **`privacy_requests` has no one working it.** Needs an admin view or an
   email to the grievance officer.
 - Rate limiting on auth (the chat model call is metered since 0035).
+- **Ideas from the AQ / Ant Afu research** are in the launch tracker:
+  goal cards first (`loop-goal-cards`, M2), then food scan, device sync,
+  staged symptom check, medicine box photo, privacy blur and partner
+  challenges. Doctor twins, elder mode, insurance pay and public counters
+  wait for V2. Ranking and reasons in `../docs/research/aq-ant-afu.md`.
 - Untested: sign-out then sign-in, and a session revoked server-side.

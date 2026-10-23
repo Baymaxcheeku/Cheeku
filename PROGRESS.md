@@ -2891,3 +2891,32 @@ local Postgres and every rewritten notification fired once
 (`supabase/manual/local-check/0036-notification-copy-scenarios.sql`; longest
 title 37, longest body 85); editor steps run clean. Web preview screenshots of
 Home and the plan. **Needs a phone:** the card on a small screen.
+
+## Research ideas into the tracker, and a V2 list · 2026-10-23
+
+Asked for: take the ranked ideas from the AQ / Ant Afu research
+(`docs/research/aq-ant-afu.md`), put what we can build before launch into the
+launch tracker, keep the rest for V2, and give investors one slide on markets
+where this has already worked.
+
+**Launch work.** Goal cards come first (`loop-goal-cards`, P1, M2) because
+the action plan engine already builds the plan; the new part is picking a
+goal and two or three questions. Then the staged symptom check
+(`loop-consult-room`), privacy blur before a photo leaves the phone
+(`sec-photo-privacy`), the medicine box photo (`ai-med-box`, after the
+prescription reader and brand-to-salt), partner challenges (`loop-challenges`,
+P2, a business decision first) and a dense-or-MoE benchmark for Suraj
+(`ai-moe-eval`). `ai-meal-vision` went from P2 to P1 and `int-wearables`
+notes Indian device brands.
+
+**V2.** The tracker page has a new milestone, `V2`, shown as its own group
+and left out of the readiness numbers, so saved ideas don't make launch look
+further away than it is. Four tasks sit there: doctor twins, elder mode,
+insurance pay, public counters. The page source in `docs/launch-tracker/
+tracker.html` matches the published page.
+
+**Decks.** Both v2 decks have a "Proven markets" slide: Ant Afu in China
+(150M users, ~20M questions a day, 60% from tier-3 and smaller cities), the
+US (ChatGPT Health, 230M weekly health askers by OpenAI's count) and India
+beside China on population, density and payment rails. All figures are the
+companies' own or UN and World Bank data, sourced on the slide.
