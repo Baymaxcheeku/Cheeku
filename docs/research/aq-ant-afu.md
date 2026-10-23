@@ -204,6 +204,30 @@ gynaecology, ENT and others). There is no public list of exactly 100 services.
 10. **Monthly "health questions answered" and "families covered" counters** as
     public proof points, the way Afu publishes daily question counts.
 
+### Where each idea went (23 Oct 2026)
+
+Launch tracker, ranked by what we can build before launch:
+
+| Rank | Idea | Task | Owner | Priority | Milestone |
+|---|---|---|---|---|---|
+| 1 | Goal cards | `loop-goal-cards` | Athar | P1 | M2 |
+| 2 | AI Food Scan | `ai-meal-vision` (raised from P2) | Suraj | P1 | M3 |
+| 3 | Device sync | `int-wearables` (Indian brands noted) | Athar | P1 | M3 |
+| 4 | Staged symptom check | `loop-consult-room` | Athar | P1 | M3 |
+| 5 | Medicine box photo | `ai-med-box` (after `ai-ocr-rx`, `ai-brand-salt`) | Suraj | P1 | M3 |
+| 6 | Privacy blur | `sec-photo-privacy` | Athar | P1 | M3 |
+| 7 | Partner challenges | `loop-challenges` (decision pending, needs goal cards) | Athar | P2 | M3 |
+| AI | Dense or MoE benchmark | `ai-moe-eval` | Suraj | P1 | M2 |
+
+Saved for V2 (milestone `V2` in the tracker, not counted in launch readiness):
+`v2-doctor-twins` (doctor twins and a doctor-side app), `v2-elder-mode`
+(elder mode and Indian languages), `v2-insurance-pay` (pay and claim with
+insurance and ABHA) and `v2-proof-counters` (public proof counters).
+
+The investor side of this note is one slide, "Proven markets", in both v2
+decks: China (Ant Afu) and the US (ChatGPT Health, 230M weekly health askers
+by OpenAI's count) set beside India on population, density and payment rails.
+
 ### For the AI plan (Suraj)
 
 - AntAngelMed shows a viable recipe: **MoE with a small active parameter
