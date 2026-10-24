@@ -1,6 +1,7 @@
 import { File, Paths } from "expo-file-system";
 import * as Sharing from "expo-sharing";
 
+import { removeSignIn } from "@/lib/account/sign-in";
 import { supabase } from "@/lib/supabase/client";
 
 /*
@@ -235,7 +236,13 @@ export async function deleteAccountData(confirmation: string): Promise<DeleteRes
   // it is the record that consent was given and withdrawn, which is the thing
   // a regulator asks for. It carries no health data. privacy_requests stay
   // for the same reason: a grievance or erasure request is the record that
-  // the person's rights were asked for and answered.
+  // the person's rights were asked for and answered. Since 0037 both outlive
+  // the sign-in too.
+
+  // Last, the sign-in itself, so the same email cannot sign back in to an
+  // empty account. Only the server can do this (see sign-in.ts).
+  const signIn = await removeSignIn();
+  if (!signIn.ok) return signIn;
 
   return { ok: true, removedDocuments: paths.length };
 }
