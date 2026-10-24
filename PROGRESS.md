@@ -2933,3 +2933,41 @@ six workflows and finish them end to end before adding more. The note lists
 six for the team to confirm. One tension is written down rather than
 settled: the report would add wellness goals only after retention is proven,
 and the tracker has goal cards at P1 in M2.
+
+## Account deletion removes the sign-in · 2026-10-24
+
+Asked for: the launch tracker's `sec-delete-auth`. "Delete my account" erased
+records, files, the inbox and tokens, but left the account in `auth.users`,
+so the same email signed straight back in to an empty account. DPDP erasure
+and store review both need the sign-in gone.
+
+**Why a function.** Only the service role can delete from `auth.users`, and
+that key never ships in the app. `supabase/functions/delete-account` checks
+who is calling with Auth (never the request body), wants `confirm: "DELETE"`
+again, refuses with 409 while the caller still owns a family or a document
+row, writes one resolved `privacy_requests` erasure row, then deletes the
+user. It is idempotent: a retry after a half-finished run answers ok.
+
+**Why the 409.** Deleting the sign-in cascades every row, but not the files
+in storage those rows point at. The app's path deletes files first, then
+rows; the function will only run after that, so no file is ever orphaned.
+
+**What stays, and why a migration.** `consent_log` and `privacy_requests` are
+the proof that consent was given and that rights were asked for and answered.
+The app already kept them on purpose, but both had `on delete cascade` to
+`auth.users`, so deleting the sign-in would have taken them. Migration 0037
+drops those two foreign keys: the rows stay, keyed by an id nobody can sign in
+as, unreadable through the API (RLS). Neither holds health data.
+
+**In the app.** `src/lib/account/sign-in.ts` calls the function as the last
+step of `deleteAccountData`; on failure the screen says the records are gone
+but the sign-in is still there, and the next tap finishes. The confirm sheet
+and the help answer now say the sign-in goes too.
+
+**Verified here:** typecheck, lint, 416 tests (5 new for the call and its
+messages); 0037 applied twice on local Postgres, then a throwaway account
+deleted from `auth.users`: family and inbox gone, consent and request rows
+kept, another account sees none of them
+(`supabase/manual/local-check/0037-delete-sign-in-scenarios.sql`); the editor
+step runs clean on top. The function compiles; it has not run against a real
+project. **Not verified:** the function on Supabase, and the flow on a phone.

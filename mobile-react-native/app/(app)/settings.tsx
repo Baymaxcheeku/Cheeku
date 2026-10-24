@@ -518,8 +518,8 @@ function AccountData({ onDeleted }: { onDeleted: () => void }) {
         >
           <Text className="text-[19px] font-bold text-ink-900">Delete your account?</Text>
           <Text className="mt-2 text-[13px] leading-[19px] text-ink-700">
-            Every document, lab value, conversation and file is removed permanently. This cannot be
-            undone, and <Brand /> keeps no copy to restore from.
+            Every document, lab value, conversation and file is removed permanently, and so is your
+            sign-in. This cannot be undone, and <Brand /> keeps no copy to restore from.
           </Text>
           <Text className="mt-3 text-[12.5px] text-ink-500">
             Export your data first if you want to keep it.

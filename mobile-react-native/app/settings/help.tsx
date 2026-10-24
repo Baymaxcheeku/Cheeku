@@ -148,7 +148,7 @@ const HELP: Record<Topic, QA[]> = {
     },
     {
       q: "How do I delete my account?",
-      a: "Tap Delete my account at the very bottom of your Profile screen. It removes every record, file and message for everyone in the account and cannot be undone.",
+      a: "Tap Delete my account at the very bottom of your Profile screen. It removes every record, file and message for everyone in the account, then your sign-in, and cannot be undone.",
     },
   ],
 };
