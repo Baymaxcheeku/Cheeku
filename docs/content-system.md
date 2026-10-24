@@ -84,6 +84,21 @@ Emoji: at most one, only in Win notifications, never next to health results.
 - Em dashes. Use a full stop or a comma.
 - Jargon without a translation: "HbA1c (3-month sugar)" the first time.
 
+## Health meaning words
+
+One ladder for how a record or a value reads, on every screen (source:
+`SEVERITY_LABEL` in `mobile-react-native/src/lib/records/types.ts`):
+
+| Tier | Words | Colour |
+|---|---|---|
+| normal | In range | safe (green) |
+| borderline | Worth a look | caution (amber) |
+| high_risk | Ask your doctor | attention (orange) |
+
+Red (`danger`) is kept for "go now" and emergencies. A single value can still
+say "High" or "Low": that is its direction against the lab's range, not a
+judgement. Never "High priority", "High risk", "Borderline" or "Alert".
+
 ## Before and after
 
 | Before | After |

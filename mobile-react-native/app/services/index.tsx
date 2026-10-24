@@ -61,7 +61,7 @@ export default function ServicesHub() {
                     </View>
                     <View style={{ flex: 1 }}>
                       <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{s.title}</Text>
-                      <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 12.5, color: ink[500], marginTop: 1 }}>{s.line}</Text>
+                      <Text numberOfLines={2} style={{ fontFamily: font.regular, fontSize: 12.5, lineHeight: 17, color: ink[500], marginTop: 1 }}>{s.line}</Text>
                     </View>
                     <ChevronRight size={18} color={ink[300]} />
                   </Pressable>

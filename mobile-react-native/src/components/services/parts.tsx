@@ -183,7 +183,7 @@ export function CompactTile({ service: s, onPress }: { service: Service; onPress
         <Text numberOfLines={1} style={{ flexShrink: 1, fontFamily: font.semibold, fontSize: 14, color: ink[900] }}>{s.title}</Text>
         <StatusPill status={s.status} />
       </View>
-      <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 11.5, color: ink[500], marginTop: 2 }}>{s.line}</Text>
+      <Text numberOfLines={2} style={{ fontFamily: font.regular, fontSize: 11.5, lineHeight: 15, color: ink[500], marginTop: 2 }}>{s.line}</Text>
     </Pressable>
   );
 }

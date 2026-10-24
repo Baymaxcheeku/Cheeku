@@ -65,7 +65,7 @@ export function Reveal({ children, style, delay = 0, rise = 22 }: { children: Re
     () => scrollY.value + viewport - top.value,
     (visible) => {
       if (shown.value === 0 && visible > 60) {
-        shown.value = withDelay(delay, withTiming(1, { duration: 560, easing: Easing.bezier(0.22, 1, 0.36, 1) }));
+        shown.value = withDelay(delay, withTiming(1, { duration: 360, easing: Easing.bezier(0.22, 1, 0.36, 1) }));
       }
     },
   );

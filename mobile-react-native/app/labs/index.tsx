@@ -219,7 +219,7 @@ function PackageCard({ test, from, added, onOpen, onToggle }: { test: LabTest; f
     <Pressable accessibilityRole="button" onPress={onOpen} style={({ pressed }) => [glassShadow, { borderRadius: 26, backgroundColor: glass.fillStrong, borderWidth: 1, borderColor: glass.rim, padding: 12, flexDirection: "row", alignItems: "center", gap: 14, transform: [{ scale: pressed ? 0.99 : 1 }] }]}>
       <TestArt test={test} size={84} radius={22} />
       <View style={{ flex: 1, minWidth: 0 }}>
-        <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 16, color: ink[900] }}>{test.name}</Text>
+        <Text numberOfLines={2} style={{ fontFamily: font.semibold, fontSize: 16, lineHeight: 21, color: ink[900] }}>{test.name}</Text>
         <Text numberOfLines={2} style={{ fontFamily: font.regular, fontSize: 12.5, lineHeight: 17, color: ink[500], marginTop: 2 }}>{test.parameters} checks · {test.includes.length} tests{test.fastingHours ? ` · ${test.fastingHours}h fast` : ""}</Text>
         <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900], marginTop: 6 }}>{from !== null ? `from ${rupees(from)}` : ""}</Text>
       </View>
@@ -233,7 +233,7 @@ function TestRow({ test, first, from, added, onOpen, onToggle }: { test: LabTest
     <Pressable accessibilityRole="button" onPress={onOpen} style={({ pressed }) => ({ flexDirection: "row", alignItems: "center", gap: 12, padding: 12, borderTopWidth: first ? 0 : 1, borderTopColor: "rgba(15,16,48,0.06)", backgroundColor: pressed ? "rgba(74,42,222,0.05)" : "transparent" })}>
       <TestArt test={test} size={46} radius={14} />
       <View style={{ flex: 1, minWidth: 0 }}>
-        <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 14.5, color: ink[900] }}>{test.name}</Text>
+        <Text numberOfLines={2} style={{ fontFamily: font.semibold, fontSize: 14.5, lineHeight: 19, color: ink[900] }}>{test.name}</Text>
         <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 12.5, color: ink[500], marginTop: 1 }}>
           {test.sample}{test.fastingHours ? ` · ${test.fastingHours}h fast` : " · no fasting"}
         </Text>

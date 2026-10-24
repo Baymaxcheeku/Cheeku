@@ -3,7 +3,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { ArrowLeftRight, Check, ChevronRight, FileText, Lock, Plus, Trash2, UserCog } from "lucide-react-native";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, View } from "react-native";
-import Animated, { ZoomIn } from "react-native-reanimated";
+import Animated from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AvatarPicker } from "@/components/family/avatar-picker";
@@ -13,7 +13,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { ConfirmSheet } from "@/components/ui/confirm-sheet";
 import { Field } from "@/components/ui/field";
 import { Glass, Gradient, glass, glassShadow } from "@/components/ui/glass";
-import { useReducedMotion } from "@/components/ui/motion";
+import { ENTER_QUICK, useReducedMotion } from "@/components/ui/motion";
 import { Backdrop, PillButton, ScreenHeader } from "@/components/ui/screen";
 import { optimisticQueries } from "@/lib/optimistic";
 import { generatedAvatar } from "@/lib/profiles/avatar";
@@ -331,7 +331,7 @@ export default function Member() {
         {/* Hero. */}
         <View style={[glassShadow, { borderRadius: 30, overflow: "hidden", paddingVertical: 22, alignItems: "center" }]}>
           <Gradient from={face.background} to="#ffffff" angle="vertical" glow="#ffffff" />
-          <Animated.View key={photoShown ?? (seed || "derived")} entering={still ? undefined : ZoomIn.springify().damping(14)} style={{ borderRadius: 999, borderWidth: 4, borderColor: "#fff", opacity: member.locked ? 0.5 : 1 }}>
+          <Animated.View key={photoShown ?? (seed || "derived")} entering={still ? undefined : ENTER_QUICK} style={{ borderRadius: 999, borderWidth: 4, borderColor: "#fff", opacity: member.locked ? 0.5 : 1 }}>
             <Avatar svg={face.svg} image={face.image} photo={photoShown} background={face.background} size={96} />
           </Animated.View>
           <Text style={{ fontFamily: font.semibold, fontSize: 22, letterSpacing: -0.5, color: ink[900], marginTop: 12 }}>{member.name}</Text>

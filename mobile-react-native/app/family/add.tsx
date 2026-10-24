@@ -3,7 +3,7 @@ import { useRouter } from "expo-router";
 import { ArrowRight, Camera, Check, FileText, HeartPulse, Lock, TriangleAlert } from "lucide-react-native";
 import { useState } from "react";
 import { ActivityIndicator, Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, View } from "react-native";
-import Animated, { FadeIn, FadeInRight, FadeOutLeft, ZoomIn } from "react-native-reanimated";
+import Animated, { FadeIn, FadeInRight, FadeOutLeft } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AvatarPicker } from "@/components/family/avatar-picker";
@@ -12,7 +12,7 @@ import { ReportQueue } from "@/components/family/report-queue";
 import { Avatar } from "@/components/ui/avatar";
 import { Field } from "@/components/ui/field";
 import { Glass, Gradient, glass, glassShadow } from "@/components/ui/glass";
-import { useReducedMotion } from "@/components/ui/motion";
+import { ENTER_POP, ENTER_QUICK, ENTER_SOFT, useReducedMotion } from "@/components/ui/motion";
 import { Backdrop, PillButton, ScreenHeader } from "@/components/ui/screen";
 import { uploadQueue, type QueueItem } from "@/lib/records/bulk-upload";
 import { generatedAvatar } from "@/lib/profiles/avatar";
@@ -220,7 +220,7 @@ export default function AddMember() {
         <Backdrop height={520} />
         <ScrollView contentContainerStyle={{ paddingHorizontal: 24, paddingTop: insets.top + 60, paddingBottom: insets.bottom + 24 }}>
           <View style={{ alignItems: "center" }}>
-            <Animated.View entering={still ? undefined : ZoomIn.springify().damping(10)} style={[glassShadow, { borderRadius: 999, borderWidth: 5, borderColor: "#fff" }]}>
+            <Animated.View entering={still ? undefined : ENTER_SOFT} style={[glassShadow, { borderRadius: 999, borderWidth: 5, borderColor: "#fff" }]}>
               {photo ? (
                 <Image alt="" source={{ uri: photo }} style={{ width: 120, height: 120, borderRadius: 60 }} />
               ) : face ? (
@@ -230,7 +230,7 @@ export default function AddMember() {
               )}
             </Animated.View>
             {done ? (
-              <Animated.View entering={still ? undefined : ZoomIn.delay(200).springify()} style={{ position: "absolute", top: 86, marginLeft: 92 }}>
+              <Animated.View entering={still ? undefined : ENTER_POP.delay(200)} style={{ position: "absolute", top: 86, marginLeft: 92 }}>
                 <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: brand[600], borderWidth: 3, borderColor: "#fff", alignItems: "center", justifyContent: "center" }}>
                   <Check size={18} color="#fff" strokeWidth={3} />
                 </View>
@@ -322,7 +322,7 @@ export default function AddMember() {
         {/* The live card: what the tray will show. */}
         <View style={[glassShadow, { height: 104, borderRadius: 26, overflow: "hidden", flexDirection: "row", alignItems: "center", gap: 14, paddingHorizontal: 16 }]}>
           <Gradient from={face?.background ?? "#ebe6ff"} to="#ffffff" angle="diagonal" glow="#ffffff" />
-          <Animated.View key={photo ?? (seed || "none")} entering={still ? undefined : ZoomIn.springify().damping(14)} style={{ borderRadius: 999, borderWidth: 3, borderColor: "#fff" }}>
+          <Animated.View key={photo ?? (seed || "none")} entering={still ? undefined : ENTER_QUICK} style={{ borderRadius: 999, borderWidth: 3, borderColor: "#fff" }}>
             {photo ? (
               <Image alt="" source={{ uri: photo }} style={{ width: 64, height: 64, borderRadius: 32 }} />
             ) : face ? (

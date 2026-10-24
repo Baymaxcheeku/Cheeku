@@ -47,6 +47,9 @@ export function RecordsView({
   const [view, setView] = useState<View_>("list");
 
   const listGroups = groupByRecency(records);
+  // One person's records: their name on every row is noise, so it shows only
+  // when the list mixes people.
+  const showPerson = new Set(records.map((r) => r.profileId)).size > 1;
   const monthGroups = groupByMonth(records);
 
   if (records.length === 0) {
@@ -74,7 +77,7 @@ export function RecordsView({
               <Text className="text-[15px] font-semibold text-ink-900">{group.label}</Text>
               <View className="mt-2 gap-2">
                 {group.records.map((record, i) => (
-                  <RecordCard key={record.id} record={record} index={i} />
+                  <RecordCard key={record.id} record={record} index={i} showPerson={showPerson} />
                 ))}
               </View>
             </View>
@@ -98,6 +101,7 @@ export function RecordsView({
                   <TimelineRow
                     key={record.id}
                     record={record}
+                    showPerson={showPerson}
                     isLast={i === month.records.length - 1}
                   />
                 ))}
@@ -224,7 +228,7 @@ function ViewTab({
  * stacked. The date gets its own soft chip rather than bare numerals, which is
  * what makes the rail feel designed rather than typeset.
  */
-function TimelineRow({ record, isLast }: { record: RecordSummary; isLast: boolean }) {
+function TimelineRow({ record, isLast, showPerson = true }: { record: RecordSummary; isLast: boolean; showPerson?: boolean }) {
   const router = useRouter();
   const { day, month } = railDate(record.eventDate ?? "");
   const typeStyle = TYPE_STYLE[record.docType] ?? TYPE_STYLE.other;
@@ -290,8 +294,7 @@ function TimelineRow({ record, isLast }: { record: RecordSummary; isLast: boolea
         <View className="mt-1 flex-row items-center gap-2">
           <SeverityPill severity={record.severity} />
           <Text className="flex-1 text-[11px] text-ink-500" numberOfLines={1}>
-            {record.profileName}
-            {record.facility ? ` · ${record.facility}` : ""}
+            {[showPerson ? record.profileName : null, record.facility].filter(Boolean).join(" · ")}
           </Text>
         </View>
       </View>

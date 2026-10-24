@@ -250,7 +250,10 @@ function Moves({ move, hop, onPress, onTap, label, children }: { move: Move; hop
 
   useEffect(() => {
     if (move === "float" || move === "sway") {
-      t.value = withRepeat(withTiming(1, { duration: move === "float" ? 2400 : 3000, easing: Easing.inOut(Easing.sin) }), -1, true);
+      // Three slow cycles, then he rests. Endless slow oscillation on a screen
+      // seen every day turns into noise, and a 0.2 Hz loop is the band
+      // motion-sensitive people find hardest (UI audit, October 2026).
+      t.value = withRepeat(withTiming(1, { duration: move === "float" ? 2400 : 3000, easing: Easing.inOut(Easing.sin) }), 6, true);
     }
     if (move === "pop") enter.value = withDelay(120, withSpring(1, { damping: 11, stiffness: 140 }));
   }, [move, t, enter]);
@@ -324,10 +327,11 @@ function FaceMark({ size, moment, still }: { size: number; moment: Moment; still
   useEffect(() => {
     if (still) return;
     if (kind === "bounce") {
-      breath.value = withDelay(offset / 3, withRepeat(withTiming(1, { duration: 520, easing: Easing.inOut(Easing.quad) }), -1, true));
+      breath.value = withDelay(offset / 3, withRepeat(withTiming(1, { duration: 520, easing: Easing.inOut(Easing.quad) }), 6, true));
       return;
     }
-    breath.value = withDelay(offset, withRepeat(withTiming(1, { duration: kind === "ponder" ? 1700 : 2600, easing: Easing.inOut(Easing.sin) }), -1, true));
+    // A few breaths on arrival, then still (even count: ends at rest).
+    breath.value = withDelay(offset, withRepeat(withTiming(1, { duration: kind === "ponder" ? 1700 : 2600, easing: Easing.inOut(Easing.sin) }), 6, true));
     if (kind === "alive") {
       // Every few seconds: a quick glance to one side and back.
       look.value = withDelay(
@@ -339,7 +343,7 @@ function FaceMark({ size, moment, still }: { size: number; moment: Moment; still
             withDelay(400, withTiming(0, { duration: 240 })),
             withDelay(3600, withTiming(0, { duration: 1 })),
           ),
-          -1,
+          2,
           false,
         ),
       );
@@ -388,8 +392,10 @@ export function CheekuPeek({ size = 76, moment = "idle", every = 7000, style }: 
       return;
     }
     const rise = withTiming(1, { duration: 520, easing: Easing.out(Easing.back(1.6)) });
-    const sink = withTiming(0, { duration: 420, easing: Easing.in(Easing.quad) });
-    up.value = withDelay(900, withRepeat(withSequence(rise, withDelay(3200, sink), withDelay(Math.max(1200, every - 4140), withTiming(0, { duration: 1 }))), -1, false));
+    // Exits ease out too: ease-in delays the moment the eye is on.
+    const sink = withTiming(0, { duration: 300, easing: Easing.bezier(0.23, 1, 0.32, 1) });
+    // Peeks twice, then stays put.
+    up.value = withDelay(900, withRepeat(withSequence(rise, withDelay(3200, sink), withDelay(Math.max(1200, every - 4020), withTiming(0, { duration: 1 }))), 2, false));
   }, [reduced, every, up]);
 
   const rising = useAnimatedStyle(() => ({ transform: [{ translateY: interpolate(up.value, [0, 1], [show + 6, 0]) }] }));

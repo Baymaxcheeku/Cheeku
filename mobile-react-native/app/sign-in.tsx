@@ -15,13 +15,11 @@ import Animated, { useAnimatedStyle, useSharedValue, withSpring } from "react-na
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   AlertCircle,
-  Apple,
   ChevronLeft,
   Eye,
   EyeOff,
   Lock,
   Mail,
-  Phone,
   ShieldCheck,
 } from "lucide-react-native";
 
@@ -79,8 +77,8 @@ type Tab = "signIn" | "create";
  *   changing its mind rather than two links.
  * - Creating a password shows a length meter instead of a rule to remember.
  *   It is brand violet, never green: green means a health result in this app.
- * - The three providers that are not configured yet say "Soon" in words. They
- *   used to be 55% opacity, which failed contrast and explained nothing.
+ * - Other sign-in providers are not shown until one is configured. Disabled
+ *   "Soon" buttons read as an unfinished app (UI audit, October 2026).
  */
 export default function SignIn() {
   const router = useRouter();
@@ -326,39 +324,11 @@ export default function SignIn() {
             </Button>
           </View>
 
-          <View className="my-5 flex-row items-center gap-3">
-            <View className="h-px flex-1 bg-line" />
-            <Text style={[type.caption, { color: ink[300] }]}>or continue with</Text>
-            <View className="h-px flex-1 bg-line" />
-          </View>
-
           {/*
-           * No provider is configured yet. Buttons that silently do nothing
-           * would be worse than saying so, so each one says "Soon" in words and
-           * is marked disabled for screen readers.
+           * Google, Apple and Phone sign-in come back here once a provider is
+           * configured. Three disabled "Soon" buttons read as an unfinished app
+           * on the first screen anyone sees, so until then there is only email.
            */}
-          <View className="flex-row gap-2">
-            {[
-              { label: "Google", Icon: Mail },
-              { label: "Apple", Icon: Apple },
-              { label: "Phone", Icon: Phone },
-            ].map(({ label, Icon }) => (
-              <View
-                key={label}
-                accessible
-                accessibilityState={{ disabled: true }}
-                accessibilityLabel={`${label}. Coming soon, use email for now`}
-                className="h-12 flex-1 flex-row items-center justify-center gap-1.5 rounded-pill"
-                style={{ borderWidth: 1, borderColor: surface.line, backgroundColor: surface.canvas }}
-              >
-                <Icon size={15} color={ink[500]} />
-                <Text style={{ fontFamily: font.semibold, fontSize: 13, color: ink[500] }}>{label}</Text>
-                <View className="rounded-pill px-1.5 py-0.5" style={{ backgroundColor: brand[50] }}>
-                  <Text style={{ fontFamily: font.bold, fontSize: 9, color: brand[700] }}>SOON</Text>
-                </View>
-              </View>
-            ))}
-          </View>
 
           <View className="mt-5 flex-row items-center justify-center gap-2">
             <ShieldCheck size={14} color={brand[400]} />

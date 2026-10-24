@@ -109,7 +109,8 @@ function LiveDot() {
   const o = useSharedValue(1);
   useEffect(() => {
     if (still) return;
-    o.value = withRepeat(withSequence(withTiming(0.25, { duration: 700 }), withTiming(1, { duration: 700 })), -1);
+    // Two pulses to catch the eye, then a steady dot.
+    o.value = withRepeat(withSequence(withTiming(0.25, { duration: 700 }), withTiming(1, { duration: 700 })), 2);
   }, [still, o]);
   const style = useAnimatedStyle(() => ({ opacity: o.value }));
   return <Animated.View style={[{ width: 7, height: 7, borderRadius: 4, backgroundColor: LIVE.dot }, style]} />;

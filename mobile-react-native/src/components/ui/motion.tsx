@@ -3,6 +3,7 @@ import { AccessibilityInfo, Pressable, View, type ViewProps } from "react-native
 import Animated, {
   Easing,
   interpolate,
+  Keyframe,
   useAnimatedStyle,
   useSharedValue,
   withDelay,
@@ -15,6 +16,7 @@ import Animated, {
 import { useState } from "react";
 
 import { brand, EASE_SETTLE } from "@/theme/tokens";
+import { feel } from "@/lib/feel";
 
 /*
  * The motion vocabulary, ported from the web app's `components/ui/motion.tsx`.
@@ -33,6 +35,31 @@ import { brand, EASE_SETTLE } from "@/theme/tokens";
  */
 
 const ease = Easing.bezier(...(EASE_SETTLE as unknown as [number, number, number, number]));
+
+/** Strong ease-out for anything entering or leaving (UI audit, October 2026). */
+export const EASE_OUT = Easing.bezier(0.23, 1, 0.32, 1);
+
+/*
+ * Entrances for things that appear in place: from 95% and transparent, never
+ * from nothing. ENTER_QUICK is for state that changes often (a check moving to
+ * the person just picked); ENTER_SOFT for occasional moments.
+ */
+export const ENTER_QUICK = new Keyframe({
+  0: { opacity: 0, transform: [{ scale: 0.95 }] },
+  100: { opacity: 1, transform: [{ scale: 1 }], easing: EASE_OUT },
+}).duration(160);
+
+export const ENTER_SOFT = new Keyframe({
+  0: { opacity: 0, transform: [{ scale: 0.95 }] },
+  100: { opacity: 1, transform: [{ scale: 1 }], easing: EASE_OUT },
+}).duration(220);
+
+/** The rare success moment (booked, filed): the one place a little overshoot belongs. */
+export const ENTER_POP = new Keyframe({
+  0: { opacity: 0, transform: [{ scale: 0.9 }] },
+  65: { opacity: 1, transform: [{ scale: 1.04 }], easing: EASE_OUT },
+  100: { opacity: 1, transform: [{ scale: 1 }], easing: Easing.inOut(Easing.quad) },
+}).duration(380);
 
 /** True when the OS asks for reduced motion. */
 export function useReducedMotion(): boolean {
@@ -60,7 +87,8 @@ function useEnter(delay: number, still: boolean): SharedValue<number> {
       progress.value = 1;
       return;
     }
-    progress.value = withDelay(delay, withTiming(1, { duration: 380, easing: ease }));
+    // 240ms: UI entrances stay under 300 (UI audit, October 2026).
+    progress.value = withDelay(delay, withTiming(1, { duration: 240, easing: ease }));
   }, [delay, still, progress]);
   return progress;
 }
@@ -200,7 +228,7 @@ export function StaggerItem({
   style?: ViewProps["style"];
 }) {
   const still = useReducedMotion();
-  const enter = useEnter(Math.min(index, 8) * 60, still);
+  const enter = useEnter(Math.min(index, 8) * 40, still);
 
   const animated = useAnimatedStyle(() => ({
     opacity: enter.value,
@@ -233,7 +261,7 @@ export function PopIn({
 
   const animated = useAnimatedStyle(() => ({
     opacity: progress.value,
-    transform: [{ scale: interpolate(progress.value, [0, 1], [0.5, 1]) }],
+    transform: [{ scale: interpolate(progress.value, [0, 1], [0.9, 1]) }],
   }));
 
   return <Animated.View style={[style, animated]}>{children}</Animated.View>;
@@ -260,7 +288,7 @@ export function PressRow({
   disabled?: boolean;
 }) {
   const still = useReducedMotion();
-  const enter = useEnter(Math.min(index, 6) * 45, still);
+  const enter = useEnter(Math.min(index, 6) * 30, still);
   const pressed = useSharedValue(0);
 
   const animated = useAnimatedStyle(() => ({
@@ -357,7 +385,10 @@ export function SpringSwitch({
       accessibilityRole="switch"
       accessibilityState={{ checked }}
       accessibilityLabel={label}
-      onPress={onChange}
+      onPress={() => {
+        feel.tick();
+        onChange();
+      }}
       style={{
         width: 48,
         height: 28,

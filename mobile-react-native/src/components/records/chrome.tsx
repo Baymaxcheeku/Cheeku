@@ -115,15 +115,15 @@ export function RecordsHeader({ title, subtitle }: { title: string; subtitle: st
 
 const STAT_CELLS = [
   { key: "total", label: "Total records", icon: FileText, fg: "#4a2ade", bg: "#f1f0fe" },
-  { key: "normal", label: "Normal", icon: ShieldCheck, fg: semantic.safe, bg: semantic.safeBg },
+  { key: "normal", label: SEVERITY_LABEL.normal, icon: ShieldCheck, fg: semantic.safe, bg: semantic.safeBg },
   {
     key: "borderline",
-    label: "Needs attention",
+    label: SEVERITY_LABEL.borderline,
     icon: TriangleAlert,
     fg: semantic.caution,
     bg: semantic.cautionBg,
   },
-  { key: "highRisk", label: "High priority", icon: Flag, fg: semantic.danger, bg: semantic.dangerBg },
+  { key: "highRisk", label: SEVERITY_LABEL.high_risk, icon: Flag, fg: semantic.attention, bg: semantic.attentionBg },
 ] as const;
 
 /*

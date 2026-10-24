@@ -21,6 +21,7 @@ import { useBookingDraft } from "@/lib/booking/draft";
 import { doctorFace } from "@/lib/booking/faces";
 import { brand, ink } from "@/theme/tokens";
 import { font } from "@/theme/type";
+import { feel } from "@/lib/feel";
 
 /*
  * Book a doctor — done.
@@ -46,8 +47,12 @@ export default function Confirmed() {
   const pop = useSharedValue(still ? 1 : 0);
   useEffect(() => {
     pop.value = still ? 1 : withDelay(120, withSpring(1, { damping: 11, stiffness: 180 }));
+    // The success buzz lands with the tick, not before it.
+    const t = setTimeout(feel.success, still ? 0 : 120);
+    return () => clearTimeout(t);
   }, [still, pop]);
-  const tick = useAnimatedStyle(() => ({ transform: [{ scale: pop.value }], opacity: pop.value }));
+  // From 90%, never from nothing.
+  const tick = useAnimatedStyle(() => ({ transform: [{ scale: 0.9 + 0.1 * pop.value }], opacity: Math.min(1, pop.value * 1.6) }));
 
   function home() {
     reset();

@@ -1,16 +1,17 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Check, FastForward, FileText, MapPin, PenLine } from "lucide-react-native";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Pressable, RefreshControl, ScrollView, Text, View } from "react-native";
-import Animated, { ZoomIn } from "react-native-reanimated";
+import Animated from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { PartnerBadge, ReviewSheet, rupees, SampleNote } from "@/components/labs/parts";
 import { ConfirmSheet } from "@/components/ui/confirm-sheet";
 import { Glass, Gradient, glassShadow } from "@/components/ui/glass";
-import { useReducedMotion } from "@/components/ui/motion";
+import { ENTER_POP, useReducedMotion } from "@/components/ui/motion";
 import { Backdrop, PillButton, ScreenHeader } from "@/components/ui/screen";
+import { feel } from "@/lib/feel";
 import { stageIndex, STAGES } from "@/lib/labs/logic";
 import { advanceLabDemo, BOOKINGS_KEY, cancelLab, postReview, useCatalog, useLabBookings } from "@/lib/labs/queries";
 import { useFamily, useSwitchMember } from "@/lib/profiles/family";
@@ -49,6 +50,15 @@ export default function LabBooking() {
   const partner = catalog.data?.partners.find((p) => p.id === b?.partnerId);
   const member = family.data?.access.all.find((m) => m.id === b?.profileId);
 
+  // Just booked: one success buzz, with the tick, the first time it shows.
+  const celebrated = useRef(false);
+  const ready = Boolean(b && partner);
+  useEffect(() => {
+    if (!fresh || !ready || celebrated.current) return;
+    celebrated.current = true;
+    feel.success();
+  }, [fresh, ready]);
+
   if (!b || !partner) {
     return (
       <View className="flex-1 bg-canvas">
@@ -84,7 +94,7 @@ export default function LabBooking() {
       >
         {fresh && !cancelled ? (
           <View style={{ alignItems: "center", marginTop: 4, marginBottom: 18 }}>
-            <Animated.View entering={still ? undefined : ZoomIn.springify().damping(11)} style={[glassShadow, { width: 76, height: 76, borderRadius: 38, backgroundColor: brand[600], alignItems: "center", justifyContent: "center" }]}>
+            <Animated.View entering={still ? undefined : ENTER_POP} style={[glassShadow, { width: 76, height: 76, borderRadius: 38, backgroundColor: brand[600], alignItems: "center", justifyContent: "center" }]}>
               <Check size={36} color="#fff" strokeWidth={3} />
             </Animated.View>
             <Text style={{ fontFamily: font.semibold, fontSize: 26, letterSpacing: -0.7, color: ink[900], marginTop: 14 }}>Collection booked!</Text>

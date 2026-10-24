@@ -22,6 +22,8 @@ import { usePlan } from "@/lib/home/use-plan";
 import { useFamily } from "@/lib/profiles/family";
 import { brand, ink, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
+import { joinAnd, softLower } from "@/lib/content/words";
+import { feel } from "@/lib/feel";
 
 /*
  * TODAY'S ACTION PLAN.
@@ -110,7 +112,9 @@ export default function TodayPlan() {
     );
   }
 
-  const builtFrom = [...plan.areas.map((a) => AREA_LABEL[a].toLowerCase()), ...(plan.tasks.some((t) => t.due) ? ["what's due"] : [])];
+  // "Built around your sugar plan and what's due." Areas read as "your ...";
+  // the due list does not, so it is added on its own.
+  const builtFrom = [...plan.areas.slice(0, 2).map((a) => `your ${softLower(AREA_LABEL[a])}`), ...(plan.tasks.some((t) => t.due) ? ["what's due"] : [])];
   const date = new Date().toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "short" });
 
   return (
@@ -143,7 +147,7 @@ export default function TodayPlan() {
                 <Meter value={plan.done} total={Math.max(1, plan.total)} />
               </View>
               <Text style={{ fontFamily: font.regular, fontSize: 12.5, lineHeight: 17, color: ink[700], marginTop: 10 }}>
-                {builtFrom.length ? `Made for your ${builtFrom.slice(0, 3).join(", ")}.` : "Everyday longevity habits. Add a report to make it yours."}
+                {builtFrom.length ? `Built around ${joinAnd(builtFrom)}.` : "Everyday longevity habits. Add a report to make it yours."}
               </Text>
             </View>
           </View>
@@ -166,7 +170,10 @@ export default function TodayPlan() {
                 accessibilityRole="tab"
                 accessibilityState={{ selected: on }}
                 accessibilityLabel={`${label}, ${prog.done} of ${prog.total} done`}
-                onPress={() => setPillar(k)}
+                onPress={() => {
+                  if (k !== pillar) feel.tick();
+                  setPillar(k);
+                }}
                 style={({ pressed }) => [
                   on ? null : glassShadow,
                   {
@@ -216,7 +223,12 @@ export default function TodayPlan() {
                     profileId={profile.id}
                     areas={plan.areas}
                     onOpen={(action) => setSheet({ action, key: t.key })}
-                    onDone={() => void logStep(qc, { profileId: profile.id, stepKey: t.key, status: "done" })}
+                    onDone={() => {
+                      // The last step of the day is the one worth celebrating.
+                      if (plan.done + 1 >= plan.total) feel.success();
+                      else feel.tap();
+                      void logStep(qc, { profileId: profile.id, stepKey: t.key, status: "done" });
+                    }}
                     onLater={() => void logStep(qc, { profileId: profile.id, stepKey: t.key, status: "later" })}
                     onUndo={() => void unlogStep(qc, { profileId: profile.id, stepKey: t.key })}
                   />

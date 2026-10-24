@@ -60,6 +60,7 @@ import { listProfileRecords, statsFrom } from "@/lib/records/queries";
 import { refreshRoster } from "@/lib/profiles/family";
 import { brand, ink, semantic, shadow, surface } from "@/theme/tokens";
 import { Brand, brandify } from "@/components/ui/brand";
+import { feel } from "@/lib/feel";
 
 /**
  * I1 — profile and settings.
@@ -420,6 +421,7 @@ function AccountData({ onDeleted }: { onDeleted: () => void }) {
   }
 
   async function runDelete() {
+    feel.thud();
     setBusy("delete");
     setMessage(null);
     try {

@@ -385,7 +385,9 @@ export default function Ask() {
           showsVerticalScrollIndicator={false}
           maintainVisibleContentPosition={{ minIndexForVisible: 0 }}
           onContentSizeChange={() => {
-            if (stickToEnd.current) scroller.current?.scrollToEnd({ animated: messages.length > 0 });
+            // An empty thread is the intro, which reads from the top: scrolling
+            // it to the end opened Ask with the mascot cut off under the chips.
+            if (stickToEnd.current && messages.length > 0) scroller.current?.scrollToEnd({ animated: true });
           }}
         >
           {empty ? (

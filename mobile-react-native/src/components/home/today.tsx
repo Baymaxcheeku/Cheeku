@@ -485,12 +485,14 @@ export function FamilyAlertCard({ row, member, onPress }: { row: DueRow; member:
       <View className="flex-row items-center gap-3 rounded-[24px] bg-white p-3.5" style={[glassShadow, { borderWidth: 1, borderColor: surface.line }]}>
         <View>
           {member ? <Avatar svg={member.avatar} photo={member.photo} image={member.avatarImage} background={member.avatarBackground} size={46} /> : <Users size={22} color={brand[600]} />}
-          <View className="absolute -bottom-0.5 -right-0.5 h-5 w-5 items-center justify-center rounded-pill border-2 border-white" style={{ backgroundColor: row.overdue ? semantic.danger : semantic.caution }}>
+          <View className="absolute -bottom-0.5 -right-0.5 h-5 w-5 items-center justify-center rounded-pill border-2 border-white" style={{ backgroundColor: row.overdue ? semantic.attention : semantic.caution }}>
             <BellRing size={10} color="#fff" strokeWidth={2.6} />
           </View>
         </View>
         <View className="min-w-0 flex-1">
-          <Text style={{ fontFamily: font.bold, fontSize: 10.5, letterSpacing: 1, color: row.overdue ? semantic.dangerText : semantic.cautionText }}>FAMILY ALERT</Text>
+          {/* Plain words in the attention tone, not a red "FAMILY ALERT": an overdue
+              test is a nudge, and red is kept for "go now" (UI audit, October 2026). */}
+          <Text style={{ fontFamily: font.bold, fontSize: 10.5, letterSpacing: 1, color: row.overdue ? semantic.attentionText : semantic.cautionText }}>{row.overdue ? "OVERDUE" : "COMING UP"}</Text>
           <Text style={{ fontFamily: font.semibold, fontSize: 14.5, lineHeight: 19, color: ink[900], marginTop: 2 }}>{sentence}</Text>
           <Text style={{ fontFamily: font.semibold, fontSize: 12.5, color: brand[600], marginTop: 4 }}>{`${when} · ${lab ? "Book collection" : "Plan it"}`}</Text>
         </View>

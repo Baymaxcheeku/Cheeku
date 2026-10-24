@@ -3,6 +3,7 @@ import { ActivityIndicator, Modal, Pressable, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ink, semantic, surface } from "@/theme/tokens";
+import { feel } from "@/lib/feel";
 
 /*
  * The app's own confirmation, replacing `Alert.alert` for anything consequential.
@@ -48,6 +49,8 @@ export function ConfirmSheet({
   const [busy, setBusy] = useState(false);
 
   async function run() {
+    // A destructive choice going ahead is felt as a firmer tap.
+    if (destructive) feel.thud();
     setBusy(true);
     try {
       await onConfirm();
