@@ -223,6 +223,14 @@ in a shell. See `../SHIPPING.md`.
    0.97, 0.98 for big cards, 0.95 for small round buttons. No Reanimated
    `Keyframe` entrances: they leave the view collapsed on web; use `<Enter>`
    from `components/ui/motion.tsx`. Haptics only through `src/lib/feel.ts`.
+8. Design values come from `src/theme/tokens.ts`: font sizes from `type`
+   (11, 12, 13, 15, 17, 20, 24, 28, 34; 10 for counters, 36 and up for
+   display), radii from `radius` (8, 12, 16, 24, 32, pill; 6 and under for
+   hairlines), colours from `brand`, `ink`, `surface`, `hue`, `lilac` and
+   `semantic`. Classes use the named scale (`text-sm`, `rounded-xl`), never
+   `text-[13px]`. One primary: filled brand-600 means "do it"; ink-900 means
+   "selected" (chips, segments) and the centre +. ESLint warns on anything
+   off the scales.
 
 ## Running it
 
@@ -335,11 +343,11 @@ haptics has to be seen on a simulator or a device before it counts as done.
 - **Haptics need a new native build.** `expo-haptics` (UI batch 1) is a native
   module: installed builds ignore it until the next `eas build`; web is a
   no-op by design. All calls go through `src/lib/feel.ts`.
-- **UI batches 3 and 4 are open** (`ui-b3-system`, `ui-b4-today` in the
-  launch tracker); the audit is `../docs/audits/2026-10-ui-ux-audit.md`.
-  Batch 2 left about 250 raw `Pressable`s (some with their own press
-  state); batch 3 moves them to `<Tap>` screen by screen. The sheet drag (fling, slow pull, pull up)
-  and every press feel need a phone.
+- **UI batch 4 is open** (`ui-b4-today`, a calmer Today); the audit is
+  `../docs/audits/2026-10-ui-ux-audit.md`. Batch 3 left 54 raw hex colours
+  (illustration faces, Learn category art, chart gradients) as lint warnings;
+  move them onto tokens when those files are next touched. The sheet drag,
+  every press, and the new type sizes on a small Android all need a phone.
 - **Ideas from the AQ / Ant Afu research** are in the launch tracker:
   goal cards first (`loop-goal-cards`, M2), then food scan, device sync,
   staged symptom check, medicine box photo, privacy blur and partner

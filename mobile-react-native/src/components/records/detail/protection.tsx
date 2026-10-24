@@ -17,7 +17,7 @@ import {
   Syringe,
   UserRound,
 } from "lucide-react-native";
-import { Linking, Pressable, Text, View } from "react-native";
+import { Linking, Text, View } from "react-native";
 
 import { Avatar } from "@/components/ui/avatar";
 import { Gradient, glassShadow } from "@/components/ui/glass";
@@ -38,10 +38,11 @@ import {
 } from "@/lib/records/details";
 import { vaccineHistory } from "@/lib/records/record-actions";
 import type { RecordDetail } from "@/lib/records/types";
-import { brand, ink, semantic, surface } from "@/theme/tokens";
+import { brand, hue, ink, semantic, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
 
 import { Bullets, Card, Chip, Eyebrow, FactGrid, FactList, Meter, ReminderButton, reminderAt, Section, Stat } from "./parts";
+import { Tap } from "@/components/ui/tap";
 
 // ------------------------------------------------------------------- scan --
 
@@ -55,24 +56,24 @@ export function ScanBody({ details }: { record: RecordDetail; details: ScanDetai
   return (
     <View>
       <View style={[glassShadow, { marginTop: 12, borderRadius: 24, overflow: "hidden", padding: 16 }]}>
-        <Gradient from="#e9eaf7" to="#ffffff" glow="#ffffff" />
+        <Gradient from={surface.line} to="#ffffff" glow="#ffffff" />
         <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
           <View style={{ width: 52, height: 52, borderRadius: 16, backgroundColor: "#fff", alignItems: "center", justifyContent: "center" }}>
-            <Icon size={24} color="#3835a0" />
+            <Icon size={24} color={hue.indigo.fg} />
           </View>
           <View style={{ flex: 1 }}>
-            <Eyebrow color="#3835a0">{MODALITY_LABEL[details.modality]}</Eyebrow>
-            <Text style={{ fontFamily: font.semibold, fontSize: 18, color: ink[900], marginTop: 2 }}>{details.bodyPart}</Text>
+            <Eyebrow color={hue.indigo.fg}>{MODALITY_LABEL[details.modality]}</Eyebrow>
+            <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900], marginTop: 2 }}>{details.bodyPart}</Text>
           </View>
-          <Chip text={details.contrast ? "With contrast" : "Plain"} bg="#fff" fg="#3835a0" />
+          <Chip text={details.contrast ? "With contrast" : "Plain"} bg="#fff" fg={hue.indigo.fg} />
         </View>
-        {details.technique ? <Text style={{ fontFamily: font.regular, fontSize: 12.5, lineHeight: 18, color: ink[500], marginTop: 12 }}>{details.technique}</Text> : null}
+        {details.technique ? <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[500], marginTop: 12 }}>{details.technique}</Text> : null}
       </View>
 
       {details.impression.length ? (
         <Section title="Conclusion">
           <View style={{ padding: 16, borderRadius: 24, backgroundColor: brand[50], gap: 10 }}>
-            <Text style={{ fontFamily: font.medium, fontSize: 12.5, color: brand[700] }}>The radiologist&apos;s impression, word for word</Text>
+            <Text style={{ fontFamily: font.medium, fontSize: 13, color: brand[700] }}>The radiologist&apos;s impression, word for word</Text>
             <Bullets items={details.impression} numbered />
           </View>
         </Section>
@@ -81,22 +82,22 @@ export function ScanBody({ details }: { record: RecordDetail; details: ScanDetai
       {details.clinicalNote ? (
         <Section title="Why it was done">
           <Card>
-            <Text selectable style={{ fontFamily: font.regular, fontSize: 14, lineHeight: 20.5, color: ink[700] }}>{details.clinicalNote}</Text>
+            <Text selectable style={{ fontFamily: font.regular, fontSize: 15, lineHeight: 20.5, color: ink[700] }}>{details.clinicalNote}</Text>
           </Card>
         </Section>
       ) : null}
 
       {details.findings.length ? (
-        <Section title="Findings" right={<Text style={{ fontFamily: font.medium, fontSize: 12.5, color: ink[500] }}>{details.findings.length} noted</Text>}>
+        <Section title="Findings" right={<Text style={{ fontFamily: font.medium, fontSize: 13, color: ink[500] }}>{details.findings.length} noted</Text>}>
           <Card>
-            <Bullets items={details.findings} color="#3835a0" />
+            <Bullets items={details.findings} color={hue.indigo.fg} />
           </Card>
         </Section>
       ) : null}
 
       <Section title="Who was involved">
         <FactGrid
-          tint="#3835a0"
+          tint={hue.indigo.fg}
           facts={[
             { label: "Reported by", value: details.radiologist, icon: UserRound },
             { label: "Referred by", value: details.referredBy, icon: Stethoscope },
@@ -133,19 +134,19 @@ export function VaccinationBody({ record, details, isPrimary }: { record: Record
       {/* The course, as dose segments. */}
       <Card style={{ marginTop: 12 }}>
         <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
-          <View style={{ width: 48, height: 48, borderRadius: 16, backgroundColor: "#fdeaf0", alignItems: "center", justifyContent: "center" }}>
-            <Syringe size={22} color="#c4396c" />
+          <View style={{ width: 48, height: 48, borderRadius: 16, backgroundColor: hue.rose.bg, alignItems: "center", justifyContent: "center" }}>
+            <Syringe size={22} color={hue.rose.fg} />
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={{ fontFamily: font.semibold, fontSize: 16.5, color: ink[900] }}>{details.doses > 1 ? `Dose ${details.dose} of ${details.doses}` : "Single dose"}</Text>
-            {details.protectsAgainst ? <Text style={{ fontFamily: font.regular, fontSize: 12.5, color: ink[500], marginTop: 1 }}>Protects against {details.protectsAgainst}</Text> : null}
+            <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>{details.doses > 1 ? `Dose ${details.dose} of ${details.doses}` : "Single dose"}</Text>
+            {details.protectsAgainst ? <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 1 }}>Protects against {details.protectsAgainst}</Text> : null}
           </View>
         </View>
         {details.doses > 1 ? (
           <View style={{ flexDirection: "row", gap: 6, marginTop: 14 }}>
             {Array.from({ length: details.doses }, (_, i) => (
               <View key={i} style={{ flex: 1 }}>
-                <View style={{ height: 8, borderRadius: 4, backgroundColor: i < details.dose ? "#c4396c" : "rgba(15,16,48,0.07)" }} />
+                <View style={{ height: 8, borderRadius: 4, backgroundColor: i < details.dose ? hue.rose.fg : "rgba(15,16,48,0.07)" }} />
                 <Text style={{ fontFamily: font.medium, fontSize: 11, color: i < details.dose ? ink[700] : ink[300], marginTop: 5 }}>Dose {i + 1}</Text>
               </View>
             ))}
@@ -163,8 +164,8 @@ export function VaccinationBody({ record, details, isPrimary }: { record: Record
           <Card style={{ gap: 12 }}>
             <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
               <View style={{ flex: 1 }}>
-                <Text style={{ fontFamily: font.semibold, fontSize: 18, color: ink[900] }}>{shortDate(details.nextDue)}</Text>
-                <Text style={{ fontFamily: font.regular, fontSize: 12.5, color: ink[500], marginTop: 1 }}>
+                <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>{shortDate(details.nextDue)}</Text>
+                <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 1 }}>
                   Dose {Math.min(details.dose + 1, details.doses)} of {details.doses}
                 </Text>
               </View>
@@ -184,7 +185,7 @@ export function VaccinationBody({ record, details, isPrimary }: { record: Record
 
       <Section title="This dose">
         <FactGrid
-          tint="#c4396c"
+          tint={hue.rose.fg}
           facts={[
             { label: "Given on", value: details.givenOn ? shortDate(details.givenOn) : null, icon: CalendarClock },
             { label: "Where", value: details.centre, icon: MapPin },
@@ -200,17 +201,17 @@ export function VaccinationBody({ record, details, isPrimary }: { record: Record
         <Section title={`Other ${details.protectsAgainst ?? details.vaccine} doses`}>
           <Card padded={false}>
             {others.map((h, i) => (
-              <Pressable
+              <Tap scale={0.98}
                 key={`${h.documentId}-${i}`}
                 accessibilityRole="button"
                 disabled={!h.documentId}
                 onPress={() => h.documentId && router.push(`/records/${h.documentId}`)}
                 style={{ flexDirection: "row", alignItems: "center", gap: 12, padding: 14, borderTopWidth: i ? 1 : 0, borderTopColor: surface.line }}
               >
-                <Text style={{ flex: 1, fontFamily: font.medium, fontSize: 14, color: ink[900] }}>Dose {h.dose}</Text>
+                <Text style={{ flex: 1, fontFamily: font.medium, fontSize: 15, color: ink[900] }}>Dose {h.dose}</Text>
                 <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[500] }}>{h.eventDate ? shortDate(h.eventDate) : ""}</Text>
                 <ChevronRight size={16} color={ink[300]} />
-              </Pressable>
+              </Tap>
             ))}
           </Card>
         </Section>
@@ -246,28 +247,28 @@ export function InsuranceBody({ record, details }: { record: RecordDetail; detai
   return (
     <View>
       {/* The policy, as the e-card people keep in their wallet. */}
-      <View style={[glassShadow, { marginTop: 12, borderRadius: 26, overflow: "hidden", padding: 18 }]}>
-        <Gradient from="#0f5566" to="#1b8aa3" angle="diagonal" />
+      <View style={[glassShadow, { marginTop: 12, borderRadius: 24, overflow: "hidden", padding: 18 }]}>
+        <Gradient from={hue.ocean.fg} to="#1b8aa3" angle="diagonal" />
         <View style={{ flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between", gap: 10 }}>
           <View style={{ flex: 1 }}>
             <Text style={{ fontFamily: font.semibold, fontSize: 12, letterSpacing: 0.6, color: "rgba(255,255,255,0.75)", textTransform: "uppercase" }}>{POLICY_TYPE[details.policyType]}</Text>
-            <Text style={{ fontFamily: font.semibold, fontSize: 18, lineHeight: 23, color: "#fff", marginTop: 4 }}>{details.insurer}</Text>
+            <Text style={{ fontFamily: font.semibold, fontSize: 17, lineHeight: 23, color: "#fff", marginTop: 4 }}>{details.insurer}</Text>
             {details.plan ? <Text style={{ fontFamily: font.regular, fontSize: 13, color: "rgba(255,255,255,0.8)", marginTop: 1 }}>{details.plan}</Text> : null}
           </View>
           <View style={{ paddingHorizontal: 10, paddingVertical: 5, borderRadius: 999, backgroundColor: statusChip.bg }}>
             <Text style={{ fontFamily: font.semibold, fontSize: 12, color: "#fff" }}>{statusChip.text}</Text>
           </View>
         </View>
-        <Text style={{ fontFamily: font.bold, fontSize: 30, letterSpacing: -0.8, color: "#fff", marginTop: 18 }}>{rupeesShort(details.sumInsured)}</Text>
-        <Text style={{ fontFamily: font.regular, fontSize: 12.5, color: "rgba(255,255,255,0.75)" }}>Sum insured</Text>
+        <Text style={{ fontFamily: font.bold, fontSize: 28, letterSpacing: -0.8, color: "#fff", marginTop: 18 }}>{rupeesShort(details.sumInsured)}</Text>
+        <Text style={{ fontFamily: font.regular, fontSize: 13, color: "rgba(255,255,255,0.75)" }}>Sum insured</Text>
         <View style={{ flexDirection: "row", gap: 16, marginTop: 18 }}>
           <View style={{ flex: 1.4 }}>
-            <Text style={{ fontFamily: font.regular, fontSize: 11.5, color: "rgba(255,255,255,0.7)" }}>Policy number</Text>
-            <Text selectable numberOfLines={1} adjustsFontSizeToFit style={{ fontFamily: font.semibold, fontSize: 13.5, color: "#fff", marginTop: 2 }}>{details.policyNo}</Text>
+            <Text style={{ fontFamily: font.regular, fontSize: 12, color: "rgba(255,255,255,0.7)" }}>Policy number</Text>
+            <Text selectable numberOfLines={1} adjustsFontSizeToFit style={{ fontFamily: font.semibold, fontSize: 13, color: "#fff", marginTop: 2 }}>{details.policyNo}</Text>
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={{ fontFamily: font.regular, fontSize: 11.5, color: "rgba(255,255,255,0.7)" }}>Valid till</Text>
-            <Text style={{ fontFamily: font.semibold, fontSize: 13.5, color: "#fff", marginTop: 2 }}>{details.end ? shortDate(details.end) : "Not stated"}</Text>
+            <Text style={{ fontFamily: font.regular, fontSize: 12, color: "rgba(255,255,255,0.7)" }}>Valid till</Text>
+            <Text style={{ fontFamily: font.semibold, fontSize: 13, color: "#fff", marginTop: 2 }}>{details.end ? shortDate(details.end) : "Not stated"}</Text>
           </View>
         </View>
       </View>
@@ -275,18 +276,18 @@ export function InsuranceBody({ record, details }: { record: RecordDetail; detai
       <Section title="Cover left this year">
         <Card style={{ gap: 12 }}>
           <View style={{ flexDirection: "row", gap: 12 }}>
-            <Stat value={rupeesShort(used.remaining)} label="Available" tint="#155e75" />
+            <Stat value={rupeesShort(used.remaining)} label="Available" tint={hue.ocean.fg} />
             <Stat value={rupeesShort(details.claimed)} label="Claimed" />
           </View>
-          <Meter share={used.share} color="#155e75" />
-          <Text style={{ fontFamily: font.regular, fontSize: 12.5, color: ink[500] }}>
+          <Meter share={used.share} color={hue.ocean.fg} />
+          <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[500] }}>
             {details.claimed > 0 ? `${Math.round(used.share * 100)}% of the cover used across ${details.claims.length} claim${details.claims.length === 1 ? "" : "s"}.` : "No claims made on this policy yet."}
           </Text>
         </Card>
       </Section>
 
       {details.members.length ? (
-        <Section title="Who's covered" right={<Text style={{ fontFamily: font.medium, fontSize: 12.5, color: ink[500] }}>{details.members.length} people</Text>}>
+        <Section title="Who's covered" right={<Text style={{ fontFamily: font.medium, fontSize: 13, color: ink[500] }}>{details.members.length} people</Text>}>
           <Card padded={false}>
             {details.members.map((m, i) => {
               const match = roster.find((p) => p.name.split(" ")[0]?.toLowerCase() === m.name.split(" ")[0]?.toLowerCase());
@@ -295,12 +296,12 @@ export function InsuranceBody({ record, details }: { record: RecordDetail; detai
                   {match ? (
                     <Avatar svg={match.avatar} photo={match.photo} image={match.avatarImage} background={match.avatarBackground} size={36} />
                   ) : (
-                    <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: "#e0f2f6", alignItems: "center", justifyContent: "center" }}>
-                      <Text style={{ fontFamily: font.semibold, fontSize: 14, color: "#155e75" }}>{m.name[0]?.toUpperCase()}</Text>
+                    <View style={{ width: 36, height: 36, borderRadius: 999, backgroundColor: hue.ocean.bg, alignItems: "center", justifyContent: "center" }}>
+                      <Text style={{ fontFamily: font.semibold, fontSize: 15, color: hue.ocean.fg }}>{m.name[0]?.toUpperCase()}</Text>
                     </View>
                   )}
                   <View style={{ flex: 1 }}>
-                    <Text style={{ fontFamily: font.semibold, fontSize: 14.5, color: ink[900] }}>{m.name}</Text>
+                    <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{m.name}</Text>
                     <Text style={{ fontFamily: font.regular, fontSize: 12, color: ink[500], marginTop: 1 }}>
                       {[m.relation, match ? "In your Cheeku family" : null].filter(Boolean).join(" · ")}
                     </Text>
@@ -333,8 +334,8 @@ export function InsuranceBody({ record, details }: { record: RecordDetail; detai
               const over = left !== null && left < 0;
               return (
                 <View key={w.label} style={{ flexDirection: "row", alignItems: "center", gap: 12, padding: 14, borderTopWidth: i ? 1 : 0, borderTopColor: surface.line }}>
-                  <Text style={{ flex: 1, fontFamily: font.medium, fontSize: 13.5, color: ink[900] }}>{w.label}</Text>
-                  <Text style={{ fontFamily: font.semibold, fontSize: 12.5, color: over ? brand[700] : ink[500] }}>
+                  <Text style={{ flex: 1, fontFamily: font.medium, fontSize: 13, color: ink[900] }}>{w.label}</Text>
+                  <Text style={{ fontFamily: font.semibold, fontSize: 13, color: over ? brand[700] : ink[500] }}>
                     {over ? "Covered now" : w.until ? `Till ${shortDate(w.until)}` : "Ongoing"}
                   </Text>
                 </View>
@@ -350,11 +351,11 @@ export function InsuranceBody({ record, details }: { record: RecordDetail; detai
             {details.claims.map((c, i) => (
               <View key={c.id} style={{ flexDirection: "row", alignItems: "center", gap: 12, padding: 14, borderTopWidth: i ? 1 : 0, borderTopColor: surface.line }}>
                 <View style={{ flex: 1 }}>
-                  <Text selectable style={{ fontFamily: font.semibold, fontSize: 13.5, color: ink[900] }}>{c.id}</Text>
+                  <Text selectable style={{ fontFamily: font.semibold, fontSize: 13, color: ink[900] }}>{c.id}</Text>
                   <Text style={{ fontFamily: font.regular, fontSize: 12, color: ink[500], marginTop: 1 }}>{c.date ? shortDate(c.date) : ""}</Text>
                 </View>
                 <View style={{ alignItems: "flex-end", gap: 4 }}>
-                  <Text style={{ fontFamily: font.semibold, fontSize: 14, color: ink[900] }}>{rupees(c.amount)}</Text>
+                  <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{rupees(c.amount)}</Text>
                   <Chip text={c.status === "settled" ? "Settled" : c.status === "pending" ? "In progress" : "Not approved"} bg={c.status === "settled" ? brand[50] : "rgba(15,16,48,0.05)"} fg={c.status === "settled" ? brand[700] : ink[700]} />
                 </View>
               </View>
@@ -365,7 +366,7 @@ export function InsuranceBody({ record, details }: { record: RecordDetail; detai
 
       <View style={{ marginTop: 18, gap: 10 }}>
         {details.tpa?.phone ? (
-          <PillButton tone="dark" icon={<Phone size={17} color="#fff" />} onPress={() => void Linking.openURL(`tel:${details.tpa?.phone?.replace(/\s/g, "")}`)}>
+          <PillButton icon={<Phone size={17} color="#fff" />} onPress={() => void Linking.openURL(`tel:${details.tpa?.phone?.replace(/\s/g, "")}`)}>
             {`Call claims · ${details.tpa.phone}`}
           </PillButton>
         ) : null}
@@ -379,7 +380,7 @@ export function InsuranceBody({ record, details }: { record: RecordDetail; detai
       {details.tpa ? (
         <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginTop: 12, justifyContent: "center" }}>
           {details.cashless ? <Hospital size={14} color={ink[500]} /> : <Building2 size={14} color={ink[500]} />}
-          <Text style={{ fontFamily: font.regular, fontSize: 12.5, color: ink[500] }}>Claims handled by {details.tpa.name}</Text>
+          <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[500] }}>Claims handled by {details.tpa.name}</Text>
         </View>
       ) : null}
     </View>

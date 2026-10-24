@@ -40,7 +40,7 @@ export default function LabBookings() {
           <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>
             {b.status === "cancelled" ? "Cancelled" : STAGES[stageIndex(b.status)]?.label}
           </Text>
-          <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 12.5, color: ink[500], marginTop: 2 }}>
+          <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 2 }}>
             {[m?.isPrimary ? "You" : m?.name.split(" ")[0], formatEventDate(b.slotDate), rupees(b.total)].filter(Boolean).join(" · ")}
           </Text>
           {b.status !== "cancelled" && b.status !== "ready" ? (
@@ -67,10 +67,10 @@ export default function LabBookings() {
         {done.length ? <Text style={{ fontFamily: font.semibold, fontSize: 13, color: ink[500], marginTop: 20, marginBottom: 8 }}>Earlier</Text> : null}
         <View style={{ gap: 10 }}>{done.map((b) => <Row key={b.id} b={b} />)}</View>
         {bookings.isSuccess && all.length === 0 ? (
-          <Glass strong className="mt-6 items-center rounded-[28px] px-6 py-8">
+          <Glass strong className="mt-6 items-center rounded-2xl px-6 py-8">
             <FlaskConical size={30} color={brand[600]} />
-            <Text style={{ fontFamily: font.semibold, fontSize: 18, color: ink[900], marginTop: 10 }}>No lab tests yet</Text>
-            <Text style={{ fontFamily: font.regular, fontSize: 14, lineHeight: 20, color: ink[500], marginTop: 4, textAlign: "center" }}>
+            <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900], marginTop: 10 }}>No lab tests yet</Text>
+            <Text style={{ fontFamily: font.regular, fontSize: 15, lineHeight: 20, color: ink[500], marginTop: 4, textAlign: "center" }}>
               Book a home collection and the report files itself.
             </Text>
             <PillButton onPress={() => router.replace("/labs")} style={{ marginTop: 16, alignSelf: "stretch" }}>

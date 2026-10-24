@@ -1,6 +1,6 @@
 import LottieView, { type AnimationObject } from "lottie-react-native";
 import { useEffect, useState } from "react";
-import { Image, Platform, Pressable, View, type ImageSourcePropType, type ViewStyle } from "react-native";
+import { Image, Platform, View, type ImageSourcePropType, type ViewStyle } from "react-native";
 import Animated, {
   Easing,
   interpolate,
@@ -39,6 +39,7 @@ import workingJson from "../../../assets/mascot/working.json";
 import workingStill from "../../../assets/mascot/working-still.png";
 import worriedJson from "../../../assets/mascot/worried.json";
 import worriedStill from "../../../assets/mascot/worried-still.png";
+import { Tap } from "@/components/ui/tap";
 
 /*
  * CHEEKU, ANIMATED.
@@ -272,7 +273,7 @@ function Moves({ move, hop, onPress, onTap, label, children }: { move: Move; hop
   const content = <Animated.View style={[{ transformOrigin: "center bottom" }, style]}>{children}</Animated.View>;
   if (!hop) return content;
   return (
-    <Pressable
+    <Tap
       accessibilityRole={onPress ? "button" : "image"}
       accessibilityLabel={label}
       onPress={() => {
@@ -282,7 +283,7 @@ function Moves({ move, hop, onPress, onTap, label, children }: { move: Move; hop
       }}
     >
       {content}
-    </Pressable>
+    </Tap>
   );
 }
 

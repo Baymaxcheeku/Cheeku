@@ -147,7 +147,7 @@ export function GaugeLegend({ severity }: { severity: Severity }) {
               style={{ backgroundColor: item.dot }}
             />
             <Text
-              className="text-[9px] leading-tight"
+              className="text-3xs leading-tight"
               style={{ color: on ? ink[900] : ink[500], fontWeight: on ? "600" : "400" }}
             >
               {item.label}

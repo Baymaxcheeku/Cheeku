@@ -2,7 +2,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Check, FastForward, FileText, MapPin, PenLine } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
-import { Pressable, RefreshControl, ScrollView, Text, View } from "react-native";
+import { RefreshControl, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { PartnerBadge, ReviewSheet, rupees, SampleNote } from "@/components/labs/parts";
@@ -15,8 +15,9 @@ import { stageIndex, STAGES } from "@/lib/labs/logic";
 import { advanceLabDemo, BOOKINGS_KEY, cancelLab, postReview, useCatalog, useLabBookings } from "@/lib/labs/queries";
 import { useFamily, useSwitchMember } from "@/lib/profiles/family";
 import { formatEventDate } from "@/lib/records/grouping";
-import { brand, ink } from "@/theme/tokens";
+import { brand, ink, semantic } from "@/theme/tokens";
 import { font } from "@/theme/type";
+import { Tap } from "@/components/ui/tap";
 
 /*
  * One lab booking, from "booked" to "report ready".
@@ -92,18 +93,18 @@ export default function LabBooking() {
       >
         {fresh && !cancelled ? (
           <View style={{ alignItems: "center", marginTop: 4, marginBottom: 18 }}>
-            <Enter kind="pop" style={[glassShadow, { width: 76, height: 76, borderRadius: 38, backgroundColor: brand[600], alignItems: "center", justifyContent: "center" }]}>
+            <Enter kind="pop" style={[glassShadow, { width: 76, height: 76, borderRadius: 999, backgroundColor: brand[600], alignItems: "center", justifyContent: "center" }]}>
               <Check size={36} color="#fff" strokeWidth={3} />
             </Enter>
-            <Text style={{ fontFamily: font.semibold, fontSize: 26, letterSpacing: -0.7, color: ink[900], marginTop: 14 }}>Collection booked!</Text>
-            <Text style={{ fontFamily: font.regular, fontSize: 14.5, color: ink[500], marginTop: 4, textAlign: "center" }}>
+            <Text style={{ fontFamily: font.semibold, fontSize: 24, letterSpacing: -0.7, color: ink[900], marginTop: 14 }}>Collection booked!</Text>
+            <Text style={{ fontFamily: font.regular, fontSize: 15, color: ink[500], marginTop: 4, textAlign: "center" }}>
               I&apos;ll file the report in {member?.isPrimary ? "your" : `${first}'s`} health file the moment it&apos;s ready.
             </Text>
           </View>
         ) : null}
 
         {/* Who and where. */}
-        <View style={[glassShadow, { borderRadius: 28, overflow: "hidden", padding: 16 }]}>
+        <View style={[glassShadow, { borderRadius: 32, overflow: "hidden", padding: 16 }]}>
           <Gradient from={partner.color} to="#ffffff" glow="#ffffff" />
           <View className="flex-row items-center gap-3">
             <PartnerBadge partner={partner} size={50} />
@@ -125,19 +126,19 @@ export default function LabBooking() {
 
         {/* Timeline. */}
         {cancelled ? (
-          <Glass strong className="mt-4 rounded-[24px] p-4">
-            <Text style={{ fontFamily: font.semibold, fontSize: 16, color: ink[900] }}>Cancelled</Text>
-            <Text style={{ fontFamily: font.regular, fontSize: 13.5, color: ink[500], marginTop: 2 }}>Nothing was collected and nothing is charged.</Text>
+          <Glass strong className="mt-4 rounded-xl p-4">
+            <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>Cancelled</Text>
+            <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 2 }}>Nothing was collected and nothing is charged.</Text>
           </Glass>
         ) : (
-          <Glass strong className="mt-4 rounded-[26px] p-4">
+          <Glass strong className="mt-4 rounded-xl p-4">
             {STAGES.map((s, i) => {
               const done = i <= idx;
               const now = i === idx;
               return (
                 <View key={s.status} style={{ flexDirection: "row", gap: 12 }}>
                   <View style={{ alignItems: "center", width: 26 }}>
-                    <View style={{ width: 26, height: 26, borderRadius: 13, alignItems: "center", justifyContent: "center", backgroundColor: done ? brand[600] : "rgba(15,16,48,0.07)", borderWidth: now ? 4 : 0, borderColor: brand[100] }}>
+                    <View style={{ width: 26, height: 26, borderRadius: 999, alignItems: "center", justifyContent: "center", backgroundColor: done ? brand[600] : "rgba(15,16,48,0.07)", borderWidth: now ? 4 : 0, borderColor: brand[100] }}>
                       {done && !now ? <Check size={13} color="#fff" strokeWidth={3} /> : null}
                     </View>
                     {i < STAGES.length - 1 ? <View style={{ width: 2, flex: 1, minHeight: 24, backgroundColor: i < idx ? brand[600] : "rgba(15,16,48,0.08)" }} /> : null}
@@ -172,11 +173,11 @@ export default function LabBooking() {
         ) : null}
 
         <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900], marginTop: 24, marginBottom: 10 }}>Tests</Text>
-        <Glass strong className="gap-2 rounded-[22px] p-4">
+        <Glass strong className="gap-2 rounded-xl p-4">
           {testNames.map((n) => (
             <View key={n} className="flex-row items-center gap-2">
               <Check size={14} color={brand[600]} strokeWidth={2.6} />
-              <Text style={{ fontFamily: font.medium, fontSize: 14, color: ink[900] }}>{n}</Text>
+              <Text style={{ fontFamily: font.medium, fontSize: 15, color: ink[900] }}>{n}</Text>
             </View>
           ))}
           <View style={{ height: 1, backgroundColor: "rgba(15,16,48,0.08)", marginVertical: 4 }} />
@@ -186,16 +187,16 @@ export default function LabBooking() {
         </Glass>
 
         {b.status === "booked" || b.status === "assigned" ? (
-          <Pressable accessibilityRole="button" onPress={() => setCancelOpen(true)} style={{ height: 48, alignItems: "center", justifyContent: "center", marginTop: 16 }}>
-            <Text style={{ fontFamily: font.semibold, fontSize: 14.5, color: "#c00a1c" }}>Cancel this collection</Text>
-          </Pressable>
+          <Tap accessibilityRole="button" onPress={() => setCancelOpen(true)} style={{ height: 48, alignItems: "center", justifyContent: "center", marginTop: 16 }}>
+            <Text style={{ fontFamily: font.semibold, fontSize: 15, color: semantic.dangerText }}>Cancel this collection</Text>
+          </Tap>
         ) : null}
 
         {!cancelled && b.status !== "ready" ? (
-          <Pressable accessibilityRole="button" disabled={stepping} onPress={() => void step()} style={{ flexDirection: "row", alignSelf: "center", alignItems: "center", gap: 6, height: 40, paddingHorizontal: 14, borderRadius: 999, backgroundColor: "rgba(15,16,48,0.05)", marginTop: 8, opacity: stepping ? 0.5 : 1 }}>
+          <Tap accessibilityRole="button" disabled={stepping} onPress={() => void step()} style={{ flexDirection: "row", alignSelf: "center", alignItems: "center", gap: 6, height: 40, paddingHorizontal: 14, borderRadius: 999, backgroundColor: "rgba(15,16,48,0.05)", marginTop: 8, opacity: stepping ? 0.5 : 1 }}>
             <FastForward size={14} color={ink[500]} />
-            <Text style={{ fontFamily: font.medium, fontSize: 12.5, color: ink[500] }}>Preview: skip to the next step</Text>
-          </Pressable>
+            <Text style={{ fontFamily: font.medium, fontSize: 13, color: ink[500] }}>Preview: skip to the next step</Text>
+          </Tap>
         ) : null}
 
         <View style={{ marginTop: 16 }}>

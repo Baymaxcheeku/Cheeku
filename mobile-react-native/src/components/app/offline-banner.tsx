@@ -31,10 +31,10 @@ export function OfflineBanner({ updatedAt }: { updatedAt?: number }) {
     >
       <CloudOff size={15} color={semantic.cautionText} />
       <View className="min-w-0 flex-1">
-        <Text className="text-[12.5px] font-semibold" style={{ color: semantic.cautionText }}>
+        <Text className="text-sm font-semibold" style={{ color: semantic.cautionText }}>
           You&apos;re offline
         </Text>
-        <Text className="mt-0.5 text-[11.5px]" style={{ color: ink[500] }}>
+        <Text className="mt-0.5 text-xs" style={{ color: ink[500] }}>
           {synced ? `${synced}. New records won't appear until you reconnect.` : "Showing what was saved on this device."}
         </Text>
       </View>

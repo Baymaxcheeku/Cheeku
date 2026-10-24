@@ -3095,3 +3095,62 @@ reader, memory and resolver work, Athar's chat metering and delete-account
 close-out) with Archit added alongside, so nothing in flight changes hands.
 Google sign-in waits on the bundle rename, because OAuth client ids are tied
 to the bundle id and Apple requires Sign in with Apple once Google is offered.
+
+## UI batch 3: one type scale, one radius scale, one primary · 2026-10-24
+
+Batch 3 of the UI audit. The design system had drifted: 33 font sizes in
+about 1,300 places, 45 radii, around 200 hex colours, and two primary button
+colours used side by side.
+
+**How it was done.** Three AST codemods (the TypeScript compiler, not regex),
+so only real `fontSize` and `border*Radius` values and real string literals
+changed. Before and after screenshots of 28 screens were compared one by one.
+
+**Type.** Ten steps: 11, 12, 13, 15, 17, 20, 24, 28, 34, plus 10 for counters
+and chart ticks, plus display sizes from 36. Ties went up at body sizes,
+because readability wins (14 became 15), and down at title sizes, because a
+title that newly wraps is worse (22 became 20). 939 edits in 108 files.
+Tailwind gets named sizes (`text-sm` is 13) without a line height, so a class
+never changes the leading a screen already set. Two tick labels at 6.5 and 7
+are now 10.
+
+**Radius.** 8, 12, 16, 24, 32 and a pill. Anything whose radius was at least
+half its own width or height became an explicit 999, so circles and capsules
+stay round whatever their size. 6 and under stays free for hairlines (bars,
+dots). Heroes at 34 and 36 went to 32; sheet tops moved from 28 to 32. 372
+edits in 84 files.
+
+**Colour.** Repeated category colours became `hue` (orange, blue, rose, plum,
+teal, ocean, indigo, slate, lime: an fg, a bg and sometimes a wash), and the
+lavender gradient stops became `lilac`. Every literal within a CIEDE2000
+distance of 5 of a token now points at it (the eye barely separates under
+about 2; 5 still reads as the same colour side by side). Health colours
+moved only on exact matches, so nothing became `semantic` by accident. 390
+literals replaced; 54 one-offs remain as lint warnings, mostly illustration
+faces and Learn category art.
+
+**One primary.** Brand purple means "do it". Ink means "selected" (chips,
+segments, the active tab) and stays on the centre +. `PillButton` lost its
+dark tone, and 25 hand-styled black actions moved to brand: Book collection,
+Choose a video slot, Send, Save, Take photo, the cart bar, the add buttons.
+Kept on ink on purpose: toasts, the swipe Clear, the active-filter chip, and
+"Show emergency numbers", because a safety action should not look like a
+sales button. The consent gate's agree button still turns purple only once
+the box is ticked.
+
+**Press.** `<Tap>` now takes `className` (registered with NativeWind's
+`cssInterop`), so 186 more pressables moved over: 241 in all. Small round
+buttons dip to 0.95, big cards to 0.98, the rest to 0.97. The 62 raw
+`Pressable`s left already change colour on `pressed`, or are backdrops that
+must not move.
+
+**Guard.** A `no-restricted-syntax` block in the root ESLint config, scoped
+to the mobile app, warns on font sizes and radii off the scales, raw hex
+colours and arbitrary size classes. These are warnings, not errors, so the
+54 known colours do not break CI.
+
+**Verified here:** typecheck, lint (0 errors, the 54 known colour warnings),
+418 tests, and before and after screenshots of 28 screens. **Needs a phone:**
+the new sizes on a small Android (14 to 15 is the biggest jump, in about 200
+places), purple buttons on the glass cards, and every press.
+

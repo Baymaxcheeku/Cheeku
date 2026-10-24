@@ -23,17 +23,17 @@ const longDate = (iso: string) =>
 export function DocumentBody({ doc }: { doc: LegalDocument }) {
   return (
     <View className="px-5">
-      <Text style={{ fontFamily: font.medium, fontSize: 12.5, color: ink[500] }}>
+      <Text style={{ fontFamily: font.medium, fontSize: 13, color: ink[500] }}>
         Version {doc.version} · Effective {longDate(doc.effectiveOn)}
       </Text>
 
-      <View className="mt-3 rounded-[20px] p-4" style={{ backgroundColor: brand[50], borderWidth: 1, borderColor: brand[100] }}>
+      <View className="mt-3 rounded-xl p-4" style={{ backgroundColor: brand[50], borderWidth: 1, borderColor: brand[100] }}>
         <Text style={{ fontFamily: font.bold, fontSize: 11, letterSpacing: 1.2, color: brand[700] }}>IN SHORT</Text>
-        <Text style={{ fontFamily: font.medium, fontSize: 14.5, lineHeight: 22, color: ink[900], marginTop: 6 }}>{doc.summary}</Text>
+        <Text style={{ fontFamily: font.medium, fontSize: 15, lineHeight: 22, color: ink[900], marginTop: 6 }}>{doc.summary}</Text>
       </View>
 
       {doc.changes.length ? (
-        <View className="mt-3 rounded-[20px] p-4" style={{ backgroundColor: surface.base, borderWidth: 1, borderColor: surface.line }}>
+        <View className="mt-3 rounded-xl p-4" style={{ backgroundColor: surface.base, borderWidth: 1, borderColor: surface.line }}>
           <Text style={{ fontFamily: font.bold, fontSize: 11, letterSpacing: 1.2, color: ink[500] }}>WHAT CHANGED</Text>
           {doc.changes.map((c) => (
             <Bullet key={c} text={c} />
@@ -43,7 +43,7 @@ export function DocumentBody({ doc }: { doc: LegalDocument }) {
 
       {hasPlaceholders() ? (
         /* Neutral, not amber: amber means a health caution in this app. */
-        <View className="mt-3 flex-row gap-2.5 rounded-[16px] p-3.5" style={{ backgroundColor: surface.tint, borderWidth: 1, borderColor: surface.line }}>
+        <View className="mt-3 flex-row gap-2.5 rounded-lg p-3.5" style={{ backgroundColor: surface.tint, borderWidth: 1, borderColor: surface.line }}>
           <PenLine size={15} color={ink[500]} style={{ marginTop: 1 }} />
           <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 12, lineHeight: 17, color: ink[500] }}>
             Draft: company details in square brackets are filled in once {LEGAL_ENTITY.brand} is incorporated.
@@ -74,9 +74,9 @@ export function DocumentBody({ doc }: { doc: LegalDocument }) {
               );
             }
             return (
-              <View key={i} className="mt-3 flex-row gap-2.5 rounded-[16px] p-3.5" style={{ backgroundColor: surface.base, borderWidth: 1, borderColor: brand[100] }}>
+              <View key={i} className="mt-3 flex-row gap-2.5 rounded-lg p-3.5" style={{ backgroundColor: surface.base, borderWidth: 1, borderColor: brand[100] }}>
                 <Info size={16} color={brand[600]} style={{ marginTop: 2 }} />
-                <Text style={{ flex: 1, fontFamily: font.semibold, fontSize: 14, lineHeight: 21, color: ink[900] }}>{b.note}</Text>
+                <Text style={{ flex: 1, fontFamily: font.semibold, fontSize: 15, lineHeight: 21, color: ink[900] }}>{b.note}</Text>
               </View>
             );
           })}

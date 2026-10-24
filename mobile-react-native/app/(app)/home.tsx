@@ -34,7 +34,7 @@ import { todayIso } from "@/lib/memory/clock";
 import type { DueItem } from "@/lib/home/rules";
 import type { TodayAction } from "@/lib/home/today";
 import type { ActiveProfile } from "@/lib/profiles/context";
-import { brand } from "@/theme/tokens";
+import { brand, lilac, surface } from "@/theme/tokens";
 import { Brand } from "@/components/ui/brand";
 import { feel } from "@/lib/feel";
 
@@ -185,7 +185,7 @@ export default function Home() {
       {/* A soft violet wash behind the top of the screen, so the glass has
           something to sit on. Scrolls with the content. */}
       <View pointerEvents="none" style={{ position: "absolute", top: -insets.top - 40, left: 0, right: 0, height: 520 }}>
-        <Gradient from="#ebe6ff" to="#fafafe" angle="vertical" />
+        <Gradient from={lilac.base} to={surface.canvas} angle="vertical" />
       </View>
 
       {/*
@@ -363,15 +363,15 @@ function LoadFailed({ topInset, onRetry }: { topInset: number; onRetry: () => vo
       <View className="mb-4 items-center">
         <MascotFigure size={120} moment="worried" hop />
       </View>
-      <Text className="text-center text-[20px] font-bold text-ink-900">
+      <Text className="text-center text-xl font-bold text-ink-900">
         Could not load your records
       </Text>
-      <Text className="mt-2 text-center text-[14px] leading-[20px] text-ink-500">
+      <Text className="mt-2 text-center text-base leading-[20px] text-ink-500">
         Check your connection and try again. Nothing has been changed.
       </Text>
       <View className="mt-5">
         <Button onPress={onRetry}>
-          <Text className="text-[16px] font-bold text-white">Try again</Text>
+          <Text className="text-lg font-bold text-white">Try again</Text>
         </Button>
       </View>
     </View>
@@ -383,13 +383,13 @@ function NoProfile({ topInset }: { topInset: number }) {
   const router = useRouter();
   return (
     <View className="flex-1 justify-center bg-canvas px-8" style={{ paddingTop: topInset }}>
-      <Text className="text-center text-[22px] font-bold text-ink-900">Set up a profile first</Text>
-      <Text className="mt-2 text-center text-[14px] leading-[20px] text-ink-500">
+      <Text className="text-center text-xl font-bold text-ink-900">Set up a profile first</Text>
+      <Text className="mt-2 text-center text-base leading-[20px] text-ink-500">
         <Brand /> needs someone to keep records for before it can show you anything.
       </Text>
       <View className="mt-5">
         <Button onPress={() => router.push("/profile")}>
-          <Text className="text-[16px] font-bold text-white">Create a profile</Text>
+          <Text className="text-lg font-bold text-white">Create a profile</Text>
         </Button>
       </View>
     </View>

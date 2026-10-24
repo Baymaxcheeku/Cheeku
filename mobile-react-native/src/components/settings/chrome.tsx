@@ -68,14 +68,14 @@ export function SettingsScreen({
           className="flex-row items-center gap-3.5 px-5 pt-3"
           style={bare ? { height: 0, opacity: 0, overflow: "hidden" } : undefined}
         >
-          <Glass strong className="h-14 w-14 items-center justify-center rounded-[18px]">
+          <Glass strong className="h-14 w-14 items-center justify-center rounded-lg">
             <Icon size={23} color={brand[600]} strokeWidth={1.8} />
           </Glass>
           <View className="min-w-0 flex-1">
-            <Text style={{ fontFamily: font.semibold, fontSize: 26, lineHeight: 31, letterSpacing: -0.7, color: ink[900] }}>
+            <Text style={{ fontFamily: font.semibold, fontSize: 24, lineHeight: 31, letterSpacing: -0.7, color: ink[900] }}>
               {brandify(title)}
             </Text>
-            <Text style={{ fontFamily: font.regular, fontSize: 13.5, lineHeight: 19, color: ink[500], marginTop: 2 }}>{brandify(eyebrow)}</Text>
+            <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 19, color: ink[500], marginTop: 2 }}>{brandify(eyebrow)}</Text>
           </View>
         </View>
 
@@ -115,7 +115,7 @@ export function Panel({ children, padded = true }: { children: React.ReactNode; 
         {
           marginHorizontal: 20,
           overflow: "hidden",
-          borderRadius: 26,
+          borderRadius: 24,
           backgroundColor: glass.fillStrong,
           borderWidth: 1,
           borderColor: glass.rim,
@@ -158,7 +158,7 @@ export function SaveButton({
         alignItems: "center",
         justifyContent: "center",
         // Brand, never green, for "Saved": green means a health result here.
-        backgroundColor: saved ? brand[600] : ink[900],
+        backgroundColor: saved ? brand[700] : brand[600],
         opacity: pending ? 0.6 : 1,
       }}
       scale={0.98}
@@ -166,7 +166,7 @@ export function SaveButton({
       {pending ? (
         <ActivityIndicator color="#fff" />
       ) : (
-        <Text accessibilityRole="alert" style={{ fontFamily: font.semibold, fontSize: 15.5, color: "#fff" }}>
+        <Text accessibilityRole="alert" style={{ fontFamily: font.semibold, fontSize: 15, color: "#fff" }}>
           {saved ? "Saved ✓" : label}
         </Text>
       )}

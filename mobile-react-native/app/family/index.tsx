@@ -11,7 +11,7 @@ import { useReducedMotion } from "@/components/ui/motion";
 import { Backdrop, PageTitle, PillButton, ScreenHeader } from "@/components/ui/screen";
 import { planFor } from "@/lib/billing/plans";
 import { familyMode, listMembers, useFamily } from "@/lib/profiles/family";
-import { brand, ink } from "@/theme/tokens";
+import { brand, ink, lilac } from "@/theme/tokens";
 import { font } from "@/theme/type";
 
 /*
@@ -54,14 +54,14 @@ export default function Family() {
         />
 
         {/* Seats. */}
-        <View style={[glassShadow, { marginTop: 18, borderRadius: 26, overflow: "hidden", padding: 16 }]}>
-          <Gradient from="#e5ddff" to="#f7f5ff" glow="#ffffff" />
+        <View style={[glassShadow, { marginTop: 18, borderRadius: 24, overflow: "hidden", padding: 16 }]}>
+          <Gradient from={lilac.violet} to={lilac.mist} glow="#ffffff" />
           <View className="flex-row items-center justify-between">
             <View className="flex-row items-center gap-2">
               <Users size={16} color={brand[700]} />
-              <Text style={{ fontFamily: font.semibold, fontSize: 14.5, color: brand[700] }}>{planFor(tier).name}</Text>
+              <Text style={{ fontFamily: font.semibold, fontSize: 15, color: brand[700] }}>{planFor(tier).name}</Text>
             </View>
-            <Text style={{ fontFamily: font.semibold, fontSize: 14.5, color: ink[900] }}>
+            <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>
               {Math.min(reachable, seats)} of {seats} {seats === 1 ? "seat" : "seats"}
             </Text>
           </View>
@@ -78,7 +78,7 @@ export default function Family() {
         </View>
 
         {/* Members. */}
-        <Glass strong className="mt-4 overflow-hidden rounded-[26px]">
+        <Glass strong className="mt-4 overflow-hidden rounded-xl">
           {list.map((m, i) => (
             <Animated.View key={m.id} entering={still ? undefined : FadeInDown.delay(i * 40).duration(240)}>
               <Pressable
@@ -101,7 +101,7 @@ export default function Family() {
                 </View>
                 <View className="min-w-0 flex-1">
                   <View className="flex-row items-center gap-2">
-                    <Text numberOfLines={1} style={{ flexShrink: 1, fontFamily: font.semibold, fontSize: 15.5, color: m.locked ? ink[500] : ink[900] }}>
+                    <Text numberOfLines={1} style={{ flexShrink: 1, fontFamily: font.semibold, fontSize: 15, color: m.locked ? ink[500] : ink[900] }}>
                       {m.name}
                     </Text>
                     {m.id === activeId ? <Tag label="Viewing" tone="brand" /> : null}
@@ -119,7 +119,7 @@ export default function Family() {
 
         {mode === "family" ? (
           reachable < seats ? (
-            <PillButton tone="dark" onPress={() => router.push("/family/add")} icon={<Plus size={18} color="#fff" />} style={{ marginTop: 16 }}>
+            <PillButton onPress={() => router.push("/family/add")} icon={<Plus size={18} color="#fff" />} style={{ marginTop: 16 }}>
               Add a family member
             </PillButton>
           ) : (
@@ -128,11 +128,11 @@ export default function Family() {
             </Text>
           )
         ) : (
-          <Glass strong className="mt-4 rounded-[26px] p-4">
-            <Text style={{ fontFamily: font.semibold, fontSize: 16, color: ink[900] }}>
+          <Glass strong className="mt-4 rounded-xl p-4">
+            <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>
               {paused > 0 ? "Bring them back" : "Want your family here too?"}
             </Text>
-            <Text style={{ fontFamily: font.regular, fontSize: 13.5, lineHeight: 19, color: ink[700], marginTop: 4 }}>
+            <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 19, color: ink[700], marginTop: 4 }}>
               Family covers up to 4 people for ₹249 a month, with unlimited chats for everyone.
             </Text>
             <PillButton tone="brand" onPress={() => router.push("/settings/subscription")} style={{ marginTop: 14, height: 48 }}>
@@ -143,7 +143,7 @@ export default function Family() {
 
         <View className="mt-6 flex-row items-start gap-2 px-1">
           <ShieldCheck size={14} color={ink[300]} style={{ marginTop: 2 }} />
-          <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 12.5, lineHeight: 18, color: ink[500] }}>
+          <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[500] }}>
             Only you can see these files. Each person&apos;s reports and chats stay in their own file and never mix.
           </Text>
         </View>

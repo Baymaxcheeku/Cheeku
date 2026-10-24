@@ -1,9 +1,10 @@
 import { useRouter } from "expo-router";
 import { ChevronLeft, Hammer } from "lucide-react-native";
-import { Pressable, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { brand, ink } from "@/theme/tokens";
+import { Tap } from "@/components/ui/tap";
 
 /**
  * A screen that exists so navigation is whole, and says so.
@@ -36,7 +37,7 @@ export function ComingLater({
     <View className="flex-1 bg-canvas" style={{ paddingTop: insets.top }}>
       {back ? (
         <View className="h-11 flex-row items-center px-5">
-          <Pressable
+          <Tap scale={0.95}
             accessibilityRole="button"
             accessibilityLabel="Go back"
             onPress={() => (router.canGoBack() ? router.back() : router.replace("/home"))}
@@ -44,7 +45,7 @@ export function ComingLater({
             className="h-9 w-9 items-center justify-center rounded-pill"
           >
             <ChevronLeft size={20} color={ink[700]} />
-          </Pressable>
+          </Tap>
         </View>
       ) : null}
 
@@ -52,11 +53,11 @@ export function ComingLater({
         <View className="h-14 w-14 items-center justify-center rounded-pill bg-brand-50">
           <Hammer size={24} color={brand[600]} />
         </View>
-        <Text className="mt-4 text-[20px] font-bold text-ink-900">{title}</Text>
-        <Text className="mt-1 text-[12px] font-semibold uppercase tracking-wide text-brand-600">
+        <Text className="mt-4 text-xl font-bold text-ink-900">{title}</Text>
+        <Text className="mt-1 text-xs font-semibold uppercase tracking-wide text-brand-600">
           {phase}
         </Text>
-        <Text className="mt-2 text-center text-[13px] leading-[19px] text-ink-500">{detail}</Text>
+        <Text className="mt-2 text-center text-sm leading-[19px] text-ink-500">{detail}</Text>
       </View>
     </View>
   );

@@ -7,7 +7,7 @@ import { SvgXml } from "react-native-svg";
 import { Tap } from "@/components/ui/tap";
 import { brandify } from "@/components/ui/brand";
 import { GlassCircle, Gradient, glassShadow } from "@/components/ui/glass";
-import { brand, ink } from "@/theme/tokens";
+import { brand, ink, lilac, semantic, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
 
 /*
@@ -26,7 +26,7 @@ import { font } from "@/theme/type";
 export function Backdrop({ height = 420 }: { height?: number }) {
   return (
     <View pointerEvents="none" style={{ position: "absolute", top: 0, left: 0, right: 0, height }}>
-      <Gradient from="#ebe6ff" to="#fafafe" angle="vertical" />
+      <Gradient from={lilac.base} to={surface.canvas} angle="vertical" />
     </View>
   );
 }
@@ -83,7 +83,7 @@ export function PageTitle({ title, line, style }: { title: string; line?: string
       <Text accessibilityRole="header" style={{ fontFamily: font.semibold, fontSize: 28, lineHeight: 33, letterSpacing: -0.8, color: ink[900] }}>
         {brandify(title)}
       </Text>
-      {line ? <Text style={{ fontFamily: font.regular, fontSize: 14, lineHeight: 20, color: ink[500], marginTop: 4 }}>{brandify(line)}</Text> : null}
+      {line ? <Text style={{ fontFamily: font.regular, fontSize: 15, lineHeight: 20, color: ink[500], marginTop: 4 }}>{brandify(line)}</Text> : null}
     </View>
   );
 }
@@ -92,20 +92,21 @@ export function PageTitle({ title, line, style }: { title: string; line?: string
 export function SectionTitle({ children, action }: { children: string; action?: React.ReactNode }) {
   return (
     <View className="flex-row items-end justify-between">
-      <Text style={{ fontFamily: font.semibold, fontSize: 19, letterSpacing: -0.3, color: ink[900] }}>{brandify(children)}</Text>
+      <Text style={{ fontFamily: font.semibold, fontSize: 20, letterSpacing: -0.3, color: ink[900] }}>{brandify(children)}</Text>
       {action}
     </View>
   );
 }
 
 /**
- * The two button styles. `dark` is the default primary on glass screens; `brand`
- * is for the one moment that should feel like a commitment (book, confirm).
+ * The pill button. `brand` is the one primary (UI audit, October 2026: the app
+ * had purple and near-black primaries side by side); `light` is secondary on a
+ * coloured surface; `danger` is a destructive action in a health context.
  */
 export function PillButton({
   children,
   onPress,
-  tone = "dark",
+  tone = "brand",
   disabled,
   loading,
   icon,
@@ -113,14 +114,14 @@ export function PillButton({
 }: {
   children: string;
   onPress?: () => void;
-  tone?: "dark" | "brand" | "light" | "danger";
+  tone?: "brand" | "light" | "danger";
   disabled?: boolean;
   loading?: boolean;
   icon?: React.ReactNode;
   style?: ViewProps["style"];
 }) {
-  const bg = { dark: ink[900], brand: brand[600], light: "#ffffff", danger: "#fef1f3" }[tone];
-  const fg = { dark: "#ffffff", brand: "#ffffff", light: ink[900], danger: "#c00a1c" }[tone];
+  const bg = { brand: brand[600], light: "#ffffff", danger: semantic.dangerBg }[tone];
+  const fg = { brand: "#ffffff", light: ink[900], danger: semantic.dangerText }[tone];
   return (
     <Tap
       accessibilityRole="button"
@@ -145,7 +146,7 @@ export function PillButton({
       ]} scale={0.98}
     >
       {loading ? <ActivityIndicator color={fg} /> : icon}
-      <Text style={{ fontFamily: font.semibold, fontSize: 15.5, color: fg }}>{brandify(children, { onDark: tone === "dark" || tone === "brand" })}</Text>
+      <Text style={{ fontFamily: font.semibold, fontSize: 15, color: fg }}>{brandify(children, { onDark: tone === "brand" })}</Text>
     </Tap>
   );
 }

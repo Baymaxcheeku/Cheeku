@@ -57,21 +57,21 @@ export default function Chats() {
 
         <View style={[glassShadow, { flexDirection: "row", alignItems: "center", gap: 8, height: 46, borderRadius: 999, backgroundColor: "#fff", paddingHorizontal: 14 }]}>
           <Search size={16} color={ink[300]} />
-          <TextInput value={query} onChangeText={setQuery} placeholder="Search by what was asked" placeholderTextColor={ink[300]} accessibilityLabel="Search conversations" style={{ flex: 1, fontFamily: font.regular, fontSize: 14.5, color: ink[900] }} />
+          <TextInput value={query} onChangeText={setQuery} placeholder="Search by what was asked" placeholderTextColor={ink[300]} accessibilityLabel="Search conversations" style={{ flex: 1, fontFamily: font.regular, fontSize: 15, color: ink[900] }} />
         </View>
 
         {sittings.isPending ? <ActivityIndicator color={brand[600]} style={{ marginTop: 30 }} /> : null}
         {sittings.isSuccess && groups.length === 0 ? (
           <View style={{ alignItems: "center", gap: 10, marginTop: 30 }}>
             <MessageCircle size={26} color={ink[300]} />
-            <Text style={{ fontFamily: font.regular, fontSize: 14, color: ink[500], textAlign: "center" }}>{query ? "Nothing matches that." : `No conversations about ${name} yet.`}</Text>
+            <Text style={{ fontFamily: font.regular, fontSize: 15, color: ink[500], textAlign: "center" }}>{query ? "Nothing matches that." : `No conversations about ${name} yet.`}</Text>
           </View>
         ) : null}
 
         {groups.map((g) => (
           <View key={g.month} style={{ gap: 8 }}>
             <Text style={{ fontFamily: font.semibold, fontSize: 12, letterSpacing: 0.6, textTransform: "uppercase", color: ink[500] }}>{g.month}</Text>
-            <View style={[glassShadow, { borderRadius: 22, backgroundColor: "#fff", overflow: "hidden" }]}>
+            <View style={[glassShadow, { borderRadius: 24, backgroundColor: "#fff", overflow: "hidden" }]}>
               {g.items.map((s, i) => (
                 <Pressable
                   key={s.id}
@@ -81,10 +81,10 @@ export default function Chats() {
                 >
                   <View style={{ width: 40, alignItems: "center" }}>
                     <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>{new Date(s.lastAt).getDate()}</Text>
-                    <Text style={{ fontFamily: font.medium, fontSize: 10.5, color: ink[500] }}>{new Date(s.lastAt).toLocaleDateString("en-IN", { weekday: "short" })}</Text>
+                    <Text style={{ fontFamily: font.medium, fontSize: 11, color: ink[500] }}>{new Date(s.lastAt).toLocaleDateString("en-IN", { weekday: "short" })}</Text>
                   </View>
                   <View style={{ flex: 1, gap: 3 }}>
-                    <Text numberOfLines={2} style={{ fontFamily: font.medium, fontSize: 14, lineHeight: 19, color: ink[900] }}>
+                    <Text numberOfLines={2} style={{ fontFamily: font.medium, fontSize: 15, lineHeight: 19, color: ink[900] }}>
                       {s.title}
                     </Text>
                     <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>

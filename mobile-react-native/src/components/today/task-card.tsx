@@ -18,7 +18,7 @@ import {
   type LucideIcon,
 } from "lucide-react-native";
 import { useState } from "react";
-import { Image, Pressable, Text, View } from "react-native";
+import { Image, Text, View } from "react-native";
 
 import { Tap } from "@/components/ui/tap";
 import { MealReadCard } from "@/components/today/sheets";
@@ -43,7 +43,7 @@ export type TaskAction = "steps" | "meal" | "reading" | "timer";
 function Thumb({ log }: { log: DailyLog }) {
   const url = usePhotoUrl(log.photoPath);
   return (
-    <View className="h-14 w-14 items-center justify-center overflow-hidden rounded-[14px]" style={{ backgroundColor: surface.tint }}>
+    <View className="h-14 w-14 items-center justify-center overflow-hidden rounded-lg" style={{ backgroundColor: surface.tint }}>
       {url.data ? <Image source={{ uri: url.data }} style={{ width: 56, height: 56 }} alt="Your logged photo" accessibilityLabel="Your logged photo" /> : <ImageIcon size={18} color={ink[300]} />}
     </View>
   );
@@ -62,13 +62,13 @@ function SmallButton({ label, onPress, dark, icon: Icon }: { label: string; onPr
         flexDirection: "row",
         alignItems: "center",
         gap: 6,
-        backgroundColor: dark ? ink[900] : "#fff",
+        backgroundColor: dark ? brand[600] : "#fff",
         borderWidth: dark ? 0 : 1,
         borderColor: surface.line,
       }}
     >
       {Icon ? <Icon size={15} color={dark ? "#fff" : ink[900]} strokeWidth={2.4} /> : null}
-      <Text style={{ fontFamily: font.semibold, fontSize: 13.5, color: dark ? "#fff" : ink[900] }}>{label}</Text>
+      <Text style={{ fontFamily: font.semibold, fontSize: 13, color: dark ? "#fff" : ink[900] }}>{label}</Text>
     </Tap>
   );
 }
@@ -106,20 +106,20 @@ export function TaskCard({
   const reading = task.kind === "reading" ? task.logs[task.logs.length - 1] : undefined;
 
   return (
-    <View className="rounded-[24px] bg-white p-4" style={[glassShadow, { borderWidth: 1, borderColor: done ? brand[100] : surface.line }]}>
+    <View className="rounded-xl bg-white p-4" style={[glassShadow, { borderWidth: 1, borderColor: done ? brand[100] : surface.line }]}>
       <View className="flex-row items-start gap-3">
-        <View className="h-11 w-11 items-center justify-center rounded-[14px]" style={{ backgroundColor: done ? brand[600] : task.due ? (task.dueLabel === "Overdue" ? semantic.dangerBg : semantic.cautionBg) : brand[50] }}>
+        <View className="h-11 w-11 items-center justify-center rounded-lg" style={{ backgroundColor: done ? brand[600] : task.due ? (task.dueLabel === "Overdue" ? semantic.dangerBg : semantic.cautionBg) : brand[50] }}>
           {done ? <Check size={20} color="#fff" strokeWidth={3} /> : <Icon size={20} color={task.due ? (task.dueLabel === "Overdue" ? semantic.dangerText : semantic.cautionText) : brand[600]} strokeWidth={1.9} />}
         </View>
         <View className="min-w-0 flex-1">
-          <Text style={{ fontFamily: font.semibold, fontSize: 15.5, lineHeight: 20, color: done ? ink[500] : ink[900] }}>{task.title}</Text>
+          <Text style={{ fontFamily: font.semibold, fontSize: 15, lineHeight: 20, color: done ? ink[500] : ink[900] }}>{task.title}</Text>
           <View className="mt-1 flex-row items-center gap-1.5">
             <View className="rounded-pill px-2 py-0.5" style={{ backgroundColor: task.due ? (task.dueLabel === "Overdue" ? semantic.dangerBg : semantic.cautionBg) : task.personal ? brand[600] : surface.tint }}>
-              <Text style={{ fontFamily: font.semibold, fontSize: 10.5, color: task.due ? (task.dueLabel === "Overdue" ? semantic.dangerText : semantic.cautionText) : task.personal ? "#fff" : ink[700] }}>
+              <Text style={{ fontFamily: font.semibold, fontSize: 11, color: task.due ? (task.dueLabel === "Overdue" ? semantic.dangerText : semantic.cautionText) : task.personal ? "#fff" : ink[700] }}>
                 {task.due ? task.dueLabel : task.personal ? "For you" : "Healthy living"}
               </Text>
             </View>
-            <Text numberOfLines={1} style={{ flexShrink: 1, fontFamily: font.medium, fontSize: 11.5, color: ink[500] }}>
+            <Text numberOfLines={1} style={{ flexShrink: 1, fontFamily: font.medium, fontSize: 12, color: ink[500] }}>
               {task.chip}
               {task.minutes ? ` · ${task.minutes} min` : ""}
               {task.window !== "anytime" ? ` · ${WINDOW_LABEL[task.window]}` : ""}
@@ -131,7 +131,7 @@ export function TaskCard({
       {task.reason ? (
         <View className="mt-3 flex-row items-center gap-1.5">
           <Sparkles size={13} color={brand[600]} />
-          <Text style={{ flex: 1, fontFamily: font.medium, fontSize: 12.5, color: brand[700] }}>{task.reason}</Text>
+          <Text style={{ flex: 1, fontFamily: font.medium, fontSize: 13, color: brand[700] }}>{task.reason}</Text>
         </View>
       ) : null}
       {!done || task.kind === "meal" ? (
@@ -145,7 +145,7 @@ export function TaskCard({
         </Text>
       ) : null}
       {showMore && task.more ? (
-        <Text style={{ fontFamily: font.regular, fontSize: 12.5, lineHeight: 18, color: ink[500], marginTop: 6 }}>{task.more}</Text>
+        <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[500], marginTop: 6 }}>{task.more}</Text>
       ) : null}
 
       {/* steps: progress against today's target, and the proof */}
@@ -154,12 +154,12 @@ export function TaskCard({
           <View className="flex-row items-baseline justify-between">
             <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>
               {task.progress.value.toLocaleString("en-IN")}
-              <Text style={{ fontFamily: font.regular, fontSize: 12.5, color: ink[500] }}> of {task.progress.target.toLocaleString("en-IN")}</Text>
+              <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[500] }}> of {task.progress.target.toLocaleString("en-IN")}</Text>
             </Text>
             {proof ? (
               <View className="flex-row items-center gap-1">
                 <BadgeCheck size={13} color={brand[600]} />
-                <Text style={{ fontFamily: font.semibold, fontSize: 11.5, color: brand[700] }}>Screenshot added</Text>
+                <Text style={{ fontFamily: font.semibold, fontSize: 12, color: brand[700] }}>Screenshot added</Text>
               </View>
             ) : null}
           </View>
@@ -182,7 +182,7 @@ export function TaskCard({
       ) : null}
 
       {reading ? (
-        <Text style={{ fontFamily: font.semibold, fontSize: 14, color: ink[900], marginTop: 8 }}>
+        <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900], marginTop: 8 }}>
           Logged {reading.valueText} {reading.unit}
         </Text>
       ) : null}
@@ -193,7 +193,7 @@ export function TaskCard({
           {SLEEP_LABELS.map((label, i) => {
             const on = rating === i + 1;
             return (
-              <Pressable
+              <Tap
                 key={label}
                 accessibilityRole="radio"
                 accessibilityState={{ checked: on }}
@@ -202,7 +202,7 @@ export function TaskCard({
                 style={{ backgroundColor: on ? brand[600] : brand[50] }}
               >
                 <Text style={{ fontFamily: font.semibold, fontSize: 12, color: on ? "#fff" : brand[700] }}>{label}</Text>
-              </Pressable>
+              </Tap>
             );
           })}
         </View>

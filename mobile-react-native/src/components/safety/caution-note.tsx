@@ -1,9 +1,10 @@
 import { Phone, TriangleAlert } from "lucide-react-native";
-import { Linking, Pressable, Text, View } from "react-native";
+import { Linking, Text, View } from "react-native";
 
 import { cautionCopy } from "@/lib/safety/caution";
 import type { SafetyResult } from "@/lib/safety/detect";
 import { ink, semantic } from "@/theme/tokens";
+import { Tap } from "@/components/ui/tap";
 
 /**
  * The tier-2 note, shown INSIDE the transcript above the answer.
@@ -31,10 +32,10 @@ export function CautionNote({ result }: { result: SafetyResult }) {
       <View className="flex-row items-start gap-2.5">
         <TriangleAlert size={17} color={semantic.cautionText} style={{ marginTop: 1 }} />
         <View className="min-w-0 flex-1">
-          <Text className="text-[14px] font-bold" style={{ color: semantic.cautionText }}>
+          <Text className="text-base font-bold" style={{ color: semantic.cautionText }}>
             {copy.title}
           </Text>
-          <Text className="mt-1 text-[12.5px] leading-[18px]" style={{ color: ink[700] }}>
+          <Text className="mt-1 text-sm leading-[18px]" style={{ color: ink[700] }}>
             {copy.body}
           </Text>
         </View>
@@ -49,7 +50,7 @@ export function CautionNote({ result }: { result: SafetyResult }) {
        * reading. Making the call one tap away costs nothing and removes the
        * step where somebody has to leave the app to find the number.
        */}
-      <Pressable
+      <Tap
         accessibilityRole="button"
         accessibilityLabel="Call emergency services on 112"
         onPress={() => void Linking.openURL("tel:112")}
@@ -57,10 +58,10 @@ export function CautionNote({ result }: { result: SafetyResult }) {
         style={{ backgroundColor: semantic.cautionText }}
       >
         <Phone size={14} color="#fff" />
-        <Text className="text-[13px] font-bold text-white">
+        <Text className="text-sm font-bold text-white">
           Call 112 if it gets worse
         </Text>
-      </Pressable>
+      </Tap>
     </View>
   );
 }

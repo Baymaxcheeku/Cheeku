@@ -14,8 +14,9 @@ import Animated, {
 } from "react-native-reanimated";
 import { useState } from "react";
 
-import { brand, EASE_SETTLE } from "@/theme/tokens";
+import { EASE_SETTLE, brand, ink, semantic, surface } from "@/theme/tokens";
 import { feel } from "@/lib/feel";
+import { Tap } from "@/components/ui/tap";
 
 /*
  * The motion vocabulary, ported from the web app's `components/ui/motion.tsx`.
@@ -355,7 +356,7 @@ export function TapToWiggle({
 
   return (
     <Animated.View style={[style, animated]}>
-      <Pressable
+      <Tap
         onPress={() => {
           if (still) return;
           wiggle.value = withSequence(
@@ -367,7 +368,7 @@ export function TapToWiggle({
         }}
       >
         {children}
-      </Pressable>
+      </Tap>
     </Animated.View>
   );
 }
@@ -399,7 +400,7 @@ export function SpringSwitch({
   const animated = useAnimatedStyle(() => ({ transform: [{ translateX: knob.value }] }));
 
   return (
-    <Pressable
+    <Tap scale={0.95}
       accessibilityRole="switch"
       accessibilityState={{ checked }}
       accessibilityLabel={label}
@@ -411,7 +412,7 @@ export function SpringSwitch({
         width: 48,
         height: 28,
         borderRadius: 999,
-        backgroundColor: checked ? brand[600] : "#e8e8f4",
+        backgroundColor: checked ? brand[600] : surface.line,
         justifyContent: "center",
       }}
     >
@@ -424,7 +425,7 @@ export function SpringSwitch({
             height: 24,
             borderRadius: 999,
             backgroundColor: "#fff",
-            shadowColor: "#0f1030",
+            shadowColor: ink[900],
             shadowOpacity: 0.12,
             shadowRadius: 4,
             shadowOffset: { width: 0, height: 1 },
@@ -433,7 +434,7 @@ export function SpringSwitch({
           animated,
         ]}
       />
-    </Pressable>
+    </Tap>
   );
 }
 
@@ -460,7 +461,7 @@ export function Meter({ value, total }: { value: number; total: number }) {
     <View style={{ height: 8, borderRadius: 999, backgroundColor: brand[100], overflow: "hidden" }}>
       <Animated.View
         style={[
-          { height: "100%", borderRadius: 999, backgroundColor: complete ? "#23af5f" : brand[600] },
+          { height: "100%", borderRadius: 999, backgroundColor: complete ? semantic.safe : brand[600] },
           animated,
         ]}
       />

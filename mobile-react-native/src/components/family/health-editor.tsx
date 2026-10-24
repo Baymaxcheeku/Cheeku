@@ -4,8 +4,9 @@ import { Pressable, Text, TextInput, View } from "react-native";
 
 import { glass } from "@/components/ui/glass";
 import { allergySuggestions, BLOOD, conditionSuggestions, type MemberHealth } from "@/lib/profiles/health";
-import { brand, ink, surface } from "@/theme/tokens";
+import { brand, ink, lilac, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
+import { Tap } from "@/components/ui/tap";
 
 /*
  * Health basics, as taps rather than typing.
@@ -66,7 +67,7 @@ export function HealthEditor({
       <Section title={`Medicines ${who === "they" ? "they take" : `${who} takes`}`} hint="Anything taken regularly, including supplements.">
         <View style={{ gap: 10 }}>
           {value.medications.map((m, i) => (
-            <View key={i} style={{ padding: 12, borderRadius: 18, backgroundColor: glass.fillStrong, borderWidth: 1, borderColor: surface.line, gap: 8 }}>
+            <View key={i} style={{ padding: 12, borderRadius: 16, backgroundColor: glass.fillStrong, borderWidth: 1, borderColor: surface.line, gap: 8 }}>
               <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
                 <Input
                   value={m.name}
@@ -74,9 +75,9 @@ export function HealthEditor({
                   placeholder="Medicine, e.g. Metformin"
                   style={{ flex: 1 }}
                 />
-                <Pressable accessibilityRole="button" accessibilityLabel="Remove medicine" hitSlop={8} onPress={() => set("medications", value.medications.filter((_, j) => j !== i))}>
+                <Tap accessibilityRole="button" accessibilityLabel="Remove medicine" hitSlop={8} onPress={() => set("medications", value.medications.filter((_, j) => j !== i))}>
                   <X size={18} color={ink[300]} />
-                </Pressable>
+                </Tap>
               </View>
               <View style={{ flexDirection: "row", gap: 8 }}>
                 <Input
@@ -104,15 +105,15 @@ export function HealthEditor({
             {row.map((b) => {
               const on = value.bloodGroup === b;
               return (
-                <Pressable
+                <Tap
                   key={b}
                   accessibilityRole="radio"
                   accessibilityState={{ selected: on }}
                   onPress={() => set("bloodGroup", on ? "" : b)}
-                  style={{ flex: 1, height: 42, borderRadius: 14, alignItems: "center", justifyContent: "center", backgroundColor: on ? brand[600] : glass.fillStrong, borderWidth: on ? 0 : 1, borderColor: surface.line }}
+                  style={{ flex: 1, height: 42, borderRadius: 16, alignItems: "center", justifyContent: "center", backgroundColor: on ? brand[600] : glass.fillStrong, borderWidth: on ? 0 : 1, borderColor: surface.line }}
                 >
-                  <Text style={{ fontFamily: font.semibold, fontSize: 14, color: on ? "#fff" : ink[900] }}>{b}</Text>
-                </Pressable>
+                  <Text style={{ fontFamily: font.semibold, fontSize: 15, color: on ? "#fff" : ink[900] }}>{b}</Text>
+                </Tap>
               );
             })}
           </View>
@@ -132,8 +133,8 @@ export function HealthEditor({
 function Section({ title, hint, children }: { title: string; hint: string; children: React.ReactNode }) {
   return (
     <View>
-      <Text style={{ fontFamily: font.semibold, fontSize: 16, color: ink[900] }}>{title}</Text>
-      <Text style={{ fontFamily: font.regular, fontSize: 12.5, color: ink[500], marginTop: 2, marginBottom: 12 }}>{hint}</Text>
+      <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>{title}</Text>
+      <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 2, marginBottom: 12 }}>{hint}</Text>
       {children}
     </View>
   );
@@ -184,22 +185,22 @@ function ChipSet({
           <Chip key={s} label={s} on={selected.includes(s)} onPress={() => toggle(s)} />
         ))}
         {!adding ? (
-          <Pressable
+          <Tap
             accessibilityRole="button"
             onPress={() => setAdding(true)}
             style={{ height: 38, paddingHorizontal: 12, borderRadius: 999, flexDirection: "row", alignItems: "center", gap: 4, borderWidth: 1.5, borderStyle: "dashed", borderColor: brand[300] }}
           >
             <Plus size={14} color={brand[600]} />
             <Text style={{ fontFamily: font.semibold, fontSize: 13, color: brand[700] }}>{addLabel}</Text>
-          </Pressable>
+          </Tap>
         ) : null}
       </View>
       {adding ? (
         <View style={{ flexDirection: "row", gap: 8, marginTop: 10 }}>
           <Input value={draft} onChangeText={setDraft} placeholder={placeholder} autoFocus onSubmitEditing={commit} returnKeyType="done" style={{ flex: 1 }} />
-          <Pressable accessibilityRole="button" accessibilityLabel="Add" onPress={commit} style={{ width: 46, height: 46, borderRadius: 14, backgroundColor: ink[900], alignItems: "center", justifyContent: "center" }}>
+          <Tap scale={0.95} accessibilityRole="button" accessibilityLabel="Add" onPress={commit} style={{ width: 46, height: 46, borderRadius: 16, backgroundColor: brand[600], alignItems: "center", justifyContent: "center" }}>
             <Check size={18} color="#fff" />
-          </Pressable>
+          </Tap>
         </View>
       ) : null}
     </View>
@@ -225,7 +226,7 @@ function Chip({ label, on, onPress }: { label: string; on: boolean; onPress: () 
       })}
     >
       {on ? <Check size={13} color={brand[700]} strokeWidth={3} /> : null}
-      <Text style={{ fontFamily: on ? font.semibold : font.medium, fontSize: 13.5, color: on ? brand[700] : ink[700] }}>{label}</Text>
+      <Text style={{ fontFamily: on ? font.semibold : font.medium, fontSize: 13, color: on ? brand[700] : ink[700] }}>{label}</Text>
     </Pressable>
   );
 }
@@ -235,10 +236,10 @@ function AddButton({ label, onPress }: { label: string; onPress: () => void }) {
     <Pressable
       accessibilityRole="button"
       onPress={onPress}
-      style={({ pressed }) => ({ height: 46, borderRadius: 16, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, borderWidth: 1.5, borderStyle: "dashed", borderColor: brand[300], backgroundColor: pressed ? "#ece8ff" : "transparent" })}
+      style={({ pressed }) => ({ height: 46, borderRadius: 16, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, borderWidth: 1.5, borderStyle: "dashed", borderColor: brand[300], backgroundColor: pressed ? lilac.base : "transparent" })}
     >
       <Plus size={16} color={brand[600]} />
-      <Text style={{ fontFamily: font.semibold, fontSize: 14, color: brand[700] }}>{label}</Text>
+      <Text style={{ fontFamily: font.semibold, fontSize: 15, color: brand[700] }}>{label}</Text>
     </Pressable>
   );
 }
@@ -251,7 +252,7 @@ function Input(props: React.ComponentProps<typeof TextInput>) {
       {...props}
       onFocus={(e) => { setFocus(true); props.onFocus?.(e); }}
       onBlur={(e) => { setFocus(false); props.onBlur?.(e); }}
-      style={[{ height: 46, paddingHorizontal: 14, borderRadius: 14, backgroundColor: "#fff", borderWidth: 1.5, borderColor: focus ? brand[500] : surface.line, fontFamily: font.regular, fontSize: 14.5, color: ink[900] }, props.style]}
+      style={[{ height: 46, paddingHorizontal: 14, borderRadius: 16, backgroundColor: "#fff", borderWidth: 1.5, borderColor: focus ? brand[500] : surface.line, fontFamily: font.regular, fontSize: 15, color: ink[900] }, props.style]}
     />
   );
 }
@@ -260,7 +261,7 @@ function Unit({ value, onChangeText, unit, placeholder }: { value: string; onCha
   return (
     <View style={{ flex: 1, flexDirection: "row", alignItems: "center" }}>
       <Input value={value} onChangeText={onChangeText} placeholder={placeholder} keyboardType="decimal-pad" style={{ flex: 1, paddingRight: 44 }} />
-      <Text style={{ position: "absolute", right: 14, fontFamily: font.medium, fontSize: 13.5, color: ink[500] }}>{unit}</Text>
+      <Text style={{ position: "absolute", right: 14, fontFamily: font.medium, fontSize: 13, color: ink[500] }}>{unit}</Text>
     </View>
   );
 }

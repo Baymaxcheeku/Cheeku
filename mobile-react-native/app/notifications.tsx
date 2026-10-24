@@ -29,8 +29,9 @@ import { useInbox, useInboxActions, useOpenNotification } from "@/lib/notificati
 import type { ActiveProfile } from "@/lib/profiles/context";
 import { updateNotificationPrefs } from "@/lib/settings/actions";
 import { kv } from "@/lib/storage";
-import { brand, ink, semantic } from "@/theme/tokens";
+import { brand, ink, lilac, semantic, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
+import { Tap } from "@/components/ui/tap";
 
 /*
  * Notifications, the whole screen.
@@ -199,7 +200,7 @@ export default function Notifications() {
             <Text accessibilityRole="header" style={{ fontFamily: font.semibold, fontSize: 28, lineHeight: 33, letterSpacing: -0.8, color: ink[900] }}>
               Notifications
             </Text>
-            <Text style={{ fontFamily: font.regular, fontSize: 14, color: ink[500], marginTop: 3 }}>
+            <Text style={{ fontFamily: font.regular, fontSize: 15, color: ink[500], marginTop: 3 }}>
               {inbox.isPending
                 ? "Checking for news"
                 : unread > 0
@@ -221,7 +222,7 @@ export default function Notifications() {
                 height: 38,
                 paddingHorizontal: 13,
                 borderRadius: 999,
-                backgroundColor: pressed ? "#e4defd" : brand[50],
+                backgroundColor: pressed ? lilac.violet : brand[50],
               })}
             >
               <CheckCheck size={16} color={brand[700]} />
@@ -279,9 +280,9 @@ export default function Notifications() {
         {inbox.isPending ? (
           <InboxSkeleton />
         ) : inbox.isError && items.length === 0 ? (
-          <Glass strong className="mt-4 items-center rounded-[28px] px-6 py-8">
+          <Glass strong className="mt-4 items-center rounded-2xl px-6 py-8">
             <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900], textAlign: "center" }}>Couldn&apos;t load your notifications</Text>
-            <Text style={{ fontFamily: font.regular, fontSize: 14, color: ink[500], marginTop: 4, textAlign: "center" }}>
+            <Text style={{ fontFamily: font.regular, fontSize: 15, color: ink[500], marginTop: 4, textAlign: "center" }}>
               Check your connection and try again.
             </Text>
             <PillButton onPress={() => void inbox.refetch()} style={{ marginTop: 16, alignSelf: "stretch" }}>
@@ -294,7 +295,7 @@ export default function Notifications() {
           <>
             {sections.length === 0 ? (
               <Animated.View entering={still ? undefined : FadeIn.duration(220)} style={{ marginTop: 20 }}>
-                <Glass strong className="flex-row items-center gap-3 rounded-[22px] px-4 py-3.5">
+                <Glass strong className="flex-row items-center gap-3 rounded-xl px-4 py-3.5">
                   <ReadMark read size={11} />
                   <View style={{ flex: 1 }}>
                     <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>You&apos;re all caught up</Text>
@@ -311,7 +312,7 @@ export default function Notifications() {
                   style={{ marginTop: 20 }}
                 >
                   <Text style={{ fontFamily: font.semibold, fontSize: 13, color: ink[500], marginBottom: 8, marginLeft: 4 }}>{section.title}</Text>
-                  <Glass strong className="overflow-hidden rounded-[26px]">
+                  <Glass strong className="overflow-hidden rounded-xl">
                     {section.items.map((item, i) => (
                       <Animated.View key={item.id} layout={still ? undefined : LinearTransition.duration(180)}>
                         <SwipeToClear onClear={() => clearOne(item)}>
@@ -334,9 +335,9 @@ export default function Notifications() {
             {/* Read ones, folded. One tap opens them, one tap clears them. */}
             {split.seen.length > 0 ? (
               <Animated.View layout={still ? undefined : LinearTransition.duration(200)} style={{ marginTop: 22 }}>
-                <Glass strong className="overflow-hidden rounded-[26px]">
+                <Glass strong className="overflow-hidden rounded-xl">
                   <View style={{ flexDirection: "row", alignItems: "center", gap: 10, paddingLeft: 14, paddingRight: 8, height: 56 }}>
-                    <Pressable
+                    <Tap
                       accessibilityRole="button"
                       accessibilityState={{ expanded: showRead }}
                       accessibilityLabel={`${split.seen.length} read. ${showRead ? "Hide" : "Show"}`}
@@ -345,22 +346,22 @@ export default function Notifications() {
                     >
                       <ReadMark read size={10} />
                       <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>Read</Text>
-                      <Text style={{ fontFamily: font.medium, fontSize: 13.5, color: ink[500] }}>{split.seen.length}</Text>
+                      <Text style={{ fontFamily: font.medium, fontSize: 13, color: ink[500] }}>{split.seen.length}</Text>
                       <View style={{ flex: 1 }} />
                       <Text style={{ fontFamily: font.medium, fontSize: 13, color: ink[500] }}>{showRead ? "Hide" : "Show"}</Text>
                       <View style={{ transform: [{ rotate: showRead ? "180deg" : "0deg" }] }}>
                         <ChevronDown size={17} color={ink[500]} />
                       </View>
-                    </Pressable>
+                    </Tap>
                     <Pressable
                       accessibilityRole="button"
                       accessibilityLabel="Clear all read notifications"
                       onPress={clearRead}
                       hitSlop={6}
-                      style={({ pressed }) => ({ flexDirection: "row", alignItems: "center", gap: 5, height: 34, paddingHorizontal: 12, borderRadius: 999, backgroundColor: pressed ? "#e4defd" : brand[50] })}
+                      style={({ pressed }) => ({ flexDirection: "row", alignItems: "center", gap: 5, height: 34, paddingHorizontal: 12, borderRadius: 999, backgroundColor: pressed ? lilac.violet : brand[50] })}
                     >
                       <Trash2 size={14} color={brand[700]} />
-                      <Text style={{ fontFamily: font.semibold, fontSize: 12.5, color: brand[700] }}>Clear</Text>
+                      <Text style={{ fontFamily: font.semibold, fontSize: 13, color: brand[700] }}>Clear</Text>
                     </Pressable>
                   </View>
                   {showRead
@@ -411,7 +412,7 @@ export default function Notifications() {
           style={{ position: "absolute", left: 16, right: 16, bottom: insets.bottom + 16 }}
         >
           <View style={{ flexDirection: "row", alignItems: "center", gap: 10, paddingLeft: 16, paddingRight: 6, height: 52, borderRadius: 999, backgroundColor: ink[900] }}>
-            <Text style={{ flex: 1, fontFamily: font.medium, fontSize: 14, color: "#fff" }}>{undo.label}</Text>
+            <Text style={{ flex: 1, fontFamily: font.medium, fontSize: 15, color: "#fff" }}>{undo.label}</Text>
             <Pressable
               accessibilityRole="button"
               onPress={() => {
@@ -421,7 +422,7 @@ export default function Notifications() {
               style={({ pressed }) => ({ flexDirection: "row", alignItems: "center", gap: 6, height: 40, paddingHorizontal: 14, borderRadius: 999, backgroundColor: pressed ? "rgba(255,255,255,0.22)" : "rgba(255,255,255,0.12)" })}
             >
               <Undo2 size={15} color="#fff" />
-              <Text style={{ fontFamily: font.semibold, fontSize: 14, color: "#fff" }}>Undo</Text>
+              <Text style={{ fontFamily: font.semibold, fontSize: 15, color: "#fff" }}>Undo</Text>
             </Pressable>
           </View>
         </Animated.View>
@@ -459,7 +460,7 @@ function StatusTile({
         {
           flex: 1,
           padding: 14,
-          borderRadius: 22,
+          borderRadius: 24,
           backgroundColor: pressed ? "#fff" : glass.fillStrong,
           borderWidth: on ? 2 : 1,
           borderColor: on ? (read ? semantic.safe : semantic.caution) : glass.rim,
@@ -470,15 +471,15 @@ function StatusTile({
       <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
         <ReadMark read={read} size={10} />
         {action ? (
-          <Pressable accessibilityRole="button" accessibilityLabel={`${action.label} read notifications`} onPress={action.run} hitSlop={10}>
+          <Tap accessibilityRole="button" accessibilityLabel={`${action.label} read notifications`} onPress={action.run} hitSlop={10}>
             <Text style={{ fontFamily: font.semibold, fontSize: 13, color: brand[700] }}>{action.label}</Text>
-          </Pressable>
+          </Tap>
         ) : null}
       </View>
       <Text style={{ fontFamily: font.semibold, fontSize: 24, letterSpacing: -0.6, color: ink[900], marginTop: 8 }}>
         {count} <Text style={{ fontFamily: font.medium, fontSize: 15, letterSpacing: 0, color: ink[700] }}>{label}</Text>
       </Text>
-      <Text style={{ fontFamily: font.regular, fontSize: 12.5, color: ink[500], marginTop: 1 }}>{note}</Text>
+      <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 1 }}>{note}</Text>
     </Pressable>
   );
 }
@@ -491,14 +492,14 @@ function SwipeToClear({ children, onClear }: { children: React.ReactNode; onClea
       rightThreshold={70}
       overshootRight={false}
       // Solid, so the Clear panel behind stays hidden until the row moves.
-      childrenContainerStyle={{ backgroundColor: "#fcfcff" }}
+      childrenContainerStyle={{ backgroundColor: surface.canvas }}
       onSwipeableOpen={(direction) => {
         if (direction === "left") onClear();
       }}
       renderRightActions={() => (
         <View style={{ width: 96, alignItems: "center", justifyContent: "center", backgroundColor: ink[900] }}>
           <Trash2 size={18} color="#fff" />
-          <Text style={{ fontFamily: font.semibold, fontSize: 12.5, color: "#fff", marginTop: 4 }}>Clear</Text>
+          <Text style={{ fontFamily: font.semibold, fontSize: 13, color: "#fff", marginTop: 4 }}>Clear</Text>
         </View>
       )}
     >
@@ -527,7 +528,7 @@ function Chip({ label, on, onPress }: { label: string; on: boolean; onPress: () 
         },
       ]}
     >
-      <Text style={{ fontFamily: on ? font.semibold : font.medium, fontSize: 13.5, color: on ? "#fff" : ink[700] }}>{label}</Text>
+      <Text style={{ fontFamily: on ? font.semibold : font.medium, fontSize: 13, color: on ? "#fff" : ink[700] }}>{label}</Text>
     </Pressable>
   );
 }

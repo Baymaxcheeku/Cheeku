@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { Pressable, Text, TextInput, View } from "react-native";
+import { Text, TextInput, View } from "react-native";
 import type { LucideIcon } from "lucide-react-native";
 
 import { brand, ink, semantic, surface } from "@/theme/tokens";
+import { Tap } from "@/components/ui/tap";
 
 /**
  * A labelled text input. Web `components/ui/field`.
@@ -33,7 +34,7 @@ export function Field({
 
   return (
     <View className="gap-1.5">
-      <Text className="text-[13px] font-medium text-ink-700">
+      <Text className="text-sm font-medium text-ink-700">
         {label}
         {required ? <Text className="text-brand-600"> *</Text> : null}
       </Text>
@@ -104,11 +105,11 @@ export function Field({
       </View>
 
       {error ? (
-        <Text accessibilityRole="alert" className="text-[12px] font-medium text-danger-text">
+        <Text accessibilityRole="alert" className="text-xs font-medium text-danger-text">
           {error}
         </Text>
       ) : hint ? (
-        <Text className="text-[12px] text-ink-300">{hint}</Text>
+        <Text className="text-xs text-ink-300">{hint}</Text>
       ) : null}
     </View>
   );
@@ -142,14 +143,14 @@ export function ChipSelect<T extends string>({
     <View className="gap-1.5">
       <View className="flex-row items-center gap-2">
         {Icon ? <Icon size={16} color={brand[400]} /> : null}
-        <Text className="text-[13px] font-medium text-ink-700">{label}</Text>
+        <Text className="text-sm font-medium text-ink-700">{label}</Text>
       </View>
 
       <View className="flex-row flex-wrap gap-2">
         {options.map(([option, optionLabel]) => {
           const on = value === option;
           return (
-            <Pressable
+            <Tap
               key={option}
               accessibilityRole="radio"
               accessibilityState={{ selected: on }}
@@ -167,12 +168,12 @@ export function ChipSelect<T extends string>({
               }}
             >
               <Text
-                className="text-[13px] font-medium"
+                className="text-sm font-medium"
                 style={{ color: on ? "#ffffff" : ink[700] }}
               >
                 {optionLabel}
               </Text>
-            </Pressable>
+            </Tap>
           );
         })}
       </View>

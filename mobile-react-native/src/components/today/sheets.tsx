@@ -1,7 +1,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { Camera, Check, ImagePlus, Watch, X } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
-import { Image, Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { Image, ScrollView, Text, TextInput, View } from "react-native";
 import Animated, { cancelAnimation, Easing, useAnimatedStyle, useSharedValue, withRepeat, withSequence, withTiming } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -14,8 +14,9 @@ import type { Area } from "@/lib/home/content";
 import { addDailyLog, pickDailyPhoto, saveReading } from "@/lib/home/logs";
 import { PLATE_TAGS, readPlate, type MealRead, type PlateTag } from "@/lib/home/meals";
 import type { PlanTask, StepsTarget } from "@/lib/home/plan";
-import { brand, ink, semantic, surface } from "@/theme/tokens";
+import { brand, ink, lilac, semantic, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
+import { Tap } from "@/components/ui/tap";
 
 /*
  * THE LOGGING SHEETS. Each one does a single thing and saves it itself:
@@ -36,9 +37,9 @@ export function Sheet({ open, title, line, onClose, children }: { open: boolean;
               </Text>
               {line ? <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[500], marginTop: 3 }}>{line}</Text> : null}
             </View>
-            <Pressable accessibilityRole="button" accessibilityLabel="Close" onPress={onClose} hitSlop={8} className="h-9 w-9 items-center justify-center rounded-pill" style={{ backgroundColor: surface.tint }}>
+            <Tap scale={0.95} accessibilityRole="button" accessibilityLabel="Close" onPress={onClose} hitSlop={8} className="h-9 w-9 items-center justify-center rounded-pill" style={{ backgroundColor: surface.tint }}>
               <X size={17} color={ink[700]} />
-            </Pressable>
+            </Tap>
           </View>
           <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 8, paddingBottom: 6 }} showsVerticalScrollIndicator={false}>
             {children}
@@ -62,27 +63,27 @@ function PhotoPicker({ uri, onPick, label, hint }: { uri: string | null; onPick:
   }
   if (uri) {
     return (
-      <View className="overflow-hidden rounded-[20px]" style={{ height: 180, backgroundColor: surface.tint }}>
+      <View className="overflow-hidden rounded-xl" style={{ height: 180, backgroundColor: surface.tint }}>
         <Image source={{ uri }} style={{ width: "100%", height: "100%" }} resizeMode="cover" alt="The photo you picked" accessibilityLabel="The photo you picked" />
-        <Pressable accessibilityRole="button" accessibilityLabel="Remove photo" onPress={() => onPick(null)} className="absolute right-2 top-2 h-8 w-8 items-center justify-center rounded-pill" style={{ backgroundColor: "rgba(15,16,48,0.6)" }}>
+        <Tap scale={0.95} accessibilityRole="button" accessibilityLabel="Remove photo" onPress={() => onPick(null)} className="absolute right-2 top-2 h-8 w-8 items-center justify-center rounded-pill" style={{ backgroundColor: "rgba(15,16,48,0.6)" }}>
           <X size={15} color="#fff" />
-        </Pressable>
+        </Tap>
       </View>
     );
   }
   return (
-    <View className="rounded-[20px] p-4" style={{ borderWidth: 1.5, borderStyle: "dashed", borderColor: brand[200], backgroundColor: brand[50] }}>
-      <Text style={{ fontFamily: font.semibold, fontSize: 14, color: ink[900] }}>{label}</Text>
-      <Text style={{ fontFamily: font.regular, fontSize: 12.5, lineHeight: 17, color: ink[500], marginTop: 2 }}>{hint}</Text>
+    <View className="rounded-xl p-4" style={{ borderWidth: 1.5, borderStyle: "dashed", borderColor: brand[200], backgroundColor: brand[50] }}>
+      <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{label}</Text>
+      <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 17, color: ink[500], marginTop: 2 }}>{hint}</Text>
       <View className="mt-3 flex-row gap-2">
-        <Pressable accessibilityRole="button" onPress={() => void pick("camera")} className="h-11 flex-1 flex-row items-center justify-center gap-2 rounded-pill" style={{ backgroundColor: ink[900] }}>
+        <Tap accessibilityRole="button" onPress={() => void pick("camera")} className="h-11 flex-1 flex-row items-center justify-center gap-2 rounded-pill" style={{ backgroundColor: brand[600] }}>
           <Camera size={16} color="#fff" />
-          <Text style={{ fontFamily: font.semibold, fontSize: 14, color: "#fff" }}>Take photo</Text>
-        </Pressable>
-        <Pressable accessibilityRole="button" onPress={() => void pick("library")} className="h-11 flex-1 flex-row items-center justify-center gap-2 rounded-pill bg-white" style={{ borderWidth: 1, borderColor: surface.line }}>
+          <Text style={{ fontFamily: font.semibold, fontSize: 15, color: "#fff" }}>Take photo</Text>
+        </Tap>
+        <Tap accessibilityRole="button" onPress={() => void pick("library")} className="h-11 flex-1 flex-row items-center justify-center gap-2 rounded-pill bg-white" style={{ borderWidth: 1, borderColor: surface.line }}>
           <ImagePlus size={16} color={ink[900]} />
-          <Text style={{ fontFamily: font.semibold, fontSize: 14, color: ink[900] }}>From gallery</Text>
-        </Pressable>
+          <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>From gallery</Text>
+        </Tap>
       </View>
     </View>
   );
@@ -118,7 +119,7 @@ export function StepsSheet({ open, profileId, task, target, onClose }: { open: b
 
   return (
     <Sheet open={open} title="Log your steps" line={target?.line} onClose={onClose}>
-      <Glass strong style={{ flexDirection: "row", alignItems: "center", gap: 12, borderRadius: 20, paddingHorizontal: 16, paddingVertical: 12 }}>
+      <Glass strong style={{ flexDirection: "row", alignItems: "center", gap: 12, borderRadius: 24, paddingHorizontal: 16, paddingVertical: 12 }}>
         <Watch size={20} color={brand[600]} />
         <TextInput
           value={count}
@@ -127,12 +128,12 @@ export function StepsSheet({ open, profileId, task, target, onClose }: { open: b
           placeholder={goal ? goal.toLocaleString("en-IN") : "8,000"}
           placeholderTextColor={ink[300]}
           accessibilityLabel="Steps today"
-          style={{ flex: 1, minWidth: 0, fontFamily: font.semibold, fontSize: 26, color: ink[900], paddingVertical: 4 }}
+          style={{ flex: 1, minWidth: 0, fontFamily: font.semibold, fontSize: 24, color: ink[900], paddingVertical: 4 }}
         />
-        <Text style={{ fontFamily: font.medium, fontSize: 14, color: ink[500] }}>steps</Text>
+        <Text style={{ fontFamily: font.medium, fontSize: 15, color: ink[500] }}>steps</Text>
       </Glass>
       {task.progress && task.progress.value > 0 ? (
-        <Text style={{ fontFamily: font.regular, fontSize: 12.5, color: ink[500], marginTop: 8 }}>So far today: {task.progress.value.toLocaleString("en-IN")}. Log the latest count; the highest one counts.</Text>
+        <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 8 }}>So far today: {task.progress.value.toLocaleString("en-IN")}. Log the latest count; the highest one counts.</Text>
       ) : null}
       <View className="mt-4">
         <PhotoPicker uri={photo} onPick={setPhoto} label="Add a screenshot as proof" hint="A screenshot from your watch, band or phone's health app." />
@@ -163,9 +164,9 @@ const TONE = {
 export function MealReadCard({ read }: { read: MealRead }) {
   const t = TONE[read.tone];
   return (
-    <View className="rounded-[18px] p-3.5" style={{ backgroundColor: t.bg }}>
-      <Text style={{ fontFamily: font.bold, fontSize: 10.5, letterSpacing: 1, color: t.fg }}>{t.label.toUpperCase()}</Text>
-      <Text style={{ fontFamily: font.semibold, fontSize: 14, lineHeight: 19, color: ink[900], marginTop: 3 }}>{read.line}</Text>
+    <View className="rounded-lg p-3.5" style={{ backgroundColor: t.bg }}>
+      <Text style={{ fontFamily: font.bold, fontSize: 11, letterSpacing: 1, color: t.fg }}>{t.label.toUpperCase()}</Text>
+      <Text style={{ fontFamily: font.semibold, fontSize: 15, lineHeight: 19, color: ink[900], marginTop: 3 }}>{read.line}</Text>
       {read.tips.map((tip) => (
         <Text key={tip} style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[700], marginTop: 6 }}>
           {tip}
@@ -221,12 +222,12 @@ export function MealSheet({ open, profileId, task, areas, veg, onClose }: { open
       <PhotoPicker uri={photo} onPick={setPhoto} label="Photo of the plate" hint="Everything you're eating or drinking. One photo is enough." />
       {GROUPS.map((g) => (
         <View key={g.key} className="mt-4">
-          <Text style={{ fontFamily: font.semibold, fontSize: 12.5, color: ink[500], marginBottom: 8 }}>{g.label}</Text>
+          <Text style={{ fontFamily: font.semibold, fontSize: 13, color: ink[500], marginBottom: 8 }}>{g.label}</Text>
           <View className="flex-row flex-wrap gap-2" style={{ alignItems: "flex-start" }}>
             {PLATE_TAGS.filter((t) => t.group === g.key && !(veg && (t.key === "egg" || t.key === "chicken_fish"))).map((t) => {
               const on = tags.includes(t.key);
               return (
-                <Pressable
+                <Tap
                   key={t.key}
                   accessibilityRole="checkbox"
                   accessibilityState={{ checked: on }}
@@ -235,8 +236,8 @@ export function MealSheet({ open, profileId, task, areas, veg, onClose }: { open
                   style={{ backgroundColor: on ? ink[900] : "#fff", borderWidth: 1, borderColor: on ? ink[900] : surface.line }}
                 >
                   {on ? <Check size={13} color="#fff" strokeWidth={3} /> : null}
-                  <Text style={{ fontFamily: font.medium, fontSize: 13.5, color: on ? "#fff" : ink[900] }}>{t.label}</Text>
-                </Pressable>
+                  <Text style={{ fontFamily: font.medium, fontSize: 13, color: on ? "#fff" : ink[900] }}>{t.label}</Text>
+                </Tap>
               );
             })}
           </View>
@@ -277,7 +278,7 @@ export function ReadingSheet({ open, profileId, task, onClose }: { open: boolean
     <Sheet open={open} title={task.title} line={task.why} onClose={onClose}>
       <View className="flex-row gap-3">
         {(task.fields ?? []).map((f) => (
-          <Glass key={f.key} strong className="flex-1 rounded-[20px] px-4 py-3">
+          <Glass key={f.key} strong className="flex-1 rounded-xl px-4 py-3">
             <Text style={{ fontFamily: font.medium, fontSize: 12, color: ink[500] }}>{f.label}</Text>
             <View className="flex-row items-baseline gap-1.5">
               <TextInput
@@ -287,14 +288,14 @@ export function ReadingSheet({ open, profileId, task, onClose }: { open: boolean
                 placeholder={f.placeholder}
                 placeholderTextColor={ink[300]}
                 accessibilityLabel={`${f.label} in ${f.unit}`}
-                style={{ flex: 1, minWidth: 0, fontFamily: font.semibold, fontSize: 26, color: ink[900], paddingVertical: 4 }}
+                style={{ flex: 1, minWidth: 0, fontFamily: font.semibold, fontSize: 24, color: ink[900], paddingVertical: 4 }}
               />
-              <Text style={{ fontFamily: font.medium, fontSize: 12.5, color: ink[500] }}>{f.unit}</Text>
+              <Text style={{ fontFamily: font.medium, fontSize: 13, color: ink[500] }}>{f.unit}</Text>
             </View>
           </Glass>
         ))}
       </View>
-      <Text style={{ fontFamily: font.regular, fontSize: 12.5, lineHeight: 17, color: ink[500], marginTop: 10 }}>
+      <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 17, color: ink[500], marginTop: 10 }}>
         Saved to your chart and to Cheeku&apos;s memory, so the next answer already knows it.
       </Text>
       <ErrorLine text={error} />
@@ -368,15 +369,15 @@ export function BreathingSheet({ open, profileId, task, onClose }: { open: boole
     <Sheet open={open} title={task.title} line="In through the nose for four, out slowly for six. Shoulders down." onClose={onClose}>
       <View className="items-center py-4">
         <View style={{ width: 230, height: 230, alignItems: "center", justifyContent: "center" }}>
-          <Animated.View style={[{ position: "absolute", width: 230, height: 230, borderRadius: 115, overflow: "hidden" }, circle]}>
-            <Gradient from="#d8cffd" to={brand[400]} angle="vertical" />
+          <Animated.View style={[{ position: "absolute", width: 230, height: 230, borderRadius: 999, overflow: "hidden" }, circle]}>
+            <Gradient from={lilac.deep} to={brand[400]} angle="vertical" />
           </Animated.View>
           <View className="items-center">
             {finished ? (
               <MascotFigure size={120} moment="joy" />
             ) : (
               <>
-                <Text style={{ fontFamily: font.semibold, fontSize: 22, color: ink[900] }}>{running ? (phase === "in" ? "Breathe in" : "Breathe out") : "Ready"}</Text>
+                <Text style={{ fontFamily: font.semibold, fontSize: 20, color: ink[900] }}>{running ? (phase === "in" ? "Breathe in" : "Breathe out") : "Ready"}</Text>
                 <Text style={{ fontFamily: font.medium, fontSize: 15, color: ink[700], marginTop: 4 }}>
                   {mm}:{ss}
                 </Text>

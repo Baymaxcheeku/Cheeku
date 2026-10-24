@@ -40,7 +40,7 @@ export function ProductAssessmentCard({ assessment }: { assessment: ProductAsses
   return (
     <View className="min-w-0 gap-3">
       <View className="rounded-card p-3.5" style={{ backgroundColor: tone.bg }}>
-        <Text className="text-[11px] font-bold uppercase tracking-wide text-ink-500">
+        <Text className="text-2xs font-bold uppercase tracking-wide text-ink-500">
           Overall safety
         </Text>
         <View className="mt-1.5 flex-row items-start gap-3">
@@ -48,10 +48,10 @@ export function ProductAssessmentCard({ assessment }: { assessment: ProductAsses
             <Icon size={20} color={tone.fg} />
           </View>
           <View className="min-w-0 flex-1">
-            <Text className="text-[17px] font-bold" style={{ color: tone.fg }}>
+            <Text className="text-lg font-bold" style={{ color: tone.fg }}>
               {VERDICT_COPY[assessment.verdict]}
             </Text>
-            <Text className="mt-0.5 text-[12.5px] leading-[18px] text-ink-700">
+            <Text className="mt-0.5 text-sm leading-[18px] text-ink-700">
               {assessment.verdictNote}
             </Text>
           </View>
@@ -65,14 +65,14 @@ export function ProductAssessmentCard({ assessment }: { assessment: ProductAsses
                 className="flex-1 rounded-tile bg-surface p-2.5"
                 style={{ minWidth: "45%" }}
               >
-                <Text className="text-[12px] font-semibold text-ink-900">{persona.label}</Text>
+                <Text className="text-xs font-semibold text-ink-900">{persona.label}</Text>
                 <Text
-                  className="mt-0.5 text-[11px] font-medium"
+                  className="mt-0.5 text-2xs font-medium"
                   style={{ color: TONE[persona.status].fg }}
                 >
                   {VERDICT_COPY[persona.status]}
                 </Text>
-                <Text className="mt-0.5 text-[10.5px] leading-tight text-ink-500">
+                <Text className="mt-0.5 text-2xs leading-tight text-ink-500">
                   {persona.note}
                 </Text>
               </View>
@@ -83,7 +83,7 @@ export function ProductAssessmentCard({ assessment }: { assessment: ProductAsses
 
       {assessment.ingredients.length > 0 ? (
         <View className="rounded-card bg-surface p-3.5" style={{ borderWidth: 1, borderColor: surface.line }}>
-          <Text className="text-[11px] font-bold uppercase tracking-wide text-ink-500">
+          <Text className="text-2xs font-bold uppercase tracking-wide text-ink-500">
             Ingredients
           </Text>
           <View className="mt-2 gap-2">
@@ -94,10 +94,10 @@ export function ProductAssessmentCard({ assessment }: { assessment: ProductAsses
                   style={{ backgroundColor: DOT[ingredient.status] }}
                 />
                 <View className="min-w-0 flex-1">
-                  <Text className="text-[12.5px] font-semibold text-ink-900">
+                  <Text className="text-sm font-semibold text-ink-900">
                     {ingredient.name}
                   </Text>
-                  <Text className="text-[11.5px] leading-[16px] text-ink-500">
+                  <Text className="text-xs leading-[16px] text-ink-500">
                     {ingredient.note}
                   </Text>
                 </View>
@@ -114,8 +114,8 @@ export function ProductAssessmentCard({ assessment }: { assessment: ProductAsses
        */}
       {assessment.personalNote ? (
         <View className="rounded-card bg-brand-50 p-3.5">
-          <Text className="text-[12px] font-bold text-brand-700">Because of your profile</Text>
-          <Text className="mt-1 text-[12px] leading-[17px] text-ink-700">
+          <Text className="text-xs font-bold text-brand-700">Because of your profile</Text>
+          <Text className="mt-1 text-xs leading-[17px] text-ink-700">
             {assessment.personalNote}
           </Text>
         </View>
@@ -123,7 +123,7 @@ export function ProductAssessmentCard({ assessment }: { assessment: ProductAsses
 
       <View className="flex-row items-start gap-2">
         <Info size={12} color={ink[300]} style={{ marginTop: 2 }} />
-        <Text className="flex-1 text-[11px] leading-[16px] text-ink-300">
+        <Text className="flex-1 text-2xs leading-[16px] text-ink-300">
           {assessment.disclaimer}
         </Text>
       </View>

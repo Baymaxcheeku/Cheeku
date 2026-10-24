@@ -58,7 +58,7 @@ export function NotificationsBell() {
         {
           width: 48,
           height: 48,
-          borderRadius: 24,
+          borderRadius: 999,
           alignItems: "center",
           justifyContent: "center",
           backgroundColor: glass.fillStrong,
@@ -81,7 +81,7 @@ export function NotificationsBell() {
               minWidth: 19,
               height: 19,
               paddingHorizontal: 5,
-              borderRadius: 10,
+              borderRadius: 999,
               alignItems: "center",
               justifyContent: "center",
               backgroundColor: brand[600],

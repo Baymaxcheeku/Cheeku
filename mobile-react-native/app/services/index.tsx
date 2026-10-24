@@ -12,6 +12,7 @@ import { onShelf, routeFor, searchServices, SHELVES } from "@/lib/services/catal
 import { useServiceRequestList, whenText } from "@/lib/services/requests";
 import { brand, ink, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
+import { Tap } from "@/components/ui/tap";
 
 /*
  * Every service, by shelf, with a search that reaches inside them ("nurse",
@@ -43,9 +44,9 @@ export default function ServicesHub() {
             style={{ flex: 1, fontFamily: font.regular, fontSize: 15, color: ink[900], paddingVertical: 0 }}
           />
           {query ? (
-            <Pressable accessibilityRole="button" accessibilityLabel="Clear search" onPress={() => setQuery("")} hitSlop={8}>
+            <Tap accessibilityRole="button" accessibilityLabel="Clear search" onPress={() => setQuery("")} hitSlop={8}>
               <X size={17} color={ink[500]} />
-            </Pressable>
+            </Tap>
           ) : null}
         </View>
 
@@ -56,12 +57,12 @@ export default function ServicesHub() {
                 const Icon = SERVICE_ICON[s.icon];
                 return (
                   <Pressable key={s.id} accessibilityRole="button" onPress={() => go(routeFor(s))} style={({ pressed }) => ({ flexDirection: "row", alignItems: "center", gap: 12, padding: 14, borderTopWidth: i ? 1 : 0, borderTopColor: surface.line, backgroundColor: pressed ? brand[50] : "#fff" })}>
-                    <View style={{ width: 40, height: 40, borderRadius: 13, backgroundColor: s.tint.from, alignItems: "center", justifyContent: "center" }}>
+                    <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: s.tint.from, alignItems: "center", justifyContent: "center" }}>
                       {Icon ? <Icon size={19} color={s.tint.fg} /> : null}
                     </View>
                     <View style={{ flex: 1 }}>
                       <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{s.title}</Text>
-                      <Text numberOfLines={2} style={{ fontFamily: font.regular, fontSize: 12.5, lineHeight: 17, color: ink[500], marginTop: 1 }}>{s.line}</Text>
+                      <Text numberOfLines={2} style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 17, color: ink[500], marginTop: 1 }}>{s.line}</Text>
                     </View>
                     <ChevronRight size={18} color={ink[300]} />
                   </Pressable>
@@ -69,7 +70,7 @@ export default function ServicesHub() {
               })}
             </View>
           ) : (
-            <Text style={{ fontFamily: font.regular, fontSize: 14, color: ink[500], textAlign: "center", marginTop: 12 }}>
+            <Text style={{ fontFamily: font.regular, fontSize: 15, color: ink[500], textAlign: "center", marginTop: 12 }}>
               Nothing called that yet. Try asking in the chat instead.
             </Text>
           )
@@ -79,10 +80,10 @@ export default function ServicesHub() {
               <View style={{ gap: 8 }}>
                 <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900], marginTop: 4 }}>Your requests</Text>
                 {open.map((r) => (
-                  <Pressable key={r.id} accessibilityRole="button" onPress={() => go(`/services/booking/${r.id}`)} style={({ pressed }) => [glassShadow, { flexDirection: "row", alignItems: "center", gap: 12, padding: 14, borderRadius: 22, backgroundColor: pressed ? brand[50] : "#fff" }]}>
+                  <Pressable key={r.id} accessibilityRole="button" onPress={() => go(`/services/booking/${r.id}`)} style={({ pressed }) => [glassShadow, { flexDirection: "row", alignItems: "center", gap: 12, padding: 14, borderRadius: 24, backgroundColor: pressed ? brand[50] : "#fff" }]}>
                     <View style={{ flex: 1 }}>
-                      <Text style={{ fontFamily: font.semibold, fontSize: 14.5, color: ink[900] }}>{r.title}</Text>
-                      <Text style={{ fontFamily: font.regular, fontSize: 12.5, color: ink[500], marginTop: 1 }}>For {r.forName} · {whenText(r)}</Text>
+                      <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{r.title}</Text>
+                      <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 1 }}>For {r.forName} · {whenText(r)}</Text>
                     </View>
                     <ChevronRight size={18} color={ink[300]} />
                   </Pressable>
@@ -98,7 +99,7 @@ export default function ServicesHub() {
               return (
                 <View key={shelf.id} style={{ marginTop: 14, gap: 12 }}>
                   <View>
-                    <Text style={{ fontFamily: font.semibold, fontSize: 18, letterSpacing: -0.3, color: ink[900] }}>{shelf.title}</Text>
+                    <Text style={{ fontFamily: font.semibold, fontSize: 17, letterSpacing: -0.3, color: ink[900] }}>{shelf.title}</Text>
                     <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 2 }}>{shelf.line}</Text>
                   </View>
                   <Grid2>

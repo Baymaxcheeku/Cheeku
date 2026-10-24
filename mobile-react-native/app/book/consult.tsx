@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ArrowRight, ArrowUp, Building2, ChevronLeft, MonitorPlay, RotateCcw, Stethoscope } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, View } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -19,7 +19,7 @@ import { useBookingDraft, type Intake } from "@/lib/booking/draft";
 import { profileAccess } from "@/lib/profiles/context";
 import { detect, type SafetyResult } from "@/lib/safety/detect";
 import { shouldCaution } from "@/lib/safety/caution";
-import { brand, ink } from "@/theme/tokens";
+import { brand, hue, ink, lilac, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
 import { Brand } from "@/components/ui/brand";
 
@@ -322,7 +322,7 @@ export default function Consult() {
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
       <View className="flex-1 bg-canvas">
         <View pointerEvents="none" style={{ position: "absolute", top: 0, left: 0, right: 0, height: 420 }}>
-          <Gradient from="#ebe6ff" to="#fafafe" angle="vertical" />
+          <Gradient from={lilac.base} to={surface.canvas} angle="vertical" />
         </View>
 
         <Header onBack={() => (router.canGoBack() ? router.back() : router.replace("/home"))} topInset={insets.top} />
@@ -349,7 +349,7 @@ export default function Consult() {
               <View style={{ width: 34, flexShrink: 0 }}>
                 <MascotBust size={34} mood="calm" />
               </View>
-              <Glass strong className="rounded-[18px] px-4 py-3" style={{ borderBottomLeftRadius: 6 }}>
+              <Glass strong className="rounded-lg px-4 py-3" style={{ borderBottomLeftRadius: 6 }}>
                 <TypingDots color={brand[400]} />
               </Glass>
             </View>
@@ -364,7 +364,7 @@ export default function Consult() {
                 onPress={() => answer("Online consultation")}
               />
               <ModeCard
-                icon={<Building2 size={24} color="#c2650b" strokeWidth={1.7} />}
+                icon={<Building2 size={24} color={hue.orange.fg} strokeWidth={1.7} />}
                 title="Clinic visit (OPD)"
                 body="Pick an arrival window, get a token at the desk."
                 onPress={() => answer("Clinic visit (OPD)")}
@@ -379,18 +379,18 @@ export default function Consult() {
                 onPress={() => router.push("/book/doctors")}
                 scale={0.98}
               >
-                <View className="flex-row items-center gap-3 overflow-hidden rounded-[24px] p-3 pr-4">
-                  <Gradient from="#ece6ff" to="#f6f3ff" />
-                  <View className="h-14 w-14 items-center justify-center rounded-[18px] bg-white">
+                <View className="flex-row items-center gap-3 overflow-hidden rounded-xl p-3 pr-4">
+                  <Gradient from={lilac.base} to={lilac.mist} />
+                  <View className="h-14 w-14 items-center justify-center rounded-lg bg-white">
                     <Stethoscope size={24} color={brand[600]} strokeWidth={1.7} />
                   </View>
                   <View className="flex-1">
-                    <Text style={{ fontFamily: font.semibold, fontSize: 16, color: ink[900] }}>See available doctors</Text>
+                    <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>See available doctors</Text>
                     <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 2 }}>
                       Your note goes with the booking
                     </Text>
                   </View>
-                  <View className="h-10 w-10 items-center justify-center rounded-pill" style={{ backgroundColor: ink[900] }}>
+                  <View className="h-10 w-10 items-center justify-center rounded-pill" style={{ backgroundColor: brand[600] }}>
                     <ArrowRight size={18} color="#fff" />
                   </View>
                 </View>
@@ -399,14 +399,14 @@ export default function Consult() {
           ) : null}
 
           {step === "stopped" && !typing ? (
-            <Pressable
+            <Tap
               accessibilityRole="button"
               onPress={() => setEscalation(stoppedBy.current)}
               className="mt-1 self-start rounded-pill px-4 py-2.5"
               style={{ backgroundColor: ink[900] }}
             >
-              <Text style={{ fontFamily: font.semibold, fontSize: 14, color: "#fff" }}>Show emergency numbers</Text>
-            </Pressable>
+              <Text style={{ fontFamily: font.semibold, fontSize: 15, color: "#fff" }}>Show emergency numbers</Text>
+            </Tap>
           ) : null}
         </ScrollView>
 
@@ -448,7 +448,7 @@ export default function Consult() {
               >
                 <View className="flex-row items-center gap-1.5">
                   {c === "Start over" ? <RotateCcw size={14} color={ink[500]} /> : null}
-                  <Text style={{ fontFamily: font.medium, fontSize: 14, color: c === "Looks good" ? brand[700] : ink[900] }}>{c}</Text>
+                  <Text style={{ fontFamily: font.medium, fontSize: 15, color: c === "Looks good" ? brand[700] : ink[900] }}>{c}</Text>
                 </View>
               </Tap>
             ))}
@@ -467,7 +467,7 @@ export default function Consult() {
                 accessibilityLabel="Your answer"
                 returnKeyType="send"
                 autoFocus
-                style={{ flex: 1, fontFamily: font.regular, fontSize: 15.5, color: ink[900] }}
+                style={{ flex: 1, fontFamily: font.regular, fontSize: 15, color: ink[900] }}
               />
             </Glass>
             <GlassCircle dark size={56} label="Send" onPress={() => answer(input)}>
@@ -495,7 +495,7 @@ function Header({ onBack, topInset }: { onBack: () => void; topInset: number }) 
         <Text style={{ fontFamily: font.regular, fontSize: 12, color: ink[500] }}>with <Brand /></Text>
       </View>
       <Glass className="rounded-pill px-3 py-1.5">
-        <Text style={{ fontFamily: font.semibold, fontSize: 11.5, color: brand[700] }}>Preview</Text>
+        <Text style={{ fontFamily: font.semibold, fontSize: 12, color: brand[700] }}>Preview</Text>
       </Glass>
     </View>
   );
@@ -508,7 +508,7 @@ function CheekuLine({ text }: { text: string }) {
       <View style={{ width: 34, flexShrink: 0 }}>
         <MascotBust size={34} mood="thinking" motion="idle" />
       </View>
-      <Glass strong className="flex-shrink rounded-[20px] px-4 py-3" style={{ borderBottomLeftRadius: 6 }}>
+      <Glass strong className="flex-shrink rounded-xl px-4 py-3" style={{ borderBottomLeftRadius: 6 }}>
         <Text style={{ fontFamily: font.regular, fontSize: 15, lineHeight: 21, color: ink[900] }}>{text}</Text>
       </Glass>
     </View>
@@ -518,7 +518,7 @@ function CheekuLine({ text }: { text: string }) {
 function MyLine({ text }: { text: string }) {
   return (
     <View className="items-end pl-14">
-      <View className="rounded-[20px] px-4 py-3" style={{ backgroundColor: brand[600], borderBottomRightRadius: 6 }}>
+      <View className="rounded-xl px-4 py-3" style={{ backgroundColor: brand[600], borderBottomRightRadius: 6 }}>
         <Text style={{ fontFamily: font.medium, fontSize: 15, lineHeight: 21, color: "#fff" }}>{text}</Text>
       </View>
     </View>
@@ -533,12 +533,12 @@ function ModeCard({ icon, title, body, onPress }: { icon: React.ReactNode; title
       onPress={onPress}
       scale={0.98}
     >
-      <Glass strong className="flex-row items-center gap-3.5 rounded-[24px] p-3 pr-4">
-        <View className="h-14 w-14 items-center justify-center rounded-[18px]" style={{ backgroundColor: brand[50] }}>
+      <Glass strong className="flex-row items-center gap-3.5 rounded-xl p-3 pr-4">
+        <View className="h-14 w-14 items-center justify-center rounded-lg" style={{ backgroundColor: brand[50] }}>
           {icon}
         </View>
         <View className="flex-1">
-          <Text style={{ fontFamily: font.semibold, fontSize: 16, color: ink[900] }}>{title}</Text>
+          <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>{title}</Text>
           <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[500], marginTop: 2 }}>{body}</Text>
         </View>
       </Glass>

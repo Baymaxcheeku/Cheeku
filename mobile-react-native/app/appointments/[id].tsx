@@ -30,7 +30,7 @@ import {
 } from "@/lib/booking/appointments";
 import { SPECIALTIES, doctorById } from "@/lib/booking/catalog";
 import { doctorFace } from "@/lib/booking/faces";
-import { brand, ink } from "@/theme/tokens";
+import { brand, hue, ink, lilac } from "@/theme/tokens";
 import { font } from "@/theme/type";
 
 /*
@@ -101,30 +101,30 @@ export default function AppointmentDetail() {
 
       <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 8, paddingBottom: 24 }} showsVerticalScrollIndicator={false}>
         {/* Who and when. */}
-        <View className="overflow-hidden rounded-[30px] p-4">
-          <Gradient from={online ? "#e5ddff" : "#ffe3d3"} to={online ? "#f6f3ff" : "#fff4ec"} glow="#ffffff" />
+        <View className="overflow-hidden rounded-2xl p-4">
+          <Gradient from={online ? lilac.violet : hue.orange.bg} to={online ? lilac.mist : hue.orange.wash} glow="#ffffff" />
           <View className="flex-row items-center gap-3.5">
             <Portrait face={face} size={72} radius={22} />
             <View className="min-w-0 flex-1">
-              <Text style={{ fontFamily: font.semibold, fontSize: 19, letterSpacing: -0.3, color: ink[900] }}>{doctor.name}</Text>
-              <Text style={{ fontFamily: font.medium, fontSize: 13.5, color: brand[600], marginTop: 1 }}>
+              <Text style={{ fontFamily: font.semibold, fontSize: 20, letterSpacing: -0.3, color: ink[900] }}>{doctor.name}</Text>
+              <Text style={{ fontFamily: font.medium, fontSize: 13, color: brand[600], marginTop: 1 }}>
                 {SPECIALTIES[doctor.specialty].label} · {doctor.years} yrs
               </Text>
               <View className="mt-1.5 flex-row items-center gap-1.5">
                 <Languages size={13} color={ink[500]} />
-                <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 12.5, color: ink[500] }}>
+                <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 13, color: ink[500] }}>
                   {doctor.languages.join(", ")}
                 </Text>
               </View>
             </View>
           </View>
 
-          <Glass strong className="mt-4 flex-row items-center gap-3 rounded-[20px] p-3.5">
-            <View className="h-11 w-11 items-center justify-center rounded-[14px]" style={{ backgroundColor: online ? brand[50] : "#fff1e8" }}>
-              {online ? <MonitorPlay size={20} color={brand[600]} /> : <Building2 size={20} color="#c2650b" />}
+          <Glass strong className="mt-4 flex-row items-center gap-3 rounded-xl p-3.5">
+            <View className="h-11 w-11 items-center justify-center rounded-lg" style={{ backgroundColor: online ? brand[50] : hue.orange.wash }}>
+              {online ? <MonitorPlay size={20} color={brand[600]} /> : <Building2 size={20} color={hue.orange.fg} />}
             </View>
             <View className="flex-1">
-              <Text style={{ fontFamily: font.semibold, fontSize: 16, color: ink[900] }}>{whenLabel(appt)}</Text>
+              <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>{whenLabel(appt)}</Text>
               <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 1 }}>
                 {cancelled
                   ? "Cancelled"
@@ -139,12 +139,12 @@ export default function AppointmentDetail() {
         {/* How to get in. */}
         {online && !cancelled ? (
           <View className="mt-4">
-            <Glass strong className="rounded-[26px] p-4">
+            <Glass strong className="rounded-xl p-4">
               <View className="flex-row items-center gap-2">
                 <Video size={17} color={brand[600]} />
-                <Text style={{ fontFamily: font.semibold, fontSize: 16, color: ink[900] }}>Video call</Text>
+                <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>Video call</Text>
               </View>
-              <Text style={{ fontFamily: font.regular, fontSize: 13.5, lineHeight: 19, color: ink[700], marginTop: 6 }}>
+              <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 19, color: ink[700], marginTop: 6 }}>
                 {win === "early"
                   ? `The room opens at ${opensAt}, 15 minutes before your slot. Find a quiet spot with good network.`
                   : win === "open"
@@ -165,7 +165,7 @@ export default function AppointmentDetail() {
             </Glass>
             {joinNote ? (
               <BubblePop style={{ marginTop: 8 }}>
-                <Glass strong className="rounded-[16px] px-3.5 py-2.5">
+                <Glass strong className="rounded-lg px-3.5 py-2.5">
                   <Text accessibilityLiveRegion="polite" style={{ fontFamily: font.medium, fontSize: 13, color: ink[700] }}>
                     Preview: there&apos;s no real call room yet. In the live app this opens the video call.
                   </Text>
@@ -176,12 +176,12 @@ export default function AppointmentDetail() {
         ) : null}
 
         {!online && !cancelled ? (
-          <Glass strong className="mt-4 gap-3 rounded-[26px] p-4">
-            <Row icon={<MapPin size={17} color="#c2650b" />} title={doctor.clinic.name} line={`${doctor.clinic.area} · ${doctor.clinic.km} km away`} />
-            <Row icon={<Clock3 size={17} color="#c2650b" />} title="OPD timings" line={doctor.clinic.opd} />
-            <Row icon={<Ticket size={17} color="#c2650b" />} title="At the front desk" line="Show this screen, take a token, and you're seen in turn." />
+          <Glass strong className="mt-4 gap-3 rounded-xl p-4">
+            <Row icon={<MapPin size={17} color={hue.orange.fg} />} title={doctor.clinic.name} line={`${doctor.clinic.area} · ${doctor.clinic.km} km away`} />
+            <Row icon={<Clock3 size={17} color={hue.orange.fg} />} title="OPD timings" line={doctor.clinic.opd} />
+            <Row icon={<Ticket size={17} color={hue.orange.fg} />} title="At the front desk" line="Show this screen, take a token, and you're seen in turn." />
             {upcoming ? (
-              <PillButton tone="dark" onPress={directions} icon={<Navigation size={17} color="#fff" />} style={{ marginTop: 4 }}>
+              <PillButton onPress={directions} icon={<Navigation size={17} color="#fff" />} style={{ marginTop: 4 }}>
                 Get directions
               </PillButton>
             ) : null}
@@ -189,11 +189,11 @@ export default function AppointmentDetail() {
         ) : null}
 
         {/* What goes with it. */}
-        <Glass className="mt-4 gap-3 rounded-[26px] p-4">
+        <Glass className="mt-4 gap-3 rounded-xl p-4">
           <Row icon={<ClipboardCheck size={17} color={brand[600]} />} title="Pre-consultation note shared" line={`For ${appt.forName === "Me" ? "you" : appt.forName} · ${appt.concern}`} />
-          <View className="flex-row items-center justify-between rounded-[16px] px-3.5 py-3" style={{ backgroundColor: "#f6f4ff" }}>
-            <Text style={{ fontFamily: font.medium, fontSize: 13.5, color: ink[700] }}>{online ? "Consultation fee" : "Pay at the clinic"}</Text>
-            <Text style={{ fontFamily: font.semibold, fontSize: 16, color: ink[900] }}>₹{fee}</Text>
+          <View className="flex-row items-center justify-between rounded-lg px-3.5 py-3" style={{ backgroundColor: lilac.mist }}>
+            <Text style={{ fontFamily: font.medium, fontSize: 13, color: ink[700] }}>{online ? "Consultation fee" : "Pay at the clinic"}</Text>
+            <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>₹{fee}</Text>
           </View>
         </Glass>
 
@@ -216,7 +216,6 @@ export default function AppointmentDetail() {
             Cancel
           </PillButton>
           <PillButton
-            tone="dark"
             icon={<CalendarClock size={17} color="#fff" />}
             onPress={() => router.push({ pathname: "/book/slot", params: { id: doctor.id, reschedule: appt.id } })}
             style={{ flex: 1.4 }}
@@ -248,7 +247,7 @@ function Row({ icon, title, line }: { icon: React.ReactNode; title: string; line
     <View className="flex-row items-start gap-3">
       <View style={{ marginTop: 1 }}>{icon}</View>
       <View className="flex-1">
-        <Text style={{ fontFamily: font.semibold, fontSize: 14.5, color: ink[900] }}>{title}</Text>
+        <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{title}</Text>
         <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[500], marginTop: 1 }}>{line}</Text>
       </View>
     </View>

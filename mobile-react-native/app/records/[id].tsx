@@ -2,7 +2,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ArrowRightLeft, BadgeCheck, FileType2, Lightbulb, MessageCircle, MoreHorizontal, Stethoscope, Trash2 } from "lucide-react-native";
-import { ActivityIndicator, Pressable, ScrollView, Text, View } from "react-native";
+import { ActivityIndicator, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { FileChip } from "@/components/records/chrome";
@@ -27,8 +27,9 @@ import { buildInsight } from "@/lib/records/insight";
 import { confirmRecord, getRecord, signedDocumentUrl } from "@/lib/records/queries";
 import { deleteRecord, moveRecord, refreshRecords, setRecordType } from "@/lib/records/record-actions";
 import { DOC_TYPE_LABEL, DOC_TYPES, type DocType, type RecordDetail as Detail } from "@/lib/records/types";
-import { brand, ink } from "@/theme/tokens";
+import { brand, ink, lilac, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
+import { Tap } from "@/components/ui/tap";
 
 /**
  * One record, in the layout its kind deserves.
@@ -153,7 +154,7 @@ export default function RecordDetailScreen() {
   if (!record) {
     return (
       <View className="flex-1 items-center justify-center bg-canvas px-10" style={{ paddingTop: insets.top }}>
-        <Text style={{ fontFamily: font.bold, fontSize: 18, color: ink[900] }}>Record not found</Text>
+        <Text style={{ fontFamily: font.bold, fontSize: 17, color: ink[900] }}>Record not found</Text>
         <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 19, color: ink[500], textAlign: "center", marginTop: 8 }}>
           It may have been removed, or it belongs to a family member this plan does not cover.
         </Text>
@@ -190,12 +191,12 @@ export default function RecordDetailScreen() {
       />
       <ScrollView className="flex-1" contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 8, paddingBottom: insets.bottom + 28 }} showsVerticalScrollIndicator={false}>
         {/* The record, as a pastel hero in its type's own colour. */}
-        <View className="overflow-hidden rounded-[30px] p-4" style={glassShadow}>
+        <View className="overflow-hidden rounded-2xl p-4" style={glassShadow}>
           <Gradient from={type.wash} to="#ffffff" glow="#ffffff" />
           <View className="flex-row items-center gap-3">
             <FileChip mimeType={rec.mimeType} docType={rec.docType} />
             <View className="min-w-0 flex-1">
-              <Text numberOfLines={2} style={{ fontFamily: font.semibold, fontSize: 18, lineHeight: 23, letterSpacing: -0.3, color: ink[900] }}>
+              <Text numberOfLines={2} style={{ fontFamily: font.semibold, fontSize: 17, lineHeight: 23, letterSpacing: -0.3, color: ink[900] }}>
                 {rec.title}
               </Text>
               <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 3 }}>
@@ -211,26 +212,26 @@ export default function RecordDetailScreen() {
                 {rec.status === "filed" ? "Filed" : "Waiting for your check"}
               </Text>
             </Glass>
-            <Pressable accessibilityRole="button" accessibilityLabel={`${isPrimary ? "In your file" : `In ${first}'s file`}. Move it to someone else`} onPress={() => { setSheetError(null); setSheet("move"); }}>
+            <Tap accessibilityRole="button" accessibilityLabel={`${isPrimary ? "In your file" : `In ${first}'s file`}. Move it to someone else`} onPress={() => { setSheetError(null); setSheet("move"); }}>
               <Glass className="flex-row items-center gap-1.5 rounded-pill py-1 pl-1 pr-3">
                 {member ? <Avatar svg={member.avatar} photo={member.photo} image={member.avatarImage} background={member.avatarBackground} size={22} /> : null}
                 <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 12, color: ink[700], marginLeft: member ? 0 : 8 }}>
                   {isPrimary ? "In your file" : `In ${first}'s file`}
                 </Text>
               </Glass>
-            </Pressable>
+            </Tap>
           </View>
         </View>
 
         {rec.status === "needs_review" ? (
           <Card style={{ marginTop: 12 }}>
             <View className="flex-row items-start gap-3">
-              <View style={{ width: 40, height: 40, borderRadius: 13, backgroundColor: brand[50], alignItems: "center", justifyContent: "center" }}>
+              <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: brand[50], alignItems: "center", justifyContent: "center" }}>
                 <BadgeCheck size={19} color={brand[600]} />
               </View>
               <View className="flex-1">
-                <Text style={{ fontFamily: font.semibold, fontSize: 16, color: ink[900] }}>Did I read this right?</Text>
-                <Text style={{ fontFamily: font.regular, fontSize: 13.5, lineHeight: 19, color: ink[700], marginTop: 3 }}>
+                <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>Did I read this right?</Text>
+                <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 19, color: ink[700], marginTop: 3 }}>
                   Match what&apos;s below with the original page. If it lines up, file it. If I got the kind of record wrong, change it from the menu.
                 </Text>
               </View>
@@ -247,9 +248,9 @@ export default function RecordDetailScreen() {
 
         {/* The original. */}
         {source ? (
-          <Glass strong className="mt-5 flex-row items-center gap-3 rounded-[22px] p-4">
+          <Glass strong className="mt-5 flex-row items-center gap-3 rounded-xl p-4">
             <BadgeCheck size={18} color={brand[600]} />
-            <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 13.5, lineHeight: 19, color: ink[700] }}>
+            <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 13, lineHeight: 19, color: ink[700] }}>
               {source === "lab_partner"
                 ? `Sent straight from ${(rec.extraction as { partner?: string }).partner ?? "the lab"}, so there is no scanned page. Every value is exactly as the lab reported it.`
                 : "Cheeku filed this from your booking, so there's no paper copy. It updates by itself if the booking changes."}
@@ -262,7 +263,7 @@ export default function RecordDetailScreen() {
         )}
 
         {/* What to do next. */}
-        <PillButton tone="dark" onPress={() => router.push(`/ask?record=${rec.id}`)} icon={<MessageCircle size={18} color="#fff" />} style={{ marginTop: 20 }}>
+        <PillButton onPress={() => router.push(`/ask?record=${rec.id}`)} icon={<MessageCircle size={18} color="#fff" />} style={{ marginTop: 20 }}>
           {`Ask Cheeku about this ${noun}`}
         </PillButton>
         {rec.docType === "lab_report" || rec.docType === "scan" || rec.docType === "discharge" ? (
@@ -396,7 +397,7 @@ function Plain({ record }: { record: Detail }) {
         <FactList rows={fields.map((f) => ({ label: f.label as string, value: /^\d{4}-\d{2}-\d{2}$/.test(f.value as string) ? shortDate(f.value as string) : (f.value as string) }))} />
       ) : (
         <Card>
-          <Text style={{ fontFamily: font.regular, fontSize: 14, lineHeight: 20, color: ink[700] }}>
+          <Text style={{ fontFamily: font.regular, fontSize: 15, lineHeight: 20, color: ink[700] }}>
             Nothing specific yet. The original page below has all of it, and if this is a prescription, a bill or another kind I know, change the kind from the menu.
           </Text>
         </Card>
@@ -408,15 +409,15 @@ function Plain({ record }: { record: Detail }) {
 function Insight({ record }: { record: Detail }) {
   const insight = buildInsight(record);
   return (
-    <View className="mt-5 overflow-hidden rounded-[26px] p-4" style={glassShadow}>
-      <Gradient from="#efeaff" to="#f8f6ff" />
+    <View className="mt-5 overflow-hidden rounded-xl p-4" style={glassShadow}>
+      <Gradient from={lilac.base} to={surface.tint} />
       <View className="flex-row items-center gap-2.5">
-        <View className="h-9 w-9 items-center justify-center rounded-[12px] bg-white">
+        <View className="h-9 w-9 items-center justify-center rounded-md bg-white">
           <Lightbulb size={17} color={brand[600]} />
         </View>
         <Text style={{ flex: 1, fontFamily: font.semibold, fontSize: 15, color: brand[700] }}>{insight.headline}</Text>
       </View>
-      <Text style={{ fontFamily: font.regular, fontSize: 13.5, lineHeight: 20, color: ink[700], marginTop: 8 }}>{insight.body}</Text>
+      <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 20, color: ink[700], marginTop: 8 }}>{insight.body}</Text>
     </View>
   );
 }

@@ -14,7 +14,7 @@ import {
   type MedTiming,
   type PaymentStatus,
 } from "@/lib/records/details";
-import { brand, ink, surface } from "@/theme/tokens";
+import { brand, hue, ink, lilac, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
 
 /*
@@ -31,7 +31,7 @@ import { font } from "@/theme/type";
 
 export function Card({ children, style, padded = true }: { children: React.ReactNode; style?: ViewStyle; padded?: boolean }) {
   return (
-    <Glass strong className="rounded-[24px]" style={[padded ? { padding: 16 } : { overflow: "hidden" }, style]}>
+    <Glass strong className="rounded-xl" style={[padded ? { padding: 16 } : { overflow: "hidden" }, style]}>
       {children}
     </Glass>
   );
@@ -41,7 +41,7 @@ export function Section({ title, right, children, style }: { title: string; righ
   return (
     <View style={[{ marginTop: 22 }, style]}>
       <View style={{ flexDirection: "row", alignItems: "baseline", justifyContent: "space-between", marginBottom: 10 }}>
-        <Text accessibilityRole="header" style={{ fontFamily: font.semibold, fontSize: 17.5, letterSpacing: -0.3, color: ink[900] }}>
+        <Text accessibilityRole="header" style={{ fontFamily: font.semibold, fontSize: 17, letterSpacing: -0.3, color: ink[900] }}>
           {title}
         </Text>
         {right}
@@ -52,7 +52,7 @@ export function Section({ title, right, children, style }: { title: string; righ
 }
 
 export function Eyebrow({ children, color = ink[500] }: { children: string; color?: string }) {
-  return <Text style={{ fontFamily: font.semibold, fontSize: 11.5, letterSpacing: 0.6, textTransform: "uppercase", color }}>{children}</Text>;
+  return <Text style={{ fontFamily: font.semibold, fontSize: 12, letterSpacing: 0.6, textTransform: "uppercase", color }}>{children}</Text>;
 }
 
 export type Fact = { label: string; value: string | null | undefined; icon?: LucideIcon };
@@ -71,10 +71,10 @@ export function FactGrid({ facts, tint = brand[600] }: { facts: Fact[]; tint?: s
       {rows.map((row, r) => (
         <View key={r} style={{ flexDirection: "row", gap: 8 }}>
           {row.map((f) => (
-            <Glass key={f.label} strong className="rounded-[18px]" style={{ flex: 1, padding: 12 }}>
+            <Glass key={f.label} strong className="rounded-lg" style={{ flex: 1, padding: 12 }}>
               {f.icon ? <f.icon size={15} color={tint} /> : null}
-              <Text style={{ fontFamily: font.regular, fontSize: 11.5, color: ink[500], marginTop: f.icon ? 6 : 0 }}>{f.label}</Text>
-              <Text selectable style={{ fontFamily: font.semibold, fontSize: 13.5, lineHeight: 18, color: ink[900], marginTop: 2 }}>
+              <Text style={{ fontFamily: font.regular, fontSize: 12, color: ink[500], marginTop: f.icon ? 6 : 0 }}>{f.label}</Text>
+              <Text selectable style={{ fontFamily: font.semibold, fontSize: 13, lineHeight: 18, color: ink[900], marginTop: 2 }}>
                 {f.value}
               </Text>
             </Glass>
@@ -95,7 +95,7 @@ export function FactList({ rows }: { rows: Fact[] }) {
       {shown.map((r, i) => (
         <View key={r.label} style={{ flexDirection: "row", alignItems: "flex-start", gap: 12, paddingHorizontal: 16, paddingVertical: 12, borderTopWidth: i ? 1 : 0, borderTopColor: surface.line }}>
           <Text style={{ width: 112, fontFamily: font.regular, fontSize: 13, color: ink[500] }}>{r.label}</Text>
-          <Text selectable style={{ flex: 1, fontFamily: font.medium, fontSize: 13.5, lineHeight: 19, color: ink[900], textAlign: "right" }}>
+          <Text selectable style={{ flex: 1, fontFamily: font.medium, fontSize: 13, lineHeight: 19, color: ink[900], textAlign: "right" }}>
             {r.value}
           </Text>
         </View>
@@ -136,13 +136,13 @@ export function Bullets({ items, color = brand[500], numbered = false }: { items
       {items.map((t, i) => (
         <View key={`${i}-${t}`} style={{ flexDirection: "row", gap: 10 }}>
           {numbered ? (
-            <View style={{ width: 20, height: 20, borderRadius: 10, backgroundColor: brand[50], alignItems: "center", justifyContent: "center", marginTop: 1 }}>
+            <View style={{ width: 20, height: 20, borderRadius: 999, backgroundColor: brand[50], alignItems: "center", justifyContent: "center", marginTop: 1 }}>
               <Text style={{ fontFamily: font.semibold, fontSize: 11, color: brand[700] }}>{i + 1}</Text>
             </View>
           ) : (
             <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: color, marginTop: 7 }} />
           )}
-          <Text selectable style={{ flex: 1, fontFamily: font.regular, fontSize: 14, lineHeight: 20.5, color: ink[700] }}>
+          <Text selectable style={{ flex: 1, fontFamily: font.regular, fontSize: 15, lineHeight: 20.5, color: ink[700] }}>
             {t}
           </Text>
         </View>
@@ -157,7 +157,7 @@ const PAYMENT_TONE: Record<PaymentStatus, { bg: string; fg: string }> = {
   paid: { bg: brand[50], fg: brand[700] },
   due: { bg: ink[900], fg: "#ffffff" },
   partial: { bg: ink[900], fg: "#ffffff" },
-  refunded: { bg: "#e9eef7", fg: "#2f4a7a" },
+  refunded: { bg: hue.slate.bg, fg: "#2f4a7a" },
   cancelled: { bg: "rgba(15,16,48,0.06)", fg: ink[500] },
 };
 
@@ -171,10 +171,10 @@ export function MoneyLine({ label, amount, strong, muted, negative, sub, free }:
   return (
     <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 12, paddingVertical: strong ? 4 : 6 }}>
       <View style={{ flex: 1 }}>
-        <Text style={{ fontFamily: strong ? font.semibold : font.regular, fontSize: strong ? 16 : 14, color }}>{label}</Text>
+        <Text style={{ fontFamily: strong ? font.semibold : font.regular, fontSize: strong ? 17 : 15, color }}>{label}</Text>
         {sub ? <Text style={{ fontFamily: font.regular, fontSize: 12, color: ink[500], marginTop: 1 }}>{sub}</Text> : null}
       </View>
-      <Text style={{ fontFamily: strong ? font.bold : font.medium, fontSize: strong ? 17 : 14, color, fontVariant: ["tabular-nums"] }}>
+      <Text style={{ fontFamily: strong ? font.bold : font.medium, fontSize: strong ? 17 : 15, color, fontVariant: ["tabular-nums"] }}>
         {free && amount === 0 ? "Free" : `${negative ? "− " : ""}${rupees(amount)}`}
       </Text>
     </View>
@@ -221,7 +221,7 @@ export function MedicineCard({ m, startIso, extra }: { m: Medicine; startIso: st
     <View style={{ padding: 14, gap: 12 }}>
       <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 10 }}>
         <View style={{ flex: 1 }}>
-          <Text selectable style={{ fontFamily: font.semibold, fontSize: 15.5, color: ink[900] }}>
+          <Text selectable style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>
             {m.name}
             {m.strength ? <Text style={{ fontFamily: font.medium, color: ink[500] }}>{`  ${m.strength}`}</Text> : null}
           </Text>
@@ -234,7 +234,7 @@ export function MedicineCard({ m, startIso, extra }: { m: Medicine; startIso: st
             <Text style={{ fontFamily: font.semibold, fontSize: 13, color: course.ended ? ink[300] : brand[700] }}>
               {course.ended ? "Course done" : `${course.left} day${course.left === 1 ? "" : "s"} left`}
             </Text>
-            {course.endsOn && !course.ended ? <Text style={{ fontFamily: font.regular, fontSize: 11.5, color: ink[500], marginTop: 1 }}>till {shortDate(course.endsOn)}</Text> : null}
+            {course.endsOn && !course.ended ? <Text style={{ fontFamily: font.regular, fontSize: 12, color: ink[500], marginTop: 1 }}>till {shortDate(course.endsOn)}</Text> : null}
           </View>
         ) : null}
       </View>
@@ -251,7 +251,7 @@ export function MedicineCard({ m, startIso, extra }: { m: Medicine; startIso: st
                 style={{ flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, height: 36, borderRadius: 12, backgroundColor: on ? brand[50] : "rgba(15,16,48,0.035)" }}
               >
                 <slot.icon size={14} color={on ? brand[600] : ink[300]} />
-                <Text style={{ fontFamily: on ? font.semibold : font.regular, fontSize: 12.5, color: on ? brand[700] : ink[300] }}>{on ? (n === 0.5 ? "½" : n) : "–"}</Text>
+                <Text style={{ fontFamily: on ? font.semibold : font.regular, fontSize: 13, color: on ? brand[700] : ink[300] }}>{on ? (n === 0.5 ? "½" : n) : "–"}</Text>
               </View>
             );
           })}
@@ -260,9 +260,9 @@ export function MedicineCard({ m, startIso, extra }: { m: Medicine; startIso: st
 
       {timing || m.note || extra ? (
         <View style={{ gap: 6 }}>
-          {timing ? <Chip text={timing} bg="#fff4e6" fg="#8a4b08" /> : null}
-          {m.note ? <Text style={{ fontFamily: font.regular, fontSize: 12.5, lineHeight: 18, color: ink[500] }}>{m.note}</Text> : null}
-          {extra ? <Text style={{ fontFamily: font.regular, fontSize: 12.5, lineHeight: 18, color: ink[500] }}>{extra}</Text> : null}
+          {timing ? <Chip text={timing} bg={hue.orange.wash} fg="#8a4b08" /> : null}
+          {m.note ? <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[500] }}>{m.note}</Text> : null}
+          {extra ? <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[500] }}>{extra}</Text> : null}
         </View>
       ) : null}
     </View>
@@ -335,14 +335,14 @@ export function ReminderButton({ reminder, label, setLabel = "Reminder set" }: {
           gap: 8,
           height: 46,
           borderRadius: 999,
-          backgroundColor: on ? brand[600] : pressed ? "#ece8ff" : brand[50],
+          backgroundColor: on ? brand[600] : pressed ? lilac.base : brand[50],
           opacity: busy ? 0.6 : 1,
         })}
       >
         {on ? <Check size={16} color="#fff" strokeWidth={2.6} /> : <BellRing size={16} color={brand[700]} />}
-        <Text style={{ fontFamily: font.semibold, fontSize: 14, color: on ? "#fff" : brand[700] }}>{on ? setLabel : label}</Text>
+        <Text style={{ fontFamily: font.semibold, fontSize: 15, color: on ? "#fff" : brand[700] }}>{on ? setLabel : label}</Text>
       </Pressable>
-      {note ? <Text style={{ fontFamily: font.regular, fontSize: 12.5, color: ink[500], textAlign: "center", marginTop: 6 }}>{note}</Text> : null}
+      {note ? <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], textAlign: "center", marginTop: 6 }}>{note}</Text> : null}
     </View>
   );
 }

@@ -24,7 +24,7 @@ import { Pressable, Text, View } from "react-native";
 import { Tap } from "@/components/ui/tap";
 import { Gradient, glassShadow } from "@/components/ui/glass";
 import { CATEGORY_LABEL, readLabel, type ArticleCard, type ArticleCategory, type ArticleIcon } from "@/lib/knowledge/catalog";
-import { ink } from "@/theme/tokens";
+import { brand, hue, ink, lilac } from "@/theme/tokens";
 import { font } from "@/theme/type";
 
 /*
@@ -45,11 +45,11 @@ import { font } from "@/theme/type";
 export type CategoryStyle = { field: string; soft: string; accent: string; deep: string; body: string };
 
 export const CATEGORY_STYLE: Record<ArticleCategory, CategoryStyle> = {
-  reports: { field: "#eeecff", soft: "#dcd7ff", accent: "#4a2ade", deep: "#221a55", body: "#5b5580" },
-  family: { field: "#e2f4f0", soft: "#c4ebe3", accent: "#0e7c70", deep: "#113f39", body: "#4a6f69" },
-  prevention: { field: "#e4f0fd", soft: "#cfe2fa", accent: "#1a64b8", deep: "#0f2e52", body: "#4f6886" },
-  pregnancy: { field: "#fdeaf0", soft: "#f8d2df", accent: "#c4396c", deep: "#4d1730", body: "#7d5566" },
-  living: { field: "#fdeee3", soft: "#f8d9c4", accent: "#b5532a", deep: "#4a230f", body: "#7a5c4b" },
+  reports: { field: lilac.base, soft: lilac.violet, accent: brand[600], deep: "#221a55", body: hue.slate.fg },
+  family: { field: hue.teal.bg, soft: "#c4ebe3", accent: hue.teal.fg, deep: "#113f39", body: "#4a6f69" },
+  prevention: { field: hue.blue.wash, soft: hue.blue.bg, accent: hue.blue.fg, deep: "#0f2e52", body: "#4f6886" },
+  pregnancy: { field: hue.rose.bg, soft: "#f8d2df", accent: hue.rose.fg, deep: "#4d1730", body: "#7d5566" },
+  living: { field: hue.orange.wash, soft: hue.orange.bg, accent: "#b5532a", deep: "#4a230f", body: "#7a5c4b" },
 };
 
 export const ICONS: Record<ArticleIcon, LucideIcon> = {
@@ -88,7 +88,7 @@ export function Emblem({ icon, category, size = 56 }: { icon: ArticleIcon; categ
 
 export function Eyebrow({ category, color }: { category: ArticleCategory; color?: string }) {
   return (
-    <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 10.5, letterSpacing: 0.8, textTransform: "uppercase", color: color ?? CATEGORY_STYLE[category].accent }}>
+    <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 11, letterSpacing: 0.8, textTransform: "uppercase", color: color ?? CATEGORY_STYLE[category].accent }}>
       {CATEGORY_LABEL[category]}
     </Text>
   );
@@ -107,7 +107,7 @@ export function ReadMeta({ card, light }: { card: ArticleCard; light?: boolean }
       {card.forYou && !finished ? (
         <View style={{ flexDirection: "row", alignItems: "center", gap: 3, paddingHorizontal: 7, paddingVertical: 2.5, borderRadius: 999, backgroundColor: light ? "rgba(255,255,255,0.85)" : s.field }}>
           <Heart size={10} color={s.accent} />
-          <Text style={{ fontFamily: font.semibold, fontSize: 10.5, color: s.accent }}>For you</Text>
+          <Text style={{ fontFamily: font.semibold, fontSize: 11, color: s.accent }}>For you</Text>
         </View>
       ) : null}
     </View>
@@ -136,10 +136,10 @@ export function RailCard({ card, width = 236 }: { card: ArticleCard; width?: num
       accessibilityRole="button"
       accessibilityLabel={`${card.title}. ${CATEGORY_LABEL[card.category]}. ${readLabel(card)}`}
       onPress={() => router.push(`/article/${card.slug}`)}
-      style={[glassShadow, { width, height: 204, borderRadius: 28, overflow: "hidden" }]}
+      style={[glassShadow, { width, height: 204, borderRadius: 32, overflow: "hidden" }]}
     >
       <Gradient from={s.soft} to={s.field} angle="diagonal" glow="#ffffff" />
-      <View style={{ position: "absolute", right: -36, top: -36, width: 140, height: 140, borderRadius: 70, backgroundColor: "rgba(255,255,255,0.45)" }} />
+      <View style={{ position: "absolute", right: -36, top: -36, width: 140, height: 140, borderRadius: 999, backgroundColor: "rgba(255,255,255,0.45)" }} />
       <View style={{ flex: 1, padding: 16, justifyContent: "space-between" }}>
         <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 10 }}>
           <View style={{ flex: 1, paddingTop: 4 }}>
@@ -148,7 +148,7 @@ export function RailCard({ card, width = 236 }: { card: ArticleCard; width?: num
           <Emblem icon={card.icon} category={card.category} size={52} />
         </View>
         <View style={{ gap: 10 }}>
-          <Text numberOfLines={3} style={{ fontFamily: font.semibold, fontSize: 16.5, lineHeight: 21.5, letterSpacing: -0.3, color: s.deep }}>
+          <Text numberOfLines={3} style={{ fontFamily: font.semibold, fontSize: 17, lineHeight: 21.5, letterSpacing: -0.3, color: s.deep }}>
             {card.title}
           </Text>
           <ReadMeta card={card} light />
@@ -170,12 +170,12 @@ export function ArticleRow({ card, showCategory = true }: { card: ArticleCard; /
       onPress={() => router.push(`/article/${card.slug}`)}
       style={({ pressed }) => ({ flexDirection: "row", gap: 14, paddingVertical: 14, opacity: pressed ? 0.7 : 1 })}
     >
-      <View style={{ width: 64, height: 76, borderRadius: 20, backgroundColor: s.field, alignItems: "center", justifyContent: "center" }}>
+      <View style={{ width: 64, height: 76, borderRadius: 24, backgroundColor: s.field, alignItems: "center", justifyContent: "center" }}>
         <Emblem icon={card.icon} category={card.category} size={44} />
       </View>
       <View style={{ flex: 1, gap: 4 }}>
         {showCategory ? <Eyebrow category={card.category} /> : null}
-        <Text numberOfLines={2} style={{ fontFamily: font.semibold, fontSize: 15.5, lineHeight: 20, color: ink[900] }}>
+        <Text numberOfLines={2} style={{ fontFamily: font.semibold, fontSize: 15, lineHeight: 20, color: ink[900] }}>
           {card.title}
         </Text>
         {card.standfirst ? (
@@ -221,12 +221,12 @@ export function ArticlePill({ card, width = 268 }: { card: ArticleCard; width?: 
     >
       <Emblem icon={card.icon} category={card.category} size={44} />
       <View style={{ flex: 1, gap: 2 }}>
-        <Text numberOfLines={2} style={{ fontFamily: font.semibold, fontSize: 13.5, lineHeight: 17, letterSpacing: -0.1, color: s.deep }}>
+        <Text numberOfLines={2} style={{ fontFamily: font.semibold, fontSize: 13, lineHeight: 17, letterSpacing: -0.1, color: s.deep }}>
           {card.title}
         </Text>
         <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
           {finished ? <Check size={11} color={s.accent} strokeWidth={2.6} /> : card.forYou ? <Heart size={11} color={s.accent} /> : null}
-          <Text numberOfLines={1} style={{ fontFamily: font.medium, fontSize: 11.5, color: finished || card.forYou ? s.accent : s.body }}>
+          <Text numberOfLines={1} style={{ fontFamily: font.medium, fontSize: 12, color: finished || card.forYou ? s.accent : s.body }}>
             {[card.forYou && !finished ? "For you" : null, readLabel(card)].filter(Boolean).join(" · ")}
           </Text>
         </View>

@@ -1,6 +1,6 @@
 import { useRouter } from "expo-router";
 import { Building2, ChevronLeft, ClipboardCheck, Clock3, GraduationCap, Languages, MapPin, MonitorPlay } from "lucide-react-native";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { ScrollView, Text, View } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -13,7 +13,7 @@ import { useBookingDraft } from "@/lib/booking/draft";
 import { doctorFace } from "@/lib/booking/faces";
 import { RatingLine } from "@/components/labs/parts";
 import { useRatings, type Rating } from "@/lib/labs/queries";
-import { brand, ink } from "@/theme/tokens";
+import { brand, ink, lilac, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
 
 /*
@@ -43,7 +43,7 @@ export default function Doctors() {
   return (
     <View className="flex-1 bg-canvas">
       <View pointerEvents="none" style={{ position: "absolute", top: 0, left: 0, right: 0, height: 380 }}>
-        <Gradient from="#ebe6ff" to="#fafafe" angle="vertical" />
+        <Gradient from={lilac.base} to={surface.canvas} angle="vertical" />
       </View>
 
       <View className="flex-row items-center gap-3 px-4 pb-2" style={{ paddingTop: insets.top + 6 }}>
@@ -61,7 +61,7 @@ export default function Doctors() {
           {(["online", "clinic"] as const).map((k) => {
             const on = m === k;
             return (
-              <Pressable
+              <Tap
                 key={k}
                 accessibilityRole="tab"
                 accessibilityState={{ selected: on }}
@@ -86,10 +86,10 @@ export default function Doctors() {
                 ) : (
                   <Building2 size={16} color={on ? "#fff" : ink[700]} strokeWidth={1.8} />
                 )}
-                <Text style={{ fontFamily: on ? font.semibold : font.medium, fontSize: 14, color: on ? "#fff" : ink[700] }}>
+                <Text style={{ fontFamily: on ? font.semibold : font.medium, fontSize: 15, color: on ? "#fff" : ink[700] }}>
                   {k === "online" ? "Online" : "Clinic visit"}
                 </Text>
-              </Pressable>
+              </Tap>
             );
           })}
         </View>
@@ -102,7 +102,7 @@ export default function Doctors() {
         </Text>
 
         {intake ? (
-          <Glass className="mt-4 flex-row items-center gap-2.5 rounded-[18px] px-3.5 py-3">
+          <Glass className="mt-4 flex-row items-center gap-2.5 rounded-lg px-3.5 py-3">
             <ClipboardCheck size={18} color={brand[600]} strokeWidth={1.8} />
             <Text style={{ flex: 1, fontFamily: font.medium, fontSize: 13, color: ink[700] }}>
               Your pre-consultation note goes to whichever doctor you book.
@@ -124,11 +124,11 @@ export default function Doctors() {
             </Animated.View>
           ))}
           {list.length === 0 ? (
-            <Glass strong className="items-center rounded-[24px] p-6">
-              <Text style={{ fontFamily: font.semibold, fontSize: 16, color: ink[900], textAlign: "center" }}>
+            <Glass strong className="items-center rounded-xl p-6">
+              <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900], textAlign: "center" }}>
                 No {sp.plural.toLowerCase()} {m === "online" ? "online" : "with clinic slots"} right now
               </Text>
-              <Text style={{ fontFamily: font.regular, fontSize: 13.5, color: ink[500], textAlign: "center", marginTop: 4 }}>
+              <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], textAlign: "center", marginTop: 4 }}>
                 Try {m === "online" ? "a clinic visit" : "an online consultation"} instead.
               </Text>
             </Glass>
@@ -159,20 +159,20 @@ function DoctorCard({
   const fee = d.fee[mode];
 
   return (
-    <Glass strong className="overflow-hidden rounded-[28px] p-3">
-      <Pressable accessibilityRole="button" accessibilityLabel={`${d.name}. Open profile and reviews`} onPress={onOpen} className="flex-row gap-3.5">
-        <View className="overflow-hidden rounded-[22px]" style={{ width: 92, height: 104 }}>
+    <Glass strong className="overflow-hidden rounded-2xl p-3">
+      <Tap accessibilityRole="button" accessibilityLabel={`${d.name}. Open profile and reviews`} onPress={onOpen} className="flex-row gap-3.5">
+        <View className="overflow-hidden rounded-xl" style={{ width: 92, height: 104 }}>
           {/* The illustrated face as a portrait tile, full bleed. */}
           {face ? (
             <View className="flex-1 items-center justify-center" style={{ backgroundColor: face.background }}>
               <SvgXml xml={face.svg} width={108} height={108} />
             </View>
           ) : (
-            <Gradient from="#ece6ff" to="#dcd3ff" />
+            <Gradient from={lilac.base} to={lilac.deep} />
           )}
         </View>
         <View className="min-w-0 flex-1 py-0.5">
-          <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 16.5, letterSpacing: -0.2, color: ink[900] }}>
+          <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 17, letterSpacing: -0.2, color: ink[900] }}>
             {d.name}
           </Text>
           <Text style={{ fontFamily: font.medium, fontSize: 13, color: brand[600], marginTop: 1 }}>
@@ -187,9 +187,9 @@ function DoctorCard({
             <Fact icon={<MapPin size={13} color={ink[500]} />} text={`${d.clinic.name}, ${d.clinic.area} · ${d.clinic.km} km`} />
           ) : null}
         </View>
-      </Pressable>
+      </Tap>
 
-      <View className="mt-3 flex-row items-center gap-2 rounded-[18px] px-3 py-2.5" style={{ backgroundColor: "rgba(241,240,254,0.8)" }}>
+      <View className="mt-3 flex-row items-center gap-2 rounded-lg px-3 py-2.5" style={{ backgroundColor: "rgba(241,240,254,0.8)" }}>
         <Clock3 size={14} color={brand[600]} />
         <Text style={{ flex: 1, fontFamily: font.medium, fontSize: 13, color: ink[700] }}>
           {next ? `Next: ${next}` : "No slots in the next 3 days"}
@@ -207,7 +207,7 @@ function DoctorCard({
           borderRadius: 999,
           alignItems: "center",
           justifyContent: "center",
-          backgroundColor: ink[900],
+          backgroundColor: brand[600],
         }}
         scale={0.98}
       >
@@ -223,7 +223,7 @@ function Fact({ icon, text }: { icon: React.ReactNode; text: string }) {
   return (
     <View className="mt-1.5 flex-row items-center gap-1.5">
       {icon}
-      <Text numberOfLines={1} style={{ flex: 1, fontFamily: font.regular, fontSize: 12.5, color: ink[500] }}>
+      <Text numberOfLines={1} style={{ flex: 1, fontFamily: font.regular, fontSize: 13, color: ink[500] }}>
         {text}
       </Text>
     </View>

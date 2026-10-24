@@ -15,6 +15,7 @@ import { useFamily } from "@/lib/profiles/family";
 import { shortDate } from "@/lib/records/details";
 import { brand, ink, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
+import { Tap } from "@/components/ui/tap";
 
 /*
  * THE READER.
@@ -91,9 +92,9 @@ export default function ArticleReader() {
         <Text style={{ fontFamily: font.regular, fontSize: 15, lineHeight: 21, color: ink[500], textAlign: "center" }}>
           That article isn&apos;t available. It may have been unpublished while it is updated.
         </Text>
-        <Pressable onPress={() => router.back()} style={{ marginTop: 18 }} hitSlop={8}>
-          <Text style={{ fontFamily: font.semibold, fontSize: 14, color: brand[600] }}>Go back</Text>
-        </Pressable>
+        <Tap onPress={() => router.back()} style={{ marginTop: 18 }} hitSlop={8}>
+          <Text style={{ fontFamily: font.semibold, fontSize: 15, color: brand[600] }}>Go back</Text>
+        </Tap>
       </View>
     );
   }
@@ -119,22 +120,22 @@ export default function ArticleReader() {
     <View className="flex-1 bg-canvas">
       <ScrollView onScroll={onScroll} scrollEventThrottle={64} contentContainerStyle={{ paddingBottom: insets.bottom + 40 }} showsVerticalScrollIndicator={false}>
         {/* Masthead. */}
-        <View style={{ backgroundColor: s.field, paddingTop: insets.top + 70, borderBottomLeftRadius: 36, borderBottomRightRadius: 36, overflow: "hidden" }}>
-          <View style={{ position: "absolute", top: insets.top + 40, right: -30, width: 180, height: 180, borderRadius: 90, backgroundColor: s.soft, opacity: 0.55 }} />
+        <View style={{ backgroundColor: s.field, paddingTop: insets.top + 70, borderBottomLeftRadius: 32, borderBottomRightRadius: 32, overflow: "hidden" }}>
+          <View style={{ position: "absolute", top: insets.top + 40, right: -30, width: 180, height: 180, borderRadius: 999, backgroundColor: s.soft, opacity: 0.55 }} />
           <View style={{ paddingHorizontal: 20, paddingBottom: 26 }}>
             <Emblem icon={data.icon} category={data.category} size={68} />
             <View style={{ marginTop: 16 }}>
               <Eyebrow category={data.category} />
             </View>
-            <Text accessibilityRole="header" style={{ fontFamily: font.semibold, fontSize: 27, lineHeight: 33, letterSpacing: -0.6, color: s.deep, marginTop: 6 }}>
+            <Text accessibilityRole="header" style={{ fontFamily: font.semibold, fontSize: 28, lineHeight: 33, letterSpacing: -0.6, color: s.deep, marginTop: 6 }}>
               {data.title}
             </Text>
             {data.standfirst ? <Text style={{ fontFamily: font.regular, fontSize: 15, lineHeight: 22, color: s.body, marginTop: 8 }}>{data.standfirst}</Text> : null}
             <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginTop: 16 }}>
-              <View style={{ width: 28, height: 28, borderRadius: 14, backgroundColor: "#fff", alignItems: "center", justifyContent: "center" }}>
+              <View style={{ width: 28, height: 28, borderRadius: 999, backgroundColor: "#fff", alignItems: "center", justifyContent: "center" }}>
                 <ShieldCheck size={14} color={s.accent} />
               </View>
-              <Text style={{ flex: 1, fontFamily: font.medium, fontSize: 12.5, color: s.body }}>
+              <Text style={{ flex: 1, fontFamily: font.medium, fontSize: 13, color: s.body }}>
                 {data.author}
                 {data.reviewedOn ? ` · checked ${shortDate(data.reviewedOn)}` : ""} · {data.readMinutes} min read
               </Text>
@@ -148,14 +149,14 @@ export default function ArticleReader() {
             <Block key={i} block={block} s={s} title={data.title} />
           ))}
 
-          <PillButton tone="dark" icon={<MessageCircle size={18} color="#fff" />} style={{ marginTop: 22 }} onPress={() => router.push({ pathname: "/ask", params: { q: `Help me understand this using my own reports: ${data.title}` } })}>
+          <PillButton icon={<MessageCircle size={18} color="#fff" />} style={{ marginTop: 22 }} onPress={() => router.push({ pathname: "/ask", params: { q: `Help me understand this using my own reports: ${data.title}` } })}>
             Ask Cheeku about this
           </PillButton>
         </View>
 
         {related.length ? (
           <View style={{ marginTop: 30, paddingHorizontal: 20 }}>
-            <Text style={{ fontFamily: font.semibold, fontSize: 18, letterSpacing: -0.3, color: ink[900] }}>Read next</Text>
+            <Text style={{ fontFamily: font.semibold, fontSize: 17, letterSpacing: -0.3, color: ink[900] }}>Read next</Text>
             <View style={{ marginTop: 4 }}>
               {related.map((c, i) => (
                 <View key={c.id} style={{ borderTopWidth: i ? 1 : 0, borderTopColor: surface.line }}>
@@ -168,12 +169,12 @@ export default function ArticleReader() {
 
         {/* Sources are part of the article. */}
         <View style={{ marginHorizontal: 20, marginTop: 26 }}>
-          <Text style={{ fontFamily: font.semibold, fontSize: 11.5, letterSpacing: 0.8, textTransform: "uppercase", color: ink[300] }}>Sources</Text>
+          <Text style={{ fontFamily: font.semibold, fontSize: 12, letterSpacing: 0.8, textTransform: "uppercase", color: ink[300] }}>Sources</Text>
           <View style={[glassShadow, { marginTop: 8, borderRadius: 24, overflow: "hidden", backgroundColor: glass.fillStrong, borderWidth: 1, borderColor: glass.rim }]}>
             {data.sources.map((source, i) => {
               const openable = Boolean(source.url);
               return (
-                <Pressable
+                <Tap
                   key={`${source.publisher}-${i}`}
                   accessibilityRole={openable ? "link" : "text"}
                   accessibilityLabel={openable ? `${source.title}, ${source.publisher}. Opens in your browser` : `${source.title}, ${source.publisher}`}
@@ -182,17 +183,17 @@ export default function ArticleReader() {
                 >
                   <View style={{ flex: 1 }}>
                     <Text style={{ fontFamily: font.semibold, fontSize: 13, lineHeight: 18, color: ink[900] }}>{source.title}</Text>
-                    <Text style={{ fontFamily: font.regular, fontSize: 11.5, color: ink[500], marginTop: 2 }}>
+                    <Text style={{ fontFamily: font.regular, fontSize: 12, color: ink[500], marginTop: 2 }}>
                       {source.publisher}
                       {source.year ? ` · ${source.year}` : ""}
                     </Text>
                   </View>
                   {openable ? <ExternalLink size={15} color={ink[300]} /> : null}
-                </Pressable>
+                </Tap>
               );
             })}
           </View>
-          <Text style={{ fontFamily: font.regular, fontSize: 11.5, lineHeight: 17, color: ink[300], marginTop: 10 }}>
+          <Text style={{ fontFamily: font.regular, fontSize: 12, lineHeight: 17, color: ink[300], marginTop: 10 }}>
             {data.reviewedOn ? `Checked against these sources on ${shortDate(data.reviewedOn)}. ` : ""}This explains; it does not advise. Anything about your own treatment is a conversation for your doctor.
           </Text>
         </View>
@@ -223,14 +224,14 @@ export default function ArticleReader() {
 function InShort({ points, s }: { points: string[]; s: CategoryStyle }) {
   return (
     <View style={{ padding: 16, borderRadius: 24, backgroundColor: s.field, marginBottom: 18 }}>
-      <Text style={{ fontFamily: font.semibold, fontSize: 11.5, letterSpacing: 0.8, textTransform: "uppercase", color: s.accent }}>In short</Text>
+      <Text style={{ fontFamily: font.semibold, fontSize: 12, letterSpacing: 0.8, textTransform: "uppercase", color: s.accent }}>In short</Text>
       <View style={{ gap: 10, marginTop: 10 }}>
         {points.map((p, i) => (
           <View key={i} style={{ flexDirection: "row", gap: 10 }}>
-            <View style={{ width: 22, height: 22, borderRadius: 11, backgroundColor: "#fff", alignItems: "center", justifyContent: "center" }}>
-              <Text style={{ fontFamily: font.bold, fontSize: 11.5, color: s.accent }}>{i + 1}</Text>
+            <View style={{ width: 22, height: 22, borderRadius: 999, backgroundColor: "#fff", alignItems: "center", justifyContent: "center" }}>
+              <Text style={{ fontFamily: font.bold, fontSize: 12, color: s.accent }}>{i + 1}</Text>
             </View>
-            <Text style={{ flex: 1, fontFamily: font.medium, fontSize: 14, lineHeight: 20.5, color: s.deep }}>{p}</Text>
+            <Text style={{ flex: 1, fontFamily: font.medium, fontSize: 15, lineHeight: 20.5, color: s.deep }}>{p}</Text>
           </View>
         ))}
       </View>
@@ -242,14 +243,14 @@ function Block({ block, s, title }: { block: ArticleBlock; s: CategoryStyle; tit
   const router = useRouter();
   switch (block.type) {
     case "h":
-      return <Text style={{ fontFamily: font.semibold, fontSize: 19, lineHeight: 25, letterSpacing: -0.3, color: ink[900], marginTop: 22, marginBottom: 8 }}>{block.text}</Text>;
+      return <Text style={{ fontFamily: font.semibold, fontSize: 20, lineHeight: 25, letterSpacing: -0.3, color: ink[900], marginTop: 22, marginBottom: 8 }}>{block.text}</Text>;
     case "callout":
       // Emphasis about the subject, never a warning about the reader: the
       // category's accent, not amber.
       return (
-        <View style={{ flexDirection: "row", gap: 12, marginVertical: 12, paddingVertical: 14, paddingHorizontal: 16, borderRadius: 20, backgroundColor: s.field }}>
+        <View style={{ flexDirection: "row", gap: 12, marginVertical: 12, paddingVertical: 14, paddingHorizontal: 16, borderRadius: 24, backgroundColor: s.field }}>
           <View style={{ width: 3, borderRadius: 2, backgroundColor: s.accent }} />
-          <Text style={{ flex: 1, fontFamily: font.medium, fontSize: 14.5, lineHeight: 21.5, color: s.deep }}>{block.text}</Text>
+          <Text style={{ flex: 1, fontFamily: font.medium, fontSize: 15, lineHeight: 21.5, color: s.deep }}>{block.text}</Text>
         </View>
       );
     case "list":
@@ -258,7 +259,7 @@ function Block({ block, s, title }: { block: ArticleBlock; s: CategoryStyle; tit
           {block.items.map((item, i) => (
             <View key={i} style={{ flexDirection: "row", gap: 11 }}>
               <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: s.accent, marginTop: 9 }} />
-              <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 15.5, lineHeight: 24, color: ink[700] }}>{item}</Text>
+              <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 15, lineHeight: 24, color: ink[700] }}>{item}</Text>
             </View>
           ))}
         </View>
@@ -268,19 +269,19 @@ function Block({ block, s, title }: { block: ArticleBlock; s: CategoryStyle; tit
         <View style={{ gap: 12, marginVertical: 10 }}>
           {block.items.map((item, i) => (
             <View key={i} style={{ flexDirection: "row", gap: 12 }}>
-              <View style={{ width: 26, height: 26, borderRadius: 13, backgroundColor: s.accent, alignItems: "center", justifyContent: "center" }}>
-                <Text style={{ fontFamily: font.bold, fontSize: 12.5, color: "#fff" }}>{i + 1}</Text>
+              <View style={{ width: 26, height: 26, borderRadius: 999, backgroundColor: s.accent, alignItems: "center", justifyContent: "center" }}>
+                <Text style={{ fontFamily: font.bold, fontSize: 13, color: "#fff" }}>{i + 1}</Text>
               </View>
-              <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 15.5, lineHeight: 24, color: ink[700] }}>{item}</Text>
+              <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 15, lineHeight: 24, color: ink[700] }}>{item}</Text>
             </View>
           ))}
         </View>
       );
     case "stat":
       return (
-        <View style={{ marginVertical: 12, paddingVertical: 16, paddingHorizontal: 18, borderRadius: 22, borderWidth: 1, borderColor: s.soft }}>
-          <Text style={{ fontFamily: font.bold, fontSize: 30, letterSpacing: -0.8, color: s.accent }}>{block.value}</Text>
-          <Text style={{ fontFamily: font.regular, fontSize: 14, lineHeight: 20, color: ink[700], marginTop: 2 }}>{block.label}</Text>
+        <View style={{ marginVertical: 12, paddingVertical: 16, paddingHorizontal: 18, borderRadius: 24, borderWidth: 1, borderColor: s.soft }}>
+          <Text style={{ fontFamily: font.bold, fontSize: 28, letterSpacing: -0.8, color: s.accent }}>{block.value}</Text>
+          <Text style={{ fontFamily: font.regular, fontSize: 15, lineHeight: 20, color: ink[700], marginTop: 2 }}>{block.label}</Text>
         </View>
       );
     case "questions":
@@ -290,13 +291,13 @@ function Block({ block, s, title }: { block: ArticleBlock; s: CategoryStyle; tit
             <View style={{ width: 36, height: 36, borderRadius: 12, backgroundColor: s.field, alignItems: "center", justifyContent: "center" }}>
               <MessageCircleQuestion size={18} color={s.accent} />
             </View>
-            <Text style={{ flex: 1, fontFamily: font.semibold, fontSize: 16, color: ink[900] }}>Questions to take to your appointment</Text>
+            <Text style={{ flex: 1, fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>Questions to take to your appointment</Text>
           </View>
           <View style={{ gap: 10, marginTop: 14 }}>
             {block.items.map((q, i) => (
               <View key={i} style={{ flexDirection: "row", gap: 10, paddingTop: i ? 10 : 0, borderTopWidth: i ? 1 : 0, borderTopColor: surface.line }}>
-                <Text style={{ fontFamily: font.bold, fontSize: 14, color: s.accent }}>Q</Text>
-                <Text selectable style={{ flex: 1, fontFamily: font.medium, fontSize: 14.5, lineHeight: 21, color: ink[900] }}>{q}</Text>
+                <Text style={{ fontFamily: font.bold, fontSize: 15, color: s.accent }}>Q</Text>
+                <Text selectable style={{ flex: 1, fontFamily: font.medium, fontSize: 15, lineHeight: 21, color: ink[900] }}>{q}</Text>
               </View>
             ))}
           </View>
@@ -305,11 +306,11 @@ function Block({ block, s, title }: { block: ArticleBlock; s: CategoryStyle; tit
             onPress={() => router.push({ pathname: "/ask", params: { q: `Help me get ready for my appointment about: ${title}` } })}
             style={({ pressed }) => ({ marginTop: 14, height: 44, borderRadius: 999, alignItems: "center", justifyContent: "center", backgroundColor: pressed ? s.soft : s.field })}
           >
-            <Text style={{ fontFamily: font.semibold, fontSize: 14, color: s.accent }}>Get ready with Cheeku</Text>
+            <Text style={{ fontFamily: font.semibold, fontSize: 15, color: s.accent }}>Get ready with Cheeku</Text>
           </Pressable>
         </View>
       );
     case "p":
-      return <Text style={{ fontFamily: font.regular, fontSize: 15.5, lineHeight: 25, color: ink[700], marginBottom: 12 }}>{block.text}</Text>;
+      return <Text style={{ fontFamily: font.regular, fontSize: 15, lineHeight: 25, color: ink[700], marginBottom: 12 }}>{block.text}</Text>;
   }
 }

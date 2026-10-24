@@ -46,13 +46,13 @@ export const font = {
  * default; the same value on 14pt body costs legibility.
  */
 export const type = {
-  hero: { fontFamily: font.display, fontSize: 31, lineHeight: 37, letterSpacing: -0.9, color: ink[900] },
-  title: { fontFamily: font.display, fontSize: 27, lineHeight: 32, letterSpacing: -0.7, color: ink[900] },
-  heading: { fontFamily: font.display, fontSize: 19, lineHeight: 24, letterSpacing: -0.3, color: ink[900] },
+  hero: { fontFamily: font.display, fontSize: 28, lineHeight: 37, letterSpacing: -0.9, color: ink[900] },
+  title: { fontFamily: font.display, fontSize: 28, lineHeight: 32, letterSpacing: -0.7, color: ink[900] },
+  heading: { fontFamily: font.display, fontSize: 20, lineHeight: 24, letterSpacing: -0.3, color: ink[900] },
   body: { fontFamily: font.regular, fontSize: 15, lineHeight: 22, color: ink[500] },
   bodySmall: { fontFamily: font.regular, fontSize: 13, lineHeight: 19, color: ink[500] },
-  label: { fontFamily: font.semibold, fontSize: 14, lineHeight: 19, color: ink[900] },
+  label: { fontFamily: font.semibold, fontSize: 15, lineHeight: 19, color: ink[900] },
   caption: { fontFamily: font.medium, fontSize: 12, lineHeight: 16, color: ink[500] },
   eyebrow: { fontFamily: font.bold, fontSize: 11, lineHeight: 14, letterSpacing: 1.2, textTransform: "uppercase" },
-  button: { fontFamily: font.bold, fontSize: 16, lineHeight: 20, color: "#ffffff" },
+  button: { fontFamily: font.bold, fontSize: 17, lineHeight: 20, color: "#ffffff" },
 } satisfies Record<string, TextStyle>;

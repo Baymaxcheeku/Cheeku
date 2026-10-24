@@ -67,12 +67,40 @@ module.exports = {
         "attention-bg": "#fff0e6",
         "attention-text": "#a63a08",
       },
+      /*
+       * The radius scale (UI audit, October 2026): 42 values became five plus
+       * a pill. Card 24 since the 2026-09-29 redesign; sheets moved 28 to 32
+       * to land on the scale. Six and under stays free for hairline geometry
+       * (bars, dots). Mirrors `radius` in tokens.ts.
+       */
       borderRadius: {
-        // 24 since the 2026-09-29 redesign: softer, closer to the glass cards.
+        sm: 8,
+        md: 12,
+        lg: 16,
+        xl: 24,
+        "2xl": 32,
         card: 24,
         tile: 16,
-        sheet: 28,
+        sheet: 32,
         pill: 999,
+      },
+      /*
+       * The type scale (UI audit, October 2026): 56 sizes became ten.
+       * 3xs is for counters and chart ticks only; display sizes (36 and up)
+       * stay inline. Plain sizes, no line height, so a class never changes
+       * the leading a screen already set. Mirrors `type` in tokens.ts.
+       */
+      fontSize: {
+        "3xs": "10px",
+        "2xs": "11px",
+        xs: "12px",
+        sm: "13px",
+        base: "15px",
+        lg: "17px",
+        xl: "20px",
+        "2xl": "24px",
+        "3xl": "28px",
+        "4xl": "34px",
       },
       fontFamily: {
         sans: ["Inter_400Regular"],

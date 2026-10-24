@@ -2,7 +2,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { FileText, Hourglass, MapPin } from "lucide-react-native";
 import { useEffect, useMemo, useState } from "react";
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { PartnerBadge, rupees, SampleNote } from "@/components/labs/parts";
@@ -14,8 +14,9 @@ import { BOOKINGS_KEY, bookLab, useCatalog, useLabCart } from "@/lib/labs/querie
 import { recordBooking, threadKey } from "@/lib/memory/store";
 import { useFamily } from "@/lib/profiles/family";
 import { kv } from "@/lib/storage";
-import { brand, ink, surface } from "@/theme/tokens";
+import { brand, hue, ink, semantic, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
+import { Tap } from "@/components/ui/tap";
 
 /*
  * Book the home collection.
@@ -83,7 +84,7 @@ export default function BookLab() {
       <View className="flex-1 bg-canvas">
         <Backdrop />
         <ScreenHeader title="Book collection" fallback="/labs" />
-        <Glass strong className="mx-5 mt-6 items-center rounded-[26px] p-6">
+        <Glass strong className="mx-5 mt-6 items-center rounded-xl p-6">
           <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>Pick tests and a lab first</Text>
           <PillButton onPress={() => router.replace("/labs")} style={{ marginTop: 14, alignSelf: "stretch" }}>
             Find a test
@@ -144,14 +145,14 @@ export default function BookLab() {
             {members.map((m) => {
               const on = m.id === who?.id;
               return (
-                <Pressable key={m.id} accessibilityRole="radio" accessibilityState={{ selected: on }} onPress={() => setMemberId(m.id)} style={[on ? null : glassShadow, { flexDirection: "row", alignItems: "center", gap: 8, paddingLeft: 4, paddingRight: 14, height: 46, borderRadius: 999, backgroundColor: on ? ink[900] : glass.fillStrong, borderWidth: on ? 0 : 1, borderColor: glass.rim }]}>
+                <Tap key={m.id} accessibilityRole="radio" accessibilityState={{ selected: on }} onPress={() => setMemberId(m.id)} style={[on ? null : glassShadow, { flexDirection: "row", alignItems: "center", gap: 8, paddingLeft: 4, paddingRight: 14, height: 46, borderRadius: 999, backgroundColor: on ? ink[900] : glass.fillStrong, borderWidth: on ? 0 : 1, borderColor: glass.rim }]}>
                   <Avatar svg={m.avatar} photo={m.photo} image={m.avatarImage} background={m.avatarBackground} size={36} />
-                  <Text style={{ fontFamily: on ? font.semibold : font.medium, fontSize: 14, color: on ? "#fff" : ink[900] }}>{m.isPrimary ? "Me" : m.name.split(" ")[0]}</Text>
-                </Pressable>
+                  <Text style={{ fontFamily: on ? font.semibold : font.medium, fontSize: 15, color: on ? "#fff" : ink[900] }}>{m.isPrimary ? "Me" : m.name.split(" ")[0]}</Text>
+                </Tap>
               );
             })}
           </ScrollView>
-          <Text style={{ fontFamily: font.regular, fontSize: 12.5, color: ink[500], marginTop: 8 }}>The report is filed in {who?.isPrimary ? "your" : `${first}'s`} health file.</Text>
+          <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 8 }}>The report is filed in {who?.isPrimary ? "your" : `${first}'s`} health file.</Text>
         </Section>
 
         {/* When. */}
@@ -161,10 +162,10 @@ export default function BookLab() {
               const on = i === dayIdx;
               const open = windowsFor(d, now, fasting).length > 0;
               return (
-                <Pressable key={i} disabled={!open} accessibilityRole="radio" accessibilityState={{ selected: on, disabled: !open }} onPress={() => setDayIdx(i)} style={[on ? null : glassShadow, { width: 64, height: 72, borderRadius: 20, alignItems: "center", justifyContent: "center", backgroundColor: on ? ink[900] : glass.fillStrong, borderWidth: on ? 0 : 1, borderColor: glass.rim, opacity: open ? 1 : 0.4 }]}>
+                <Tap scale={0.98} key={i} disabled={!open} accessibilityRole="radio" accessibilityState={{ selected: on, disabled: !open }} onPress={() => setDayIdx(i)} style={[on ? null : glassShadow, { width: 64, height: 72, borderRadius: 24, alignItems: "center", justifyContent: "center", backgroundColor: on ? ink[900] : glass.fillStrong, borderWidth: on ? 0 : 1, borderColor: glass.rim, opacity: open ? 1 : 0.4 }]}>
                   <Text style={{ fontFamily: font.medium, fontSize: 12, color: on ? "rgba(255,255,255,0.75)" : ink[500] }}>{dayLabel(d, i)}</Text>
                   <Text style={{ fontFamily: font.semibold, fontSize: 20, color: on ? "#fff" : ink[900], marginTop: 2 }}>{d.getDate()}</Text>
-                </Pressable>
+                </Tap>
               );
             })}
           </ScrollView>
@@ -172,38 +173,38 @@ export default function BookLab() {
             {windows.map((w) => {
               const on = w === chosenWindow;
               return (
-                <Pressable key={w} accessibilityRole="radio" accessibilityState={{ selected: on }} onPress={() => setWin(w)} style={{ flex: 1, height: 44, borderRadius: 14, alignItems: "center", justifyContent: "center", backgroundColor: on ? brand[50] : glass.fillStrong, borderWidth: 1.5, borderColor: on ? brand[500] : surface.line }}>
-                  <Text style={{ fontFamily: on ? font.semibold : font.medium, fontSize: 13.5, color: on ? brand[700] : ink[700] }}>{w}</Text>
-                </Pressable>
+                <Tap key={w} accessibilityRole="radio" accessibilityState={{ selected: on }} onPress={() => setWin(w)} style={{ flex: 1, height: 44, borderRadius: 16, alignItems: "center", justifyContent: "center", backgroundColor: on ? brand[50] : glass.fillStrong, borderWidth: 1.5, borderColor: on ? brand[500] : surface.line }}>
+                  <Text style={{ fontFamily: on ? font.semibold : font.medium, fontSize: 13, color: on ? brand[700] : ink[700] }}>{w}</Text>
+                </Tap>
               );
             })}
           </View>
           {fasting ? (
             <View style={{ flexDirection: "row", gap: 8, alignItems: "center", marginTop: 10 }}>
               <Hourglass size={14} color={brand[600]} />
-              <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 12.5, color: ink[700] }}>Needs a {fasting}-hour fast, so only morning windows. Water is fine. I&apos;ll remind you the night before.</Text>
+              <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 13, color: ink[700] }}>Needs a {fasting}-hour fast, so only morning windows. Water is fine. I&apos;ll remind you the night before.</Text>
             </View>
           ) : null}
         </Section>
 
         {/* Where. */}
         <Section title="Where?">
-          <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 10, padding: 14, borderRadius: 18, backgroundColor: "#fff", borderWidth: 1.5, borderColor: surface.line }}>
+          <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 10, padding: 14, borderRadius: 16, backgroundColor: "#fff", borderWidth: 1.5, borderColor: surface.line }}>
             <MapPin size={17} color={brand[600]} style={{ marginTop: 2 }} />
             <TextInput value={address} onChangeText={setAddress} placeholder="Flat, building, street, area, pincode" placeholderTextColor={ink[300]} multiline maxLength={300} style={{ flex: 1, minHeight: 60, fontFamily: font.regular, fontSize: 15, lineHeight: 21, color: ink[900], textAlignVertical: "top" }} />
           </View>
         </Section>
 
         {cart.prescriptionId ? (
-          <View style={{ marginTop: 14, flexDirection: "row", alignItems: "center", gap: 10, padding: 12, borderRadius: 16, backgroundColor: "#fff1e8" }}>
-            <FileText size={16} color="#c2650b" />
+          <View style={{ marginTop: 14, flexDirection: "row", alignItems: "center", gap: 10, padding: 12, borderRadius: 16, backgroundColor: hue.orange.wash }}>
+            <FileText size={16} color={hue.orange.fg} />
             <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 13, color: ink[700] }}>Prescription attached. The lab calls to confirm the tests before the visit.</Text>
           </View>
         ) : null}
 
         {/* Bill. */}
         <Section title="Your bill">
-          <Glass strong className="rounded-[24px] p-4">
+          <Glass strong className="rounded-xl p-4">
             <View className="flex-row items-center gap-3">
               <PartnerBadge partner={partner} size={40} />
               <Text style={{ flex: 1, fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{partner.name}</Text>
@@ -221,7 +222,7 @@ export default function BookLab() {
           </Glass>
         </Section>
 
-        {error ? <Text accessibilityRole="alert" style={{ fontFamily: font.medium, fontSize: 13, color: "#c00a1c", marginTop: 12 }}>{error}</Text> : null}
+        {error ? <Text accessibilityRole="alert" style={{ fontFamily: font.medium, fontSize: 13, color: semantic.dangerText, marginTop: 12 }}>{error}</Text> : null}
         <View style={{ marginTop: 14 }}>
           <SampleNote />
         </View>
@@ -248,8 +249,8 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 function Line({ label, value, strong }: { label: string; value: string; strong?: boolean }) {
   return (
     <View className="flex-row items-center justify-between gap-3">
-      <Text numberOfLines={1} style={{ flex: 1, fontFamily: strong ? font.semibold : font.regular, fontSize: strong ? 15.5 : 14, color: strong ? ink[900] : ink[700] }}>{label}</Text>
-      <Text style={{ fontFamily: font.semibold, fontSize: strong ? 17 : 14, color: ink[900] }}>{value}</Text>
+      <Text numberOfLines={1} style={{ flex: 1, fontFamily: strong ? font.semibold : font.regular, fontSize: 15, color: strong ? ink[900] : ink[700] }}>{label}</Text>
+      <Text style={{ fontFamily: font.semibold, fontSize: strong ? 17 : 15, color: ink[900] }}>{value}</Text>
     </View>
   );
 }

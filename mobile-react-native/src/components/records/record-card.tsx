@@ -23,7 +23,7 @@ import { font } from "@/theme/type";
 import { generatedAvatar } from "@/lib/profiles/avatar";
 import { formatEventDate } from "@/lib/records/grouping";
 import { SEVERITY_LABEL, type DocType, type RecordSummary, type Severity } from "@/lib/records/types";
-import { ink, semantic, shadow } from "@/theme/tokens";
+import { brand, hue, ink, lilac, semantic, shadow, surface } from "@/theme/tokens";
 
 /*
  * A record, as a card worth looking at.
@@ -50,17 +50,17 @@ type TypeStyle = { icon: LucideIcon; tint: string; wash: string; label: string }
  * These five are identity only.
  */
 const TYPE_STYLE: Record<DocType, TypeStyle> = {
-  lab_report: { icon: FlaskConical, tint: "#4a2ade", wash: "#eeecff", label: "Lab report" },
-  prescription: { icon: Pill, tint: "#0e8478", wash: "#e4f5f2", label: "Prescription" },
-  scan: { icon: ScanLine, tint: "#3835a0", wash: "#e9eaf7", label: "Scan" },
-  vaccination: { icon: Syringe, tint: "#c4396c", wash: "#fdeaf0", label: "Vaccination" },
+  lab_report: { icon: FlaskConical, tint: brand[600], wash: lilac.base, label: "Lab report" },
+  prescription: { icon: Pill, tint: hue.teal.fg, wash: hue.teal.bg, label: "Prescription" },
+  scan: { icon: ScanLine, tint: hue.indigo.fg, wash: surface.line, label: "Scan" },
+  vaccination: { icon: Syringe, tint: hue.rose.fg, wash: hue.rose.bg, label: "Vaccination" },
   discharge: { icon: Stethoscope, tint: "#a9631a", wash: "#fdf0dc", label: "Discharge" },
-  bill: { icon: ReceiptText, tint: "#5b5580", wash: "#efeff5", label: "Bill" },
-  consultation_invoice: { icon: ReceiptIndianRupee, tint: "#2563a8", wash: "#e5eefb", label: "Consultation invoice" },
-  booking_invoice: { icon: CalendarCheck, tint: "#6b4fc4", wash: "#efeafd", label: "Booking invoice" },
-  insurance: { icon: ShieldPlus, tint: "#155e75", wash: "#e0f2f6", label: "Insurance" },
-  medication: { icon: Tablets, tint: "#b0428a", wash: "#fbe9f5", label: "Medication" },
-  other: { icon: ReceiptText, tint: "#5b5580", wash: "#efeff5", label: "Document" },
+  bill: { icon: ReceiptText, tint: hue.slate.fg, wash: hue.slate.bg, label: "Bill" },
+  consultation_invoice: { icon: ReceiptIndianRupee, tint: hue.blue.fg, wash: hue.blue.wash, label: "Consultation invoice" },
+  booking_invoice: { icon: CalendarCheck, tint: "#6b4fc4", wash: lilac.base, label: "Booking invoice" },
+  insurance: { icon: ShieldPlus, tint: hue.ocean.fg, wash: hue.ocean.bg, label: "Insurance" },
+  medication: { icon: Tablets, tint: hue.plum.fg, wash: hue.plum.bg, label: "Medication" },
+  other: { icon: ReceiptText, tint: hue.slate.fg, wash: hue.slate.bg, label: "Document" },
 };
 
 const SEVERITY: Record<Severity, { label: string; fg: string; bg: string } | null> = {
@@ -103,10 +103,10 @@ export function RecordCard({
       onPress={() => router.push(`/records/${record.id}`)}
       scale={0.98}
     >
-      <View className="flex-row items-center gap-3.5 overflow-hidden rounded-[26px] p-2.5 pr-3" style={shadow.e1}>
+      <View className="flex-row items-center gap-3.5 overflow-hidden rounded-xl p-2.5 pr-3" style={shadow.e1}>
         <Gradient from={style.wash} to="#ffffff" />
         <View
-          className="h-[68px] w-[68px] items-center justify-center rounded-[20px]"
+          className="h-[68px] w-[68px] items-center justify-center rounded-xl"
           style={{ backgroundColor: "rgba(255,255,255,0.9)", borderWidth: 1, borderColor: "rgba(255,255,255,0.95)" }}
         >
           <style.icon size={26} color={style.tint} strokeWidth={1.7} />
@@ -117,14 +117,14 @@ export function RecordCard({
 
         <View className="min-w-0 flex-1 gap-0.5">
           <View className="flex-row items-center gap-2">
-            <Text style={{ fontFamily: font.semibold, fontSize: 11.5, color: style.tint }}>{style.label}</Text>
+            <Text style={{ fontFamily: font.semibold, fontSize: 12, color: style.tint }}>{style.label}</Text>
             {severity ? (
               <View className="rounded-pill px-2 py-0.5" style={{ backgroundColor: severity.bg }}>
-                <Text style={{ fontFamily: font.bold, fontSize: 10.5, color: severity.fg }}>{severity.label}</Text>
+                <Text style={{ fontFamily: font.bold, fontSize: 11, color: severity.fg }}>{severity.label}</Text>
               </View>
             ) : null}
           </View>
-          <Text numberOfLines={2} style={{ fontFamily: font.semibold, fontSize: 15.5, lineHeight: 20, color: ink[900] }}>
+          <Text numberOfLines={2} style={{ fontFamily: font.semibold, fontSize: 15, lineHeight: 20, color: ink[900] }}>
             {record.title}
           </Text>
           <View className="flex-row items-center gap-1.5">
@@ -136,7 +136,7 @@ export function RecordCard({
             </Text>
           </View>
           {record.summary ? (
-            <Text numberOfLines={1} style={{ fontFamily: font.medium, fontSize: 12.5, color: ink[700] }}>
+            <Text numberOfLines={1} style={{ fontFamily: font.medium, fontSize: 13, color: ink[700] }}>
               {record.summary}
             </Text>
           ) : null}

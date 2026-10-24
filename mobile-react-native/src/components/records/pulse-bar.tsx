@@ -1,7 +1,8 @@
-import { Pressable, Text, View } from "react-native";
+import { Text, View } from "react-native";
 
 import { SEVERITY_LABEL, type RecordStats, type Severity } from "@/lib/records/types";
 import { ink, semantic, surface } from "@/theme/tokens";
+import { Tap } from "@/components/ui/tap";
 
 /*
  * The composition of the filtered set, as one bar plus three filters.
@@ -98,7 +99,7 @@ export function PulseBar({
           const dim = count === 0;
 
           return (
-            <Pressable
+            <Tap scale={0.98}
               key={cell.key}
               accessibilityRole="button"
               accessibilityState={{ selected: on }}
@@ -125,16 +126,16 @@ export function PulseBar({
               />
               <View className="min-w-0 flex-1">
                 <Text
-                  className="text-[15px] font-semibold leading-none"
+                  className="text-base font-semibold leading-none"
                   style={{ color: on ? cell.fg : ink[900] }}
                 >
                   {count}
                 </Text>
-                <Text className="mt-0.5 text-[9.5px] leading-tight text-ink-500" numberOfLines={1}>
+                <Text className="mt-0.5 text-3xs leading-tight text-ink-500" numberOfLines={1}>
                   {cell.label}
                 </Text>
               </View>
-            </Pressable>
+            </Tap>
           );
         })}
       </View>

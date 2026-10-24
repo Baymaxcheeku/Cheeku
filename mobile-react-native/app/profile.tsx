@@ -407,7 +407,7 @@ export default function Profile() {
           {message ? (
             <Text
               accessibilityRole="alert"
-              style={{ fontFamily: font.medium, fontSize: 13.5, color: semantic.dangerText }}
+              style={{ fontFamily: font.medium, fontSize: 13, color: semantic.dangerText }}
             >
               {message}
             </Text>
@@ -437,11 +437,11 @@ function Section({
   return (
     <Card className="mt-5 p-5">
       <View className="flex-row items-center gap-2.5">
-        <View className="h-9 w-9 items-center justify-center rounded-[12px]" style={{ backgroundColor: brand[50] }}>
+        <View className="h-9 w-9 items-center justify-center rounded-md" style={{ backgroundColor: brand[50] }}>
           <Icon size={18} color={brand[600]} />
         </View>
         <View>
-          <Text style={[type.heading, { fontSize: 18, lineHeight: 22 }]}>{title}</Text>
+          <Text style={[type.heading, { fontSize: 17, lineHeight: 22 }]}>{title}</Text>
           <Text style={[type.caption, { color: ink[500] }]}>{note}</Text>
         </View>
       </View>

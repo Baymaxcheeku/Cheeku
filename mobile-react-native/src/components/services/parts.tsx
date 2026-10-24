@@ -30,7 +30,7 @@ import { NerveIcon, WellbeingIcon, type AppIcon } from "@/components/ui/icons";
 import { Gradient, glass, glassShadow } from "@/components/ui/glass";
 import type { SpecialtyId } from "@/lib/booking/catalog";
 import type { Service } from "@/lib/services/catalog";
-import { ink } from "@/theme/tokens";
+import { brand, ink } from "@/theme/tokens";
 import { font } from "@/theme/type";
 
 /*
@@ -106,7 +106,7 @@ export function ServiceArt({ icon: Icon, fg, size = 92 }: { icon: AppIcon; fg: s
   return (
     <View style={{ width: size, height: size }}>
       <View style={{ position: "absolute", right: 0, bottom: 0, width: size * 0.86, height: size * 0.86, borderRadius: size, backgroundColor: fg, opacity: 0.1 }} />
-      <View style={{ position: "absolute", right: size * 0.1, bottom: size * 0.12, width: card, height: card, borderRadius: card * 0.3, backgroundColor: "#fff", transform: [{ rotate: "-8deg" }], shadowColor: "#0f1030", shadowOpacity: 0.12, shadowRadius: 10, shadowOffset: { width: 0, height: 6 }, elevation: 4, alignItems: "center", justifyContent: "center" }}>
+      <View style={{ position: "absolute", right: size * 0.1, bottom: size * 0.12, width: card, height: card, borderRadius: card * 0.3, backgroundColor: "#fff", transform: [{ rotate: "-8deg" }], shadowColor: ink[900], shadowOpacity: 0.12, shadowRadius: 10, shadowOffset: { width: 0, height: 6 }, elevation: 4, alignItems: "center", justifyContent: "center" }}>
         <Icon size={card * 0.5} color={fg} strokeWidth={1.7} />
       </View>
       <View style={{ position: "absolute", right: size * 0.04, top: size * 0.14, width: size * 0.16, height: size * 0.16, borderRadius: size, backgroundColor: fg, opacity: 0.35 }} />
@@ -120,14 +120,14 @@ export function StatusPill({ status }: { status: Service["status"] }) {
     return (
       <View style={{ flexDirection: "row", alignItems: "center", gap: 4, paddingHorizontal: 8, height: 22, borderRadius: 999, backgroundColor: "rgba(15,16,48,0.08)" }}>
         <Lock size={9} color={ink[700]} />
-        <Text style={{ fontFamily: font.semibold, fontSize: 10.5, color: ink[700] }}>Locked</Text>
+        <Text style={{ fontFamily: font.semibold, fontSize: 11, color: ink[700] }}>Locked</Text>
       </View>
     );
   }
   if (status === "soon") {
     return (
       <View style={{ paddingHorizontal: 8, height: 22, borderRadius: 999, justifyContent: "center", backgroundColor: "rgba(255,255,255,0.8)" }}>
-        <Text style={{ fontFamily: font.semibold, fontSize: 10.5, color: ink[500] }}>Soon</Text>
+        <Text style={{ fontFamily: font.semibold, fontSize: 11, color: ink[500] }}>Soon</Text>
       </View>
     );
   }
@@ -142,7 +142,7 @@ export function ServiceTile({ service: s, onPress, tall = true }: { service: Ser
       accessibilityRole="button"
       accessibilityLabel={`${s.title}. ${s.line}${s.status === "live" ? "" : s.status === "soon" ? ". Coming soon" : ". Locked"}`}
       onPress={onPress}
-      style={[glassShadow, { flex: 1, height: tall ? 196 : 168, borderRadius: 28, overflow: "hidden", backgroundColor: "#fff", borderWidth: 1, borderColor: glass.rim }]}
+      style={[glassShadow, { flex: 1, height: tall ? 196 : 168, borderRadius: 32, overflow: "hidden", backgroundColor: "#fff", borderWidth: 1, borderColor: glass.rim }]}
     >
       <Gradient from={s.tint.to} to="#ffffff" angle="vertical" />
       <View style={{ padding: 16, flex: 1 }}>
@@ -152,9 +152,9 @@ export function ServiceTile({ service: s, onPress, tall = true }: { service: Ser
           </View>
         ) : null}
         <Text numberOfLines={2} style={{ fontFamily: font.semibold, fontSize: 17, lineHeight: 21, letterSpacing: -0.3, color: ink[900] }}>{s.title}</Text>
-        <Text numberOfLines={2} style={{ fontFamily: font.regular, fontSize: 12.5, lineHeight: 17, color: ink[500], marginTop: 4, maxWidth: "92%" }}>{s.line}</Text>
+        <Text numberOfLines={2} style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 17, color: ink[500], marginTop: 4, maxWidth: "92%" }}>{s.line}</Text>
         <View style={{ flex: 1 }} />
-        <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: ink[900], alignItems: "center", justifyContent: "center" }}>
+        <View style={{ width: 36, height: 36, borderRadius: 999, backgroundColor: brand[600], alignItems: "center", justifyContent: "center" }}>
           <ChevronRight size={18} color="#fff" />
         </View>
       </View>
@@ -176,15 +176,15 @@ export function CompactTile({ service: s, onPress }: { service: Service; onPress
       style={[glassShadow, { width: 136, height: 132, borderRadius: 24, overflow: "hidden", backgroundColor: "#fff", borderWidth: 1, borderColor: glass.rim, padding: 12 }]}
     >
       <Gradient from={s.tint.from} to="#ffffff" angle="vertical" />
-      <View style={{ width: 40, height: 40, borderRadius: 13, backgroundColor: "#fff", alignItems: "center", justifyContent: "center" }}>
+      <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: "#fff", alignItems: "center", justifyContent: "center" }}>
         <Icon size={20} color={s.tint.fg} strokeWidth={1.8} />
       </View>
       <View style={{ flex: 1 }} />
       <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
-        <Text numberOfLines={1} style={{ flexShrink: 1, fontFamily: font.semibold, fontSize: 14, color: ink[900] }}>{s.title}</Text>
+        <Text numberOfLines={1} style={{ flexShrink: 1, fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{s.title}</Text>
         <StatusPill status={s.status} />
       </View>
-      <Text numberOfLines={2} style={{ fontFamily: font.regular, fontSize: 11.5, lineHeight: 15, color: ink[500], marginTop: 2 }}>{s.line}</Text>
+      <Text numberOfLines={2} style={{ fontFamily: font.regular, fontSize: 12, lineHeight: 15, color: ink[500], marginTop: 2 }}>{s.line}</Text>
     </Tap>
   );
 }
@@ -196,9 +196,9 @@ export function AskToBook({ onPress, line }: { onPress: () => void; line?: strin
       accessibilityRole="button"
       accessibilityLabel="Tell Cheeku what you need"
       onPress={onPress}
-      style={[glassShadow, { borderRadius: 28, overflow: "hidden", minHeight: 124 }]} scale={0.98}
+      style={[glassShadow, { borderRadius: 32, overflow: "hidden", minHeight: 124 }]} scale={0.98}
     >
-      <Gradient from="#1b1a3f" to="#3b2bc9" glow="#5b4ef0" />
+      <Gradient from={ink[900]} to={brand[700]} glow={brand[500]} />
       <View style={{ flexDirection: "row", alignItems: "center", padding: 18, paddingRight: 8 }}>
         <View style={{ flex: 1 }}>
           <Text style={{ fontFamily: font.semibold, fontSize: 20, lineHeight: 25, letterSpacing: -0.4, color: "#fff" }}>
@@ -208,7 +208,7 @@ export function AskToBook({ onPress, line }: { onPress: () => void; line?: strin
             {line ?? "“Book HbA1c again” or “a dentist on Saturday”. It books, and files it."}
           </Text>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginTop: 12 }}>
-            <Text style={{ fontFamily: font.semibold, fontSize: 13.5, color: "#fff" }}>Start a chat</Text>
+            <Text style={{ fontFamily: font.semibold, fontSize: 13, color: "#fff" }}>Start a chat</Text>
             <ArrowRight size={15} color="#fff" />
           </View>
         </View>

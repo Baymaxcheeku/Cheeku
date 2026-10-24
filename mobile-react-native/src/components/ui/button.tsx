@@ -2,7 +2,7 @@ import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 
 import { EASE_OUT, useReducedMotion } from "@/components/ui/motion";
-import { brand } from "@/theme/tokens";
+import { brand, ink, surface } from "@/theme/tokens";
 
 /*
  * The primary action. Ported from the web `Button`.
@@ -55,7 +55,7 @@ export function Button({
           opacity: off ? 0.6 : 1,
           backgroundColor: primary ? brand[600] : "#ffffff",
           borderWidth: primary ? 0 : 1,
-          borderColor: "#e8e8f4",
+          borderColor: surface.line,
         }}
       >
         {loading ? <ActivityIndicator color={primary ? "#fff" : brand[600]} /> : null}
@@ -63,9 +63,9 @@ export function Button({
           {typeof children === "string" ? (
             <Text
               style={{
-                fontSize: 16,
+                fontSize: 17,
                 fontWeight: "700",
-                color: primary ? "#ffffff" : "#3a3b57",
+                color: primary ? "#ffffff" : ink[700],
               }}
             >
               {children}

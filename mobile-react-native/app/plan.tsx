@@ -13,7 +13,7 @@ import { Paywall } from "@/components/billing/paywall";
 import { Button } from "@/components/ui/button";
 import { clearAudience, readAudience } from "@/lib/auth/audience";
 import { formatPrice, PLANS } from "@/lib/billing/plans";
-import { brand, surface } from "@/theme/tokens";
+import { brand, lilac, surface } from "@/theme/tokens";
 
 /**
  * A7 — family access, offered once, skippable.
@@ -93,7 +93,7 @@ export default function Plan() {
         showsVerticalScrollIndicator={false}
       >
         <Headline lead="You're set up for" accent="your family" />
-        <Text className="mt-2 text-[13.5px] leading-[19px] text-ink-500">
+        <Text className="mt-2 text-sm leading-[19px] text-ink-500">
           Family access lets you keep records for everyone and switch between them. It&apos;s part of
           the Family plan.
         </Text>
@@ -105,28 +105,28 @@ export default function Plan() {
           <FamilyScene size={150} />
         </View>
 
-        <View className="overflow-hidden rounded-[28px] p-4" style={[glassShadow, { borderWidth: 2, borderColor: brand[300] }]}>
-          <Gradient from="#ffffff" to="#efeaff" glow="#ffffff" />
+        <View className="overflow-hidden rounded-2xl p-4" style={[glassShadow, { borderWidth: 2, borderColor: brand[300] }]}>
+          <Gradient from="#ffffff" to={lilac.base} glow="#ffffff" />
           <View className="flex-row items-start gap-3">
             <View className="h-11 w-11 items-center justify-center rounded-tile bg-brand-50">
               <Users size={20} color={brand[600]} />
             </View>
             <View className="min-w-0 flex-1">
               <View className="flex-row items-center gap-2">
-                <Text className="text-[17px] font-bold text-ink-900">{family.name}</Text>
+                <Text className="text-lg font-bold text-ink-900">{family.name}</Text>
                 {family.highlight ? (
                   <View className="rounded-pill bg-brand-600 px-2 py-0.5">
-                    <Text className="text-[10px] font-bold text-white">{family.highlight}</Text>
+                    <Text className="text-3xs font-bold text-white">{family.highlight}</Text>
                   </View>
                 ) : null}
               </View>
-              <Text className="mt-0.5 text-[12px] text-ink-500">{family.tagline}</Text>
+              <Text className="mt-0.5 text-xs text-ink-500">{family.tagline}</Text>
             </View>
             <View className="items-end">
-              <Text className="text-[20px] font-bold leading-none text-ink-900">
+              <Text className="text-xl font-bold leading-none text-ink-900">
                 {formatPrice(family.priceInPaise)}
               </Text>
-              <Text className="mt-0.5 text-[11px] text-ink-500">/{family.period}</Text>
+              <Text className="mt-0.5 text-2xs text-ink-500">/{family.period}</Text>
             </View>
           </View>
 
@@ -138,7 +138,7 @@ export default function Plan() {
               <View key={feature} className="flex-row items-start gap-2">
                 {/* Brand, not green: a plan feature is not a health result. */}
                 <Check size={14} color={brand[600]} strokeWidth={2.6} style={{ marginTop: 2 }} />
-                <Text className="flex-1 text-[12.5px] leading-[18px] text-ink-700">{feature}</Text>
+                <Text className="flex-1 text-sm leading-[18px] text-ink-700">{feature}</Text>
               </View>
             ))}
           </View>
@@ -152,16 +152,16 @@ export default function Plan() {
            * the reader has not seen a single record yet.
            */}
           <Button onPress={() => setPaywallOpen(true)}>
-            <Text className="text-[16px] font-bold text-white">See plans</Text>
+            <Text className="text-lg font-bold text-white">See plans</Text>
             <ArrowRight size={18} color="#ffffff" />
           </Button>
 
           <Button variant="secondary" onPress={finish} disabled={pending}>
-            <Text className="text-[16px] font-bold text-ink-700">
+            <Text className="text-lg font-bold text-ink-700">
               {pending ? "One moment…" : "Start free with just me"}
             </Text>
           </Button>
-          <Text className="text-center text-[11.5px] leading-[16px] text-ink-500">
+          <Text className="text-center text-xs leading-[16px] text-ink-500">
             You can add family members later from your Profile.
           </Text>
         </View>

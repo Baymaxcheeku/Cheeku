@@ -52,7 +52,7 @@ import { getEntitlement } from "@/lib/billing/quota";
 import { cancelSubscription, subscribeDemo } from "@/lib/billing/subscribe";
 import { profileAccess, type ActiveProfile } from "@/lib/profiles/context";
 import { joinNames, planChange, refreshRoster } from "@/lib/profiles/family";
-import { brand, ink, surface } from "@/theme/tokens";
+import { brand, hue, ink, lilac, semantic, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
 
 /*
@@ -191,29 +191,29 @@ export default function Subscription() {
     <SettingsScreen title="Your plan" eyebrow="What you get and who it covers" icon={Crown} bare>
       {/* -------------------------------------------------------- the hero -- */}
       <Reveal style={[glassShadow, { marginHorizontal: 20, marginTop: 4, borderRadius: 32, overflow: "hidden", padding: 20 }]}>
-        {paid ? <Gradient from={brand[800]} to={brand[500]} glow="#8a82f5" /> : <Gradient from="#e6e0ff" to="#ffffff" glow="#ffffff" />}
+        {paid ? <Gradient from={brand[800]} to={brand[500]} glow={brand[400]} /> : <Gradient from={lilac.violet} to="#ffffff" glow="#ffffff" />}
         <Eyebrow color={paid ? BRAND_ON_DARK : brand[600]}>You&apos;re on</Eyebrow>
         <View style={{ flexDirection: "row", alignItems: "center", gap: 10, marginTop: 6 }}>
-          <View style={{ width: 40, height: 40, borderRadius: 14, alignItems: "center", justifyContent: "center", backgroundColor: paid ? "rgba(255,255,255,0.16)" : "#fff" }}>
+          <View style={{ width: 40, height: 40, borderRadius: 16, alignItems: "center", justifyContent: "center", backgroundColor: paid ? "rgba(255,255,255,0.16)" : "#fff" }}>
             {(() => {
               const Icon = ICON[tier];
               return <Icon size={20} color={paid ? "#fff" : brand[600]} />;
             })()}
           </View>
-          <Text style={{ flex: 1, fontFamily: font.semibold, fontSize: 30, letterSpacing: -0.9, color: paid ? "#fff" : ink[900] }}>{plan.name}</Text>
+          <Text style={{ flex: 1, fontFamily: font.semibold, fontSize: 28, letterSpacing: -0.9, color: paid ? "#fff" : ink[900] }}>{plan.name}</Text>
         </View>
-        <Text style={{ fontFamily: font.regular, fontSize: 14.5, lineHeight: 20, color: paid ? "rgba(255,255,255,0.82)" : ink[700], marginTop: 8 }}>{plan.tagline}</Text>
-        <Text style={{ fontFamily: font.semibold, fontSize: 14, color: paid ? "#fff" : ink[900], marginTop: 10 }}>
+        <Text style={{ fontFamily: font.regular, fontSize: 15, lineHeight: 20, color: paid ? "rgba(255,255,255,0.82)" : ink[700], marginTop: 8 }}>{plan.tagline}</Text>
+        <Text style={{ fontFamily: font.semibold, fontSize: 15, color: paid ? "#fff" : ink[900], marginTop: 10 }}>
           {paid ? `${formatPrice(plan.priceInPaise)} a ${plan.period}` : "₹0, for as long as you like"}
           {paid && perDayLabel(plan) ? <Text style={{ fontFamily: font.regular, color: paid ? "rgba(255,255,255,0.7)" : ink[500] }}>{`  ·  ${perDayLabel(plan)}`}</Text> : null}
         </Text>
 
         {/* Usage. A meter on Free, a plain promise on paid plans. */}
-        <View style={{ marginTop: 16, padding: 14, borderRadius: 20, backgroundColor: paid ? "rgba(255,255,255,0.12)" : "rgba(255,255,255,0.85)" }}>
+        <View style={{ marginTop: 16, padding: 14, borderRadius: 24, backgroundColor: paid ? "rgba(255,255,255,0.12)" : "rgba(255,255,255,0.85)" }}>
           {isUnlimited(tier) ? (
             <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
               <InfinityIcon size={18} color="#fff" />
-              <Text style={{ flex: 1, fontFamily: font.semibold, fontSize: 14.5, color: "#fff" }}>Unlimited chats{tier === "family" ? " for everyone" : ""}</Text>
+              <Text style={{ flex: 1, fontFamily: font.semibold, fontSize: 15, color: "#fff" }}>Unlimited chats{tier === "family" ? " for everyone" : ""}</Text>
             </View>
           ) : (
             <Meter left={entitlement.chatsRemaining ?? 0} />
@@ -221,11 +221,11 @@ export default function Subscription() {
           <View style={{ height: 1, backgroundColor: paid ? "rgba(255,255,255,0.14)" : surface.line, marginVertical: 12 }} />
           <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
             <Faces members={covered} dark={paid} />
-            <Text style={{ flex: 1, fontFamily: font.medium, fontSize: 13.5, color: paid ? "#fff" : ink[900] }}>
+            <Text style={{ flex: 1, fontFamily: font.medium, fontSize: 13, color: paid ? "#fff" : ink[900] }}>
               {seats === 1 ? "Covers just you" : `${covered.length} of ${seats} people covered`}
             </Text>
             {seats > 1 && covered.length < seats ? (
-              <Text style={{ fontFamily: font.regular, fontSize: 12.5, color: paid ? "rgba(255,255,255,0.7)" : ink[500] }}>
+              <Text style={{ fontFamily: font.regular, fontSize: 13, color: paid ? "rgba(255,255,255,0.7)" : ink[500] }}>
                 {seats - covered.length === 1 ? "1 seat free" : `${seats - covered.length} seats free`}
               </Text>
             ) : null}
@@ -249,7 +249,7 @@ export default function Subscription() {
           style={({ pressed }) => ({ marginTop: 16, height: 52, borderRadius: 999, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, backgroundColor: paid ? "#fff" : brand[600], opacity: pressed ? 0.88 : 1, transform: [{ scale: pressed ? 0.985 : 1 }] })}
         >
           <next.icon size={17} color={paid ? brand[700] : "#fff"} />
-          <Text style={{ fontFamily: font.semibold, fontSize: 15.5, color: paid ? brand[700] : "#fff" }}>{next.label}</Text>
+          <Text style={{ fontFamily: font.semibold, fontSize: 15, color: paid ? brand[700] : "#fff" }}>{next.label}</Text>
         </Pressable>
       </Reveal>
 
@@ -303,7 +303,7 @@ export default function Subscription() {
             onPress={() => setTarget("micro")}
             style={({ pressed }) => [glassShadow, { flexDirection: "row", alignItems: "center", gap: 12, padding: 16, borderRadius: 24, backgroundColor: pressed ? brand[100] : brand[50] }]}
           >
-            <View style={{ width: 42, height: 42, borderRadius: 14, backgroundColor: "#fff", alignItems: "center", justifyContent: "center" }}>
+            <View style={{ width: 42, height: 42, borderRadius: 16, backgroundColor: "#fff", alignItems: "center", justifyContent: "center" }}>
               <Zap size={19} color={brand[600]} />
             </View>
             <View style={{ flex: 1 }}>
@@ -333,9 +333,9 @@ export default function Subscription() {
           <Assurance icon={FileHeart} text="Nothing deleted on a change" />
         </View>
         {paid && tier !== "micro" ? (
-          <Pressable accessibilityRole="button" onPress={() => setTarget("free")} style={{ alignSelf: "center", paddingVertical: 14, paddingHorizontal: 20 }}>
-            <Text style={{ fontFamily: font.semibold, fontSize: 14, color: ink[500], textDecorationLine: "underline" }}>Cancel plan</Text>
-          </Pressable>
+          <Tap accessibilityRole="button" onPress={() => setTarget("free")} style={{ alignSelf: "center", paddingVertical: 14, paddingHorizontal: 20 }}>
+            <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[500], textDecorationLine: "underline" }}>Cancel plan</Text>
+          </Tap>
         ) : null}
       </Reveal>
 
@@ -370,7 +370,7 @@ function Meter({ left }: { left: number }) {
     <View>
       <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
         <MessageCircle size={17} color={brand[600]} />
-        <Text style={{ flex: 1, fontFamily: font.semibold, fontSize: 14.5, color: ink[900] }}>
+        <Text style={{ flex: 1, fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>
           {left} of {FREE_CHAT_LIMIT} chats left today
         </Text>
       </View>
@@ -401,19 +401,19 @@ function Faces({ members, dark }: { members: readonly ActiveProfile[]; dark: boo
 function Perk({ text, dark = false }: { text: string; dark?: boolean }) {
   return (
     <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 10 }}>
-      <View style={{ width: 20, height: 20, borderRadius: 10, marginTop: 1, alignItems: "center", justifyContent: "center", backgroundColor: dark ? "rgba(255,255,255,0.18)" : brand[50] }}>
+      <View style={{ width: 20, height: 20, borderRadius: 999, marginTop: 1, alignItems: "center", justifyContent: "center", backgroundColor: dark ? "rgba(255,255,255,0.18)" : brand[50] }}>
         <Check size={12} color={dark ? "#fff" : brand[600]} strokeWidth={3} />
       </View>
-      <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 14, lineHeight: 20, color: dark ? "#fff" : ink[700] }}>{text}</Text>
+      <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 15, lineHeight: 20, color: dark ? "#fff" : ink[700] }}>{text}</Text>
     </View>
   );
 }
 
 function Assurance({ icon: Icon, text }: { icon: LucideIcon; text: string }) {
   return (
-    <View style={{ flex: 1, flexDirection: "row", alignItems: "center", gap: 8, padding: 12, borderRadius: 18, backgroundColor: "rgba(255,255,255,0.7)", borderWidth: 1, borderColor: surface.line }}>
+    <View style={{ flex: 1, flexDirection: "row", alignItems: "center", gap: 8, padding: 12, borderRadius: 16, backgroundColor: "rgba(255,255,255,0.7)", borderWidth: 1, borderColor: surface.line }}>
       <Icon size={16} color={brand[600]} />
-      <Text style={{ flex: 1, fontFamily: font.medium, fontSize: 12.5, lineHeight: 17, color: ink[700] }}>{text}</Text>
+      <Text style={{ flex: 1, fontFamily: font.medium, fontSize: 13, lineHeight: 17, color: ink[700] }}>{text}</Text>
     </View>
   );
 }
@@ -438,7 +438,7 @@ function PlanCard({ plan, current, from, onPress }: { plan: Plan; current: boole
       style={[glassShadow, {
         width: CARD_W,
         padding: 18,
-        borderRadius: 28,
+        borderRadius: 32,
         overflow: "hidden",
         backgroundColor: featured ? brand[700] : "#fff",
         borderWidth: current ? 2 : 0,
@@ -446,9 +446,9 @@ function PlanCard({ plan, current, from, onPress }: { plan: Plan; current: boole
       }]}
       scale={0.98}
     >
-      {featured ? <Gradient from={brand[800]} to={brand[500]} glow="#8a82f5" /> : null}
+      {featured ? <Gradient from={brand[800]} to={brand[500]} glow={brand[400]} /> : null}
       <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
-        <View style={{ width: 40, height: 40, borderRadius: 14, alignItems: "center", justifyContent: "center", backgroundColor: featured ? "rgba(255,255,255,0.16)" : brand[50] }}>
+        <View style={{ width: 40, height: 40, borderRadius: 16, alignItems: "center", justifyContent: "center", backgroundColor: featured ? "rgba(255,255,255,0.16)" : brand[50] }}>
           <Icon size={19} color={featured ? "#fff" : brand[600]} />
         </View>
         {featured ? (
@@ -462,14 +462,14 @@ function PlanCard({ plan, current, from, onPress }: { plan: Plan; current: boole
         ) : null}
       </View>
 
-      <Text style={{ fontFamily: font.semibold, fontSize: 19, color: fg, marginTop: 14 }}>{plan.name}</Text>
+      <Text style={{ fontFamily: font.semibold, fontSize: 20, color: fg, marginTop: 14 }}>{plan.name}</Text>
       <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: soft, marginTop: 2 }}>{plan.tagline}</Text>
 
       <View style={{ flexDirection: "row", alignItems: "flex-end", gap: 4, marginTop: 14 }}>
-        <Text style={{ fontFamily: font.semibold, fontSize: 32, letterSpacing: -1, color: fg }}>{plan.priceInPaise === 0 ? "₹0" : formatPrice(plan.priceInPaise)}</Text>
-        <Text style={{ fontFamily: font.regular, fontSize: 13.5, color: soft, marginBottom: 6 }}>{plan.priceInPaise === 0 ? "forever" : `/ ${plan.period}`}</Text>
+        <Text style={{ fontFamily: font.semibold, fontSize: 34, letterSpacing: -1, color: fg }}>{plan.priceInPaise === 0 ? "₹0" : formatPrice(plan.priceInPaise)}</Text>
+        <Text style={{ fontFamily: font.regular, fontSize: 13, color: soft, marginBottom: 6 }}>{plan.priceInPaise === 0 ? "forever" : `/ ${plan.period}`}</Text>
       </View>
-      <Text style={{ fontFamily: font.medium, fontSize: 12.5, color: soft, minHeight: 17 }}>
+      <Text style={{ fontFamily: font.medium, fontSize: 13, color: soft, minHeight: 17 }}>
         {[perDay, perSeat].filter(Boolean).join("  ·  ") || (plan.tier === "micro" ? "One payment, no renewal" : "No card needed")}
       </Text>
 
@@ -489,11 +489,11 @@ function PlanCard({ plan, current, from, onPress }: { plan: Plan; current: boole
           alignItems: "center",
           justifyContent: "center",
           gap: 6,
-          backgroundColor: current ? (featured ? "rgba(255,255,255,0.16)" : brand[50]) : featured ? "#fff" : up ? brand[600] : "#eef0f5",
+          backgroundColor: current ? (featured ? "rgba(255,255,255,0.16)" : brand[50]) : featured ? "#fff" : up ? brand[600] : hue.slate.bg,
         }}
       >
         {current ? <Check size={15} color={featured ? "#fff" : brand[700]} strokeWidth={2.8} /> : up ? <ArrowUpRight size={16} color={featured ? brand[700] : "#fff"} /> : <ArrowDownRight size={16} color={ink[700]} />}
-        <Text style={{ fontFamily: font.semibold, fontSize: 14.5, color: current ? (featured ? "#fff" : brand[700]) : featured ? brand[700] : up ? "#fff" : ink[700] }}>{label}</Text>
+        <Text style={{ fontFamily: font.semibold, fontSize: 15, color: current ? (featured ? "#fff" : brand[700]) : featured ? brand[700] : up ? "#fff" : ink[700] }}>{label}</Text>
       </View>
     </Tap>
   );
@@ -517,19 +517,19 @@ function Compare({ current }: { current: Tier }) {
       </View>
       {COMPARE.map((row, i) => (
         <View key={row.label} style={{ flexDirection: "row", alignItems: "center", paddingHorizontal: 14, paddingVertical: 12, borderTopWidth: i === 0 ? 0 : 1, borderTopColor: surface.line }}>
-          <Text style={{ flex: 1.5, fontFamily: font.medium, fontSize: 12.5, lineHeight: 17, color: ink[700], paddingRight: 6 }}>{brandify(row.label)}</Text>
+          <Text style={{ flex: 1.5, fontFamily: font.medium, fontSize: 13, lineHeight: 17, color: ink[700], paddingRight: 6 }}>{brandify(row.label)}</Text>
           {cols.map((c) => {
             const v = row[c.tier];
             return (
               <View key={c.tier} style={{ flex: 1, alignItems: "center" }}>
                 {v === true ? (
-                  <View style={{ width: 22, height: 22, borderRadius: 11, backgroundColor: brand[50], alignItems: "center", justifyContent: "center" }}>
+                  <View style={{ width: 22, height: 22, borderRadius: 999, backgroundColor: brand[50], alignItems: "center", justifyContent: "center" }}>
                     <Check size={13} color={brand[600]} strokeWidth={3} />
                   </View>
                 ) : v === false ? (
                   <Minus size={15} color={ink[300]} />
                 ) : (
-                  <Text style={{ fontFamily: font.semibold, fontSize: 12.5, color: ink[900], textAlign: "center" }}>{v}</Text>
+                  <Text style={{ fontFamily: font.semibold, fontSize: 13, color: ink[900], textAlign: "center" }}>{v}</Text>
                 )}
               </View>
             );
@@ -612,34 +612,34 @@ function ChangeSheet({
 
   return (
     <Sheet open={true} onClose={onClose} label="Close">
-      <View style={{ borderTopLeftRadius: 32, borderTopRightRadius: 32, backgroundColor: "#fafafe", paddingHorizontal: 22, paddingTop: 10, paddingBottom: insets.bottom + 14 }}>
-        <Text style={{ fontFamily: font.semibold, fontSize: 12.5, color: brand[700], marginTop: 16 }}>
+      <View style={{ borderTopLeftRadius: 32, borderTopRightRadius: 32, backgroundColor: surface.canvas, paddingHorizontal: 22, paddingTop: 10, paddingBottom: insets.bottom + 14 }}>
+        <Text style={{ fontFamily: font.semibold, fontSize: 13, color: brand[700], marginTop: 16 }}>
           {target.priceInPaise === 0 ? "₹0" : `${formatPrice(target.priceInPaise)}/${target.period}`}
         </Text>
         <Text accessibilityRole="header" style={{ fontFamily: font.semibold, fontSize: 24, letterSpacing: -0.6, color: ink[900], marginTop: 2 }}>
           {title}
         </Text>
-        <Text style={{ fontFamily: font.regular, fontSize: 14, color: ink[500], marginTop: 4 }}>Here&apos;s what changes for you.</Text>
+        <Text style={{ fontFamily: font.regular, fontSize: 15, color: ink[500], marginTop: 4 }}>Here&apos;s what changes for you.</Text>
 
-        <Glass strong className="mt-4 gap-3 rounded-[22px] p-4">
+        <Glass strong className="mt-4 gap-3 rounded-xl p-4">
           {lines.map((l) => (
             <View key={l.text} className="flex-row items-start gap-3">
-              <View style={{ width: 30, height: 30, borderRadius: 10, backgroundColor: l.tone === "good" ? brand[50] : "#eef0f5", alignItems: "center", justifyContent: "center" }}>
+              <View style={{ width: 30, height: 30, borderRadius: 12, backgroundColor: l.tone === "good" ? brand[50] : hue.slate.bg, alignItems: "center", justifyContent: "center" }}>
                 <l.icon size={15} color={l.tone === "good" ? brand[600] : ink[700]} />
               </View>
-              <Text style={{ flex: 1, fontFamily: font.medium, fontSize: 14.5, lineHeight: 20, color: ink[900], marginTop: 4 }}>{l.text}</Text>
+              <Text style={{ flex: 1, fontFamily: font.medium, fontSize: 15, lineHeight: 20, color: ink[900], marginTop: 4 }}>{l.text}</Text>
             </View>
           ))}
         </Glass>
 
-        {error ? <Text accessibilityRole="alert" style={{ fontFamily: font.medium, fontSize: 13, color: "#c00a1c", marginTop: 10 }}>{error}</Text> : null}
+        {error ? <Text accessibilityRole="alert" style={{ fontFamily: font.medium, fontSize: 13, color: semantic.dangerText, marginTop: 10 }}>{error}</Text> : null}
 
-        <PillButton tone={upgrade ? "brand" : "dark"} loading={busy} onPress={() => void confirm()} style={{ marginTop: 18 }}>
+        <PillButton loading={busy} onPress={() => void confirm()} style={{ marginTop: 18 }}>
           {upgrade ? "Continue to payment" : toFree ? "Move to Free" : `Switch to ${target.name}`}
         </PillButton>
-        <Pressable accessibilityRole="button" onPress={onClose} style={{ height: 46, alignItems: "center", justifyContent: "center", marginTop: 2 }}>
-          <Text style={{ fontFamily: font.semibold, fontSize: 14.5, color: ink[500] }}>{upgrade ? "Not now" : "Keep my plan"}</Text>
-        </Pressable>
+        <Tap accessibilityRole="button" onPress={onClose} style={{ height: 46, alignItems: "center", justifyContent: "center", marginTop: 2 }}>
+          <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[500] }}>{upgrade ? "Not now" : "Keep my plan"}</Text>
+        </Tap>
       </View>
     </Sheet>
   );

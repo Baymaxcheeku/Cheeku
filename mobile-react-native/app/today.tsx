@@ -2,7 +2,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useLocalSearchParams } from "expo-router";
 import { Check, LayoutGrid, SlidersHorizontal } from "lucide-react-native";
 import { useEffect, useMemo, useState } from "react";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { CardListSkeleton } from "@/components/ui/skeleton";
@@ -22,7 +22,7 @@ import { mealsToday, type PlanTask } from "@/lib/home/plan";
 import { logStep, unlogStep, useHomeStage } from "@/lib/home/stage";
 import { usePlan } from "@/lib/home/use-plan";
 import { useFamily } from "@/lib/profiles/family";
-import { brand, ink, surface } from "@/theme/tokens";
+import { brand, ink, lilac, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
 import { joinAnd, softLower } from "@/lib/content/words";
 import { feel } from "@/lib/feel";
@@ -134,21 +134,21 @@ export default function TodayPlan() {
       <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + 40 }} showsVerticalScrollIndicator={false}>
         {/* The day at a glance */}
         <StaggerItem index={0}>
-          <View className="mx-5 mt-3 overflow-hidden rounded-[28px]" style={glassShadow}>
-            <Gradient from="#f1edff" to="#d8cffd" glow="#ffffff" />
+          <View className="mx-5 mt-3 overflow-hidden rounded-2xl" style={glassShadow}>
+            <Gradient from={lilac.base} to={lilac.deep} glow="#ffffff" />
             <View pointerEvents="none" style={{ position: "absolute", right: -4, bottom: -10 }}>
               <MascotFigure size={112} moment={plan.done === plan.total && plan.total > 0 ? "joy" : "present"} />
             </View>
             <View className="p-4" style={{ paddingRight: 110 }}>
               <Text style={{ fontFamily: font.bold, fontSize: 11, letterSpacing: 1.2, color: brand[700] }}>{profile.isPrimary ? "YOUR DAY" : `${firstName(profile.name).toUpperCase()}'S DAY`}</Text>
-              <Text style={{ fontFamily: font.semibold, fontSize: 30, letterSpacing: -0.8, color: ink[900], marginTop: 4 }}>
+              <Text style={{ fontFamily: font.semibold, fontSize: 28, letterSpacing: -0.8, color: ink[900], marginTop: 4 }}>
                 {plan.done}
-                <Text style={{ fontFamily: font.medium, fontSize: 18, color: ink[500] }}> of {plan.total} done</Text>
+                <Text style={{ fontFamily: font.medium, fontSize: 17, color: ink[500] }}> of {plan.total} done</Text>
               </Text>
               <View className="mt-2">
                 <Meter value={plan.done} total={Math.max(1, plan.total)} />
               </View>
-              <Text style={{ fontFamily: font.regular, fontSize: 12.5, lineHeight: 17, color: ink[700], marginTop: 10 }}>
+              <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 17, color: ink[700], marginTop: 10 }}>
                 {builtFrom.length ? `Built around ${joinAnd(builtFrom)}.` : "Everyday longevity habits. Add a report to make it yours."}
               </Text>
             </View>
@@ -181,7 +181,7 @@ export default function TodayPlan() {
                   {
                     flex: 1,
                     height: 78,
-                    borderRadius: 18,
+                    borderRadius: 16,
                     alignItems: "center",
                     justifyContent: "center",
                     gap: 4,
@@ -193,24 +193,24 @@ export default function TodayPlan() {
                 scale={0.95}
               >
                 <Icon size={18} color={on ? "#fff" : brand[600]} strokeWidth={2} />
-                <Text style={{ fontFamily: font.semibold, fontSize: 11.5, color: on ? "#fff" : ink[900] }}>{label}</Text>
+                <Text style={{ fontFamily: font.semibold, fontSize: 12, color: on ? "#fff" : ink[900] }}>{label}</Text>
                 {complete ? (
                   <View className="h-4 w-4 items-center justify-center rounded-pill" style={{ backgroundColor: brand[500] }}>
                     <Check size={10} color="#fff" strokeWidth={3.2} />
                   </View>
                 ) : (
-                  <Text style={{ fontFamily: font.medium, fontSize: 10.5, color: on ? "rgba(255,255,255,0.75)" : ink[500] }}>{`${prog.done}/${prog.total}`}</Text>
+                  <Text style={{ fontFamily: font.medium, fontSize: 11, color: on ? "rgba(255,255,255,0.75)" : ink[500] }}>{`${prog.done}/${prog.total}`}</Text>
                 )}
               </Tap>
             );
           })}
         </View>
 
-        <Text style={{ fontFamily: font.regular, fontSize: 13.5, lineHeight: 19, color: ink[500], marginTop: 12, marginHorizontal: 20 }}>{INTRO[pillar]}</Text>
+        <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 19, color: ink[500], marginTop: 12, marginHorizontal: 20 }}>{INTRO[pillar]}</Text>
         {plate ? (
-          <View className="mx-5 mt-3 rounded-[18px] p-3.5" style={{ backgroundColor: brand[50] }}>
-            <Text style={{ fontFamily: font.bold, fontSize: 10.5, letterSpacing: 1, color: brand[700] }}>TODAY&apos;S PLATE</Text>
-            <Text style={{ fontFamily: font.semibold, fontSize: 14, lineHeight: 19, color: ink[900], marginTop: 3 }}>{plate.line}</Text>
+          <View className="mx-5 mt-3 rounded-lg p-3.5" style={{ backgroundColor: brand[50] }}>
+            <Text style={{ fontFamily: font.bold, fontSize: 11, letterSpacing: 1, color: brand[700] }}>TODAY&apos;S PLATE</Text>
+            <Text style={{ fontFamily: font.semibold, fontSize: 15, lineHeight: 19, color: ink[900], marginTop: 3 }}>{plate.line}</Text>
           </View>
         ) : null}
 
@@ -239,7 +239,7 @@ export default function TodayPlan() {
             </View>
           </View>
         ))}
-        {!groups.length ? <Text style={{ fontFamily: font.regular, fontSize: 14, color: ink[500], margin: 20 }}>Nothing here for today.</Text> : null}
+        {!groups.length ? <Text style={{ fontFamily: font.regular, fontSize: 15, color: ink[500], margin: 20 }}>Nothing here for today.</Text> : null}
       </ScrollView>
 
       {sheetTask && sheet?.action === "steps" ? <StepsSheet open profileId={profile.id} task={sheetTask} target={plan.steps} onClose={() => setSheet(null)} /> : null}
@@ -262,22 +262,22 @@ function PrefsSheet({ open, profileId, onClose }: { open: boolean; profileId: st
   const set = (next: typeof current) => void saveDailyPrefs(qc, profileId, next);
   return (
     <Sheet open={open} title="Tune your plan" line="Cheeku picks the tasks. These are yours to set." onClose={onClose}>
-      <Text style={{ fontFamily: font.semibold, fontSize: 14, color: ink[900] }}>Daily step goal</Text>
+      <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>Daily step goal</Text>
       <View className="mt-2 flex-row flex-wrap gap-2" style={{ alignItems: "flex-start" }}>
         {[undefined, ...GOALS].map((g) => {
           const on = current.steps_goal === g;
           return (
-            <Pressable key={g ?? "auto"} accessibilityRole="radio" accessibilityState={{ checked: on }} onPress={() => set({ ...current, steps_goal: g })} className="h-10 items-center justify-center rounded-pill px-4" style={{ backgroundColor: on ? ink[900] : "#fff", borderWidth: 1, borderColor: on ? ink[900] : surface.line }}>
-              <Text style={{ fontFamily: font.semibold, fontSize: 13.5, color: on ? "#fff" : ink[900] }}>{g ? g.toLocaleString("en-IN") : "Pick for me"}</Text>
-            </Pressable>
+            <Tap key={g ?? "auto"} accessibilityRole="radio" accessibilityState={{ checked: on }} onPress={() => set({ ...current, steps_goal: g })} className="h-10 items-center justify-center rounded-pill px-4" style={{ backgroundColor: on ? ink[900] : "#fff", borderWidth: 1, borderColor: on ? ink[900] : surface.line }}>
+              <Text style={{ fontFamily: font.semibold, fontSize: 13, color: on ? "#fff" : ink[900] }}>{g ? g.toLocaleString("en-IN") : "Pick for me"}</Text>
+            </Tap>
           );
         })}
       </View>
-      <Text style={{ fontFamily: font.regular, fontSize: 12.5, lineHeight: 17, color: ink[500], marginTop: 8 }}>
+      <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 17, color: ink[500], marginTop: 8 }}>
         &quot;Pick for me&quot; sets it by age and builds up from what you actually walked this week.
       </Text>
 
-      <Text style={{ fontFamily: font.semibold, fontSize: 14, color: ink[900], marginTop: 20 }}>Food</Text>
+      <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900], marginTop: 20 }}>Food</Text>
       <View className="mt-2 flex-row gap-2">
         {[
           { v: false, label: "I eat everything" },
@@ -285,9 +285,9 @@ function PrefsSheet({ open, profileId, onClose }: { open: boolean; profileId: st
         ].map((o) => {
           const on = Boolean(current.veg) === o.v;
           return (
-            <Pressable key={o.label} accessibilityRole="radio" accessibilityState={{ checked: on }} onPress={() => set({ ...current, veg: o.v })} className="h-10 flex-1 items-center justify-center rounded-pill" style={{ backgroundColor: on ? ink[900] : "#fff", borderWidth: 1, borderColor: on ? ink[900] : surface.line }}>
-              <Text style={{ fontFamily: font.semibold, fontSize: 13.5, color: on ? "#fff" : ink[900] }}>{o.label}</Text>
-            </Pressable>
+            <Tap key={o.label} accessibilityRole="radio" accessibilityState={{ checked: on }} onPress={() => set({ ...current, veg: o.v })} className="h-10 flex-1 items-center justify-center rounded-pill" style={{ backgroundColor: on ? ink[900] : "#fff", borderWidth: 1, borderColor: on ? ink[900] : surface.line }}>
+              <Text style={{ fontFamily: font.semibold, fontSize: 13, color: on ? "#fff" : ink[900] }}>{o.label}</Text>
+            </Tap>
           );
         })}
       </View>

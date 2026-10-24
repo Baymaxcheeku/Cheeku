@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { PopIn, PressRow } from "@/components/ui/motion";
 import { JOURNEYS, type JourneyId } from "@/lib/onboarding/journeys";
 import { supabase } from "@/lib/supabase/client";
-import { brand, ink, shadow, surface } from "@/theme/tokens";
+import { brand, hue, ink, lilac, shadow, surface } from "@/theme/tokens";
 import { type } from "@/theme/type";
 
 /*
@@ -124,7 +124,7 @@ export default function Journey() {
                     accessibilityLabel={`${j.label}. ${j.problem}`}
                     // No `h-full`: a percentage height against an auto-height
                     // animated wrapper is undefined in Yoga.
-                    className="rounded-[22px] p-4"
+                    className="rounded-xl p-4"
                     style={[
                       active ? shadow.e2 : shadow.e1,
                       {
@@ -141,7 +141,7 @@ export default function Journey() {
                     >
                       <Icon size={20} color={fg} />
                     </View>
-                    <Text style={[type.label, { marginTop: 12, fontSize: 14.5 }]}>{j.label}</Text>
+                    <Text style={[type.label, { marginTop: 12, fontSize: 15 }]}>{j.label}</Text>
                     <Text style={[type.caption, { marginTop: 3, lineHeight: 16, color: ink[500] }]}>{j.problem}</Text>
 
                     {active ? (
@@ -184,19 +184,19 @@ export default function Journey() {
  * on purpose: green, amber and red mean health status everywhere else.
  */
 const TINT: Record<string, string> = {
-  expecting: "#f3e9fd",
-  fertility: "#e6f1fd",
-  caregiver: "#fdeee0",
-  new_parent: "#fdeaf0",
-  optimiser: "#eaf6ec",
+  expecting: lilac.base,
+  fertility: hue.blue.wash,
+  caregiver: hue.orange.wash,
+  new_parent: hue.rose.bg,
+  optimiser: hue.teal.bg,
   other: brand[50],
 };
 
 const TINT_FG: Record<string, string> = {
   expecting: "#7b3fd4",
-  fertility: "#1a6fc2",
-  caregiver: "#c2650b",
-  new_parent: "#c22a6b",
+  fertility: hue.blue.fg,
+  caregiver: hue.orange.fg,
+  new_parent: hue.rose.fg,
   optimiser: "#1f8a45",
   other: brand[600],
 };

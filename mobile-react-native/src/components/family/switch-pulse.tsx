@@ -41,7 +41,7 @@ export function SwitchPulse() {
         style={[glassShadow, { flexDirection: "row", alignItems: "center", gap: 8, paddingLeft: 4, paddingRight: 14, height: 36, borderRadius: 999, backgroundColor: glass.fillStrong, borderWidth: 1, borderColor: glass.rim }]}
       >
         <Avatar svg={member.avatar} photo={member.photo} image={member.avatarImage} background={member.avatarBackground} size={28} />
-        <Text style={{ fontFamily: font.semibold, fontSize: 13.5, color: ink[900] }}>
+        <Text style={{ fontFamily: font.semibold, fontSize: 13, color: ink[900] }}>
           {member.isPrimary ? "Back to your own file" : `Now viewing ${first}'s file`}
         </Text>
       </Animated.View>

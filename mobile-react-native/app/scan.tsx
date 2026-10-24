@@ -17,7 +17,7 @@ import {
   type LucideIcon,
 } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
-import { ActivityIndicator, Alert, Pressable, ScrollView, Text, View } from "react-native";
+import { ActivityIndicator, Alert, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Tap } from "@/components/ui/tap";
@@ -31,7 +31,7 @@ import { TYPE_STYLE } from "@/components/records/record-card";
 import { uploadDocument, type PickedFile } from "@/lib/records/upload";
 import { DOC_TYPE_LABEL, DOC_TYPES, type DocType } from "@/lib/records/types";
 import { stripImageMetadata } from "@/lib/upload/strip-exif";
-import { brand, ink, semantic } from "@/theme/tokens";
+import { brand, hue, ink, lilac, semantic } from "@/theme/tokens";
 import { useFamily } from "@/lib/profiles/family";
 import { feel } from "@/lib/feel";
 
@@ -283,10 +283,10 @@ export default function Scan() {
         <View className="items-center">
           <MascotFigure size={132} moment="working" move="float" hop />
         </View>
-        <Text style={{ fontFamily: font.semibold, fontSize: 26, letterSpacing: -0.7, color: ink[900], textAlign: "center", marginTop: 6 }}>
+        <Text style={{ fontFamily: font.semibold, fontSize: 24, letterSpacing: -0.7, color: ink[900], textAlign: "center", marginTop: 6 }}>
           Reading it now
         </Text>
-        <Text style={{ fontFamily: font.regular, fontSize: 14, lineHeight: 20, color: ink[500], textAlign: "center", marginTop: 4 }}>
+        <Text style={{ fontFamily: font.regular, fontSize: 15, lineHeight: 20, color: ink[500], textAlign: "center", marginTop: 4 }}>
           {STEP_NARRATIVE[Math.min(stepIndex, STEP_NARRATIVE.length - 1)]}
         </Text>
 
@@ -298,7 +298,7 @@ export default function Scan() {
             return (
               <View
                 key={step.key}
-                className="flex-row items-center gap-3 rounded-[22px] p-3.5"
+                className="flex-row items-center gap-3 rounded-xl p-3.5"
                 style={[glassShadow, { backgroundColor: glass.fillStrong, borderWidth: 1, borderColor: glass.rim, opacity: done || current ? 1 : 0.45 }]}
               >
                 <View
@@ -315,8 +315,8 @@ export default function Scan() {
                   )}
                 </View>
                 <View className="min-w-0 flex-1">
-                  <Text className="text-[14px] font-semibold text-ink-900">{step.title}</Text>
-                  <Text className="text-[12px] text-ink-500">{step.body}</Text>
+                  <Text className="text-base font-semibold text-ink-900">{step.title}</Text>
+                  <Text className="text-xs text-ink-500">{step.body}</Text>
                 </View>
               </View>
             );
@@ -330,7 +330,7 @@ export default function Scan() {
            * with its GPS intact after promising otherwise is worse than the
            * metadata itself.
            */
-          <Text className="mt-5 text-[12px] leading-[17px] text-caution-text">
+          <Text className="mt-5 text-xs leading-[17px] text-caution-text">
             This photo could not be re-encoded, so its location data was left in place. The file is
             still private to your family.
           </Text>
@@ -349,9 +349,9 @@ export default function Scan() {
    * only wanted a photo they already have is the request most often denied.
    */
   const sources = [
-    { key: "camera", title: "Take a photo", line: "Snap a report or prescription, page by page", Icon: CameraIcon, from: "#ece6ff", fg: brand[600], onPress: takePhoto },
-    { key: "library", title: "Choose from photos", line: "Screenshots and pictures you already have", Icon: Images, from: "#dcecff", fg: "#1a6fc2", onPress: pickFromLibrary },
-    { key: "file", title: "Upload a PDF or file", line: "A full lab report, a discharge summary", Icon: FileUp, from: "#ffe3d3", fg: "#c2650b", onPress: pickFile },
+    { key: "camera", title: "Take a photo", line: "Snap a report or prescription, page by page", Icon: CameraIcon, from: lilac.base, fg: brand[600], onPress: takePhoto },
+    { key: "library", title: "Choose from photos", line: "Screenshots and pictures you already have", Icon: Images, from: hue.blue.bg, fg: hue.blue.fg, onPress: pickFromLibrary },
+    { key: "file", title: "Upload a PDF or file", line: "A full lab report, a discharge summary", Icon: FileUp, from: hue.orange.bg, fg: hue.orange.fg, onPress: pickFile },
   ] as const;
 
   return (
@@ -364,14 +364,14 @@ export default function Scan() {
       showsVerticalScrollIndicator={false}
     >
       <View style={{ flexDirection: "row", alignItems: "flex-end" }}>
-        <Text accessibilityRole="header" style={{ flex: 1, fontFamily: font.medium, fontSize: 30, lineHeight: 36, letterSpacing: -1, color: ink[900] }}>
+        <Text accessibilityRole="header" style={{ flex: 1, fontFamily: font.medium, fontSize: 28, lineHeight: 36, letterSpacing: -1, color: ink[900] }}>
           What are we{"\n"}
           <Text style={{ fontFamily: font.italic, color: brand[600] }}>filing today?</Text>
         </Text>
         {/* Open arms: "hand it over". Worried at his desk if the last try failed. */}
         <MascotFigure size={92} moment={phase === "error" ? "worried" : "present"} move={phase === "error" ? undefined : "sway"} hop />
       </View>
-      <Text style={{ fontFamily: font.regular, fontSize: 14, lineHeight: 20, color: ink[500], marginTop: 8 }}>
+      <Text style={{ fontFamily: font.regular, fontSize: 15, lineHeight: 20, color: ink[500], marginTop: 8 }}>
         I&apos;ll read it and pull out the key details. You check everything before it&apos;s saved.
       </Text>
 
@@ -380,7 +380,7 @@ export default function Scan() {
         {profiles.map((p) => {
           const active = p.id === profileId;
           return (
-            <Pressable
+            <Tap
               key={p.id}
               accessibilityRole="radio"
               accessibilityState={{ selected: active }}
@@ -403,8 +403,8 @@ export default function Scan() {
               ]}
             >
               <Avatar svg={p.avatar} photo={p.photo} image={p.avatarImage} background={p.avatarBackground ?? undefined} size={38} />
-              <Text style={{ fontFamily: font.semibold, fontSize: 14, color: active ? "#ffffff" : ink[900] }}>{p.name.split(" ")[0]}</Text>
-            </Pressable>
+              <Text style={{ fontFamily: font.semibold, fontSize: 15, color: active ? "#ffffff" : ink[900] }}>{p.name.split(" ")[0]}</Text>
+            </Tap>
           );
         })}
       </ScrollView>
@@ -421,7 +421,7 @@ export default function Scan() {
           const style = t ? TYPE_STYLE[t] : null;
           const Icon = style?.icon ?? ScanSearch;
           return (
-            <Pressable
+            <Tap
               key={t ?? "auto"}
               accessibilityRole="radio"
               accessibilityState={{ selected: on }}
@@ -432,8 +432,8 @@ export default function Scan() {
               ]}
             >
               <Icon size={15} color={on ? "#fff" : (style?.tint ?? brand[600])} />
-              <Text style={{ fontFamily: font.semibold, fontSize: 13.5, color: on ? "#fff" : ink[900] }}>{t ? DOC_TYPE_LABEL[t] : "Let Cheeku tell"}</Text>
-            </Pressable>
+              <Text style={{ fontFamily: font.semibold, fontSize: 13, color: on ? "#fff" : ink[900] }}>{t ? DOC_TYPE_LABEL[t] : "Let Cheeku tell"}</Text>
+            </Tap>
           );
         })}
       </ScrollView>
@@ -449,16 +449,16 @@ export default function Scan() {
             onPress={() => void src.onPress()}
             style={{ opacity: profileId ? 1 : 0.5 }} scale={0.98}
           >
-            <View className="flex-row items-center gap-3.5 overflow-hidden rounded-[26px] p-2.5 pr-3" style={glassShadow}>
+            <View className="flex-row items-center gap-3.5 overflow-hidden rounded-xl p-2.5 pr-3" style={glassShadow}>
               <Gradient from={src.from} to="#ffffff" />
               <View
-                className="h-[68px] w-[68px] items-center justify-center rounded-[20px]"
+                className="h-[68px] w-[68px] items-center justify-center rounded-xl"
                 style={{ backgroundColor: "rgba(255,255,255,0.9)", borderWidth: 1, borderColor: glass.rim }}
               >
                 <src.Icon size={26} color={src.fg} strokeWidth={1.7} />
               </View>
               <View className="min-w-0 flex-1">
-                <Text style={{ fontFamily: font.semibold, fontSize: 16, color: ink[900] }}>{src.title}</Text>
+                <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>{src.title}</Text>
                 <Text numberOfLines={2} style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[500], marginTop: 2 }}>
                   {src.line}
                 </Text>
@@ -475,14 +475,14 @@ export default function Scan() {
       </Text>
 
       {message ? (
-        <Text accessibilityRole="alert" style={{ fontFamily: font.medium, fontSize: 13.5, color: semantic.dangerText, marginTop: 12 }}>
+        <Text accessibilityRole="alert" style={{ fontFamily: font.medium, fontSize: 13, color: semantic.dangerText, marginTop: 12 }}>
           {message}
         </Text>
       ) : null}
 
-      <Glass className="mt-5 flex-row items-start gap-2.5 rounded-[20px] px-4 py-3">
+      <Glass className="mt-5 flex-row items-start gap-2.5 rounded-xl px-4 py-3">
         <ShieldCheck size={15} color={brand[500]} style={{ marginTop: 1 }} />
-        <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 12.5, lineHeight: 18, color: ink[700] }}>
+        <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[700] }}>
           Photos lose their location data on your phone before upload. Files stay private to you and
           your family.
         </Text>

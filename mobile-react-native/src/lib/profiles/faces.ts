@@ -22,6 +22,7 @@ import v19 from "../../../assets/avatars/v19.png";
 import v20 from "../../../assets/avatars/v20.png";
 
 import { ADULT_FACE_IDS } from "./face-pool";
+import { brand } from "@/theme/tokens";
 
 /*
  * The faces people choose from.
@@ -52,7 +53,7 @@ import { ADULT_FACE_IDS } from "./face-pool";
  * PROGRESS.md. f40 to f44 were made for this app and carry no such terms.
  */
 
-const BACKGROUNDS = ["#d1d4f9", "#ffd5dc", "#c0aede", "#b6e3f4", "#ffdfbf", "#d7f0e0"] as const;
+const BACKGROUNDS = [brand[100], "#ffd5dc", "#c0aede", "#b6e3f4", "#ffdfbf", "#d7f0e0"] as const;
 
 const IMAGES: ImageSourcePropType[] = [v01, v02, v03, v04, v05, v06, v07, v08, v09, v10, v11, v12, v13, v14, v15, v16, v17, v18, v19, v20];
 

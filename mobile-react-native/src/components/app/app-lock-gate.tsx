@@ -2,7 +2,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { Fingerprint, ShieldCheck } from "lucide-react-native";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { AppState, type AppStateStatus, Platform, Pressable, Text, View } from "react-native";
+import { AppState, type AppStateStatus, Platform, Text, View } from "react-native";
 
 import { MascotBust } from "@/components/illustrations/sprout";
 import { signOutAndWipe } from "@/lib/privacy/local-data";
@@ -10,6 +10,7 @@ import { authenticate, isLockEnabled, lockDelay, onLockSettingsChanged } from "@
 import { DEFAULT_LOCK_DELAY, shouldLock, type LockDelay } from "@/lib/security/lock-timing";
 import { brand, ink, surface } from "@/theme/tokens";
 import { Brand } from "@/components/ui/brand";
+import { Tap } from "@/components/ui/tap";
 
 /*
  * Holds the app behind a biometric challenge when the lock is on.
@@ -191,16 +192,16 @@ export function AppLockGate({ children }: { children: React.ReactNode }) {
 
           {locked ? (
             <>
-              <Text className="mt-5 text-center text-[21px] font-bold text-ink-900">
+              <Text className="mt-5 text-center text-xl font-bold text-ink-900">
                 <Brand ai /> is locked
               </Text>
-              <Text className="mt-2 text-center text-[13.5px] leading-[20px] text-ink-500">
+              <Text className="mt-2 text-center text-sm leading-[20px] text-ink-500">
                 {failed
                   ? "That did not go through. Try again when you are ready."
                   : "Your family's records are private. Unlock to open them."}
               </Text>
 
-              <Pressable
+              <Tap
                 accessibilityRole="button"
                 disabled={prompting}
                 onPress={() => void unlock()}
@@ -208,26 +209,26 @@ export function AppLockGate({ children }: { children: React.ReactNode }) {
                 style={{ backgroundColor: brand[600], opacity: prompting ? 0.6 : 1 }}
               >
                 <Fingerprint size={18} color="#fff" />
-                <Text className="text-[15.5px] font-bold text-white">Unlock</Text>
-              </Pressable>
+                <Text className="text-base font-bold text-white">Unlock</Text>
+              </Tap>
 
-              <Pressable
+              <Tap
                 accessibilityRole="button"
                 onPress={() => void escapeBySigningOut()}
                 hitSlop={8}
                 className="mt-4"
               >
-                <Text className="text-[13px] font-medium text-ink-500">
+                <Text className="text-sm font-medium text-ink-500">
                   Can&apos;t unlock? Sign out
                 </Text>
-              </Pressable>
+              </Tap>
             </>
           ) : (
             /* The shield. Deliberately says nothing about what is underneath —
                this is the frame that ends up in the app switcher. */
             <View className="mt-5 flex-row items-center gap-2">
               <ShieldCheck size={16} color={ink[300]} />
-              <Text className="text-[13px] text-ink-300"><Brand ai /></Text>
+              <Text className="text-sm text-ink-300"><Brand ai /></Text>
             </View>
           )}
         </View>

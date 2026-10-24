@@ -1,8 +1,9 @@
 import { ExternalLink, FileSearch } from "lucide-react-native";
 import { useState } from "react";
-import { Linking, Pressable, ScrollView, Text, View } from "react-native";
+import { Linking, ScrollView, Text, View } from "react-native";
 
 import { brand, ink, surface } from "@/theme/tokens";
+import { Tap } from "@/components/ui/tap";
 
 /**
  * The "structured / original" escape hatch on D2.
@@ -51,14 +52,14 @@ export function OriginalToggle({
           <FileSearch size={17} color={ink[500]} />
         </View>
         <View className="min-w-0 flex-1">
-          <Text className="text-[13px] font-semibold text-ink-900">Original document</Text>
+          <Text className="text-sm font-semibold text-ink-900">Original document</Text>
           {/*
            * Confidence is stated as a plain number in neutral type, NEVER as a
            * green/amber/red pill. Those three colours mean health severity
            * everywhere else in the app, and one palette must not carry two
            * meanings — "read with 78% confidence" is not a medical finding.
            */}
-          <Text className="text-[11px] text-ink-500">
+          <Text className="text-2xs text-ink-500">
             {confidence !== null
               ? `Read with ${Math.round(confidence * 100)}% confidence`
               : "Check anything that looks wrong"}
@@ -68,7 +69,7 @@ export function OriginalToggle({
 
       <View className="mt-2.5 flex-row gap-2">
         {url ? (
-          <Pressable
+          <Tap
             accessibilityRole="button"
             accessibilityLabel={`View the original file for ${fileLabel}`}
             onPress={openOriginal}
@@ -76,30 +77,30 @@ export function OriginalToggle({
             style={{ borderWidth: 1, borderColor: brand[200] }}
           >
             <ExternalLink size={14} color={brand[700]} />
-            <Text className="text-[12px] font-semibold text-brand-700">View original</Text>
-          </Pressable>
+            <Text className="text-xs font-semibold text-brand-700">View original</Text>
+          </Tap>
         ) : (
           <View
             accessibilityLabel="The original file could not be reached"
             className="h-9 flex-1 items-center justify-center rounded-pill"
             style={{ borderWidth: 1, borderColor: surface.line }}
           >
-            <Text className="text-[12px] font-medium text-ink-300">Original unavailable</Text>
+            <Text className="text-xs font-medium text-ink-300">Original unavailable</Text>
           </View>
         )}
 
         {rawText ? (
-          <Pressable
+          <Tap
             accessibilityRole="button"
             accessibilityState={{ expanded: showText }}
             onPress={() => setShowText((v) => !v)}
             className="h-9 flex-1 items-center justify-center rounded-pill"
             style={{ borderWidth: 1, borderColor: surface.line }}
           >
-            <Text className="text-[12px] font-semibold text-ink-700">
+            <Text className="text-xs font-semibold text-ink-700">
               {showText ? "Hide text" : "Show text"}
             </Text>
-          </Pressable>
+          </Tap>
         ) : null}
       </View>
 
@@ -109,7 +110,7 @@ export function OriginalToggle({
           style={{ maxHeight: 224 }}
           nestedScrollEnabled
         >
-          <Text className="text-[11px] leading-[17px] text-ink-700">{rawText}</Text>
+          <Text className="text-2xs leading-[17px] text-ink-700">{rawText}</Text>
         </ScrollView>
       ) : null}
     </View>
