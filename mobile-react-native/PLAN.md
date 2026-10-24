@@ -293,8 +293,8 @@ haptics has to be seen on a simulator or a device before it counts as done.
   downgrade. Needs 0035. Steps `supabase/manual/0036-step-1-of-5.sql` to
   `5-of-5`, then `0036-check.sql`. Until then the old wording shows; nothing
   breaks.
-- **Account deletion removes the sign-in (0037 + `delete-account`).** In
-  order: run `supabase/manual/0037-step-1-of-1.sql`, check with
+- **Account deletion removes the sign-in (0037 + `delete-account`).** 0037
+  applied on production (24 Oct, merged in PR #38). In order: run `supabase/manual/0037-step-1-of-1.sql`, check with
   `0037-check.sql`, deploy `supabase functions deploy delete-account` (JWT
   verification on), then ship the app. An app on the new code without the
   function says "your sign-in is still there" after erasing the records; a
