@@ -21,8 +21,9 @@ import {
   Waves,
   Zap,
 } from "lucide-react-native";
-import { Pressable, Text, View } from "react-native";
+import { Text, View } from "react-native";
 
+import { Tap } from "@/components/ui/tap";
 import { MascotFigure } from "@/components/illustrations/sprout";
 import { Brand } from "@/components/ui/brand";
 import { NerveIcon, WellbeingIcon, type AppIcon } from "@/components/ui/icons";
@@ -137,11 +138,11 @@ export function StatusPill({ status }: { status: Service["status"] }) {
 export function ServiceTile({ service: s, onPress, tall = true }: { service: Service; onPress: () => void; tall?: boolean }) {
   const Icon = SERVICE_ICON[s.icon] ?? Stethoscope;
   return (
-    <Pressable
+    <Tap
       accessibilityRole="button"
       accessibilityLabel={`${s.title}. ${s.line}${s.status === "live" ? "" : s.status === "soon" ? ". Coming soon" : ". Locked"}`}
       onPress={onPress}
-      style={({ pressed }) => [glassShadow, { flex: 1, height: tall ? 196 : 168, borderRadius: 28, overflow: "hidden", backgroundColor: "#fff", borderWidth: 1, borderColor: glass.rim, transform: [{ scale: pressed ? 0.975 : 1 }] }]}
+      style={[glassShadow, { flex: 1, height: tall ? 196 : 168, borderRadius: 28, overflow: "hidden", backgroundColor: "#fff", borderWidth: 1, borderColor: glass.rim }]}
     >
       <Gradient from={s.tint.to} to="#ffffff" angle="vertical" />
       <View style={{ padding: 16, flex: 1 }}>
@@ -160,7 +161,7 @@ export function ServiceTile({ service: s, onPress, tall = true }: { service: Ser
       <View pointerEvents="none" style={{ position: "absolute", right: -4, bottom: -4 }}>
         <ServiceArt icon={Icon} fg={s.tint.fg} size={tall ? 104 : 88} />
       </View>
-    </Pressable>
+    </Tap>
   );
 }
 
@@ -168,11 +169,11 @@ export function ServiceTile({ service: s, onPress, tall = true }: { service: Ser
 export function CompactTile({ service: s, onPress }: { service: Service; onPress: () => void }) {
   const Icon = SERVICE_ICON[s.icon] ?? Stethoscope;
   return (
-    <Pressable
+    <Tap
       accessibilityRole="button"
       accessibilityLabel={`${s.title}. ${s.line}`}
       onPress={onPress}
-      style={({ pressed }) => [glassShadow, { width: 136, height: 132, borderRadius: 24, overflow: "hidden", backgroundColor: "#fff", borderWidth: 1, borderColor: glass.rim, padding: 12, transform: [{ scale: pressed ? 0.97 : 1 }] }]}
+      style={[glassShadow, { width: 136, height: 132, borderRadius: 24, overflow: "hidden", backgroundColor: "#fff", borderWidth: 1, borderColor: glass.rim, padding: 12 }]}
     >
       <Gradient from={s.tint.from} to="#ffffff" angle="vertical" />
       <View style={{ width: 40, height: 40, borderRadius: 13, backgroundColor: "#fff", alignItems: "center", justifyContent: "center" }}>
@@ -184,18 +185,18 @@ export function CompactTile({ service: s, onPress }: { service: Service; onPress
         <StatusPill status={s.status} />
       </View>
       <Text numberOfLines={2} style={{ fontFamily: font.regular, fontSize: 11.5, lineHeight: 15, color: ink[500], marginTop: 2 }}>{s.line}</Text>
-    </Pressable>
+    </Tap>
   );
 }
 
 /** The dark prompt card on top: book anything in a sentence, through Cheeku. */
 export function AskToBook({ onPress, line }: { onPress: () => void; line?: string }) {
   return (
-    <Pressable
+    <Tap
       accessibilityRole="button"
       accessibilityLabel="Tell Cheeku what you need"
       onPress={onPress}
-      style={({ pressed }) => [glassShadow, { borderRadius: 28, overflow: "hidden", minHeight: 124, transform: [{ scale: pressed ? 0.985 : 1 }] }]}
+      style={[glassShadow, { borderRadius: 28, overflow: "hidden", minHeight: 124 }]} scale={0.98}
     >
       <Gradient from="#1b1a3f" to="#3b2bc9" glow="#5b4ef0" />
       <View style={{ flexDirection: "row", alignItems: "center", padding: 18, paddingRight: 8 }}>
@@ -213,6 +214,6 @@ export function AskToBook({ onPress, line }: { onPress: () => void; line?: strin
         </View>
         <MascotFigure size={92} moment="present" move="sway" />
       </View>
-    </Pressable>
+    </Tap>
   );
 }

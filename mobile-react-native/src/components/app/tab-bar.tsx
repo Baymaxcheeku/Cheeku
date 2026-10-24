@@ -8,9 +8,10 @@ import type { BottomTabBarProps } from "expo-router/tabs";
 import { useRouter } from "expo-router";
 import { FolderClosed, House, MessageCircleHeart, Plus, User, type LucideIcon } from "lucide-react-native";
 import { Fragment } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { Tap } from "@/components/ui/tap";
 import { glass, glassShadow } from "@/components/ui/glass";
 import { brand, ink, shadow, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
@@ -92,7 +93,7 @@ export function TabBar({ state, navigation }: BottomTabBarProps) {
           return (
             <Fragment key={route.key}>
               {index === 2 ? <Fab onPress={() => { feel.tap(); router.push("/scan"); }} /> : null}
-              <Pressable
+              <Tap
                 accessibilityRole="tab"
                 accessibilityState={{ selected: active }}
                 accessibilityLabel={meta.label}
@@ -119,7 +120,7 @@ export function TabBar({ state, navigation }: BottomTabBarProps) {
                     {brandify(meta.short, { size: 12.5 })}
                   </Text>
                 </View>
-              </Pressable>
+              </Tap>
             </Fragment>
           );
         })}
@@ -132,11 +133,11 @@ export function TabBar({ state, navigation }: BottomTabBarProps) {
 function Fab({ onPress }: { onPress: () => void }) {
   return (
     <View style={{ width: 64, alignItems: "center" }}>
-      <Pressable
+      <Tap
         accessibilityRole="button"
         accessibilityLabel="Add a health record"
         onPress={onPress}
-        style={({ pressed }) => [
+        style={[
           shadow.e2,
           {
             width: 52,
@@ -145,12 +146,12 @@ function Fab({ onPress }: { onPress: () => void }) {
             alignItems: "center",
             justifyContent: "center",
             backgroundColor: ink[900],
-            transform: [{ scale: pressed ? 0.94 : 1 }],
           },
         ]}
+        scale={0.95}
       >
         <Plus size={24} strokeWidth={2.4} color="#ffffff" />
-      </Pressable>
+      </Tap>
     </View>
   );
 }

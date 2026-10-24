@@ -5,6 +5,7 @@ import Animated, { FadeInDown } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { SvgXml } from "react-native-svg";
+import { Tap } from "@/components/ui/tap";
 import { Glass, GlassCircle, Gradient, glass, glassShadow } from "@/components/ui/glass";
 import { useReducedMotion } from "@/components/ui/motion";
 import { SPECIALTIES, doctorsFor, nextFree, type Doctor, type Mode } from "@/lib/booking/catalog";
@@ -196,24 +197,24 @@ function DoctorCard({
         <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>₹{fee}</Text>
       </View>
 
-      <Pressable
+      <Tap
         accessibilityRole="button"
         accessibilityLabel={`Choose a time with ${d.name}`}
         onPress={onBook}
-        style={({ pressed }) => ({
+        style={{
           marginTop: 10,
           height: 48,
           borderRadius: 999,
           alignItems: "center",
           justifyContent: "center",
           backgroundColor: ink[900],
-          transform: [{ scale: pressed ? 0.98 : 1 }],
-        })}
+        }}
+        scale={0.98}
       >
         <Text style={{ fontFamily: font.semibold, fontSize: 15, color: "#fff" }}>
           {mode === "online" ? "Choose a video slot" : "Choose a visit time"}
         </Text>
-      </Pressable>
+      </Tap>
     </Glass>
   );
 }

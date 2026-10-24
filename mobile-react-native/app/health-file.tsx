@@ -19,9 +19,10 @@ import {
   type LucideIcon,
 } from "lucide-react-native";
 import { useState } from "react";
-import { ActivityIndicator, Pressable, RefreshControl, ScrollView, Share, Text, View } from "react-native";
+import { Pressable, RefreshControl, ScrollView, Share, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { FileSkeleton } from "@/components/ui/skeleton";
 import { FLAG_DOT, SectionHead, Sparkline } from "@/components/health/file-parts";
 import { TYPE_STYLE } from "@/components/records/record-card";
 import { Avatar } from "@/components/ui/avatar";
@@ -108,7 +109,7 @@ export default function HealthFileScreen() {
 
         <View style={{ paddingHorizontal: 20 }}>
           {file.isPending || !member ? (
-            <ActivityIndicator color={brand[600]} style={{ marginTop: 60 }} />
+            <FileSkeleton />
           ) : !f ? (
             <Text style={{ fontFamily: font.regular, fontSize: 14.5, lineHeight: 21, color: ink[500], textAlign: "center", marginTop: 50 }}>
               This file isn&apos;t available. It may belong to a family member your plan doesn&apos;t cover.

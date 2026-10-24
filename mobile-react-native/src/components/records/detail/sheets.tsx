@@ -1,7 +1,8 @@
 import { Check, type LucideIcon } from "lucide-react-native";
-import { ActivityIndicator, Modal, Pressable, ScrollView, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { Sheet, useSheetMax } from "@/components/ui/sheet";
 import { brand, ink, semantic, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
 
@@ -42,11 +43,10 @@ export function OptionsSheet({
   onClose: () => void;
 }) {
   const insets = useSafeAreaInsets();
+  const sheetMax80 = useSheetMax(0.80);
   return (
-    <Modal visible={open} transparent animationType="slide" onRequestClose={onClose}>
-      <Pressable accessibilityLabel="Close" onPress={busyKey ? undefined : onClose} style={{ flex: 1, backgroundColor: "rgba(15,16,48,0.4)" }} />
-      <View style={{ maxHeight: "80%", borderTopLeftRadius: 28, borderTopRightRadius: 28, backgroundColor: surface.canvas, paddingTop: 10, paddingBottom: insets.bottom + 12 }}>
-        <View style={{ alignSelf: "center", width: 40, height: 5, borderRadius: 3, backgroundColor: "rgba(15,16,48,0.12)" }} />
+    <Sheet open={open} onClose={onClose} label="Close" dismissible={!busyKey}>
+      <View style={{ maxHeight: sheetMax80, borderTopLeftRadius: 28, borderTopRightRadius: 28, backgroundColor: surface.canvas, paddingTop: 10, paddingBottom: insets.bottom + 12 }}>
         <View style={{ paddingHorizontal: 20, paddingTop: 14 }}>
           <Text style={{ fontFamily: font.bold, fontSize: 19, color: ink[900] }}>{title}</Text>
           {body ? <Text style={{ fontFamily: font.regular, fontSize: 13.5, lineHeight: 19, color: ink[700], marginTop: 6 }}>{body}</Text> : null}
@@ -94,6 +94,6 @@ export function OptionsSheet({
           })}
         </ScrollView>
       </View>
-    </Modal>
+    </Sheet>
   );
 }

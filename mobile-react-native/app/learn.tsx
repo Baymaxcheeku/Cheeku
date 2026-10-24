@@ -5,6 +5,7 @@ import { useState } from "react";
 import { ActivityIndicator, Pressable, RefreshControl, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { Tap } from "@/components/ui/tap";
 import { ArticleRow, CATEGORY_STYLE, Emblem, Eyebrow, RailCard, ReadMeta } from "@/components/learn/parts";
 import { Gradient, glass, glassShadow } from "@/components/ui/glass";
 import { Backdrop, ScreenHeader } from "@/components/ui/screen";
@@ -117,11 +118,11 @@ function Featured({ card }: { card: ArticleCard }) {
   const router = useRouter();
   const s = CATEGORY_STYLE[card.category];
   return (
-    <Pressable
+    <Tap
       accessibilityRole="button"
       accessibilityLabel={`Featured. ${card.title}`}
       onPress={() => router.push(`/article/${card.slug}`)}
-      style={({ pressed }) => [glassShadow, { marginHorizontal: 20, marginTop: 14, borderRadius: 30, overflow: "hidden", transform: [{ scale: pressed ? 0.985 : 1 }] }]}
+      style={[glassShadow, { marginHorizontal: 20, marginTop: 14, borderRadius: 30, overflow: "hidden" }]} scale={0.98}
     >
       <Gradient from={s.field} to="#ffffff" angle="diagonal" glow="#ffffff" />
       <View style={{ position: "absolute", right: -40, top: -40, width: 190, height: 190, borderRadius: 95, backgroundColor: s.soft, opacity: 0.6 }} />
@@ -146,7 +147,7 @@ function Featured({ card }: { card: ArticleCard }) {
           <ReadMeta card={card} light />
         </View>
       </View>
-    </Pressable>
+    </Tap>
   );
 }
 

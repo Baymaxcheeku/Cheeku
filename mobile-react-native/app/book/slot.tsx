@@ -7,6 +7,7 @@ import Animated, { FadeIn } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SvgXml } from "react-native-svg";
 
+import { Tap } from "@/components/ui/tap";
 import { NoteCard } from "@/components/booking/note-card";
 import { Boop } from "@/components/onboarding/motion";
 import { Glass, GlassCircle, Gradient, glass, glassShadow } from "@/components/ui/glass";
@@ -291,27 +292,27 @@ export default function SlotScreen() {
         <Glass strong className="h-14 justify-center rounded-pill px-5">
           <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>₹{fee}</Text>
         </Glass>
-        <Pressable
+        <Tap
           accessibilityRole="button"
           accessibilityState={{ disabled: !slot }}
           disabled={!slot}
           onPress={confirm}
-          style={({ pressed }) => ({
+          style={{
             flex: 1,
             height: 56,
             borderRadius: 999,
             alignItems: "center",
             justifyContent: "center",
             backgroundColor: slot ? brand[600] : "rgba(74,42,222,0.35)",
-            transform: [{ scale: pressed ? 0.98 : 1 }],
-          })}
+          }}
+          scale={0.98}
         >
           <Text style={{ fontFamily: font.semibold, fontSize: 15.5, color: "#fff" }}>
             {slot
               ? `${reschedule ? "Move to" : "Book"} ${slot.label.split(" – ")[0]}, ${dayIndex === 0 ? "today" : dayName(day)}`
               : "Pick a time to continue"}
           </Text>
-        </Pressable>
+        </Tap>
       </View>
     </View>
   );

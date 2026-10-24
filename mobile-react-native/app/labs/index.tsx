@@ -2,10 +2,12 @@ import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { Check, ChevronRight, ClipboardList, FileText, Plus, Search, X } from "lucide-react-native";
 import { useMemo, useState } from "react";
-import { Modal, Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { Tap } from "@/components/ui/tap";
+import { Sheet } from "@/components/ui/sheet";
 import { CartBar, rupees, SampleNote, TestArt } from "@/components/labs/parts";
 import { Glass, GlassCircle, Gradient, glass, glassShadow } from "@/components/ui/glass";
 import { useReducedMotion } from "@/components/ui/motion";
@@ -102,7 +104,7 @@ export default function Labs() {
         {!query ? (
           <>
             {active ? (
-              <Pressable accessibilityRole="button" onPress={() => router.push({ pathname: "/labs/booking/[id]", params: { id: active.id } })} style={({ pressed }) => [glassShadow, { marginTop: 16, borderRadius: 24, overflow: "hidden", padding: 16, transform: [{ scale: pressed ? 0.99 : 1 }] }]}>
+              <Tap accessibilityRole="button" onPress={() => router.push({ pathname: "/labs/booking/[id]", params: { id: active.id } })} style={[glassShadow, { marginTop: 16, borderRadius: 24, overflow: "hidden", padding: 16 }]} scale={0.98}>
                 <Gradient from="#dcecff" to="#f4f9ff" glow="#ffffff" />
                 <View className="flex-row items-center justify-between">
                   <Text style={{ fontFamily: font.semibold, fontSize: 13, color: "#1a6fc2" }}>Your lab booking</Text>
@@ -117,11 +119,11 @@ export default function Labs() {
                 <Text style={{ fontFamily: font.regular, fontSize: 12.5, color: ink[500], marginTop: 8 }}>
                   {formatEventDate(active.slotDate)}, {active.slotWindow}
                 </Text>
-              </Pressable>
+              </Tap>
             ) : null}
 
             {/* From a prescription. */}
-            <Pressable accessibilityRole="button" onPress={() => setRxOpen(true)} style={({ pressed }) => [glassShadow, { marginTop: 16, borderRadius: 26, overflow: "hidden", padding: 16, flexDirection: "row", alignItems: "center", gap: 14, transform: [{ scale: pressed ? 0.99 : 1 }] }]}>
+            <Tap accessibilityRole="button" onPress={() => setRxOpen(true)} style={[glassShadow, { marginTop: 16, borderRadius: 26, overflow: "hidden", padding: 16, flexDirection: "row", alignItems: "center", gap: 14 }]} scale={0.98}>
               <Gradient from="#ffe3d3" to="#fff5ee" glow="#ffffff" />
               <View style={{ width: 52, height: 52, borderRadius: 16, backgroundColor: "rgba(255,255,255,0.85)", alignItems: "center", justifyContent: "center" }}>
                 <FileText size={24} color="#c2650b" />
@@ -133,7 +135,7 @@ export default function Labs() {
                 </Text>
               </View>
               {cart.prescriptionId ? <Check size={20} color="#c2650b" /> : <ChevronRight size={18} color={ink[500]} />}
-            </Pressable>
+            </Tap>
 
             {/* Suggested. */}
             {suggested.length ? (
@@ -202,21 +204,21 @@ export default function Labs() {
 
 function AddButton({ added, onPress, dark }: { added: boolean; onPress: () => void; dark?: boolean }) {
   return (
-    <Pressable
+    <Tap
       accessibilityRole="button"
       accessibilityLabel={added ? "Remove from cart" : "Add to cart"}
       onPress={onPress}
       hitSlop={6}
-      style={({ pressed }) => ({ width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center", backgroundColor: added ? brand[600] : dark ? ink[900] : "#fff", borderWidth: added || dark ? 0 : 1, borderColor: "rgba(15,16,48,0.1)", transform: [{ scale: pressed ? 0.9 : 1 }] })}
+      style={{ width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center", backgroundColor: added ? brand[600] : dark ? ink[900] : "#fff", borderWidth: added || dark ? 0 : 1, borderColor: "rgba(15,16,48,0.1)" }} scale={0.95}
     >
       {added ? <Check size={18} color="#fff" strokeWidth={2.6} /> : <Plus size={18} color={dark ? "#fff" : ink[900]} strokeWidth={2.4} />}
-    </Pressable>
+    </Tap>
   );
 }
 
 function PackageCard({ test, from, added, onOpen, onToggle }: { test: LabTest; from: number | null; added: boolean; onOpen: () => void; onToggle: () => void }) {
   return (
-    <Pressable accessibilityRole="button" onPress={onOpen} style={({ pressed }) => [glassShadow, { borderRadius: 26, backgroundColor: glass.fillStrong, borderWidth: 1, borderColor: glass.rim, padding: 12, flexDirection: "row", alignItems: "center", gap: 14, transform: [{ scale: pressed ? 0.99 : 1 }] }]}>
+    <Tap accessibilityRole="button" onPress={onOpen} style={[glassShadow, { borderRadius: 26, backgroundColor: glass.fillStrong, borderWidth: 1, borderColor: glass.rim, padding: 12, flexDirection: "row", alignItems: "center", gap: 14 }]} scale={0.98}>
       <TestArt test={test} size={84} radius={22} />
       <View style={{ flex: 1, minWidth: 0 }}>
         <Text numberOfLines={2} style={{ fontFamily: font.semibold, fontSize: 16, lineHeight: 21, color: ink[900] }}>{test.name}</Text>
@@ -224,7 +226,7 @@ function PackageCard({ test, from, added, onOpen, onToggle }: { test: LabTest; f
         <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900], marginTop: 6 }}>{from !== null ? `from ${rupees(from)}` : ""}</Text>
       </View>
       <AddButton added={added} onPress={onToggle} dark />
-    </Pressable>
+    </Tap>
   );
 }
 
@@ -246,14 +248,14 @@ function TestRow({ test, first, from, added, onOpen, onToggle }: { test: LabTest
 
 function MiniCard({ test, from, added, onOpen, onToggle }: { test: LabTest; from: number | null; added: boolean; onOpen: () => void; onToggle: () => void }) {
   return (
-    <Pressable accessibilityRole="button" onPress={onOpen} style={({ pressed }) => [glassShadow, { width: 170, borderRadius: 24, backgroundColor: glass.fillStrong, borderWidth: 1, borderColor: glass.rim, padding: 12, transform: [{ scale: pressed ? 0.98 : 1 }] }]}>
+    <Tap accessibilityRole="button" onPress={onOpen} style={[glassShadow, { width: 170, borderRadius: 24, backgroundColor: glass.fillStrong, borderWidth: 1, borderColor: glass.rim, padding: 12 }]} scale={0.98}>
       <View className="flex-row items-start justify-between">
         <TestArt test={test} size={52} radius={16} />
         <AddButton added={added} onPress={onToggle} />
       </View>
       <Text numberOfLines={2} style={{ fontFamily: font.semibold, fontSize: 14.5, lineHeight: 19, color: ink[900], marginTop: 10, minHeight: 38 }}>{test.name}</Text>
       <Text style={{ fontFamily: font.medium, fontSize: 13, color: ink[700], marginTop: 4 }}>{from !== null ? `from ${rupees(from)}` : ""}</Text>
-    </Pressable>
+    </Tap>
   );
 }
 
@@ -265,8 +267,7 @@ function PrescriptionSheet({ open, profileId, name, onClose }: { open: boolean; 
   const records = useQuery({ queryKey: ["records", profileId], queryFn: () => listProfileRecords(profileId as string), enabled: open && Boolean(profileId) });
   const rx = (records.data ?? []).filter((r) => r.docType === "prescription").slice(0, 6);
   return (
-    <Modal visible={open} transparent animationType="slide" onRequestClose={onClose}>
-      <Pressable accessibilityLabel="Close" onPress={onClose} style={{ flex: 1, backgroundColor: "rgba(15,16,48,0.38)" }} />
+    <Sheet open={open} onClose={onClose} label="Close">
       <View style={{ borderTopLeftRadius: 32, borderTopRightRadius: 32, backgroundColor: "#fafafe", padding: 22, paddingBottom: insets.bottom + 16 }}>
         <Text style={{ fontFamily: font.semibold, fontSize: 22, letterSpacing: -0.5, color: ink[900] }}>Book from a prescription</Text>
         <Text style={{ fontFamily: font.regular, fontSize: 14, lineHeight: 20, color: ink[500], marginTop: 4 }}>
@@ -294,6 +295,6 @@ function PrescriptionSheet({ open, profileId, name, onClose }: { open: boolean; 
           </Pressable>
         </View>
       </View>
-    </Modal>
+    </Sheet>
   );
 }

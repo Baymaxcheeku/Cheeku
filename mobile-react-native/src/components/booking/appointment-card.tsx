@@ -2,6 +2,7 @@ import { useRouter } from "expo-router";
 import { Building2, ChevronRight, MonitorPlay, Video } from "lucide-react-native";
 import { Pressable, Text, View } from "react-native";
 
+import { Tap } from "@/components/ui/tap";
 import { Glass, Gradient, glassShadow } from "@/components/ui/glass";
 import { Portrait } from "@/components/ui/screen";
 import { countdown, joinWindow, whenLabel, type Appointment } from "@/lib/booking/appointments";
@@ -52,16 +53,16 @@ export function AppointmentCard({ appt, hero }: { appt: Appointment; hero?: bool
 
   if (!hero) {
     return (
-      <Pressable accessibilityRole="button" onPress={go} style={({ pressed }) => ({ transform: [{ scale: pressed ? 0.985 : 1 }], opacity: cancelled ? 0.6 : 1 })}>
+      <Tap accessibilityRole="button" onPress={go} style={{ opacity: cancelled ? 0.6 : 1 }} scale={0.98}>
         <Glass strong className="rounded-[24px] p-3 pr-4">
           {body}
         </Glass>
-      </Pressable>
+      </Tap>
     );
   }
 
   return (
-    <Pressable accessibilityRole="button" accessibilityLabel={`Upcoming appointment with ${doctor.name}, ${whenLabel(appt)}`} onPress={go} style={({ pressed }) => ({ transform: [{ scale: pressed ? 0.985 : 1 }] })}>
+    <Tap accessibilityRole="button" accessibilityLabel={`Upcoming appointment with ${doctor.name}, ${whenLabel(appt)}`} onPress={go} scale={0.98}>
       <View className="overflow-hidden rounded-[28px] p-3.5" style={glassShadow}>
         <Gradient from={online ? "#e8e2ff" : "#ffe7d8"} to={online ? "#f7f5ff" : "#fff5ee"} glow="#ffffff" />
         <View className="mb-3 flex-row items-center justify-between">
@@ -92,6 +93,6 @@ export function AppointmentCard({ appt, hero }: { appt: Appointment; hero?: bool
           </Pressable>
         ) : null}
       </View>
-    </Pressable>
+    </Tap>
   );
 }

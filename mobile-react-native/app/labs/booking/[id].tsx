@@ -3,13 +3,12 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { Check, FastForward, FileText, MapPin, PenLine } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
 import { Pressable, RefreshControl, ScrollView, Text, View } from "react-native";
-import Animated from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { PartnerBadge, ReviewSheet, rupees, SampleNote } from "@/components/labs/parts";
 import { ConfirmSheet } from "@/components/ui/confirm-sheet";
 import { Glass, Gradient, glassShadow } from "@/components/ui/glass";
-import { ENTER_POP, useReducedMotion } from "@/components/ui/motion";
+import { Enter } from "@/components/ui/motion";
 import { Backdrop, PillButton, ScreenHeader } from "@/components/ui/screen";
 import { feel } from "@/lib/feel";
 import { stageIndex, STAGES } from "@/lib/labs/logic";
@@ -35,7 +34,6 @@ import { font } from "@/theme/type";
 export default function LabBooking() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const still = useReducedMotion();
   const qc = useQueryClient();
   const { id, fresh } = useLocalSearchParams<{ id: string; fresh?: string }>();
   const bookings = useLabBookings();
@@ -94,9 +92,9 @@ export default function LabBooking() {
       >
         {fresh && !cancelled ? (
           <View style={{ alignItems: "center", marginTop: 4, marginBottom: 18 }}>
-            <Animated.View entering={still ? undefined : ENTER_POP} style={[glassShadow, { width: 76, height: 76, borderRadius: 38, backgroundColor: brand[600], alignItems: "center", justifyContent: "center" }]}>
+            <Enter kind="pop" style={[glassShadow, { width: 76, height: 76, borderRadius: 38, backgroundColor: brand[600], alignItems: "center", justifyContent: "center" }]}>
               <Check size={36} color="#fff" strokeWidth={3} />
-            </Animated.View>
+            </Enter>
             <Text style={{ fontFamily: font.semibold, fontSize: 26, letterSpacing: -0.7, color: ink[900], marginTop: 14 }}>Collection booked!</Text>
             <Text style={{ fontFamily: font.regular, fontSize: 14.5, color: ink[500], marginTop: 4, textAlign: "center" }}>
               I&apos;ll file the report in {member?.isPrimary ? "your" : `${first}'s`} health file the moment it&apos;s ready.

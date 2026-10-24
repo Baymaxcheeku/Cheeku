@@ -15,9 +15,10 @@ import {
   type LucideIcon,
 } from "lucide-react-native";
 import { useState } from "react";
-import { ActivityIndicator, KeyboardAvoidingView, Modal, Platform, Pressable, Text, TextInput, View } from "react-native";
+import { ActivityIndicator, Pressable, Text, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { Sheet } from "@/components/ui/sheet";
 import { Panel, Section, SettingsScreen } from "@/components/settings/chrome";
 import { ConfirmSheet } from "@/components/ui/confirm-sheet";
 import { SpringSwitch } from "@/components/ui/motion";
@@ -439,9 +440,7 @@ function RequestSheet({ kind, onClose, onSent }: { kind: RequestKind | null; onC
 
   const copy = kind ? REQUEST_COPY[kind] : null;
   return (
-    <Modal visible={kind !== null} transparent animationType="slide" onRequestClose={onClose}>
-      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
-        <Pressable accessibilityLabel="Close" onPress={busy ? undefined : onClose} style={{ flex: 1, backgroundColor: "rgba(15,16,48,0.4)" }} />
+    <Sheet open={kind !== null} onClose={onClose} label="Close" dismissible={!busy}>
         <View className="rounded-t-sheet bg-canvas px-5 pt-5" style={{ paddingBottom: insets.bottom + 16 }}>
           <Text style={{ fontFamily: font.semibold, fontSize: 19, color: ink[900] }}>{copy?.title}</Text>
           <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 19, color: ink[500], marginTop: 4 }}>
@@ -487,7 +486,6 @@ function RequestSheet({ kind, onClose, onSent }: { kind: RequestKind | null; onC
             {busy ? <ActivityIndicator color="#fff" /> : <Text style={{ fontFamily: font.semibold, fontSize: 15, color: "#fff" }}>Send request</Text>}
           </Pressable>
         </View>
-      </KeyboardAvoidingView>
-    </Modal>
+    </Sheet>
   );
 }

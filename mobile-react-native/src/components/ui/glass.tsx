@@ -1,7 +1,8 @@
 import { useId } from "react";
-import { Pressable, StyleSheet, View, type ViewProps } from "react-native";
+import { StyleSheet, View, type ViewProps } from "react-native";
 import Svg, { Defs, LinearGradient, RadialGradient, Rect, Stop } from "react-native-svg";
 
+import { Tap } from "@/components/ui/tap";
 import { ink } from "@/theme/tokens";
 
 /*
@@ -74,12 +75,12 @@ export function GlassCircle({
   dark?: boolean;
 }) {
   return (
-    <Pressable
+    <Tap
       accessibilityRole="button"
       accessibilityLabel={label}
       onPress={onPress}
       hitSlop={4}
-      style={({ pressed }) => [
+      style={[
         glassShadow,
         {
           width: size,
@@ -90,12 +91,12 @@ export function GlassCircle({
           backgroundColor: dark ? ink[900] : glass.fillStrong,
           borderWidth: dark ? 0 : 1,
           borderColor: glass.rim,
-          transform: [{ scale: pressed ? 0.95 : 1 }],
         },
       ]}
+      scale={0.95}
     >
       {children}
-    </Pressable>
+    </Tap>
   );
 }
 

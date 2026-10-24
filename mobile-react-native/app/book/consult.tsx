@@ -6,6 +6,7 @@ import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput,
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { Tap } from "@/components/ui/tap";
 import { NoteCard } from "@/components/booking/note-card";
 import { MascotBust } from "@/components/illustrations/sprout";
 import { BubblePop, TypingDots } from "@/components/onboarding/motion";
@@ -373,10 +374,10 @@ export default function Consult() {
 
           {!typing && step === "done" ? (
             <BubblePop from="right" style={{ marginTop: 4 }}>
-              <Pressable
+              <Tap
                 accessibilityRole="button"
                 onPress={() => router.push("/book/doctors")}
-                style={({ pressed }) => ({ transform: [{ scale: pressed ? 0.98 : 1 }] })}
+                scale={0.98}
               >
                 <View className="flex-row items-center gap-3 overflow-hidden rounded-[24px] p-3 pr-4">
                   <Gradient from="#ece6ff" to="#f6f3ff" />
@@ -393,7 +394,7 @@ export default function Consult() {
                     <ArrowRight size={18} color="#fff" />
                   </View>
                 </View>
-              </Pressable>
+              </Tap>
             </BubblePop>
           ) : null}
 
@@ -424,14 +425,14 @@ export default function Consult() {
             keyboardShouldPersistTaps="handled"
           >
             {chips.map((c) => (
-              <Pressable
+              <Tap
                 key={c}
                 accessibilityRole="button"
                 onPress={() => {
                   if (step === "details" && c === "Skip this") answer("");
                   else answer(c);
                 }}
-                style={({ pressed }) => [
+                style={[
                   glassShadow,
                   {
                     minHeight: 44,
@@ -441,15 +442,15 @@ export default function Consult() {
                     backgroundColor: c === "Start over" ? "transparent" : glass.fillStrong,
                     borderWidth: 1,
                     borderColor: c === "Looks good" ? brand[300] : glass.rim,
-                    transform: [{ scale: pressed ? 0.96 : 1 }],
                   },
                 ]}
+                scale={0.95}
               >
                 <View className="flex-row items-center gap-1.5">
                   {c === "Start over" ? <RotateCcw size={14} color={ink[500]} /> : null}
                   <Text style={{ fontFamily: font.medium, fontSize: 14, color: c === "Looks good" ? brand[700] : ink[900] }}>{c}</Text>
                 </View>
-              </Pressable>
+              </Tap>
             ))}
           </ScrollView>
         ) : null}
@@ -526,11 +527,11 @@ function MyLine({ text }: { text: string }) {
 
 function ModeCard({ icon, title, body, onPress }: { icon: React.ReactNode; title: string; body: string; onPress: () => void }) {
   return (
-    <Pressable
+    <Tap
       accessibilityRole="button"
       accessibilityLabel={`${title}. ${body}`}
       onPress={onPress}
-      style={({ pressed }) => ({ transform: [{ scale: pressed ? 0.98 : 1 }] })}
+      scale={0.98}
     >
       <Glass strong className="flex-row items-center gap-3.5 rounded-[24px] p-3 pr-4">
         <View className="h-14 w-14 items-center justify-center rounded-[18px]" style={{ backgroundColor: brand[50] }}>
@@ -541,6 +542,6 @@ function ModeCard({ icon, title, body, onPress }: { icon: React.ReactNode; title
           <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[500], marginTop: 2 }}>{body}</Text>
         </View>
       </Glass>
-    </Pressable>
+    </Tap>
   );
 }

@@ -3,7 +3,6 @@ import { AccessibilityInfo, Pressable, View, type ViewProps } from "react-native
 import Animated, {
   Easing,
   interpolate,
-  Keyframe,
   useAnimatedStyle,
   useSharedValue,
   withDelay,
@@ -40,26 +39,45 @@ const ease = Easing.bezier(...(EASE_SETTLE as unknown as [number, number, number
 export const EASE_OUT = Easing.bezier(0.23, 1, 0.32, 1);
 
 /*
- * Entrances for things that appear in place: from 95% and transparent, never
- * from nothing. ENTER_QUICK is for state that changes often (a check moving to
- * the person just picked); ENTER_SOFT for occasional moments.
+ * <Enter>: for things that appear in place, from 95% and transparent, never
+ * from nothing. "quick" (160ms) is for state that changes often, "soft"
+ * (220ms) for occasional moments, "pop" (90% to a 104% overshoot and back) for
+ * the rare success moment only (booked, filed).
+ *
+ * Driven by a shared value on mount rather than a layout-animation Keyframe:
+ * on web a finished Keyframe left the element collapsed (the member page
+ * avatar slid under the name). Remount it with a `key` to play it again.
  */
-export const ENTER_QUICK = new Keyframe({
-  0: { opacity: 0, transform: [{ scale: 0.95 }] },
-  100: { opacity: 1, transform: [{ scale: 1 }], easing: EASE_OUT },
-}).duration(160);
+export function Enter({
+  kind = "soft",
+  delay = 0,
+  style,
+  children,
+}: {
+  kind?: "quick" | "soft" | "pop";
+  delay?: number;
+  style?: ViewProps["style"];
+  children: React.ReactNode;
+}) {
+  const still = useReducedMotion();
+  const o = useSharedValue(still ? 1 : 0);
+  const s = useSharedValue(still ? 1 : kind === "pop" ? 0.9 : 0.95);
 
-export const ENTER_SOFT = new Keyframe({
-  0: { opacity: 0, transform: [{ scale: 0.95 }] },
-  100: { opacity: 1, transform: [{ scale: 1 }], easing: EASE_OUT },
-}).duration(220);
+  useEffect(() => {
+    if (still) return;
+    const ms = kind === "quick" ? 160 : kind === "soft" ? 220 : 200;
+    o.value = withDelay(delay, withTiming(1, { duration: ms, easing: EASE_OUT }));
+    s.value = withDelay(
+      delay,
+      kind === "pop"
+        ? withSequence(withTiming(1.04, { duration: 240, easing: EASE_OUT }), withTiming(1, { duration: 140, easing: Easing.inOut(Easing.quad) }))
+        : withTiming(1, { duration: ms, easing: EASE_OUT }),
+    );
+  }, [still, kind, delay, o, s]);
 
-/** The rare success moment (booked, filed): the one place a little overshoot belongs. */
-export const ENTER_POP = new Keyframe({
-  0: { opacity: 0, transform: [{ scale: 0.9 }] },
-  65: { opacity: 1, transform: [{ scale: 1.04 }], easing: EASE_OUT },
-  100: { opacity: 1, transform: [{ scale: 1 }], easing: Easing.inOut(Easing.quad) },
-}).duration(380);
+  const animated = useAnimatedStyle(() => ({ opacity: o.value, transform: [{ scale: s.value }] }));
+  return <Animated.View style={[style, animated]}>{children}</Animated.View>;
+}
 
 /** True when the OS asks for reduced motion. */
 export function useReducedMotion(): boolean {
@@ -295,7 +313,7 @@ export function PressRow({
     opacity: enter.value,
     transform: [
       { translateY: interpolate(enter.value, [0, 1], [10, 0]) },
-      { scale: interpolate(pressed.value, [0, 1], [1, 0.985]) },
+      { scale: interpolate(pressed.value, [0, 1], [1, 0.98]) },
     ],
   }));
 
@@ -305,10 +323,10 @@ export function PressRow({
         onPress={onPress}
         disabled={disabled}
         onPressIn={() => {
-          if (!still) pressed.value = withTiming(1, { duration: 90 });
+          if (!still) pressed.value = withTiming(1, { duration: 120, easing: EASE_OUT });
         }}
         onPressOut={() => {
-          if (!still) pressed.value = withTiming(0, { duration: 140 });
+          if (!still) pressed.value = withTiming(0, { duration: 160, easing: EASE_OUT });
         }}
       >
         {children}

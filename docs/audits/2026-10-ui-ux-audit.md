@@ -15,8 +15,15 @@ called out where they matter.
 - **Batch 1 (quick wins): built, 24 Oct.** Bugs 1 to 9 fixed (bug 10 was a
   capture taken mid-animation; the settled screen is fine), haptics, pop-ins,
   loops, entrance timings, one severity ladder, web shell. Needs a phone check.
-- Batch 2 (Sheet, Tap, blur, skeletons), batch 3 (type, radius, colour scales,
-  one primary) and batch 4 (Today) are open in the launch tracker.
+- **Batch 2 (primitives): built, 24 Oct.** One `<Sheet>` for all 13 sheets
+  (backdrop fades, sheet springs in, drag to dismiss), one `<Tap>` on 55
+  surfaces including the tab bar, skeletons on Home, Records, Health file, Ask
+  and Today. The blur item is withdrawn: nothing scrolls under the tab bar, so
+  there was nothing to blur. Found on the way: the batch 1 keyframe entrances
+  left views collapsed on web; replaced with `<Enter>`. Needs a phone check.
+- Batch 3 (type, radius, colour scales, one primary, the remaining 250 or so
+  raw `Pressable`s onto `<Tap>`) and batch 4 (Today) are open in the launch
+  tracker.
 
 ## Verdict
 

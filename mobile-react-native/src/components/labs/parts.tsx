@@ -14,9 +14,11 @@ import {
   type LucideIcon,
 } from "lucide-react-native";
 import { useState } from "react";
-import { Modal, Pressable, Text, TextInput, View } from "react-native";
+import { Pressable, Text, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { Tap } from "@/components/ui/tap";
+import { Sheet } from "@/components/ui/sheet";
 import { Glass, Gradient, glassShadow } from "@/components/ui/glass";
 import { PillButton } from "@/components/ui/screen";
 import type { LabPartner, LabTest } from "@/lib/labs/logic";
@@ -109,10 +111,10 @@ export function SampleNote({ text = "Preview · sample labs, prices and reviews.
 export function CartBar({ count, from, label, onPress, bottom }: { count: number; from: number | null; label: string; onPress: () => void; bottom: number }) {
   return (
     <View style={{ position: "absolute", left: 16, right: 16, bottom: bottom + 12 }}>
-      <Pressable
+      <Tap
         accessibilityRole="button"
         onPress={onPress}
-        style={({ pressed }) => [glassShadow, {
+        style={[glassShadow, {
           height: 64,
           borderRadius: 999,
           backgroundColor: ink[900],
@@ -121,8 +123,8 @@ export function CartBar({ count, from, label, onPress, bottom }: { count: number
           paddingLeft: 22,
           paddingRight: 8,
           shadowOpacity: 0.25,
-          transform: [{ scale: pressed ? 0.985 : 1 }],
         }]}
+        scale={0.98}
       >
         <View style={{ flex: 1 }}>
           <Text style={{ fontFamily: font.semibold, fontSize: 15, color: "#fff" }}>
@@ -134,7 +136,7 @@ export function CartBar({ count, from, label, onPress, bottom }: { count: number
           <Text style={{ fontFamily: font.semibold, fontSize: 14.5, color: ink[900] }}>{label}</Text>
           <ArrowRight size={16} color={ink[900]} />
         </View>
-      </Pressable>
+      </Tap>
     </View>
   );
 }
@@ -202,8 +204,7 @@ export function ReviewSheet({
   }
 
   return (
-    <Modal visible={open} transparent animationType="slide" onRequestClose={onClose}>
-      <Pressable accessibilityLabel="Close" onPress={onClose} style={{ flex: 1, backgroundColor: "rgba(15,16,48,0.38)" }} />
+    <Sheet open={open} onClose={onClose} label="Close">
       <View style={{ borderTopLeftRadius: 32, borderTopRightRadius: 32, backgroundColor: "#fafafe", padding: 22, paddingBottom: insets.bottom + 16 }}>
         <Text style={{ fontFamily: font.semibold, fontSize: 22, letterSpacing: -0.5, color: ink[900] }}>{title}</Text>
         <View style={{ flexDirection: "row", gap: 10, marginTop: 16, alignItems: "center" }}>
@@ -228,6 +229,6 @@ export function ReviewSheet({
           Post review
         </PillButton>
       </View>
-    </Modal>
+    </Sheet>
   );
 }

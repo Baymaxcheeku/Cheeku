@@ -21,6 +21,7 @@ import {
 } from "lucide-react-native";
 import { Pressable, Text, View } from "react-native";
 
+import { Tap } from "@/components/ui/tap";
 import { Gradient, glassShadow } from "@/components/ui/glass";
 import { CATEGORY_LABEL, readLabel, type ArticleCard, type ArticleCategory, type ArticleIcon } from "@/lib/knowledge/catalog";
 import { ink } from "@/theme/tokens";
@@ -131,11 +132,11 @@ export function RailCard({ card, width = 236 }: { card: ArticleCard; width?: num
   const router = useRouter();
   const s = CATEGORY_STYLE[card.category];
   return (
-    <Pressable
+    <Tap
       accessibilityRole="button"
       accessibilityLabel={`${card.title}. ${CATEGORY_LABEL[card.category]}. ${readLabel(card)}`}
       onPress={() => router.push(`/article/${card.slug}`)}
-      style={({ pressed }) => [glassShadow, { width, height: 204, borderRadius: 28, overflow: "hidden", transform: [{ scale: pressed ? 0.97 : 1 }] }]}
+      style={[glassShadow, { width, height: 204, borderRadius: 28, overflow: "hidden" }]}
     >
       <Gradient from={s.soft} to={s.field} angle="diagonal" glow="#ffffff" />
       <View style={{ position: "absolute", right: -36, top: -36, width: 140, height: 140, borderRadius: 70, backgroundColor: "rgba(255,255,255,0.45)" }} />
@@ -154,7 +155,7 @@ export function RailCard({ card, width = 236 }: { card: ArticleCard; width?: num
           <ProgressLine card={card} />
         </View>
       </View>
-    </Pressable>
+    </Tap>
   );
 }
 
@@ -200,11 +201,11 @@ export function ArticlePill({ card, width = 268 }: { card: ArticleCard; width?: 
   const s = CATEGORY_STYLE[card.category];
   const finished = card.read?.finished;
   return (
-    <Pressable
+    <Tap
       accessibilityRole="button"
       accessibilityLabel={`${card.title}. ${CATEGORY_LABEL[card.category]}. ${readLabel(card)}`}
       onPress={() => router.push(`/article/${card.slug}`)}
-      style={({ pressed }) => ({
+      style={{
         width,
         flexDirection: "row",
         alignItems: "center",
@@ -216,8 +217,7 @@ export function ArticlePill({ card, width = 268 }: { card: ArticleCard; width?: 
         backgroundColor: s.field,
         borderWidth: 1,
         borderColor: s.soft,
-        transform: [{ scale: pressed ? 0.97 : 1 }],
-      })}
+      }}
     >
       <Emblem icon={card.icon} category={card.category} size={44} />
       <View style={{ flex: 1, gap: 2 }}>
@@ -231,6 +231,6 @@ export function ArticlePill({ card, width = 268 }: { card: ArticleCard; width?: 
           </Text>
         </View>
       </View>
-    </Pressable>
+    </Tap>
   );
 }

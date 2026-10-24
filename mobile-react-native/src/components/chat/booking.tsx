@@ -10,6 +10,7 @@ import {
   Hourglass,
   Stethoscope,
 } from "lucide-react-native";
+import { Tap } from "@/components/ui/tap";
 import type { AppIcon } from "@/components/ui/icons";
 import { Pressable, Text, View } from "react-native";
 
@@ -113,15 +114,15 @@ function Steps({ items }: { items: string[] }) {
 
 function Cta({ label, onPress, disabled }: { label: string; onPress?: () => void; disabled?: boolean }) {
   return (
-    <Pressable
+    <Tap
       accessibilityRole="button"
       disabled={disabled || !onPress}
       onPress={onPress}
-      style={({ pressed }) => ({ height: 48, borderRadius: 999, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, backgroundColor: brand[600], opacity: disabled || !onPress ? 0.45 : 1, transform: [{ scale: pressed ? 0.98 : 1 }] })}
+      style={{ height: 48, borderRadius: 999, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, backgroundColor: brand[600], opacity: disabled || !onPress ? 0.45 : 1 }} scale={0.98}
     >
       <Text style={{ fontFamily: font.semibold, fontSize: 15, color: "#fff" }}>{label}</Text>
       <ArrowRight size={16} color="#fff" />
-    </Pressable>
+    </Tap>
   );
 }
 
@@ -202,15 +203,15 @@ function SoonCard({ booking }: { booking: Booking }) {
 
   return (
     <Shell icon={Dumbbell} eyebrow="Coming soon" title={label} sub={`For ${booking.forName}`}>
-      <Pressable
+      <Tap
         accessibilityRole="button"
         disabled={on}
         onPress={join}
-        style={({ pressed }) => ({ height: 46, borderRadius: 999, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, backgroundColor: on ? brand[50] : ink[900], transform: [{ scale: pressed ? 0.98 : 1 }] })}
+        style={{ height: 46, borderRadius: 999, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, backgroundColor: on ? brand[50] : ink[900] }} scale={0.98}
       >
         {on ? <Check size={16} color={brand[700]} /> : <BellRing size={16} color="#fff" />}
         <Text style={{ fontFamily: font.semibold, fontSize: 14.5, color: on ? brand[700] : "#fff" }}>{on ? "You're on the list" : "Tell me when it's live"}</Text>
-      </Pressable>
+      </Tap>
     </Shell>
   );
 }

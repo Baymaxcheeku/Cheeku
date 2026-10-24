@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Pressable, Text, TextInput, View } from "react-native";
 import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 
+import { Tap } from "@/components/ui/tap";
 import { MascotBust, MascotFigure } from "@/components/illustrations/sprout";
 import { BubblePop } from "@/components/onboarding/motion";
 import { Avatar } from "@/components/ui/avatar";
@@ -46,11 +47,11 @@ export function ProfileChip({
   onPress: () => void;
 }) {
   return (
-    <Pressable
+    <Tap
       accessibilityRole="button"
       accessibilityLabel={locked ? `${active.name}. Add your family with the Family plan` : `Viewing ${active.name}. Switch family member`}
       onPress={onPress}
-      style={({ pressed }) => [
+      style={[
         glassShadow,
         {
           flexDirection: "row",
@@ -63,9 +64,9 @@ export function ProfileChip({
           backgroundColor: glass.fillStrong,
           borderWidth: 1,
           borderColor: glass.rim,
-          transform: [{ scale: pressed ? 0.98 : 1 }],
         },
       ]}
+      scale={0.98}
     >
       <Avatar svg={active.avatar} photo={active.photo} image={active.avatarImage} background={active.avatarBackground} size={40} />
       <View>
@@ -111,7 +112,7 @@ export function ProfileChip({
           ))}
         </View>
       ) : null}
-    </Pressable>
+    </Tap>
   );
 }
 
@@ -342,18 +343,17 @@ export function CheekuCard({
         </View>
 
         {/* The action: a dark disc joined to a glass label, one tap target. */}
-        <Pressable
+        <Tap
           accessibilityRole="button"
           accessibilityLabel="Start a chat with Cheeku"
           onPress={() => router.push("/ask")}
-          style={({ pressed }) => ({
+          style={{
             marginTop: "auto",
             paddingTop: 22,
             alignSelf: "flex-start",
             flexDirection: "row",
             alignItems: "center",
-            transform: [{ scale: pressed ? 0.97 : 1 }],
-          })}
+          }}
         >
           <View className="z-10 h-[52px] w-[52px] items-center justify-center rounded-pill" style={{ backgroundColor: ink[900] }}>
             <MessageCircleHeart size={21} color="#ffffff" strokeWidth={1.9} />
@@ -365,7 +365,7 @@ export function CheekuCard({
           >
             <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>Start a chat</Text>
           </Glass>
-        </Pressable>
+        </Tap>
       </View>
     </View>
   );

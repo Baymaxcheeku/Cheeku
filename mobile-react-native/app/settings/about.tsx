@@ -21,10 +21,11 @@ import {
   X,
   type LucideIcon,
 } from "lucide-react-native";
-import { Pressable, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import { SvgXml } from "react-native-svg";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { Tap } from "@/components/ui/tap";
 import { MascotFigure } from "@/components/illustrations/sprout";
 import { Brand } from "@/components/ui/brand";
 import { GlassCircle, Gradient, glass, glassShadow } from "@/components/ui/glass";
@@ -233,14 +234,14 @@ export default function About() {
             <Text style={{ fontFamily: font.regular, fontSize: 14.5, lineHeight: 21, color: "rgba(255,255,255,0.85)", textAlign: "center", marginTop: 6 }}>
               Tell <Brand onDark /> what&apos;s going on. It already knows the background.
             </Text>
-            <Pressable
+            <Tap
               accessibilityRole="button"
               onPress={() => router.push("/ask")}
-              style={({ pressed }) => ({ marginTop: 16, height: 50, paddingHorizontal: 22, borderRadius: 999, backgroundColor: "#fff", flexDirection: "row", alignItems: "center", gap: 8, transform: [{ scale: pressed ? 0.97 : 1 }] })}
+              style={{ marginTop: 16, height: 50, paddingHorizontal: 22, borderRadius: 999, backgroundColor: "#fff", flexDirection: "row", alignItems: "center", gap: 8 }}
             >
               <MessageCircleHeart size={18} color={brand[700]} />
               <Text style={{ fontFamily: font.semibold, fontSize: 15, color: brand[700] }}>Start a chat</Text>
-            </Pressable>
+            </Tap>
           </View>
         </Reveal>
 

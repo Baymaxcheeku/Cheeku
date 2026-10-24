@@ -20,6 +20,7 @@ import { useState } from "react";
 import { Linking, Pressable, ScrollView, Share, Text, View } from "react-native";
 import { SvgXml } from "react-native-svg";
 
+import { Tap } from "@/components/ui/tap";
 import { MascotBust } from "@/components/illustrations/sprout";
 import { glass, glassShadow } from "@/components/ui/glass";
 import type { ThreadMessage, TurnMemory } from "@/lib/memory/thread";
@@ -202,22 +203,22 @@ function Paragraph({ text }: { text: string }) {
 function CareOffer({ onBook }: { onBook: (mode: "clinic" | "online") => void }) {
   return (
     <View style={{ flexDirection: "row", gap: 8 }}>
-      <Pressable
+      <Tap
         accessibilityRole="button"
         onPress={() => onBook("clinic")}
-        style={({ pressed }) => ({ flex: 1, height: 46, borderRadius: 999, backgroundColor: ink[900], flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, transform: [{ scale: pressed ? 0.98 : 1 }] })}
+        style={{ flex: 1, height: 46, borderRadius: 999, backgroundColor: ink[900], flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6 }} scale={0.98}
       >
         <MapPin size={15} color="#fff" />
         <Text style={{ fontFamily: font.semibold, fontSize: 13.5, color: "#fff" }}>Doctors nearby</Text>
-      </Pressable>
-      <Pressable
+      </Tap>
+      <Tap
         accessibilityRole="button"
         onPress={() => onBook("online")}
-        style={({ pressed }) => [glassShadow, { flex: 1, height: 46, borderRadius: 999, backgroundColor: "#fff", borderWidth: 1, borderColor: surface.line, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, transform: [{ scale: pressed ? 0.98 : 1 }] }]}
+        style={[glassShadow, { flex: 1, height: 46, borderRadius: 999, backgroundColor: "#fff", borderWidth: 1, borderColor: surface.line, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6 }]} scale={0.98}
       >
         <Video size={15} color={brand[600]} />
         <Text style={{ fontFamily: font.semibold, fontSize: 13.5, color: ink[900] }}>Online consultation</Text>
-      </Pressable>
+      </Tap>
     </View>
   );
 }

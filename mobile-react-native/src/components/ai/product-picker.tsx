@@ -1,10 +1,11 @@
 import { Camera, X } from "lucide-react-native";
-import { Modal, Pressable, ScrollView, Text, View } from "react-native";
+import { Pressable, ScrollView, Text, View } from "react-native";
 import { SvgXml } from "react-native-svg";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { Sheet, useSheetMax } from "@/components/ui/sheet";
 import { PRODUCT_SCENARIOS } from "@/lib/ai/mock/scenarios";
-import { brand, ink, shadow, surface } from "@/theme/tokens";
+import { brand, ink, shadow } from "@/theme/tokens";
 
 /**
  * The product-photo path, as a picker over FIXED scenarios rather than a real
@@ -29,20 +30,14 @@ export function ProductPicker({
   onPick: (scenarioId: string) => void;
 }) {
   const insets = useSafeAreaInsets();
+  const sheetMax78 = useSheetMax(0.78);
 
   return (
-    <Modal visible={open} transparent animationType="slide" onRequestClose={onClose}>
-      <Pressable
-        accessibilityLabel="Close"
-        onPress={onClose}
-        className="flex-1"
-        style={{ backgroundColor: "rgba(15,16,48,0.35)" }}
-      />
+    <Sheet open={open} onClose={onClose} label="Close">
       <View
         className="rounded-t-sheet bg-canvas px-5 pt-2"
-        style={{ maxHeight: "78%", paddingBottom: insets.bottom + 16 }}
+        style={{ maxHeight: sheetMax78, paddingBottom: insets.bottom + 16 }}
       >
-        <View className="h-1 w-10 self-center rounded-pill" style={{ backgroundColor: surface.line }} />
 
         <View className="mt-3 flex-row items-start gap-3">
           <View className="h-10 w-10 items-center justify-center rounded-pill bg-brand-50">
@@ -93,6 +88,6 @@ export function ProductPicker({
           </View>
         </ScrollView>
       </View>
-    </Modal>
+    </Sheet>
   );
 }

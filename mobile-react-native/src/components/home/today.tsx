@@ -23,6 +23,7 @@ import {
 import { Modal, Pressable, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { Tap } from "@/components/ui/tap";
 import { LIVE } from "@/components/home/care";
 import { MascotFigure } from "@/components/illustrations/sprout";
 import { Avatar } from "@/components/ui/avatar";
@@ -104,11 +105,11 @@ export function UnlockCard({ stage, signals }: { stage: "starter" | "building"; 
           <Meter value={done} total={rows.length} />
         </View>
 
-        <Pressable
+        <Tap
           accessibilityRole="button"
           accessibilityLabel="Add your latest report"
           onPress={() => router.push("/scan")}
-          style={({ pressed }) => ({ marginTop: 18, flexDirection: "row", alignItems: "center", alignSelf: "flex-start", transform: [{ scale: pressed ? 0.97 : 1 }] })}
+          style={{ marginTop: 18, flexDirection: "row", alignItems: "center", alignSelf: "flex-start" }}
         >
           <View className="z-10 h-[52px] w-[52px] items-center justify-center rounded-pill" style={{ backgroundColor: ink[900] }}>
             <FileUp size={21} color="#ffffff" strokeWidth={1.9} />
@@ -116,7 +117,7 @@ export function UnlockCard({ stage, signals }: { stage: "starter" | "building"; 
           <Glass strong className="-ml-4 h-[46px] justify-center pl-7 pr-5" style={{ borderTopRightRadius: 999, borderBottomRightRadius: 999 }}>
             <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>Add your latest report</Text>
           </Glass>
-        </Pressable>
+        </Tap>
         <Text style={{ fontFamily: font.regular, fontSize: 12, lineHeight: 17, color: ink[500], marginTop: 10 }}>
           Photo, PDF or a screenshot. Cheeku reads it in under a minute.
         </Text>
@@ -372,12 +373,12 @@ export function StepCard({
           </View>
           <View className="mt-auto flex-row items-center gap-2 pt-5">
             {onMore ? (
-              <Pressable accessibilityRole="button" onPress={onMore} style={({ pressed }) => ({ transform: [{ scale: pressed ? 0.97 : 1 }] })}>
+              <Tap accessibilityRole="button" onPress={onMore}>
                 <View className="h-[44px] flex-row items-center gap-1.5 rounded-pill px-4" style={{ backgroundColor: ink[900] }}>
                   <Text style={{ fontFamily: font.semibold, fontSize: 14, color: "#fff" }}>One more?</Text>
                   <ArrowRight size={15} color="#fff" />
                 </View>
-              </Pressable>
+              </Tap>
             ) : null}
             {doneStep ? (
               <Pressable accessibilityRole="button" accessibilityLabel="Undo done" onPress={() => onUndo(doneStep)}>
@@ -430,20 +431,20 @@ export function StepCard({
 
         <View className="mt-auto flex-row items-center gap-2 pt-5">
           {action ? (
-            <Pressable accessibilityRole="button" onPress={() => router.push(action.route as never)} style={({ pressed }) => ({ transform: [{ scale: pressed ? 0.97 : 1 }] })}>
+            <Tap accessibilityRole="button" onPress={() => router.push(action.route as never)}>
               <View className="h-[46px] flex-row items-center gap-1.5 rounded-pill px-4" style={{ backgroundColor: ink[900] }}>
                 <Text style={{ fontFamily: font.semibold, fontSize: 14, color: "#fff" }}>{action.label}</Text>
               </View>
-            </Pressable>
+            </Tap>
           ) : (
-            <Pressable accessibilityRole="button" accessibilityLabel={`Done: ${step.title}`} onPress={() => onDone(step)} style={({ pressed }) => ({ transform: [{ scale: pressed ? 0.97 : 1 }] })}>
+            <Tap accessibilityRole="button" accessibilityLabel={`Done: ${step.title}`} onPress={() => onDone(step)}>
               <View className="h-[46px] flex-row items-center gap-2 rounded-pill pl-1.5 pr-5" style={{ backgroundColor: ink[900] }}>
                 <View className="h-[34px] w-[34px] items-center justify-center rounded-pill" style={{ backgroundColor: brand[500] }}>
                   <Check size={17} color="#fff" strokeWidth={3} />
                 </View>
                 <Text style={{ fontFamily: font.semibold, fontSize: 15, color: "#fff" }}>Done</Text>
               </View>
-            </Pressable>
+            </Tap>
           )}
           <Pressable accessibilityRole="button" accessibilityLabel={`Later: ${step.title}`} onPress={() => onLater(step)}>
             <Glass strong className="h-[46px] items-center justify-center rounded-pill px-4">
@@ -481,7 +482,7 @@ export function FamilyAlertCard({ row, member, onPress }: { row: DueRow; member:
   const late = Math.abs(row.daysToDue);
   const when = row.overdue ? `${late} day${late === 1 ? "" : "s"} late` : row.daysToDue === 0 ? "Today" : row.daysToDue === 1 ? "Tomorrow" : `In ${row.daysToDue} days`;
   return (
-    <Pressable accessibilityRole="button" accessibilityLabel={sentence} onPress={onPress} style={({ pressed }) => ({ transform: [{ scale: pressed ? 0.99 : 1 }] })}>
+    <Tap accessibilityRole="button" accessibilityLabel={sentence} onPress={onPress} scale={0.98}>
       <View className="flex-row items-center gap-3 rounded-[24px] bg-white p-3.5" style={[glassShadow, { borderWidth: 1, borderColor: surface.line }]}>
         <View>
           {member ? <Avatar svg={member.avatar} photo={member.photo} image={member.avatarImage} background={member.avatarBackground} size={46} /> : <Users size={22} color={brand[600]} />}
@@ -498,7 +499,7 @@ export function FamilyAlertCard({ row, member, onPress }: { row: DueRow; member:
         </View>
         <ChevronRight size={18} color={ink[300]} />
       </View>
-    </Pressable>
+    </Tap>
   );
 }
 
@@ -612,7 +613,7 @@ export function PlanPreview({ plan, skip, onOpen }: { plan: Plan; skip: string |
 export function AskRow() {
   const router = useRouter();
   return (
-    <Pressable accessibilityRole="button" accessibilityLabel="Ask Cheeku" onPress={() => router.push("/ask")} style={({ pressed }) => ({ transform: [{ scale: pressed ? 0.99 : 1 }] })}>
+    <Tap accessibilityRole="button" accessibilityLabel="Ask Cheeku" onPress={() => router.push("/ask")} scale={0.98}>
       <Glass strong className="flex-row items-center gap-3 rounded-[22px] p-3.5">
         <View className="h-10 w-10 items-center justify-center rounded-pill" style={{ backgroundColor: ink[900] }}>
           <MessageCircle size={18} color="#fff" strokeWidth={1.9} />
@@ -623,7 +624,7 @@ export function AskRow() {
         </View>
         <ChevronRight size={16} color={ink[300]} />
       </Glass>
-    </Pressable>
+    </Tap>
   );
 }
 
@@ -668,13 +669,13 @@ export function UnlockMoment({ open, via, onClose }: { open: boolean; via: Unloc
               ))}
             </Glass>
 
-            <Pressable
+            <Tap
               accessibilityRole="button"
               onPress={onClose}
-              style={({ pressed }) => ({ marginTop: 18, alignSelf: "stretch", height: 52, borderRadius: 999, backgroundColor: ink[900], alignItems: "center", justifyContent: "center", transform: [{ scale: pressed ? 0.98 : 1 }] })}
+              style={{ marginTop: 18, alignSelf: "stretch", height: 52, borderRadius: 999, backgroundColor: ink[900], alignItems: "center", justifyContent: "center" }} scale={0.98}
             >
               <Text style={{ fontFamily: font.semibold, fontSize: 16, color: "#fff" }}>See today</Text>
-            </Pressable>
+            </Tap>
           </View>
         </View>
       </View>

@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { Tap } from "@/components/ui/tap";
 import { PartnerBadge, ReviewList, ReviewSheet, rupees, SampleNote, Stars, TestArt } from "@/components/labs/parts";
 import { Glass, Gradient, glassShadow } from "@/components/ui/glass";
 import { ScreenHeader } from "@/components/ui/screen";
@@ -119,18 +120,18 @@ export default function LabPartner() {
       </ScrollView>
 
       <View style={{ position: "absolute", left: 16, right: 16, bottom: insets.bottom + 12 }}>
-        <Pressable
+        <Tap
           accessibilityRole="button"
           onPress={() => {
             cart.setPartner(p.id);
             router.push(cart.tests.length ? "/labs/book" : "/labs");
           }}
-          style={({ pressed }) => [glassShadow, { height: 58, borderRadius: 999, backgroundColor: brand[600], alignItems: "center", justifyContent: "center", transform: [{ scale: pressed ? 0.98 : 1 }] }]}
+          style={[glassShadow, { height: 58, borderRadius: 999, backgroundColor: brand[600], alignItems: "center", justifyContent: "center" }]} scale={0.98}
         >
           <Text style={{ fontFamily: font.semibold, fontSize: 16, color: "#fff" }}>
             {cart.tests.length ? `Book home collection · ${cart.tests.length} ${cart.tests.length === 1 ? "test" : "tests"}` : "Pick tests to book"}
           </Text>
-        </Pressable>
+        </Tap>
       </View>
 
       <ReviewSheet
