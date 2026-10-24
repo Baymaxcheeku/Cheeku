@@ -46,6 +46,11 @@ export const semantic = {
   dangerStrong: "#e10a1e",
   dangerBg: "#fef1f3",
   dangerText: "#c00a1c",
+  // "Ask your doctor": firmer than caution, calmer than danger. Red is kept
+  // for "go now" (UI audit, October 2026).
+  attention: "#e8590c",
+  attentionBg: "#fff0e6",
+  attentionText: "#a63a08",
 } as const;
 
 export const radius = { card: 24, tile: 16, sheet: 28, pill: 999 } as const;

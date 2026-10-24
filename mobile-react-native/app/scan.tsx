@@ -32,6 +32,7 @@ import { DOC_TYPE_LABEL, DOC_TYPES, type DocType } from "@/lib/records/types";
 import { stripImageMetadata } from "@/lib/upload/strip-exif";
 import { brand, ink, semantic } from "@/theme/tokens";
 import { useFamily } from "@/lib/profiles/family";
+import { feel } from "@/lib/feel";
 
 type Phase = "pick" | "working" | "error";
 
@@ -171,10 +172,12 @@ export default function Scan() {
     if (!result.ok) {
       setMessage(result.message);
       setPhase("error");
+      feel.warn();
       return;
     }
 
     setSettleStep(STEPS.length);
+    feel.success();
     // Let the last steps land before the screen changes, so the transition does
     // not read as a flicker.
     setTimeout(() => router.replace(`/records/${result.documentId}`), 900);
@@ -455,7 +458,7 @@ export default function Scan() {
               </View>
               <View className="min-w-0 flex-1">
                 <Text style={{ fontFamily: font.semibold, fontSize: 16, color: ink[900] }}>{src.title}</Text>
-                <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 2 }}>
+                <Text numberOfLines={2} style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[500], marginTop: 2 }}>
                   {src.line}
                 </Text>
               </View>

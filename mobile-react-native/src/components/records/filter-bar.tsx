@@ -69,7 +69,7 @@ export function FilterBar({
   const memberLabel =
     profileId === "all"
       ? "All members"
-      : (profiles.find((p) => p.id === profileId)?.name ?? "Member");
+      : (profiles.find((p) => p.id === profileId)?.name.trim().split(/\s+/)[0] ?? "Member");
 
   /*
    * Scoping to the active member is the app's normal state, not something the

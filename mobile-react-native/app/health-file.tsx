@@ -423,8 +423,26 @@ function Vital({ label, value }: { label: string; value: string | null }) {
 }
 
 function TagRow({ label, items, empty, bg, fg, icon: Icon }: { label: string; items: string[]; empty: string; bg: string; fg: string; icon?: LucideIcon }) {
+  /*
+   * Packed into rows by length rather than three at a time. A fixed three let
+   * "Type 2 diabetes mellitus with peripheral neuropathy" run off the screen.
+   * Rows are built here instead of with flexWrap, which stretched wrapped
+   * rows to full height on iOS (see PROGRESS.md). A pill longer than a row
+   * sits alone and its text wraps.
+   */
+  const BUDGET = 30;
   const rows: string[][] = [];
-  for (let i = 0; i < items.length; i += 3) rows.push(items.slice(i, i + 3));
+  let used = 0;
+  for (const t of items) {
+    const last = rows[rows.length - 1];
+    if (last && used + t.length <= BUDGET) {
+      last.push(t);
+      used += t.length;
+    } else {
+      rows.push([t]);
+      used = t.length;
+    }
+  }
   return (
     <View style={{ flexDirection: "row", gap: 10 }}>
       <Text style={{ width: 78, fontFamily: font.medium, fontSize: 12.5, color: ink[500], marginTop: 5 }}>{label}</Text>
@@ -435,9 +453,9 @@ function TagRow({ label, items, empty, bg, fg, icon: Icon }: { label: string; it
           rows.map((row, r) => (
             <View key={r} style={{ flexDirection: "row", gap: 6 }}>
               {row.map((t) => (
-                <View key={t} style={{ flexDirection: "row", alignItems: "center", gap: 4, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 999, backgroundColor: bg }}>
+                <View key={t} style={{ flexShrink: 1, flexDirection: "row", alignItems: "center", gap: 4, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 14, backgroundColor: bg }}>
                   {Icon ? <Icon size={11} color={fg} /> : null}
-                  <Text style={{ fontFamily: font.semibold, fontSize: 12, color: fg }}>{t}</Text>
+                  <Text style={{ flexShrink: 1, fontFamily: font.semibold, fontSize: 12, color: fg }}>{t}</Text>
                 </View>
               ))}
             </View>

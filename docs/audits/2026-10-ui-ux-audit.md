@@ -10,6 +10,14 @@ What this could not judge: anything that needs a phone (haptic timing, gesture
 feel, 120fps, Dynamic Type at the largest sizes, keyboard behaviour). Those are
 called out where they matter.
 
+## Status
+
+- **Batch 1 (quick wins): built, 24 Oct.** Bugs 1 to 9 fixed (bug 10 was a
+  capture taken mid-animation; the settled screen is fine), haptics, pop-ins,
+  loops, entrance timings, one severity ladder, web shell. Needs a phone check.
+- Batch 2 (Sheet, Tap, blur, skeletons), batch 3 (type, radius, colour scales,
+  one primary) and batch 4 (Today) are open in the launch tracker.
+
 ## Verdict
 
 The base is good. The lavender glass palette, the mascot, the Instrument Serif

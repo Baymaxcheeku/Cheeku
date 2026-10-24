@@ -1,12 +1,12 @@
 import { Check, Lock, MessagesSquare, Plus, Settings2, ShieldCheck, Users, X } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
 import { Modal, Pressable, ScrollView, Text, View } from "react-native";
-import Animated, { FadeInDown, ZoomIn } from "react-native-reanimated";
+import Animated from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Avatar } from "@/components/ui/avatar";
 import { Glass, Gradient, glass, glassShadow } from "@/components/ui/glass";
-import { useReducedMotion } from "@/components/ui/motion";
+import { ENTER_QUICK, ENTER_SOFT, useReducedMotion } from "@/components/ui/motion";
 import { PillButton } from "@/components/ui/screen";
 import { formatPrice, PLANS } from "@/lib/billing/plans";
 import type { ActiveProfile } from "@/lib/profiles/context";
@@ -14,6 +14,7 @@ import type { FamilyMode } from "@/lib/profiles/family";
 import { catalogFace, type Face } from "@/lib/profiles/faces";
 import { brand, ink } from "@/theme/tokens";
 import { font } from "@/theme/type";
+import { feel } from "@/lib/feel";
 
 const GHOSTS = ["f34", "f33", "f39"];
 
@@ -99,6 +100,7 @@ export function FamilyTray({
       return;
     }
     setPicked(id);
+    feel.tick();
     onSelect(id);
     closing.current = setTimeout(onClose, still ? 0 : 260);
   }
@@ -138,10 +140,11 @@ export function FamilyTray({
         <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 18, paddingBottom: 6, gap: 12 }} showsVerticalScrollIndicator={false}>
           {chunk(tiles, 2).map((row, r) => (
             <View key={r} style={{ flexDirection: "row", gap: 12 }}>
-              {row.map((t, c) => (
+              {/* No entrance stagger: the tray opens many times a day, and the
+                  people in it should simply be there (UI audit, October 2026). */}
+              {row.map((t) => (
                 <Animated.View
                   key={t.kind === "member" ? t.profile.id : t.kind === "paused" ? t.key : "add"}
-                  entering={still ? undefined : FadeInDown.delay((r * 2 + c) * 45).duration(260)}
                   style={{ flex: 1 }}
                 >
                   {t.kind === "member" ? (
@@ -214,7 +217,7 @@ function MemberCard({ profile, active, onPress }: { profile: ActiveProfile; acti
           <Avatar svg={profile.avatar} photo={profile.photo} image={profile.avatarImage} background={profile.avatarBackground} size={62} />
         </View>
         {active ? (
-          <Animated.View entering={still ? undefined : ZoomIn.springify().damping(12)}>
+          <Animated.View entering={still ? undefined : ENTER_QUICK}>
             <View style={{ width: 26, height: 26, borderRadius: 13, backgroundColor: brand[600], alignItems: "center", justifyContent: "center" }}>
               <Check size={15} color="#fff" strokeWidth={3} />
             </View>
@@ -345,7 +348,7 @@ export function FamilyUpsellSheet({
             {faces.slice(0, 1).map((f, i) => (
               <Ghost key={`l${i}`} face={f} tilt={-8} />
             ))}
-            <Animated.View entering={still ? undefined : ZoomIn.springify().damping(13)} style={{ marginHorizontal: -6, zIndex: 2, borderRadius: 999, borderWidth: 4, borderColor: "#fff" }}>
+            <Animated.View entering={still ? undefined : ENTER_SOFT} style={{ marginHorizontal: -6, zIndex: 2, borderRadius: 999, borderWidth: 4, borderColor: "#fff" }}>
               <Avatar svg={me.avatar} photo={me.photo} image={me.avatarImage} background={me.avatarBackground} size={78} />
             </Animated.View>
             {faces.slice(1, 3).map((f, i) => (

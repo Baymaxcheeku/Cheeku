@@ -12,10 +12,17 @@
 /** How a document's findings look overall, and how a single value reads. */
 export type Severity = "normal" | "borderline" | "high_risk";
 
+/*
+ * ONE LADDER, everywhere a record or a value is judged (UI audit, October
+ * 2026): In range, Worth a look, Ask your doctor. It replaced four
+ * vocabularies ("Borderline", "Needs attention", "High risk", "High
+ * priority") and keeps red for emergencies only, as docs/content-system.md
+ * asks: calm and plain on results.
+ */
 export const SEVERITY_LABEL: Record<Severity, string> = {
-  normal: "Normal",
-  borderline: "Borderline",
-  high_risk: "High risk",
+  normal: "In range",
+  borderline: "Worth a look",
+  high_risk: "Ask your doctor",
 };
 
 /*
@@ -24,24 +31,20 @@ export const SEVERITY_LABEL: Record<Severity, string> = {
  * documents and the other is describing one. Both come from here so they cannot
  * drift.
  */
-export const SEVERITY_STAT_LABEL: Record<Severity, string> = {
-  normal: "Normal",
-  borderline: "Needs attention",
-  high_risk: "High priority",
-};
+export const SEVERITY_STAT_LABEL: Record<Severity, string> = SEVERITY_LABEL;
 
 /** Tailwind classes for a severity pill. Never used for confidence. */
 export const SEVERITY_PILL: Record<Severity, string> = {
   normal: "bg-safe-bg text-safe-text",
   borderline: "bg-caution-bg text-caution-text",
-  high_risk: "bg-danger-bg text-danger-text",
+  high_risk: "bg-attention-bg text-attention-text",
 };
 
 /** The ring on the timeline rail. Fill weight, so the sampled hues are right. */
 export const SEVERITY_DOT: Record<Severity, string> = {
   normal: "border-safe",
   borderline: "border-caution",
-  high_risk: "border-danger",
+  high_risk: "border-attention",
 };
 
 /*
@@ -51,10 +54,10 @@ export const SEVERITY_DOT: Record<Severity, string> = {
 export type EntityFlag = "normal" | "high" | "low" | "caution";
 
 export const FLAG_LABEL: Record<EntityFlag, string> = {
-  normal: "Normal",
+  normal: "In range",
   high: "High",
   low: "Low",
-  caution: "Borderline",
+  caution: "Worth a look",
 };
 
 export const FLAG_PILL: Record<EntityFlag, string> = {

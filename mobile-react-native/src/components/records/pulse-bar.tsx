@@ -1,6 +1,6 @@
 import { Pressable, Text, View } from "react-native";
 
-import type { RecordStats, Severity } from "@/lib/records/types";
+import { SEVERITY_LABEL, type RecordStats, type Severity } from "@/lib/records/types";
 import { ink, semantic, surface } from "@/theme/tokens";
 
 /*
@@ -34,15 +34,15 @@ type Cell = { key: Severity; label: string; fg: string; bar: string; bg: string 
  * marks saturated puts the intensity where the meaning is.
  */
 const CELLS: readonly Cell[] = [
-  { key: "normal", label: "In range", fg: semantic.safe, bar: "#7fd0a4", bg: semantic.safeBg },
+  { key: "normal", label: SEVERITY_LABEL.normal, fg: semantic.safe, bar: "#7fd0a4", bg: semantic.safeBg },
   {
     key: "borderline",
-    label: "Worth a look",
+    label: SEVERITY_LABEL.borderline,
     fg: semantic.cautionText,
     bar: "#f0c073",
     bg: semantic.cautionBg,
   },
-  { key: "high_risk", label: "High priority", fg: semantic.danger, bar: "#eda0a8", bg: semantic.dangerBg },
+  { key: "high_risk", label: SEVERITY_LABEL.high_risk, fg: semantic.attentionText, bar: "#f5a97f", bg: semantic.attentionBg },
 ];
 
 const COUNT_KEY: Record<Severity, keyof RecordStats> = {

@@ -1,7 +1,7 @@
 import { Text, View } from "react-native";
 import Svg, { Circle, Path, Polygon } from "react-native-svg";
 
-import type { Severity } from "@/lib/records/types";
+import { SEVERITY_LABEL, type Severity } from "@/lib/records/types";
 import { ink, semantic, surface } from "@/theme/tokens";
 
 /*
@@ -125,9 +125,9 @@ export function HealthGauge({ severity, width = 118 }: { severity: Severity; wid
 }
 
 const LEGEND: readonly { severity: Severity; label: string; dot: string }[] = [
-  { severity: "normal", label: "Good", dot: semantic.safe },
-  { severity: "borderline", label: "Needs attention", dot: semantic.caution },
-  { severity: "high_risk", label: "High risk", dot: semantic.danger },
+  { severity: "normal", label: SEVERITY_LABEL.normal, dot: semantic.safe },
+  { severity: "borderline", label: SEVERITY_LABEL.borderline, dot: semantic.caution },
+  { severity: "high_risk", label: SEVERITY_LABEL.high_risk, dot: semantic.attention },
 ];
 
 /*

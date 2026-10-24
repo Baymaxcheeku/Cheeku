@@ -15,6 +15,7 @@ import { glass, glassShadow } from "@/components/ui/glass";
 import { brand, ink, shadow, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
 import { brandify } from "@/components/ui/brand";
+import { feel } from "@/lib/feel";
 
 const ICONS: Record<string, { icon: LucideIcon; label: string; short: string }> = {
   home: { icon: House, label: "Home", short: "Home" },
@@ -78,7 +79,10 @@ export function TabBar({ state, navigation }: BottomTabBarProps) {
             // Re-pressing the active tab is a no-op rather than a fresh
             // navigation, which would otherwise reset a scrolled list under
             // someone's thumb.
-            if (!active && !event.defaultPrevented) navigation.navigate(route.name);
+            if (!active && !event.defaultPrevented) {
+              feel.tick();
+              navigation.navigate(route.name);
+            }
           }
 
           /*
@@ -87,7 +91,7 @@ export function TabBar({ state, navigation }: BottomTabBarProps) {
            */
           return (
             <Fragment key={route.key}>
-              {index === 2 ? <Fab onPress={() => router.push("/scan")} /> : null}
+              {index === 2 ? <Fab onPress={() => { feel.tap(); router.push("/scan"); }} /> : null}
               <Pressable
                 accessibilityRole="tab"
                 accessibilityState={{ selected: active }}

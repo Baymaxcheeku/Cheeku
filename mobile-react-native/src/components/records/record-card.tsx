@@ -21,7 +21,7 @@ import { Gradient } from "@/components/ui/glass";
 import { font } from "@/theme/type";
 import { generatedAvatar } from "@/lib/profiles/avatar";
 import { formatEventDate } from "@/lib/records/grouping";
-import type { DocType, RecordSummary, Severity } from "@/lib/records/types";
+import { SEVERITY_LABEL, type DocType, type RecordSummary, type Severity } from "@/lib/records/types";
 import { ink, semantic, shadow } from "@/theme/tokens";
 
 /*
@@ -66,15 +66,18 @@ const SEVERITY: Record<Severity, { label: string; fg: string; bg: string } | nul
   // A normal result gets NO pill. Labelling the unremarkable teaches the eye to
   // skip the pill entirely, and then the one that matters is skipped too.
   normal: null,
-  borderline: { label: "Worth a look", fg: semantic.cautionText, bg: semantic.cautionBg },
-  high_risk: { label: "High priority", fg: semantic.danger, bg: semantic.dangerBg },
+  borderline: { label: SEVERITY_LABEL.borderline, fg: semantic.cautionText, bg: semantic.cautionBg },
+  high_risk: { label: SEVERITY_LABEL.high_risk, fg: semantic.attentionText, bg: semantic.attentionBg },
 };
 
 export function RecordCard({
   record,
   index = 0,
+  showPerson = true,
 }: {
   record: RecordSummary;
+  /** False when every record in the list belongs to the same person. */
+  showPerson?: boolean;
   /** Only picks the avatar palette, so faces in a list stay distinguishable. */
   index?: number;
 }) {
@@ -94,7 +97,7 @@ export function RecordCard({
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={`${style.label}. ${record.title}. ${record.profileName}. ${
-        severity ? severity.label : "In range"
+        severity ? severity.label : SEVERITY_LABEL.normal
       }`}
       onPress={() => router.push(`/records/${record.id}`)}
       style={({ pressed }) => ({ transform: [{ scale: pressed ? 0.985 : 1 }] })}
@@ -126,7 +129,8 @@ export function RecordCard({
           <View className="flex-row items-center gap-1.5">
             <CalendarDays size={12} color={ink[300]} />
             <Text numberOfLines={1} style={{ flexShrink: 1, fontFamily: font.regular, fontSize: 12, color: ink[500] }}>
-              {formatEventDate(record.eventDate)} · {record.profileName}
+              {formatEventDate(record.eventDate)}
+              {showPerson ? ` · ${record.profileName}` : ""}
               {record.facility && !record.summary ? ` · ${record.facility}` : ""}
             </Text>
           </View>

@@ -63,6 +63,9 @@ module.exports = {
         "danger-strong": "#e10a1e",
         "danger-bg": "#fef1f3",
         "danger-text": "#c00a1c",
+        attention: "#e8590c",
+        "attention-bg": "#fff0e6",
+        "attention-text": "#a63a08",
       },
       borderRadius: {
         // 24 since the 2026-09-29 redesign: softer, closer to the glass cards.

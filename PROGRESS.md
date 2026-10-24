@@ -2971,3 +2971,50 @@ kept, another account sees none of them
 (`supabase/manual/local-check/0037-delete-sign-in-scenarios.sql`); the editor
 step runs clean on top. The function compiles; it has not run against a real
 project. **Not verified:** the function on Supabase, and the flow on a phone.
+
+## UI batch 1: bugs, haptics, motion and wording · 2026-10-24
+
+From the UI/UX audit (`docs/audits/2026-10-ui-ux-audit.md`, done with the
+design skills in `.claude/skills`). Batch 1 is the quick wins; batches 2 to 4
+(shared Sheet and Tap, the type and colour system, a calmer Today) are in the
+launch tracker.
+
+**Bugs.** Today's header read "Made for your what's due" (now "Built around
+your sugar plan and what's due", via `softLower` and `joinAnd` in
+`src/lib/content/words.ts`, which also stop "Vitamin D" becoming "vitamin d").
+Ask's first chip said "hba1c". Ask opened scrolled to the end of an empty
+thread, cutting the mascot off. Long conditions ran off the Health file (pills
+now pack by length and wrap; still no flexWrap, see the Yoga note above). The
+records member chip shows a first name, and rows drop the person's name when
+the list is one person. Choose a lab no longer shows "₹0" for every lab with an
+empty cart. Sign-in no longer shows three disabled "Soon" providers. Test names
+and option lines wrap to two lines instead of cutting mid-word. The tenth item,
+a gap on Welcome, was a screenshot taken mid-animation; nothing to fix.
+
+**Haptics.** `expo-haptics` through `src/lib/feel.ts` (tick, tap, thud,
+success, warn): tabs, the + button, picking a person, switches, pillar chips,
+Done (success on the day's last step), booking confirmed, report filed, an
+upload error, destructive confirms. One per action, always with a visual.
+
+**Motion.** No more scale-from-zero `ZoomIn`: shared `ENTER_QUICK`,
+`ENTER_SOFT` and `ENTER_POP` keyframes in `components/ui/motion.tsx`, bounce
+kept only for booking confirmed. The family tray has no entrance at all (it
+opens many times a day). `PopIn` starts at 90%. Mascot float, breath, glance
+and peek, and the "Open now" dot, finish after a few cycles instead of looping
+forever. Entrances 240ms, stagger 40ms, reveal 360ms. The peek's ease-in exit
+became a strong ease-out.
+
+**Words.** One severity ladder, In range / Worth a look / Ask your doctor,
+from `SEVERITY_LABEL`, replacing "Normal", "Borderline", "Needs attention",
+"High risk" and "High priority". A new `attention` (orange) tone; red is for
+"go now". Home's red "FAMILY ALERT" became "OVERDUE" or "COMING UP".
+Documented in `docs/content-system.md`.
+
+**Web shell.** `public/index.html`: viewport-fit=cover, theme colour, no tap
+highlight, no page overscroll, 16px inputs on touch screens, no text selection
+on controls.
+
+**Verified here:** typecheck, lint, 418 tests (2 new); before and after
+screenshots of sign-in, Ask, Today, Health file and Records (worst-case
+names), Choose a lab, Home and Scan. **Needs a phone:** every haptic (timing
+and strength), the entrance feel, and a new native build for expo-haptics.

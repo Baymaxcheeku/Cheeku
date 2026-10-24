@@ -35,6 +35,7 @@ import type { TodayAction } from "@/lib/home/today";
 import type { ActiveProfile } from "@/lib/profiles/context";
 import { brand } from "@/theme/tokens";
 import { Brand } from "@/components/ui/brand";
+import { feel } from "@/lib/feel";
 
 /** Deliberately time-of-day aware, like the frame. */
 function greeting(): string {
@@ -467,7 +468,10 @@ function TodayBody({
             streak={streak}
             milestone={celebrating ? (milestoneFor(streak.count)?.line ?? null) : null}
             forName={profile.isPrimary ? null : firstName(profile.name)}
-            onDone={(s) => void mark(s, "done")}
+            onDone={(s) => {
+              feel.tap();
+              void mark(s, "done");
+            }}
             onLater={(s) => void mark(s, "later")}
             onUndo={(s) => {
               setCelebrating(null);

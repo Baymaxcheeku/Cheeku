@@ -34,12 +34,20 @@ export default function ChooseLab() {
   const ranked = catalog.data ? rankPartners(catalog.data, cart.tests) : [];
   const fastest = ranked.length ? Math.min(...ranked.map((r) => r.partner.reportHours)) : 0;
 
+  const empty = cart.tests.length === 0;
+
   return (
     <View className="flex-1 bg-canvas">
       <Backdrop />
       <ScreenHeader title="Choose a lab" fallback="/labs" />
       <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: insets.bottom + 30 }} showsVerticalScrollIndicator={false}>
-        <PageTitle title={`${ranked.length} ${ranked.length === 1 ? "lab does" : "labs do"} all of it`} line="Prices include the home visit. Tap a lab to see reviews." style={{ marginTop: 6 }} />
+        {/* With nothing in the cart every lab "does all of it" for ₹0, which is
+            true and useless. The title and the list wait for a test. */}
+        <PageTitle
+          title={empty ? "Pick a test first" : `${ranked.length} ${ranked.length === 1 ? "lab does" : "labs do"} all of it`}
+          line={empty ? "Then we'll show every lab that does it, cheapest first." : "Prices include the home visit. Tap a lab to see reviews."}
+          style={{ marginTop: 6 }}
+        />
 
         {/* The cart, removable. */}
         <View style={{ flexDirection: "row", flexWrap: "wrap", alignItems: "flex-start", alignContent: "flex-start", gap: 8, marginTop: 14 }}>
@@ -53,7 +61,7 @@ export default function ChooseLab() {
           ))}
         </View>
 
-        {cart.tests.length === 0 ? (
+        {empty ? (
           <Glass strong className="mt-6 items-center rounded-[26px] p-6">
             <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>Your cart is empty</Text>
             <PillButton onPress={() => router.replace("/labs")} style={{ marginTop: 14, alignSelf: "stretch" }}>
@@ -63,7 +71,7 @@ export default function ChooseLab() {
         ) : null}
 
         <View style={{ marginTop: 18, gap: 12 }}>
-          {ranked.map(({ partner: p, quote: q }, i) => (
+          {(empty ? [] : ranked).map(({ partner: p, quote: q }, i) => (
             <Animated.View key={p.id} entering={still ? undefined : FadeInDown.delay(i * 50).duration(260)}>
               <Pressable accessibilityRole="button" onPress={() => router.push({ pathname: "/labs/partner/[id]", params: { id: p.id } })} style={({ pressed }) => [glassShadow, { borderRadius: 26, padding: 14, backgroundColor: pressed ? "#fff" : glass.fillStrong, borderWidth: i === 0 ? 2 : 1, borderColor: i === 0 ? brand[500] : glass.rim }]}>
                 <View className="flex-row items-center gap-3">

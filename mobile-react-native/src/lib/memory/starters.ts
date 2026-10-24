@@ -1,3 +1,5 @@
+import { softLower } from "@/lib/content/words";
+
 import type { MemoryContext } from "./context";
 import { loopWhen } from "./loops";
 
@@ -35,7 +37,7 @@ export function memoryStarters(c: MemoryContext): Starter[] {
   if (moved && moved.previous) {
     out.push({
       key: "trend",
-      text: `How has ${name}'s ${moved.key === "bp_systolic" ? "blood pressure" : /^[A-Z0-9]{2,}/.test(moved.name) ? moved.name : moved.name.toLowerCase()} changed?`,
+      text: `How has ${name}'s ${moved.key === "bp_systolic" ? "blood pressure" : softLower(moved.name)} changed?`,
       detail: `${fmt(moved.previous.value)} to ${fmt(moved.latest.value)}${moved.unit ? ` ${moved.unit}` : ""}`,
       icon: "trend",
     });
