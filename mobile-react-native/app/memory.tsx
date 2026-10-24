@@ -18,7 +18,7 @@ import {
   type LucideIcon,
 } from "lucide-react-native";
 import { useMemo, useState } from "react";
-import { ActivityIndicator, Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { ActivityIndicator, ScrollView, Text, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { TIER_STYLE } from "@/components/chat/tier";
@@ -33,8 +33,9 @@ import type { Fact } from "@/lib/memory/types";
 import { optimisticQueries } from "@/lib/optimistic";
 import { useFamily } from "@/lib/profiles/family";
 import { shortDate } from "@/lib/records/details";
-import { brand, ink, surface } from "@/theme/tokens";
+import { brand, ink, lilac, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
+import { Tap } from "@/components/ui/tap";
 
 /*
  * WHAT CHEEKU REMEMBERS, AND WHERE IT CAME FROM.
@@ -79,7 +80,7 @@ export default function MemoryScreen() {
     return (
       <View className="flex-1 bg-canvas">
         <ScreenHeader title="Memory" fallback="/ask" />
-        <Text style={{ padding: 24, fontFamily: font.regular, fontSize: 14, color: ink[500] }}>Nothing to show for this member.</Text>
+        <Text style={{ padding: 24, fontFamily: font.regular, fontSize: 15, color: ink[500] }}>Nothing to show for this member.</Text>
       </View>
     );
   }
@@ -97,12 +98,12 @@ export default function MemoryScreen() {
       <Backdrop />
       <ScreenHeader title="Memory" fallback="/ask" />
       <ScrollView contentContainerStyle={{ paddingHorizontal: 18, paddingBottom: insets.bottom + 40, gap: 22 }} showsVerticalScrollIndicator={false}>
-        <View style={[glassShadow, { borderRadius: 28, overflow: "hidden" }]}>
-          <Gradient from="#dcd6ff" to="#f5f3ff" angle="diagonal" glow="#ffffff" />
+        <View style={[glassShadow, { borderRadius: 32, overflow: "hidden" }]}>
+          <Gradient from={lilac.deep} to={lilac.mist} angle="diagonal" glow="#ffffff" />
           <View style={{ padding: 20, gap: 6 }}>
             <Text style={{ fontFamily: font.semibold, fontSize: 11, letterSpacing: 0.8, textTransform: "uppercase", color: brand[600] }}>What I remember about {name}</Text>
-            <Text style={{ fontFamily: font.semibold, fontSize: 26, letterSpacing: -0.7, color: ink[900] }}>{ctx.clock.label}</Text>
-            <Text style={{ fontFamily: font.regular, fontSize: 13.5, lineHeight: 19, color: ink[700] }}>
+            <Text style={{ fontFamily: font.semibold, fontSize: 24, letterSpacing: -0.7, color: ink[900] }}>{ctx.clock.label}</Text>
+            <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 19, color: ink[700] }}>
               {memoryLine(ctx)}. Everything I say about {name} is read against this.
             </Text>
             <View style={{ flexDirection: "row", gap: 8, marginTop: 8 }}>
@@ -120,7 +121,7 @@ export default function MemoryScreen() {
           <Section title="Pregnancy">
             <Card>
               <Row icon={Baby} title={ctx.clock.relative?.kind === "gestational" ? `${formatGa(ctx.clock.relative.totalDays)} today` : "Pregnancy"} detail={ctx.clock.relative?.kind === "gestational" ? `Due ${shortDate(ctx.clock.relative.edd)}, by ${ctx.clock.relative.source === "scan" ? "scan dating" : ctx.clock.relative.source === "lmp" ? "the last period" : "the doctor's date"}` : null} />
-              <Text style={{ fontFamily: font.regular, fontSize: 12.5, lineHeight: 18, color: ink[500] }}>
+              <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[500] }}>
                 {ongoing.datings.length ? `${ongoing.datings.length} scan dating${ongoing.datings.length === 1 ? "" : "s"} on file. ` : ""}Thresholds for {name} use pregnancy ranges for the right trimester.
               </Text>
               <View style={{ flexDirection: "row", gap: 8 }}>
@@ -130,21 +131,21 @@ export default function MemoryScreen() {
             </Card>
           </Section>
         ) : canCarry ? (
-          <Pressable accessibilityRole="button" onPress={() => router.push("/pregnancy")} style={[glassShadow, { flexDirection: "row", alignItems: "center", gap: 12, borderRadius: 22, backgroundColor: "#fff", padding: 14 }]}>
-            <View style={{ width: 40, height: 40, borderRadius: 13, backgroundColor: brand[50], alignItems: "center", justifyContent: "center" }}>
+          <Tap scale={0.98} accessibilityRole="button" onPress={() => router.push("/pregnancy")} style={[glassShadow, { flexDirection: "row", alignItems: "center", gap: 12, borderRadius: 24, backgroundColor: "#fff", padding: 14 }]}>
+            <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: brand[50], alignItems: "center", justifyContent: "center" }}>
               <Baby size={18} color={brand[600]} />
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={{ fontFamily: font.semibold, fontSize: 14, color: ink[900] }}>Expecting?</Text>
-              <Text style={{ fontFamily: font.regular, fontSize: 12.5, color: ink[500] }}>Track the weeks, and the baby joins the family with their history when they arrive.</Text>
+              <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>Expecting?</Text>
+              <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[500] }}>Track the weeks, and the baby joins the family with their history when they arrive.</Text>
             </View>
-          </Pressable>
+          </Tap>
         ) : null}
 
         {ctx.subject.birth ? (
           <Section title="Carried over at birth">
             <Card>
-              <Text style={{ fontFamily: font.regular, fontSize: 13.5, lineHeight: 20, color: ink[700] }}>
+              <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 20, color: ink[700] }}>
                 {[
                   ctx.subject.birth.gaAtBirthDays ? `Born at ${formatGa(ctx.subject.birth.gaAtBirthDays)}` : null,
                   ctx.subject.birth.deliveryMode ? `by ${ctx.subject.birth.deliveryMode}` : null,
@@ -156,7 +157,7 @@ export default function MemoryScreen() {
               </Text>
               {ctx.subject.birth.maternalBloodGroup ? <Row icon={HeartHandshake} title={`Mother's blood group: ${ctx.subject.birth.maternalBloodGroup}`} detail="Used when reading newborn jaundice" /> : null}
               {ctx.subject.birth.inUteroMedicines.length ? <Row icon={PillBottle} title="Mother's medicines before birth" detail={ctx.subject.birth.inUteroMedicines.join(", ")} /> : null}
-              <Text style={{ fontFamily: font.regular, fontSize: 11.5, color: ink[500] }}>Copied from the pregnancy in the mother&apos;s file when the baby was added.</Text>
+              <Text style={{ fontFamily: font.regular, fontSize: 12, color: ink[500] }}>Copied from the pregnancy in the mother&apos;s file when the baby was added.</Text>
             </Card>
           </Section>
         ) : null}
@@ -165,9 +166,9 @@ export default function MemoryScreen() {
           {flags.map((f) => {
             const tone = f.tier === "reassure" ? null : TIER_STYLE[f.tier];
             return (
-              <View key={f.title} style={{ borderRadius: 20, backgroundColor: tone ? tone.bg : surface.tint, padding: 14, gap: 4 }}>
-                <Text style={{ fontFamily: font.semibold, fontSize: 13.5, color: tone ? tone.fg : ink[900] }}>{f.title}</Text>
-                <Text style={{ fontFamily: font.regular, fontSize: 12.5, lineHeight: 18, color: ink[700] }}>{f.text}</Text>
+              <View key={f.title} style={{ borderRadius: 24, backgroundColor: tone ? tone.bg : surface.tint, padding: 14, gap: 4 }}>
+                <Text style={{ fontFamily: font.semibold, fontSize: 13, color: tone ? tone.fg : ink[900] }}>{f.title}</Text>
+                <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[700] }}>{f.text}</Text>
               </View>
             );
           })}
@@ -258,7 +259,7 @@ export default function MemoryScreen() {
           </Section>
         ) : null}
 
-        <Text style={{ fontFamily: font.regular, fontSize: 11.5, lineHeight: 17, color: ink[500], textAlign: "center", paddingHorizontal: 12 }}>
+        <Text style={{ fontFamily: font.regular, fontSize: 12, lineHeight: 17, color: ink[500], textAlign: "center", paddingHorizontal: 12 }}>
           Cheeku reads symptoms against this memory and says how urgent things look. It does not diagnose. Limits for newborns and pregnancy still need sign-off from a clinician.
         </Text>
       </ScrollView>
@@ -272,7 +273,7 @@ function Section({ title, count, children }: { title: string; count?: number; ch
   return (
     <View style={{ gap: 10 }}>
       <View style={{ flexDirection: "row", alignItems: "baseline", gap: 8 }}>
-        <Text style={{ fontFamily: font.semibold, fontSize: 18, letterSpacing: -0.3, color: ink[900] }}>{title}</Text>
+        <Text style={{ fontFamily: font.semibold, fontSize: 17, letterSpacing: -0.3, color: ink[900] }}>{title}</Text>
         {count ? <Text style={{ fontFamily: font.medium, fontSize: 13, color: ink[500] }}>{count}</Text> : null}
       </View>
       {children}
@@ -281,12 +282,12 @@ function Section({ title, count, children }: { title: string; count?: number; ch
 }
 
 function Card({ children }: { children: React.ReactNode }) {
-  return <View style={[glassShadow, { borderRadius: 22, backgroundColor: "#fff", padding: 14, gap: 12 }]}>{children}</View>;
+  return <View style={[glassShadow, { borderRadius: 24, backgroundColor: "#fff", padding: 14, gap: 12 }]}>{children}</View>;
 }
 
 function Note({ text }: { text: string }) {
   return (
-    <View style={{ flexDirection: "row", gap: 10, borderRadius: 20, backgroundColor: brand[50], padding: 14 }}>
+    <View style={{ flexDirection: "row", gap: 10, borderRadius: 24, backgroundColor: brand[50], padding: 14 }}>
       <Info size={15} color={brand[600]} style={{ marginTop: 2 }} />
       <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 13, lineHeight: 19, color: ink[700] }}>{text}</Text>
     </View>
@@ -295,7 +296,7 @@ function Note({ text }: { text: string }) {
 
 function Empty({ text }: { text: string }) {
   return (
-    <View style={{ borderRadius: 20, borderWidth: 1, borderStyle: "dashed", borderColor: surface.line, padding: 14 }}>
+    <View style={{ borderRadius: 24, borderWidth: 1, borderStyle: "dashed", borderColor: surface.line, padding: 14 }}>
       <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 19, color: ink[500] }}>{text}</Text>
     </View>
   );
@@ -304,12 +305,12 @@ function Empty({ text }: { text: string }) {
 function Row({ icon: Icon, title, detail }: { icon: LucideIcon; title: string; detail: string | null }) {
   return (
     <View style={{ flexDirection: "row", gap: 10 }}>
-      <View style={{ width: 34, height: 34, borderRadius: 11, backgroundColor: brand[50], alignItems: "center", justifyContent: "center" }}>
+      <View style={{ width: 34, height: 34, borderRadius: 12, backgroundColor: brand[50], alignItems: "center", justifyContent: "center" }}>
         <Icon size={16} color={brand[600]} />
       </View>
       <View style={{ flex: 1, gap: 2, justifyContent: "center" }}>
-        <Text style={{ fontFamily: font.semibold, fontSize: 14, color: ink[900] }}>{title}</Text>
-        {detail ? <Text style={{ fontFamily: font.regular, fontSize: 12.5, lineHeight: 17, color: ink[500] }}>{detail}</Text> : null}
+        <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{title}</Text>
+        {detail ? <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 17, color: ink[500] }}>{detail}</Text> : null}
       </View>
     </View>
   );
@@ -317,10 +318,10 @@ function Row({ icon: Icon, title, detail }: { icon: LucideIcon; title: string; d
 
 function Pill({ label, icon: Icon, onPress, dark }: { label: string; icon?: LucideIcon; onPress: () => void; dark?: boolean }) {
   return (
-    <Pressable accessibilityRole="button" onPress={onPress} style={{ flexDirection: "row", alignItems: "center", gap: 6, height: 36, paddingHorizontal: 13, borderRadius: 999, backgroundColor: dark ? ink[900] : surface.tint }}>
+    <Tap accessibilityRole="button" onPress={onPress} style={{ flexDirection: "row", alignItems: "center", gap: 6, height: 36, paddingHorizontal: 13, borderRadius: 999, backgroundColor: dark ? brand[600] : surface.tint }}>
       {Icon ? <Icon size={14} color={dark ? "#fff" : ink[900]} /> : null}
-      <Text style={{ fontFamily: font.semibold, fontSize: 12.5, color: dark ? "#fff" : ink[900] }}>{label}</Text>
-    </Pressable>
+      <Text style={{ fontFamily: font.semibold, fontSize: 13, color: dark ? "#fff" : ink[900] }}>{label}</Text>
+    </Tap>
   );
 }
 
@@ -336,12 +337,12 @@ function LedgerRow({ entry, first }: { entry: LedgerEntry; first: boolean }) {
     <View style={{ gap: 12 }}>
       <Divider show={!first} />
       <View style={{ flexDirection: "row", gap: 10, opacity: ended ? 0.55 : 1 }}>
-        <View style={{ width: 34, height: 34, borderRadius: 11, backgroundColor: brand[50], alignItems: "center", justifyContent: "center" }}>
+        <View style={{ width: 34, height: 34, borderRadius: 12, backgroundColor: brand[50], alignItems: "center", justifyContent: "center" }}>
           <PillBottle size={16} color={brand[600]} />
         </View>
         <View style={{ flex: 1, gap: 2 }}>
-          <Text style={{ fontFamily: font.semibold, fontSize: 14, color: ink[900] }}>{entry.name}</Text>
-          <Text style={{ fontFamily: font.regular, fontSize: 12.5, lineHeight: 17, color: ink[500] }}>
+          <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{entry.name}</Text>
+          <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 17, color: ink[500] }}>
             {[entry.ingredients.map((i) => i.name).join(" + "), entry.prescribedBy, ended ? `Ended ${shortDate(entry.end)}` : entry.end ? `Until ${shortDate(entry.end)}` : null].filter(Boolean).join(" · ")}
           </Text>
           {CLASS_LABEL[entry.regulatoryClass] ? (
@@ -361,12 +362,12 @@ function LoopRow({ loop, first, onAsk, onSet }: { loop: LoopView; first: boolean
     <View style={{ gap: 12 }}>
       <Divider show={!first} />
       <View style={{ flexDirection: "row", gap: 10 }}>
-        <View style={{ width: 34, height: 34, borderRadius: 11, backgroundColor: brand[50], alignItems: "center", justifyContent: "center" }}>
+        <View style={{ width: 34, height: 34, borderRadius: 12, backgroundColor: brand[50], alignItems: "center", justifyContent: "center" }}>
           <Icon size={16} color={brand[600]} />
         </View>
         <View style={{ flex: 1, gap: 2 }}>
-          <Text style={{ fontFamily: font.semibold, fontSize: 14, color: ink[900] }}>{loop.title}</Text>
-          <Text style={{ fontFamily: font.regular, fontSize: 12.5, color: loop.overdue ? brand[700] : ink[500] }}>
+          <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{loop.title}</Text>
+          <Text style={{ fontFamily: font.regular, fontSize: 13, color: loop.overdue ? brand[700] : ink[500] }}>
             {loopWhen(loop)}
             {loop.detail ? ` · ${loop.detail}` : ""}
           </Text>
@@ -390,7 +391,7 @@ function FactRow({ fact, first, onCorrect, onForget }: { fact: Fact; first: bool
       <Divider show={!first} />
       <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
         <View style={{ flex: 1, gap: 2 }}>
-          <Text style={{ fontFamily: font.semibold, fontSize: 14, color: ink[900] }}>
+          <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>
             {fact.label}: {fact.valueText && fact.key.startsWith("bp_") ? fact.valueText : `${fact.value ?? fact.valueText}${fact.unit ? ` ${fact.unit}` : ""}`}
           </Text>
           <Text style={{ fontFamily: font.regular, fontSize: 12, color: ink[500] }}>
@@ -401,13 +402,13 @@ function FactRow({ fact, first, onCorrect, onForget }: { fact: Fact; first: bool
         {!editing ? (
           <>
             {fact.value !== null && !fact.key.startsWith("bp_") ? (
-              <Pressable accessibilityRole="button" accessibilityLabel={`Correct ${fact.label}`} onPress={() => setEditing(true)} hitSlop={6}>
-                <Text style={{ fontFamily: font.semibold, fontSize: 12.5, color: brand[600] }}>Correct</Text>
-              </Pressable>
+              <Tap accessibilityRole="button" accessibilityLabel={`Correct ${fact.label}`} onPress={() => setEditing(true)} hitSlop={6}>
+                <Text style={{ fontFamily: font.semibold, fontSize: 13, color: brand[600] }}>Correct</Text>
+              </Tap>
             ) : null}
-            <Pressable accessibilityRole="button" accessibilityLabel={`Forget ${fact.label}`} onPress={onForget} hitSlop={6}>
+            <Tap accessibilityRole="button" accessibilityLabel={`Forget ${fact.label}`} onPress={onForget} hitSlop={6}>
               <Trash2 size={16} color={ink[300]} />
-            </Pressable>
+            </Tap>
           </>
         ) : null}
       </View>
@@ -418,10 +419,9 @@ function FactRow({ fact, first, onCorrect, onForget }: { fact: Fact; first: bool
             onChangeText={setValue}
             keyboardType="decimal-pad"
             accessibilityLabel={`New value for ${fact.label}`}
-            style={{ flex: 1, height: 44, borderRadius: 14, borderWidth: 1, borderColor: brand[300], paddingHorizontal: 12, fontFamily: font.regular, fontSize: 15, color: ink[900] }}
+            style={{ flex: 1, height: 44, borderRadius: 16, borderWidth: 1, borderColor: brand[300], paddingHorizontal: 12, fontFamily: font.regular, fontSize: 15, color: ink[900] }}
           />
           <PillButton
-            tone="dark"
             disabled={!Number.isFinite(n) || value.trim() === ""}
             onPress={() => {
               setEditing(false);

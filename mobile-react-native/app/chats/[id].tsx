@@ -49,7 +49,7 @@ export default function Sitting() {
             if (m.assessment) return <ProductAssessmentCard key={item.key} assessment={m.assessment} />;
             return <AssistantTurn key={item.key} message={m} name={name} onOpenRecord={(doc) => router.push(`/records/${doc}`)} onOpenMemory={() => router.push("/memory")} onBook={(mode) => router.push({ pathname: "/book/consult", params: { mode } })} />;
           })}
-          <PillButton tone="dark" icon={<MessageCircle size={17} color="#fff" />} onPress={() => router.replace("/ask")} style={{ marginTop: 8 }}>
+          <PillButton icon={<MessageCircle size={17} color="#fff" />} onPress={() => router.replace("/ask")} style={{ marginTop: 8 }}>
             {`Carry on with ${name}`}
           </PillButton>
         </ScrollView>

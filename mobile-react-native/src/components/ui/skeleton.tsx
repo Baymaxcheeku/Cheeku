@@ -81,7 +81,7 @@ export function CardListSkeleton({ count = 4 }: { count?: number }) {
   return (
     <Animated.View accessibilityLabel="Loading" style={[{ gap: 10, marginTop: 14 }, pulse]}>
       {Array.from({ length: count }, (_, i) => (
-        <Card key={i} style={{ padding: 10, borderRadius: 26 }}>
+        <Card key={i} style={{ padding: 10, borderRadius: 24 }}>
           <View style={{ flexDirection: "row", gap: 14, alignItems: "center" }}>
             <Bone w={68} h={68} r={20} />
             <View style={{ flex: 1, gap: 8 }}>

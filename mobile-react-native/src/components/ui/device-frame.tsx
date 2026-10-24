@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { Platform, useWindowDimensions, View } from "react-native";
 import { SafeAreaInsetsContext } from "react-native-safe-area-context";
 
-import { surface } from "@/theme/tokens";
+import { ink, surface } from "@/theme/tokens";
 
 /*
  * An iPhone 16 shell, for the web preview only.
@@ -128,7 +128,7 @@ export function DeviceFrame({ children }: { children: React.ReactNode }) {
         flex: 1,
         alignItems: "center",
         justifyContent: "center",
-        backgroundColor: "#eceaf6",
+        backgroundColor: surface.line,
       }}
     >
       {/* The bezel. A hair larger than the screen on every side. */}
@@ -137,9 +137,9 @@ export function DeviceFrame({ children }: { children: React.ReactNode }) {
           width: SCREEN.width + 12,
           height: SCREEN.height + 12,
           borderRadius: SCREEN.radius + 6,
-          backgroundColor: "#0f1030",
+          backgroundColor: ink[900],
           padding: 6,
-          shadowColor: "#0f1030",
+          shadowColor: ink[900],
           shadowOpacity: 0.28,
           shadowRadius: 48,
           shadowOffset: { width: 0, height: 24 },
@@ -184,7 +184,7 @@ export function DeviceFrame({ children }: { children: React.ReactNode }) {
               width: 140,
               height: 5,
               borderRadius: 999,
-              backgroundColor: "#0f1030",
+              backgroundColor: ink[900],
               opacity: 0.35,
             }}
           />

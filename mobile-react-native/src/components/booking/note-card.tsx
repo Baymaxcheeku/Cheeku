@@ -20,11 +20,11 @@ export function NoteCard({ intake, compact }: { intake: Intake; compact?: boolea
   const shown = compact ? rows.filter(([k]) => k === "About" || k === "Since" || k === "Reports") : rows;
 
   return (
-    <View className="overflow-hidden rounded-[24px]" style={glassShadow}>
-      <Gradient from="#ffffff" to="#f3f0ff" angle="vertical" />
+    <View className="overflow-hidden rounded-xl" style={glassShadow}>
+      <Gradient from="#ffffff" to={brand[50]} angle="vertical" />
       <View className="p-4">
         <View className="flex-row items-center gap-2">
-          <View className="h-8 w-8 items-center justify-center rounded-[10px]" style={{ backgroundColor: brand[50] }}>
+          <View className="h-8 w-8 items-center justify-center rounded-md" style={{ backgroundColor: brand[50] }}>
             <ClipboardList size={16} color={brand[600]} />
           </View>
           <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>Pre-consultation note</Text>
@@ -33,7 +33,7 @@ export function NoteCard({ intake, compact }: { intake: Intake; compact?: boolea
           {shown.map(([k, v]) => (
             <View key={k} className="flex-row gap-3">
               <Text style={{ width: 118, fontFamily: font.regular, fontSize: 13, color: ink[500] }}>{k}</Text>
-              <Text style={{ flex: 1, fontFamily: font.medium, fontSize: 13.5, color: ink[900] }}>{v}</Text>
+              <Text style={{ flex: 1, fontFamily: font.medium, fontSize: 13, color: ink[900] }}>{v}</Text>
             </View>
           ))}
         </View>

@@ -9,7 +9,7 @@ import { Glass, Gradient, glass, glassShadow } from "@/components/ui/glass";
 import { ScreenHeader } from "@/components/ui/screen";
 import { quote } from "@/lib/labs/logic";
 import { useCatalog, useLabCart, useRatings } from "@/lib/labs/queries";
-import { brand, ink } from "@/theme/tokens";
+import { brand, hue, ink } from "@/theme/tokens";
 import { font } from "@/theme/type";
 
 /*
@@ -56,9 +56,9 @@ export default function LabTestDetail() {
     <View className="flex-1 bg-canvas">
       <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + 110 }} showsVerticalScrollIndicator={false}>
         {/* Hero. */}
-        <View style={{ height: insets.top + 260, marginHorizontal: 10, marginTop: 6, paddingTop: insets.top, borderRadius: 34, overflow: "hidden", alignItems: "center", justifyContent: "center" }}>
+        <View style={{ height: insets.top + 260, marginHorizontal: 10, marginTop: 6, paddingTop: insets.top, borderRadius: 32, overflow: "hidden", alignItems: "center", justifyContent: "center" }}>
           <Gradient from={art.from} to={art.to} glow="#ffffff" />
-          <View style={{ width: 150, height: 150, borderRadius: 75, backgroundColor: "rgba(255,255,255,0.75)", alignItems: "center", justifyContent: "center" }}>
+          <View style={{ width: 150, height: 150, borderRadius: 999, backgroundColor: "rgba(255,255,255,0.75)", alignItems: "center", justifyContent: "center" }}>
             <art.Icon size={70} color={art.fg} strokeWidth={1.5} />
           </View>
           <View style={{ position: "absolute", top: 0, left: 0, right: 0 }}>
@@ -67,7 +67,7 @@ export default function LabTestDetail() {
           {test.kind === "package" ? (
             <View style={{ position: "absolute", bottom: 16, left: 16 }}>
               <Glass strong className="rounded-pill px-3 py-1.5">
-                <Text style={{ fontFamily: font.semibold, fontSize: 12.5, color: ink[900] }}>Package · {test.includes.length} tests</Text>
+                <Text style={{ fontFamily: font.semibold, fontSize: 13, color: ink[900] }}>Package · {test.includes.length} tests</Text>
               </Glass>
             </View>
           ) : null}
@@ -77,18 +77,18 @@ export default function LabTestDetail() {
           <View className="flex-row items-start justify-between gap-3">
             <View style={{ flex: 1 }}>
               <Text style={{ fontFamily: font.semibold, fontSize: 24, lineHeight: 29, letterSpacing: -0.6, color: ink[900] }}>{test.name}</Text>
-              <Text style={{ fontFamily: font.regular, fontSize: 14, color: ink[500], marginTop: 3 }}>{test.parameters} {test.parameters === 1 ? "check" : "checks"} · home collection</Text>
+              <Text style={{ fontFamily: font.regular, fontSize: 15, color: ink[500], marginTop: 3 }}>{test.parameters} {test.parameters === 1 ? "check" : "checks"} · home collection</Text>
             </View>
             {cheapest && cheapest.mrp > cheapest.price ? (
-              <View style={{ width: 66, height: 66, borderRadius: 33, backgroundColor: "#e4ff7a", alignItems: "center", justifyContent: "center" }}>
-                <Text style={{ fontFamily: font.regular, fontSize: 10.5, color: "#2f3d00" }}>Up to</Text>
-                <Text style={{ fontFamily: font.bold, fontSize: 16, color: "#2f3d00" }}>{Math.round((1 - cheapest.price / cheapest.mrp) * 100)}%</Text>
-                <Text style={{ fontFamily: font.regular, fontSize: 10.5, color: "#2f3d00" }}>off</Text>
+              <View style={{ width: 66, height: 66, borderRadius: 999, backgroundColor: hue.lime.bg, alignItems: "center", justifyContent: "center" }}>
+                <Text style={{ fontFamily: font.regular, fontSize: 11, color: hue.lime.fg }}>Up to</Text>
+                <Text style={{ fontFamily: font.bold, fontSize: 17, color: hue.lime.fg }}>{Math.round((1 - cheapest.price / cheapest.mrp) * 100)}%</Text>
+                <Text style={{ fontFamily: font.regular, fontSize: 11, color: hue.lime.fg }}>off</Text>
               </View>
             ) : null}
           </View>
           {cheapest ? (
-            <Text style={{ fontFamily: font.semibold, fontSize: 26, color: ink[900], marginTop: 10 }}>
+            <Text style={{ fontFamily: font.semibold, fontSize: 24, color: ink[900], marginTop: 10 }}>
               {rupees(cheapest.price)}{" "}
               <Text style={{ fontFamily: font.regular, fontSize: 15, color: ink[300], textDecorationLine: "line-through" }}>{rupees(cheapest.mrp)}</Text>
             </Text>
@@ -107,11 +107,11 @@ export default function LabTestDetail() {
               <View style={{ gap: 8 }}>
                 {inside.map((t) =>
                   t ? (
-                    <Pressable key={t.id} onPress={() => router.push({ pathname: "/labs/test/[id]", params: { id: t.id } })} style={{ flexDirection: "row", alignItems: "center", gap: 10, paddingVertical: 4 }}>
+                    <Tap key={t.id} onPress={() => router.push({ pathname: "/labs/test/[id]", params: { id: t.id } })} style={{ flexDirection: "row", alignItems: "center", gap: 10, paddingVertical: 4 }}>
                       <Check size={15} color={brand[600]} strokeWidth={2.6} />
-                      <Text style={{ flex: 1, fontFamily: font.medium, fontSize: 14.5, color: ink[900] }}>{t.name}</Text>
+                      <Text style={{ flex: 1, fontFamily: font.medium, fontSize: 15, color: ink[900] }}>{t.name}</Text>
                       <ChevronRight size={15} color={ink[300]} />
-                    </Pressable>
+                    </Tap>
                   ) : null,
                 )}
               </View>
@@ -121,7 +121,7 @@ export default function LabTestDetail() {
           <Heading text="About this test" />
           <Text style={{ fontFamily: font.regular, fontSize: 15, lineHeight: 22, color: ink[700] }}>{test.about}</Text>
           {test.fastingHours ? (
-            <Text style={{ fontFamily: font.regular, fontSize: 14, lineHeight: 20, color: ink[500], marginTop: 8 }}>
+            <Text style={{ fontFamily: font.regular, fontSize: 15, lineHeight: 20, color: ink[500], marginTop: 8 }}>
               Nothing to eat or drink except water for {test.fastingHours} hours before the collection. Morning slots make that easy.
             </Text>
           ) : null}
@@ -129,21 +129,21 @@ export default function LabTestDetail() {
           <Heading text={`Labs that do it (${labs.length})`} />
           <View style={{ gap: 10 }}>
             {labs.map(({ p, o }, i) => (
-              <Pressable key={p.id} accessibilityRole="button" onPress={() => router.push({ pathname: "/labs/partner/[id]", params: { id: p.id } })} style={({ pressed }) => [glassShadow, { flexDirection: "row", alignItems: "center", gap: 12, padding: 12, borderRadius: 22, backgroundColor: pressed ? "#fff" : glass.fillStrong, borderWidth: 1, borderColor: glass.rim }]}>
+              <Pressable key={p.id} accessibilityRole="button" onPress={() => router.push({ pathname: "/labs/partner/[id]", params: { id: p.id } })} style={({ pressed }) => [glassShadow, { flexDirection: "row", alignItems: "center", gap: 12, padding: 12, borderRadius: 24, backgroundColor: pressed ? "#fff" : glass.fillStrong, borderWidth: 1, borderColor: glass.rim }]}>
                 <PartnerBadge partner={p} size={46} />
                 <View style={{ flex: 1, minWidth: 0 }}>
                   <View className="flex-row items-center gap-2">
-                    <Text numberOfLines={1} style={{ flexShrink: 1, fontFamily: font.semibold, fontSize: 14.5, color: ink[900] }}>{p.name}</Text>
-                    {i === 0 ? <View style={{ paddingHorizontal: 7, height: 20, borderRadius: 999, justifyContent: "center", backgroundColor: "#e4ff7a" }}><Text style={{ fontFamily: font.semibold, fontSize: 10.5, color: "#2f3d00" }}>Best price</Text></View> : null}
+                    <Text numberOfLines={1} style={{ flexShrink: 1, fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{p.name}</Text>
+                    {i === 0 ? <View style={{ paddingHorizontal: 7, height: 20, borderRadius: 999, justifyContent: "center", backgroundColor: hue.lime.bg }}><Text style={{ fontFamily: font.semibold, fontSize: 11, color: hue.lime.fg }}>Best price</Text></View> : null}
                   </View>
                   <View style={{ marginTop: 3, flexDirection: "row", alignItems: "center", gap: 8 }}>
                     <RatingLine rating={ratings.data?.get(p.id)} />
-                    <Text style={{ fontFamily: font.regular, fontSize: 12.5, color: ink[500] }}>· {p.reportHours}h</Text>
+                    <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[500] }}>· {p.reportHours}h</Text>
                   </View>
                 </View>
                 <View style={{ alignItems: "flex-end" }}>
                   <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{rupees(o.price)}</Text>
-                  <Text style={{ fontFamily: font.regular, fontSize: 11.5, color: ink[300] }}>
+                  <Text style={{ fontFamily: font.regular, fontSize: 12, color: ink[300] }}>
                     {quote(catalog.data.offers, p, [test.id]).fee ? `+ ${rupees(p.collectionFee)} visit` : "free visit"}
                   </Text>
                 </View>
@@ -168,7 +168,7 @@ export default function LabTestDetail() {
           style={[glassShadow, { flex: 1, height: 58, borderRadius: 999, backgroundColor: brand[600], flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8 }]} scale={0.98}
         >
           {added ? <Check size={18} color="#fff" strokeWidth={2.6} /> : <Plus size={18} color="#fff" strokeWidth={2.6} />}
-          <Text style={{ fontFamily: font.semibold, fontSize: 16, color: "#fff" }}>{added ? `In cart · Choose lab` : "Add to cart"}</Text>
+          <Text style={{ fontFamily: font.semibold, fontSize: 17, color: "#fff" }}>{added ? `In cart · Choose lab` : "Add to cart"}</Text>
         </Tap>
       </View>
     </View>
@@ -177,10 +177,10 @@ export default function LabTestDetail() {
 
 function Fact({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
-    <Glass strong className="flex-1 rounded-[18px] p-3">
+    <Glass strong className="flex-1 rounded-lg p-3">
       {icon}
-      <Text style={{ fontFamily: font.regular, fontSize: 11.5, color: ink[500], marginTop: 6 }}>{label}</Text>
-      <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 13.5, color: ink[900], marginTop: 1 }}>{value}</Text>
+      <Text style={{ fontFamily: font.regular, fontSize: 12, color: ink[500], marginTop: 6 }}>{label}</Text>
+      <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 13, color: ink[900], marginTop: 1 }}>{value}</Text>
     </Glass>
   );
 }
@@ -189,7 +189,7 @@ function Heading({ text, icon }: { text: string; icon?: React.ReactNode }) {
   return (
     <View className="flex-row items-center gap-2" style={{ marginTop: 26, marginBottom: 12 }}>
       {icon}
-      <Text style={{ fontFamily: font.semibold, fontSize: 18, letterSpacing: -0.3, color: ink[900] }}>{text}</Text>
+      <Text style={{ fontFamily: font.semibold, fontSize: 17, letterSpacing: -0.3, color: ink[900] }}>{text}</Text>
     </View>
   );
 }

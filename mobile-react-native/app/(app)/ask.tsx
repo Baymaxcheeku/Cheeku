@@ -48,6 +48,7 @@ import { shortDate } from "@/lib/records/details";
 import { detect, type SafetyResult } from "@/lib/safety/detect";
 import { brand, ink, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
+import { Tap } from "@/components/ui/tap";
 
 /*
  * ASK CHEEKU: ONE CONTINUOUS, REMEMBERED THREAD PER FAMILY MEMBER.
@@ -321,7 +322,7 @@ export default function Ask() {
   if (!member) {
     return (
       <View className="flex-1 items-center justify-center bg-canvas px-10">
-        <Text className="text-center text-[15px] text-ink-500">Set up a profile before asking.</Text>
+        <Text className="text-center text-base text-ink-500">Set up a profile before asking.</Text>
       </View>
     );
   }
@@ -345,10 +346,10 @@ export default function Ask() {
             </View>
           </Glass>
           <View className="flex-1">
-            <Text style={{ fontFamily: font.semibold, fontSize: 18, color: ink[900] }}>
+            <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>
               <Brand />
             </Text>
-            <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 12.5, color: ink[500] }}>
+            <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 13, color: ink[500] }}>
               {name}&apos;s health memory
             </Text>
           </View>
@@ -387,13 +388,13 @@ export default function Ask() {
             <View className="flex-1 justify-center py-4">
               <View className="items-center">
                 <MascotFigure size={132} moment="present" move="float" hop />
-                <Text style={{ fontFamily: font.semibold, fontSize: 25, letterSpacing: -0.7, color: ink[900], marginTop: 6, textAlign: "center" }}>
+                <Text style={{ fontFamily: font.semibold, fontSize: 24, letterSpacing: -0.7, color: ink[900], marginTop: 6, textAlign: "center" }}>
                   Hi, I&apos;m{" "}
                   <Text style={{ fontFamily: font.italic, color: brand[600] }}>
                     <Brand />
                   </Text>
                 </Text>
-                <Text style={{ fontFamily: font.regular, fontSize: 14.5, lineHeight: 21, color: ink[500], marginTop: 6, textAlign: "center", maxWidth: 320 }}>
+                <Text style={{ fontFamily: font.regular, fontSize: 15, lineHeight: 21, color: ink[500], marginTop: 6, textAlign: "center", maxWidth: 320 }}>
                   I keep {name}&apos;s health memory: every report, every reading you tell me, everything we talk about. Tell me what&apos;s going on and I&apos;ll read it against {name}&apos;s history.
                 </Text>
               </View>
@@ -402,18 +403,18 @@ export default function Ask() {
                 {starters.map((s) => {
                   const Icon = STARTER_ICON[s.icon] ?? FileText;
                   return (
-                    <Pressable
+                    <Tap scale={0.98}
                       key={s.key}
                       accessibilityRole="button"
                       onPress={() => void send(s.text)}
-                      className="flex-row items-center gap-3 rounded-[22px] px-3 py-3"
+                      className="flex-row items-center gap-3 rounded-xl px-3 py-3"
                       style={[glassShadow, { backgroundColor: glass.fillStrong, borderWidth: 1, borderColor: glass.rim }]}
                     >
-                      <View className="h-10 w-10 items-center justify-center rounded-[13px] bg-brand-50">
+                      <View className="h-10 w-10 items-center justify-center rounded-md bg-brand-50">
                         <Icon size={17} color={brand[600]} />
                       </View>
                       <View style={{ flex: 1 }}>
-                        <Text style={{ fontFamily: font.medium, fontSize: 14, lineHeight: 19, color: ink[900] }}>{s.text}</Text>
+                        <Text style={{ fontFamily: font.medium, fontSize: 15, lineHeight: 19, color: ink[900] }}>{s.text}</Text>
                         {s.detail ? (
                           <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 12, color: ink[500] }}>
                             {s.detail}
@@ -421,27 +422,27 @@ export default function Ask() {
                         ) : null}
                       </View>
                       <ArrowUpRight size={15} color={ink[300]} />
-                    </Pressable>
+                    </Tap>
                   );
                 })}
-                <Pressable
+                <Tap scale={0.98}
                   accessibilityRole="button"
                   onPress={() => input.current?.focus()}
-                  className="flex-row items-center gap-3 rounded-[22px] px-3 py-3"
+                  className="flex-row items-center gap-3 rounded-xl px-3 py-3"
                   style={{ borderWidth: 1, borderStyle: "dashed", borderColor: brand[200] }}
                 >
-                  <View className="h-10 w-10 items-center justify-center rounded-[13px] bg-white">
+                  <View className="h-10 w-10 items-center justify-center rounded-md bg-white">
                     <Stethoscope size={17} color={brand[600]} />
                   </View>
-                  <Text style={{ flex: 1, fontFamily: font.medium, fontSize: 14, color: ink[900] }}>Something&apos;s not right with {name}</Text>
-                </Pressable>
+                  <Text style={{ flex: 1, fontFamily: font.medium, fontSize: 15, color: ink[900] }}>Something&apos;s not right with {name}</Text>
+                </Tap>
               </View>
 
-              <View className="mt-4 gap-2.5 rounded-[22px] p-4" style={{ backgroundColor: "rgba(241,240,254,0.85)" }}>
+              <View className="mt-4 gap-2.5 rounded-xl p-4" style={{ backgroundColor: "rgba(241,240,254,0.85)" }}>
                 <How icon={ReadsIcon} text={`Reads what you describe against ${name}'s own reports, readings and medicines`} />
                 <How icon={ShieldCheck} text="Tells you how urgent it looks: fits the pattern, keep an eye on it, call today, or go now" />
                 <How icon={Stethoscope} text="Writes out exactly what to tell the doctor, with the numbers" />
-                <Text style={{ fontFamily: font.regular, fontSize: 11.5, lineHeight: 16, color: ink[500], marginTop: 2 }}>
+                <Text style={{ fontFamily: font.regular, fontSize: 12, lineHeight: 16, color: ink[500], marginTop: 2 }}>
                   I don&apos;t diagnose. The doctor examines and decides; I make sure they hear the whole story.
                 </Text>
               </View>
@@ -449,7 +450,7 @@ export default function Ask() {
           ) : (
             <View style={{ gap: 14, paddingTop: 4 }}>
               {thread.hasNextPage ? (
-                <Pressable
+                <Tap
                   accessibilityRole="button"
                   onPress={() => {
                     stickToEnd.current = false;
@@ -457,10 +458,10 @@ export default function Ask() {
                   }}
                   style={{ alignSelf: "center", paddingHorizontal: 14, paddingVertical: 8, borderRadius: 999, backgroundColor: surface.tint }}
                 >
-                  <Text style={{ fontFamily: font.medium, fontSize: 12.5, color: ink[700] }}>{thread.isFetchingNextPage ? "Loading…" : "Show earlier"}</Text>
-                </Pressable>
+                  <Text style={{ fontFamily: font.medium, fontSize: 13, color: ink[700] }}>{thread.isFetchingNextPage ? "Loading…" : "Show earlier"}</Text>
+                </Tap>
               ) : messages.length ? (
-                <Text style={{ alignSelf: "center", fontFamily: font.regular, fontSize: 11.5, color: ink[300] }}>
+                <Text style={{ alignSelf: "center", fontFamily: font.regular, fontSize: 12, color: ink[300] }}>
                   Everything you&apos;ve told me about {name} starts here
                 </Text>
               ) : null}
@@ -505,10 +506,10 @@ export default function Ask() {
                   {pendingText !== "Checking a product…" ? <UserBubble message={{ id: "pending", conversationId: "", role: "user", content: pendingText, createdAt: "", tier: null, memory: null, citations: [], safety: "clear", attachment: null, assessment: null }} /> : null}
                   <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
                     <MascotBust size={28} mood="thinking" motion="idle" />
-                    <Glass strong className="rounded-[20px] px-4 py-3.5" style={{ borderTopLeftRadius: 6 }}>
+                    <Glass strong className="rounded-xl px-4 py-3.5" style={{ borderTopLeftRadius: 6 }}>
                       <TypingDots color={brand[400]} />
                     </Glass>
-                    <Text style={{ fontFamily: font.regular, fontSize: 11.5, color: ink[500] }}>Reading {name}&apos;s history…</Text>
+                    <Text style={{ fontFamily: font.regular, fontSize: 12, color: ink[500] }}>Reading {name}&apos;s history…</Text>
                   </View>
                 </>
               ) : null}
@@ -516,7 +517,7 @@ export default function Ask() {
           )}
 
           {error ? (
-            <Text accessibilityRole="alert" className="mt-3 text-[13px] font-medium text-danger-text">
+            <Text accessibilityRole="alert" className="mt-3 text-sm font-medium text-danger-text">
               {error}
             </Text>
           ) : null}
@@ -526,7 +527,7 @@ export default function Ask() {
           {switched && switched.toName === name ? (
             <View style={{ flexDirection: "row", alignItems: "center", gap: 8, paddingLeft: 12, paddingRight: 4, paddingVertical: 4, borderRadius: 999, backgroundColor: ink[900], alignSelf: "flex-start" }}>
               <ArrowLeftRight size={13} color="#fff" />
-              <Text numberOfLines={1} style={{ maxWidth: 200, fontFamily: font.medium, fontSize: 12.5, color: "#fff" }}>
+              <Text numberOfLines={1} style={{ maxWidth: 200, fontFamily: font.medium, fontSize: 13, color: "#fff" }}>
                 Now in {switched.toName}&apos;s memory
               </Text>
               <Pressable
@@ -546,31 +547,31 @@ export default function Ask() {
           {about ? (
             <View style={{ flexDirection: "row", alignItems: "center", gap: 8, alignSelf: "flex-start", paddingLeft: 12, paddingRight: 6, paddingVertical: 6, borderRadius: 999, backgroundColor: brand[50] }}>
               <FileText size={13} color={brand[600]} />
-              <Text numberOfLines={1} style={{ maxWidth: 240, fontFamily: font.medium, fontSize: 12.5, color: brand[700] }}>
+              <Text numberOfLines={1} style={{ maxWidth: 240, fontFamily: font.medium, fontSize: 13, color: brand[700] }}>
                 About {about.title}
                 {about.date ? ` · ${shortDate(about.date)}` : ""}
               </Text>
-              <Pressable accessibilityRole="button" accessibilityLabel="Stop asking about this record" onPress={() => setAboutId(null)} hitSlop={8}>
+              <Tap accessibilityRole="button" accessibilityLabel="Stop asking about this record" onPress={() => setAboutId(null)} hitSlop={8}>
                 <X size={14} color={brand[600]} />
-              </Pressable>
+              </Tap>
             </View>
           ) : null}
           {quotaLeft !== null && quotaLeft > 0 && quotaLeft <= FREE_CHAT_SOFT_LINE ? (
-            <Pressable
+            <Tap
               accessibilityRole="button"
               accessibilityLabel={`${quotaLeft} free ${quotaLeft === 1 ? "chat" : "chats"} left today. See plans`}
               onPress={() => setPaywallFor("")}
               hitSlop={6}
               style={{ alignSelf: "center", paddingHorizontal: 12, paddingVertical: 4 }}
             >
-              <Text style={{ fontFamily: font.medium, fontSize: 12.5, color: ink[500] }}>
+              <Text style={{ fontFamily: font.medium, fontSize: 13, color: ink[500] }}>
                 {quotaLeft} free {quotaLeft === 1 ? "chat" : "chats"} left today ·{" "}
                 <Text style={{ fontFamily: font.semibold, color: brand[600] }}>Unlimited with a plan</Text>
               </Text>
-            </Pressable>
+            </Tap>
           ) : null}
           <View
-            className="flex-row items-end gap-1.5 rounded-[26px] p-1.5 pl-4"
+            className="flex-row items-end gap-1.5 rounded-xl p-1.5 pl-4"
             style={[glassShadow, { backgroundColor: glass.fillStrong, borderWidth: focused ? 1.5 : 1, borderColor: focused ? brand[300] : glass.rim }]}
           >
             <TextInput
@@ -586,20 +587,20 @@ export default function Ask() {
               className="flex-1 py-2"
               style={{ maxHeight: 120, fontSize: 15, color: ink[900], fontFamily: "Inter_400Regular" }}
             />
-            <Pressable accessibilityRole="button" accessibilityLabel="Ask about a product" onPress={() => setPickerOpen(true)} className="h-10 w-10 items-center justify-center rounded-pill">
+            <Tap scale={0.95} accessibilityRole="button" accessibilityLabel="Ask about a product" onPress={() => setPickerOpen(true)} className="h-10 w-10 items-center justify-center rounded-pill">
               <Camera size={19} color={brand[600]} />
-            </Pressable>
-            <Pressable
+            </Tap>
+            <Tap scale={0.95}
               accessibilityRole="button"
               accessibilityLabel="Send"
               accessibilityState={{ disabled: Boolean(pendingText) || !draft.trim() }}
               disabled={Boolean(pendingText) || !draft.trim()}
               onPress={() => void send(draft)}
               className="h-11 w-11 items-center justify-center rounded-pill"
-              style={{ backgroundColor: ink[900], opacity: pendingText || !draft.trim() ? 0.35 : 1 }}
+              style={{ backgroundColor: brand[600], opacity: pendingText || !draft.trim() ? 0.35 : 1 }}
             >
               <ArrowUp size={19} color="#ffffff" />
-            </Pressable>
+            </Tap>
           </View>
         </View>
       </View>
@@ -628,16 +629,16 @@ export default function Ask() {
 
 function MemoryChip({ label, strong, onPress }: { label: string; strong?: boolean; onPress?: () => void }) {
   return (
-    <Pressable
+    <Tap
       accessibilityRole={onPress ? "button" : "text"}
       disabled={!onPress}
       onPress={onPress}
-      style={[glassShadow, { height: 32, justifyContent: "center", paddingHorizontal: 12, borderRadius: 999, backgroundColor: strong ? ink[900] : glass.fillStrong, borderWidth: strong ? 0 : 1, borderColor: glass.rim }]}
+      style={[glassShadow, { height: 32, justifyContent: "center", paddingHorizontal: 12, borderRadius: 999, backgroundColor: strong ? brand[600] : glass.fillStrong, borderWidth: strong ? 0 : 1, borderColor: glass.rim }]}
     >
       <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 12, color: strong ? "#fff" : ink[700] }}>
         {label}
       </Text>
-    </Pressable>
+    </Tap>
   );
 }
 
@@ -645,7 +646,7 @@ function How({ icon: Icon, text }: { icon: AppIcon; text: string }) {
   return (
     <View style={{ flexDirection: "row", gap: 10, alignItems: "flex-start" }}>
       <Icon size={15} color={brand[600]} style={{ marginTop: 1 }} />
-      <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 12.5, lineHeight: 18, color: ink[700] }}>{text}</Text>
+      <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[700] }}>{text}</Text>
     </View>
   );
 }

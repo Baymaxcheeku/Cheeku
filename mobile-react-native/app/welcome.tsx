@@ -1,6 +1,6 @@
 import { useRouter } from "expo-router";
 import { useMemo, useRef, useState } from "react";
-import { PanResponder, Pressable, Text, useWindowDimensions, View } from "react-native";
+import { PanResponder, Text, useWindowDimensions, View } from "react-native";
 import Animated, { FadeIn, FadeInLeft, FadeInRight } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
@@ -22,8 +22,9 @@ import { CareOrbit } from "@/components/onboarding/care-orbit";
 import { BubblePop, FillBar, TypingDots, useTypedReveal } from "@/components/onboarding/motion";
 import { PANELS } from "@/lib/onboarding/panels";
 import { castFaces } from "@/lib/profiles/avatar";
-import { brand, ink, shadow, surface } from "@/theme/tokens";
+import { brand, hue, ink, semantic, shadow, surface } from "@/theme/tokens";
 import { font, type } from "@/theme/type";
+import { Tap } from "@/components/ui/tap";
 
 
 /*
@@ -36,9 +37,9 @@ import { font, type } from "@/theme/type";
  */
 const CHAPTER: Record<"meet" | "memory" | "family" | "care", { bg: string; fg: string }> = {
   meet: { bg: brand[50], fg: brand[600] },
-  memory: { bg: "#e6f1fd", fg: "#1a6fc2" },
-  family: { bg: "#fdeaf0", fg: "#c22a6b" },
-  care: { bg: "#e2f3fb", fg: "#0b6f99" },
+  memory: { bg: hue.blue.wash, fg: hue.blue.fg },
+  family: { bg: hue.rose.bg, fg: hue.rose.fg },
+  care: { bg: hue.ocean.bg, fg: "#0b6f99" },
 };
 
 /*
@@ -116,7 +117,7 @@ export default function Welcome() {
           forward reads as progress made. Tappable, like a story. */}
       <View className="flex-row gap-1.5 px-5 pt-3">
         {PANELS.map((p, i) => (
-          <Pressable
+          <Tap
             key={p.kind}
             className="flex-1 py-1.5"
             accessibilityRole="button"
@@ -124,13 +125,13 @@ export default function Welcome() {
             onPress={() => go(i)}
           >
             <FillBar value={i <= index ? 1 : 0} color={brand[600]} track={brand[100]} height={5} />
-          </Pressable>
+          </Tap>
         ))}
       </View>
 
       <View className="h-12 flex-row items-center px-5">
         {index > 0 ? (
-          <Pressable
+          <Tap scale={0.95}
             accessibilityRole="button"
             accessibilityLabel="Previous"
             onPress={() => go(index - 1)}
@@ -138,17 +139,17 @@ export default function Welcome() {
             style={shadow.e1}
           >
             <ChevronLeft size={20} color={ink[700]} />
-          </Pressable>
+          </Tap>
         ) : null}
         {!isLast ? (
-          <Pressable
+          <Tap
             className="ml-auto h-10 justify-center"
             hitSlop={10}
             accessibilityRole="button"
             onPress={() => router.push("/sign-in")}
           >
             <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[500] }}>Skip</Text>
-          </Pressable>
+          </Tap>
         ) : null}
       </View>
 
@@ -183,12 +184,12 @@ export default function Welcome() {
         </Button>
 
         {index === 0 ? (
-          <Pressable onPress={() => router.push("/sign-in")} hitSlop={6} accessibilityRole="button">
+          <Tap onPress={() => router.push("/sign-in")} hitSlop={6} accessibilityRole="button">
             <Text style={[type.bodySmall, { textAlign: "center" }]}>
               Already have an account?{" "}
               <Text style={{ fontFamily: font.bold, color: brand[600] }}>Log in</Text>
             </Text>
-          </Pressable>
+          </Tap>
         ) : (
           <ReassuranceStrip />
         )}
@@ -234,10 +235,10 @@ function SceneMeet({ compact }: { compact: boolean }) {
       {asked.map((q, i) => (
         <BubblePop key={q} delay={0.25 + i * 0.5} from="right" style={{ alignSelf: "flex-end", maxWidth: "82%" }}>
           <View
-            className="rounded-[20px] px-4 py-2.5"
+            className="rounded-xl px-4 py-2.5"
             style={[shadow.e1, { backgroundColor: surface.base, borderBottomRightRadius: 6 }]}
           >
-            <Text style={{ fontFamily: font.medium, fontSize: 14, lineHeight: 19, color: ink[700] }}>{q}</Text>
+            <Text style={{ fontFamily: font.medium, fontSize: 15, lineHeight: 19, color: ink[700] }}>{q}</Text>
           </View>
         </BubblePop>
       ))}
@@ -248,13 +249,13 @@ function SceneMeet({ compact }: { compact: boolean }) {
         </BubblePop>
         <BubblePop delay={replyAt - 0.9} from="left" style={{ flexShrink: 1, marginBottom: 10 }}>
           <View
-            className="rounded-[20px] px-4 py-3"
+            className="rounded-xl px-4 py-3"
             style={[shadow.e2, { backgroundColor: brand[600], borderBottomLeftRadius: 6, minWidth: 64 }]}
           >
             {replied ? (
               <Animated.Text
                 entering={FadeIn.duration(220)}
-                style={{ fontFamily: font.semibold, fontSize: 14, lineHeight: 19, color: "#ffffff" }}
+                style={{ fontFamily: font.semibold, fontSize: 15, lineHeight: 19, color: "#ffffff" }}
               >
                 Ask away. I&apos;ll explain it simply, no judgement.
               </Animated.Text>
@@ -282,9 +283,9 @@ function SceneMeet({ compact }: { compact: boolean }) {
  * "she has hypothyroidism" would be this screen promising a diagnosis.
  */
 const SOURCES = [
-  { label: "WhatsApp forward", Icon: MessageCircle, tint: "#e7f7ee", fg: "#1f8a45", tilt: "-5deg" },
-  { label: "Email PDF", Icon: Mail, tint: "#e6f1fd", fg: "#1a6fc2", tilt: "3deg" },
-  { label: "Gallery photo", Icon: ImageIcon, tint: "#fdeee0", fg: "#c2650b", tilt: "-2deg" },
+  { label: "WhatsApp forward", Icon: MessageCircle, tint: semantic.safeBg, fg: "#1f8a45", tilt: "-5deg" },
+  { label: "Email PDF", Icon: Mail, tint: hue.blue.wash, fg: hue.blue.fg, tilt: "3deg" },
+  { label: "Gallery photo", Icon: ImageIcon, tint: hue.orange.wash, fg: hue.orange.fg, tilt: "-2deg" },
 ] as const;
 
 function SceneMemory({ compact }: { compact: boolean }) {
@@ -303,7 +304,7 @@ function SceneMemory({ compact }: { compact: boolean }) {
               <View className="h-7 w-7 items-center justify-center rounded-pill" style={{ backgroundColor: s.tint }}>
                 <s.Icon size={14} color={s.fg} />
               </View>
-              <Text style={{ fontFamily: font.semibold, fontSize: 12.5, color: ink[700] }}>{s.label}</Text>
+              <Text style={{ fontFamily: font.semibold, fontSize: 13, color: ink[700] }}>{s.label}</Text>
             </View>
           </BubblePop>
         ))}
@@ -312,13 +313,13 @@ function SceneMemory({ compact }: { compact: boolean }) {
       <BubblePop delay={0.75} style={{ alignSelf: "center", marginVertical: compact ? 10 : 14 }}>
         <View className="flex-row items-center gap-1.5 rounded-pill px-3 py-1.5" style={{ backgroundColor: brand[50] }}>
           <FolderCheck size={13} color={brand[600]} />
-          <Text style={{ fontFamily: font.bold, fontSize: 11.5, color: brand[700] }}>Saved to Mummy&apos;s file</Text>
+          <Text style={{ fontFamily: font.bold, fontSize: 12, color: brand[700] }}>Saved to Mummy&apos;s file</Text>
         </View>
       </BubblePop>
 
       <BubblePop delay={1.05} from="left">
-        <View className="rounded-[22px] bg-surface p-4" style={[shadow.e2, { borderWidth: 1, borderColor: surface.line }]}>
-          <Text style={{ fontFamily: font.medium, fontSize: 12.5, color: ink[500] }}>
+        <View className="rounded-xl bg-surface p-4" style={[shadow.e2, { borderWidth: 1, borderColor: surface.line }]}>
+          <Text style={{ fontFamily: font.medium, fontSize: 13, color: ink[500] }}>
             When was Mummy&apos;s last thyroid test?
           </Text>
           <Text style={{ fontFamily: font.regular, fontSize: 15, lineHeight: 21, color: ink[900], marginTop: 6 }}>
@@ -358,7 +359,7 @@ function SceneFamily({ faces, compact }: { faces: readonly string[]; compact: bo
     <View className="flex-1 items-center justify-center px-6">
       <BubblePop delay={0.7} style={{ alignSelf: "flex-end", marginBottom: 6 }}>
         <View className="rounded-pill bg-surface px-3 py-1.5" style={shadow.e1}>
-          <Text style={{ fontFamily: font.bold, fontSize: 11.5, color: brand[700] }}>Up to 4 people</Text>
+          <Text style={{ fontFamily: font.bold, fontSize: 12, color: brand[700] }}>Up to 4 people</Text>
         </View>
       </BubblePop>
 
@@ -375,7 +376,7 @@ function SceneFamily({ faces, compact }: { faces: readonly string[]; compact: bo
                 style={[shadow.e1, { backgroundColor: i === 1 ? brand[600] : surface.base }]}
               >
                 <Text
-                  style={{ fontFamily: font.bold, fontSize: 11.5, color: i === 1 ? "#ffffff" : ink[700] }}
+                  style={{ fontFamily: font.bold, fontSize: 12, color: i === 1 ? "#ffffff" : ink[700] }}
                 >
                   {name}
                 </Text>
@@ -406,7 +407,7 @@ function SceneFamily({ faces, compact }: { faces: readonly string[]; compact: bo
           <View className="h-8 w-8 items-center justify-center rounded-pill" style={{ backgroundColor: brand[50] }}>
             <ShieldCheck size={16} color={brand[600]} />
           </View>
-          <Text style={{ fontFamily: font.regular, fontSize: 12.5, color: ink[700] }}>
+          <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[700] }}>
             <Text style={{ fontFamily: font.bold, color: ink[900] }}>Private by default.</Text> Never sold, never used for ads.
           </Text>
         </View>

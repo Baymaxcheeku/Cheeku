@@ -3,7 +3,7 @@ import { StyleSheet, View, type ViewProps } from "react-native";
 import Svg, { Defs, LinearGradient, RadialGradient, Rect, Stop } from "react-native-svg";
 
 import { Tap } from "@/components/ui/tap";
-import { ink } from "@/theme/tokens";
+import { brand } from "@/theme/tokens";
 
 /*
  * Glass and gradient, without new native modules.
@@ -27,7 +27,7 @@ export const glass = {
 
 /** The soft lift under glass: wide and faint rather than tight and dark. */
 export const glassShadow = {
-  shadowColor: "#2a1f6b",
+  shadowColor: brand[900],
   shadowOpacity: 0.08,
   shadowRadius: 18,
   shadowOffset: { width: 0, height: 6 },
@@ -88,7 +88,7 @@ export function GlassCircle({
           borderRadius: size / 2,
           alignItems: "center",
           justifyContent: "center",
-          backgroundColor: dark ? ink[900] : glass.fillStrong,
+          backgroundColor: dark ? brand[600] : glass.fillStrong,
           borderWidth: dark ? 0 : 1,
           borderColor: glass.rim,
         },

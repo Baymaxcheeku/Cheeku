@@ -14,7 +14,7 @@ import { formatPrice, PLANS } from "@/lib/billing/plans";
 import type { ActiveProfile } from "@/lib/profiles/context";
 import type { FamilyMode } from "@/lib/profiles/family";
 import { catalogFace, type Face } from "@/lib/profiles/faces";
-import { brand, ink } from "@/theme/tokens";
+import { brand, hue, ink, lilac, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
 import { feel } from "@/lib/feel";
 
@@ -110,16 +110,16 @@ export function FamilyTray({
 
   return (
     <Sheet open={open} onClose={onClose} label="Close">
-      <View style={{ maxHeight: sheetMax86, borderTopLeftRadius: 32, borderTopRightRadius: 32, overflow: "hidden", backgroundColor: "#fafafe", paddingBottom: insets.bottom + 12 }}>
+      <View style={{ maxHeight: sheetMax86, borderTopLeftRadius: 32, borderTopRightRadius: 32, overflow: "hidden", backgroundColor: surface.canvas, paddingBottom: insets.bottom + 12 }}>
         <View pointerEvents="none" style={{ position: "absolute", top: 0, left: 0, right: 0, height: 260 }}>
-          <Gradient from="#ebe6ff" to="#fafafe" angle="vertical" />
+          <Gradient from={lilac.base} to={surface.canvas} angle="vertical" />
         </View>
 
         <View className="flex-row items-start gap-3 px-5 pt-4">
           <View className="min-w-0 flex-1">
             <View className="flex-row items-center gap-1.5">
               <Users size={13} color={brand[600]} />
-              <Text style={{ fontFamily: font.semibold, fontSize: 12.5, color: brand[700] }}>
+              <Text style={{ fontFamily: font.semibold, fontSize: 13, color: brand[700] }}>
                 Family plan · {used} of {seats} seats
               </Text>
             </View>
@@ -127,15 +127,15 @@ export function FamilyTray({
               Whose health are we{"\n"}looking at?
             </Text>
           </View>
-          <Pressable
+          <Tap scale={0.95}
             accessibilityRole="button"
             accessibilityLabel="Close"
             onPress={onClose}
             hitSlop={8}
-            style={[glassShadow, { width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center", backgroundColor: glass.fillStrong, borderWidth: 1, borderColor: glass.rim }]}
+            style={[glassShadow, { width: 40, height: 40, borderRadius: 999, alignItems: "center", justifyContent: "center", backgroundColor: glass.fillStrong, borderWidth: 1, borderColor: glass.rim }]}
           >
             <X size={17} color={ink[700]} />
-          </Pressable>
+          </Tap>
         </View>
 
         <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 18, paddingBottom: 6, gap: 12 }} showsVerticalScrollIndicator={false}>
@@ -163,7 +163,7 @@ export function FamilyTray({
 
           <View className="mt-1 flex-row items-center gap-2 px-1">
             <ShieldCheck size={14} color={ink[500]} />
-            <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 12.5, lineHeight: 17, color: ink[500] }}>
+            <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 13, lineHeight: 17, color: ink[500] }}>
               Everyone&apos;s file stays separate. Cheeku only ever talks about the person you&apos;re viewing.
             </Text>
           </View>
@@ -202,7 +202,7 @@ function MemberCard({ profile, active, onPress }: { profile: ActiveProfile; acti
       onPress={onPress}
       style={[glassShadow, {
         height: 158,
-        borderRadius: 26,
+        borderRadius: 24,
         overflow: "hidden",
         padding: 14,
         borderWidth: active ? 2 : 1,
@@ -217,16 +217,16 @@ function MemberCard({ profile, active, onPress }: { profile: ActiveProfile; acti
         </View>
         {active ? (
           // No entrance: picking a person is frequent, so the tick is simply there.
-          <View style={{ width: 26, height: 26, borderRadius: 13, backgroundColor: brand[600], alignItems: "center", justifyContent: "center" }}>
+          <View style={{ width: 26, height: 26, borderRadius: 999, backgroundColor: brand[600], alignItems: "center", justifyContent: "center" }}>
             <Check size={15} color="#fff" strokeWidth={3} />
           </View>
         ) : null}
       </View>
       <View style={{ flex: 1 }} />
-      <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 16.5, letterSpacing: -0.2, color: ink[900] }}>
+      <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 17, letterSpacing: -0.2, color: ink[900] }}>
         {firstName(profile.name)}
       </Text>
-      <Text numberOfLines={1} style={{ fontFamily: font.medium, fontSize: 12.5, color: active ? brand[700] : ink[500], marginTop: 1 }}>
+      <Text numberOfLines={1} style={{ fontFamily: font.medium, fontSize: 13, color: active ? brand[700] : ink[500], marginTop: 1 }}>
         {active ? "Viewing now" : profile.isPrimary ? "You" : (profile.relationship ?? "Family")}
       </Text>
     </Tap>
@@ -247,19 +247,19 @@ function PausedCard({ onPress }: { onPress: () => void }) {
       onPress={onPress}
       style={({ pressed }) => ({
         height: 158,
-        borderRadius: 26,
+        borderRadius: 24,
         padding: 14,
-        backgroundColor: pressed ? "#f1f0fe" : "rgba(255,255,255,0.6)",
+        backgroundColor: pressed ? brand[50] : "rgba(255,255,255,0.6)",
         borderWidth: 1,
         borderColor: "rgba(15,16,48,0.08)",
       })}
     >
-      <View style={{ width: 62, height: 62, borderRadius: 31, backgroundColor: "#eeecf8", alignItems: "center", justifyContent: "center" }}>
+      <View style={{ width: 62, height: 62, borderRadius: 999, backgroundColor: brand[50], alignItems: "center", justifyContent: "center" }}>
         <Lock size={20} color={ink[500]} />
       </View>
       <View style={{ flex: 1 }} />
       <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[700] }}>Paused</Text>
-      <Text style={{ fontFamily: font.medium, fontSize: 12.5, color: brand[700], marginTop: 1 }}>Unlock with Family</Text>
+      <Text style={{ fontFamily: font.medium, fontSize: 13, color: brand[700], marginTop: 1 }}>Unlock with Family</Text>
     </Pressable>
   );
 }
@@ -272,21 +272,21 @@ function AddCard({ left, onPress }: { left: number; onPress: () => void }) {
       onPress={onPress}
       style={({ pressed }) => ({
         height: 158,
-        borderRadius: 26,
+        borderRadius: 24,
         padding: 14,
         borderWidth: 1.5,
         borderStyle: "dashed",
         borderColor: brand[300],
-        backgroundColor: pressed ? "#ece8ff" : "rgba(241,240,254,0.7)",
+        backgroundColor: pressed ? lilac.base : "rgba(241,240,254,0.7)",
         transform: [{ scale: pressed ? 0.97 : 1 }],
       })}
     >
-      <View style={{ width: 62, height: 62, borderRadius: 31, backgroundColor: "#fff", alignItems: "center", justifyContent: "center" }}>
+      <View style={{ width: 62, height: 62, borderRadius: 999, backgroundColor: "#fff", alignItems: "center", justifyContent: "center" }}>
         <Plus size={24} color={brand[600]} strokeWidth={2.2} />
       </View>
       <View style={{ flex: 1 }} />
-      <Text style={{ fontFamily: font.semibold, fontSize: 16, color: brand[700] }}>Add someone</Text>
-      <Text style={{ fontFamily: font.medium, fontSize: 12.5, color: ink[500], marginTop: 1 }}>
+      <Text style={{ fontFamily: font.semibold, fontSize: 17, color: brand[700] }}>Add someone</Text>
+      <Text style={{ fontFamily: font.medium, fontSize: 13, color: ink[500], marginTop: 1 }}>
         {left === 1 ? "1 seat left" : `${left} seats left`}
       </Text>
     </Pressable>
@@ -334,11 +334,11 @@ export function FamilyUpsellSheet({
 
   return (
     <Sheet open={open} onClose={onClose} label="Close">
-      <View style={{ borderTopLeftRadius: 32, borderTopRightRadius: 32, overflow: "hidden", backgroundColor: "#fafafe", paddingBottom: insets.bottom + 14 }}>
+      <View style={{ borderTopLeftRadius: 32, borderTopRightRadius: 32, overflow: "hidden", backgroundColor: surface.canvas, paddingBottom: insets.bottom + 14 }}>
 
         {/* The picture: you, with three empty places beside you. */}
-        <View style={{ marginHorizontal: 16, marginTop: 12, height: 150, borderRadius: 28, overflow: "hidden", alignItems: "center", justifyContent: "center" }}>
-          <Gradient from="#e2d9ff" to="#fff1f6" glow="#ffffff" />
+        <View style={{ marginHorizontal: 16, marginTop: 12, height: 150, borderRadius: 32, overflow: "hidden", alignItems: "center", justifyContent: "center" }}>
+          <Gradient from={lilac.violet} to={hue.rose.bg} glow="#ffffff" />
           <View style={{ flexDirection: "row", alignItems: "center" }}>
             {faces.slice(0, 1).map((f, i) => (
               <Ghost key={`l${i}`} face={f} tilt={-8} />
@@ -353,7 +353,7 @@ export function FamilyUpsellSheet({
           <View style={{ position: "absolute", top: 12, right: 12 }}>
             <Glass strong className="flex-row items-center gap-1 rounded-pill px-2.5 py-1">
               <Lock size={11} color={brand[700]} />
-              <Text style={{ fontFamily: font.semibold, fontSize: 11.5, color: brand[700] }}>Family plan</Text>
+              <Text style={{ fontFamily: font.semibold, fontSize: 12, color: brand[700] }}>Family plan</Text>
             </Glass>
           </View>
         </View>
@@ -362,7 +362,7 @@ export function FamilyUpsellSheet({
           <Text accessibilityRole="header" style={{ fontFamily: font.semibold, fontSize: 24, lineHeight: 29, letterSpacing: -0.6, color: ink[900] }}>
             {mode === "free" ? "Bring your family along" : "Make room for your family"}
           </Text>
-          <Text style={{ fontFamily: font.regular, fontSize: 14.5, lineHeight: 21, color: ink[700], marginTop: 6 }}>
+          <Text style={{ fontFamily: font.regular, fontSize: 15, lineHeight: 21, color: ink[700], marginTop: 6 }}>
             {mode === "free"
               ? "Keep Mummy's thyroid reports, Papa's prescriptions and yours in one place. Switch between them in a tap."
               : "Your Solo plan covers just you. Family keeps everyone's reports beside yours, each in their own file."}
@@ -373,7 +373,7 @@ export function FamilyUpsellSheet({
               <View key={title} className="flex-row items-start gap-3">
                 <View style={{ width: 36, height: 36, borderRadius: 12, backgroundColor: brand[50], alignItems: "center", justifyContent: "center" }}>{icon}</View>
                 <View className="flex-1">
-                  <Text style={{ fontFamily: font.semibold, fontSize: 14.5, color: ink[900] }}>{title}</Text>
+                  <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{title}</Text>
                   <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[500], marginTop: 1 }}>{line}</Text>
                 </View>
               </View>
@@ -385,9 +385,9 @@ export function FamilyUpsellSheet({
               ? `Get Family · ${formatPrice(PLANS.family.priceInPaise)}/month`
               : `Upgrade to Family · +${formatPrice(step)}/month`}
           </PillButton>
-          <Pressable accessibilityRole="button" onPress={() => { onClose(); onCompare(); }} style={{ height: 44, alignItems: "center", justifyContent: "center", marginTop: 4 }}>
-            <Text style={{ fontFamily: font.semibold, fontSize: 14, color: ink[700] }}>Compare all plans</Text>
-          </Pressable>
+          <Tap accessibilityRole="button" onPress={() => { onClose(); onCompare(); }} style={{ height: 44, alignItems: "center", justifyContent: "center", marginTop: 4 }}>
+            <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[700] }}>Compare all plans</Text>
+          </Tap>
         </View>
       </View>
     </Sheet>
@@ -399,7 +399,7 @@ function Ghost({ face, tilt }: { face: Face; tilt: number }) {
     <View style={{ marginHorizontal: -6, opacity: 0.55, transform: [{ rotate: `${tilt}deg` }], borderRadius: 999, borderWidth: 3, borderColor: "rgba(255,255,255,0.9)" }}>
       <Avatar svg="" image={face.image} background={face.background} size={54} />
       <View style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, alignItems: "center", justifyContent: "center" }}>
-        <View style={{ width: 24, height: 24, borderRadius: 12, backgroundColor: "rgba(255,255,255,0.92)", alignItems: "center", justifyContent: "center" }}>
+        <View style={{ width: 24, height: 24, borderRadius: 999, backgroundColor: "rgba(255,255,255,0.92)", alignItems: "center", justifyContent: "center" }}>
           <Plus size={14} color={brand[600]} strokeWidth={2.6} />
         </View>
       </View>

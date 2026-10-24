@@ -10,7 +10,7 @@ import {
   MessageCircleQuestion,
   type LucideIcon,
 } from "lucide-react-native";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Headline, StepLabel, Lede, OnboardingHeader } from "@/components/onboarding/chrome";
@@ -18,6 +18,7 @@ import { BubblePop } from "@/components/onboarding/motion";
 import { Button } from "@/components/ui/button";
 import { brand, ink, shadow, surface } from "@/theme/tokens";
 import { font, type } from "@/theme/type";
+import { Tap } from "@/components/ui/tap";
 
 /*
  * What the first report makes possible, stated as things the app does today.
@@ -115,11 +116,11 @@ export default function FirstUpload() {
          * dragged on a phone.
          */}
         <BubblePop delay={0.1} style={{ marginTop: 22 }}>
-          <View className="overflow-hidden rounded-[26px]" style={[shadow.e2, { backgroundColor: brand[600] }]}>
+          <View className="overflow-hidden rounded-xl" style={[shadow.e2, { backgroundColor: brand[600] }]}>
             <View className="p-5">
               <View className="flex-row items-start gap-3.5">
                 <View
-                  className="h-12 w-12 items-center justify-center rounded-[16px]"
+                  className="h-12 w-12 items-center justify-center rounded-lg"
                   style={{ backgroundColor: "rgba(255,255,255,0.16)" }}
                 >
                   <FileText size={22} color="#ffffff" />
@@ -156,7 +157,7 @@ export default function FirstUpload() {
               </View>
 
               <Text
-                style={{ marginTop: 10, textAlign: "center", fontFamily: font.regular, fontSize: 11.5, color: "rgba(255,255,255,0.7)" }}
+                style={{ marginTop: 10, textAlign: "center", fontFamily: font.regular, fontSize: 12, color: "rgba(255,255,255,0.7)" }}
               >
                 PDF, JPG, PNG or HEIC · up to 10MB each
               </Text>
@@ -166,11 +167,11 @@ export default function FirstUpload() {
 
         {/* Alternatives: real controls, deliberately lower billing. */}
         <Text style={[type.eyebrow, { color: ink[300], marginTop: 26 }]}>Or add them one at a time</Text>
-        <View className="mt-3 overflow-hidden rounded-[22px] bg-surface" style={shadow.e1}>
+        <View className="mt-3 overflow-hidden rounded-xl bg-surface" style={shadow.e1}>
           {ROUTES.map((route, i) => {
             const Icon = route.icon;
             return (
-              <Pressable
+              <Tap
                 key={route.source}
                 accessibilityRole="button"
                 accessibilityLabel={`${route.title}. ${route.body}`}
@@ -178,7 +179,7 @@ export default function FirstUpload() {
                 className="flex-row items-center gap-3.5 px-4 py-4"
                 style={i > 0 ? { borderTopWidth: 1, borderTopColor: surface.line } : undefined}
               >
-                <View className="h-11 w-11 items-center justify-center rounded-[14px] bg-brand-50">
+                <View className="h-11 w-11 items-center justify-center rounded-lg bg-brand-50">
                   <Icon size={19} color={brand[600]} />
                 </View>
                 <View className="min-w-0 flex-1">
@@ -186,7 +187,7 @@ export default function FirstUpload() {
                   <Text style={[type.caption, { marginTop: 2 }]}>{route.body}</Text>
                 </View>
                 <ArrowRight size={17} color={ink[300]} />
-              </Pressable>
+              </Tap>
             );
           })}
         </View>
@@ -196,7 +197,7 @@ export default function FirstUpload() {
          * somebody decides whether to hand over a year of medical history, not
          * three screens away in a settings page nobody opens.
          */}
-        <View className="mt-5 flex-row items-start gap-2.5 rounded-[18px] px-4 py-3.5" style={{ backgroundColor: brand[50] }}>
+        <View className="mt-5 flex-row items-start gap-2.5 rounded-lg px-4 py-3.5" style={{ backgroundColor: brand[50] }}>
           <Lock size={15} color={brand[500]} style={{ marginTop: 2 }} />
           <Text style={[type.bodySmall, { flex: 1, color: ink[700] }]}>
             Encrypted and private to your family. I read it, remember it, and check everything you tell me
@@ -206,7 +207,7 @@ export default function FirstUpload() {
       </ScrollView>
 
       <View className="px-6 pt-2" style={{ paddingBottom: insets.bottom + 10 }}>
-        <Pressable
+        <Tap
           accessibilityRole="button"
           onPress={() => router.push("/plan")}
           hitSlop={8}
@@ -214,7 +215,7 @@ export default function FirstUpload() {
         >
           <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[500] }}>I&apos;ll do this later</Text>
           <Text style={[type.caption, { marginTop: 2, color: ink[300] }]}>You can add documents any time</Text>
-        </Pressable>
+        </Tap>
       </View>
     </View>
   );

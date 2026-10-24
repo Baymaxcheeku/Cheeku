@@ -2,7 +2,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { ChevronRight } from "lucide-react-native";
 import { useEffect } from "react";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { ScrollView, Text, View } from "react-native";
 import Animated, { FadeInDown, useAnimatedStyle, useSharedValue, withRepeat, withSequence, withTiming } from "react-native-reanimated";
 
 import { AskToBook, CompactTile, Grid2, ServiceTile } from "@/components/services/parts";
@@ -10,8 +10,9 @@ import { useReducedMotion } from "@/components/ui/motion";
 import { setWaitlisted } from "@/lib/notifications/queries";
 import { onShelf, routeFor, SERVICES } from "@/lib/services/catalog";
 import { kv } from "@/lib/storage";
-import { brand, ink } from "@/theme/tokens";
+import { brand, hue, ink } from "@/theme/tokens";
 import { font } from "@/theme/type";
+import { Tap } from "@/components/ui/tap";
 
 /*
  * BOOK SERVICES, on Home.
@@ -59,22 +60,22 @@ export function CareSection() {
       <View className="flex-row items-end px-5">
         <View className="flex-1">
           <View className="flex-row items-center gap-2.5">
-            <Text style={{ fontFamily: font.semibold, fontSize: 21, letterSpacing: -0.4, color: ink[900] }}>Book services</Text>
+            <Text style={{ fontFamily: font.semibold, fontSize: 20, letterSpacing: -0.4, color: ink[900] }}>Book services</Text>
             {/*
              * Lime, not green. Green means "healthy" everywhere else in this app
              * (PLAN.md rule 3); this citrus lime only says "open now".
              */}
             <View className="flex-row items-center gap-1.5 rounded-pill px-2.5 py-1" style={{ backgroundColor: LIVE.bg }}>
               <LiveDot />
-              <Text style={{ fontFamily: font.semibold, fontSize: 11.5, color: LIVE.fg }}>Open now</Text>
+              <Text style={{ fontFamily: font.semibold, fontSize: 12, color: LIVE.fg }}>Open now</Text>
             </View>
           </View>
-          <Text style={{ fontFamily: font.regular, fontSize: 13.5, color: ink[500], marginTop: 3 }}>Doctors, tests, medicines and care at home</Text>
+          <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 3 }}>Doctors, tests, medicines and care at home</Text>
         </View>
-        <Pressable accessibilityRole="button" onPress={() => open("/services")} hitSlop={8} style={{ flexDirection: "row", alignItems: "center", gap: 2, paddingBottom: 2 }}>
-          <Text style={{ fontFamily: font.semibold, fontSize: 13.5, color: brand[600] }}>See all</Text>
+        <Tap accessibilityRole="button" onPress={() => open("/services")} hitSlop={8} style={{ flexDirection: "row", alignItems: "center", gap: 2, paddingBottom: 2 }}>
+          <Text style={{ fontFamily: font.semibold, fontSize: 13, color: brand[600] }}>See all</Text>
           <ChevronRight size={15} color={brand[600]} />
-        </Pressable>
+        </Tap>
       </View>
 
       <View className="mt-4 px-5" style={{ gap: 12 }}>
@@ -102,7 +103,7 @@ export function CareSection() {
 const KEY = "cheeku.notify";
 
 /** The "open now" accent: citrus lime on deep olive. See the note on the pill. */
-export const LIVE = { bg: "#e4ff7a", fg: "#2f3d00", dot: "#5f7a00" } as const;
+export const LIVE = { bg: hue.lime.bg, fg: hue.lime.fg, dot: "#5f7a00" } as const;
 
 function LiveDot() {
   const still = useReducedMotion();

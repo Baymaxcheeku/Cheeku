@@ -9,13 +9,7 @@ import {
   type LucideIcon,
 } from "lucide-react-native";
 import { useEffect, useState } from "react";
-import {
-  ActivityIndicator,
-  Pressable,
-  ScrollView,
-  Text,
-  View,
-} from "react-native";
+import { ActivityIndicator, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Sheet, useSheetMax } from "@/components/ui/sheet";
@@ -34,8 +28,9 @@ import {
   type Tier,
 } from "@/lib/billing/plans";
 import { subscribeDemo } from "@/lib/billing/subscribe";
-import { brand, ink, shadow, surface } from "@/theme/tokens";
+import { brand, ink, lilac, shadow, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
+import { Tap } from "@/components/ui/tap";
 
 /*
  * H1 / H2 — the paywall and its checkout, ported from the web build.
@@ -256,12 +251,12 @@ function PlanChooser({
   return (
     <View className="px-6">
       <View pointerEvents="none" style={{ position: "absolute", top: -16, left: 0, right: 0, height: 240, borderTopLeftRadius: 32, borderTopRightRadius: 32, overflow: "hidden" }}>
-        <Gradient from="#e3dcff" to="#fafafe" angle="vertical" />
+        <Gradient from={lilac.violet} to={surface.canvas} angle="vertical" />
       </View>
       {/* A grabber, and the close control as far from the CTA as it can be. */}
       <View className="flex-row items-start">
         <View className="min-w-0 flex-1">
-          <Text style={{ fontFamily: font.semibold, fontSize: 11.5, letterSpacing: 1.2, textTransform: "uppercase", color: brand[600] }}>
+          <Text style={{ fontFamily: font.semibold, fontSize: 12, letterSpacing: 1.2, textTransform: "uppercase", color: brand[600] }}>
             {copy.eyebrow}
           </Text>
           {/*
@@ -270,14 +265,14 @@ function PlanChooser({
            * is the cheapest premium signal in typography and costs no space.
            */}
           <Text
-            className="mt-2.5 text-[29px] font-bold leading-[33px] text-ink-900"
+            className="mt-2.5 text-3xl font-bold leading-[33px] text-ink-900"
             style={{ letterSpacing: -0.8 }}
           >
             {copy.title}
           </Text>
-          <Text className="mt-2 text-[13.5px] leading-[19px] text-ink-500">{copy.body}</Text>
+          <Text className="mt-2 text-sm leading-[19px] text-ink-500">{copy.body}</Text>
         </View>
-        <Pressable
+        <Tap scale={0.95}
           accessibilityRole="button"
           accessibilityLabel="Close"
           onPress={onClose}
@@ -285,7 +280,7 @@ function PlanChooser({
           className="-mr-1 h-8 w-8 items-center justify-center rounded-pill"
         >
           <X size={18} color={ink[300]} />
-        </Pressable>
+        </Tap>
       </View>
 
       {/*
@@ -298,10 +293,10 @@ function PlanChooser({
           className="mt-5 border-l-2 pl-3"
           style={{ borderLeftColor: brand[200] }}
         >
-          <Text className="text-[10.5px] font-bold uppercase text-ink-300" style={{ letterSpacing: 1 }}>
+          <Text className="text-2xs font-bold uppercase text-ink-300" style={{ letterSpacing: 1 }}>
             Held for you
           </Text>
-          <Text className="mt-1 text-[13px] italic leading-[18px] text-ink-700" numberOfLines={2}>
+          <Text className="mt-1 text-sm italic leading-[18px] text-ink-700" numberOfLines={2}>
             &ldquo;{pendingQuestion}&rdquo;
           </Text>
         </View>
@@ -313,10 +308,10 @@ function PlanChooser({
         {UNLOCKS.map((line, i) => (
           <StaggerItem key={line} index={i}>
             <View className="flex-row items-start gap-2.5">
-              <View style={{ width: 22, height: 22, borderRadius: 11, backgroundColor: brand[600], alignItems: "center", justifyContent: "center" }}>
+              <View style={{ width: 22, height: 22, borderRadius: 999, backgroundColor: brand[600], alignItems: "center", justifyContent: "center" }}>
                 <Check size={12} color="#fff" strokeWidth={3} />
               </View>
-              <Text className="flex-1 text-[14px] leading-[21px] text-ink-900">{line}</Text>
+              <Text className="flex-1 text-base leading-[21px] text-ink-900">{line}</Text>
             </View>
           </StaggerItem>
         ))}
@@ -343,17 +338,17 @@ function PlanChooser({
       <NextSteps plan={selected} />
 
       <View className="mt-6">
-        <Pressable
+        <Tap
           accessibilityRole="button"
           accessibilityLabel={`Continue with ${selected.name}, ${formatPrice(selected.priceInPaise)} per ${selected.period}`}
           onPress={() => onSelect(selected)}
           className="h-[54px] items-center justify-center rounded-pill"
           style={{ backgroundColor: brand[600] }}
         >
-          <Text className="text-[16px] font-bold text-white">Continue</Text>
-        </Pressable>
+          <Text className="text-lg font-bold text-white">Continue</Text>
+        </Tap>
 
-        <Text className="mt-3 text-center text-[11.5px] text-ink-300">
+        <Text className="mt-3 text-center text-xs text-ink-300">
           {selected.tier === "micro"
             ? `One payment of ${formatPrice(selected.priceInPaise)}. Nothing renews.`
             : `${formatPrice(selected.priceInPaise)} a ${selected.period}. Cancel any time.`}
@@ -365,14 +360,14 @@ function PlanChooser({
          * unhealthy" are the same control written to shame; on a health app
          * that is indefensible, whatever it does to conversion.
          */}
-        <Pressable
+        <Tap
           accessibilityRole="button"
           onPress={onClose}
           hitSlop={10}
           className="mt-2 items-center py-3"
         >
-          <Text className="text-[13.5px] font-semibold text-ink-500">Not now</Text>
-        </Pressable>
+          <Text className="text-sm font-semibold text-ink-500">Not now</Text>
+        </Tap>
       </View>
     </View>
   );
@@ -401,7 +396,7 @@ function PlanRow({
   const saving = plan.tier === "family" ? familySavingPercent() : null;
 
   return (
-    <Pressable
+    <Tap
       accessibilityRole="radio"
       accessibilityState={{ selected }}
       accessibilityLabel={`${plan.name}, ${formatPrice(plan.priceInPaise)} per ${plan.period}${
@@ -431,16 +426,16 @@ function PlanRow({
 
       <View className="min-w-0 flex-1">
         <View className="flex-row items-center gap-2">
-          <Text className="text-[15px] font-semibold text-ink-900">
+          <Text className="text-base font-semibold text-ink-900">
             {plan.name.replace(" Plan", "")}
           </Text>
           {saving ? (
             <View style={{ paddingHorizontal: 8, height: 20, borderRadius: 999, justifyContent: "center", backgroundColor: brand[600] }}>
-              <Text style={{ fontFamily: font.semibold, fontSize: 10.5, color: "#fff" }}>Best value · save {saving}%</Text>
+              <Text style={{ fontFamily: font.semibold, fontSize: 11, color: "#fff" }}>Best value · save {saving}%</Text>
             </View>
           ) : null}
         </View>
-        <Text className="mt-0.5 text-[11.5px] text-ink-500">
+        <Text className="mt-0.5 text-xs text-ink-500">
           {plan.seats > 1 ? `Up to ${plan.seats} people` : "One person"}
           {perDay ? ` · ${perDay}` : ` · ${DAILY_PASS_HOURS} hours`}
         </Text>
@@ -450,14 +445,14 @@ function PlanRow({
         {/* Tabular figures so ₹29, ₹99 and ₹249 align on the decimal column
             rather than drifting with the width of each glyph. */}
         <Text
-          className="text-[17px] font-bold text-ink-900"
+          className="text-lg font-bold text-ink-900"
           style={{ fontVariant: ["tabular-nums"] }}
         >
           {formatPrice(plan.priceInPaise)}
         </Text>
-        <Text className="text-[11px] text-ink-300">per {plan.period}</Text>
+        <Text className="text-2xs text-ink-300">per {plan.period}</Text>
       </View>
-    </Pressable>
+    </Tap>
   );
 }
 
@@ -496,8 +491,8 @@ function NextSteps({ plan }: { plan: Plan }) {
     <View className="mt-5 gap-2 pt-4" style={{ borderTopWidth: 1, borderTopColor: surface.line }}>
       {lines.map(([when, what]) => (
         <View key={when} className="flex-row items-baseline gap-3">
-          <Text className="w-[84px] text-[12px] font-semibold text-ink-900">{when}</Text>
-          <Text className="min-w-0 flex-1 text-[12px] leading-[17px] text-ink-500">{what}</Text>
+          <Text className="w-[84px] text-xs font-semibold text-ink-900">{when}</Text>
+          <Text className="min-w-0 flex-1 text-xs leading-[17px] text-ink-500">{what}</Text>
         </View>
       ))}
     </View>
@@ -533,7 +528,7 @@ function Checkout({
   return (
     <View className="px-5">
       <View className="flex-row items-center gap-3">
-        <Pressable
+        <Tap scale={0.95}
           accessibilityRole="button"
           accessibilityLabel="Back to plans"
           onPress={onBack}
@@ -542,12 +537,12 @@ function Checkout({
           style={shadow.e1}
         >
           <ArrowLeft size={17} color={ink[700]} />
-        </Pressable>
+        </Tap>
         <View className="min-w-0 flex-1 items-center">
-          <Text className="text-[17px] font-bold text-ink-900">Complete your subscription</Text>
+          <Text className="text-lg font-bold text-ink-900">Complete your subscription</Text>
           <View className="mt-0.5 flex-row items-center gap-1">
             <Lock size={11} color={ink[500]} />
-            <Text className="text-[11px] text-ink-500">Secure and encrypted</Text>
+            <Text className="text-2xs text-ink-500">Secure and encrypted</Text>
           </View>
         </View>
         <View className="w-9" />
@@ -559,16 +554,16 @@ function Checkout({
             <Icon size={20} color={brand[600]} />
           </View>
           <View className="min-w-0 flex-1">
-            <Text className="text-[17px] font-bold text-ink-900">{plan.name}</Text>
+            <Text className="text-lg font-bold text-ink-900">{plan.name}</Text>
             <View className="mt-0.5 flex-row items-baseline">
-              <Text className="text-[20px] font-bold text-brand-700">
+              <Text className="text-xl font-bold text-brand-700">
                 {formatPrice(plan.priceInPaise)}
               </Text>
-              <Text className="text-[13px] text-ink-500"> / {plan.period}</Text>
+              <Text className="text-sm text-ink-500"> / {plan.period}</Text>
             </View>
             {/* The Daily pass is a one-off, so promising a renewal — or a
                 cancellation — would both be wrong. */}
-            <Text className="mt-0.5 text-[11px] text-ink-500">
+            <Text className="mt-0.5 text-2xs text-ink-500">
               {isDaily
                 ? `One-time, expires after ${DAILY_PASS_HOURS} hours`
                 : "Billed monthly, cancel anytime"}
@@ -584,7 +579,7 @@ function Checkout({
               <View className="h-5 w-5 items-center justify-center rounded-pill bg-surface" style={{ marginTop: 1 }}>
                 <Check size={11} color={brand[600]} strokeWidth={3} />
               </View>
-              <Text className="flex-1 text-[12.5px] leading-[18px] text-ink-700">{label}</Text>
+              <Text className="flex-1 text-sm leading-[18px] text-ink-700">{label}</Text>
             </View>
           ))}
         </View>
@@ -595,14 +590,14 @@ function Checkout({
         style={{ backgroundColor: "rgba(255,255,255,0.8)", borderWidth: 1, borderColor: surface.line }}
       >
         <CalendarClock size={15} color={brand[600]} style={{ marginTop: 1 }} />
-        <Text className="flex-1 text-[12px] leading-[17px] text-ink-700">
+        <Text className="flex-1 text-xs leading-[17px] text-ink-700">
           {isDaily
             ? `${formatPrice(plan.priceInPaise)} charged once. Nothing renews. The pass ends after ${DAILY_PASS_HOURS} hours.`
             : `${formatPrice(plan.priceInPaise)} will be charged every month on the date you subscribe.`}
         </Text>
       </View>
 
-      <Text className="mt-4 text-[14px] font-semibold text-ink-900">Payment method</Text>
+      <Text className="mt-4 text-base font-semibold text-ink-900">Payment method</Text>
 
       {/*
        * One method, not a chooser. Razorpay IS the gateway; UPI, cards and net
@@ -616,11 +611,11 @@ function Checkout({
       >
         <View className="flex-row items-center gap-3">
           <View className="h-10 w-10 items-center justify-center rounded-tile bg-brand-50">
-            <Text className="text-[10px] font-black tracking-tight text-brand-600">RZP</Text>
+            <Text className="text-3xs font-black tracking-tight text-brand-600">RZP</Text>
           </View>
           <View className="min-w-0 flex-1">
-            <Text className="text-[15px] font-semibold text-ink-900">Razorpay</Text>
-            <Text className="mt-0.5 text-[12px] text-ink-500">
+            <Text className="text-base font-semibold text-ink-900">Razorpay</Text>
+            <Text className="mt-0.5 text-xs text-ink-500">
               Pay by UPI, card, net banking or wallet
             </Text>
           </View>
@@ -642,30 +637,30 @@ function Checkout({
               className="rounded-tile bg-canvas px-2 py-1"
               style={{ borderWidth: 1, borderColor: surface.line }}
             >
-              <Text className="text-[10px] font-bold text-ink-500">{label}</Text>
+              <Text className="text-3xs font-bold text-ink-500">{label}</Text>
             </View>
           ))}
         </View>
       </View>
 
       {error ? (
-        <Text accessibilityRole="alert" className="mt-3 text-[13px] font-medium text-danger-text">
+        <Text accessibilityRole="alert" className="mt-3 text-sm font-medium text-danger-text">
           {error}
         </Text>
       ) : null}
 
       <View className="mt-4 rounded-card bg-surface p-4" style={shadow.e1}>
         <View className="flex-row items-baseline justify-between">
-          <Text className="text-[15px] font-semibold text-ink-900">Total</Text>
+          <Text className="text-base font-semibold text-ink-900">Total</Text>
           <View className="flex-row items-baseline">
-            <Text className="text-[20px] font-bold text-brand-700">
+            <Text className="text-xl font-bold text-brand-700">
               {formatPrice(plan.priceInPaise)}
             </Text>
-            <Text className="text-[12px] text-ink-500"> / {plan.period}</Text>
+            <Text className="text-xs text-ink-500"> / {plan.period}</Text>
           </View>
         </View>
 
-        <Pressable
+        <Tap
           accessibilityRole="button"
           disabled={pending}
           onPress={onPay}
@@ -677,21 +672,21 @@ function Checkout({
           ) : (
             <>
               <Lock size={16} color="#fff" />
-              <Text className="text-[16px] font-semibold text-white">Continue to Razorpay</Text>
+              <Text className="text-lg font-semibold text-white">Continue to Razorpay</Text>
             </>
           )}
-        </Pressable>
+        </Tap>
 
         {/*
          * Two claims, both true and both kept true when the real provider is
          * wired in: authorisation happens in Razorpay's sheet, and this build
          * is not charging anybody. The second line goes when payment is real.
          */}
-        <Text className="mt-2 text-center text-[11px] leading-[16px] text-ink-500">
+        <Text className="mt-2 text-center text-2xs leading-[16px] text-ink-500">
           You&apos;ll confirm in Razorpay&apos;s secure screen. <Brand /> never sees your UPI PIN or
           card details.
         </Text>
-        <Text className="mt-1.5 text-center text-[11px] font-medium text-ink-300">
+        <Text className="mt-1.5 text-center text-2xs font-medium text-ink-300">
           Preview build: no payment is taken and no money moves.
         </Text>
       </View>
@@ -714,10 +709,10 @@ function Success({
     <View className="px-5 pb-2">
       <View className="mt-4 items-center">
         <MascotFigure size={128} moment="celebrate" move="pop" />
-        <Text className="mt-3 text-[24px] font-bold tracking-tight text-ink-900">
+        <Text className="mt-3 text-2xl font-bold tracking-tight text-ink-900">
           You&apos;re in
         </Text>
-        <Text className="mt-1.5 max-w-[280px] text-center text-[13px] leading-[18px] text-ink-500">
+        <Text className="mt-1.5 max-w-[280px] text-center text-sm leading-[18px] text-ink-500">
           {plan.name} is active.{" "}
           {plan.tier === "micro"
             ? `Unlimited chats for the next ${DAILY_PASS_HOURS} hours.`
@@ -738,24 +733,24 @@ function Success({
             >
               <Check size={14} color={brand[600]} />
             </View>
-            <Text className="flex-1 text-[13px] text-ink-700">{feature}</Text>
+            <Text className="flex-1 text-sm text-ink-700">{feature}</Text>
           </View>
         ))}
       </View>
 
-      <Pressable
+      <Tap
         accessibilityRole="button"
         onPress={onDone}
         className="mt-5 h-14 items-center justify-center rounded-pill"
         style={{ backgroundColor: brand[600] }}
       >
-        <Text className="text-[16px] font-semibold text-white">
+        <Text className="text-lg font-semibold text-white">
           {pendingQuestion ? "Send my question" : "Start a chat"}
         </Text>
-      </Pressable>
+      </Tap>
 
       {pendingQuestion ? (
-        <Text className="mt-2 text-center text-[11px] text-ink-500">
+        <Text className="mt-2 text-center text-2xs text-ink-500">
           Your question is still here. We&apos;ll send it now.
         </Text>
       ) : null}

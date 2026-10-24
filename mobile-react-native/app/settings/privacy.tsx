@@ -15,7 +15,7 @@ import {
   type LucideIcon,
 } from "lucide-react-native";
 import { useState } from "react";
-import { ActivityIndicator, Pressable, Text, TextInput, View } from "react-native";
+import { ActivityIndicator, Text, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Sheet } from "@/components/ui/sheet";
@@ -32,6 +32,7 @@ import { REQUEST_COPY, REQUESTS_KEY, STATUS_LABEL, openRequest, useRequests, typ
 import { supabase } from "@/lib/supabase/client";
 import { brand, ink, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
+import { Tap } from "@/components/ui/tap";
 
 const DOC_ICON: Record<LegalKind, LucideIcon> = { terms: ScrollText, privacy: ShieldCheck, health_consent: FileText, storage: Cookie };
 
@@ -176,12 +177,12 @@ export default function PrivacySettings() {
         <Panel padded={false}>
           {REQUIRED_PURPOSES.map((p, i) => (
             <View key={p} className="px-4 py-3" style={i ? { borderTopWidth: 1, borderTopColor: surface.line } : undefined}>
-              <Text style={{ fontFamily: font.semibold, fontSize: 13.5, color: ink[900] }}>{PURPOSE_COPY[p].title}</Text>
+              <Text style={{ fontFamily: font.semibold, fontSize: 13, color: ink[900] }}>{PURPOSE_COPY[p].title}</Text>
               <Text style={{ fontFamily: font.regular, fontSize: 12, lineHeight: 17, color: ink[500], marginTop: 2 }}>{PURPOSE_COPY[p].line}</Text>
             </View>
           ))}
         </Panel>
-        <Text style={{ marginHorizontal: 20, marginTop: 8, fontFamily: font.regular, fontSize: 11.5, lineHeight: 17, color: ink[500] }}>
+        <Text style={{ marginHorizontal: 20, marginTop: 8, fontFamily: font.regular, fontSize: 12, lineHeight: 17, color: ink[500] }}>
           These are needed for Cheeku to work and were agreed together. To stop all of them, pause Cheeku at the bottom of this page.
         </Text>
       </Section>
@@ -194,7 +195,7 @@ export default function PrivacySettings() {
             return (
               <View key={p} className="flex-row items-center gap-3 px-4 py-3.5" style={i ? { borderTopWidth: 1, borderTopColor: surface.line } : undefined}>
                 <View className="min-w-0 flex-1">
-                  <Text style={{ fontFamily: font.semibold, fontSize: 14, color: ink[900] }}>{PURPOSE_COPY[p].title}</Text>
+                  <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{PURPOSE_COPY[p].title}</Text>
                   <Text style={{ fontFamily: font.regular, fontSize: 12, lineHeight: 17, color: ink[500], marginTop: 2 }}>{PURPOSE_COPY[p].line}</Text>
                 </View>
                 {pending === p ? (
@@ -208,11 +209,11 @@ export default function PrivacySettings() {
             );
           })}
         </Panel>
-        <Text style={{ marginHorizontal: 20, marginTop: 8, fontFamily: font.regular, fontSize: 11.5, lineHeight: 17, color: ink[500] }}>
+        <Text style={{ marginHorizontal: 20, marginTop: 8, fontFamily: font.regular, fontSize: 12, lineHeight: 17, color: ink[500] }}>
           Off unless you turn them on. Anything shared for research or improvement is de-identified first, and your data is never sold.
         </Text>
         {note ? (
-          <Text accessibilityRole="alert" style={{ marginHorizontal: 20, marginTop: 8, fontFamily: font.medium, fontSize: 12.5, lineHeight: 18, color: ink[700] }}>
+          <Text accessibilityRole="alert" style={{ marginHorizontal: 20, marginTop: 8, fontFamily: font.medium, fontSize: 13, lineHeight: 18, color: ink[700] }}>
             {note}
           </Text>
         ) : null}
@@ -254,7 +255,7 @@ export default function PrivacySettings() {
             {requests.data.map((r, i) => (
               <View key={r.id} className="px-4 py-3" style={i ? { borderTopWidth: 1, borderTopColor: surface.line } : undefined}>
                 <View className="flex-row items-center justify-between gap-2">
-                  <Text style={{ fontFamily: font.semibold, fontSize: 13.5, color: ink[900] }}>
+                  <Text style={{ fontFamily: font.semibold, fontSize: 13, color: ink[900] }}>
                     {r.kind in REQUEST_COPY ? REQUEST_COPY[r.kind as RequestKind].title : r.kind}
                   </Text>
                   <View className="rounded-pill px-2 py-0.5" style={{ backgroundColor: brand[50] }}>
@@ -265,7 +266,7 @@ export default function PrivacySettings() {
                   Sent {shortDate(r.created_at)}
                   {r.status === "resolved" || r.status === "rejected" ? "" : ` · answer due by ${shortDate(r.due_by)}`}
                 </Text>
-                {r.response ? <Text style={{ fontFamily: font.regular, fontSize: 12.5, lineHeight: 18, color: ink[700], marginTop: 4 }}>{r.response}</Text> : null}
+                {r.response ? <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[700], marginTop: 4 }}>{r.response}</Text> : null}
               </View>
             ))}
           </Panel>
@@ -281,7 +282,7 @@ export default function PrivacySettings() {
                 <Text style={{ fontFamily: font.semibold, fontSize: 13, color: ink[900] }}>
                   {h.granted ? "Agreed" : "Withdrew"} · {h.label}
                 </Text>
-                <Text style={{ fontFamily: font.regular, fontSize: 11.5, color: ink[500], marginTop: 2 }}>
+                <Text style={{ fontFamily: font.regular, fontSize: 12, color: ink[500], marginTop: 2 }}>
                   {shortDate(h.at)} · {METHOD_LABEL[h.method ?? ""] ?? "Recorded"}
                 </Text>
               </View>
@@ -294,23 +295,23 @@ export default function PrivacySettings() {
       {active ? (
         <Section label="Pause Cheeku">
           <Panel>
-            <Text style={{ fontFamily: font.regular, fontSize: 12.5, lineHeight: 18.5, color: ink[700] }}>
+            <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 18.5, color: ink[700] }}>
               Withdraw all consent. Cheeku stops using your data and stops saving anything new. Your records stay, so you can
               download them, delete them, or agree again to carry on.
             </Text>
-            <Pressable
+            <Tap
               accessibilityRole="button"
               onPress={() => setPauseOpen(true)}
               className="mt-3 h-11 items-center justify-center rounded-pill"
               style={{ borderWidth: 1.5, borderColor: ink[300] }}
             >
-              <Text style={{ fontFamily: font.semibold, fontSize: 14, color: ink[900] }}>Withdraw consent and pause</Text>
-            </Pressable>
+              <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>Withdraw consent and pause</Text>
+            </Tap>
           </Panel>
         </Section>
       ) : null}
 
-      <Text style={{ marginHorizontal: 20, marginTop: 24, fontFamily: font.regular, fontSize: 11.5, lineHeight: 17, color: ink[300] }}>
+      <Text style={{ marginHorizontal: 20, marginTop: 24, fontFamily: font.regular, fontSize: 12, lineHeight: 17, color: ink[300] }}>
         Grievance Officer: {LEGAL_ENTITY.grievanceOfficer}, {LEGAL_ENTITY.privacyEmail}. If you are not satisfied with our answer, you may
         complain to the Data Protection Board of India.
       </Text>
@@ -372,12 +373,12 @@ function groupHistory(rows: HistoryRow[]) {
 function StatusLine({ icon: Icon, title, body }: { icon: LucideIcon; title: string; body: string }) {
   return (
     <View className="flex-row gap-3">
-      <View className="h-10 w-10 items-center justify-center rounded-[13px]" style={{ backgroundColor: brand[50] }}>
+      <View className="h-10 w-10 items-center justify-center rounded-md" style={{ backgroundColor: brand[50] }}>
         <Icon size={19} color={brand[600]} />
       </View>
       <View className="min-w-0 flex-1">
-        <Text style={{ fontFamily: font.semibold, fontSize: 15.5, color: ink[900] }}>{title}</Text>
-        <Text style={{ fontFamily: font.regular, fontSize: 12.5, lineHeight: 18, color: ink[500], marginTop: 3 }}>{body}</Text>
+        <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{title}</Text>
+        <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[500], marginTop: 3 }}>{body}</Text>
       </View>
     </View>
   );
@@ -399,7 +400,7 @@ function LinkRow({
   onPress: () => void;
 }) {
   return (
-    <Pressable
+    <Tap
       accessibilityRole="button"
       disabled={busy}
       onPress={onPress}
@@ -410,11 +411,11 @@ function LinkRow({
         <Icon size={16} color={brand[600]} />
       </View>
       <View className="min-w-0 flex-1">
-        <Text style={{ fontFamily: font.semibold, fontSize: 14, color: ink[900] }}>{title}</Text>
-        <Text style={{ fontFamily: font.regular, fontSize: 11.5, lineHeight: 16, color: ink[500], marginTop: 1 }}>{body}</Text>
+        <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{title}</Text>
+        <Text style={{ fontFamily: font.regular, fontSize: 12, lineHeight: 16, color: ink[500], marginTop: 1 }}>{body}</Text>
       </View>
       {busy ? <ActivityIndicator size="small" color={brand[600]} /> : <ChevronRight size={16} color={ink[300]} />}
-    </Pressable>
+    </Tap>
   );
 }
 
@@ -442,7 +443,7 @@ function RequestSheet({ kind, onClose, onSent }: { kind: RequestKind | null; onC
   return (
     <Sheet open={kind !== null} onClose={onClose} label="Close" dismissible={!busy}>
         <View className="rounded-t-sheet bg-canvas px-5 pt-5" style={{ paddingBottom: insets.bottom + 16 }}>
-          <Text style={{ fontFamily: font.semibold, fontSize: 19, color: ink[900] }}>{copy?.title}</Text>
+          <Text style={{ fontFamily: font.semibold, fontSize: 20, color: ink[900] }}>{copy?.title}</Text>
           <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 19, color: ink[500], marginTop: 4 }}>
             {copy?.line} We reply within 90 days, usually much sooner.
           </Text>
@@ -468,23 +469,23 @@ function RequestSheet({ kind, onClose, onSent }: { kind: RequestKind | null; onC
               textAlignVertical: "top",
             }}
           />
-          <Text style={{ fontFamily: font.regular, fontSize: 11.5, lineHeight: 16, color: ink[300], marginTop: 6 }}>
+          <Text style={{ fontFamily: font.regular, fontSize: 12, lineHeight: 16, color: ink[300], marginTop: 6 }}>
             Please don&apos;t include medical details we don&apos;t need to act on this.
           </Text>
           {error ? (
-            <Text accessibilityRole="alert" style={{ fontFamily: font.medium, fontSize: 12.5, color: ink[700], marginTop: 8 }}>
+            <Text accessibilityRole="alert" style={{ fontFamily: font.medium, fontSize: 13, color: ink[700], marginTop: 8 }}>
               {error}
             </Text>
           ) : null}
-          <Pressable
+          <Tap
             accessibilityRole="button"
             disabled={busy}
             onPress={() => void send()}
             className="mt-4 h-[52px] items-center justify-center rounded-pill"
-            style={{ backgroundColor: ink[900], opacity: busy ? 0.6 : 1 }}
+            style={{ backgroundColor: brand[600], opacity: busy ? 0.6 : 1 }}
           >
             {busy ? <ActivityIndicator color="#fff" /> : <Text style={{ fontFamily: font.semibold, fontSize: 15, color: "#fff" }}>Send request</Text>}
-          </Pressable>
+          </Tap>
         </View>
     </Sheet>
   );

@@ -58,7 +58,7 @@ export function TabBar({ state, navigation }: BottomTabBarProps) {
     <View style={{ backgroundColor: surface.canvas, paddingHorizontal: 14, paddingTop: 6, paddingBottom: Math.max(insets.bottom, 10) }}>
       <View
         accessibilityRole="tablist"
-        className="flex-row items-center rounded-[30px] px-1.5"
+        className="flex-row items-center rounded-2xl px-1.5"
         style={[
           glassShadow,
           { height: 68, backgroundColor: glass.fillStrong, borderWidth: 1, borderColor: glass.rim },
@@ -107,14 +107,14 @@ export function TabBar({ state, navigation }: BottomTabBarProps) {
                     gap: 3,
                     paddingHorizontal: 10,
                     paddingVertical: 6,
-                    borderRadius: 18,
+                    borderRadius: 16,
                     backgroundColor: active ? brand[50] : "transparent",
                   }}
                 >
                   <Icon size={21} strokeWidth={active ? 2.2 : 1.8} color={active ? brand[600] : ink[500]} />
                   <Text
                     numberOfLines={1}
-                    style={{ fontFamily: active ? font.semibold : font.medium, fontSize: 10.5, color: active ? brand[700] : ink[500] }}
+                    style={{ fontFamily: active ? font.semibold : font.medium, fontSize: 11, color: active ? brand[700] : ink[500] }}
                   >
                     {/* The serif wordmark runs small at 10.5, so it is set up a size. */}
                     {brandify(meta.short, { size: 12.5 })}
@@ -142,7 +142,7 @@ function Fab({ onPress }: { onPress: () => void }) {
           {
             width: 52,
             height: 52,
-            borderRadius: 26,
+            borderRadius: 999,
             alignItems: "center",
             justifyContent: "center",
             backgroundColor: ink[900],

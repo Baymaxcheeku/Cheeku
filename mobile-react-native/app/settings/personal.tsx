@@ -131,7 +131,7 @@ export default function PersonalInfo() {
   if (!detail) {
     return (
       <SettingsScreen title="Personal information" eyebrow="Name, date of birth and contact" icon={UserCog}>
-        <Text className="mt-16 px-10 text-center text-[15px] text-ink-500">
+        <Text className="mt-16 px-10 text-center text-base text-ink-500">
           Set up a profile first.
         </Text>
       </SettingsScreen>
@@ -162,10 +162,10 @@ export default function PersonalInfo() {
           sub={detail.isPrimary ? "Your own profile" : (detail.relationship ?? "Family member")}
           avatar={{ svg: context.data?.avatar ?? "", photo: context.data?.photo, image: context.data?.image, background: context.data?.background }}
         >
-          <View style={{ marginTop: 16, padding: 14, borderRadius: 20, backgroundColor: "rgba(255,255,255,0.85)" }}>
+          <View style={{ marginTop: 16, padding: 14, borderRadius: 24, backgroundColor: "rgba(255,255,255,0.85)" }}>
             <View style={{ flexDirection: "row", alignItems: "baseline", justifyContent: "space-between" }}>
-              <Text style={{ fontFamily: font.semibold, fontSize: 13.5, color: ink[900] }}>{filled === 3 ? "All the basics are in" : "The basics"}</Text>
-              <Text style={{ fontFamily: font.medium, fontSize: 12.5, color: ink[500] }}>{filled} of 3</Text>
+              <Text style={{ fontFamily: font.semibold, fontSize: 13, color: ink[900] }}>{filled === 3 ? "All the basics are in" : "The basics"}</Text>
+              <Text style={{ fontFamily: font.medium, fontSize: 13, color: ink[500] }}>{filled} of 3</Text>
             </View>
             <View style={{ marginTop: 8 }}>
               <Meter value={filled} total={3} />
@@ -181,10 +181,10 @@ export default function PersonalInfo() {
           <Pressable
             accessibilityRole="button"
             onPress={() => router.push({ pathname: "/family/[id]", params: { id: detail.id } })}
-            style={({ pressed }) => ({ flexDirection: "row", alignItems: "center", gap: 12, padding: 14, borderRadius: 20, backgroundColor: pressed ? brand[100] : brand[50] })}
+            style={({ pressed }) => ({ flexDirection: "row", alignItems: "center", gap: 12, padding: 14, borderRadius: 24, backgroundColor: pressed ? brand[100] : brand[50] })}
           >
             <HeartPulse size={17} color={brand[600]} />
-            <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 13.5, lineHeight: 19, color: ink[700] }}>
+            <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 13, lineHeight: 19, color: ink[700] }}>
               {first}&apos;s photo, health basics and past reports live on their page.
             </Text>
             <ChevronRight size={17} color={brand[600]} />
@@ -192,10 +192,10 @@ export default function PersonalInfo() {
         </Reveal>
       ) : context.data?.email ? (
         <Reveal style={{ marginHorizontal: 20, marginTop: 12 }}>
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 12, padding: 14, borderRadius: 20, backgroundColor: "rgba(255,255,255,0.75)", borderWidth: 1, borderColor: surface.line }}>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 12, padding: 14, borderRadius: 24, backgroundColor: "rgba(255,255,255,0.75)", borderWidth: 1, borderColor: surface.line }}>
             <Mail size={17} color={brand[600]} />
             <View style={{ flex: 1, minWidth: 0 }}>
-              <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 14, color: ink[900] }}>{context.data.email}</Text>
+              <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{context.data.email}</Text>
               <Text style={{ fontFamily: font.regular, fontSize: 12, color: ink[500], marginTop: 1 }}>Sign-in email. Only you see this.</Text>
             </View>
           </View>
@@ -203,7 +203,7 @@ export default function PersonalInfo() {
       ) : null}
 
       <Reveal style={{ marginHorizontal: 20, marginTop: 16 }}>
-        <View style={[glassShadow, { borderRadius: 28, backgroundColor: "#fff", padding: 18, gap: 16 }]}>
+        <View style={[glassShadow, { borderRadius: 32, backgroundColor: "#fff", padding: 18, gap: 16 }]}>
           <Field label="Full name" required value={name} onChangeText={setName} error={errors.name} autoCapitalize="words" />
 
           <Field
@@ -251,7 +251,7 @@ export default function PersonalInfo() {
 
       <Reveal style={{ marginHorizontal: 20, marginTop: 18, flexDirection: "row", gap: 8, alignItems: "flex-start" }}>
         <ShieldCheck size={14} color={ink[300]} style={{ marginTop: 2 }} />
-        <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 12.5, lineHeight: 18, color: ink[500] }}>
+        <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[500] }}>
           These stay inside your account. They&apos;re never sold, never shown to anyone else, and you can change them any time.
         </Text>
       </Reveal>

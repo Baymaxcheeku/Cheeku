@@ -1,3 +1,4 @@
+import { cssInterop } from "nativewind";
 import { Pressable, type GestureResponderEvent, type PressableProps, type StyleProp, type ViewStyle } from "react-native";
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 
@@ -14,7 +15,9 @@ import { EASE_OUT, useReducedMotion } from "@/components/ui/motion";
  *
  * Reduce Motion: a slight dim instead of a scale.
  *
- * Do not pass a `transform` in `style`; the press owns it.
+ * Do not pass a `transform` in `style`; the press owns it. `className` works:
+ * NativeWind turns it into `style` (registered below), so a Pressable styled
+ * with classes moves over unchanged.
  */
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
@@ -29,6 +32,7 @@ export function Tap({
 }: Omit<PressableProps, "style"> & {
   scale?: number;
   style?: StyleProp<ViewStyle>;
+  className?: string;
 }) {
   const still = useReducedMotion();
   const p = useSharedValue(0);
@@ -54,3 +58,5 @@ export function Tap({
     </AnimatedPressable>
   );
 }
+
+cssInterop(Tap, { className: "style" });

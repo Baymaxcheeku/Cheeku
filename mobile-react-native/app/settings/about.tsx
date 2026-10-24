@@ -34,7 +34,7 @@ import { Body, Eyebrow, Question, Title } from "@/components/settings/editorial"
 import { Reveal, RevealScroll, Spin } from "@/components/ui/reveal";
 import { APP_VERSION } from "@/lib/app-meta";
 import { castFaces } from "@/lib/profiles/avatar";
-import { brand, ink, semantic, surface } from "@/theme/tokens";
+import { brand, ink, lilac, semantic, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
 
 /*
@@ -70,7 +70,7 @@ export default function About() {
       <RevealScroll contentContainerStyle={{ paddingBottom: insets.bottom + 40 }} showsVerticalScrollIndicator={false}>
         {/* ------------------------------------------------------------ hero */}
         <View style={{ overflow: "hidden", paddingTop: insets.top + 8, paddingBottom: 30 }}>
-          <Gradient from="#e4dcff" to="#fafafe" angle="vertical" glow="#ffffff" />
+          <Gradient from={lilac.violet} to={surface.canvas} angle="vertical" glow="#ffffff" />
           <View style={{ paddingHorizontal: 16 }}>
             <GlassCircle label="Go back" onPress={() => (router.canGoBack() ? router.back() : router.replace("/settings"))}>
               <ChevronLeft size={21} color={ink[900]} />
@@ -79,9 +79,9 @@ export default function About() {
 
           <View style={{ height: 300, alignItems: "center", justifyContent: "center", marginTop: 4 }}>
             <Spin seconds={40} style={{ position: "absolute", width: 260, height: 260, zIndex: 0 }}>
-              <View style={{ flex: 1, borderRadius: 130, borderWidth: 1.5, borderStyle: "dashed", borderColor: brand[200] }} />
+              <View style={{ flex: 1, borderRadius: 999, borderWidth: 1.5, borderStyle: "dashed", borderColor: brand[200] }} />
             </Spin>
-            <View style={{ position: "absolute", width: 170, height: 170, borderRadius: 85, backgroundColor: "rgba(255,255,255,0.7)", zIndex: 0 }} />
+            <View style={{ position: "absolute", width: 170, height: 170, borderRadius: 999, backgroundColor: "rgba(255,255,255,0.7)", zIndex: 0 }} />
             <View style={{ position: "absolute", zIndex: 0, alignItems: "center", justifyContent: "center", width: 170, height: 170 }}>
               <PulseRing size={170} />
             </View>
@@ -96,14 +96,14 @@ export default function About() {
           </View>
 
           <View style={{ paddingHorizontal: 24, alignItems: "center" }}>
-            <Text style={{ fontFamily: font.semibold, fontSize: 11.5, letterSpacing: 1.2, textTransform: "uppercase", color: brand[600] }}>
+            <Text style={{ fontFamily: font.semibold, fontSize: 12, letterSpacing: 1.2, textTransform: "uppercase", color: brand[600] }}>
               About <Brand ai size={12} style={{ textTransform: "none", letterSpacing: 0.2 }} />
             </Text>
-            <Text accessibilityRole="header" style={{ fontFamily: font.semibold, fontSize: 32, lineHeight: 37, letterSpacing: -1, color: ink[900], textAlign: "center", marginTop: 8 }}>
+            <Text accessibilityRole="header" style={{ fontFamily: font.semibold, fontSize: 34, lineHeight: 37, letterSpacing: -1, color: ink[900], textAlign: "center", marginTop: 8 }}>
               Your family&apos;s health,{"\n"}
               <Text style={{ fontFamily: font.italic, color: brand[600] }}>remembered.</Text>
             </Text>
-            <Text style={{ fontFamily: font.regular, fontSize: 15.5, lineHeight: 23, color: ink[700], textAlign: "center", marginTop: 12, maxWidth: 330 }}>
+            <Text style={{ fontFamily: font.regular, fontSize: 15, lineHeight: 23, color: ink[700], textAlign: "center", marginTop: 12, maxWidth: 330 }}>
               <Brand /> keeps every report, every reading and every conversation, for every person in your family. So when something isn&apos;t right, the answer starts from everything that came before.
             </Text>
           </View>
@@ -122,8 +122,8 @@ export default function About() {
 
         {/* ------------------------------------------------------- four levels */}
         <Reveal style={{ marginHorizontal: 20, marginTop: 30 }}>
-          <View style={[glassShadow, { borderRadius: 30, overflow: "hidden", padding: 20 }]}>
-            <Gradient from="#ffffff" to="#f3f0ff" angle="diagonal" />
+          <View style={[glassShadow, { borderRadius: 32, overflow: "hidden", padding: 20 }]}>
+            <Gradient from="#ffffff" to={brand[50]} angle="diagonal" />
             <Eyebrow>One clear answer</Eyebrow>
             <Title>Every worry lands on one of four levels</Title>
             <Body>
@@ -134,7 +134,7 @@ export default function About() {
                 <Level key={l.title} {...l} />
               ))}
             </View>
-            <Text style={{ fontFamily: font.regular, fontSize: 12.5, lineHeight: 18, color: ink[500], marginTop: 14 }}>
+            <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[500], marginTop: 14 }}>
               Some things skip the reasoning entirely: fewer movements late in pregnancy, a fever in a baby under three months. Those go straight to &quot;go now&quot;, every time.
             </Text>
           </View>
@@ -161,11 +161,11 @@ export default function About() {
 
         {/* ---------------------------------------------------------- families */}
         <Reveal style={{ marginHorizontal: 20, marginTop: 34 }}>
-          <View style={[glassShadow, { borderRadius: 30, overflow: "hidden", padding: 20 }]}>
-            <Gradient from="#ddd3ff" to="#f6f3ff" angle="diagonal" glow="#ffffff" />
+          <View style={[glassShadow, { borderRadius: 32, overflow: "hidden", padding: 20 }]}>
+            <Gradient from={lilac.deep} to={lilac.mist} angle="diagonal" glow="#ffffff" />
             <View style={{ flexDirection: "row", marginBottom: 14 }}>
               {faces.map((svg, i) => (
-                <View key={i} style={{ marginLeft: i ? -12 : 0, width: 52, height: 52, borderRadius: 26, borderWidth: 3, borderColor: "#fff", overflow: "hidden", backgroundColor: "#fff" }}>
+                <View key={i} style={{ marginLeft: i ? -12 : 0, width: 52, height: 52, borderRadius: 999, borderWidth: 3, borderColor: "#fff", overflow: "hidden", backgroundColor: "#fff" }}>
                   <SvgXml xml={svg} width={46} height={46} />
                 </View>
               ))}
@@ -195,16 +195,16 @@ export default function About() {
         </Reveal>
         <Reveal style={{ marginHorizontal: 20, marginTop: 12 }}>
           <View style={{ borderRadius: 24, borderWidth: 1, borderColor: surface.line, backgroundColor: "#fff", padding: 18 }}>
-            <Text style={{ fontFamily: font.semibold, fontSize: 16, color: ink[900] }}>
+            <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>
               What <Brand /> will never do
             </Text>
             <View style={{ marginTop: 12, gap: 10 }}>
               {NEVER.map((n) => (
                 <View key={n} style={{ flexDirection: "row", gap: 10 }}>
-                  <View style={{ width: 22, height: 22, borderRadius: 11, backgroundColor: surface.tint, alignItems: "center", justifyContent: "center", marginTop: 1 }}>
+                  <View style={{ width: 22, height: 22, borderRadius: 999, backgroundColor: surface.tint, alignItems: "center", justifyContent: "center", marginTop: 1 }}>
                     <X size={12} color={ink[500]} strokeWidth={2.6} />
                   </View>
-                  <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 14, lineHeight: 20, color: ink[700] }}>{n}</Text>
+                  <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 15, lineHeight: 20, color: ink[700] }}>{n}</Text>
                 </View>
               ))}
             </View>
@@ -226,12 +226,12 @@ export default function About() {
 
         {/* ---------------------------------------------------------------- CTA */}
         <Reveal style={{ marginHorizontal: 20, marginTop: 30 }}>
-          <View style={{ borderRadius: 30, overflow: "hidden", padding: 22, alignItems: "center" }}>
-            <Gradient from={brand[700]} to={brand[500]} angle="diagonal" glow="#8a82f5" />
+          <View style={{ borderRadius: 32, overflow: "hidden", padding: 22, alignItems: "center" }}>
+            <Gradient from={brand[700]} to={brand[500]} angle="diagonal" glow={brand[400]} />
             <Text style={{ fontFamily: font.semibold, fontSize: 24, lineHeight: 29, letterSpacing: -0.6, color: "#fff", textAlign: "center" }}>
               Something on your mind?
             </Text>
-            <Text style={{ fontFamily: font.regular, fontSize: 14.5, lineHeight: 21, color: "rgba(255,255,255,0.85)", textAlign: "center", marginTop: 6 }}>
+            <Text style={{ fontFamily: font.regular, fontSize: 15, lineHeight: 21, color: "rgba(255,255,255,0.85)", textAlign: "center", marginTop: 6 }}>
               Tell <Brand onDark /> what&apos;s going on. It already knows the background.
             </Text>
             <Tap
@@ -246,10 +246,10 @@ export default function About() {
         </Reveal>
 
         <Reveal style={{ alignItems: "center", marginTop: 24, gap: 4 }}>
-          <Text style={{ fontFamily: font.medium, fontSize: 12.5, color: ink[500] }}>
+          <Text style={{ fontFamily: font.medium, fontSize: 13, color: ink[500] }}>
             <Brand ai size={13} /> · Version {APP_VERSION}
           </Text>
-          <Text style={{ fontFamily: font.regular, fontSize: 11.5, color: ink[300], textAlign: "center", paddingHorizontal: 40 }}>
+          <Text style={{ fontFamily: font.regular, fontSize: 12, color: ink[300], textAlign: "center", paddingHorizontal: 40 }}>
             General health guidance, not a diagnosis. In an emergency, call 112.
           </Text>
         </Reveal>
@@ -311,11 +311,11 @@ function Floating({ label, note, icon: Icon, style, delay }: { label: string; no
   return (
     <Drift delay={delay} style={[{ position: "absolute", zIndex: 3 }, style]}>
       <View style={[glassShadow, { flexDirection: "row", alignItems: "center", gap: 7, paddingVertical: 7, paddingLeft: 7, paddingRight: 11, borderRadius: 999, backgroundColor: "#fff" }]}>
-        <View style={{ width: 24, height: 24, borderRadius: 12, backgroundColor: brand[50], alignItems: "center", justifyContent: "center" }}>
+        <View style={{ width: 24, height: 24, borderRadius: 999, backgroundColor: brand[50], alignItems: "center", justifyContent: "center" }}>
           <Icon size={13} color={brand[600]} />
         </View>
         <View>
-          <Text style={{ fontFamily: font.semibold, fontSize: 11.5, color: ink[900] }}>{label}</Text>
+          <Text style={{ fontFamily: font.semibold, fontSize: 12, color: ink[900] }}>{label}</Text>
           <Text style={{ fontFamily: font.regular, fontSize: 10, color: ink[500] }}>{note}</Text>
         </View>
       </View>
@@ -327,15 +327,15 @@ function Step({ n, last, icon: Icon, title, text }: { n: number; last: boolean; 
   return (
     <View style={{ flexDirection: "row", gap: 14, marginTop: n === 1 ? 18 : 0 }}>
       <View style={{ alignItems: "center", width: 44 }}>
-        <View style={[glassShadow, { width: 44, height: 44, borderRadius: 15, backgroundColor: "#fff", alignItems: "center", justifyContent: "center" }]}>
+        <View style={[glassShadow, { width: 44, height: 44, borderRadius: 16, backgroundColor: "#fff", alignItems: "center", justifyContent: "center" }]}>
           <Icon size={20} color={brand[600]} />
         </View>
         {last ? null : <View style={{ width: 2, flex: 1, minHeight: 24, marginVertical: 6, borderRadius: 1, backgroundColor: brand[100] }} />}
       </View>
       <View style={{ flex: 1, paddingBottom: last ? 0 : 18 }}>
         <Text style={{ fontFamily: font.semibold, fontSize: 11, letterSpacing: 0.8, color: brand[500] }}>STEP {n}</Text>
-        <Text style={{ fontFamily: font.semibold, fontSize: 16.5, color: ink[900], marginTop: 2 }}>{title}</Text>
-        <Text style={{ fontFamily: font.regular, fontSize: 14, lineHeight: 20, color: ink[700], marginTop: 3 }}>{text}</Text>
+        <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900], marginTop: 2 }}>{title}</Text>
+        <Text style={{ fontFamily: font.regular, fontSize: 15, lineHeight: 20, color: ink[700], marginTop: 3 }}>{text}</Text>
       </View>
     </View>
   );
@@ -351,13 +351,13 @@ const LEVEL_TONE = {
 function Level({ tier, icon: Icon, title, text }: (typeof LEVELS)[number]) {
   const t = LEVEL_TONE[tier];
   return (
-    <View style={{ flexDirection: "row", alignItems: "center", gap: 12, padding: 12, borderRadius: 18, backgroundColor: "#fff", borderWidth: 1, borderColor: surface.line }}>
+    <View style={{ flexDirection: "row", alignItems: "center", gap: 12, padding: 12, borderRadius: 16, backgroundColor: "#fff", borderWidth: 1, borderColor: surface.line }}>
       <View style={{ width: 36, height: 36, borderRadius: 12, backgroundColor: t.bg, alignItems: "center", justifyContent: "center" }}>
         <Icon size={17} color={t.fg} strokeWidth={2.2} />
       </View>
       <View style={{ flex: 1 }}>
-        <Text style={{ fontFamily: font.semibold, fontSize: 14.5, color: ink[900] }}>{title}</Text>
-        <Text style={{ fontFamily: font.regular, fontSize: 12.5, lineHeight: 17, color: ink[500], marginTop: 1 }}>{text}</Text>
+        <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{title}</Text>
+        <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 17, color: ink[500], marginTop: 1 }}>{text}</Text>
       </View>
     </View>
   );
@@ -366,11 +366,11 @@ function Level({ tier, icon: Icon, title, text }: (typeof LEVELS)[number]) {
 function Feature({ icon: Icon, title, text }: { icon: LucideIcon; title: string; text: string }) {
   return (
     <View style={[glassShadow, { flex: 1, borderRadius: 24, backgroundColor: "#fff", padding: 14, gap: 8 }]}>
-      <View style={{ width: 38, height: 38, borderRadius: 13, backgroundColor: brand[50], alignItems: "center", justifyContent: "center" }}>
+      <View style={{ width: 38, height: 38, borderRadius: 12, backgroundColor: brand[50], alignItems: "center", justifyContent: "center" }}>
         <Icon size={18} color={brand[600]} />
       </View>
-      <Text style={{ fontFamily: font.semibold, fontSize: 14.5, color: ink[900] }}>{title}</Text>
-      <Text style={{ fontFamily: font.regular, fontSize: 12.5, lineHeight: 18, color: ink[700] }}>{text}</Text>
+      <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{title}</Text>
+      <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[700] }}>{text}</Text>
     </View>
   );
 }
@@ -379,19 +379,19 @@ function Tick({ text }: { text: string }) {
   return (
     <View style={{ flexDirection: "row", gap: 8, alignItems: "flex-start" }}>
       <HeartHandshake size={15} color={brand[600]} style={{ marginTop: 2 }} />
-      <Text style={{ flex: 1, fontFamily: font.medium, fontSize: 13.5, lineHeight: 19, color: ink[900] }}>{text}</Text>
+      <Text style={{ flex: 1, fontFamily: font.medium, fontSize: 13, lineHeight: 19, color: ink[900] }}>{text}</Text>
     </View>
   );
 }
 
 function Trust({ icon: Icon, title, text }: { icon: LucideIcon; title: string; text: string }) {
   return (
-    <View style={[glassShadow, { flex: 1, alignItems: "center", borderRadius: 22, backgroundColor: "#fff", paddingVertical: 16, paddingHorizontal: 8, gap: 6 }]}>
-      <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: brand[50], alignItems: "center", justifyContent: "center" }}>
+    <View style={[glassShadow, { flex: 1, alignItems: "center", borderRadius: 24, backgroundColor: "#fff", paddingVertical: 16, paddingHorizontal: 8, gap: 6 }]}>
+      <View style={{ width: 40, height: 40, borderRadius: 999, backgroundColor: brand[50], alignItems: "center", justifyContent: "center" }}>
         <Icon size={18} color={brand[600]} />
       </View>
-      <Text style={{ fontFamily: font.semibold, fontSize: 13.5, color: ink[900] }}>{title}</Text>
-      <Text style={{ fontFamily: font.regular, fontSize: 11.5, color: ink[500], textAlign: "center" }}>{text}</Text>
+      <Text style={{ fontFamily: font.semibold, fontSize: 13, color: ink[900] }}>{title}</Text>
+      <Text style={{ fontFamily: font.regular, fontSize: 12, color: ink[500], textAlign: "center" }}>{text}</Text>
     </View>
   );
 }

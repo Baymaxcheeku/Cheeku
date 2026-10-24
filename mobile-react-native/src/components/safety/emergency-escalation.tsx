@@ -1,6 +1,6 @@
 import { Phone, ShieldAlert, X } from "lucide-react-native";
 import { useEffect, useState } from "react";
-import { Linking, Modal, Pressable, ScrollView, Text, View } from "react-native";
+import { Linking, Modal, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import {
@@ -12,6 +12,7 @@ import {
 } from "@/lib/safety/escalation";
 import type { SafetyResult } from "@/lib/safety/detect";
 import { ink, semantic, shadow, surface } from "@/theme/tokens";
+import { Tap } from "@/components/ui/tap";
 
 /**
  * The interrupt shown when the safety gate escalates.
@@ -72,13 +73,13 @@ export function EmergencyEscalation({
             <ShieldAlert size={26} color={semantic.danger} />
           </View>
 
-          <Text className="mt-4 text-[24px] font-bold leading-tight text-ink-900">
+          <Text className="mt-4 text-2xl font-bold leading-tight text-ink-900">
             {copy.title}
           </Text>
-          <Text className="mt-1 text-[18px] font-semibold leading-tight text-ink-900">
+          <Text className="mt-1 text-lg font-semibold leading-tight text-ink-900">
             {copy.lead}
           </Text>
-          <Text className="mt-3 text-[14px] leading-[21px] text-ink-700">{copy.body}</Text>
+          <Text className="mt-3 text-base leading-[21px] text-ink-700">{copy.body}</Text>
 
           <View className="mt-5 gap-2.5">
             {contacts.map((contact) => (
@@ -92,13 +93,13 @@ export function EmergencyEscalation({
            * to them by an app that just refused to answer.
            */}
           <View className="mt-5 rounded-card bg-surface p-4" style={shadow.e1}>
-            <Text className="text-[13px] font-semibold text-ink-900">Why you are seeing this</Text>
-            <Text className="mt-1.5 text-[12.5px] leading-[18px] text-ink-500">{copy.why}</Text>
+            <Text className="text-sm font-semibold text-ink-900">Why you are seeing this</Text>
+            <Text className="mt-1.5 text-sm leading-[18px] text-ink-500">{copy.why}</Text>
           </View>
 
           <View className="flex-1" />
 
-          <Pressable
+          <Tap
             accessibilityRole="button"
             accessibilityState={{ disabled: held }}
             accessibilityLabel={
@@ -115,10 +116,10 @@ export function EmergencyEscalation({
             }}
           >
             <X size={16} color={ink[700]} />
-            <Text className="text-[14px] font-semibold text-ink-700">
+            <Text className="text-base font-semibold text-ink-700">
               {held ? "Please read the above" : "Back to the chat"}
             </Text>
-          </Pressable>
+          </Tap>
         </ScrollView>
       </View>
     </Modal>
@@ -136,7 +137,7 @@ function ContactRow({ contact }: { contact: EmergencyContact }) {
   }
 
   return (
-    <Pressable
+    <Tap scale={0.98}
       accessibilityRole="button"
       accessibilityLabel={`Call ${contact.label} on ${contact.number.split("").join(" ")}`}
       onPress={call}
@@ -156,24 +157,24 @@ function ContactRow({ contact }: { contact: EmergencyContact }) {
       </View>
       <View className="min-w-0 flex-1">
         <Text
-          className="text-[15px] font-bold"
+          className="text-base font-bold"
           style={{ color: contact.primary ? "#ffffff" : ink[900] }}
         >
           {contact.label}
         </Text>
         <Text
-          className="text-[12px]"
+          className="text-xs"
           style={{ color: contact.primary ? "rgba(255,255,255,0.85)" : ink[500] }}
         >
           {contact.detail}
         </Text>
       </View>
       <Text
-        className="text-[17px] font-bold"
+        className="text-lg font-bold"
         style={{ color: contact.primary ? "#ffffff" : semantic.danger }}
       >
         {contact.number}
       </Text>
-    </Pressable>
+    </Tap>
   );
 }

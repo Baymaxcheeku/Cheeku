@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { Building2, CalendarDays, ChevronRight, Clock3, Hash, MonitorPlay, Receipt, Share2, ShieldPlus, Store, TestTube, Wallet } from "lucide-react-native";
-import { Pressable, Share, Text, View } from "react-native";
+import { Share, Text, View } from "react-native";
 
 import { PillButton } from "@/components/ui/screen";
 import { useAppointments } from "@/lib/booking/appointments";
@@ -16,10 +16,11 @@ import {
 } from "@/lib/records/details";
 import { recordsOfType } from "@/lib/records/record-actions";
 import type { RecordDetail } from "@/lib/records/types";
-import { brand, ink, surface } from "@/theme/tokens";
+import { brand, hue, ink, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
 
 import { Card, Eyebrow, FactList, MoneyLine, PaymentBadge, Perforation, Section } from "./parts";
+import { Tap } from "@/components/ui/tap";
 
 /*
  * Money records: a pharmacy or hospital bill, and the invoices the app files
@@ -43,10 +44,10 @@ function AmountHero({ total, status, caption, tint }: { total: number; status: B
       <View style={{ flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between" }}>
         <View style={{ flex: 1 }}>
           <Eyebrow>Total</Eyebrow>
-          <Text style={{ fontFamily: font.bold, fontSize: 32, letterSpacing: -1, color: ink[900], marginTop: 4, fontVariant: ["tabular-nums"] }}>{rupees(total)}</Text>
+          <Text style={{ fontFamily: font.bold, fontSize: 34, letterSpacing: -1, color: ink[900], marginTop: 4, fontVariant: ["tabular-nums"] }}>{rupees(total)}</Text>
           {caption ? <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 2 }}>{caption}</Text> : null}
         </View>
-        <View style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: `${tint}14`, alignItems: "center", justifyContent: "center" }}>
+        <View style={{ width: 44, height: 44, borderRadius: 16, backgroundColor: `${tint}14`, alignItems: "center", justifyContent: "center" }}>
           <Wallet size={20} color={tint} />
         </View>
       </View>
@@ -90,10 +91,10 @@ export function BillBody({ record, details }: { record: RecordDetail; details: B
 
   return (
     <View>
-      <AmountHero total={details.total} status={details.status} caption={caption} tint="#5b5580" />
+      <AmountHero total={details.total} status={details.status} caption={caption} tint={hue.slate.fg} />
 
       {details.items.length ? (
-        <Section title="What was billed" right={<Text style={{ fontFamily: font.medium, fontSize: 12.5, color: ink[500] }}>{details.items.length} item{details.items.length === 1 ? "" : "s"}</Text>}>
+        <Section title="What was billed" right={<Text style={{ fontFamily: font.medium, fontSize: 13, color: ink[500] }}>{details.items.length} item{details.items.length === 1 ? "" : "s"}</Text>}>
           <Card>
             {groups.map((g, gi) => (
               <View key={g.name} style={{ marginTop: gi ? 14 : 0 }}>
@@ -124,7 +125,7 @@ export function BillBody({ record, details }: { record: RecordDetail; details: B
 
       {details.claimable ? (
         <Section title="Insurance">
-          <Pressable
+          <Tap
             accessibilityRole="button"
             onPress={() => {
               const first = insurance.data?.[0];
@@ -133,18 +134,18 @@ export function BillBody({ record, details }: { record: RecordDetail; details: B
             disabled={!insurance.data?.length}
           >
             <Card style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
-              <View style={{ width: 42, height: 42, borderRadius: 14, backgroundColor: "#e0f2f6", alignItems: "center", justifyContent: "center" }}>
-                <ShieldPlus size={19} color="#155e75" />
+              <View style={{ width: 42, height: 42, borderRadius: 16, backgroundColor: hue.ocean.bg, alignItems: "center", justifyContent: "center" }}>
+                <ShieldPlus size={19} color={hue.ocean.fg} />
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={{ fontFamily: font.semibold, fontSize: 14.5, color: ink[900] }}>This bill can be claimed</Text>
-                <Text style={{ fontFamily: font.regular, fontSize: 12.5, lineHeight: 17, color: ink[500], marginTop: 2 }}>
+                <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>This bill can be claimed</Text>
+                <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 17, color: ink[500], marginTop: 2 }}>
                   {insurance.data?.length ? "Open the policy for the claims number and what it covers." : "Add the insurance policy to see what it covers."}
                 </Text>
               </View>
               {insurance.data?.length ? <ChevronRight size={18} color={ink[500]} /> : null}
             </Card>
-          </Pressable>
+          </Tap>
         </Section>
       ) : null}
 
@@ -199,19 +200,19 @@ export function ConsultationInvoiceBody({ record, details }: { record: RecordDet
           <View style={{ flex: 1 }}>
             <Eyebrow>Invoice</Eyebrow>
             <Text selectable style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900], marginTop: 4 }}>{details.invoiceNo}</Text>
-            {details.issuedAt ? <Text style={{ fontFamily: font.regular, fontSize: 12.5, color: ink[500], marginTop: 1 }}>Issued {shortDate(details.issuedAt)}</Text> : null}
+            {details.issuedAt ? <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 1 }}>Issued {shortDate(details.issuedAt)}</Text> : null}
           </View>
           <PaymentBadge status={details.status} />
         </View>
 
-        <View style={{ marginTop: 16, padding: 12, borderRadius: 18, backgroundColor: "rgba(15,16,48,0.035)", gap: 10 }}>
+        <View style={{ marginTop: 16, padding: 12, borderRadius: 16, backgroundColor: "rgba(15,16,48,0.035)", gap: 10 }}>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-            <View style={{ width: 36, height: 36, borderRadius: 12, backgroundColor: "#e5eefb", alignItems: "center", justifyContent: "center" }}>
-              {online ? <MonitorPlay size={17} color="#2563a8" /> : <Building2 size={17} color="#2563a8" />}
+            <View style={{ width: 36, height: 36, borderRadius: 12, backgroundColor: hue.blue.wash, alignItems: "center", justifyContent: "center" }}>
+              {online ? <MonitorPlay size={17} color={hue.blue.fg} /> : <Building2 size={17} color={hue.blue.fg} />}
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={{ fontFamily: font.semibold, fontSize: 14.5, color: ink[900] }}>{details.doctor.name}</Text>
-              <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 12.5, color: ink[500], marginTop: 1 }}>
+              <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{details.doctor.name}</Text>
+              <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 1 }}>
                 {[details.doctor.specialty, online ? "Video consultation" : details.doctor.clinic ?? "Clinic visit"].filter(Boolean).join(" · ")}
               </Text>
             </View>
@@ -233,7 +234,7 @@ export function ConsultationInvoiceBody({ record, details }: { record: RecordDet
           ))}
           <Perforation />
           <MoneyLine label="Total" amount={details.total} strong />
-          {details.paymentMode ? <Text style={{ fontFamily: font.regular, fontSize: 12.5, color: ink[500], marginTop: 4 }}>{paidBy(details.paymentMode)}</Text> : null}
+          {details.paymentMode ? <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 4 }}>{paidBy(details.paymentMode)}</Text> : null}
         </View>
 
         {STATUS_NOTE[details.status] ? (
@@ -244,7 +245,7 @@ export function ConsultationInvoiceBody({ record, details }: { record: RecordDet
       </Card>
 
       {appointment ? (
-        <PillButton tone="dark" icon={<Clock3 size={17} color="#fff" />} style={{ marginTop: 16 }} onPress={() => router.push(`/appointments/${appointment.id}`)}>
+        <PillButton icon={<Clock3 size={17} color="#fff" />} style={{ marginTop: 16 }} onPress={() => router.push(`/appointments/${appointment.id}`)}>
           See the appointment
         </PillButton>
       ) : null}
@@ -294,7 +295,7 @@ export function BookingInvoiceBody({ record, details }: { record: RecordDetail; 
       </Section>
 
       {fromApp && details.bookingId ? (
-        <PillButton tone="dark" icon={<TestTube size={17} color="#fff" />} style={{ marginTop: 16 }} onPress={() => router.push(`/labs/booking/${details.bookingId}`)}>
+        <PillButton icon={<TestTube size={17} color="#fff" />} style={{ marginTop: 16 }} onPress={() => router.push(`/labs/booking/${details.bookingId}`)}>
           {details.status === "cancelled" ? "See the booking" : "Track this booking"}
         </PillButton>
       ) : null}

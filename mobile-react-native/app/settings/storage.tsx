@@ -2,7 +2,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { Cookie, Eraser, HardDrive, KeyRound, ScanEye, WifiOff } from "lucide-react-native";
 import { useState } from "react";
-import { ActivityIndicator, Pressable, Text, View } from "react-native";
+import { ActivityIndicator, Text, View } from "react-native";
 
 import { Panel, Section, SettingsScreen } from "@/components/settings/chrome";
 import { SpringSwitch } from "@/components/ui/motion";
@@ -12,6 +12,7 @@ import { clearCaches, formatBytes, storageUsage } from "@/lib/privacy/local-data
 import { STORAGE_REGISTRY, WHERE_LABEL, type StoredItem } from "@/lib/privacy/storage-registry";
 import { brand, ink, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
+import { Tap } from "@/components/ui/tap";
 
 /**
  * Storage and cache: what this app keeps on the phone, and the controls.
@@ -68,7 +69,7 @@ export default function StorageSettings() {
             <ActivityIndicator style={{ marginTop: 14 }} color={brand[600]} />
           ) : (
             <>
-              <Text style={{ fontFamily: font.semibold, fontSize: 30, letterSpacing: -0.8, color: ink[900], marginTop: 6 }}>
+              <Text style={{ fontFamily: font.semibold, fontSize: 28, letterSpacing: -0.8, color: ink[900], marginTop: 6 }}>
                 {formatBytes(total)}
               </Text>
               <View className="mt-3 gap-2">
@@ -77,22 +78,22 @@ export default function StorageSettings() {
               </View>
             </>
           )}
-          <Pressable
+          <Tap
             accessibilityRole="button"
             disabled={busy}
             onPress={() => void clear()}
             className="mt-4 h-12 flex-row items-center justify-center gap-2 rounded-pill"
-            style={{ backgroundColor: ink[900], opacity: busy ? 0.6 : 1 }}
+            style={{ backgroundColor: brand[600], opacity: busy ? 0.6 : 1 }}
           >
             {busy ? <ActivityIndicator color="#fff" /> : <Eraser size={16} color="#fff" />}
             <Text style={{ fontFamily: font.semibold, fontSize: 15, color: "#fff" }}>Clear cache</Text>
-          </Pressable>
-          <Text style={{ fontFamily: font.regular, fontSize: 11.5, lineHeight: 17, color: ink[500], marginTop: 8 }}>
+          </Tap>
+          <Text style={{ fontFamily: font.regular, fontSize: 12, lineHeight: 17, color: ink[500], marginTop: 8 }}>
             Keeps you signed in and keeps your settings. Nothing on our servers is deleted.
           </Text>
         </Panel>
         {note ? (
-          <Text accessibilityRole="alert" style={{ marginHorizontal: 20, marginTop: 10, fontFamily: font.medium, fontSize: 12.5, lineHeight: 18, color: ink[700] }}>
+          <Text accessibilityRole="alert" style={{ marginHorizontal: 20, marginTop: 10, fontFamily: font.medium, fontSize: 13, lineHeight: 18, color: ink[700] }}>
             {note}
           </Text>
         ) : null}
@@ -106,8 +107,8 @@ export default function StorageSettings() {
               <WifiOff size={17} color={brand[600]} />
             </View>
             <View className="min-w-0 flex-1">
-              <Text style={{ fontFamily: font.semibold, fontSize: 14.5, color: ink[900] }}>Keep records readable offline</Text>
-              <Text style={{ fontFamily: font.regular, fontSize: 11.5, lineHeight: 16, color: ink[500], marginTop: 2 }}>
+              <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>Keep records readable offline</Text>
+              <Text style={{ fontFamily: font.regular, fontSize: 12, lineHeight: 16, color: ink[500], marginTop: 2 }}>
                 Your records list and details, for a waiting room with no signal.
               </Text>
             </View>
@@ -116,12 +117,12 @@ export default function StorageSettings() {
 
           {p?.enabled ? (
             <View className="mt-4">
-              <Text style={{ fontFamily: font.medium, fontSize: 12.5, color: ink[700] }}>Keep the offline copy for</Text>
+              <Text style={{ fontFamily: font.medium, fontSize: 13, color: ink[700] }}>Keep the offline copy for</Text>
               <View className="mt-2 flex-row gap-2">
                 {OFFLINE_WINDOWS.map((w) => {
                   const on = p.days === w.days;
                   return (
-                    <Pressable
+                    <Tap
                       key={w.days}
                       accessibilityRole="radio"
                       accessibilityState={{ selected: on }}
@@ -130,7 +131,7 @@ export default function StorageSettings() {
                       style={{ backgroundColor: on ? brand[600] : surface.base, borderWidth: 1, borderColor: on ? brand[600] : surface.line }}
                     >
                       <Text style={{ fontFamily: font.semibold, fontSize: 13, color: on ? "#fff" : ink[700] }}>{w.label}</Text>
-                    </Pressable>
+                    </Tap>
                   );
                 })}
               </View>
@@ -147,9 +148,9 @@ export default function StorageSettings() {
           <Fact icon={ScanEye} title="No trackers or analytics" body="No advertising SDK, no analytics or session-recording tool, and your advertising ID is never read." />
           <Divider />
           <Fact icon={KeyRound} title="Your sign-in stays in the keychain" body="Held by iOS Keychain or Android Keystore, not in a plain file." />
-          <Pressable accessibilityRole="link" onPress={() => router.push({ pathname: "/legal/[doc]", params: { doc: "storage" } })} className="mt-3">
+          <Tap accessibilityRole="link" onPress={() => router.push({ pathname: "/legal/[doc]", params: { doc: "storage" } })} className="mt-3">
             <Text style={{ fontFamily: font.semibold, fontSize: 13, color: brand[600] }}>Read the cookie and storage notice</Text>
-          </Pressable>
+          </Tap>
         </Panel>
       </Section>
 
@@ -182,7 +183,7 @@ function Fact({ icon: Icon, title, body }: { icon: typeof Cookie; title: string;
     <View className="flex-row gap-3">
       <Icon size={17} color={brand[500]} style={{ marginTop: 2 }} />
       <View className="min-w-0 flex-1">
-        <Text style={{ fontFamily: font.semibold, fontSize: 13.5, color: ink[900] }}>{title}</Text>
+        <Text style={{ fontFamily: font.semibold, fontSize: 13, color: ink[900] }}>{title}</Text>
         <Text style={{ fontFamily: font.regular, fontSize: 12, lineHeight: 17, color: ink[500], marginTop: 2 }}>{body}</Text>
       </View>
     </View>
@@ -198,9 +199,9 @@ function InventoryRow({ item, last }: { item: StoredItem; last: boolean }) {
   return (
     <View className="px-4 py-3" style={last ? undefined : { borderBottomWidth: 1, borderBottomColor: surface.line }}>
       <View className="flex-row items-start gap-2">
-        <Text style={{ flex: 1, fontFamily: font.semibold, fontSize: 13.5, color: ink[900] }}>{item.label}</Text>
+        <Text style={{ flex: 1, fontFamily: font.semibold, fontSize: 13, color: ink[900] }}>{item.label}</Text>
         <View className="rounded-pill px-2 py-0.5" style={{ backgroundColor: kept ? surface.tint : brand[50] }}>
-          <Text style={{ fontFamily: font.semibold, fontSize: 10.5, color: kept ? ink[500] : brand[700] }}>
+          <Text style={{ fontFamily: font.semibold, fontSize: 11, color: kept ? ink[500] : brand[700] }}>
             {kept ? "Kept for this phone" : item.scope === "session" ? "Ends at sign-out" : "Removed at sign-out"}
           </Text>
         </View>

@@ -18,7 +18,7 @@ import {
   TriangleAlert,
   type LucideIcon,
 } from "lucide-react-native";
-import { Pressable, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { MascotFigure } from "@/components/illustrations/sprout";
@@ -34,8 +34,9 @@ import {
   type RecordSummary,
   type Severity,
 } from "@/lib/records/types";
-import { ink, semantic, shadow, surface } from "@/theme/tokens";
+import { brand, hue, ink, lilac, semantic, shadow, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
+import { Tap } from "@/components/ui/tap";
 
 const DOC_ICON: Record<string, LucideIcon> = {
   flask: FlaskConical,
@@ -60,16 +61,16 @@ const DOC_ICON: Record<string, LucideIcon> = {
  * for the same reason the tokens are.
  */
 const DOC_TINT: Record<DocType, { bg: string; fg: string }> = {
-  lab_report: { bg: "#f1f0fe", fg: "#4a2ade" },
-  prescription: { bg: "#fdeee0", fg: "#c2650b" },
-  discharge: { bg: "#e6f1fd", fg: "#1a6fc2" },
-  scan: { bg: "#f1eafd", fg: "#7b3fd4" },
-  bill: { bg: "#efeff5", fg: "#5b5580" },
-  vaccination: { bg: "#fdeaf0", fg: "#c22a6b" },
-  consultation_invoice: { bg: "#e5eefb", fg: "#2563a8" },
-  booking_invoice: { bg: "#efeafd", fg: "#6b4fc4" },
-  insurance: { bg: "#e0f2f6", fg: "#155e75" },
-  medication: { bg: "#fbe9f5", fg: "#b0428a" },
+  lab_report: { bg: brand[50], fg: brand[600] },
+  prescription: { bg: hue.orange.wash, fg: hue.orange.fg },
+  discharge: { bg: hue.blue.wash, fg: hue.blue.fg },
+  scan: { bg: lilac.base, fg: "#7b3fd4" },
+  bill: { bg: hue.slate.bg, fg: hue.slate.fg },
+  vaccination: { bg: hue.rose.bg, fg: hue.rose.fg },
+  consultation_invoice: { bg: hue.blue.wash, fg: hue.blue.fg },
+  booking_invoice: { bg: lilac.base, fg: "#6b4fc4" },
+  insurance: { bg: hue.ocean.bg, fg: hue.ocean.fg },
+  medication: { bg: hue.plum.bg, fg: hue.plum.fg },
   other: { bg: surface.canvas, fg: ink[500] },
 };
 
@@ -95,7 +96,7 @@ export function RecordsHeader({ title, subtitle }: { title: string; subtitle: st
           <Text accessibilityRole="header" style={{ fontFamily: font.semibold, fontSize: 28, lineHeight: 33, letterSpacing: -0.8, color: ink[900] }}>
             {title}
           </Text>
-          <Text style={{ fontFamily: font.regular, fontSize: 14, color: ink[500], marginTop: 4 }}>{subtitle}</Text>
+          <Text style={{ fontFamily: font.regular, fontSize: 15, color: ink[500], marginTop: 4 }}>{subtitle}</Text>
         </View>
         {/* The filing clerk: Cheeku at his desk, typing away. Tap him. */}
         <MascotFigure size={72} moment="working" hop />
@@ -114,7 +115,7 @@ export function RecordsHeader({ title, subtitle }: { title: string; subtitle: st
 }
 
 const STAT_CELLS = [
-  { key: "total", label: "Total records", icon: FileText, fg: "#4a2ade", bg: "#f1f0fe" },
+  { key: "total", label: "Total records", icon: FileText, fg: brand[600], bg: brand[50] },
   { key: "normal", label: SEVERITY_LABEL.normal, icon: ShieldCheck, fg: semantic.safe, bg: semantic.safeBg },
   {
     key: "borderline",
@@ -152,8 +153,8 @@ export function StatsCard({ stats }: { stats: RecordStats }) {
           >
             <Icon size={15} color={fg} />
           </View>
-          <Text className="text-[18px] font-bold leading-none text-ink-900">{stats[key]}</Text>
-          <Text className="text-center text-[9.5px] leading-tight text-ink-500">{label}</Text>
+          <Text className="text-lg font-bold leading-none text-ink-900">{stats[key]}</Text>
+          <Text className="text-center text-3xs leading-tight text-ink-500">{label}</Text>
         </View>
       ))}
     </View>
@@ -165,7 +166,7 @@ export function SeverityPill({ severity }: { severity: Severity }) {
   const tint = SEVERITY_TINT[severity];
   return (
     <View className="rounded-pill px-2.5 py-1" style={{ backgroundColor: tint.bg }}>
-      <Text className="text-[11px] font-semibold" style={{ color: tint.fg }}>
+      <Text className="text-2xs font-semibold" style={{ color: tint.fg }}>
         {SEVERITY_LABEL[severity]}
       </Text>
     </View>
@@ -199,12 +200,12 @@ export function FileChip({
     >
       <Icon size={compact ? 16 : 19} strokeWidth={2.1} color={tint.fg} />
       <View
-        className="absolute -bottom-1 -right-1 rounded-[5px] bg-surface px-[3px]"
-        style={[{ borderWidth: 1, borderColor: surface.base }, shadow.e1]}
+        className="absolute -bottom-1 -right-1 bg-surface px-[3px]"
+        style={[{ borderRadius: 5, borderWidth: 1, borderColor: surface.base }, shadow.e1]}
       >
         <Text
           className="font-bold"
-          style={{ fontSize: compact ? 6.5 : 7, lineHeight: 10, color: ink[500] }}
+          style={{ fontSize: 10, lineHeight: 12, color: ink[500] }}
         >
           {fileKind(mimeType)}
         </Text>
@@ -237,7 +238,7 @@ export function RecordRow({
   const card = variant === "card";
 
   return (
-    <Pressable
+    <Tap scale={0.98}
       accessibilityRole="button"
       accessibilityLabel={`${record.title}, ${record.profileName}, ${SEVERITY_LABEL[record.severity]}`}
       onPress={() => router.push(`/records/${record.id}`)}
@@ -251,14 +252,14 @@ export function RecordRow({
       <FileChip mimeType={record.mimeType} docType={record.docType} />
 
       <View className="min-w-0 flex-1">
-        <Text className="text-[15px] font-semibold text-ink-900" numberOfLines={1}>
+        <Text className="text-base font-semibold text-ink-900" numberOfLines={1}>
           {record.title}
         </Text>
-        <Text className="mt-0.5 text-[12px] text-ink-500" numberOfLines={1}>
+        <Text className="mt-0.5 text-xs text-ink-500" numberOfLines={1}>
           {record.profileName} · {formatEventDate(record.eventDate)}
         </Text>
         {record.facility ? (
-          <Text className="mt-0.5 text-[12px] text-ink-300" numberOfLines={1}>
+          <Text className="mt-0.5 text-xs text-ink-300" numberOfLines={1}>
             {record.facility}
           </Text>
         ) : null}
@@ -266,7 +267,7 @@ export function RecordRow({
 
       <SeverityPill severity={record.severity} />
       <ChevronRight size={18} color={ink[300]} />
-    </Pressable>
+    </Tap>
   );
 }
 
@@ -275,18 +276,18 @@ export function EmptyRecords({ filtered }: { filtered: boolean }) {
   const router = useRouter();
 
   return (
-    <Glass strong className="mx-5 mt-6 items-center rounded-[28px] px-6 py-8">
+    <Glass strong className="mx-5 mt-6 items-center rounded-2xl px-6 py-8">
       {filtered ? (
         <View className="h-12 w-12 items-center justify-center rounded-pill bg-brand-50">
-          <FileText size={22} color="#5b4ef0" />
+          <FileText size={22} color={brand[500]} />
         </View>
       ) : (
         <MascotFigure size={96} moment="present" move="sway" hop />
       )}
-      <Text style={{ fontFamily: font.semibold, fontSize: 18, color: ink[900], marginTop: 10, textAlign: "center" }}>
+      <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900], marginTop: 10, textAlign: "center" }}>
         {filtered ? "Nothing matches those filters" : "Your health file is empty"}
       </Text>
-      <Text style={{ fontFamily: font.regular, fontSize: 14, lineHeight: 20, color: ink[500], marginTop: 4, textAlign: "center", maxWidth: 280 }}>
+      <Text style={{ fontFamily: font.regular, fontSize: 15, lineHeight: 20, color: ink[500], marginTop: 4, textAlign: "center", maxWidth: 280 }}>
         {filtered
           ? "Try clearing a filter to see more of your documents."
           : "Snap a report or pick a PDF. I'll read it, file it and remember every value."}

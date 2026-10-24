@@ -2,7 +2,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { ChevronLeft, Download, LogOut } from "lucide-react-native";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, AppState, Modal, Pressable, ScrollView, Text, View } from "react-native";
+import { ActivityIndicator, AppState, Modal, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { MascotBust } from "@/components/illustrations/sprout";
@@ -17,6 +17,7 @@ import { signOutAndWipe } from "@/lib/privacy/local-data";
 import { supabase } from "@/lib/supabase/client";
 import { brand, ink, shadow, surface } from "@/theme/tokens";
 import { font, type } from "@/theme/type";
+import { Tap } from "@/components/ui/tap";
 
 /*
  * Asks a signed-in person to agree, when the database says they have to.
@@ -143,31 +144,31 @@ function ConsentSheet({ state }: { state: ConsentState }) {
                 const doc = LEGAL_DOCUMENTS[k as LegalKind];
                 if (!doc) return null;
                 return (
-                  <Pressable
+                  <Tap scale={0.98}
                     key={k}
                     accessibilityRole="button"
                     onPress={() => setReading(doc.kind)}
-                    className="rounded-[18px] p-4"
+                    className="rounded-lg p-4"
                     style={[{ backgroundColor: surface.base }, shadow.e1]}
                   >
-                    <Text style={{ fontFamily: font.semibold, fontSize: 14.5, color: ink[900] }}>{doc.title}</Text>
-                    <Text style={{ fontFamily: font.regular, fontSize: 12.5, lineHeight: 18, color: ink[500], marginTop: 4 }}>
+                    <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{doc.title}</Text>
+                    <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[500], marginTop: 4 }}>
                       {doc.changes[0] ?? doc.summary}
                     </Text>
-                    <Text style={{ fontFamily: font.semibold, fontSize: 12.5, color: brand[600], marginTop: 8 }}>
+                    <Text style={{ fontFamily: font.semibold, fontSize: 13, color: brand[600], marginTop: 8 }}>
                       {doc.changes.length ? "Read what changed" : `Read the ${doc.title}`}
                     </Text>
-                  </Pressable>
+                  </Tap>
                 );
               })}
             </View>
           ) : null}
 
           {state.reason === "withdrawn" && state.missing.length ? (
-            <View className="mt-5 rounded-[18px] p-4" style={{ backgroundColor: surface.base, borderWidth: 1, borderColor: surface.line }}>
+            <View className="mt-5 rounded-lg p-4" style={{ backgroundColor: surface.base, borderWidth: 1, borderColor: surface.line }}>
               <Text style={{ fontFamily: font.semibold, fontSize: 13, color: ink[900] }}>Paused because you withdrew</Text>
               {state.missing.map((p) => (
-                <Text key={p} style={{ fontFamily: font.regular, fontSize: 12.5, lineHeight: 19, color: ink[500], marginTop: 4 }}>
+                <Text key={p} style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 19, color: ink[500], marginTop: 4 }}>
                   {PURPOSE_COPY[p].title}
                 </Text>
               ))}
@@ -194,7 +195,7 @@ function ConsentSheet({ state }: { state: ConsentState }) {
             </Text>
           ) : null}
 
-          <Pressable
+          <Tap
             accessibilityRole="button"
             disabled={busy !== null}
             onPress={() => void agree()}
@@ -204,16 +205,16 @@ function ConsentSheet({ state }: { state: ConsentState }) {
             {busy === "agree" ? (
               <ActivityIndicator color="#fff" />
             ) : (
-              <Text style={{ fontFamily: font.bold, fontSize: 16, color: "#fff" }}>{copy.cta}</Text>
+              <Text style={{ fontFamily: font.bold, fontSize: 17, color: "#fff" }}>{copy.cta}</Text>
             )}
-          </Pressable>
+          </Tap>
 
           <View className="mt-4 flex-row gap-2.5">
             <Secondary icon={Download} label="Download my data" busy={busy === "export"} disabled={busy !== null} onPress={() => void download()} />
             <Secondary icon={LogOut} label="Sign out" busy={busy === "signout"} disabled={busy !== null} onPress={() => void signOut()} />
           </View>
 
-          <Text style={{ fontFamily: font.regular, fontSize: 11.5, lineHeight: 17, color: ink[300], marginTop: 16, textAlign: "center" }}>
+          <Text style={{ fontFamily: font.regular, fontSize: 12, lineHeight: 17, color: ink[300], marginTop: 16, textAlign: "center" }}>
             Not agreeing never costs you your records. Download them here, or sign in later to delete everything from
             Settings.
           </Text>
@@ -224,7 +225,7 @@ function ConsentSheet({ state }: { state: ConsentState }) {
       <Modal visible={reading !== null} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setReading(null)}>
         <View className="flex-1 bg-canvas">
           <View className="flex-row items-center gap-3 px-4 pb-2" style={{ paddingTop: 14 }}>
-            <Pressable
+            <Tap scale={0.95}
               accessibilityRole="button"
               accessibilityLabel="Close"
               onPress={() => setReading(null)}
@@ -232,7 +233,7 @@ function ConsentSheet({ state }: { state: ConsentState }) {
               style={shadow.e1}
             >
               <ChevronLeft size={20} color={ink[700]} />
-            </Pressable>
+            </Tap>
             <Text numberOfLines={1} style={{ flex: 1, fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>
               {reading ? LEGAL_DOCUMENTS[reading].title : ""}
             </Text>
@@ -289,7 +290,7 @@ function Secondary({
   onPress: () => void;
 }) {
   return (
-    <Pressable
+    <Tap
       accessibilityRole="button"
       disabled={disabled}
       onPress={onPress}
@@ -297,7 +298,7 @@ function Secondary({
       style={{ backgroundColor: surface.base, borderWidth: 1, borderColor: surface.line, opacity: disabled && !busy ? 0.6 : 1 }}
     >
       {busy ? <ActivityIndicator size="small" color={brand[600]} /> : <Icon size={16} color={ink[700]} />}
-      <Text style={{ fontFamily: font.semibold, fontSize: 13.5, color: ink[700] }}>{label}</Text>
-    </Pressable>
+      <Text style={{ fontFamily: font.semibold, fontSize: 13, color: ink[700] }}>{label}</Text>
+    </Tap>
   );
 }

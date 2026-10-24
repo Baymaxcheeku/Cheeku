@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { Award, Bookmark } from "lucide-react-native";
 import { useState } from "react";
-import { ActivityIndicator, Pressable, RefreshControl, ScrollView, Text, View } from "react-native";
+import { ActivityIndicator, RefreshControl, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Tap } from "@/components/ui/tap";
@@ -52,7 +52,7 @@ export default function Learn() {
         refreshControl={<RefreshControl refreshing={library.isRefetching} onRefresh={() => void library.refetch()} tintColor={brand[600]} />}
       >
         <View style={{ paddingHorizontal: 20 }}>
-          <Text style={{ fontFamily: font.regular, fontSize: 14, lineHeight: 20, color: ink[500] }}>
+          <Text style={{ fontFamily: font.regular, fontSize: 15, lineHeight: 20, color: ink[500] }}>
             Plain-language explainers, written and checked by the Cheeku health desk against the sources they cite. They explain; they never advise.
           </Text>
         </View>
@@ -74,7 +74,7 @@ export default function Learn() {
 
             {started.length ? (
               <View style={{ marginTop: 24 }}>
-                <Text style={{ fontFamily: font.semibold, fontSize: 18, letterSpacing: -0.3, color: ink[900], paddingHorizontal: 20 }}>Continue reading</Text>
+                <Text style={{ fontFamily: font.semibold, fontSize: 17, letterSpacing: -0.3, color: ink[900], paddingHorizontal: 20 }}>Continue reading</Text>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 12, paddingHorizontal: 20, paddingTop: 12, paddingBottom: 8 }}>
                   {started.map((c) => (
                     <RailCard key={c.id} card={c} />
@@ -101,7 +101,7 @@ export default function Learn() {
 
 function Chip({ label, on, onPress, dot, icon }: { label: string; on: boolean; onPress: () => void; dot?: string; icon?: React.ReactNode }) {
   return (
-    <Pressable
+    <Tap
       accessibilityRole="tab"
       accessibilityState={{ selected: on }}
       onPress={onPress}
@@ -109,8 +109,8 @@ function Chip({ label, on, onPress, dot, icon }: { label: string; on: boolean; o
     >
       {dot ? <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: dot }} /> : null}
       {icon}
-      <Text style={{ fontFamily: font.semibold, fontSize: 13.5, color: on ? "#fff" : ink[900] }}>{label}</Text>
-    </Pressable>
+      <Text style={{ fontFamily: font.semibold, fontSize: 13, color: on ? "#fff" : ink[900] }}>{label}</Text>
+    </Tap>
   );
 }
 
@@ -122,24 +122,24 @@ function Featured({ card }: { card: ArticleCard }) {
       accessibilityRole="button"
       accessibilityLabel={`Featured. ${card.title}`}
       onPress={() => router.push(`/article/${card.slug}`)}
-      style={[glassShadow, { marginHorizontal: 20, marginTop: 14, borderRadius: 30, overflow: "hidden" }]} scale={0.98}
+      style={[glassShadow, { marginHorizontal: 20, marginTop: 14, borderRadius: 32, overflow: "hidden" }]} scale={0.98}
     >
       <Gradient from={s.field} to="#ffffff" angle="diagonal" glow="#ffffff" />
-      <View style={{ position: "absolute", right: -40, top: -40, width: 190, height: 190, borderRadius: 95, backgroundColor: s.soft, opacity: 0.6 }} />
+      <View style={{ position: "absolute", right: -40, top: -40, width: 190, height: 190, borderRadius: 999, backgroundColor: s.soft, opacity: 0.6 }} />
       <View style={{ padding: 20 }}>
         <View style={{ flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between" }}>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 5, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 999, backgroundColor: "#fff" }}>
             <Award size={12} color={s.accent} />
-            <Text style={{ fontFamily: font.semibold, fontSize: 11.5, color: s.accent }}>Featured</Text>
+            <Text style={{ fontFamily: font.semibold, fontSize: 12, color: s.accent }}>Featured</Text>
           </View>
           <Emblem icon={card.icon} category={card.category} size={76} />
         </View>
         <View style={{ marginTop: 6 }}>
           <Eyebrow category={card.category} />
         </View>
-        <Text style={{ fontFamily: font.semibold, fontSize: 22, lineHeight: 27, letterSpacing: -0.5, color: s.deep, marginTop: 6 }}>{card.title}</Text>
+        <Text style={{ fontFamily: font.semibold, fontSize: 20, lineHeight: 27, letterSpacing: -0.5, color: s.deep, marginTop: 6 }}>{card.title}</Text>
         {card.standfirst ? (
-          <Text numberOfLines={3} style={{ fontFamily: font.regular, fontSize: 14, lineHeight: 20, color: s.body, marginTop: 6 }}>
+          <Text numberOfLines={3} style={{ fontFamily: font.regular, fontSize: 15, lineHeight: 20, color: s.body, marginTop: 6 }}>
             {card.standfirst}
           </Text>
         ) : null}
@@ -158,8 +158,8 @@ function Shelf({ category, cards }: { category: ArticleCategory; cards: ArticleC
     <View style={{ marginTop: 26, paddingHorizontal: 20 }}>
       <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
         <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: s.accent }} />
-        <Text style={{ flex: 1, fontFamily: font.semibold, fontSize: 18, letterSpacing: -0.3, color: ink[900] }}>{CATEGORY_LABEL[category]}</Text>
-        <Text style={{ fontFamily: font.medium, fontSize: 12.5, color: ink[500] }}>{cards.length}</Text>
+        <Text style={{ flex: 1, fontFamily: font.semibold, fontSize: 17, letterSpacing: -0.3, color: ink[900] }}>{CATEGORY_LABEL[category]}</Text>
+        <Text style={{ fontFamily: font.medium, fontSize: 13, color: ink[500] }}>{cards.length}</Text>
       </View>
       <List cards={cards} inset={false} showCategory={false} />
     </View>
@@ -182,7 +182,7 @@ function Empty({ text, icon }: { text: string; icon?: boolean }) {
   return (
     <View style={{ alignItems: "center", paddingHorizontal: 40, marginTop: 40, gap: 10 }}>
       {icon ? <Bookmark size={26} color={ink[300]} /> : null}
-      <Text style={{ fontFamily: font.regular, fontSize: 14, lineHeight: 20, color: ink[500], textAlign: "center" }}>{text}</Text>
+      <Text style={{ fontFamily: font.regular, fontSize: 15, lineHeight: 20, color: ink[500], textAlign: "center" }}>{text}</Text>
     </View>
   );
 }

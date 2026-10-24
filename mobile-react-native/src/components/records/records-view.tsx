@@ -2,7 +2,7 @@ import { useRouter } from "expo-router";
 import { CalendarRange, LayoutList, type LucideIcon } from "lucide-react-native";
 import { useState } from "react";
 import type { LayoutChangeEvent} from "react-native";
-import { Pressable, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import Animated, {
   FadeIn,
   FadeOut,
@@ -17,6 +17,7 @@ import { useReducedMotion } from "@/components/ui/motion";
 import { groupByMonth, groupByRecency, railDate } from "@/lib/records/grouping";
 import { type RecordSummary, type Severity } from "@/lib/records/types";
 import { brand, ink, semantic, shadow, surface } from "@/theme/tokens";
+import { Tap } from "@/components/ui/tap";
 
 type View_ = "list" | "timeline";
 
@@ -74,7 +75,7 @@ export function RecordsView({
         <Animated.View entering={FadeIn.duration(180)} exiting={FadeOut.duration(120)}>
           {listGroups.map((group) => (
             <View key={group.key} className="mt-5 px-5">
-              <Text className="text-[15px] font-semibold text-ink-900">{group.label}</Text>
+              <Text className="text-base font-semibold text-ink-900">{group.label}</Text>
               <View className="mt-2 gap-2">
                 {group.records.map((record, i) => (
                   <RecordCard key={record.id} record={record} index={i} showPerson={showPerson} />
@@ -88,9 +89,9 @@ export function RecordsView({
           {monthGroups.map((month) => (
             <View key={month.key} className="mt-6">
               <View className="flex-row items-center justify-between px-5">
-                <Text className="text-[16px] font-bold text-ink-900">{month.label}</Text>
+                <Text className="text-lg font-bold text-ink-900">{month.label}</Text>
                 <View className="rounded-pill bg-brand-50 px-2.5 py-1">
-                  <Text className="text-[11px] font-semibold text-brand-700">
+                  <Text className="text-2xs font-semibold text-brand-700">
                     {month.records.length} record{month.records.length === 1 ? "" : "s"}
                   </Text>
                 </View>
@@ -204,7 +205,7 @@ function ViewTab({
   label: string;
 }) {
   return (
-    <Pressable
+    <Tap
       accessibilityRole="tab"
       accessibilityState={{ selected: active }}
       onPress={onPress}
@@ -212,12 +213,12 @@ function ViewTab({
     >
       <Icon size={15} color={active ? "#ffffff" : ink[500]} />
       <Text
-        className="text-[13px] font-semibold"
+        className="text-sm font-semibold"
         style={{ color: active ? "#ffffff" : ink[500] }}
       >
         {label}
       </Text>
-    </Pressable>
+    </Tap>
   );
 }
 
@@ -237,8 +238,8 @@ function TimelineRow({ record, isLast, showPerson = true }: { record: RecordSumm
     <View className="flex-row gap-3 px-5">
       <View className="w-9 items-center pt-1">
         <View className="items-center rounded-tile bg-surface px-1.5 py-1" style={shadow.e1}>
-          <Text className="text-[14px] font-bold leading-none text-ink-900">{day}</Text>
-          <Text className="mt-0.5 text-[8.5px] font-bold leading-none tracking-wide text-ink-300">
+          <Text className="text-base font-bold leading-none text-ink-900">{day}</Text>
+          <Text className="mt-0.5 text-3xs font-bold leading-none tracking-wide text-ink-300">
             {month}
           </Text>
         </View>
@@ -254,7 +255,7 @@ function TimelineRow({ record, isLast, showPerson = true }: { record: RecordSumm
         ) : null}
       </View>
 
-      <Pressable
+      <Tap scale={0.98}
         accessibilityRole="button"
         accessibilityLabel={record.title}
         onPress={() => router.push(`/records/${record.id}`)}
@@ -288,17 +289,17 @@ function TimelineRow({ record, isLast, showPerson = true }: { record: RecordSumm
        * target, so it was buying nothing at 16pt plus a gap.
        */}
       <View className="min-w-0 flex-1">
-        <Text className="text-[14px] font-semibold text-ink-900" numberOfLines={1}>
+        <Text className="text-base font-semibold text-ink-900" numberOfLines={1}>
           {record.title}
         </Text>
         <View className="mt-1 flex-row items-center gap-2">
           <SeverityPill severity={record.severity} />
-          <Text className="flex-1 text-[11px] text-ink-500" numberOfLines={1}>
+          <Text className="flex-1 text-2xs text-ink-500" numberOfLines={1}>
             {[showPerson ? record.profileName : null, record.facility].filter(Boolean).join(" · ")}
           </Text>
         </View>
       </View>
-      </Pressable>
+      </Tap>
     </View>
   );
 }

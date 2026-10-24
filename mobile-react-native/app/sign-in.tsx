@@ -1,16 +1,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import {
-  ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  ScrollView,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, View } from "react-native";
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
@@ -39,6 +30,7 @@ import { supabase } from "@/lib/supabase/client";
 import { brand, ink, semantic, shadow, surface } from "@/theme/tokens";
 import { font, type } from "@/theme/type";
 import { Brand } from "@/components/ui/brand";
+import { Tap } from "@/components/ui/tap";
 
 /** Mirrors `passwordSchema`'s minimum, for the live length meter. */
 const MIN_PASSWORD = 10;
@@ -204,7 +196,7 @@ export default function SignIn() {
     >
       <View className="flex-1 bg-canvas" style={{ paddingTop: insets.top }}>
         <View className="h-12 flex-row items-center px-5">
-          <Pressable
+          <Tap scale={0.95}
             accessibilityRole="button"
             accessibilityLabel="Go back"
             onPress={goBack}
@@ -213,10 +205,10 @@ export default function SignIn() {
             style={shadow.e1}
           >
             <ChevronLeft size={20} color={ink[700]} />
-          </Pressable>
-          <Pressable className="ml-auto h-10 justify-center" hitSlop={8} onPress={() => router.push("/welcome")}>
+          </Tap>
+          <Tap className="ml-auto h-10 justify-center" hitSlop={8} onPress={() => router.push("/welcome")}>
             <Text style={{ fontFamily: font.semibold, fontSize: 15, color: brand[600] }}>Help</Text>
-          </Pressable>
+          </Tap>
         </View>
 
         {/* The greeting. Cheeku says hello in a bubble that changes with the tab. */}
@@ -231,10 +223,10 @@ export default function SignIn() {
             <BubblePop key={tab} from="right" style={{ marginBottom: 4 }}>
               <View
                 accessibilityLiveRegion="polite"
-                className="rounded-[16px] px-3 py-1.5"
+                className="rounded-lg px-3 py-1.5"
                 style={[shadow.e1, { backgroundColor: brand[600], borderBottomRightRadius: 4 }]}
               >
-                <Text style={{ fontFamily: font.bold, fontSize: 12.5, color: "#ffffff" }}>{copy.greet}</Text>
+                <Text style={{ fontFamily: font.bold, fontSize: 13, color: "#ffffff" }}>{copy.greet}</Text>
               </View>
             </BubblePop>
             <MascotBust size={104} moment="present" />
@@ -281,25 +273,25 @@ export default function SignIn() {
                 autoComplete={tab === "signIn" ? "current-password" : "new-password"}
                 textContentType={tab === "signIn" ? "password" : "newPassword"}
                 trailing={
-                  <Pressable
+                  <Tap
                     accessibilityRole="button"
                     accessibilityLabel={show ? "Hide password" : "Show password"}
                     onPress={() => setShow((v) => !v)}
                     hitSlop={10}
                   >
                     {show ? <EyeOff size={18} color={ink[300]} /> : <Eye size={18} color={ink[300]} />}
-                  </Pressable>
+                  </Tap>
                 }
               />
               {tab === "create" ? <PasswordMeter length={password.length} /> : null}
             </View>
 
             {tab === "signIn" ? (
-              <Pressable className="-mt-1 self-end" hitSlop={8} accessibilityRole="button">
-                <Text style={{ fontFamily: font.semibold, fontSize: 13.5, color: brand[600] }}>
+              <Tap className="-mt-1 self-end" hitSlop={8} accessibilityRole="button">
+                <Text style={{ fontFamily: font.semibold, fontSize: 13, color: brand[600] }}>
                   Forgot password?
                 </Text>
-              </Pressable>
+              </Tap>
             ) : (
               /* DPDP Act: unticked by default, one box for the uses the service
                  needs, each itemised one tap away, optional uses never here. */
@@ -313,7 +305,7 @@ export default function SignIn() {
             {error ? (
               <View accessibilityRole="alert" className="flex-row items-start gap-2">
                 <AlertCircle size={16} color={semantic.dangerText} style={{ marginTop: 1 }} />
-                <Text style={{ flex: 1, fontFamily: font.medium, fontSize: 13.5, lineHeight: 19, color: semantic.dangerText }}>
+                <Text style={{ flex: 1, fontFamily: font.medium, fontSize: 13, lineHeight: 19, color: semantic.dangerText }}>
                   {error}
                 </Text>
               </View>
@@ -394,17 +386,17 @@ function Segmented({ value, onChange }: { value: Tab; onChange: (next: Tab) => v
       ).map(([key, label]) => {
         const on = value === key;
         return (
-          <Pressable
+          <Tap
             key={key}
             accessibilityRole="tab"
             accessibilityState={{ selected: on }}
             onPress={() => onChange(key)}
             className="flex-1 items-center justify-center"
           >
-            <Text style={{ fontFamily: on ? font.bold : font.medium, fontSize: 14, color: on ? brand[700] : ink[500] }}>
+            <Text style={{ fontFamily: on ? font.bold : font.medium, fontSize: 15, color: on ? brand[700] : ink[500] }}>
               {label}
             </Text>
-          </Pressable>
+          </Tap>
         );
       })}
     </View>
@@ -443,7 +435,7 @@ function Field({
     <View className="gap-1.5">
       <Text style={{ fontFamily: font.semibold, fontSize: 13, color: ink[700] }}>{label}</Text>
       <View
-        className="h-[54px] flex-row items-center gap-3 rounded-[16px] px-4"
+        className="h-[54px] flex-row items-center gap-3 rounded-lg px-4"
         style={{
           backgroundColor: focused ? surface.base : surface.canvas,
           borderWidth: 1.5,
@@ -457,7 +449,7 @@ function Field({
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
           placeholderTextColor={ink[300]}
-          style={{ flex: 1, fontSize: 16, color: ink[900], fontFamily: font.regular }}
+          style={{ flex: 1, fontSize: 17, color: ink[900], fontFamily: font.regular }}
         />
         {trailing}
       </View>

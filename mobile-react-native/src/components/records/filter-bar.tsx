@@ -8,12 +8,13 @@ import {
   X,
 } from "lucide-react-native";
 import { useState } from "react";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Sheet, useSheetMax } from "@/components/ui/sheet";
 import { DOC_TYPE_LABEL, DOC_TYPES, type DocType } from "@/lib/records/types";
 import { brand, ink, shadow, surface } from "@/theme/tokens";
+import { Tap } from "@/components/ui/tap";
 
 /*
  * FILTER STATE LIVES IN THE SCREEN, not in a URL.
@@ -112,7 +113,7 @@ export function FilterBar({
           icon={SlidersHorizontal}
         />
         {activeCount > 0 ? (
-          <Pressable
+          <Tap
             accessibilityRole="button"
             accessibilityLabel="Clear filters"
             onPress={() =>
@@ -122,8 +123,8 @@ export function FilterBar({
             style={{ backgroundColor: ink[900] }}
           >
             <X size={13} color="#ffffff" />
-            <Text className="text-[12px] font-semibold text-white">Clear {activeCount}</Text>
-          </Pressable>
+            <Text className="text-xs font-semibold text-white">Clear {activeCount}</Text>
+          </Tap>
         ) : null}
       </ScrollView>
 
@@ -197,7 +198,7 @@ function Chip({
   icon?: typeof ChevronDown;
 }) {
   return (
-    <Pressable
+    <Tap
       accessibilityRole="button"
       accessibilityState={{ selected: on }}
       accessibilityLabel={on ? `${label}, filter applied` : label}
@@ -211,7 +212,7 @@ function Chip({
     >
       <Icon size={13} color={on ? "#ffffff" : ink[300]} />
       <Text
-        className="text-[12.5px] font-medium"
+        className="text-sm font-medium"
         numberOfLines={1}
         style={{ color: on ? "#ffffff" : ink[700] }}
       >
@@ -224,7 +225,7 @@ function Chip({
       ) : (
         <ChevronDown size={13} color={ink[300]} />
       )}
-    </Pressable>
+    </Tap>
   );
 }
 
@@ -260,13 +261,13 @@ function OptionSheet({
         className="rounded-t-sheet bg-canvas px-5 pt-2"
         style={{ maxHeight: sheetMax70, paddingBottom: insets.bottom + 16 }}
       >
-        <Text className="mt-3 text-[18px] font-bold text-ink-900">{title}</Text>
+        <Text className="mt-3 text-lg font-bold text-ink-900">{title}</Text>
 
         <ScrollView className="mt-3 rounded-card bg-surface" style={shadow.e1}>
           {options.map((option, i) => {
             const on = option.value === value;
             return (
-              <Pressable
+              <Tap
                 key={option.value || "none"}
                 accessibilityRole="radio"
                 accessibilityState={{ selected: on }}
@@ -279,13 +280,13 @@ function OptionSheet({
                 style={i > 0 ? { borderTopWidth: 1, borderTopColor: surface.line } : undefined}
               >
                 <Text
-                  className="flex-1 text-[15px]"
+                  className="flex-1 text-base"
                   style={{ color: on ? brand[700] : ink[900], fontWeight: on ? "600" : "400" }}
                 >
                   {option.label}
                 </Text>
                 {on ? <Check size={17} color={brand[600]} /> : null}
-              </Pressable>
+              </Tap>
             );
           })}
         </ScrollView>

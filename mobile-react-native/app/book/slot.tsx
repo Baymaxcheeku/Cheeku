@@ -2,7 +2,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Building2, ChevronLeft, Clock3, MapPin, MonitorPlay, Ticket } from "lucide-react-native";
 import { useMemo, useState } from "react";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { ScrollView, Text, View } from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SvgXml } from "react-native-svg";
@@ -18,7 +18,7 @@ import { useBookingDraft } from "@/lib/booking/draft";
 import { doctorFace } from "@/lib/booking/faces";
 import { recordBooking, threadKey } from "@/lib/memory/store";
 import { useFamily } from "@/lib/profiles/family";
-import { brand, ink } from "@/theme/tokens";
+import { brand, ink, lilac } from "@/theme/tokens";
 import { font } from "@/theme/type";
 
 /*
@@ -57,9 +57,9 @@ export default function SlotScreen() {
     return (
       <View className="flex-1 items-center justify-center bg-canvas px-8">
         <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>That doctor isn&apos;t available</Text>
-        <Pressable onPress={() => router.back()} className="mt-4">
+        <Tap onPress={() => router.back()} className="mt-4">
           <Text style={{ fontFamily: font.semibold, fontSize: 15, color: brand[600] }}>Go back</Text>
-        </Pressable>
+        </Tap>
       </View>
     );
   }
@@ -119,18 +119,18 @@ export default function SlotScreen() {
     <View className="flex-1 bg-canvas">
       {/* The doctor, as the hero: a pastel panel with the portrait, like the
           reference's detail screens. */}
-      <View className="overflow-hidden" style={{ borderBottomLeftRadius: 36, borderBottomRightRadius: 36 }}>
-        <Gradient from="#e3dcff" to="#f4f1ff" angle="vertical" glow="#ffffff" />
+      <View className="overflow-hidden" style={{ borderBottomLeftRadius: 32, borderBottomRightRadius: 32 }}>
+        <Gradient from={lilac.violet} to={lilac.mist} angle="vertical" glow="#ffffff" />
         <View className="flex-row items-center justify-between px-4" style={{ paddingTop: insets.top + 6 }}>
           <GlassCircle label="Go back" onPress={() => router.back()}>
             <ChevronLeft size={21} color={ink[900]} />
           </GlassCircle>
           <Glass className="rounded-pill px-3 py-1.5">
-            <Text style={{ fontFamily: font.semibold, fontSize: 11.5, color: brand[700] }}>Preview</Text>
+            <Text style={{ fontFamily: font.semibold, fontSize: 12, color: brand[700] }}>Preview</Text>
           </Glass>
         </View>
         <View className="flex-row items-end gap-4 px-5 pb-5 pt-2">
-          <View className="overflow-hidden rounded-[26px]" style={[glassShadow, { width: 104, height: 116, backgroundColor: face?.background }]}>
+          <View className="overflow-hidden rounded-xl" style={[glassShadow, { width: 104, height: 116, backgroundColor: face?.background }]}>
             {face ? (
               <View className="flex-1 items-center justify-center">
                 <SvgXml xml={face.svg} width={120} height={120} />
@@ -138,11 +138,11 @@ export default function SlotScreen() {
             ) : null}
           </View>
           <View className="min-w-0 flex-1 pb-1">
-            <Text style={{ fontFamily: font.semibold, fontSize: 21, letterSpacing: -0.4, color: ink[900] }}>{doctor.name}</Text>
-            <Text style={{ fontFamily: font.medium, fontSize: 13.5, color: brand[600], marginTop: 2 }}>
+            <Text style={{ fontFamily: font.semibold, fontSize: 20, letterSpacing: -0.4, color: ink[900] }}>{doctor.name}</Text>
+            <Text style={{ fontFamily: font.medium, fontSize: 13, color: brand[600], marginTop: 2 }}>
               {SPECIALTIES[doctor.specialty].label} · {doctor.years} yrs
             </Text>
-            <Text numberOfLines={2} style={{ fontFamily: font.regular, fontSize: 12.5, color: ink[500], marginTop: 4 }}>
+            <Text numberOfLines={2} style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 4 }}>
               {doctor.qualifications} · Speaks {doctor.languages.join(", ")}
             </Text>
           </View>
@@ -155,7 +155,7 @@ export default function SlotScreen() {
             {offers.map((k) => {
               const on = m === k;
               return (
-                <Pressable
+                <Tap
                   key={k}
                   accessibilityRole="tab"
                   accessibilityState={{ selected: on }}
@@ -167,29 +167,29 @@ export default function SlotScreen() {
                   style={[on ? glassShadow : null, { backgroundColor: on ? "#fff" : "transparent" }]}
                 >
                   {k === "online" ? <MonitorPlay size={16} color={on ? brand[600] : ink[500]} /> : <Building2 size={16} color={on ? brand[600] : ink[500]} />}
-                  <Text style={{ fontFamily: on ? font.semibold : font.medium, fontSize: 14, color: on ? ink[900] : ink[500] }}>
+                  <Text style={{ fontFamily: on ? font.semibold : font.medium, fontSize: 15, color: on ? ink[900] : ink[500] }}>
                     {k === "online" ? `Video · ₹${doctor.fee.online}` : `Clinic · ₹${doctor.fee.clinic}`}
                   </Text>
-                </Pressable>
+                </Tap>
               );
             })}
           </View>
         ) : null}
 
         {m === "clinic" ? (
-          <Glass className="mt-3 gap-2 rounded-[20px] p-3.5">
+          <Glass className="mt-3 gap-2 rounded-xl p-3.5">
             <Row icon={<MapPin size={15} color={brand[600]} />} text={`${doctor.clinic.name}, ${doctor.clinic.area} · ${doctor.clinic.km} km`} />
             <Row icon={<Clock3 size={15} color={brand[600]} />} text={`OPD ${doctor.clinic.opd}`} />
             <Row icon={<Ticket size={15} color={brand[600]} />} text="Arrive in your window, take a token at the desk, and you're seen in turn." />
           </Glass>
         ) : null}
 
-        <Text style={{ fontFamily: font.semibold, fontSize: 18, color: ink[900], marginTop: 22 }}>Pick a day</Text>
+        <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900], marginTop: 22 }}>Pick a day</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingVertical: 12 }}>
           {days.map((d, i) => {
             const on = i === dayIndex;
             return (
-              <Pressable
+              <Tap scale={0.98}
                 key={d.toISOString()}
                 accessibilityRole="tab"
                 accessibilityState={{ selected: on }}
@@ -203,7 +203,7 @@ export default function SlotScreen() {
                   {
                     width: 58,
                     height: 72,
-                    borderRadius: 20,
+                    borderRadius: 24,
                     alignItems: "center",
                     justifyContent: "center",
                     backgroundColor: on ? ink[900] : glass.fillStrong,
@@ -216,12 +216,12 @@ export default function SlotScreen() {
                   {i === 0 ? "Today" : dayName(d)}
                 </Text>
                 <Text style={{ fontFamily: font.semibold, fontSize: 20, color: on ? "#fff" : ink[900], marginTop: 2 }}>{d.getDate()}</Text>
-              </Pressable>
+              </Tap>
             );
           })}
         </ScrollView>
 
-        <Text style={{ fontFamily: font.semibold, fontSize: 18, color: ink[900], marginTop: 8 }}>
+        <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900], marginTop: 8 }}>
           {m === "online" ? "Pick a video slot" : "Pick an arrival window"}
         </Text>
 
@@ -237,7 +237,7 @@ export default function SlotScreen() {
                     const on = slot?.id === s.id;
                     return (
                       <Boop key={s.id} trigger={on ? s.id : null}>
-                        <Pressable
+                        <Tap
                           accessibilityRole="radio"
                           accessibilityState={{ selected: on, disabled: s.taken }}
                           accessibilityLabel={`${s.label}${s.taken ? ", taken" : ""}`}
@@ -246,7 +246,7 @@ export default function SlotScreen() {
                           style={{
                             height: 44,
                             paddingHorizontal: 14,
-                            borderRadius: 14,
+                            borderRadius: 16,
                             justifyContent: "center",
                             backgroundColor: on ? brand[600] : s.taken ? "transparent" : "#ffffff",
                             borderWidth: 1,
@@ -256,14 +256,14 @@ export default function SlotScreen() {
                           <Text
                             style={{
                               fontFamily: on ? font.semibold : font.medium,
-                              fontSize: 13.5,
+                              fontSize: 13,
                               color: on ? "#fff" : s.taken ? ink[300] : ink[900],
                               textDecorationLine: s.taken ? "line-through" : "none",
                             }}
                           >
                             {s.label}
                           </Text>
-                        </Pressable>
+                        </Tap>
                       </Boop>
                     );
                   })}
@@ -272,7 +272,7 @@ export default function SlotScreen() {
             );
           })}
           {slots.every((s) => s.taken) ? (
-            <Text style={{ fontFamily: font.regular, fontSize: 14, color: ink[500], marginTop: 12 }}>
+            <Text style={{ fontFamily: font.regular, fontSize: 15, color: ink[500], marginTop: 12 }}>
               Fully booked on this day. Try another day.
             </Text>
           ) : null}
@@ -280,7 +280,7 @@ export default function SlotScreen() {
 
         {intake ? (
           <View className="mt-6">
-            <Text style={{ fontFamily: font.semibold, fontSize: 18, color: ink[900], marginBottom: 10 }}>Going with your booking</Text>
+            <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900], marginBottom: 10 }}>Going with your booking</Text>
             <NoteCard intake={intake} compact />
           </View>
         ) : null}
@@ -307,7 +307,7 @@ export default function SlotScreen() {
           }}
           scale={0.98}
         >
-          <Text style={{ fontFamily: font.semibold, fontSize: 15.5, color: "#fff" }}>
+          <Text style={{ fontFamily: font.semibold, fontSize: 15, color: "#fff" }}>
             {slot
               ? `${reschedule ? "Move to" : "Book"} ${slot.label.split(" – ")[0]}, ${dayIndex === 0 ? "today" : dayName(day)}`
               : "Pick a time to continue"}
@@ -322,7 +322,7 @@ function Row({ icon, text }: { icon: React.ReactNode; text: string }) {
   return (
     <View className="flex-row items-start gap-2.5">
       <View style={{ marginTop: 2 }}>{icon}</View>
-      <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 13.5, lineHeight: 19, color: ink[700] }}>{text}</Text>
+      <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 13, lineHeight: 19, color: ink[700] }}>{text}</Text>
     </View>
   );
 }

@@ -30,7 +30,7 @@ import { PillButton } from "@/components/ui/screen";
 import { APP_VERSION, SUPPORT_EMAIL } from "@/lib/app-meta";
 import { submitSupportTicket } from "@/lib/settings/actions";
 import { SUPPORT_CATEGORIES } from "@/lib/settings/schemas";
-import { brand, ink, semantic, surface } from "@/theme/tokens";
+import { brand, ink, lilac, semantic, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
 
 /*
@@ -218,7 +218,7 @@ export default function Help() {
         <Reveal style={{ alignItems: "center", paddingHorizontal: 32, marginTop: 40 }}>
           <MascotFigure size={120} moment="present" move="sway" hop />
           <Text style={{ fontFamily: font.semibold, fontSize: 24, letterSpacing: -0.6, color: ink[900], marginTop: 18 }}>Got it, thank you</Text>
-          <Text style={{ fontFamily: font.regular, fontSize: 14.5, lineHeight: 21, color: ink[700], textAlign: "center", marginTop: 8 }}>
+          <Text style={{ fontFamily: font.regular, fontSize: 15, lineHeight: 21, color: ink[700], textAlign: "center", marginTop: 8 }}>
             A real person on our team will read this and reply by email, usually within two working days.
           </Text>
           {/*
@@ -227,11 +227,11 @@ export default function Help() {
            * the reader's time and ours.
            */}
           <View style={[glassShadow, { marginTop: 16, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 999, backgroundColor: "#fff" }]}>
-            <Text style={{ fontFamily: font.medium, fontSize: 12.5, color: ink[500] }}>Reference {ticketId.slice(0, 8).toUpperCase()}</Text>
+            <Text style={{ fontFamily: font.medium, fontSize: 13, color: ink[500] }}>Reference {ticketId.slice(0, 8).toUpperCase()}</Text>
           </View>
-          <Pressable accessibilityRole="button" onPress={() => setTicketId(null)} hitSlop={8} style={{ marginTop: 26 }}>
-            <Text style={{ fontFamily: font.semibold, fontSize: 14.5, color: brand[600] }}>Back to help</Text>
-          </Pressable>
+          <Tap accessibilityRole="button" onPress={() => setTicketId(null)} hitSlop={8} style={{ marginTop: 26 }}>
+            <Text style={{ fontFamily: font.semibold, fontSize: 15, color: brand[600] }}>Back to help</Text>
+          </Tap>
         </Reveal>
       </SettingsScreen>
     );
@@ -241,12 +241,12 @@ export default function Help() {
     <SettingsScreen title="Help & support" eyebrow="Answers, guides and our team" icon={CircleHelp} bare>
       {/* -------------------------------------------------------- hero -- */}
       <Reveal style={[glassShadow, { marginHorizontal: 20, marginTop: 4, borderRadius: 32, overflow: "hidden", padding: 20 }]}>
-        <Gradient from="#e3dcff" to="#ffffff" glow="#ffffff" />
+        <Gradient from={lilac.violet} to="#ffffff" glow="#ffffff" />
         <View style={{ flexDirection: "row", alignItems: "center" }}>
           <View style={{ flex: 1 }}>
             <Eyebrow>Help centre</Eyebrow>
-            <Text style={{ fontFamily: font.semibold, fontSize: 27, lineHeight: 32, letterSpacing: -0.8, color: ink[900], marginTop: 6 }}>How can we help?</Text>
-            <Text style={{ fontFamily: font.regular, fontSize: 14, lineHeight: 20, color: ink[700], marginTop: 6 }}>Quick answers first. A real person if you need one.</Text>
+            <Text style={{ fontFamily: font.semibold, fontSize: 28, lineHeight: 32, letterSpacing: -0.8, color: ink[900], marginTop: 6 }}>How can we help?</Text>
+            <Text style={{ fontFamily: font.regular, fontSize: 15, lineHeight: 20, color: ink[700], marginTop: 6 }}>Quick answers first. A real person if you need one.</Text>
           </View>
           <MascotFigure size={96} moment="shrug" move="float" hop />
         </View>
@@ -262,9 +262,9 @@ export default function Help() {
             style={{ flex: 1, fontFamily: font.regular, fontSize: 15, color: ink[900], paddingVertical: 0 }}
           />
           {query ? (
-            <Pressable accessibilityRole="button" accessibilityLabel="Clear search" onPress={() => setQuery("")} hitSlop={8}>
+            <Tap accessibilityRole="button" accessibilityLabel="Clear search" onPress={() => setQuery("")} hitSlop={8}>
               <X size={17} color={ink[500]} />
-            </Pressable>
+            </Tap>
           ) : null}
         </View>
       </Reveal>
@@ -275,14 +275,14 @@ export default function Help() {
           accessibilityRole="button"
           accessibilityLabel="Health emergency. Call 112"
           onPress={() => void Linking.openURL("tel:112").catch(() => undefined)}
-          style={({ pressed }) => ({ flexDirection: "row", alignItems: "center", gap: 12, padding: 14, borderRadius: 22, backgroundColor: semantic.dangerBg, opacity: pressed ? 0.85 : 1 })}
+          style={({ pressed }) => ({ flexDirection: "row", alignItems: "center", gap: 12, padding: 14, borderRadius: 24, backgroundColor: semantic.dangerBg, opacity: pressed ? 0.85 : 1 })}
         >
-          <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: semantic.dangerStrong, alignItems: "center", justifyContent: "center" }}>
+          <View style={{ width: 40, height: 40, borderRadius: 999, backgroundColor: semantic.dangerStrong, alignItems: "center", justifyContent: "center" }}>
             <PhoneCall size={18} color="#fff" />
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={{ fontFamily: font.semibold, fontSize: 14.5, color: semantic.dangerText }}>Health emergency? Call 112</Text>
-            <Text style={{ fontFamily: font.regular, fontSize: 12.5, lineHeight: 17, color: ink[700], marginTop: 1 }}>Don&apos;t wait on a help article or a reply from us.</Text>
+            <Text style={{ fontFamily: font.semibold, fontSize: 15, color: semantic.dangerText }}>Health emergency? Call 112</Text>
+            <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 17, color: ink[700], marginTop: 1 }}>Don&apos;t wait on a help article or a reply from us.</Text>
           </View>
         </Pressable>
       </Reveal>
@@ -308,11 +308,11 @@ export default function Help() {
 
       {/* --------------------------------------------------- questions -- */}
       <Reveal style={{ paddingHorizontal: 20, marginTop: 28, flexDirection: "row", alignItems: "flex-end", justifyContent: "space-between" }}>
-        <Text style={{ fontFamily: font.semibold, fontSize: 18, letterSpacing: -0.3, color: ink[900] }}>{heading}</Text>
+        <Text style={{ fontFamily: font.semibold, fontSize: 17, letterSpacing: -0.3, color: ink[900] }}>{heading}</Text>
         {topic && !q ? (
-          <Pressable accessibilityRole="button" onPress={() => setTopic(null)} hitSlop={8}>
-            <Text style={{ fontFamily: font.semibold, fontSize: 13.5, color: brand[600] }}>Show most asked</Text>
-          </Pressable>
+          <Tap accessibilityRole="button" onPress={() => setTopic(null)} hitSlop={8}>
+            <Text style={{ fontFamily: font.semibold, fontSize: 13, color: brand[600] }}>Show most asked</Text>
+          </Tap>
         ) : null}
       </Reveal>
       <Reveal style={{ marginHorizontal: 20, marginTop: 12 }}>
@@ -320,7 +320,7 @@ export default function Help() {
           <Questions key={`${topic ?? ""}|${q}`} items={results} />
         ) : (
           <View style={[glassShadow, { borderRadius: 24, backgroundColor: "#fff", padding: 18 }]}>
-            <Text style={{ fontFamily: font.regular, fontSize: 14, lineHeight: 21, color: ink[700] }}>
+            <Text style={{ fontFamily: font.regular, fontSize: 15, lineHeight: 21, color: ink[700] }}>
               Nothing matches &ldquo;{query.trim()}&rdquo;. Try a simpler word, or write to us below and we&apos;ll answer it ourselves.
             </Text>
           </View>
@@ -339,14 +339,14 @@ export default function Help() {
       </Reveal>
 
       <Reveal style={{ marginHorizontal: 20, marginTop: 14 }}>
-        <View style={[glassShadow, { borderRadius: 28, backgroundColor: "#fff", padding: 18 }]}>
+        <View style={[glassShadow, { borderRadius: 32, backgroundColor: "#fff", padding: 18 }]}>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-            <View style={{ width: 38, height: 38, borderRadius: 13, backgroundColor: brand[50], alignItems: "center", justifyContent: "center" }}>
+            <View style={{ width: 38, height: 38, borderRadius: 12, backgroundColor: brand[50], alignItems: "center", justifyContent: "center" }}>
               <MessageSquareWarning size={18} color={brand[600]} />
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={{ fontFamily: font.semibold, fontSize: 16, color: ink[900] }}>Report a problem</Text>
-              <Text style={{ fontFamily: font.regular, fontSize: 12.5, color: ink[500], marginTop: 1 }}>Something broken, confusing or missing</Text>
+              <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>Report a problem</Text>
+              <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 1 }}>Something broken, confusing or missing</Text>
             </View>
           </View>
           {/*
@@ -355,14 +355,14 @@ export default function Help() {
            * records to whoever reads the ticket. Nothing here touches them:
            * this writes a category, a title, your text and the app version.
            */}
-          <Text style={{ fontFamily: font.regular, fontSize: 12.5, lineHeight: 18, color: ink[700], marginTop: 12, padding: 12, borderRadius: 14, backgroundColor: surface.tint }}>
+          <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[700], marginTop: 12, padding: 12, borderRadius: 16, backgroundColor: surface.tint }}>
             We never attach your records, lab values or chats to a report. Only what you type here and the app version.
           </Text>
 
           <View style={{ marginTop: 16, gap: 16 }}>
             <ChipSelect label="What kind of problem?" options={CATEGORY_OPTIONS} value={category} onChange={setCategory} />
             {errors.category ? (
-              <Text accessibilityRole="alert" style={{ fontFamily: font.regular, fontSize: 12.5, color: semantic.dangerText }}>
+              <Text accessibilityRole="alert" style={{ fontFamily: font.regular, fontSize: 13, color: semantic.dangerText }}>
                 {errors.category}
               </Text>
             ) : null}
@@ -395,7 +395,7 @@ export default function Help() {
         <Text style={{ fontFamily: font.regular, fontSize: 12, lineHeight: 18, color: ink[500], textAlign: "center" }}>
           <Brand /> support can help with the app, not with medical advice. For anything urgent about your health, call a doctor or 112.
         </Text>
-        <Text style={{ fontFamily: font.regular, fontSize: 11.5, color: ink[300] }}>Version {APP_VERSION}</Text>
+        <Text style={{ fontFamily: font.regular, fontSize: 12, color: ink[300] }}>Version {APP_VERSION}</Text>
       </Reveal>
     </SettingsScreen>
   );
@@ -410,14 +410,14 @@ function TopicTile({ icon: Icon, title, note, selected, onPress }: { icon: Lucid
       style={[glassShadow, {
         flex: 1,
         padding: 14,
-        borderRadius: 22,
+        borderRadius: 24,
         backgroundColor: selected ? brand[600] : "#fff",
       }]}
     >
-      <View style={{ width: 38, height: 38, borderRadius: 13, alignItems: "center", justifyContent: "center", backgroundColor: selected ? "rgba(255,255,255,0.18)" : brand[50] }}>
+      <View style={{ width: 38, height: 38, borderRadius: 12, alignItems: "center", justifyContent: "center", backgroundColor: selected ? "rgba(255,255,255,0.18)" : brand[50] }}>
         <Icon size={18} color={selected ? "#fff" : brand[600]} />
       </View>
-      <Text style={{ fontFamily: font.semibold, fontSize: 14, color: selected ? "#fff" : ink[900], marginTop: 10 }}>{brandify(title, { onDark: selected })}</Text>
+      <Text style={{ fontFamily: font.semibold, fontSize: 15, color: selected ? "#fff" : ink[900], marginTop: 10 }}>{brandify(title, { onDark: selected })}</Text>
       <Text style={{ fontFamily: font.regular, fontSize: 12, color: selected ? "rgba(255,255,255,0.8)" : ink[500], marginTop: 2 }}>{note}</Text>
     </Tap>
   );
@@ -428,11 +428,11 @@ function ContactTile({ icon: Icon, title, note, onPress }: { icon: LucideIcon; t
     <Pressable
       accessibilityRole="button"
       onPress={onPress}
-      style={({ pressed }) => [glassShadow, { flex: 1, padding: 14, borderRadius: 22, backgroundColor: pressed ? brand[50] : "#fff", gap: 8 }]}
+      style={({ pressed }) => [glassShadow, { flex: 1, padding: 14, borderRadius: 24, backgroundColor: pressed ? brand[50] : "#fff", gap: 8 }]}
     >
       <Icon size={19} color={brand[600]} />
       <View>
-        <Text style={{ fontFamily: font.semibold, fontSize: 14.5, color: ink[900] }}>{brandify(title)}</Text>
+        <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{brandify(title)}</Text>
         <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 12, color: ink[500], marginTop: 2 }}>{note}</Text>
       </View>
     </Pressable>

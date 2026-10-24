@@ -7,8 +7,9 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useReducedMotion } from "@/components/ui/motion";
 import { useSaveError } from "@/lib/optimistic";
-import { ink } from "@/theme/tokens";
+import { brand, ink, lilac } from "@/theme/tokens";
 import { font } from "@/theme/type";
+import { Tap } from "@/components/ui/tap";
 
 /*
  * THE SAVE BAR: a background save that did not land.
@@ -55,9 +56,9 @@ export function SaveBar() {
           paddingVertical: 10,
           paddingLeft: 14,
           paddingRight: 8,
-          borderRadius: 20,
-          backgroundColor: ink[900],
-          shadowColor: "#0f1030",
+          borderRadius: 24,
+          backgroundColor: brand[600],
+          shadowColor: ink[900],
           shadowOpacity: 0.22,
           shadowRadius: 18,
           shadowOffset: { width: 0, height: 8 },
@@ -65,7 +66,7 @@ export function SaveBar() {
         }}
       >
         <CloudOff size={18} color="rgba(255,255,255,0.8)" />
-        <Text style={{ flex: 1, fontFamily: font.medium, fontSize: 13.5, lineHeight: 18, color: "#fff" }}>{message}</Text>
+        <Text style={{ flex: 1, fontFamily: font.medium, fontSize: 13, lineHeight: 18, color: "#fff" }}>{message}</Text>
         {retry ? (
           <Pressable
             accessibilityRole="button"
@@ -74,14 +75,14 @@ export function SaveBar() {
               clear();
               retry();
             }}
-            style={({ pressed }) => ({ paddingHorizontal: 14, height: 34, borderRadius: 999, justifyContent: "center", backgroundColor: pressed ? "#e9e7ff" : "#fff" })}
+            style={({ pressed }) => ({ paddingHorizontal: 14, height: 34, borderRadius: 999, justifyContent: "center", backgroundColor: pressed ? lilac.base : "#fff" })}
           >
-            <Text style={{ fontFamily: font.semibold, fontSize: 13.5, color: ink[900] }}>Retry</Text>
+            <Text style={{ fontFamily: font.semibold, fontSize: 13, color: ink[900] }}>Retry</Text>
           </Pressable>
         ) : null}
-        <Pressable accessibilityRole="button" accessibilityLabel="Dismiss" onPress={clear} hitSlop={10} style={{ padding: 4 }}>
+        <Tap accessibilityRole="button" accessibilityLabel="Dismiss" onPress={clear} hitSlop={10} style={{ padding: 4 }}>
           <X size={16} color="rgba(255,255,255,0.6)" />
-        </Pressable>
+        </Tap>
       </Animated.View>
     </View>
   );

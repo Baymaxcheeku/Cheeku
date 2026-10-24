@@ -1,11 +1,12 @@
 import { Camera, X } from "lucide-react-native";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { ScrollView, Text, View } from "react-native";
 import { SvgXml } from "react-native-svg";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Sheet, useSheetMax } from "@/components/ui/sheet";
 import { PRODUCT_SCENARIOS } from "@/lib/ai/mock/scenarios";
 import { brand, ink, shadow } from "@/theme/tokens";
+import { Tap } from "@/components/ui/tap";
 
 /**
  * The product-photo path, as a picker over FIXED scenarios rather than a real
@@ -44,12 +45,12 @@ export function ProductPicker({
             <Camera size={18} color={brand[600]} />
           </View>
           <View className="flex-1">
-            <Text className="text-[18px] font-bold text-ink-900">Ask about a product</Text>
-            <Text className="mt-0.5 text-[12.5px] leading-[18px] text-ink-500">
+            <Text className="text-lg font-bold text-ink-900">Ask about a product</Text>
+            <Text className="mt-0.5 text-sm leading-[18px] text-ink-500">
               Photo recognition is not live yet. Pick one of these to see how the check works.
             </Text>
           </View>
-          <Pressable
+          <Tap scale={0.95}
             accessibilityRole="button"
             accessibilityLabel="Close"
             onPress={onClose}
@@ -58,13 +59,13 @@ export function ProductPicker({
             style={shadow.e1}
           >
             <X size={17} color={ink[500]} />
-          </Pressable>
+          </Tap>
         </View>
 
         <ScrollView className="mt-4" showsVerticalScrollIndicator={false}>
           <View className="gap-2">
             {PRODUCT_SCENARIOS.map((scenario) => (
-              <Pressable
+              <Tap scale={0.98}
                 key={scenario.id}
                 accessibilityRole="button"
                 accessibilityLabel={`${scenario.title}. ${scenario.subtitle}`}
@@ -76,14 +77,14 @@ export function ProductPicker({
                     scenarios.ts, where `Buffer` does not exist. */}
                 <SvgXml xml={scenario.thumbnail} width={44} height={44} />
                 <View className="min-w-0 flex-1">
-                  <Text className="text-[14px] font-semibold text-ink-900" numberOfLines={1}>
+                  <Text className="text-base font-semibold text-ink-900" numberOfLines={1}>
                     {scenario.title}
                   </Text>
-                  <Text className="text-[12px] text-ink-500" numberOfLines={1}>
+                  <Text className="text-xs text-ink-500" numberOfLines={1}>
                     {scenario.subtitle}
                   </Text>
                 </View>
-              </Pressable>
+              </Tap>
             ))}
           </View>
         </ScrollView>

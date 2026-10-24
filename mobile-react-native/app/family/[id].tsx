@@ -33,9 +33,10 @@ import {
   useSwitchMember,
 } from "@/lib/profiles/family";
 import { addMemberSchema } from "@/lib/settings/schemas";
-import { brand, ink, semantic } from "@/theme/tokens";
+import { brand, hue, ink, lilac, semantic } from "@/theme/tokens";
 import { font } from "@/theme/type";
 import { Brand } from "@/components/ui/brand";
+import { Tap } from "@/components/ui/tap";
 
 /*
  * One family member: switch to them, change their face or details, or remove
@@ -327,19 +328,19 @@ export default function Member() {
 
       <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 6, paddingBottom: 24 }} showsVerticalScrollIndicator={false}>
         {/* Hero. */}
-        <View style={[glassShadow, { borderRadius: 30, overflow: "hidden", paddingVertical: 22, alignItems: "center" }]}>
+        <View style={[glassShadow, { borderRadius: 32, overflow: "hidden", paddingVertical: 22, alignItems: "center" }]}>
           <Gradient from={face.background} to="#ffffff" angle="vertical" glow="#ffffff" />
           <Enter key={photoShown ?? (seed || "derived")} kind="quick" style={{ borderRadius: 999, borderWidth: 4, borderColor: "#fff", opacity: member.locked ? 0.5 : 1 }}>
             <Avatar svg={face.svg} image={face.image} photo={photoShown} background={face.background} size={96} />
           </Enter>
-          <Text style={{ fontFamily: font.semibold, fontSize: 22, letterSpacing: -0.5, color: ink[900], marginTop: 12 }}>{member.name}</Text>
-          <Text style={{ fontFamily: font.medium, fontSize: 13.5, color: ink[500], marginTop: 2 }}>
+          <Text style={{ fontFamily: font.semibold, fontSize: 20, letterSpacing: -0.5, color: ink[900], marginTop: 12 }}>{member.name}</Text>
+          <Text style={{ fontFamily: font.medium, fontSize: 13, color: ink[500], marginTop: 2 }}>
             {member.isPrimary ? "Account holder" : (member.relationship ?? "Family")} · {member.reports === 1 ? "1 report" : `${member.reports} reports`}
           </Text>
           {viewing ? (
             <View style={{ marginTop: 12, flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 12, height: 30, borderRadius: 999, backgroundColor: brand[600] }}>
               <Check size={13} color="#fff" strokeWidth={3} />
-              <Text style={{ fontFamily: font.semibold, fontSize: 12.5, color: "#fff" }}>Viewing now</Text>
+              <Text style={{ fontFamily: font.semibold, fontSize: 13, color: "#fff" }}>Viewing now</Text>
             </View>
           ) : !member.locked ? (
             <Pressable
@@ -351,7 +352,7 @@ export default function Member() {
               style={({ pressed }) => [glassShadow, { marginTop: 12, flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 14, height: 36, borderRadius: 999, backgroundColor: pressed ? "#fff" : glass.fillStrong, borderWidth: 1, borderColor: glass.rim }]}
             >
               <ArrowLeftRight size={14} color={ink[900]} />
-              <Text style={{ fontFamily: font.semibold, fontSize: 13.5, color: ink[900] }}>Switch to {firstName(member.name)}</Text>
+              <Text style={{ fontFamily: font.semibold, fontSize: 13, color: ink[900] }}>Switch to {firstName(member.name)}</Text>
             </Pressable>
           ) : null}
         </View>
@@ -360,10 +361,10 @@ export default function Member() {
           <Pressable
             accessibilityRole="button"
             onPress={() => router.push("/settings/subscription")}
-            style={({ pressed }) => ({ marginTop: 12, flexDirection: "row", alignItems: "center", gap: 10, padding: 14, borderRadius: 20, backgroundColor: pressed ? "#ece8ff" : brand[50] })}
+            style={({ pressed }) => ({ marginTop: 12, flexDirection: "row", alignItems: "center", gap: 10, padding: 14, borderRadius: 24, backgroundColor: pressed ? lilac.base : brand[50] })}
           >
             <Lock size={17} color={brand[700]} />
-            <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 13.5, lineHeight: 19, color: ink[700] }}>
+            <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 13, lineHeight: 19, color: ink[700] }}>
               {firstName(member.name)} is paused on your current plan. Their records are safe.{" "}
               <Text style={{ fontFamily: font.semibold, color: brand[700] }}>Family opens them again.</Text>
             </Text>
@@ -372,7 +373,7 @@ export default function Member() {
 
         {/* Face. */}
         <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900], marginTop: 24, marginBottom: 12 }}>Photo or face</Text>
-        <Glass strong className="rounded-[26px] p-4">
+        <Glass strong className="rounded-xl p-4">
           <AvatarPicker
             value={seed}
             onChange={setSeed}
@@ -390,12 +391,12 @@ export default function Member() {
           <Pressable
             accessibilityRole="button"
             onPress={() => router.push("/settings/personal")}
-            style={({ pressed }) => [glassShadow, { marginTop: 16, flexDirection: "row", alignItems: "center", gap: 12, padding: 14, borderRadius: 22, backgroundColor: pressed ? "#fff" : glass.fillStrong, borderWidth: 1, borderColor: glass.rim }]}
+            style={({ pressed }) => [glassShadow, { marginTop: 16, flexDirection: "row", alignItems: "center", gap: 12, padding: 14, borderRadius: 24, backgroundColor: pressed ? "#fff" : glass.fillStrong, borderWidth: 1, borderColor: glass.rim }]}
           >
             <UserCog size={19} color={ink[700]} />
             <View style={{ flex: 1 }}>
               <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>Your name and details</Text>
-              <Text style={{ fontFamily: font.regular, fontSize: 12.5, color: ink[500], marginTop: 1 }}>Edited in Personal information</Text>
+              <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 1 }}>Edited in Personal information</Text>
             </View>
             <ChevronRight size={18} color={ink[300]} />
           </Pressable>
@@ -412,15 +413,15 @@ export default function Member() {
               {SEXES.map(([value, label]) => {
                 const on = sex === value;
                 return (
-                  <Pressable
+                  <Tap
                     key={value}
                     accessibilityRole="radio"
                     accessibilityState={{ selected: on }}
                     onPress={() => setSex(on ? "" : value)}
-                    style={{ flex: 1, height: 44, borderRadius: 14, alignItems: "center", justifyContent: "center", backgroundColor: on ? brand[50] : glass.fillStrong, borderWidth: 1.5, borderColor: on ? brand[500] : "rgba(15,16,48,0.08)" }}
+                    style={{ flex: 1, height: 44, borderRadius: 16, alignItems: "center", justifyContent: "center", backgroundColor: on ? brand[50] : glass.fillStrong, borderWidth: 1.5, borderColor: on ? brand[500] : "rgba(15,16,48,0.08)" }}
                   >
-                    <Text numberOfLines={1} style={{ fontFamily: on ? font.semibold : font.medium, fontSize: 12.5, color: on ? brand[700] : ink[700] }}>{label}</Text>
-                  </Pressable>
+                    <Text numberOfLines={1} style={{ fontFamily: on ? font.semibold : font.medium, fontSize: 13, color: on ? brand[700] : ink[700] }}>{label}</Text>
+                  </Tap>
                 );
               })}
             </View>
@@ -437,9 +438,9 @@ export default function Member() {
             <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900], marginTop: 28, marginBottom: 12 }}>
               {member.isPrimary ? "Your reports" : `${firstName(member.name)}'s reports`}
             </Text>
-            <Glass strong className="rounded-[26px] p-4">
+            <Glass strong className="rounded-xl p-4">
               {(records.data ?? []).slice(0, 3).map((r, i) => (
-                <Pressable
+                <Tap
                   key={r.id}
                   accessibilityRole="button"
                   onPress={() => {
@@ -450,23 +451,23 @@ export default function Member() {
                   }}
                   style={{ flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 10, borderTopWidth: i ? 1 : 0, borderTopColor: "rgba(15,16,48,0.06)" }}
                 >
-                  <View style={{ width: 36, height: 36, borderRadius: 11, backgroundColor: brand[50], alignItems: "center", justifyContent: "center" }}>
+                  <View style={{ width: 36, height: 36, borderRadius: 12, backgroundColor: brand[50], alignItems: "center", justifyContent: "center" }}>
                     <FileText size={16} color={brand[600]} />
                   </View>
                   <View style={{ flex: 1, minWidth: 0 }}>
-                    <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 14.5, color: ink[900] }}>{r.title}</Text>
-                    <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 12.5, color: ink[500] }}>{formatEventDate(r.eventDate)}{r.facility ? ` · ${r.facility}` : ""}</Text>
+                    <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{r.title}</Text>
+                    <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 13, color: ink[500] }}>{formatEventDate(r.eventDate)}{r.facility ? ` · ${r.facility}` : ""}</Text>
                   </View>
                   <ChevronRight size={16} color={ink[300]} />
-                </Pressable>
+                </Tap>
               ))}
               {records.data && records.data.length === 0 ? (
-                <Text style={{ fontFamily: font.regular, fontSize: 13.5, color: ink[500], marginBottom: 4 }}>
+                <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginBottom: 4 }}>
                   Nothing filed yet. Add old reports and I&apos;ll read them for {member.isPrimary ? "you" : firstName(member.name)}.
                 </Text>
               ) : null}
               {records.data && records.data.length > 3 ? (
-                <Pressable
+                <Tap
                   accessibilityRole="button"
                   onPress={() => {
                     void switchMember(member.id);
@@ -474,8 +475,8 @@ export default function Member() {
                   }}
                   style={{ height: 40, justifyContent: "center" }}
                 >
-                  <Text style={{ fontFamily: font.semibold, fontSize: 14, color: brand[700] }}>See all {records.data.length}</Text>
-                </Pressable>
+                  <Text style={{ fontFamily: font.semibold, fontSize: 15, color: brand[700] }}>See all {records.data.length}</Text>
+                </Tap>
               ) : null}
               <View style={{ marginTop: 10 }}>
                 <ReportQueue items={queue} onChange={setQueue} locked={filing} />
@@ -501,7 +502,7 @@ export default function Member() {
           <Pressable
             accessibilityRole="button"
             onPress={() => setConfirm(true)}
-            style={({ pressed }) => ({ marginTop: 28, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, height: 50, borderRadius: 999, backgroundColor: pressed ? "#fde4e7" : semantic.dangerBg })}
+            style={({ pressed }) => ({ marginTop: 28, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, height: 50, borderRadius: 999, backgroundColor: pressed ? hue.rose.bg : semantic.dangerBg })}
           >
             <Trash2 size={17} color={semantic.dangerText} />
             <Text style={{ fontFamily: font.semibold, fontSize: 15, color: semantic.dangerText }}>Remove {firstName(member.name)} from family</Text>
@@ -511,7 +512,7 @@ export default function Member() {
 
       {dirty || saved ? (
         <View style={{ paddingHorizontal: 20, paddingTop: 8, paddingBottom: insets.bottom + 12 }}>
-          <PillButton tone={saved ? "light" : "dark"} loading={saving} disabled={saved} onPress={() => void save()} icon={saved ? <Check size={17} color={ink[900]} /> : undefined}>
+          <PillButton tone={saved ? "light" : "brand"} loading={saving} disabled={saved} onPress={() => void save()} icon={saved ? <Check size={17} color={ink[900]} /> : undefined}>
             {saved ? "Saved" : "Save changes"}
           </PillButton>
         </View>

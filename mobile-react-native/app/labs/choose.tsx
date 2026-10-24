@@ -10,8 +10,9 @@ import { useReducedMotion } from "@/components/ui/motion";
 import { Backdrop, PageTitle, PillButton, ScreenHeader } from "@/components/ui/screen";
 import { rankPartners } from "@/lib/labs/logic";
 import { useCatalog, useLabCart, useRatings } from "@/lib/labs/queries";
-import { brand, ink } from "@/theme/tokens";
+import { brand, hue, ink } from "@/theme/tokens";
 import { font } from "@/theme/type";
+import { Tap } from "@/components/ui/tap";
 
 /*
  * Choose a lab for everything in the cart.
@@ -54,15 +55,15 @@ export default function ChooseLab() {
           {cart.tests.map((id) => (
             <View key={id} style={{ height: 34, paddingLeft: 12, paddingRight: 6, borderRadius: 999, flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: brand[50] }}>
               <Text style={{ fontFamily: font.medium, fontSize: 13, color: brand[700] }}>{tests.find((t) => t.id === id)?.name ?? id}</Text>
-              <Pressable accessibilityLabel="Remove" hitSlop={6} onPress={() => cart.remove(id)} style={{ width: 22, height: 22, borderRadius: 11, alignItems: "center", justifyContent: "center", backgroundColor: "#fff" }}>
+              <Tap scale={0.95} accessibilityLabel="Remove" hitSlop={6} onPress={() => cart.remove(id)} style={{ width: 22, height: 22, borderRadius: 999, alignItems: "center", justifyContent: "center", backgroundColor: "#fff" }}>
                 <X size={12} color={brand[700]} />
-              </Pressable>
+              </Tap>
             </View>
           ))}
         </View>
 
         {empty ? (
-          <Glass strong className="mt-6 items-center rounded-[26px] p-6">
+          <Glass strong className="mt-6 items-center rounded-xl p-6">
             <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>Your cart is empty</Text>
             <PillButton onPress={() => router.replace("/labs")} style={{ marginTop: 14, alignSelf: "stretch" }}>
               Find a test
@@ -73,17 +74,17 @@ export default function ChooseLab() {
         <View style={{ marginTop: 18, gap: 12 }}>
           {(empty ? [] : ranked).map(({ partner: p, quote: q }, i) => (
             <Animated.View key={p.id} entering={still ? undefined : FadeInDown.delay(i * 50).duration(260)}>
-              <Pressable accessibilityRole="button" onPress={() => router.push({ pathname: "/labs/partner/[id]", params: { id: p.id } })} style={({ pressed }) => [glassShadow, { borderRadius: 26, padding: 14, backgroundColor: pressed ? "#fff" : glass.fillStrong, borderWidth: i === 0 ? 2 : 1, borderColor: i === 0 ? brand[500] : glass.rim }]}>
+              <Pressable accessibilityRole="button" onPress={() => router.push({ pathname: "/labs/partner/[id]", params: { id: p.id } })} style={({ pressed }) => [glassShadow, { borderRadius: 24, padding: 14, backgroundColor: pressed ? "#fff" : glass.fillStrong, borderWidth: i === 0 ? 2 : 1, borderColor: i === 0 ? brand[500] : glass.rim }]}>
                 <View className="flex-row items-center gap-3">
                   <PartnerBadge partner={p} size={52} />
                   <View style={{ flex: 1, minWidth: 0 }}>
-                    <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 16, color: ink[900] }}>{p.name}</Text>
+                    <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>{p.name}</Text>
                     <View style={{ marginTop: 3 }}>
                       <RatingLine rating={ratings.data?.get(p.id)} />
                     </View>
                   </View>
                   <View style={{ alignItems: "flex-end" }}>
-                    <Text style={{ fontFamily: font.semibold, fontSize: 18, color: ink[900] }}>{rupees(q.total)}</Text>
+                    <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>{rupees(q.total)}</Text>
                     {q.mrp > q.subtotal ? <Text style={{ fontFamily: font.regular, fontSize: 12, color: ink[300], textDecorationLine: "line-through" }}>{rupees(q.mrp + q.fee)}</Text> : null}
                   </View>
                 </View>
@@ -95,7 +96,6 @@ export default function ChooseLab() {
                   {p.accreditation.length ? <Tag icon={<ShieldCheck size={11} color={ink[700]} />} text={p.accreditation.join(" · ")} /> : null}
                 </View>
                 <PillButton
-                  tone={i === 0 ? "brand" : "dark"}
                   onPress={() => {
                     cart.setPartner(p.id);
                     router.push("/labs/book");
@@ -110,7 +110,7 @@ export default function ChooseLab() {
         </View>
 
         {catalog.data && cart.tests.length && ranked.length === 0 ? (
-          <Text style={{ fontFamily: font.regular, fontSize: 14, color: ink[500], marginTop: 12 }}>No single lab does all of these. Remove one and try again.</Text>
+          <Text style={{ fontFamily: font.regular, fontSize: 15, color: ink[500], marginTop: 12 }}>No single lab does all of these. Remove one and try again.</Text>
         ) : null}
 
         <View style={{ marginTop: 18 }}>
@@ -123,9 +123,9 @@ export default function ChooseLab() {
 
 function Tag({ text, icon, lime }: { text: string; icon?: React.ReactNode; lime?: boolean }) {
   return (
-    <View style={{ height: 26, paddingHorizontal: 9, borderRadius: 999, flexDirection: "row", alignItems: "center", gap: 4, backgroundColor: lime ? "#e4ff7a" : "rgba(15,16,48,0.05)" }}>
+    <View style={{ height: 26, paddingHorizontal: 9, borderRadius: 999, flexDirection: "row", alignItems: "center", gap: 4, backgroundColor: lime ? hue.lime.bg : "rgba(15,16,48,0.05)" }}>
       {icon}
-      <Text style={{ fontFamily: font.semibold, fontSize: 11.5, color: lime ? "#2f3d00" : ink[700] }}>{text}</Text>
+      <Text style={{ fontFamily: font.semibold, fontSize: 12, color: lime ? hue.lime.fg : ink[700] }}>{text}</Text>
     </View>
   );
 }

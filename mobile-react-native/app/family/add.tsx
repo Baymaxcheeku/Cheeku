@@ -21,8 +21,9 @@ import { facePool, isChild } from "@/lib/profiles/face-pool";
 import { ageFrom, EMPTY_HEALTH, hasHealth, saveMemberHealth, type MemberHealth } from "@/lib/profiles/health";
 import { pickPhoto, setProfilePhoto } from "@/lib/profiles/photo";
 import { addFamilyMember } from "@/lib/settings/actions";
-import { brand, ink } from "@/theme/tokens";
+import { brand, ink, lilac, semantic } from "@/theme/tokens";
 import { font } from "@/theme/type";
+import { Tap } from "@/components/ui/tap";
 
 /*
  * Add a family member: five short steps, then everything is saved at once.
@@ -195,12 +196,12 @@ export default function AddMember() {
         <Backdrop />
         <ScreenHeader title="Add a family member" />
         <View className="px-5 pt-6">
-          <Glass strong className="items-center rounded-[28px] px-6 py-8">
-            <View style={{ width: 56, height: 56, borderRadius: 18, backgroundColor: brand[50], alignItems: "center", justifyContent: "center" }}>
+          <Glass strong className="items-center rounded-2xl px-6 py-8">
+            <View style={{ width: 56, height: 56, borderRadius: 16, backgroundColor: brand[50], alignItems: "center", justifyContent: "center" }}>
               <Lock size={24} color={brand[600]} />
             </View>
-            <Text style={{ fontFamily: font.semibold, fontSize: 19, color: ink[900], marginTop: 12, textAlign: "center" }}>Family members come with Family</Text>
-            <Text style={{ fontFamily: font.regular, fontSize: 14, lineHeight: 20, color: ink[500], marginTop: 6, textAlign: "center" }}>
+            <Text style={{ fontFamily: font.semibold, fontSize: 20, color: ink[900], marginTop: 12, textAlign: "center" }}>Family members come with Family</Text>
+            <Text style={{ fontFamily: font.regular, fontSize: 15, lineHeight: 20, color: ink[500], marginTop: 6, textAlign: "center" }}>
               Up to 4 people, each with their own file, for ₹249 a month.
             </Text>
             <PillButton tone="brand" onPress={() => router.replace("/settings/subscription")} style={{ marginTop: 18, alignSelf: "stretch" }}>
@@ -222,16 +223,16 @@ export default function AddMember() {
           <View style={{ alignItems: "center" }}>
             <Enter kind="soft" style={[glassShadow, { borderRadius: 999, borderWidth: 5, borderColor: "#fff" }]}>
               {photo ? (
-                <Image alt="" source={{ uri: photo }} style={{ width: 120, height: 120, borderRadius: 60 }} />
+                <Image alt="" source={{ uri: photo }} style={{ width: 120, height: 120, borderRadius: 999 }} />
               ) : face ? (
                 <Avatar svg={face.svg} image={face.image} background={face.background} size={120} />
               ) : (
-                <View style={{ width: 120, height: 120, borderRadius: 60, backgroundColor: brand[100] }} />
+                <View style={{ width: 120, height: 120, borderRadius: 999, backgroundColor: brand[100] }} />
               )}
             </Enter>
             {done ? (
               <Enter kind="pop" delay={200} style={{ position: "absolute", top: 86, marginLeft: 92 }}>
-                <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: brand[600], borderWidth: 3, borderColor: "#fff", alignItems: "center", justifyContent: "center" }}>
+                <View style={{ width: 36, height: 36, borderRadius: 999, backgroundColor: brand[600], borderWidth: 3, borderColor: "#fff", alignItems: "center", justifyContent: "center" }}>
                   <Check size={18} color="#fff" strokeWidth={3} />
                 </View>
               </Enter>
@@ -245,28 +246,28 @@ export default function AddMember() {
           </View>
 
           {done && outcome ? (
-            <Glass strong className="mt-6 gap-3 rounded-[24px] p-4">
+            <Glass strong className="mt-6 gap-3 rounded-xl p-4">
               <Line ok icon={<Check size={15} color={brand[600]} />} text={`${first}'s profile is set up`} />
               {outcome.photo === "saved" ? <Line ok icon={<Camera size={15} color={brand[600]} />} text="Photo added" /> : null}
               {outcome.photo === "failed" ? (
                 <View style={{ gap: 10 }}>
-                  <Line ok={false} icon={<Camera size={15} color="#c00a1c" />} text={`${photoError ?? "The photo didn't upload."} ${first} has a drawn face for now.`} />
-                  <Pressable
+                  <Line ok={false} icon={<Camera size={15} color={semantic.dangerText} />} text={`${photoError ?? "The photo didn't upload."} ${first} has a drawn face for now.`} />
+                  <Tap
                     accessibilityRole="button"
                     disabled={retrying}
                     onPress={() => void retryPhoto()}
                     style={{ alignSelf: "flex-start", marginLeft: 40, flexDirection: "row", alignItems: "center", gap: 8, height: 36, paddingHorizontal: 14, borderRadius: 999, backgroundColor: brand[50], opacity: retrying ? 0.6 : 1 }}
                   >
                     {retrying ? <ActivityIndicator size="small" color={brand[600]} /> : <Camera size={14} color={brand[700]} />}
-                    <Text style={{ fontFamily: font.semibold, fontSize: 13.5, color: brand[700] }}>{retrying ? "Uploading..." : "Try the photo again"}</Text>
-                  </Pressable>
+                    <Text style={{ fontFamily: font.semibold, fontSize: 13, color: brand[700] }}>{retrying ? "Uploading..." : "Try the photo again"}</Text>
+                  </Tap>
                 </View>
               ) : null}
               {outcome.health !== "skipped" ? (
-                <Line ok={outcome.health === "saved"} icon={<HeartPulse size={15} color={outcome.health === "saved" ? brand[600] : "#c00a1c"} />} text={outcome.health === "saved" ? "Health basics saved" : "Health basics didn't save. Add them from their page."} />
+                <Line ok={outcome.health === "saved"} icon={<HeartPulse size={15} color={outcome.health === "saved" ? brand[600] : semantic.dangerText} />} text={outcome.health === "saved" ? "Health basics saved" : "Health basics didn't save. Add them from their page."} />
               ) : null}
               {outcome.filed > 0 ? <Line ok icon={<FileText size={15} color={brand[600]} />} text={`${outcome.filed === 1 ? "1 report" : `${outcome.filed} reports`} filed. I'm reading them now.`} /> : null}
-              {outcome.failed > 0 ? <Line ok={false} icon={<TriangleAlert size={15} color="#c00a1c" />} text={`${outcome.failed === 1 ? "1 report" : `${outcome.failed} reports`} didn't upload. Try them again from ${first}'s file.`} /> : null}
+              {outcome.failed > 0 ? <Line ok={false} icon={<TriangleAlert size={15} color={semantic.dangerText} />} text={`${outcome.failed === 1 ? "1 report" : `${outcome.failed} reports`} didn't upload. Try them again from ${first}'s file.`} /> : null}
             </Glass>
           ) : null}
 
@@ -288,9 +289,9 @@ export default function AddMember() {
               >
                 {outcome && outcome.filed > 0 ? `See ${first}'s reports` : `Switch to ${first}`}
               </PillButton>
-              <Pressable accessibilityRole="button" onPress={() => router.replace("/home")} style={{ height: 44, alignItems: "center", justifyContent: "center" }}>
-                <Text style={{ fontFamily: font.semibold, fontSize: 14.5, color: ink[500] }}>Done for now</Text>
-              </Pressable>
+              <Tap accessibilityRole="button" onPress={() => router.replace("/home")} style={{ height: 44, alignItems: "center", justifyContent: "center" }}>
+                <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[500] }}>Done for now</Text>
+              </Tap>
             </View>
           ) : null}
         </ScrollView>
@@ -320,16 +321,16 @@ export default function AddMember() {
 
       <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 16, paddingBottom: 24 }} showsVerticalScrollIndicator={false}>
         {/* The live card: what the tray will show. */}
-        <View style={[glassShadow, { height: 104, borderRadius: 26, overflow: "hidden", flexDirection: "row", alignItems: "center", gap: 14, paddingHorizontal: 16 }]}>
-          <Gradient from={face?.background ?? "#ebe6ff"} to="#ffffff" angle="diagonal" glow="#ffffff" />
+        <View style={[glassShadow, { height: 104, borderRadius: 24, overflow: "hidden", flexDirection: "row", alignItems: "center", gap: 14, paddingHorizontal: 16 }]}>
+          <Gradient from={face?.background ?? lilac.base} to="#ffffff" angle="diagonal" glow="#ffffff" />
           <Enter key={photo ?? (seed || "none")} kind="quick" style={{ borderRadius: 999, borderWidth: 3, borderColor: "#fff" }}>
             {photo ? (
-              <Image alt="" source={{ uri: photo }} style={{ width: 64, height: 64, borderRadius: 32 }} />
+              <Image alt="" source={{ uri: photo }} style={{ width: 64, height: 64, borderRadius: 999 }} />
             ) : face ? (
               <Avatar svg={face.svg} image={face.image} background={face.background} size={64} />
             ) : (
-              <View style={{ width: 64, height: 64, borderRadius: 32, backgroundColor: brand[100], alignItems: "center", justifyContent: "center" }}>
-                <Text style={{ fontFamily: font.semibold, fontSize: 26, color: brand[700] }}>{name.trim() ? name.trim()[0]?.toUpperCase() : "?"}</Text>
+              <View style={{ width: 64, height: 64, borderRadius: 999, backgroundColor: brand[100], alignItems: "center", justifyContent: "center" }}>
+                <Text style={{ fontFamily: font.semibold, fontSize: 24, color: brand[700] }}>{name.trim() ? name.trim()[0]?.toUpperCase() : "?"}</Text>
               </View>
             )}
           </Enter>
@@ -370,7 +371,7 @@ export default function AddMember() {
                           style={({ pressed }) => [on ? null : glassShadow, {
                             flex: 1,
                             height: 52,
-                            borderRadius: 18,
+                            borderRadius: 16,
                             alignItems: "center",
                             justifyContent: "center",
                             backgroundColor: on ? ink[900] : pressed ? "#fff" : glass.fillStrong,
@@ -379,7 +380,7 @@ export default function AddMember() {
                             transform: [{ scale: pressed ? 0.96 : 1 }],
                           }]}
                         >
-                          <Text numberOfLines={1} style={{ fontFamily: on ? font.semibold : font.medium, fontSize: 14, color: on ? "#fff" : ink[900] }}>{label}</Text>
+                          <Text numberOfLines={1} style={{ fontFamily: on ? font.semibold : font.medium, fontSize: 15, color: on ? "#fff" : ink[900] }}>{label}</Text>
                         </Pressable>
                       );
                     })}
@@ -440,7 +441,7 @@ export default function AddMember() {
                       style={({ pressed }) => ({
                         flex: 1,
                         height: 44,
-                        borderRadius: 14,
+                        borderRadius: 16,
                         alignItems: "center",
                         justifyContent: "center",
                         backgroundColor: on ? brand[50] : pressed ? "#fff" : glass.fillStrong,
@@ -472,7 +473,7 @@ export default function AddMember() {
         </Animated.View>
 
         {message ? (
-          <Text accessibilityRole="alert" style={{ fontFamily: font.medium, fontSize: 13, color: "#c00a1c", marginTop: 14 }}>{message}</Text>
+          <Text accessibilityRole="alert" style={{ fontFamily: font.medium, fontSize: 13, color: semantic.dangerText, marginTop: 14 }}>{message}</Text>
         ) : null}
       </ScrollView>
 
@@ -502,7 +503,7 @@ function Title({ text, line }: { text: string; line: string }) {
   return (
     <>
       <Text style={{ fontFamily: font.semibold, fontSize: 24, lineHeight: 29, letterSpacing: -0.6, color: ink[900] }}>{text}</Text>
-      <Text style={{ fontFamily: font.regular, fontSize: 14, lineHeight: 20, color: ink[500], marginTop: 4 }}>{line}</Text>
+      <Text style={{ fontFamily: font.regular, fontSize: 15, lineHeight: 20, color: ink[500], marginTop: 4 }}>{line}</Text>
     </>
   );
 }
@@ -510,8 +511,8 @@ function Title({ text, line }: { text: string; line: string }) {
 function Line({ ok, icon, text }: { ok: boolean; icon: React.ReactNode; text: string }) {
   return (
     <View className="flex-row items-start gap-3">
-      <View style={{ width: 28, height: 28, borderRadius: 9, backgroundColor: ok ? brand[50] : "#fef1f3", alignItems: "center", justifyContent: "center" }}>{icon}</View>
-      <Text style={{ flex: 1, fontFamily: font.medium, fontSize: 14, lineHeight: 20, color: ink[900], marginTop: 3 }}>{text}</Text>
+      <View style={{ width: 28, height: 28, borderRadius: 8, backgroundColor: ok ? brand[50] : semantic.dangerBg, alignItems: "center", justifyContent: "center" }}>{icon}</View>
+      <Text style={{ flex: 1, fontFamily: font.medium, fontSize: 15, lineHeight: 20, color: ink[900], marginTop: 3 }}>{text}</Text>
     </View>
   );
 }

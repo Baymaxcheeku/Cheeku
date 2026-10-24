@@ -15,7 +15,7 @@ import {
   type LucideIcon,
 } from "lucide-react-native";
 import { useState } from "react";
-import { ActivityIndicator, Linking, Pressable, Text, View } from "react-native";
+import { ActivityIndicator, Linking, Text, View } from "react-native";
 
 import { Panel, Section, SettingsScreen } from "@/components/settings/chrome";
 import { Brand } from "@/components/ui/brand";
@@ -27,6 +27,7 @@ import { LOCK_DELAYS, type LockDelay } from "@/lib/security/lock-timing";
 import { supabase } from "@/lib/supabase/client";
 import { brand, ink, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
+import { Tap } from "@/components/ui/tap";
 
 /**
  * Security: who can open this app, and what has happened on the account.
@@ -160,8 +161,8 @@ export default function Security() {
               <View className="flex-row items-center gap-3.5 px-4 py-3.5">
                 <IconTile icon={capability.kind === "face" ? ScanFace : Fingerprint} />
                 <View className="min-w-0 flex-1">
-                  <Text style={{ fontFamily: font.semibold, fontSize: 14.5, color: ink[900] }}>Require {lockName(capability.kind)}</Text>
-                  <Text style={{ fontFamily: font.regular, fontSize: 11.5, lineHeight: 16, color: ink[500], marginTop: 2 }}>
+                  <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>Require {lockName(capability.kind)}</Text>
+                  <Text style={{ fontFamily: font.regular, fontSize: 12, lineHeight: 16, color: ink[500], marginTop: 2 }}>
                     Ask when <Brand ai /> is opened or comes back from the background.
                   </Text>
                 </View>
@@ -176,14 +177,14 @@ export default function Security() {
                 <View className="px-4 pb-4 pt-3" style={{ borderTopWidth: 1, borderTopColor: surface.line }}>
                   <View className="flex-row items-center gap-2">
                     <Timer size={15} color={ink[500]} />
-                    <Text style={{ fontFamily: font.medium, fontSize: 12.5, color: ink[700] }}>Lock after leaving the app</Text>
+                    <Text style={{ fontFamily: font.medium, fontSize: 13, color: ink[700] }}>Lock after leaving the app</Text>
                     {busy === "delay" ? <ActivityIndicator size="small" color={brand[600]} /> : null}
                   </View>
                   <View className="mt-2.5 flex-row gap-2">
                     {LOCK_DELAYS.map((d) => {
                       const on = delay === d.seconds;
                       return (
-                        <Pressable
+                        <Tap
                           key={d.seconds}
                           accessibilityRole="radio"
                           accessibilityState={{ selected: on }}
@@ -194,18 +195,18 @@ export default function Security() {
                           style={{ backgroundColor: on ? brand[600] : surface.base, borderWidth: 1, borderColor: on ? brand[600] : surface.line }}
                         >
                           <Text style={{ fontFamily: font.semibold, fontSize: 13, color: on ? "#fff" : ink[700] }}>{d.label}</Text>
-                        </Pressable>
+                        </Tap>
                       );
                     })}
                   </View>
-                  <Text style={{ fontFamily: font.regular, fontSize: 11.5, lineHeight: 17, color: ink[500], marginTop: 10 }}>
+                  <Text style={{ fontFamily: font.regular, fontSize: 12, lineHeight: 17, color: ink[500], marginTop: 10 }}>
                     The screen is hidden in your app switcher straight away, whichever you pick. Restarting the app always asks.
                   </Text>
                 </View>
               ) : null}
             </>
           ) : (
-            <Pressable
+            <Tap
               accessibilityRole={capability?.reason === "not-enrolled" ? "button" : "text"}
               onPress={capability?.reason === "not-enrolled" ? () => void Linking.openSettings() : undefined}
               className="flex-row items-center gap-3.5 px-4 py-3.5"
@@ -214,8 +215,8 @@ export default function Security() {
                 <Fingerprint size={17} color={ink[300]} />
               </View>
               <View className="min-w-0 flex-1">
-                <Text style={{ fontFamily: font.semibold, fontSize: 14.5, color: ink[500] }}>App lock</Text>
-                <Text style={{ fontFamily: font.regular, fontSize: 11.5, lineHeight: 16, color: ink[300], marginTop: 2 }}>
+                <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[500] }}>App lock</Text>
+                <Text style={{ fontFamily: font.regular, fontSize: 12, lineHeight: 16, color: ink[300], marginTop: 2 }}>
                   {/*
                    * The two unavailable cases read differently on purpose. One
                    * is fixable in thirty seconds and the other is not, and
@@ -227,7 +228,7 @@ export default function Security() {
                     : "This device does not support a biometric lock."}
                 </Text>
               </View>
-            </Pressable>
+            </Tap>
           )}
         </Panel>
       </Section>
@@ -251,7 +252,7 @@ export default function Security() {
           />
         </Panel>
         {note ? (
-          <Text accessibilityRole="alert" style={{ marginHorizontal: 20, marginTop: 10, fontFamily: font.medium, fontSize: 12.5, lineHeight: 18, color: ink[700] }}>
+          <Text accessibilityRole="alert" style={{ marginHorizontal: 20, marginTop: 10, fontFamily: font.medium, fontSize: 13, lineHeight: 18, color: ink[700] }}>
             {note}
           </Text>
         ) : null}
@@ -272,7 +273,7 @@ export default function Security() {
             activity.data.map((row, i) => <ActivityLine key={row.id} row={row} first={i === 0} />)
           )}
         </Panel>
-        <Text style={{ marginHorizontal: 20, marginTop: 10, fontFamily: font.regular, fontSize: 11.5, lineHeight: 17, color: ink[500] }}>
+        <Text style={{ marginHorizontal: 20, marginTop: 10, fontFamily: font.regular, fontSize: 12, lineHeight: 17, color: ink[500] }}>
           See something you didn&apos;t do? Change your password, then sign out of other devices.
         </Text>
       </Section>
@@ -338,8 +339,8 @@ function ActivityLine({ row, first }: { row: ActivityRow; first: boolean }) {
   return (
     <View className="flex-row items-center gap-3 px-4 py-3" style={first ? undefined : { borderTopWidth: 1, borderTopColor: surface.line }}>
       <View className="min-w-0 flex-1">
-        <Text style={{ fontFamily: font.semibold, fontSize: 13.5, color: ink[900] }}>{ACTIVITY_LABEL[row.kind] ?? row.kind}</Text>
-        <Text style={{ fontFamily: font.regular, fontSize: 11.5, color: ink[500], marginTop: 1 }}>
+        <Text style={{ fontFamily: font.semibold, fontSize: 13, color: ink[900] }}>{ACTIVITY_LABEL[row.kind] ?? row.kind}</Text>
+        <Text style={{ fontFamily: font.regular, fontSize: 12, color: ink[500], marginTop: 1 }}>
           {[when(row.created_at), source].filter(Boolean).join(" · ")}
         </Text>
       </View>
@@ -349,7 +350,7 @@ function ActivityLine({ row, first }: { row: ActivityRow; first: boolean }) {
 
 function EmptyLine({ text }: { text: string }) {
   return (
-    <Text style={{ paddingHorizontal: 16, paddingVertical: 16, fontFamily: font.regular, fontSize: 12.5, lineHeight: 18, color: ink[500] }}>{text}</Text>
+    <Text style={{ paddingHorizontal: 16, paddingVertical: 16, fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[500] }}>{text}</Text>
   );
 }
 
@@ -377,7 +378,7 @@ function ActionRow({
   onPress: () => void;
 }) {
   return (
-    <Pressable
+    <Tap
       accessibilityRole="button"
       disabled={busy}
       onPress={onPress}
@@ -386,11 +387,11 @@ function ActionRow({
     >
       <IconTile icon={icon} />
       <View className="min-w-0 flex-1">
-        <Text style={{ fontFamily: font.semibold, fontSize: 14.5, color: ink[900] }}>{title}</Text>
-        <Text style={{ fontFamily: font.regular, fontSize: 11.5, lineHeight: 16, color: ink[500], marginTop: 2 }}>{body}</Text>
+        <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{title}</Text>
+        <Text style={{ fontFamily: font.regular, fontSize: 12, lineHeight: 16, color: ink[500], marginTop: 2 }}>{body}</Text>
       </View>
       {busy ? <ActivityIndicator size="small" color={brand[600]} /> : <ChevronRight size={16} color={ink[300]} />}
-    </Pressable>
+    </Tap>
   );
 }
 
@@ -399,8 +400,8 @@ function Fact({ icon: Icon, title, body }: { icon: LucideIcon; title: string; bo
     <View className="flex-row gap-3 rounded-card bg-surface p-3.5" style={{ borderWidth: 1, borderColor: surface.line }}>
       <Icon size={17} color={brand[500]} style={{ marginTop: 1 }} />
       <View className="min-w-0 flex-1">
-        <Text style={{ fontFamily: font.semibold, fontSize: 13.5, color: ink[900] }}>{title}</Text>
-        <Text style={{ fontFamily: font.regular, fontSize: 11.5, lineHeight: 17, color: ink[500], marginTop: 3 }}>{body}</Text>
+        <Text style={{ fontFamily: font.semibold, fontSize: 13, color: ink[900] }}>{title}</Text>
+        <Text style={{ fontFamily: font.regular, fontSize: 12, lineHeight: 17, color: ink[500], marginTop: 3 }}>{body}</Text>
       </View>
     </View>
   );

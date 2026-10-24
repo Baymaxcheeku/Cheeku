@@ -1,7 +1,7 @@
 import { useRouter } from "expo-router";
 import { ArrowUp, Camera, ChevronDown, Clock3, MessageCircleHeart, Mic, Plus } from "lucide-react-native";
 import { useEffect, useState } from "react";
-import { Pressable, Text, TextInput, View } from "react-native";
+import { Text, TextInput, View } from "react-native";
 import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 
 import { Tap } from "@/components/ui/tap";
@@ -11,7 +11,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { Glass, GlassCircle, Gradient, glass, glassShadow } from "@/components/ui/glass";
 import { useReducedMotion } from "@/components/ui/motion";
 import type { ActiveProfile } from "@/lib/profiles/context";
-import { brand, ink, semantic } from "@/theme/tokens";
+import { brand, ink, lilac, semantic } from "@/theme/tokens";
 import { font } from "@/theme/type";
 import { Brand, brandify } from "@/components/ui/brand";
 
@@ -70,7 +70,7 @@ export function ProfileChip({
     >
       <Avatar svg={active.avatar} photo={active.photo} image={active.avatarImage} background={active.avatarBackground} size={40} />
       <View>
-        <Text style={{ fontFamily: font.regular, fontSize: 11.5, color: ink[500] }}>
+        <Text style={{ fontFamily: font.regular, fontSize: 12, color: ink[500] }}>
           {active.isPrimary ? greeting : "Viewing"}
         </Text>
         <View className="flex-row items-center gap-1">
@@ -90,7 +90,7 @@ export function ProfileChip({
                 marginLeft: i === 0 ? 0 : -8,
                 width: 26,
                 height: 26,
-                borderRadius: 13,
+                borderRadius: 999,
                 borderWidth: 1.5,
                 borderStyle: "dashed",
                 borderColor: brand[300],
@@ -203,7 +203,7 @@ export function AskBar() {
               onSubmitEditing={() => ask(value)}
               returnKeyType="send"
               accessibilityLabel="Ask Cheeku a question"
-              style={{ fontSize: 15.5, color: ink[900], fontFamily: font.regular, height: 44 }}
+              style={{ fontSize: 15, color: ink[900], fontFamily: font.regular, height: 44 }}
             />
             {/* A drawn placeholder, so it can fade between hints. */}
             {!value ? (
@@ -219,14 +219,14 @@ export function AskBar() {
                   entering={still ? undefined : FadeIn.duration(260)}
                   exiting={still ? undefined : FadeOut.duration(120)}
                   numberOfLines={1}
-                  style={{ position: "absolute", left: 0, right: 0, top: 0, bottom: 0, lineHeight: 44, fontFamily: font.regular, fontSize: 15.5, color: ink[300] }}
+                  style={{ position: "absolute", left: 0, right: 0, top: 0, bottom: 0, lineHeight: 44, fontFamily: font.regular, fontSize: 15, color: ink[300] }}
                 >
                   {brandify(focused ? "Ask Cheeku anything…" : hint, { size: 17 })}
                 </Animated.Text>
               </View>
             ) : null}
           </View>
-          <Pressable
+          <Tap scale={0.95}
             accessibilityRole="button"
             accessibilityLabel="Photograph a report to ask about"
             onPress={openUpload}
@@ -234,8 +234,8 @@ export function AskBar() {
             className="h-11 w-10 items-center justify-center"
           >
             <Camera size={20} color={ink[700]} strokeWidth={1.8} />
-          </Pressable>
-          <Pressable
+          </Tap>
+          <Tap scale={0.95}
             accessibilityRole="button"
             accessibilityLabel="Voice. Coming soon"
             onPress={() => setVoiceHint(true)}
@@ -243,7 +243,7 @@ export function AskBar() {
             className="h-11 w-10 items-center justify-center"
           >
             <Mic size={20} color={ink[700]} strokeWidth={1.8} />
-          </Pressable>
+          </Tap>
         </Glass>
         <GlassCircle dark size={56} label="Send" onPress={() => ask(value)}>
           <ArrowUp size={21} color="#ffffff" />
@@ -252,8 +252,8 @@ export function AskBar() {
 
       {voiceHint ? (
         <BubblePop from="right" style={{ alignSelf: "flex-end", marginTop: 8, marginRight: 60 }}>
-          <Glass strong className="rounded-[14px] px-3 py-2">
-            <Text accessibilityLiveRegion="polite" style={{ fontFamily: font.medium, fontSize: 12.5, color: ink[700] }}>
+          <Glass strong className="rounded-lg px-3 py-2">
+            <Text accessibilityLiveRegion="polite" style={{ fontFamily: font.medium, fontSize: 13, color: ink[700] }}>
               Talking to me is coming soon. Type for now?
             </Text>
           </Glass>
@@ -303,8 +303,8 @@ export function CheekuCard({
       : "Snap one report and I'll take it from there.";
 
   return (
-    <View className="overflow-hidden rounded-[32px]" style={[glassShadow, { minHeight: 318 }]}>
-      <Gradient from="#f1edff" to="#d8cffd" glow="#ffffff" />
+    <View className="overflow-hidden rounded-2xl" style={[glassShadow, { minHeight: 318 }]}>
+      <Gradient from={lilac.base} to={lilac.deep} glow="#ffffff" />
 
       {/*
        * Cheeku, large and alive, anchored to the card's bottom-right corner.
@@ -320,22 +320,22 @@ export function CheekuCard({
 
       <View className="flex-1 p-4">
         <View className="flex-row items-center justify-between">
-          <Pressable accessibilityRole="button" accessibilityLabel={`${status.text}. Open records`} onPress={onStatus}>
+          <Tap accessibilityRole="button" accessibilityLabel={`${status.text}. Open records`} onPress={onStatus}>
             <Glass className="flex-row items-center gap-2 rounded-pill py-2 pl-2.5 pr-3.5">
               <View className="h-5 w-5 items-center justify-center rounded-pill bg-white">
                 <View className="h-2 w-2 rounded-pill" style={{ backgroundColor: status.dot }} />
               </View>
-              <Text style={{ fontFamily: font.semibold, fontSize: 13.5, color: ink[900] }}>{status.text}</Text>
+              <Text style={{ fontFamily: font.semibold, fontSize: 13, color: ink[900] }}>{status.text}</Text>
             </Glass>
-          </Pressable>
+          </Tap>
           <Glass className="flex-row items-center gap-1.5 rounded-pill px-3.5 py-2">
             <Clock3 size={14} color={ink[700]} strokeWidth={1.9} />
-            <Text style={{ fontFamily: font.semibold, fontSize: 13.5, color: ink[900] }}>24/7</Text>
+            <Text style={{ fontFamily: font.semibold, fontSize: 13, color: ink[900] }}>24/7</Text>
           </Glass>
         </View>
 
         <View className="mt-6 pr-[38%]">
-          <Text style={{ fontFamily: font.semibold, fontSize: 26, lineHeight: 31, letterSpacing: -0.7, color: ink[900] }}>
+          <Text style={{ fontFamily: font.semibold, fontSize: 24, lineHeight: 31, letterSpacing: -0.7, color: ink[900] }}>
             Hi, I&apos;m <Brand size={28} />
           </Text>
           <Text style={{ fontFamily: font.medium, fontSize: 15, lineHeight: 20, color: ink[700], marginTop: 4 }}>Your personal health companion.</Text>
@@ -355,7 +355,7 @@ export function CheekuCard({
             alignItems: "center",
           }}
         >
-          <View className="z-10 h-[52px] w-[52px] items-center justify-center rounded-pill" style={{ backgroundColor: ink[900] }}>
+          <View className="z-10 h-[52px] w-[52px] items-center justify-center rounded-pill" style={{ backgroundColor: brand[600] }}>
             <MessageCircleHeart size={21} color="#ffffff" strokeWidth={1.9} />
           </View>
           <Glass

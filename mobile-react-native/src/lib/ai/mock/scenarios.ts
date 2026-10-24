@@ -1,3 +1,4 @@
+import { brand, semantic } from "@/theme/tokens";
 /*
  * Product-safety scenarios — the photo half of Ask Cheeku.
  *
@@ -86,8 +87,8 @@ export const PRODUCT_SCENARIOS: ProductScenario[] = [
     title: "Daily Moisturizing Lotion",
     subtitle: "Body lotion · 400ml",
     thumbnail: icon(
-      "#EFEDFC",
-      "#4A2ADE",
+      brand[50],
+      brand[600],
       '<rect x="34" y="20" width="28" height="56" rx="8" fill="#fff"/><rect x="40" y="14" width="16" height="12" rx="4" fill="#4A2ADE"/><rect x="38" y="34" width="20" height="4" rx="2" fill="#c6c6f6"/>',
     ),
     sampleQuestion: "Is this body lotion safe for my pregnant wife and our toddler?",
@@ -119,8 +120,8 @@ export const PRODUCT_SCENARIOS: ProductScenario[] = [
     title: "Peanut Crunch Protein Bar",
     subtitle: "Snack bar · 45g",
     thumbnail: icon(
-      "#FFF4E0",
-      "#8F5400",
+      semantic.cautionBg,
+      semantic.cautionText,
       '<rect x="18" y="34" width="60" height="30" rx="10" fill="#fff"/><rect x="24" y="42" width="48" height="6" rx="3" fill="#ffaf23"/><rect x="24" y="52" width="30" height="5" rx="2.5" fill="#f0d9a8"/>',
     ),
     sampleQuestion: "Can I eat this protein bar? I have a peanut allergy.",
@@ -151,8 +152,8 @@ export const PRODUCT_SCENARIOS: ProductScenario[] = [
     title: "Mineral Sunscreen SPF 50",
     subtitle: "Sunscreen · 100ml",
     thumbnail: icon(
-      "#E7F7EE",
-      "#0F7538",
+      semantic.safeBg,
+      semantic.safeText,
       '<rect x="30" y="22" width="36" height="52" rx="10" fill="#fff"/><circle cx="48" cy="40" r="10" fill="#ffaf23"/><rect x="38" y="56" width="20" height="5" rx="2.5" fill="#bfe8cf"/>',
     ),
     sampleQuestion: "Is this mineral sunscreen okay for daily use while pregnant?",
@@ -183,8 +184,8 @@ export const PRODUCT_SCENARIOS: ProductScenario[] = [
     title: "Sleep Support Herbal Tea",
     subtitle: "Herbal tea · 20 bags",
     thumbnail: icon(
-      "#F1F0FE",
-      "#5B4EF0",
+      brand[50],
+      brand[500],
       '<rect x="26" y="30" width="44" height="38" rx="6" fill="#fff"/><path d="M70 40 q12 0 12 12 t-12 12" stroke="#5B4EF0" stroke-width="4" fill="none"/><rect x="34" y="40" width="28" height="4" rx="2" fill="#c6c6f6"/>',
     ),
     sampleQuestion: "Is this sleep tea safe to drink every night?",
@@ -214,8 +215,8 @@ export const PRODUCT_SCENARIOS: ProductScenario[] = [
     title: "Citrus Energy Drink",
     subtitle: "Energy drink · 250ml",
     thumbnail: icon(
-      "#FEF1F3",
-      "#C00A1C",
+      semantic.dangerBg,
+      semantic.dangerText,
       '<rect x="36" y="18" width="24" height="58" rx="6" fill="#fff"/><rect x="36" y="18" width="24" height="16" rx="6" fill="#ea2a36"/><rect x="42" y="46" width="12" height="4" rx="2" fill="#f7c2c8"/>',
     ),
     sampleQuestion: "I train in the mornings. Is this energy drink okay before a workout?",

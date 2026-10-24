@@ -17,7 +17,7 @@ import {
   UserRound,
 } from "lucide-react-native";
 import { useState } from "react";
-import { Linking, Pressable, Text, View } from "react-native";
+import { Linking, Text, View } from "react-native";
 
 import { PillButton } from "@/components/ui/screen";
 import { useLabCart } from "@/lib/labs/queries";
@@ -34,10 +34,11 @@ import {
 } from "@/lib/records/details";
 import { addMedicinesToMember, medicinesAlreadyListed } from "@/lib/records/record-actions";
 import type { RecordDetail } from "@/lib/records/types";
-import { brand, ink, semantic, surface } from "@/theme/tokens";
+import { brand, hue, ink, semantic, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
 
 import { Bullets, Card, ChipRow, Eyebrow, FactGrid, MedicineList, ReminderButton, reminderAt, Section } from "./parts";
+import { Tap } from "@/components/ui/tap";
 
 /*
  * Prescriptions, discharge summaries and medicine lists: three documents that
@@ -63,17 +64,17 @@ export function PrescriptionBody({ record, details, isPrimary }: { record: Recor
       {/* The doctor, as a card you could hand to a receptionist. */}
       <Card style={{ marginTop: 12 }}>
         <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
-          <View style={{ width: 48, height: 48, borderRadius: 16, backgroundColor: "#e4f5f2", alignItems: "center", justifyContent: "center" }}>
-            <Stethoscope size={22} color="#0e8478" />
+          <View style={{ width: 48, height: 48, borderRadius: 16, backgroundColor: hue.teal.bg, alignItems: "center", justifyContent: "center" }}>
+            <Stethoscope size={22} color={hue.teal.fg} />
           </View>
           <View style={{ flex: 1 }}>
-            <Text selectable style={{ fontFamily: font.semibold, fontSize: 16.5, color: ink[900] }}>{d.name}</Text>
-            {d.qualification ? <Text style={{ fontFamily: font.regular, fontSize: 12.5, color: ink[500], marginTop: 1 }}>{d.qualification}</Text> : null}
+            <Text selectable style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>{d.name}</Text>
+            {d.qualification ? <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 1 }}>{d.qualification}</Text> : null}
           </View>
           {d.phone ? (
-            <Pressable accessibilityRole="button" accessibilityLabel={`Call ${d.name}`} onPress={() => void Linking.openURL(`tel:${d.phone?.replace(/\s/g, "")}`)} hitSlop={6} style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: brand[50], alignItems: "center", justifyContent: "center" }}>
+            <Tap scale={0.95} accessibilityRole="button" accessibilityLabel={`Call ${d.name}`} onPress={() => void Linking.openURL(`tel:${d.phone?.replace(/\s/g, "")}`)} hitSlop={6} style={{ width: 40, height: 40, borderRadius: 999, backgroundColor: brand[50], alignItems: "center", justifyContent: "center" }}>
               <Phone size={17} color={brand[700]} />
-            </Pressable>
+            </Tap>
           ) : null}
         </View>
         {d.clinic || d.regNo ? (
@@ -104,9 +105,9 @@ export function PrescriptionBody({ record, details, isPrimary }: { record: Recor
                 <Eyebrow>Checked</Eyebrow>
                 <View style={{ flexDirection: "row", gap: 6 }}>
                   {details.vitals.slice(0, 4).map((v) => (
-                    <View key={v.label} style={{ flex: 1, paddingVertical: 8, paddingHorizontal: 8, borderRadius: 14, backgroundColor: "rgba(15,16,48,0.035)" }}>
+                    <View key={v.label} style={{ flex: 1, paddingVertical: 8, paddingHorizontal: 8, borderRadius: 16, backgroundColor: "rgba(15,16,48,0.035)" }}>
                       <Text style={{ fontFamily: font.regular, fontSize: 11, color: ink[500] }}>{v.label}</Text>
-                      <Text numberOfLines={1} adjustsFontSizeToFit style={{ fontFamily: font.semibold, fontSize: 13.5, color: ink[900], marginTop: 1 }}>{v.value}</Text>
+                      <Text numberOfLines={1} adjustsFontSizeToFit style={{ fontFamily: font.semibold, fontSize: 13, color: ink[900], marginTop: 1 }}>{v.value}</Text>
                     </View>
                   ))}
                 </View>
@@ -117,7 +118,7 @@ export function PrescriptionBody({ record, details, isPrimary }: { record: Recor
       ) : null}
 
       {details.medicines.length ? (
-        <Section title="Medicines" right={<Text style={{ fontFamily: font.medium, fontSize: 12.5, color: ink[500] }}>{details.medicines.length} prescribed</Text>}>
+        <Section title="Medicines" right={<Text style={{ fontFamily: font.medium, fontSize: 13, color: ink[500] }}>{details.medicines.length} prescribed</Text>}>
           <MedicineList medicines={details.medicines} startIso={record.eventDate} />
           <View style={{ marginTop: 10 }}>
             <AddToMedicines record={record} medicines={details.medicines} isPrimary={isPrimary} />
@@ -128,7 +129,7 @@ export function PrescriptionBody({ record, details, isPrimary }: { record: Recor
       {details.tests.length ? (
         <Section title="Tests advised">
           <Card style={{ gap: 12 }}>
-            <Bullets items={details.tests} color="#0e8478" />
+            <Bullets items={details.tests} color={hue.teal.fg} />
             <PillButton
               tone="light"
               icon={<FlaskConical size={17} color={brand[600]} />}
@@ -163,12 +164,12 @@ function FollowUp({ record, date, with: withWhom, isPrimary }: { record: RecordD
     <Section title="Follow-up">
       <Card style={{ gap: 12 }}>
         <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
-          <View style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: brand[50], alignItems: "center", justifyContent: "center" }}>
+          <View style={{ width: 44, height: 44, borderRadius: 16, backgroundColor: brand[50], alignItems: "center", justifyContent: "center" }}>
             <CalendarCheck size={20} color={brand[600]} />
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={{ fontFamily: font.semibold, fontSize: 15.5, color: ink[900] }}>{shortDate(date)}</Text>
-            <Text style={{ fontFamily: font.regular, fontSize: 12.5, color: ink[500], marginTop: 1 }}>
+            <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{shortDate(date)}</Text>
+            <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 1 }}>
               {left === null ? "" : left < 0 ? `Was due ${-left} day${left === -1 ? "" : "s"} ago` : left === 0 ? "Today" : `In ${left} day${left === 1 ? "" : "s"}`}
               {withWhom ? ` · ${withWhom}` : ""}
             </Text>
@@ -222,10 +223,10 @@ function AddToMedicines({ record, medicines, isPrimary }: { record: RecordDetail
       {all ? (
         <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, height: 46, borderRadius: 999, backgroundColor: brand[50] }}>
           <Check size={16} color={brand[700]} strokeWidth={2.6} />
-          <Text style={{ fontFamily: font.semibold, fontSize: 14, color: brand[700] }}>In {who} medicines</Text>
+          <Text style={{ fontFamily: font.semibold, fontSize: 15, color: brand[700] }}>In {who} medicines</Text>
         </View>
       ) : (
-        <PillButton tone="dark" loading={busy} icon={<ListPlus size={17} color="#fff" />} onPress={() => void add()}>
+        <PillButton loading={busy} icon={<ListPlus size={17} color="#fff" />} onPress={() => void add()}>
           {`Add to ${who} medicines`}
         </PillButton>
       )}
@@ -247,12 +248,12 @@ export function DischargeBody({ record, details, isPrimary }: { record: RecordDe
       {/* The stay, as a short timeline: in, what was done, out. */}
       <Card style={{ marginTop: 12 }}>
         <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-          <View style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: "#fdf0dc", alignItems: "center", justifyContent: "center" }}>
+          <View style={{ width: 44, height: 44, borderRadius: 16, backgroundColor: "#fdf0dc", alignItems: "center", justifyContent: "center" }}>
             <BedDouble size={20} color="#a9631a" />
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={{ fontFamily: font.semibold, fontSize: 16, color: ink[900] }}>{stay ? `${stay} day${stay === 1 ? "" : "s"} in hospital` : "Hospital stay"}</Text>
-            <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 12.5, color: ink[500], marginTop: 1 }}>{details.ward ?? details.hospital}</Text>
+            <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>{stay ? `${stay} day${stay === 1 ? "" : "s"} in hospital` : "Hospital stay"}</Text>
+            <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 1 }}>{details.ward ?? details.hospital}</Text>
           </View>
         </View>
         <View style={{ marginTop: 14, gap: 0 }}>
@@ -275,13 +276,13 @@ export function DischargeBody({ record, details, isPrimary }: { record: RecordDe
       {details.course ? (
         <Section title="What happened">
           <Card>
-            <Text numberOfLines={open ? undefined : 4} style={{ fontFamily: font.regular, fontSize: 14, lineHeight: 21, color: ink[700] }}>
+            <Text numberOfLines={open ? undefined : 4} style={{ fontFamily: font.regular, fontSize: 15, lineHeight: 21, color: ink[700] }}>
               {details.course}
             </Text>
             {details.course.length > 180 ? (
-              <Pressable accessibilityRole="button" onPress={() => setOpen((o) => !o)} hitSlop={6} style={{ marginTop: 8 }}>
-                <Text style={{ fontFamily: font.semibold, fontSize: 13.5, color: brand[700] }}>{open ? "Show less" : "Read all"}</Text>
-              </Pressable>
+              <Tap accessibilityRole="button" onPress={() => setOpen((o) => !o)} hitSlop={6} style={{ marginTop: 8 }}>
+                <Text style={{ fontFamily: font.semibold, fontSize: 13, color: brand[700] }}>{open ? "Show less" : "Read all"}</Text>
+              </Tap>
             ) : null}
           </Card>
         </Section>
@@ -309,7 +310,7 @@ export function DischargeBody({ record, details, isPrimary }: { record: RecordDe
           <View style={{ padding: 16, borderRadius: 24, backgroundColor: semantic.cautionBg, gap: 12 }}>
             <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
               <ShieldAlert size={17} color={semantic.cautionText} />
-              <Text style={{ flex: 1, fontFamily: font.semibold, fontSize: 13.5, color: semantic.cautionText }}>The hospital listed these. Don&apos;t wait for the follow-up.</Text>
+              <Text style={{ flex: 1, fontFamily: font.semibold, fontSize: 13, color: semantic.cautionText }}>The hospital listed these. Don&apos;t wait for the follow-up.</Text>
             </View>
             <Bullets items={details.warningSigns} color={semantic.caution} />
           </View>
@@ -342,10 +343,10 @@ function Step({ label, date, detail, first, last }: { label: string; date: strin
       </View>
       <View style={{ flex: 1, paddingBottom: last ? 0 : 12 }}>
         <View style={{ flexDirection: "row", alignItems: "baseline", gap: 8 }}>
-          <Text style={{ flex: 1, fontFamily: font.semibold, fontSize: 14, color: ink[900] }}>{label}</Text>
+          <Text style={{ flex: 1, fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{label}</Text>
           {date ? <Text style={{ fontFamily: font.regular, fontSize: 12, color: ink[500] }}>{shortDate(date)}</Text> : null}
         </View>
-        {detail ? <Text style={{ fontFamily: font.regular, fontSize: 12.5, lineHeight: 18, color: ink[500], marginTop: 2 }}>{detail}</Text> : null}
+        {detail ? <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[500], marginTop: 2 }}>{detail}</Text> : null}
       </View>
     </View>
   );
@@ -371,32 +372,32 @@ export function MedicationBody({ record, details, isPrimary }: { record: RecordD
         <Card padded={false}>
           {slots.map((slot, i) => (
             <View key={slot.name} style={{ flexDirection: "row", gap: 12, padding: 14, borderTopWidth: i ? 1 : 0, borderTopColor: surface.line }}>
-              <Text style={{ width: 78, fontFamily: font.semibold, fontSize: 13.5, color: slot.meds.length ? ink[900] : ink[300] }}>{slot.name}</Text>
+              <Text style={{ width: 78, fontFamily: font.semibold, fontSize: 13, color: slot.meds.length ? ink[900] : ink[300] }}>{slot.name}</Text>
               <View style={{ flex: 1, gap: 4 }}>
                 {slot.meds.length ? (
                   slot.meds.map((m) => (
-                    <Text key={m.name} style={{ fontFamily: font.regular, fontSize: 13.5, color: ink[700] }}>
+                    <Text key={m.name} style={{ fontFamily: font.regular, fontSize: 13, color: ink[700] }}>
                       {m.name}
                       {m.strength ? ` ${m.strength}` : ""}
                       {(m.schedule[SLOT_NAMES.indexOf(slot.name)] ?? 1) > 1 ? ` ×${m.schedule[SLOT_NAMES.indexOf(slot.name)]}` : ""}
                     </Text>
                   ))
                 ) : (
-                  <Text style={{ fontFamily: font.regular, fontSize: 13.5, color: ink[300] }}>Nothing</Text>
+                  <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[300] }}>Nothing</Text>
                 )}
               </View>
             </View>
           ))}
           {asNeeded.length ? (
             <View style={{ flexDirection: "row", gap: 12, padding: 14, borderTopWidth: 1, borderTopColor: surface.line }}>
-              <Text style={{ width: 78, fontFamily: font.semibold, fontSize: 13.5, color: ink[900] }}>If needed</Text>
-              <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 13.5, color: ink[700] }}>{asNeeded.map((m) => m.name).join(", ")}</Text>
+              <Text style={{ width: 78, fontFamily: font.semibold, fontSize: 13, color: ink[900] }}>If needed</Text>
+              <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 13, color: ink[700] }}>{asNeeded.map((m) => m.name).join(", ")}</Text>
             </View>
           ) : null}
         </Card>
       </Section>
 
-      <Section title="Medicines" right={<Text style={{ fontFamily: font.medium, fontSize: 12.5, color: ink[500] }}>{details.medicines.reduce((n, m) => n + dosesPerDay(m), 0)} doses a day</Text>}>
+      <Section title="Medicines" right={<Text style={{ fontFamily: font.medium, fontSize: 13, color: ink[500] }}>{details.medicines.reduce((n, m) => n + dosesPerDay(m), 0)} doses a day</Text>}>
         <MedicineList
           medicines={details.medicines}
           startIso={null}
@@ -421,12 +422,12 @@ export function MedicationBody({ record, details, isPrimary }: { record: RecordD
         <Section title="Refill">
           <Card style={{ gap: 12 }}>
             <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
-              <View style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: "#fbe9f5", alignItems: "center", justifyContent: "center" }}>
-                <Pill size={20} color="#b0428a" />
+              <View style={{ width: 44, height: 44, borderRadius: 16, backgroundColor: hue.plum.bg, alignItems: "center", justifyContent: "center" }}>
+                <Pill size={20} color={hue.plum.fg} />
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{soonest.m.name} runs out first</Text>
-                <Text style={{ fontFamily: font.regular, fontSize: 12.5, color: ink[500], marginTop: 1 }}>Around {shortDate(soonest.s.runsOutOn)}, in {soonest.s.daysLeft} days</Text>
+                <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 1 }}>Around {shortDate(soonest.s.runsOutOn)}, in {soonest.s.daysLeft} days</Text>
               </View>
             </View>
             <ReminderButton

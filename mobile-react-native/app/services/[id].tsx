@@ -69,15 +69,15 @@ export default function ServicePage() {
       <RevealScroll contentContainerStyle={{ paddingBottom: insets.bottom + 32 }} showsVerticalScrollIndicator={false}>
         {s.urgent?.map((u) => (
           <Reveal key={u.call} style={{ marginHorizontal: 20, marginTop: 6, marginBottom: 6 }}>
-            <Pressable accessibilityRole="button" accessibilityLabel={`${u.title} ${u.label}`} onPress={() => void Linking.openURL(`tel:${u.call}`).catch(() => undefined)} style={({ pressed }) => ({ flexDirection: "row", alignItems: "center", gap: 12, padding: 14, borderRadius: 22, backgroundColor: semantic.dangerBg, opacity: pressed ? 0.85 : 1 })}>
-              <View style={{ width: 42, height: 42, borderRadius: 21, backgroundColor: semantic.dangerStrong, alignItems: "center", justifyContent: "center" }}>
+            <Pressable accessibilityRole="button" accessibilityLabel={`${u.title} ${u.label}`} onPress={() => void Linking.openURL(`tel:${u.call}`).catch(() => undefined)} style={({ pressed }) => ({ flexDirection: "row", alignItems: "center", gap: 12, padding: 14, borderRadius: 24, backgroundColor: semantic.dangerBg, opacity: pressed ? 0.85 : 1 })}>
+              <View style={{ width: 42, height: 42, borderRadius: 999, backgroundColor: semantic.dangerStrong, alignItems: "center", justifyContent: "center" }}>
                 <Phone size={18} color="#fff" />
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={{ fontFamily: font.semibold, fontSize: 14.5, color: semantic.dangerText }}>{u.title}</Text>
-                <Text style={{ fontFamily: font.regular, fontSize: 12.5, lineHeight: 17, color: ink[700], marginTop: 1 }}>{u.text}</Text>
+                <Text style={{ fontFamily: font.semibold, fontSize: 15, color: semantic.dangerText }}>{u.title}</Text>
+                <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 17, color: ink[700], marginTop: 1 }}>{u.text}</Text>
               </View>
-              <Text style={{ fontFamily: font.semibold, fontSize: 13.5, color: semantic.dangerText }}>{u.label}</Text>
+              <Text style={{ fontFamily: font.semibold, fontSize: 13, color: semantic.dangerText }}>{u.label}</Text>
             </Pressable>
           </Reveal>
         ))}
@@ -92,28 +92,28 @@ export default function ServicePage() {
                   {live ? (marketplace().preview ? "Partner network · preview" : "Partner network") : s.status === "locked" ? "Locked" : "Coming soon"}
                 </Text>
               </View>
-              <Text style={{ fontFamily: font.semibold, fontSize: 27, lineHeight: 32, letterSpacing: -0.8, color: ink[900], marginTop: 10 }}>{s.title}</Text>
+              <Text style={{ fontFamily: font.semibold, fontSize: 28, lineHeight: 32, letterSpacing: -0.8, color: ink[900], marginTop: 10 }}>{s.title}</Text>
             </View>
             <ServiceArt icon={Icon} fg={s.tint.fg} size={96} />
           </View>
-          <Text style={{ fontFamily: font.regular, fontSize: 14.5, lineHeight: 21, color: ink[700], marginTop: 8 }}>{s.promise}</Text>
+          <Text style={{ fontFamily: font.regular, fontSize: 15, lineHeight: 21, color: ink[700], marginTop: 8 }}>{s.promise}</Text>
         </Reveal>
 
         {live && s.offerings.length ? (
           <>
             <Reveal style={{ paddingHorizontal: 20, marginTop: 26 }}>
-              <Text style={{ fontFamily: font.semibold, fontSize: 18, letterSpacing: -0.3, color: ink[900] }}>What would you like to book?</Text>
+              <Text style={{ fontFamily: font.semibold, fontSize: 17, letterSpacing: -0.3, color: ink[900] }}>What would you like to book?</Text>
             </Reveal>
             <Reveal style={{ marginHorizontal: 20, marginTop: 12, gap: 10 }}>
               {s.offerings.map((o) => (
-                <Pressable key={o.id} accessibilityRole="button" onPress={() => choose(o)} style={({ pressed }) => [glassShadow, { flexDirection: "row", alignItems: "center", gap: 12, padding: 14, borderRadius: 22, backgroundColor: pressed ? brand[50] : "#fff", borderWidth: 1, borderColor: o.call ? semantic.dangerBg : glass.rim }]}>
-                  <View style={{ width: 42, height: 42, borderRadius: 14, backgroundColor: o.call ? semantic.dangerBg : s.tint.from, alignItems: "center", justifyContent: "center" }}>
+                <Pressable key={o.id} accessibilityRole="button" onPress={() => choose(o)} style={({ pressed }) => [glassShadow, { flexDirection: "row", alignItems: "center", gap: 12, padding: 14, borderRadius: 24, backgroundColor: pressed ? brand[50] : "#fff", borderWidth: 1, borderColor: o.call ? semantic.dangerBg : glass.rim }]}>
+                  <View style={{ width: 42, height: 42, borderRadius: 16, backgroundColor: o.call ? semantic.dangerBg : s.tint.from, alignItems: "center", justifyContent: "center" }}>
                     {o.call ? <Phone size={18} color={semantic.dangerText} /> : o.specialty ? <Stethoscope size={18} color={s.tint.fg} /> : <Icon size={18} color={s.tint.fg} />}
                   </View>
                   <View style={{ flex: 1 }}>
                     <Text style={{ fontFamily: font.semibold, fontSize: 15, color: o.call ? semantic.dangerText : ink[900] }}>{o.title}</Text>
-                    <Text style={{ fontFamily: font.regular, fontSize: 12.5, lineHeight: 17, color: ink[500], marginTop: 1 }}>{o.line}</Text>
-                    {!o.call ? <Text style={{ fontFamily: font.medium, fontSize: 11.5, color: s.tint.fg, marginTop: 4 }}>{o.modes.map((m) => MODE_LABEL[m]).join(" · ")}{o.specialty ? " · with a pre-consultation note" : ""}</Text> : null}
+                    <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 17, color: ink[500], marginTop: 1 }}>{o.line}</Text>
+                    {!o.call ? <Text style={{ fontFamily: font.medium, fontSize: 12, color: s.tint.fg, marginTop: 4 }}>{o.modes.map((m) => MODE_LABEL[m]).join(" · ")}{o.specialty ? " · with a pre-consultation note" : ""}</Text> : null}
                   </View>
                   <ChevronRight size={18} color={ink[300]} />
                 </Pressable>
@@ -127,16 +127,16 @@ export default function ServicePage() {
         {s.steps.length ? (
           <>
             <Reveal style={{ paddingHorizontal: 20, marginTop: 28 }}>
-              <Text style={{ fontFamily: font.semibold, fontSize: 18, letterSpacing: -0.3, color: ink[900] }}>How it works</Text>
+              <Text style={{ fontFamily: font.semibold, fontSize: 17, letterSpacing: -0.3, color: ink[900] }}>How it works</Text>
             </Reveal>
             <Reveal style={{ marginHorizontal: 20, marginTop: 12 }}>
               <View style={[glassShadow, { borderRadius: 24, backgroundColor: "#fff", padding: 16, gap: 14 }]}>
                 {s.steps.map((step, i) => (
                   <View key={step} style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
-                    <View style={{ width: 28, height: 28, borderRadius: 14, backgroundColor: brand[600], alignItems: "center", justifyContent: "center" }}>
+                    <View style={{ width: 28, height: 28, borderRadius: 999, backgroundColor: brand[600], alignItems: "center", justifyContent: "center" }}>
                       <Text style={{ fontFamily: font.semibold, fontSize: 13, color: "#fff" }}>{i + 1}</Text>
                     </View>
-                    <Text style={{ flex: 1, fontFamily: font.medium, fontSize: 14.5, color: ink[900] }}>{step}</Text>
+                    <Text style={{ flex: 1, fontFamily: font.medium, fontSize: 15, color: ink[900] }}>{step}</Text>
                   </View>
                 ))}
               </View>
@@ -160,7 +160,7 @@ export default function ServicePage() {
 
 function Assurance({ icon: Icon, text }: { icon: LucideIcon; text: string }) {
   return (
-    <View style={{ flexDirection: "row", alignItems: "center", gap: 10, padding: 12, borderRadius: 18, backgroundColor: "rgba(255,255,255,0.75)", borderWidth: 1, borderColor: surface.line }}>
+    <View style={{ flexDirection: "row", alignItems: "center", gap: 10, padding: 12, borderRadius: 16, backgroundColor: "rgba(255,255,255,0.75)", borderWidth: 1, borderColor: surface.line }}>
       <Icon size={16} color={brand[600]} />
       <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[700] }}>{text}</Text>
     </View>
@@ -175,9 +175,9 @@ function Waitlist({ id }: { id: string }) {
     void joinWaitlist(id);
   }
   return (
-    <Tap accessibilityRole="button" disabled={on} onPress={join} style={{ height: 54, borderRadius: 999, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, backgroundColor: on ? "#fff" : ink[900], borderWidth: on ? 1.5 : 0, borderColor: brand[200] }} scale={0.98}>
+    <Tap accessibilityRole="button" disabled={on} onPress={join} style={{ height: 54, borderRadius: 999, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, backgroundColor: on ? "#fff" : brand[600], borderWidth: on ? 1.5 : 0, borderColor: brand[200] }} scale={0.98}>
       {on ? <Check size={18} color={brand[700]} strokeWidth={3} /> : <BellRing size={18} color="#fff" />}
-      <Text style={{ fontFamily: font.semibold, fontSize: 15.5, color: on ? brand[700] : "#fff" }}>{on ? "You're on the list" : "Tell me when it's open"}</Text>
+      <Text style={{ fontFamily: font.semibold, fontSize: 15, color: on ? brand[700] : "#fff" }}>{on ? "You're on the list" : "Tell me when it's open"}</Text>
     </Tap>
   );
 }

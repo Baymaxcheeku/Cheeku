@@ -48,12 +48,12 @@ export function SectionHead({ title, right, note }: { title: string; right?: Rea
   return (
     <View style={{ marginTop: 26, marginBottom: 10 }}>
       <View style={{ flexDirection: "row", alignItems: "baseline", justifyContent: "space-between" }}>
-        <Text accessibilityRole="header" style={{ fontFamily: font.semibold, fontSize: 18, letterSpacing: -0.3, color: ink[900] }}>
+        <Text accessibilityRole="header" style={{ fontFamily: font.semibold, fontSize: 17, letterSpacing: -0.3, color: ink[900] }}>
           {title}
         </Text>
         {right}
       </View>
-      {note ? <Text style={{ fontFamily: font.regular, fontSize: 12.5, lineHeight: 17, color: ink[500], marginTop: 2 }}>{note}</Text> : null}
+      {note ? <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 17, color: ink[500], marginTop: 2 }}>{note}</Text> : null}
     </View>
   );
 }

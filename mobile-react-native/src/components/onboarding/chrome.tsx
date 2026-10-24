@@ -1,12 +1,13 @@
 import { useRouter } from "expo-router";
 import { ArrowRight, ChevronLeft, Lock } from "lucide-react-native";
-import { Pressable, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { MascotBust } from "@/components/illustrations/sprout";
 import { BubblePop, FillBar } from "@/components/onboarding/motion";
 import { brand, ink, shadow, surface } from "@/theme/tokens";
 import { font, type } from "@/theme/type";
+import { Tap } from "@/components/ui/tap";
 
 /*
  * The pieces every onboarding screen shares.
@@ -59,7 +60,7 @@ export function OnboardingHeader({
     <View style={{ marginTop: insets.top }} className="px-5 pt-1">
       <View className="h-11 flex-row items-center gap-3">
         {back ? (
-          <Pressable
+          <Tap scale={0.95}
             accessibilityRole="button"
             accessibilityLabel="Go back"
             onPress={goBack}
@@ -68,7 +69,7 @@ export function OnboardingHeader({
             style={shadow.e1}
           >
             <ChevronLeft size={20} color={ink[700]} />
-          </Pressable>
+          </Tap>
         ) : (
           <View className="h-10 w-10" />
         )}
@@ -88,7 +89,7 @@ export function OnboardingHeader({
         )}
 
         {action ? (
-          <Pressable
+          <Tap scale={0.95}
             accessibilityRole="button"
             hitSlop={10}
             onPress={() => router.push(action.href as never)}
@@ -97,7 +98,7 @@ export function OnboardingHeader({
             <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[500] }}>
               {action.label}
             </Text>
-          </Pressable>
+          </Tap>
         ) : (
           <View className="h-10 w-10" />
         )}
@@ -224,7 +225,7 @@ export function CheekuSays({ children, size = 46 }: { children: string; size?: n
       <BubblePop key={children} from="left" style={{ flexShrink: 1 }}>
         <View
           accessibilityLiveRegion="polite"
-          className="rounded-[18px] bg-surface px-3.5 py-2.5"
+          className="rounded-lg bg-surface px-3.5 py-2.5"
           style={[shadow.e1, { borderBottomLeftRadius: 6, borderWidth: 1, borderColor: surface.line }]}
         >
           <Text style={{ fontFamily: font.medium, fontSize: 13, lineHeight: 18, color: ink[700] }}>

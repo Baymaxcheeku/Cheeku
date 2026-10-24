@@ -1,6 +1,6 @@
 import { useRouter } from "expo-router";
 import { CalendarClock, ChevronRight, FlaskConical, FolderHeart, ShieldAlert } from "lucide-react-native";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { ScrollView, Text, View } from "react-native";
 
 import { Tap } from "@/components/ui/tap";
 import { ArticlePill } from "@/components/learn/parts";
@@ -35,14 +35,14 @@ export function ReadsStrip({ articles }: { articles: readonly ArticleCard[] }) {
     <View style={{ marginTop: 28 }}>
       <View style={{ flexDirection: "row", alignItems: "flex-end", paddingHorizontal: 20 }}>
         <View style={{ flex: 1 }}>
-          <Text accessibilityRole="header" style={{ fontFamily: font.semibold, fontSize: 21, letterSpacing: -0.4, color: ink[900] }}>
+          <Text accessibilityRole="header" style={{ fontFamily: font.semibold, fontSize: 20, letterSpacing: -0.4, color: ink[900] }}>
             Worth knowing
           </Text>
         </View>
-        <Pressable accessibilityRole="link" onPress={() => router.push("/learn")} hitSlop={8} style={{ flexDirection: "row", alignItems: "center", gap: 2, paddingBottom: 2 }}>
-          <Text style={{ fontFamily: font.semibold, fontSize: 14, color: brand[600] }}>See all</Text>
+        <Tap accessibilityRole="link" onPress={() => router.push("/learn")} hitSlop={8} style={{ flexDirection: "row", alignItems: "center", gap: 2, paddingBottom: 2 }}>
+          <Text style={{ fontFamily: font.semibold, fontSize: 15, color: brand[600] }}>See all</Text>
           <ChevronRight size={16} color={brand[600]} />
-        </Pressable>
+        </Tap>
       </View>
       {/* Columns of two, so both rows move as one shelf. Built by hand, no wrapping. */}
       <ScrollView horizontal showsHorizontalScrollIndicator={false} decelerationRate="fast" snapToInterval={278} contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 12, paddingBottom: 6, gap: 10 }}>
@@ -108,21 +108,21 @@ export function FileCard({ file, member, loading }: { file: HealthFile | null | 
       {/* Cheeku peeks over the card's top edge every few seconds, glancing
           about, then ducks back down: Home's quiet sign of life. */}
       <CheekuPeek size={78} moment="idle" style={{ position: "absolute", right: 26, top: -42 }} />
-      <Glass strong className="rounded-[28px]" style={{ padding: 14 }}>
+      <Glass strong className="rounded-2xl" style={{ padding: 14 }}>
         <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
           <View>
             <Avatar svg={member.avatar} photo={member.photo} image={member.avatarImage} background={member.avatarBackground} size={46} />
-            <View style={{ position: "absolute", right: -4, bottom: -4, width: 22, height: 22, borderRadius: 11, backgroundColor: "#fff", alignItems: "center", justifyContent: "center" }}>
+            <View style={{ position: "absolute", right: -4, bottom: -4, width: 22, height: 22, borderRadius: 999, backgroundColor: "#fff", alignItems: "center", justifyContent: "center" }}>
               <FolderHeart size={13} color={brand[600]} />
             </View>
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={{ fontFamily: font.semibold, fontSize: 16, color: ink[900] }}>{whose}</Text>
-            <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 12.5, color: ink[500], marginTop: 2 }}>
+            <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>{whose}</Text>
+            <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 2 }}>
               {loading && !file ? "Opening…" : file?.totals.lastEvent ? `Last record ${shortDate(file.totals.lastEvent)}` : "Nothing filed yet"}
             </Text>
           </View>
-          <View style={{ width: 38, height: 38, borderRadius: 19, backgroundColor: brand[50], alignItems: "center", justifyContent: "center" }}>
+          <View style={{ width: 38, height: 38, borderRadius: 999, backgroundColor: brand[50], alignItems: "center", justifyContent: "center" }}>
             <ChevronRight size={18} color={ink[700]} />
           </View>
         </View>
@@ -132,16 +132,16 @@ export function FileCard({ file, member, loading }: { file: HealthFile | null | 
             {stats.map(([n, label]) => (
               <View key={label} style={{ flex: 1, paddingVertical: 9, paddingHorizontal: 10, borderRadius: 16, backgroundColor: "rgba(15,16,48,0.035)" }}>
                 <Text style={{ fontFamily: font.bold, fontSize: 17, color: ink[900] }}>{n}</Text>
-                <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 11.5, color: ink[500] }}>{label}</Text>
+                <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 12, color: ink[500] }}>{label}</Text>
               </View>
             ))}
           </View>
         ) : null}
 
         {h ? (
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginTop: 10, paddingVertical: 9, paddingHorizontal: 12, borderRadius: 14, backgroundColor: h.bg }}>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginTop: 10, paddingVertical: 9, paddingHorizontal: 12, borderRadius: 16, backgroundColor: h.bg }}>
             <h.icon size={14} color={h.tint} />
-            <Text numberOfLines={1} style={{ flex: 1, fontFamily: font.semibold, fontSize: 12.5, color: h.tint }}>{h.text}</Text>
+            <Text numberOfLines={1} style={{ flex: 1, fontFamily: font.semibold, fontSize: 13, color: h.tint }}>{h.text}</Text>
           </View>
         ) : null}
       </Glass>

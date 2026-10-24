@@ -2,7 +2,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Building2, Home as HomeIcon, MonitorPlay, type LucideIcon } from "lucide-react-native";
 import { useEffect, useMemo, useState } from "react";
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { CautionNote } from "@/components/safety/caution-note";
@@ -18,8 +18,9 @@ import { MODE_LABEL, serviceById, type VisitMode } from "@/lib/services/catalog"
 import { marketplace } from "@/lib/services/provider";
 import { useServiceRequests, whenText } from "@/lib/services/requests";
 import { kv } from "@/lib/storage";
-import { brand, ink, surface } from "@/theme/tokens";
+import { brand, ink, semantic, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
+import { Tap } from "@/components/ui/tap";
 
 /*
  * BOOK ONE THING FROM A SERVICE: who, how, when, where, and a note.
@@ -169,10 +170,10 @@ export default function ServiceRequestScreen() {
             {members.map((m) => {
               const on = m.id === who?.id;
               return (
-                <Pressable key={m.id} accessibilityRole="radio" accessibilityState={{ selected: on }} onPress={() => setMemberId(m.id)} style={[on ? null : glassShadow, { flexDirection: "row", alignItems: "center", gap: 8, paddingLeft: 4, paddingRight: 14, height: 46, borderRadius: 999, backgroundColor: on ? ink[900] : glass.fillStrong, borderWidth: on ? 0 : 1, borderColor: glass.rim }]}>
+                <Tap key={m.id} accessibilityRole="radio" accessibilityState={{ selected: on }} onPress={() => setMemberId(m.id)} style={[on ? null : glassShadow, { flexDirection: "row", alignItems: "center", gap: 8, paddingLeft: 4, paddingRight: 14, height: 46, borderRadius: 999, backgroundColor: on ? ink[900] : glass.fillStrong, borderWidth: on ? 0 : 1, borderColor: glass.rim }]}>
                   <Avatar svg={m.avatar} photo={m.photo} image={m.avatarImage} background={m.avatarBackground} size={36} />
-                  <Text style={{ fontFamily: on ? font.semibold : font.medium, fontSize: 14, color: on ? "#fff" : ink[900] }}>{m.isPrimary ? "Me" : m.name.split(" ")[0]}</Text>
-                </Pressable>
+                  <Text style={{ fontFamily: on ? font.semibold : font.medium, fontSize: 15, color: on ? "#fff" : ink[900] }}>{m.isPrimary ? "Me" : m.name.split(" ")[0]}</Text>
+                </Tap>
               );
             })}
           </ScrollView>
@@ -185,10 +186,10 @@ export default function ServiceRequestScreen() {
                 const on = m === mode;
                 const Icon = MODE_ICON[m];
                 return (
-                  <Pressable key={m} accessibilityRole="radio" accessibilityState={{ selected: on }} onPress={() => setMode(m)} style={[on ? null : glassShadow, { flex: 1, height: 64, borderRadius: 20, alignItems: "center", justifyContent: "center", gap: 4, backgroundColor: on ? ink[900] : glass.fillStrong, borderWidth: on ? 0 : 1, borderColor: glass.rim }]}>
+                  <Tap scale={0.98} key={m} accessibilityRole="radio" accessibilityState={{ selected: on }} onPress={() => setMode(m)} style={[on ? null : glassShadow, { flex: 1, height: 64, borderRadius: 24, alignItems: "center", justifyContent: "center", gap: 4, backgroundColor: on ? ink[900] : glass.fillStrong, borderWidth: on ? 0 : 1, borderColor: glass.rim }]}>
                     <Icon size={18} color={on ? "#fff" : brand[600]} />
-                    <Text style={{ fontFamily: font.semibold, fontSize: 12.5, color: on ? "#fff" : ink[900] }}>{MODE_LABEL[m]}</Text>
-                  </Pressable>
+                    <Text style={{ fontFamily: font.semibold, fontSize: 13, color: on ? "#fff" : ink[900] }}>{MODE_LABEL[m]}</Text>
+                  </Tap>
                 );
               })}
             </View>
@@ -200,10 +201,10 @@ export default function ServiceRequestScreen() {
             {days.map((d, i) => {
               const on = i === dayIdx;
               return (
-                <Pressable key={i} accessibilityRole="radio" accessibilityState={{ selected: on }} onPress={() => setDayIdx(i)} style={[on ? null : glassShadow, { width: 74, height: 70, borderRadius: 20, alignItems: "center", justifyContent: "center", backgroundColor: on ? ink[900] : glass.fillStrong, borderWidth: on ? 0 : 1, borderColor: glass.rim }]}>
+                <Tap scale={0.98} key={i} accessibilityRole="radio" accessibilityState={{ selected: on }} onPress={() => setDayIdx(i)} style={[on ? null : glassShadow, { width: 74, height: 70, borderRadius: 24, alignItems: "center", justifyContent: "center", backgroundColor: on ? ink[900] : glass.fillStrong, borderWidth: on ? 0 : 1, borderColor: glass.rim }]}>
                   <Text style={{ fontFamily: font.medium, fontSize: 12, color: on ? "rgba(255,255,255,0.75)" : ink[500] }}>{dayLabel(d, i)}</Text>
-                  <Text style={{ fontFamily: font.semibold, fontSize: 18, color: on ? "#fff" : ink[900], marginTop: 2 }}>{d.getDate()}</Text>
-                </Pressable>
+                  <Text style={{ fontFamily: font.semibold, fontSize: 17, color: on ? "#fff" : ink[900], marginTop: 2 }}>{d.getDate()}</Text>
+                </Tap>
               );
             })}
           </ScrollView>
@@ -211,9 +212,9 @@ export default function ServiceRequestScreen() {
             {(windows.data ?? []).map((w) => {
               const on = w === chosen;
               return (
-                <Pressable key={w} accessibilityRole="radio" accessibilityState={{ selected: on }} onPress={() => setWin(w)} style={{ height: 42, paddingHorizontal: 16, borderRadius: 999, justifyContent: "center", backgroundColor: on ? brand[600] : "#fff", borderWidth: 1, borderColor: on ? brand[600] : surface.line }}>
-                  <Text style={{ fontFamily: font.semibold, fontSize: 13.5, color: on ? "#fff" : ink[900] }}>{w}</Text>
-                </Pressable>
+                <Tap key={w} accessibilityRole="radio" accessibilityState={{ selected: on }} onPress={() => setWin(w)} style={{ height: 42, paddingHorizontal: 16, borderRadius: 999, justifyContent: "center", backgroundColor: on ? brand[600] : "#fff", borderWidth: 1, borderColor: on ? brand[600] : surface.line }}>
+                  <Text style={{ fontFamily: font.semibold, fontSize: 13, color: on ? "#fff" : ink[900] }}>{w}</Text>
+                </Tap>
               );
             })}
             {windows.data && windows.data.length === 0 ? <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], paddingVertical: 10 }}>Nothing left today. Pick another day.</Text> : null}
@@ -241,7 +242,7 @@ export default function ServiceRequestScreen() {
             <CautionNote result={caution} />
           </View>
         ) : null}
-        {error ? <Text accessibilityRole="alert" style={{ marginTop: 14, fontFamily: font.medium, fontSize: 13, color: "#c00a1c" }}>{error}</Text> : null}
+        {error ? <Text accessibilityRole="alert" style={{ marginTop: 14, fontFamily: font.medium, fontSize: 13, color: semantic.dangerText }}>{error}</Text> : null}
       </ScrollView>
 
       <View style={{ paddingHorizontal: 20, paddingTop: 10, paddingBottom: insets.bottom + 10, borderTopWidth: 1, borderTopColor: surface.line, backgroundColor: "rgba(250,250,254,0.96)" }}>
@@ -272,7 +273,7 @@ function Field(props: React.ComponentProps<typeof TextInput>) {
     <TextInput
       placeholderTextColor={ink[300]}
       {...props}
-      style={[glassShadow, { minHeight: props.multiline ? 86 : 50, paddingHorizontal: 16, paddingVertical: 14, borderRadius: 20, backgroundColor: "#fff", borderWidth: 1, borderColor: glass.rim, fontFamily: font.regular, fontSize: 15, color: ink[900], textAlignVertical: props.multiline ? "top" : "center" }]}
+      style={[glassShadow, { minHeight: props.multiline ? 86 : 50, paddingHorizontal: 16, paddingVertical: 14, borderRadius: 24, backgroundColor: "#fff", borderWidth: 1, borderColor: glass.rim, fontFamily: font.regular, fontSize: 15, color: ink[900], textAlignVertical: props.multiline ? "top" : "center" }]}
     />
   );
 }

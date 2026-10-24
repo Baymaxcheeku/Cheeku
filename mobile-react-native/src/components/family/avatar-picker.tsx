@@ -4,8 +4,9 @@ import { Image, Pressable, Text, View, type ImageSourcePropType } from "react-na
 import { Avatar } from "@/components/ui/avatar";
 import { KID_FACE_IDS } from "@/lib/profiles/face-pool";
 import { allFaces, type Face } from "@/lib/profiles/faces";
-import { brand, ink } from "@/theme/tokens";
+import { brand, ink, lilac } from "@/theme/tokens";
 import { font } from "@/theme/type";
+import { Tap } from "@/components/ui/tap";
 
 /*
  * Choose how someone looks: a real photo, or one of the app's own faces.
@@ -60,15 +61,15 @@ export function AvatarPicker({
     <View style={{ gap: 14 }}>
       {onPickPhoto ? (
         photo ? (
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 12, padding: 10, borderRadius: 20, backgroundColor: brand[50], borderWidth: 1.5, borderColor: brand[500] }}>
-            <Image alt="" source={{ uri: photo }} style={{ width: 52, height: 52, borderRadius: 26 }} />
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 12, padding: 10, borderRadius: 24, backgroundColor: brand[50], borderWidth: 1.5, borderColor: brand[500] }}>
+            <Image alt="" source={{ uri: photo }} style={{ width: 52, height: 52, borderRadius: 999 }} />
             <View style={{ flex: 1 }}>
-              <Text style={{ fontFamily: font.semibold, fontSize: 14.5, color: ink[900] }}>Using a photo</Text>
-              <Text style={{ fontFamily: font.regular, fontSize: 12.5, color: ink[500], marginTop: 1 }}>Only you can see it.</Text>
+              <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>Using a photo</Text>
+              <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 1 }}>Only you can see it.</Text>
             </View>
-            <Pressable accessibilityRole="button" accessibilityLabel="Remove photo" onPress={onClearPhoto} hitSlop={8} style={{ width: 34, height: 34, borderRadius: 17, backgroundColor: "#fff", alignItems: "center", justifyContent: "center" }}>
+            <Tap scale={0.95} accessibilityRole="button" accessibilityLabel="Remove photo" onPress={onClearPhoto} hitSlop={8} style={{ width: 34, height: 34, borderRadius: 999, backgroundColor: "#fff", alignItems: "center", justifyContent: "center" }}>
               <X size={16} color={ink[700]} />
-            </Pressable>
+            </Tap>
           </View>
         ) : (
           <View style={{ flexDirection: "row", gap: 10 }}>
@@ -107,7 +108,7 @@ export function AvatarPicker({
               label="Surprise me"
               onPress={() => { onShuffle(); onClearPhoto?.(); }}
               icon={
-                <View style={{ width: 30, height: 30, borderRadius: 15, backgroundColor: brand[50], alignItems: "center", justifyContent: "center" }}>
+                <View style={{ width: 30, height: 30, borderRadius: 999, backgroundColor: brand[50], alignItems: "center", justifyContent: "center" }}>
                   <Shuffle size={14} color={brand[600]} />
                 </View>
               }
@@ -135,11 +136,11 @@ function PhotoButton({ icon, label, onPress }: { icon: React.ReactNode; label: s
         borderWidth: 1.5,
         borderStyle: "dashed",
         borderColor: brand[300],
-        backgroundColor: pressed ? "#ece8ff" : "rgba(241,240,254,0.7)",
+        backgroundColor: pressed ? lilac.base : "rgba(241,240,254,0.7)",
       })}
     >
       {icon}
-      <Text style={{ fontFamily: font.semibold, fontSize: 13.5, color: brand[700] }}>{label}</Text>
+      <Text style={{ fontFamily: font.semibold, fontSize: 13, color: brand[700] }}>{label}</Text>
     </Pressable>
   );
 }
@@ -165,7 +166,7 @@ function FaceTile({ face, size, selected, onPress }: { face: Face; size: number;
     >
       <Avatar svg={face.svg} image={face.image} background={face.background} size={size} />
       {selected ? (
-        <View style={{ position: "absolute", right: -3, bottom: -3, width: 22, height: 22, borderRadius: 11, backgroundColor: brand[600], borderWidth: 2, borderColor: "#fff", alignItems: "center", justifyContent: "center" }}>
+        <View style={{ position: "absolute", right: -3, bottom: -3, width: 22, height: 22, borderRadius: 999, backgroundColor: brand[600], borderWidth: 2, borderColor: "#fff", alignItems: "center", justifyContent: "center" }}>
           <Check size={12} color="#fff" strokeWidth={3} />
         </View>
       ) : null}
@@ -187,7 +188,7 @@ function Option({ on, label, onPress, icon }: { on: boolean; label: string; onPr
         paddingRight: 12,
         height: 42,
         borderRadius: 999,
-        backgroundColor: on ? brand[50] : pressed ? "#f3f1ff" : "rgba(255,255,255,0.86)",
+        backgroundColor: on ? brand[50] : pressed ? brand[50] : "rgba(255,255,255,0.86)",
         borderWidth: 1.5,
         borderColor: on ? brand[500] : "rgba(15,16,48,0.08)",
       })}

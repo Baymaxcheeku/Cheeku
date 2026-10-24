@@ -15,6 +15,7 @@ import { font } from "@/theme/type";
 import { brandify } from "@/components/ui/brand";
 
 import { NotificationIcon } from "./parts";
+import { Tap } from "@/components/ui/tap";
 
 /*
  * The in-app banner: a new inbox row arriving while the app is open.
@@ -74,7 +75,7 @@ export function ToastHost() {
               alignItems: "center",
               gap: 12,
               padding: 12,
-              borderRadius: 22,
+              borderRadius: 24,
               backgroundColor: pressed ? "#ffffff" : glass.fillStrong,
               borderWidth: 1,
               borderColor: glass.rim,
@@ -85,16 +86,16 @@ export function ToastHost() {
         >
           <NotificationIcon kind={item.kind} size={40} />
           <View style={{ flex: 1, minWidth: 0 }}>
-            <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 14.5, color: ink[900] }}>
+            <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>
               {brandify(item.title)}
             </Text>
             <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 1 }}>
               {item.body}
             </Text>
           </View>
-          <Pressable accessibilityRole="button" accessibilityLabel="Dismiss" onPress={hide} hitSlop={10}>
+          <Tap accessibilityRole="button" accessibilityLabel="Dismiss" onPress={hide} hitSlop={10}>
             <X size={16} color={ink[300]} />
-          </Pressable>
+          </Tap>
         </Pressable>
       </Animated.View>
     </View>

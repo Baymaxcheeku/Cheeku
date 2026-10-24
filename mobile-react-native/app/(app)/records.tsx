@@ -153,8 +153,8 @@ export default function Records() {
            saying "no records" here would be a claim about someone's data that
            the app has no basis for. */
         <View className="mx-5 mt-8 items-center">
-          <Text className="text-[15px] font-semibold text-ink-900">Could not load your records</Text>
-          <Text className="mt-1 text-center text-[13px] leading-[18px] text-ink-500">
+          <Text className="text-base font-semibold text-ink-900">Could not load your records</Text>
+          <Text className="mt-1 text-center text-sm leading-[18px] text-ink-500">
             Pull down to try again. Nothing has been changed.
           </Text>
         </View>

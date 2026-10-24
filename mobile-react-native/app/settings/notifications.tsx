@@ -26,7 +26,7 @@ import { runOptimistic } from "@/lib/optimistic";
 import { updateNotificationPrefs } from "@/lib/settings/actions";
 import { DEFAULT_PREFS, ownFamily } from "@/lib/settings/queries";
 import type { NotificationPrefs } from "@/lib/settings/schemas";
-import { brand, ink } from "@/theme/tokens";
+import { brand, hue, ink, lilac } from "@/theme/tokens";
 import { font } from "@/theme/type";
 
 type Key = keyof NotificationPrefs;
@@ -51,15 +51,15 @@ const GROUPS: { title: string; rows: { key: Key; icon: LucideIcon; tint: string;
       {
         key: "appointmentReminders",
         icon: CalendarClock,
-        tint: "#e3f0ff",
-        fg: "#1a6fc2",
+        tint: hue.blue.wash,
+        fg: hue.blue.fg,
         title: "Appointment reminders",
         body: "A day before, an hour before, and the moment your call room opens.",
       },
       {
         key: "reportNotifications",
         icon: FileText,
-        tint: "#ece8ff",
+        tint: lilac.base,
         fg: brand[600],
         title: "Reports",
         body: "When a report is filed, needs a quick check, or has values worth a look.",
@@ -67,8 +67,8 @@ const GROUPS: { title: string; rows: { key: Key; icon: LucideIcon; tint: string;
       {
         key: "familyActivity",
         icon: Users2,
-        tint: "#ffe9f1",
-        fg: "#c22a6b",
+        tint: hue.rose.bg,
+        fg: hue.rose.fg,
         title: "Family",
         body: "When someone new joins your family's health files.",
       },
@@ -80,7 +80,7 @@ const GROUPS: { title: string; rows: { key: Key; icon: LucideIcon; tint: string;
       {
         key: "accountSecurity",
         icon: KeyRound,
-        tint: "#eef0f5",
+        tint: hue.slate.bg,
         fg: ink[700],
         title: "Account and security",
         body: "Password changes, plan changes and replies from our support team.",
@@ -93,16 +93,16 @@ const GROUPS: { title: string; rows: { key: Key; icon: LucideIcon; tint: string;
       {
         key: "productUpdates",
         icon: Rocket,
-        tint: "#fff1e3",
-        fg: "#c2650b",
+        tint: hue.orange.wash,
+        fg: hue.orange.fg,
         title: "New on Cheeku",
         body: "When a service you asked about goes live. We keep it rare.",
       },
       {
         key: "promotions",
         icon: Tag,
-        tint: "#fff1e3",
-        fg: "#c2650b",
+        tint: hue.orange.wash,
+        fg: hue.orange.fg,
         title: "Offers",
         body: "Discounts on plans and bookings, only if you want them.",
       },
@@ -175,13 +175,13 @@ export default function NotificationSettings() {
             <Panel>
               <View className="flex-row items-center gap-3">
                 <View
-                  className="h-11 w-11 items-center justify-center rounded-[14px]"
-                  style={{ backgroundColor: status === "granted" ? brand[50] : "#eef0f5" }}
+                  className="h-11 w-11 items-center justify-center rounded-lg"
+                  style={{ backgroundColor: status === "granted" ? brand[50] : hue.slate.bg }}
                 >
                   {status === "granted" ? <BellRing size={20} color={brand[600]} /> : <BellOff size={20} color={ink[500]} />}
                 </View>
                 <View className="flex-1">
-                  <Text style={{ fontFamily: font.semibold, fontSize: 15.5, color: ink[900] }}>
+                  <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>
                     {status === "granted"
                       ? "Phone alerts are on"
                       : status === "denied"
@@ -213,7 +213,7 @@ export default function NotificationSettings() {
             </Panel>
           </Section>
 
-          <View className="mx-5 mt-4 flex-row items-start gap-2.5 rounded-[18px] px-4 py-3" style={{ backgroundColor: brand[50] }}>
+          <View className="mx-5 mt-4 flex-row items-start gap-2.5 rounded-lg px-4 py-3" style={{ backgroundColor: brand[50] }}>
             <Inbox size={16} color={brand[600]} style={{ marginTop: 1 }} />
             <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[700] }}>
               Everything always lands in your inbox. These switches only choose what can also buzz your phone.
@@ -229,12 +229,12 @@ export default function NotificationSettings() {
                     className="flex-row items-center gap-3 px-4 py-3.5"
                     style={i > 0 ? { borderTopWidth: 1, borderTopColor: "rgba(15,16,48,0.06)" } : undefined}
                   >
-                    <View className="h-10 w-10 items-center justify-center rounded-[13px]" style={{ backgroundColor: row.tint }}>
+                    <View className="h-10 w-10 items-center justify-center rounded-md" style={{ backgroundColor: row.tint }}>
                       <row.icon size={18} color={row.fg} />
                     </View>
                     <View className="min-w-0 flex-1">
                       <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{row.title}</Text>
-                      <Text style={{ fontFamily: font.regular, fontSize: 12.5, lineHeight: 17, color: ink[500], marginTop: 2 }}>{row.body}</Text>
+                      <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 17, color: ink[500], marginTop: 2 }}>{row.body}</Text>
                     </View>
                     <SpringSwitch checked={prefs[row.key]} onChange={() => toggle(row.key)} label={row.title} />
                   </View>
@@ -245,7 +245,7 @@ export default function NotificationSettings() {
 
           <View className="mx-5 mt-6 flex-row items-start gap-2.5">
             <Lock size={14} color={ink[300]} style={{ marginTop: 2 }} />
-            <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 12.5, lineHeight: 18, color: ink[500] }}>
+            <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[500] }}>
               Your lock screen stays private. A buzz says something like &quot;Cheeku has an update on a report&quot;, never
               a result, a doctor or a name. The details wait inside the app.
             </Text>
@@ -265,7 +265,7 @@ export default function NotificationSettings() {
               opacity: pressed ? 0.6 : 1,
             })}
           >
-            <Text style={{ fontFamily: font.semibold, fontSize: 14, color: brand[700] }}>Open your inbox</Text>
+            <Text style={{ fontFamily: font.semibold, fontSize: 15, color: brand[700] }}>Open your inbox</Text>
             <ChevronRight size={16} color={brand[700]} />
           </Pressable>
         </>

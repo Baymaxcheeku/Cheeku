@@ -35,7 +35,7 @@ import type { HomeSignals, UnlockedVia } from "@/lib/home/rules";
 import type { Plan, PlanTask } from "@/lib/home/plan";
 import type { DueRow, Streak, WeekDay } from "@/lib/home/today";
 import type { ActiveProfile } from "@/lib/profiles/context";
-import { brand, ink, semantic, surface } from "@/theme/tokens";
+import { brand, ink, lilac, semantic, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
 
 /*
@@ -67,8 +67,8 @@ export function UnlockCard({ stage, signals }: { stage: "starter" | "building"; 
   const copy = UNLOCK_COPY[stage];
 
   return (
-    <View className="overflow-hidden rounded-[32px]" style={glassShadow}>
-      <Gradient from="#f1edff" to="#d8cffd" glow="#ffffff" />
+    <View className="overflow-hidden rounded-2xl" style={glassShadow}>
+      <Gradient from={lilac.base} to={lilac.deep} glow="#ffffff" />
 
       <View pointerEvents="box-none" style={{ position: "absolute", right: 4, top: 26 }}>
         <MascotFigure size={118} moment="present" hop />
@@ -83,21 +83,21 @@ export function UnlockCard({ stage, signals }: { stage: "starter" | "building"; 
         </Glass>
 
         <View style={{ paddingRight: "36%", marginTop: 14 }}>
-          <Text accessibilityRole="header" style={{ fontFamily: font.semibold, fontSize: 23, lineHeight: 28, letterSpacing: -0.6, color: ink[900] }}>
+          <Text accessibilityRole="header" style={{ fontFamily: font.semibold, fontSize: 24, lineHeight: 28, letterSpacing: -0.6, color: ink[900] }}>
             {copy.title}
           </Text>
         </View>
-        <Text style={{ fontFamily: font.regular, fontSize: 13.5, lineHeight: 19.5, color: ink[700], marginTop: 8 }}>{copy.body}</Text>
+        <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 19.5, color: ink[700], marginTop: 8 }}>{copy.body}</Text>
 
-        <Glass strong className="mt-4 rounded-[22px] px-3 py-1.5">
+        <Glass strong className="mt-4 rounded-xl px-3 py-1.5">
           {rows.map((r, i) => (
             <UnlockRowView key={r.key} row={r} index={i} last={i === rows.length - 1} onPress={() => router.push(r.route as never)} />
           ))}
         </Glass>
 
         <View className="mt-4 flex-row items-center justify-between">
-          <Text style={{ fontFamily: font.semibold, fontSize: 12.5, color: ink[700] }}>Your health memory</Text>
-          <Text style={{ fontFamily: font.semibold, fontSize: 12.5, color: brand[700] }}>
+          <Text style={{ fontFamily: font.semibold, fontSize: 13, color: ink[700] }}>Your health memory</Text>
+          <Text style={{ fontFamily: font.semibold, fontSize: 13, color: brand[700] }}>
             {done} of {rows.length} set up
           </Text>
         </View>
@@ -111,7 +111,7 @@ export function UnlockCard({ stage, signals }: { stage: "starter" | "building"; 
           onPress={() => router.push("/scan")}
           style={{ marginTop: 18, flexDirection: "row", alignItems: "center", alignSelf: "flex-start" }}
         >
-          <View className="z-10 h-[52px] w-[52px] items-center justify-center rounded-pill" style={{ backgroundColor: ink[900] }}>
+          <View className="z-10 h-[52px] w-[52px] items-center justify-center rounded-pill" style={{ backgroundColor: brand[600] }}>
             <FileUp size={21} color="#ffffff" strokeWidth={1.9} />
           </View>
           <Glass strong className="-ml-4 h-[46px] justify-center pl-7 pr-5" style={{ borderTopRightRadius: 999, borderBottomRightRadius: 999 }}>
@@ -155,7 +155,7 @@ function UnlockRowView({ row, index, last, onPress }: { row: UnlockRow; index: n
         </View>
       )}
       <View className="min-w-0 flex-1">
-        <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 14, color: row.done ? ink[500] : ink[900], textDecorationLine: row.done ? "line-through" : "none" }}>
+        <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 15, color: row.done ? ink[500] : ink[900], textDecorationLine: row.done ? "line-through" : "none" }}>
           {row.title}
         </Text>
         <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 12, color: ink[500], marginTop: 1 }}>
@@ -164,7 +164,7 @@ function UnlockRowView({ row, index, last, onPress }: { row: UnlockRow; index: n
       </View>
       {key && !row.done ? (
         <View className="rounded-pill px-2 py-1" style={{ backgroundColor: LIVE.bg }}>
-          <Text style={{ fontFamily: font.bold, fontSize: 10.5, color: LIVE.fg }}>Opens Today</Text>
+          <Text style={{ fontFamily: font.bold, fontSize: 11, color: LIVE.fg }}>Opens Today</Text>
         </View>
       ) : (
         <ChevronRight size={16} color={ink[300]} />
@@ -185,15 +185,15 @@ export function LockedPreview() {
       <Text style={{ fontFamily: font.semibold, fontSize: 17, letterSpacing: -0.3, color: ink[900] }}>What your first record opens</Text>
       <View className="mt-3 flex-row gap-2.5">
         {tiles.map((t) => (
-          <View key={t.title} className="flex-1 rounded-[20px] bg-white p-3" style={[glassShadow, { borderWidth: 1, borderColor: surface.line, minHeight: 128 }]}>
+          <View key={t.title} className="flex-1 rounded-xl bg-white p-3" style={[glassShadow, { borderWidth: 1, borderColor: surface.line, minHeight: 128 }]}>
             <View className="flex-row items-center justify-between">
-              <View className="h-9 w-9 items-center justify-center rounded-[12px]" style={{ backgroundColor: brand[50] }}>
+              <View className="h-9 w-9 items-center justify-center rounded-md" style={{ backgroundColor: brand[50] }}>
                 <t.icon size={18} color={brand[600]} strokeWidth={1.9} />
               </View>
               <Lock size={13} color={ink[300]} strokeWidth={2.2} />
             </View>
             <Text style={{ fontFamily: font.semibold, fontSize: 13, color: ink[900], marginTop: 10 }}>{t.title}</Text>
-            <Text style={{ fontFamily: font.regular, fontSize: 11.5, lineHeight: 15, color: ink[500], marginTop: 3 }}>{t.sub}</Text>
+            <Text style={{ fontFamily: font.regular, fontSize: 12, lineHeight: 15, color: ink[500], marginTop: 3 }}>{t.sub}</Text>
           </View>
         ))}
       </View>
@@ -219,22 +219,22 @@ export function ProgressStrip({ streak, week, pillars, onPillar }: { streak: Str
   const balanced = pillars.size === PILLARS.length;
   const sub = streak.todayDone ? "Today's done. See you tomorrow." : streak.count > 0 ? "Keep it going today" : "Do today's step to start one";
   return (
-    <Glass strong className="rounded-[26px] p-4">
+    <Glass strong className="rounded-xl p-4">
       <View className="flex-row items-center gap-3">
         <View className="h-11 w-11 items-center justify-center rounded-pill" style={{ backgroundColor: streak.count > 0 ? brand[600] : brand[50] }}>
           <Flame size={21} color={streak.count > 0 ? "#fff" : brand[500]} strokeWidth={2} fill={streak.count > 0 ? "rgba(255,255,255,0.25)" : "none"} />
         </View>
         <View className="min-w-0 flex-1">
-          <Text style={{ fontFamily: font.semibold, fontSize: 16, letterSpacing: -0.2, color: ink[900] }}>
+          <Text style={{ fontFamily: font.semibold, fontSize: 17, letterSpacing: -0.2, color: ink[900] }}>
             {streak.count > 0 ? `${streak.count}-day streak` : "No streak yet"}
           </Text>
-          <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 12.5, color: ink[500], marginTop: 1 }}>
+          <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 1 }}>
             {sub}
           </Text>
         </View>
         {streak.best > streak.count ? (
           <View className="rounded-pill px-2.5 py-1" style={{ backgroundColor: brand[50] }}>
-            <Text style={{ fontFamily: font.semibold, fontSize: 11.5, color: brand[700] }}>Best {streak.best}</Text>
+            <Text style={{ fontFamily: font.semibold, fontSize: 12, color: brand[700] }}>Best {streak.best}</Text>
           </View>
         ) : null}
       </View>
@@ -262,10 +262,10 @@ export function ProgressStrip({ streak, week, pillars, onPillar }: { streak: Str
         <Text style={{ fontFamily: font.semibold, fontSize: 12, color: ink[700] }}>This week</Text>
         {balanced ? (
           <View className="rounded-pill px-2 py-0.5" style={{ backgroundColor: LIVE.bg }}>
-            <Text style={{ fontFamily: font.bold, fontSize: 10.5, color: LIVE.fg }}>Balanced week</Text>
+            <Text style={{ fontFamily: font.bold, fontSize: 11, color: LIVE.fg }}>Balanced week</Text>
           </View>
         ) : (
-          <Text style={{ fontFamily: font.regular, fontSize: 11.5, color: ink[500] }}>{pillars.size} of 5 pillars</Text>
+          <Text style={{ fontFamily: font.regular, fontSize: 12, color: ink[500] }}>{pillars.size} of 5 pillars</Text>
         )}
       </View>
       <View className="mt-2 flex-row gap-1.5">
@@ -300,7 +300,7 @@ export function ProgressStrip({ streak, week, pillars, onPillar }: { streak: Str
         })}
       </View>
       {onPillar ? (
-        <Text style={{ fontFamily: font.regular, fontSize: 11.5, color: ink[500], marginTop: 8, textAlign: "center" }}>Tap a pillar to see its steps</Text>
+        <Text style={{ fontFamily: font.regular, fontSize: 12, color: ink[500], marginTop: 8, textAlign: "center" }}>Tap a pillar to see its steps</Text>
       ) : null}
     </Glass>
   );
@@ -310,7 +310,7 @@ function Chip({ children, icon: Icon }: { children: string; icon?: AppIcon }) {
   return (
     <Glass className="flex-row items-center gap-1.5 rounded-pill px-3 py-1.5">
       {Icon ? <Icon size={13} color={brand[700]} strokeWidth={2.2} /> : null}
-      <Text style={{ fontFamily: font.semibold, fontSize: 12.5, color: ink[900] }}>{children}</Text>
+      <Text style={{ fontFamily: font.semibold, fontSize: 13, color: ink[900] }}>{children}</Text>
     </Glass>
   );
 }
@@ -348,8 +348,8 @@ export function StepCard({
   if (doneStep || !step) {
     const allDone = !doneStep;
     return (
-      <View className="overflow-hidden rounded-[32px]" style={[glassShadow, { minHeight: 250 }]}>
-        <Gradient from="#f1edff" to="#d8cffd" glow="#ffffff" />
+      <View className="overflow-hidden rounded-2xl" style={[glassShadow, { minHeight: 250 }]}>
+        <Gradient from={lilac.base} to={lilac.deep} glow="#ffffff" />
         <View pointerEvents="box-none" style={{ position: "absolute", right: -10, bottom: -12 }}>
           <MascotFigure size={168} moment={allDone ? "joy" : "celebrate"} hop />
         </View>
@@ -359,7 +359,7 @@ export function StepCard({
               <View className="h-4 w-4 items-center justify-center rounded-pill" style={{ backgroundColor: brand[600] }}>
                 <Check size={10} color="#fff" strokeWidth={3.4} />
               </View>
-              <Text style={{ fontFamily: font.semibold, fontSize: 12.5, color: ink[900] }}>{allDone ? "All done" : "Done"}</Text>
+              <Text style={{ fontFamily: font.semibold, fontSize: 13, color: ink[900] }}>{allDone ? "All done" : "Done"}</Text>
             </Glass>
             {streak.count > 0 ? <Chip icon={Flame}>{`Day ${streak.count}`}</Chip> : null}
           </View>
@@ -367,26 +367,26 @@ export function StepCard({
             <Text style={{ fontFamily: font.semibold, fontSize: 24, lineHeight: 29, letterSpacing: -0.6, color: ink[900] }}>
               {milestone ?? (allDone ? "All done for today." : streak.count > 1 ? `${streak.count} days in a row.` : "First one done.")}
             </Text>
-            <Text style={{ fontFamily: font.regular, fontSize: 14, lineHeight: 20, color: ink[700], marginTop: 8 }}>
+            <Text style={{ fontFamily: font.regular, fontSize: 15, lineHeight: 20, color: ink[700], marginTop: 8 }}>
               {doneStep ? doneStep.title : "See you tomorrow."}
             </Text>
           </View>
           <View className="mt-auto flex-row items-center gap-2 pt-5">
             {onMore ? (
               <Tap accessibilityRole="button" onPress={onMore}>
-                <View className="h-[44px] flex-row items-center gap-1.5 rounded-pill px-4" style={{ backgroundColor: ink[900] }}>
-                  <Text style={{ fontFamily: font.semibold, fontSize: 14, color: "#fff" }}>One more?</Text>
+                <View className="h-[44px] flex-row items-center gap-1.5 rounded-pill px-4" style={{ backgroundColor: brand[600] }}>
+                  <Text style={{ fontFamily: font.semibold, fontSize: 15, color: "#fff" }}>One more?</Text>
                   <ArrowRight size={15} color="#fff" />
                 </View>
               </Tap>
             ) : null}
             {doneStep ? (
-              <Pressable accessibilityRole="button" accessibilityLabel="Undo done" onPress={() => onUndo(doneStep)}>
+              <Tap accessibilityRole="button" accessibilityLabel="Undo done" onPress={() => onUndo(doneStep)}>
                 <Glass className="h-[44px] flex-row items-center gap-1.5 rounded-pill px-4">
                   <Undo2 size={14} color={ink[700]} />
-                  <Text style={{ fontFamily: font.semibold, fontSize: 14, color: ink[900] }}>Undo</Text>
+                  <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>Undo</Text>
                 </Glass>
-              </Pressable>
+              </Tap>
             ) : null}
           </View>
         </View>
@@ -399,8 +399,8 @@ export function StepCard({
   // A task that needs more than a tap (steps, a meal, a reading) opens its sheet in the plan.
   const action = step.cta ?? (step.kind !== "habit" ? { label: ACTION_LABEL[step.kind], route: `/today?task=${encodeURIComponent(step.key)}` } : null);
   return (
-    <View className="overflow-hidden rounded-[32px]" style={[glassShadow, { minHeight: 300 }]}>
-      <Gradient from="#f1edff" to="#d8cffd" glow="#ffffff" />
+    <View className="overflow-hidden rounded-2xl" style={[glassShadow, { minHeight: 300 }]}>
+      <Gradient from={lilac.base} to={lilac.deep} glow="#ffffff" />
       <View pointerEvents="box-none" style={{ position: "absolute", right: -4, bottom: -12 }}>
         <MascotFigure size={due ? 128 : 160} moment={due ? "think" : "present"} hop />
       </View>
@@ -409,7 +409,7 @@ export function StepCard({
           {due ? (
             <View className="flex-row items-center gap-1.5 rounded-pill px-3 py-1.5" style={{ backgroundColor: step.dueLabel === "Overdue" ? semantic.dangerBg : semantic.cautionBg }}>
               <CalendarClock size={13} color={step.dueLabel === "Overdue" ? semantic.dangerText : semantic.cautionText} strokeWidth={2.2} />
-              <Text style={{ fontFamily: font.semibold, fontSize: 12.5, color: step.dueLabel === "Overdue" ? semantic.dangerText : semantic.cautionText }}>{step.dueLabel}</Text>
+              <Text style={{ fontFamily: font.semibold, fontSize: 13, color: step.dueLabel === "Overdue" ? semantic.dangerText : semantic.cautionText }}>{step.dueLabel}</Text>
             </View>
           ) : (
             <Chip icon={PillarIcon}>{step.chip}</Chip>
@@ -419,44 +419,44 @@ export function StepCard({
 
         {/* Title, then at most two short lines: their reason and the payoff. */}
         <View style={{ paddingRight: "36%", marginTop: 20 }}>
-          <Text style={{ fontFamily: font.semibold, fontSize: 25, lineHeight: 30, letterSpacing: -0.6, color: ink[900] }}>{step.title}</Text>
+          <Text style={{ fontFamily: font.semibold, fontSize: 24, lineHeight: 30, letterSpacing: -0.6, color: ink[900] }}>{step.title}</Text>
           {step.reason ? (
             <View className="flex-row items-center gap-1.5" style={{ marginTop: 10 }}>
               <Sparkles size={13} color={brand[600]} />
               <Text numberOfLines={1} style={{ flex: 1, fontFamily: font.semibold, fontSize: 13, color: brand[700] }}>{step.reason}</Text>
             </View>
           ) : null}
-          <Text numberOfLines={2} style={{ fontFamily: font.regular, fontSize: 14, lineHeight: 20, color: ink[700], marginTop: step.reason ? 4 : 10 }}>{step.why}</Text>
+          <Text numberOfLines={2} style={{ fontFamily: font.regular, fontSize: 15, lineHeight: 20, color: ink[700], marginTop: step.reason ? 4 : 10 }}>{step.why}</Text>
         </View>
 
         <View className="mt-auto flex-row items-center gap-2 pt-5">
           {action ? (
             <Tap accessibilityRole="button" onPress={() => router.push(action.route as never)}>
-              <View className="h-[46px] flex-row items-center gap-1.5 rounded-pill px-4" style={{ backgroundColor: ink[900] }}>
-                <Text style={{ fontFamily: font.semibold, fontSize: 14, color: "#fff" }}>{action.label}</Text>
+              <View className="h-[46px] flex-row items-center gap-1.5 rounded-pill px-4" style={{ backgroundColor: brand[600] }}>
+                <Text style={{ fontFamily: font.semibold, fontSize: 15, color: "#fff" }}>{action.label}</Text>
               </View>
             </Tap>
           ) : (
             <Tap accessibilityRole="button" accessibilityLabel={`Done: ${step.title}`} onPress={() => onDone(step)}>
-              <View className="h-[46px] flex-row items-center gap-2 rounded-pill pl-1.5 pr-5" style={{ backgroundColor: ink[900] }}>
-                <View className="h-[34px] w-[34px] items-center justify-center rounded-pill" style={{ backgroundColor: brand[500] }}>
+              <View className="h-[46px] flex-row items-center gap-2 rounded-pill pl-1.5 pr-5" style={{ backgroundColor: brand[600] }}>
+                <View className="h-[34px] w-[34px] items-center justify-center rounded-pill" style={{ backgroundColor: "rgba(255,255,255,0.22)" }}>
                   <Check size={17} color="#fff" strokeWidth={3} />
                 </View>
                 <Text style={{ fontFamily: font.semibold, fontSize: 15, color: "#fff" }}>Done</Text>
               </View>
             </Tap>
           )}
-          <Pressable accessibilityRole="button" accessibilityLabel={`Later: ${step.title}`} onPress={() => onLater(step)}>
+          <Tap accessibilityRole="button" accessibilityLabel={`Later: ${step.title}`} onPress={() => onLater(step)}>
             <Glass strong className="h-[46px] items-center justify-center rounded-pill px-4">
-              <Text style={{ fontFamily: font.semibold, fontSize: 14, color: ink[700] }}>Later</Text>
+              <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[700] }}>Later</Text>
             </Glass>
-          </Pressable>
+          </Tap>
         </View>
         {due ? (
           // Booked somewhere else, or already done: it still counts.
-          <Pressable accessibilityRole="button" accessibilityLabel={`Mark done: ${step.title}`} onPress={() => onDone(step)} hitSlop={8} style={{ alignSelf: "flex-start", marginTop: 10 }}>
+          <Tap accessibilityRole="button" accessibilityLabel={`Mark done: ${step.title}`} onPress={() => onDone(step)} hitSlop={8} style={{ alignSelf: "flex-start", marginTop: 10 }}>
             <Text style={{ fontFamily: font.semibold, fontSize: 13, color: brand[700] }}>Already done? Mark it</Text>
-          </Pressable>
+          </Tap>
         ) : null}
       </View>
     </View>
@@ -483,7 +483,7 @@ export function FamilyAlertCard({ row, member, onPress }: { row: DueRow; member:
   const when = row.overdue ? `${late} day${late === 1 ? "" : "s"} late` : row.daysToDue === 0 ? "Today" : row.daysToDue === 1 ? "Tomorrow" : `In ${row.daysToDue} days`;
   return (
     <Tap accessibilityRole="button" accessibilityLabel={sentence} onPress={onPress} scale={0.98}>
-      <View className="flex-row items-center gap-3 rounded-[24px] bg-white p-3.5" style={[glassShadow, { borderWidth: 1, borderColor: surface.line }]}>
+      <View className="flex-row items-center gap-3 rounded-xl bg-white p-3.5" style={[glassShadow, { borderWidth: 1, borderColor: surface.line }]}>
         <View>
           {member ? <Avatar svg={member.avatar} photo={member.photo} image={member.avatarImage} background={member.avatarBackground} size={46} /> : <Users size={22} color={brand[600]} />}
           <View className="absolute -bottom-0.5 -right-0.5 h-5 w-5 items-center justify-center rounded-pill border-2 border-white" style={{ backgroundColor: row.overdue ? semantic.attention : semantic.caution }}>
@@ -493,9 +493,9 @@ export function FamilyAlertCard({ row, member, onPress }: { row: DueRow; member:
         <View className="min-w-0 flex-1">
           {/* Plain words in the attention tone, not a red "FAMILY ALERT": an overdue
               test is a nudge, and red is kept for "go now" (UI audit, October 2026). */}
-          <Text style={{ fontFamily: font.bold, fontSize: 10.5, letterSpacing: 1, color: row.overdue ? semantic.attentionText : semantic.cautionText }}>{row.overdue ? "OVERDUE" : "COMING UP"}</Text>
-          <Text style={{ fontFamily: font.semibold, fontSize: 14.5, lineHeight: 19, color: ink[900], marginTop: 2 }}>{sentence}</Text>
-          <Text style={{ fontFamily: font.semibold, fontSize: 12.5, color: brand[600], marginTop: 4 }}>{`${when} · ${lab ? "Book collection" : "Plan it"}`}</Text>
+          <Text style={{ fontFamily: font.bold, fontSize: 11, letterSpacing: 1, color: row.overdue ? semantic.attentionText : semantic.cautionText }}>{row.overdue ? "OVERDUE" : "COMING UP"}</Text>
+          <Text style={{ fontFamily: font.semibold, fontSize: 15, lineHeight: 19, color: ink[900], marginTop: 2 }}>{sentence}</Text>
+          <Text style={{ fontFamily: font.semibold, fontSize: 13, color: brand[600], marginTop: 4 }}>{`${when} · ${lab ? "Book collection" : "Plan it"}`}</Text>
         </View>
         <ChevronRight size={18} color={ink[300]} />
       </View>
@@ -507,20 +507,20 @@ export function DueThisWeek({ rows, onPress }: { rows: DueRow[]; onPress: (r: Du
   return (
     <View>
       <View className="flex-row items-baseline justify-between">
-        <Text style={{ fontFamily: font.semibold, fontSize: 19, letterSpacing: -0.4, color: ink[900] }}>Due soon</Text>
-        <Text style={{ fontFamily: font.medium, fontSize: 12.5, color: ink[500] }}>Next two weeks</Text>
+        <Text style={{ fontFamily: font.semibold, fontSize: 20, letterSpacing: -0.4, color: ink[900] }}>Due soon</Text>
+        <Text style={{ fontFamily: font.medium, fontSize: 13, color: ink[500] }}>Next two weeks</Text>
       </View>
       {rows.length === 0 ? (
-        <View className="mt-3 flex-row items-center gap-3 rounded-[22px] bg-white p-4" style={[glassShadow, { borderWidth: 1, borderColor: surface.line }]}>
-          <View className="h-10 w-10 items-center justify-center rounded-[14px]" style={{ backgroundColor: brand[50] }}>
+        <View className="mt-3 flex-row items-center gap-3 rounded-xl bg-white p-4" style={[glassShadow, { borderWidth: 1, borderColor: surface.line }]}>
+          <View className="h-10 w-10 items-center justify-center rounded-lg" style={{ backgroundColor: brand[50] }}>
             <Check size={18} color={brand[600]} strokeWidth={2.6} />
           </View>
-          <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 13.5, lineHeight: 19, color: ink[700] }}>
+          <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 13, lineHeight: 19, color: ink[700] }}>
             Nothing due for the family in the next two weeks. Cheeku will put it here when something is.
           </Text>
         </View>
       ) : (
-        <View className="mt-3 overflow-hidden rounded-[22px] bg-white" style={[glassShadow, { borderWidth: 1, borderColor: surface.line }]}>
+        <View className="mt-3 overflow-hidden rounded-xl bg-white" style={[glassShadow, { borderWidth: 1, borderColor: surface.line }]}>
           {rows.slice(0, 6).map((r, i) => {
             const Icon = DUE_ICON[r.type] ?? CalendarClock;
             return (
@@ -531,14 +531,14 @@ export function DueThisWeek({ rows, onPress }: { rows: DueRow[]; onPress: (r: Du
                 onPress={() => onPress(r)}
                 style={({ pressed }) => ({ flexDirection: "row", alignItems: "center", gap: 12, padding: 14, borderTopWidth: i === 0 ? 0 : 1, borderTopColor: surface.line, backgroundColor: pressed ? surface.tint : "#fff" })}
               >
-                <View className="h-10 w-10 items-center justify-center rounded-[14px]" style={{ backgroundColor: brand[50] }}>
+                <View className="h-10 w-10 items-center justify-center rounded-lg" style={{ backgroundColor: brand[50] }}>
                   <Icon size={18} color={brand[600]} strokeWidth={1.9} />
                 </View>
                 <View className="min-w-0 flex-1">
-                  <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 14.5, color: ink[900] }}>
+                  <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>
                     {r.title}
                   </Text>
-                  <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 12.5, color: ink[500], marginTop: 2 }}>
+                  <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 2 }}>
                     {r.who} ·{" "}
                     <Text style={{ fontFamily: font.medium, color: r.overdue ? semantic.dangerText : r.daysToDue <= 2 ? semantic.cautionText : ink[500] }}>{r.when}</Text>
                   </Text>
@@ -562,18 +562,18 @@ const KIND_ICON: Partial<Record<PlanTask["kind"], AppIcon>> = { steps: Footprint
 export function PlanPreview({ plan, skip, onOpen }: { plan: Plan; skip: string | null; onOpen: (href: string) => void }) {
   const nextUp = plan.tasks.filter((t) => t.status === "open" && t.key !== skip).slice(0, 3);
   return (
-    <View className="rounded-[26px] bg-white p-4" style={[glassShadow, { borderWidth: 1, borderColor: surface.line }]}>
+    <View className="rounded-xl bg-white p-4" style={[glassShadow, { borderWidth: 1, borderColor: surface.line }]}>
       <View className="flex-row items-center justify-between">
         <View>
           <Text style={{ fontFamily: font.semibold, fontSize: 17, letterSpacing: -0.3, color: ink[900] }}>Today&apos;s action plan</Text>
-          <Text style={{ fontFamily: font.regular, fontSize: 12.5, color: ink[500], marginTop: 1 }}>
+          <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 1 }}>
             {plan.done} of {plan.total} done{plan.areas.length ? " · made for your numbers" : ""}
           </Text>
         </View>
-        <Pressable accessibilityRole="button" accessibilityLabel="See the full plan" onPress={() => onOpen("/today")} hitSlop={8} className="flex-row items-center gap-1">
-          <Text style={{ fontFamily: font.semibold, fontSize: 13.5, color: brand[600] }}>See all</Text>
+        <Tap accessibilityRole="button" accessibilityLabel="See the full plan" onPress={() => onOpen("/today")} hitSlop={8} className="flex-row items-center gap-1">
+          <Text style={{ fontFamily: font.semibold, fontSize: 13, color: brand[600] }}>See all</Text>
           <ChevronRight size={15} color={brand[600]} />
-        </Pressable>
+        </Tap>
       </View>
       <View className="mt-3">
         <Meter value={plan.done} total={Math.max(1, plan.total)} />
@@ -589,11 +589,11 @@ export function PlanPreview({ plan, skip, onOpen }: { plan: Plan; skip: string |
               onPress={() => onOpen(t.kind === "habit" ? `/today?pillar=${t.pillar}` : `/today?task=${encodeURIComponent(t.key)}`)}
               style={({ pressed }) => ({ flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 11, borderTopWidth: i === 0 ? 0 : 1, borderTopColor: surface.line, opacity: pressed ? 0.7 : 1 })}
             >
-              <View className="h-9 w-9 items-center justify-center rounded-[12px]" style={{ backgroundColor: brand[50] }}>
+              <View className="h-9 w-9 items-center justify-center rounded-md" style={{ backgroundColor: brand[50] }}>
                 <Icon size={17} color={brand[600]} strokeWidth={1.9} />
               </View>
               <View className="min-w-0 flex-1">
-                <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 14, color: ink[900] }}>
+                <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>
                   {t.title}
                 </Text>
                 <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 12, color: t.personal ? brand[700] : ink[500], marginTop: 1 }}>
@@ -614,13 +614,13 @@ export function AskRow() {
   const router = useRouter();
   return (
     <Tap accessibilityRole="button" accessibilityLabel="Ask Cheeku" onPress={() => router.push("/ask")} scale={0.98}>
-      <Glass strong className="flex-row items-center gap-3 rounded-[22px] p-3.5">
-        <View className="h-10 w-10 items-center justify-center rounded-pill" style={{ backgroundColor: ink[900] }}>
+      <Glass strong className="flex-row items-center gap-3 rounded-xl p-3.5">
+        <View className="h-10 w-10 items-center justify-center rounded-pill" style={{ backgroundColor: brand[600] }}>
           <MessageCircle size={18} color="#fff" strokeWidth={1.9} />
         </View>
         <View className="min-w-0 flex-1">
-          <Text style={{ fontFamily: font.semibold, fontSize: 14.5, color: ink[900] }}>Ask about food, a symptom or a reading</Text>
-          <Text style={{ fontFamily: font.regular, fontSize: 12.5, color: ink[500], marginTop: 1 }}>Answered against your own numbers</Text>
+          <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>Ask about food, a symptom or a reading</Text>
+          <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 1 }}>Answered against your own numbers</Text>
         </View>
         <ChevronRight size={16} color={ink[300]} />
       </Glass>
@@ -641,28 +641,28 @@ export function UnlockMoment({ open, via, onClose }: { open: boolean; via: Unloc
   return (
     <Modal visible={open} transparent animationType="fade" onRequestClose={onClose}>
       <View className="flex-1 items-center justify-center px-5" style={{ backgroundColor: "rgba(15,16,48,0.45)", paddingTop: insets.top, paddingBottom: insets.bottom }}>
-        <View className="w-full overflow-hidden rounded-[32px]" style={{ maxWidth: 420 }}>
-          <Gradient from="#f1edff" to="#d8cffd" glow="#ffffff" />
+        <View className="w-full overflow-hidden rounded-2xl" style={{ maxWidth: 420 }}>
+          <Gradient from={lilac.base} to={lilac.deep} glow="#ffffff" />
           <View className="items-center px-5 pb-5 pt-4">
             <MascotFigure size={170} moment="celebrate" />
             <View className="-mt-2 rounded-pill px-3 py-1" style={{ backgroundColor: LIVE.bg }}>
               <Text style={{ fontFamily: font.bold, fontSize: 11, letterSpacing: 1, color: LIVE.fg }}>UNLOCKED</Text>
             </View>
-            <Text accessibilityRole="header" style={{ fontFamily: font.semibold, fontSize: 27, lineHeight: 32, letterSpacing: -0.8, color: ink[900], marginTop: 10, textAlign: "center" }}>
+            <Text accessibilityRole="header" style={{ fontFamily: font.semibold, fontSize: 28, lineHeight: 32, letterSpacing: -0.8, color: ink[900], marginTop: 10, textAlign: "center" }}>
               {backfill ? "Home is now Today." : "Today is here."}
             </Text>
-            <Text style={{ fontFamily: font.regular, fontSize: 14, lineHeight: 20, color: ink[700], marginTop: 8, textAlign: "center" }}>
+            <Text style={{ fontFamily: font.regular, fontSize: 15, lineHeight: 20, color: ink[700], marginTop: 8, textAlign: "center" }}>
               {backfill ? "Built from what your family has shared." : viaLine(via)}
             </Text>
 
-            <Glass strong className="mt-5 w-full rounded-[22px] px-3.5 py-1">
+            <Glass strong className="mt-5 w-full rounded-xl px-3.5 py-1">
               {items.map((it, i) => (
                 <View key={it.title} className="flex-row items-center gap-3 py-3" style={{ borderTopWidth: i === 0 ? 0 : 1, borderTopColor: surface.line }}>
-                  <View className="h-9 w-9 items-center justify-center rounded-[12px]" style={{ backgroundColor: brand[50] }}>
+                  <View className="h-9 w-9 items-center justify-center rounded-md" style={{ backgroundColor: brand[50] }}>
                     <it.icon size={17} color={brand[600]} strokeWidth={2} />
                   </View>
                   <View className="min-w-0 flex-1">
-                    <Text style={{ fontFamily: font.semibold, fontSize: 14, color: ink[900] }}>{it.title}</Text>
+                    <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{it.title}</Text>
                     <Text style={{ fontFamily: font.regular, fontSize: 12, color: ink[500], marginTop: 1 }}>{it.sub}</Text>
                   </View>
                 </View>
@@ -672,9 +672,9 @@ export function UnlockMoment({ open, via, onClose }: { open: boolean; via: Unloc
             <Tap
               accessibilityRole="button"
               onPress={onClose}
-              style={{ marginTop: 18, alignSelf: "stretch", height: 52, borderRadius: 999, backgroundColor: ink[900], alignItems: "center", justifyContent: "center" }} scale={0.98}
+              style={{ marginTop: 18, alignSelf: "stretch", height: 52, borderRadius: 999, backgroundColor: brand[600], alignItems: "center", justifyContent: "center" }} scale={0.98}
             >
-              <Text style={{ fontFamily: font.semibold, fontSize: 16, color: "#fff" }}>See today</Text>
+              <Text style={{ fontFamily: font.semibold, fontSize: 17, color: "#fff" }}>See today</Text>
             </Tap>
           </View>
         </View>

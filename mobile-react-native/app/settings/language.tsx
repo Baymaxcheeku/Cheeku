@@ -32,17 +32,17 @@ export default function Language() {
     <SettingsScreen title="Language" eyebrow="Choose your preferred language" icon={Globe}>
       <View className="mt-4">
         <Panel>
-          <Text className="text-[17px] font-bold leading-[21px] text-ink-900">
+          <Text className="text-lg font-bold leading-[21px] text-ink-900">
             Your language, <Text className="text-brand-600">your experience</Text>
           </Text>
-          <Text className="mt-1.5 text-[12.5px] leading-[18px] text-ink-500">
+          <Text className="mt-1.5 text-sm leading-[18px] text-ink-500">
             We&apos;re working hard to bring Cheeku AI to more languages.
           </Text>
         </Panel>
       </View>
 
       <View className="mt-5 px-5">
-        <Text className="text-[15px] font-semibold text-ink-700">
+        <Text className="text-base font-semibold text-ink-700">
           Available now
         </Text>
         {/* `alignSelf: stretch` because PopIn's animated wrapper otherwise
@@ -54,11 +54,11 @@ export default function Language() {
             style={{ borderWidth: 2, borderColor: brand[500] }}
           >
             <View className="h-9 w-9 items-center justify-center rounded-pill bg-surface">
-              <Text className="text-[12px] font-bold text-brand-600">EN</Text>
+              <Text className="text-xs font-bold text-brand-600">EN</Text>
             </View>
             <View className="min-w-0 flex-1">
-              <Text className="text-[14px] font-semibold text-ink-900">English</Text>
-              <Text className="text-[12px] font-medium text-brand-600">Default language</Text>
+              <Text className="text-base font-semibold text-ink-900">English</Text>
+              <Text className="text-xs font-medium text-brand-600">Default language</Text>
             </View>
             <View className="h-6 w-6 items-center justify-center rounded-pill bg-brand-600">
               <Check size={14} color="#fff" />
@@ -68,7 +68,7 @@ export default function Language() {
       </View>
 
       <View className="mt-5 px-5">
-        <Text className="text-[15px] font-semibold text-ink-700">
+        <Text className="text-base font-semibold text-ink-700">
           Coming soon
         </Text>
         <View className="mt-2 overflow-hidden rounded-card bg-surface" style={shadow.e1}>
@@ -82,16 +82,16 @@ export default function Language() {
                 }}
               >
                 <View className="h-9 w-9 items-center justify-center rounded-pill bg-brand-50">
-                  <Text className="text-[13px] font-semibold text-brand-600">
+                  <Text className="text-sm font-semibold text-brand-600">
                     {native.charAt(0)}
                   </Text>
                 </View>
                 <View className="min-w-0 flex-1">
-                  <Text className="text-[14px] font-semibold text-ink-900">{native}</Text>
-                  <Text className="text-[12px] text-ink-500">{name}</Text>
+                  <Text className="text-base font-semibold text-ink-900">{native}</Text>
+                  <Text className="text-xs text-ink-500">{name}</Text>
                 </View>
                 <View className="rounded-pill bg-brand-50 px-2.5 py-1">
-                  <Text className="text-[11px] font-semibold text-brand-600">Coming soon</Text>
+                  <Text className="text-2xs font-semibold text-brand-600">Coming soon</Text>
                 </View>
               </View>
             </StaggerItem>
@@ -101,7 +101,7 @@ export default function Language() {
 
       <View className="mx-5 mt-4 flex-row items-start gap-2 rounded-card bg-brand-50 px-3.5 py-3">
         <Globe size={15} color={brand[500]} style={{ marginTop: 1 }} />
-        <Text className="flex-1 text-[12px] leading-[17px] text-ink-500">
+        <Text className="flex-1 text-xs leading-[17px] text-ink-500">
           We&apos;re constantly adding more languages to make Cheeku AI accessible for everyone.
         </Text>
       </View>

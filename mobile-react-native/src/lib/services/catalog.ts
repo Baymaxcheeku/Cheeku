@@ -1,3 +1,4 @@
+import { brand, hue, lilac, surface } from "@/theme/tokens";
 /*
  * EVERYTHING CHEEKU CAN BOOK, IN ONE PLACE.
  *
@@ -92,7 +93,7 @@ export const SERVICES: readonly Service[] = [
     status: "live",
     route: "/services/doctors",
     icon: "Stethoscope",
-    tint: { from: "#ece6ff", to: "#f6f3ff", fg: "#4a2ade" },
+    tint: { from: lilac.base, to: lilac.mist, fg: brand[600] },
     offerings: [],
     steps: ["Tell Cheeku what's going on", "A note for the doctor", "Pick a doctor and a slot"],
     keywords: ["doctor", "consult", "specialist", "appointment", "physician"],
@@ -107,7 +108,7 @@ export const SERVICES: readonly Service[] = [
     status: "live",
     route: "/labs",
     icon: "FlaskConical",
-    tint: { from: "#dcecff", to: "#eef6ff", fg: "#1a6fc2" },
+    tint: { from: hue.blue.bg, to: hue.blue.wash, fg: hue.blue.fg },
     offerings: [],
     steps: ["Pick tests", "Pick a lab and slot", "Result filed in memory"],
     keywords: ["lab", "test", "blood test", "diagnostic", "scan", "xray", "x-ray", "ultrasound", "mri", "ct"],
@@ -121,7 +122,7 @@ export const SERVICES: readonly Service[] = [
     network: "pharmacy",
     status: "live",
     icon: "Pill",
-    tint: { from: "#ffe3d3", to: "#fff1e9", fg: "#c2650b" },
+    tint: { from: hue.orange.bg, to: hue.orange.wash, fg: hue.orange.fg },
     offerings: [
       { id: "rx", title: "Order from a prescription", line: "Pick one from your records, or upload a new one", modes: ["home"] },
       { id: "refill", title: "Refill current medicines", line: "The ones Cheeku already knows you take", modes: ["home"] },
@@ -139,7 +140,7 @@ export const SERVICES: readonly Service[] = [
     network: "insurance",
     status: "locked",
     icon: "ShieldCheck",
-    tint: { from: "#e6f0ff", to: "#f2f7ff", fg: "#2b5fb8" },
+    tint: { from: hue.blue.wash, to: surface.tint, fg: "#2b5fb8" },
     offerings: [],
     steps: ["Tell us who to cover", "Compare plans", "Buy and keep the policy on file"],
     keywords: ["insurance", "policy", "cover", "floater", "claim"],
@@ -153,7 +154,7 @@ export const SERVICES: readonly Service[] = [
     network: "specialised",
     status: "live",
     icon: "WellbeingIcon",
-    tint: { from: "#e9e4ff", to: "#f5f2ff", fg: "#5b3fd4" },
+    tint: { from: lilac.base, to: lilac.mist, fg: brand[600] },
     offerings: [
       { id: "therapy", title: "Talk to a psychologist", line: "Stress, anxiety, low mood, relationships", modes: ["online", "centre"], specialty: "psych" },
       { id: "psychiatry", title: "See a psychiatrist", line: "Sleep, mood, when medicines may help", modes: ["online", "centre"], specialty: "psychiatry" },
@@ -174,7 +175,7 @@ export const SERVICES: readonly Service[] = [
     network: "specialised",
     status: "live",
     icon: "Smile",
-    tint: { from: "#e0f2ff", to: "#f0f8ff", fg: "#1f6fae" },
+    tint: { from: hue.blue.wash, to: hue.blue.wash, fg: hue.blue.fg },
     offerings: [
       { id: "consult", title: "See a dentist", line: "Pain, sensitivity, a check-up", modes: ["centre"], specialty: "dental" },
       { id: "cleaning", title: "Teeth cleaning", line: "Scaling and polishing", modes: ["centre"] },
@@ -192,7 +193,7 @@ export const SERVICES: readonly Service[] = [
     network: "specialised",
     status: "live",
     icon: "Eye",
-    tint: { from: "#e4f0ff", to: "#f2f8ff", fg: "#2563b8" },
+    tint: { from: hue.blue.wash, to: surface.canvas, fg: hue.blue.fg },
     offerings: [
       { id: "test", title: "Eye test", line: "Vision check, power for glasses", modes: ["home", "centre"] },
       { id: "specialist", title: "See an eye specialist", line: "Redness, pain, blurry vision", modes: ["online", "centre"], specialty: "eye" },
@@ -210,7 +211,7 @@ export const SERVICES: readonly Service[] = [
     network: "specialised",
     status: "live",
     icon: "Activity",
-    tint: { from: "#e8ebff", to: "#f3f5ff", fg: "#3f4fd9" },
+    tint: { from: brand[50], to: surface.tint, fg: brand[500] },
     offerings: [
       { id: "pain", title: "Back, neck or joint pain", line: "Assessment and a plan", modes: ["home", "centre"] },
       { id: "rehab", title: "After an injury or surgery", line: "Get moving again, safely", modes: ["home", "centre"] },
@@ -228,7 +229,7 @@ export const SERVICES: readonly Service[] = [
     network: "specialised",
     status: "live",
     icon: "HeartHandshake",
-    tint: { from: "#ffe4ef", to: "#fff1f6", fg: "#b8326b" },
+    tint: { from: hue.plum.bg, to: hue.rose.bg, fg: hue.rose.fg },
     offerings: [
       { id: "nurse", title: "Nurse visit", line: "Injections, dressings, IV, catheter care", modes: ["home"] },
       { id: "elder", title: "Elder care at home", line: "Daily help, by the shift", modes: ["home"] },
@@ -247,7 +248,7 @@ export const SERVICES: readonly Service[] = [
     network: "specialised",
     status: "live",
     icon: "Ambulance",
-    tint: { from: "#eceff6", to: "#f6f7fb", fg: "#334a6b" },
+    tint: { from: hue.slate.bg, to: surface.canvas, fg: "#334a6b" },
     offerings: [
       { id: "emergency", title: "Emergency ambulance", line: "Call 108 now. Don't book.", modes: ["home"], call: "108" },
       { id: "transfer", title: "Planned hospital transfer", line: "Between hospitals, or for a scheduled admission", modes: ["home"] },
@@ -266,7 +267,7 @@ export const SERVICES: readonly Service[] = [
     network: "wellness",
     status: "soon",
     icon: "Dumbbell",
-    tint: { from: "#dfe6ff", to: "#f0f3ff", fg: "#3f5bd9" },
+    tint: { from: lilac.base, to: surface.tint, fg: "#3f5bd9" },
     offerings: [],
     steps: [],
     keywords: ["fitness", "yoga", "gym", "trainer", "workout", "pilates", "zumba"],

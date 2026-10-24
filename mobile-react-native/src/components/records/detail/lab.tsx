@@ -63,16 +63,16 @@ export function LabBody({ record, details }: { record: RecordDetail; details: La
     <View>
       {/* How it reads, with the gauge. */}
       <Card style={{ marginTop: 12 }}>
-        <Text style={{ fontFamily: font.semibold, fontSize: 16, color: ink[900] }}>How this report reads</Text>
+        <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>How this report reads</Text>
         <View style={{ flexDirection: "row", alignItems: "stretch", gap: 12, marginTop: 8 }}>
           <View style={{ flex: 1, alignSelf: "center" }}>
             <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-              <View style={{ width: 24, height: 24, borderRadius: 12, backgroundColor: tint.bg, alignItems: "center", justifyContent: "center" }}>
+              <View style={{ width: 24, height: 24, borderRadius: 999, backgroundColor: tint.bg, alignItems: "center", justifyContent: "center" }}>
                 <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: tint.dot }} />
               </View>
-              <Text style={{ fontFamily: font.bold, fontSize: 18, color: ink[900] }}>{SEVERITY_LABEL[record.severity]}</Text>
+              <Text style={{ fontFamily: font.bold, fontSize: 17, color: ink[900] }}>{SEVERITY_LABEL[record.severity]}</Text>
             </View>
-            <Text style={{ fontFamily: font.regular, fontSize: 12.5, lineHeight: 18, color: ink[500], marginTop: 6 }}>{SEVERITY_BLURB[record.severity]}</Text>
+            <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[500], marginTop: 6 }}>{SEVERITY_BLURB[record.severity]}</Text>
           </View>
           <View style={{ width: 132, alignItems: "center", justifyContent: "center", paddingLeft: 12, borderLeftWidth: 1, borderLeftColor: surface.line }}>
             <HealthGauge severity={record.severity} />
@@ -89,7 +89,7 @@ export function LabBody({ record, details }: { record: RecordDetail; details: La
       </Card>
 
       {groups.map((g) => (
-        <Section key={g.name} title={g.name} right={g === groups[0] && flagged ? <Text style={{ fontFamily: font.semibold, fontSize: 12.5, color: semantic.dangerText }}>{flagged} flagged</Text> : undefined}>
+        <Section key={g.name} title={g.name} right={g === groups[0] && flagged ? <Text style={{ fontFamily: font.semibold, fontSize: 13, color: semantic.dangerText }}>{flagged} flagged</Text> : undefined}>
           <Card padded={false}>
             {g.items.map((e, i) => (
               <View key={e.id} style={{ borderTopWidth: i ? 1 : 0, borderTopColor: surface.line }}>
@@ -102,7 +102,7 @@ export function LabBody({ record, details }: { record: RecordDetail; details: La
 
       {measured.length === 0 ? (
         <Card style={{ marginTop: 12 }}>
-          <Text style={{ fontFamily: font.regular, fontSize: 14, lineHeight: 20, color: ink[700] }}>
+          <Text style={{ fontFamily: font.regular, fontSize: 15, lineHeight: 20, color: ink[700] }}>
             No values were read from this report yet. The original page below has everything the lab printed.
           </Text>
         </Card>
@@ -137,8 +137,8 @@ export function LabBody({ record, details }: { record: RecordDetail; details: La
 function Tally({ n, label, tone = ink[900] }: { n: number; label: string; tone?: string }) {
   return (
     <View style={{ flex: 1, paddingVertical: 10, paddingHorizontal: 12, borderRadius: 16, backgroundColor: "rgba(15,16,48,0.035)" }}>
-      <Text style={{ fontFamily: font.bold, fontSize: 18, color: tone }}>{n}</Text>
-      <Text style={{ fontFamily: font.regular, fontSize: 11.5, color: ink[500] }}>{label}</Text>
+      <Text style={{ fontFamily: font.bold, fontSize: 17, color: tone }}>{n}</Text>
+      <Text style={{ fontFamily: font.regular, fontSize: 12, color: ink[500] }}>{label}</Text>
     </View>
   );
 }
@@ -161,7 +161,7 @@ function ValueRow({ entity, previous }: { entity: RecordEntity; previous?: { val
         </View>
         {flag && tint ? (
           <View style={{ paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999, backgroundColor: tint.bg }}>
-            <Text style={{ fontFamily: font.semibold, fontSize: 11.5, color: tint.fg }}>{FLAG_LABEL[flag]}</Text>
+            <Text style={{ fontFamily: font.semibold, fontSize: 12, color: tint.fg }}>{FLAG_LABEL[flag]}</Text>
           </View>
         ) : null}
       </View>
@@ -181,7 +181,7 @@ function ValueRow({ entity, previous }: { entity: RecordEntity; previous?: { val
               marginLeft: -7,
               width: 14,
               height: 14,
-              borderRadius: 7,
+              borderRadius: 999,
               backgroundColor: tint?.dot ?? brand[600],
               borderWidth: 2.5,
               borderColor: "#fff",
@@ -194,13 +194,13 @@ function ValueRow({ entity, previous }: { entity: RecordEntity; previous?: { val
           </View>
         </View>
       ) : entity.refRange ? (
-        <Text style={{ fontFamily: font.regular, fontSize: 11.5, color: ink[300], marginTop: 4 }}>Range {entity.refRange}</Text>
+        <Text style={{ fontFamily: font.regular, fontSize: 12, color: ink[300], marginTop: 4 }}>Range {entity.refRange}</Text>
       ) : null}
 
       {change && previous ? (
         <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginTop: 10 }}>
           {change.direction === "up" ? <TrendingUp size={14} color={ink[500]} /> : change.direction === "down" ? <TrendingDown size={14} color={ink[500]} /> : <FlaskConical size={14} color={ink[500]} />}
-          <Text style={{ fontFamily: font.regular, fontSize: 12.5, color: ink[500] }}>
+          <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[500] }}>
             {change.direction === "same"
               ? `Same as ${previous.eventDate ? shortDate(previous.eventDate) : "last time"}`
               : `${change.direction === "up" ? "Up" : "Down"} ${Math.abs(change.delta)} from ${previous.value}${previous.eventDate ? ` on ${shortDate(previous.eventDate)}` : ""}`}

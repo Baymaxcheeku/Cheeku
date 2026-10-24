@@ -1,7 +1,7 @@
 import { Children, Fragment, isValidElement, type ReactNode } from "react";
 import { Text, type TextStyle } from "react-native";
 
-import { brand } from "@/theme/tokens";
+import { brand, lilac } from "@/theme/tokens";
 import { font } from "@/theme/type";
 
 /*
@@ -19,7 +19,7 @@ import { font } from "@/theme/type";
  * `onDark` swaps to a light violet for text on the ink and violet buttons,
  * where brand violet would vanish.
  */
-export const BRAND_ON_DARK = "#d4ccff";
+export const BRAND_ON_DARK = lilac.deep;
 
 export function Brand({ ai = false, onDark = false, size, style }: { ai?: boolean; onDark?: boolean; size?: number; style?: TextStyle }) {
   return (

@@ -12,8 +12,9 @@ import { useReducedMotion } from "@/components/ui/motion";
 import { Backdrop, PageTitle, PillButton, ScreenHeader } from "@/components/ui/screen";
 import { isUpcoming, startsAt, useAppointmentList } from "@/lib/booking/appointments";
 import { useLabBookings } from "@/lib/labs/queries";
-import { ink } from "@/theme/tokens";
+import { hue, ink } from "@/theme/tokens";
 import { font } from "@/theme/type";
+import { Tap } from "@/components/ui/tap";
 
 /*
  * Appointments — every booking, upcoming first.
@@ -58,10 +59,10 @@ export default function Appointments() {
         <Pressable
           accessibilityRole="button"
           onPress={() => router.push("/labs/bookings")}
-          style={({ pressed }) => [glassShadow, { marginTop: 14, flexDirection: "row", alignItems: "center", gap: 12, padding: 14, borderRadius: 22, backgroundColor: pressed ? "#fff" : glass.fillStrong, borderWidth: 1, borderColor: glass.rim }]}
+          style={({ pressed }) => [glassShadow, { marginTop: 14, flexDirection: "row", alignItems: "center", gap: 12, padding: 14, borderRadius: 24, backgroundColor: pressed ? "#fff" : glass.fillStrong, borderWidth: 1, borderColor: glass.rim }]}
         >
-          <View style={{ width: 38, height: 38, borderRadius: 12, backgroundColor: "#dcecff", alignItems: "center", justifyContent: "center" }}>
-            <FlaskConical size={18} color="#1a6fc2" />
+          <View style={{ width: 38, height: 38, borderRadius: 12, backgroundColor: hue.blue.bg, alignItems: "center", justifyContent: "center" }}>
+            <FlaskConical size={18} color={hue.blue.fg} />
           </View>
           <Text style={{ flex: 1, fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>
             Lab tests at home{labsOpen ? ` · ${labsOpen} in progress` : ""}
@@ -78,7 +79,7 @@ export default function Appointments() {
           ).map(([k, label]) => {
             const on = tab === k;
             return (
-              <Pressable
+              <Tap
                 key={k}
                 accessibilityRole="tab"
                 accessibilityState={{ selected: on }}
@@ -96,8 +97,8 @@ export default function Appointments() {
                   },
                 ]}
               >
-                <Text style={{ fontFamily: on ? font.semibold : font.medium, fontSize: 14, color: on ? "#fff" : ink[700] }}>{label}</Text>
-              </Pressable>
+                <Text style={{ fontFamily: on ? font.semibold : font.medium, fontSize: 15, color: on ? "#fff" : ink[700] }}>{label}</Text>
+              </Tap>
             );
           })}
         </View>
@@ -111,12 +112,12 @@ export default function Appointments() {
         </View>
 
         {loaded && list.length === 0 ? (
-          <Glass strong className="mt-2 items-center rounded-[28px] px-6 py-8">
+          <Glass strong className="mt-2 items-center rounded-2xl px-6 py-8">
             <MascotFigure size={84} moment="shrug" move="float" hop />
-            <Text style={{ fontFamily: font.semibold, fontSize: 18, color: ink[900], marginTop: 10, textAlign: "center" }}>
+            <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900], marginTop: 10, textAlign: "center" }}>
               {tab === "upcoming" ? "Nothing booked yet" : "No past appointments"}
             </Text>
-            <Text style={{ fontFamily: font.regular, fontSize: 14, lineHeight: 20, color: ink[500], marginTop: 4, textAlign: "center" }}>
+            <Text style={{ fontFamily: font.regular, fontSize: 15, lineHeight: 20, color: ink[500], marginTop: 4, textAlign: "center" }}>
               {tab === "upcoming"
                 ? "Tell me what's bothering you and I'll help you find a doctor, online or nearby."
                 : "Appointments you've had will show up here."}

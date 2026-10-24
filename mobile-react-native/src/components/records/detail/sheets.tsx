@@ -46,10 +46,10 @@ export function OptionsSheet({
   const sheetMax80 = useSheetMax(0.80);
   return (
     <Sheet open={open} onClose={onClose} label="Close" dismissible={!busyKey}>
-      <View style={{ maxHeight: sheetMax80, borderTopLeftRadius: 28, borderTopRightRadius: 28, backgroundColor: surface.canvas, paddingTop: 10, paddingBottom: insets.bottom + 12 }}>
+      <View style={{ maxHeight: sheetMax80, borderTopLeftRadius: 32, borderTopRightRadius: 32, backgroundColor: surface.canvas, paddingTop: 10, paddingBottom: insets.bottom + 12 }}>
         <View style={{ paddingHorizontal: 20, paddingTop: 14 }}>
-          <Text style={{ fontFamily: font.bold, fontSize: 19, color: ink[900] }}>{title}</Text>
-          {body ? <Text style={{ fontFamily: font.regular, fontSize: 13.5, lineHeight: 19, color: ink[700], marginTop: 6 }}>{body}</Text> : null}
+          <Text style={{ fontFamily: font.bold, fontSize: 20, color: ink[900] }}>{title}</Text>
+          {body ? <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 19, color: ink[700], marginTop: 6 }}>{body}</Text> : null}
           {error ? (
             <Text accessibilityRole="alert" style={{ fontFamily: font.medium, fontSize: 13, color: semantic.dangerText, marginTop: 8 }}>
               {error}
@@ -74,19 +74,19 @@ export function OptionsSheet({
                   minHeight: 56,
                   paddingHorizontal: 10,
                   paddingVertical: 8,
-                  borderRadius: 18,
+                  borderRadius: 16,
                   backgroundColor: o.selected ? brand[50] : pressed ? "rgba(15,16,48,0.04)" : "transparent",
                   opacity: o.disabled ? 0.45 : 1,
                 })}
               >
                 {o.leading ?? (o.icon ? (
-                  <View style={{ width: 40, height: 40, borderRadius: 13, backgroundColor: o.destructive ? semantic.dangerBg : `${o.tint ?? brand[600]}14`, alignItems: "center", justifyContent: "center" }}>
+                  <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: o.destructive ? semantic.dangerBg : `${o.tint ?? brand[600]}14`, alignItems: "center", justifyContent: "center" }}>
                     <o.icon size={18} color={o.destructive ? semantic.dangerText : (o.tint ?? brand[600])} />
                   </View>
                 ) : null)}
                 <View style={{ flex: 1 }}>
                   <Text style={{ fontFamily: font.semibold, fontSize: 15, color }}>{o.label}</Text>
-                  {o.sub ? <Text style={{ fontFamily: font.regular, fontSize: 12.5, color: ink[500], marginTop: 1 }}>{o.sub}</Text> : null}
+                  {o.sub ? <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 1 }}>{o.sub}</Text> : null}
                 </View>
                 {busy ? <ActivityIndicator color={brand[600]} /> : o.selected ? <Check size={18} color={brand[600]} strokeWidth={2.6} /> : null}
               </Pressable>

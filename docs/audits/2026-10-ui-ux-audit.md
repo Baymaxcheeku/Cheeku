@@ -21,9 +21,13 @@ called out where they matter.
   and Today. The blur item is withdrawn: nothing scrolls under the tab bar, so
   there was nothing to blur. Found on the way: the batch 1 keyframe entrances
   left views collapsed on web; replaced with `<Enter>`. Needs a phone check.
-- Batch 3 (type, radius, colour scales, one primary, the remaining 250 or so
-  raw `Pressable`s onto `<Tap>`) and batch 4 (Today) are open in the launch
-  tracker.
+- **Batch 3 (design system): built, 24 Oct.** 939 font sizes onto ten
+  steps, 372 radii onto five plus a pill, 390 colour literals onto tokens
+  (new `hue` and `lilac` families), one primary (brand; ink now means
+  selected), 186 more pressables onto `<Tap>` (241 in all; the 62 left have
+  their own press state or are backdrops), and an ESLint guard. 54 raw hex
+  colours remain as warnings. Needs a phone check.
+- Batch 4 (Today) is open in the launch tracker.
 
 ## Verdict
 

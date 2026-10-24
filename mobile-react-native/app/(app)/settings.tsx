@@ -59,7 +59,7 @@ import {
 } from "@/lib/profiles/context";
 import { listProfileRecords, statsFrom } from "@/lib/records/queries";
 import { refreshRoster } from "@/lib/profiles/family";
-import { brand, ink, semantic, shadow, surface } from "@/theme/tokens";
+import { brand, hue, ink, lilac, semantic, shadow, surface } from "@/theme/tokens";
 import { Brand, brandify } from "@/components/ui/brand";
 import { feel } from "@/lib/feel";
 
@@ -124,7 +124,7 @@ export default function Settings() {
   if (!data?.profile) {
     return (
       <View className="flex-1 items-center justify-center bg-canvas px-10">
-        <Text className="text-center text-[15px] text-ink-500">Set up a profile first.</Text>
+        <Text className="text-center text-base text-ink-500">Set up a profile first.</Text>
       </View>
     );
   }
@@ -158,12 +158,12 @@ export default function Settings() {
        */}
       <View className="mx-5 mt-4">
         <CheekuPeek size={80} moment="idle" style={{ position: "absolute", right: 22, top: -44 }} />
-      <View className="overflow-hidden rounded-[30px] p-4" style={glassShadow}>
-        <Gradient from="#ffffff" to="#efeaff" glow="#ffffff" />
+      <View className="overflow-hidden rounded-2xl p-4" style={glassShadow}>
+        <Gradient from="#ffffff" to={lilac.base} glow="#ffffff" />
         <View className="flex-row items-center gap-3.5">
           <Avatar svg={profile.avatar} photo={profile.photo} image={profile.avatarImage} background={profile.avatarBackground ?? undefined} size={68} />
           <View className="min-w-0 flex-1">
-            <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 21, letterSpacing: -0.4, color: ink[900] }}>
+            <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 20, letterSpacing: -0.4, color: ink[900] }}>
               {profile.name}
             </Text>
             <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 2 }}>
@@ -186,7 +186,7 @@ export default function Settings() {
               gap: 12,
               padding: 10,
               paddingRight: 14,
-              borderRadius: 20,
+              borderRadius: 24,
               backgroundColor: glass.fillStrong,
               borderWidth: 1,
               borderColor: glass.rim,
@@ -194,18 +194,18 @@ export default function Settings() {
           ]}
           scale={0.98}
         >
-          <View className="h-10 w-10 items-center justify-center rounded-pill" style={{ backgroundColor: ink[900] }}>
+          <View className="h-10 w-10 items-center justify-center rounded-pill" style={{ backgroundColor: brand[600] }}>
             <Crown size={17} color="#fff" />
           </View>
           <View className="min-w-0 flex-1">
-            <Text style={{ fontFamily: font.semibold, fontSize: 14.5, color: ink[900] }}>{plan.name}</Text>
-            <Text style={{ fontFamily: font.regular, fontSize: 12.5, color: ink[500] }}>
+            <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{plan.name}</Text>
+            <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[500] }}>
               {entitlement.chatsRemaining === null
                 ? "Unlimited Ask Cheeku"
                 : `${entitlement.chatsRemaining} of ${entitlement.limit} chats left today`}
             </Text>
           </View>
-          <Text style={{ fontFamily: font.semibold, fontSize: 13.5, color: brand[600] }}>{canUpgrade ? "Upgrade" : "Manage"}</Text>
+          <Text style={{ fontFamily: font.semibold, fontSize: 13, color: brand[600] }}>{canUpgrade ? "Upgrade" : "Manage"}</Text>
           <ChevronRight size={15} color={brand[600]} />
         </Tap>
       </View>
@@ -213,8 +213,8 @@ export default function Settings() {
 
       {/* Your care: the two places people come back to, as tiles. */}
       <View className="mx-5 mt-4 flex-row gap-3">
-        <CareTile icon={CalendarDays} title="Appointments" line="Visits and video calls" tint="#ece6ff" fg={brand[600]} href="/appointments" />
-        <CareTile icon={FolderHeart} title="Health file" line="Everything filed" tint="#dcecff" fg="#1a6fc2" href="/health-file" />
+        <CareTile icon={CalendarDays} title="Appointments" line="Visits and video calls" tint={lilac.base} fg={brand[600]} href="/appointments" />
+        <CareTile icon={FolderHeart} title="Health file" line="Everything filed" tint={hue.blue.bg} fg={hue.blue.fg} href="/health-file" />
       </View>
 
       {/*
@@ -258,17 +258,17 @@ export default function Settings() {
 
       <AccountData onDeleted={signOut} />
 
-      <Glass strong className="mx-5 mt-6 overflow-hidden rounded-[26px]">
-        <Pressable
+      <Glass strong className="mx-5 mt-6 overflow-hidden rounded-xl">
+        <Tap
           accessibilityRole="button"
           onPress={() => setSignOutOpen(true)}
           className="flex-row items-center gap-3.5 px-4 py-3.5"
         >
-          <View className="h-10 w-10 items-center justify-center rounded-[13px]" style={{ backgroundColor: "#f4f4f8" }}>
+          <View className="h-10 w-10 items-center justify-center rounded-md" style={{ backgroundColor: surface.canvas }}>
             <LogOut size={18} color={ink[500]} />
           </View>
           <Text style={{ flex: 1, fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>Sign out</Text>
-        </Pressable>
+        </Tap>
       </Glass>
 
       {/*
@@ -300,7 +300,7 @@ export default function Settings() {
 
       <View className="mx-5 mt-6 flex-row items-start gap-2">
         <ShieldCheck size={14} color={ink[300]} style={{ marginTop: 2 }} />
-        <Text className="flex-1 text-[11.5px] leading-[17px] text-ink-300">
+        <Text className="flex-1 text-xs leading-[17px] text-ink-300">
           <Brand /> never sells your data or uses it for ads. It gives helpful
           information, not medical advice.
         </Text>
@@ -356,7 +356,7 @@ function FamilySection({
             alignItems: "center",
             gap: 12,
             padding: 14,
-            borderRadius: 26,
+            borderRadius: 24,
             backgroundColor: pressed ? "#ffffff" : glass.fillStrong,
             borderWidth: 1,
             borderColor: glass.rim,
@@ -370,7 +370,7 @@ function FamilySection({
             </View>
           ))}
           {!canAdd ? (
-            <View style={{ marginLeft: -10, width: 38, height: 38, borderRadius: 19, borderWidth: 2, borderColor: "#fff", backgroundColor: brand[600], alignItems: "center", justifyContent: "center" }}>
+            <View style={{ marginLeft: -10, width: 38, height: 38, borderRadius: 999, borderWidth: 2, borderColor: "#fff", backgroundColor: brand[600], alignItems: "center", justifyContent: "center" }}>
               <UserPlus size={15} color="#fff" />
             </View>
           ) : null}
@@ -379,7 +379,7 @@ function FamilySection({
           <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>
             {canAdd ? (active ? `Viewing ${active.name.split(" ")[0]}` : "Your family") : "Add your family"}
           </Text>
-          <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 12.5, color: ink[500], marginTop: 1 }}>
+          <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 1 }}>
             {canAdd
               ? `${reachable.length} of ${seats} seats used`
               : paused > 0
@@ -441,11 +441,11 @@ function AccountData({ onDeleted }: { onDeleted: () => void }) {
   return (
     <>
       <View className="mt-6">
-        <Text className="px-5 text-[12px] font-bold uppercase tracking-wide text-ink-300">
+        <Text className="px-5 text-xs font-bold uppercase tracking-wide text-ink-300">
           Your data
         </Text>
         <View className="mx-5 mt-2 overflow-hidden rounded-card bg-surface" style={shadow.e1}>
-          <Pressable
+          <Tap
             accessibilityRole="button"
             disabled={busy !== null}
             onPress={() => void runExport()}
@@ -459,15 +459,15 @@ function AccountData({ onDeleted }: { onDeleted: () => void }) {
               )}
             </View>
             <View className="min-w-0 flex-1">
-              <Text className="text-[14.5px] font-semibold text-ink-900">Export my data</Text>
-              <Text className="text-[11.5px] text-ink-500">
+              <Text className="text-base font-semibold text-ink-900">Export my data</Text>
+              <Text className="text-xs text-ink-500">
                 Everything <Brand /> holds, as a JSON file
               </Text>
             </View>
             <ChevronRight size={17} color={ink[300]} />
-          </Pressable>
+          </Tap>
 
-          <Pressable
+          <Tap
             accessibilityRole="button"
             disabled={busy !== null}
             onPress={() => {
@@ -485,19 +485,19 @@ function AccountData({ onDeleted }: { onDeleted: () => void }) {
               <Trash2 size={17} color={semantic.danger} />
             </View>
             <View className="min-w-0 flex-1">
-              <Text className="text-[14.5px] font-semibold" style={{ color: semantic.dangerText }}>
+              <Text className="text-base font-semibold" style={{ color: semantic.dangerText }}>
                 Delete my account
               </Text>
-              <Text className="text-[11.5px] text-ink-500">
+              <Text className="text-xs text-ink-500">
                 Removes every record and file. Permanent
               </Text>
             </View>
             <ChevronRight size={17} color={ink[300]} />
-          </Pressable>
+          </Tap>
         </View>
 
         {message ? (
-          <Text accessibilityRole="alert" className="mx-5 mt-2 text-[12.5px] font-medium text-danger-text">
+          <Text accessibilityRole="alert" className="mx-5 mt-2 text-sm font-medium text-danger-text">
             {message}
           </Text>
         ) : null}
@@ -508,16 +508,16 @@ function AccountData({ onDeleted }: { onDeleted: () => void }) {
           className="rounded-t-sheet bg-canvas px-5 pt-4"
           style={{ paddingBottom: insets.bottom + 16 }}
         >
-          <Text className="text-[19px] font-bold text-ink-900">Delete your account?</Text>
-          <Text className="mt-2 text-[13px] leading-[19px] text-ink-700">
+          <Text className="text-xl font-bold text-ink-900">Delete your account?</Text>
+          <Text className="mt-2 text-sm leading-[19px] text-ink-700">
             Every document, lab value, conversation and file is removed permanently, and so is your
             sign-in. This cannot be undone, and <Brand /> keeps no copy to restore from.
           </Text>
-          <Text className="mt-3 text-[12.5px] text-ink-500">
+          <Text className="mt-3 text-sm text-ink-500">
             Export your data first if you want to keep it.
           </Text>
 
-          <Text className="mt-4 text-[13px] font-medium text-ink-700">Type DELETE to confirm</Text>
+          <Text className="mt-4 text-sm font-medium text-ink-700">Type DELETE to confirm</Text>
           <TextInput
             value={confirmation}
             onChangeText={setConfirmation}
@@ -538,13 +538,13 @@ function AccountData({ onDeleted }: { onDeleted: () => void }) {
           />
 
           {message ? (
-            <Text accessibilityRole="alert" className="mt-2 text-[12.5px] font-medium text-danger-text">
+            <Text accessibilityRole="alert" className="mt-2 text-sm font-medium text-danger-text">
               {message}
             </Text>
           ) : null}
 
           <View className="mt-4 gap-2">
-            <Pressable
+            <Tap
               accessibilityRole="button"
               // Disabled until the word is right, so the destructive button
               // cannot be reached by a stray tap on a sheet that just appeared.
@@ -559,17 +559,17 @@ function AccountData({ onDeleted }: { onDeleted: () => void }) {
               {busy === "delete" ? (
                 <ActivityIndicator color="#ffffff" />
               ) : (
-                <Text className="text-[15px] font-bold text-white">Delete everything</Text>
+                <Text className="text-base font-bold text-white">Delete everything</Text>
               )}
-            </Pressable>
-            <Pressable
+            </Tap>
+            <Tap
               accessibilityRole="button"
               onPress={() => setConfirmOpen(false)}
               className="h-12 items-center justify-center rounded-pill bg-surface"
               style={{ borderWidth: 1, borderColor: surface.line }}
             >
-              <Text className="text-[15px] font-semibold text-ink-700">Keep my account</Text>
-            </Pressable>
+              <Text className="text-base font-semibold text-ink-700">Keep my account</Text>
+            </Tap>
           </View>
         </View>
       </Sheet>
@@ -581,7 +581,7 @@ function Group({ label, children }: { label: string; children: React.ReactNode }
   return (
     <View className="mt-6">
       <Text style={{ paddingHorizontal: 20, fontFamily: font.semibold, fontSize: 15, color: ink[700] }}>{label}</Text>
-      <Glass strong className="mx-5 mt-2.5 overflow-hidden rounded-[26px]">
+      <Glass strong className="mx-5 mt-2.5 overflow-hidden rounded-xl">
         {children}
       </Glass>
     </View>
@@ -601,24 +601,24 @@ function Row({
 }) {
   const router = useRouter();
   return (
-    <Pressable
+    <Tap
       accessibilityRole="button"
       accessibilityLabel={`${title}. ${body}`}
       onPress={() => router.push(href as never)}
       className="flex-row items-center gap-3.5 px-4 py-3.5"
       style={{ borderBottomWidth: 1, borderBottomColor: "rgba(15,16,48,0.05)" }}
     >
-      <View className="h-10 w-10 items-center justify-center rounded-[13px]" style={{ backgroundColor: brand[50] }}>
+      <View className="h-10 w-10 items-center justify-center rounded-md" style={{ backgroundColor: brand[50] }}>
         <Icon size={18} color={brand[600]} strokeWidth={1.9} />
       </View>
       <View className="min-w-0 flex-1">
         <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{brandify(title)}</Text>
-        <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 12.5, color: ink[500], marginTop: 1 }}>
+        <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 1 }}>
           {body}
         </Text>
       </View>
       <ChevronRight size={17} color={ink[300]} />
-    </Pressable>
+    </Tap>
   );
 }
 
@@ -646,13 +646,13 @@ function CareTile({
       onPress={() => router.push(href as never)}
       style={{ flex: 1 }}
     >
-      <View className="overflow-hidden rounded-[24px] p-3.5" style={glassShadow}>
+      <View className="overflow-hidden rounded-xl p-3.5" style={glassShadow}>
         <Gradient from={tint} to="#ffffff" />
-        <View className="h-11 w-11 items-center justify-center rounded-[14px] bg-white">
+        <View className="h-11 w-11 items-center justify-center rounded-lg bg-white">
           <Icon size={20} color={fg} strokeWidth={1.8} />
         </View>
-        <Text style={{ fontFamily: font.semibold, fontSize: 15.5, color: ink[900], marginTop: 12 }}>{title}</Text>
-        <Text style={{ fontFamily: font.regular, fontSize: 12.5, color: ink[500], marginTop: 1 }}>{line}</Text>
+        <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900], marginTop: 12 }}>{title}</Text>
+        <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 1 }}>{line}</Text>
       </View>
     </Tap>
   );

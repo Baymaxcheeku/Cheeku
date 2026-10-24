@@ -24,7 +24,7 @@ import type { BookedEvent } from "@/lib/memory/thread";
 import { fetchWaitlist } from "@/lib/notifications/queries";
 import { useJoinWaitlist } from "@/lib/notifications/waitlist";
 import { serviceById } from "@/lib/services/catalog";
-import { brand, ink, surface } from "@/theme/tokens";
+import { brand, ink, semantic, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
 
 /*
@@ -60,13 +60,13 @@ function ServiceLinkCard({ booking, onStart }: { booking: Booking; onStart?: (b:
   return (
     <Shell icon={Icon} eyebrow="Book a service" title={svc.title} sub={`For ${booking.forName} · ${svc.line.toLowerCase()}`}>
       {svc.urgent?.length ? (
-        <Text style={{ fontFamily: font.semibold, fontSize: 13, lineHeight: 18, color: "#c00a1c" }}>{svc.urgent[0]?.title} {svc.urgent[0]?.label}.</Text>
+        <Text style={{ fontFamily: font.semibold, fontSize: 13, lineHeight: 18, color: semantic.dangerText }}>{svc.urgent[0]?.title} {svc.urgent[0]?.label}.</Text>
       ) : null}
       <View style={{ gap: 6 }}>
         {offerings.map((o) => (
           <View key={o.id} style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
             <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: brand[400] }} />
-            <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 13.5, color: ink[700] }}>{o.title}</Text>
+            <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 13, color: ink[700] }}>{o.title}</Text>
           </View>
         ))}
       </View>
@@ -80,13 +80,13 @@ function Shell({ icon: Icon, eyebrow, title, sub, children }: { icon: AppIcon; e
   return (
     <View style={[glassShadow, { borderRadius: 24, backgroundColor: "#fff", borderWidth: 1, borderColor: glass.rim, overflow: "hidden" }]}>
       <View style={{ flexDirection: "row", alignItems: "center", gap: 12, padding: 14, backgroundColor: brand[50] }}>
-        <View style={{ width: 42, height: 42, borderRadius: 14, backgroundColor: "#fff", alignItems: "center", justifyContent: "center" }}>
+        <View style={{ width: 42, height: 42, borderRadius: 16, backgroundColor: "#fff", alignItems: "center", justifyContent: "center" }}>
           <Icon size={20} color={brand[600]} />
         </View>
         <View style={{ flex: 1, minWidth: 0 }}>
-          <Text style={{ fontFamily: font.semibold, fontSize: 10.5, letterSpacing: 0.9, textTransform: "uppercase", color: brand[600] }}>{eyebrow}</Text>
-          <Text numberOfLines={2} style={{ fontFamily: font.semibold, fontSize: 16, color: ink[900], marginTop: 1 }}>{title}</Text>
-          <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 12.5, color: ink[500], marginTop: 1 }}>{sub}</Text>
+          <Text style={{ fontFamily: font.semibold, fontSize: 11, letterSpacing: 0.9, textTransform: "uppercase", color: brand[600] }}>{eyebrow}</Text>
+          <Text numberOfLines={2} style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900], marginTop: 1 }}>{title}</Text>
+          <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 1 }}>{sub}</Text>
         </View>
       </View>
       <View style={{ padding: 14, gap: 12 }}>{children}</View>
@@ -100,12 +100,12 @@ function Steps({ items }: { items: string[] }) {
       {items.map((s, i) => (
         <View key={s} style={{ flex: 1, gap: 5 }}>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
-            <View style={{ width: 18, height: 18, borderRadius: 9, backgroundColor: brand[600], alignItems: "center", justifyContent: "center" }}>
+            <View style={{ width: 18, height: 18, borderRadius: 999, backgroundColor: brand[600], alignItems: "center", justifyContent: "center" }}>
               <Text style={{ fontFamily: font.semibold, fontSize: 10, color: "#fff" }}>{i + 1}</Text>
             </View>
             {i < items.length - 1 ? <View style={{ flex: 1, height: 2, borderRadius: 1, backgroundColor: brand[100] }} /> : null}
           </View>
-          <Text style={{ fontFamily: font.medium, fontSize: 11.5, lineHeight: 15, color: ink[700] }}>{s}</Text>
+          <Text style={{ fontFamily: font.medium, fontSize: 12, lineHeight: 15, color: ink[700] }}>{s}</Text>
         </View>
       ))}
     </View>
@@ -142,28 +142,28 @@ function LabCard({ booking, onStart }: { booking: Booking; onStart?: (b: Booking
             const price = catalog.data ? fromPrice(catalog.data.offers, pick.id) : null;
             return (
               <View key={pick.id} style={{ flexDirection: "row", alignItems: "flex-start", gap: 10 }}>
-                <View style={{ width: 20, height: 20, borderRadius: 10, backgroundColor: brand[50], alignItems: "center", justifyContent: "center", marginTop: 1 }}>
+                <View style={{ width: 20, height: 20, borderRadius: 999, backgroundColor: brand[50], alignItems: "center", justifyContent: "center", marginTop: 1 }}>
                   <Check size={11} color={brand[600]} strokeWidth={3} />
                 </View>
                 <View style={{ flex: 1 }}>
-                  <Text style={{ fontFamily: font.semibold, fontSize: 14, color: ink[900] }}>{test?.name ?? pick.label}</Text>
-                  {pick.because ? <Text style={{ fontFamily: font.regular, fontSize: 12.5, lineHeight: 17, color: ink[500], marginTop: 1 }}>{pick.because}</Text> : null}
+                  <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{test?.name ?? pick.label}</Text>
+                  {pick.because ? <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 17, color: ink[500], marginTop: 1 }}>{pick.because}</Text> : null}
                 </View>
-                {price !== null ? <Text style={{ fontFamily: font.semibold, fontSize: 12.5, color: ink[700] }}>from ₹{price}</Text> : null}
+                {price !== null ? <Text style={{ fontFamily: font.semibold, fontSize: 13, color: ink[700] }}>from ₹{price}</Text> : null}
               </View>
             );
           })}
         </View>
       ) : (
-        <Text style={{ fontFamily: font.regular, fontSize: 13.5, lineHeight: 19, color: ink[700] }}>
+        <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 19, color: ink[700] }}>
           Pick from the catalogue, or tell me the test name and I&apos;ll fill this in.
         </Text>
       )}
 
       {tests.length ? (
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 8, padding: 10, borderRadius: 14, backgroundColor: surface.tint }}>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 8, padding: 10, borderRadius: 16, backgroundColor: surface.tint }}>
           <Hourglass size={14} color={brand[600]} />
-          <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 12.5, lineHeight: 17, color: ink[700] }}>
+          <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 13, lineHeight: 17, color: ink[700] }}>
             {fasting >= 8 ? `Fast ${fasting} hours before: water is fine. Morning slots only.` : "No fasting needed."}
             {samples.length ? ` ${samples.join(" and ")} sample.` : ""}
           </Text>
@@ -181,7 +181,7 @@ function DoctorCard({ booking, onStart }: { booking: Booking; onStart?: (b: Book
   const how = booking.mode === "online" ? "video call" : booking.mode === "clinic" ? "at a clinic nearby" : "online or at a clinic";
   return (
     <Shell icon={Stethoscope} eyebrow="Pre-consultation" title={sp ? `See a ${sp.label.toLowerCase()}` : "See a doctor"} sub={`For ${booking.forName} · ${how}`}>
-      <Text style={{ fontFamily: font.regular, fontSize: 13.5, lineHeight: 19, color: ink[700] }}>
+      <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 19, color: ink[700] }}>
         A few quick questions, then a note the doctor reads before you meet, with {booking.forName}&apos;s readings and medicines attached.
       </Text>
       <Steps items={["A few questions", "Note for the doctor", "Pick a doctor and slot"]} />
@@ -207,10 +207,10 @@ function SoonCard({ booking }: { booking: Booking }) {
         accessibilityRole="button"
         disabled={on}
         onPress={join}
-        style={{ height: 46, borderRadius: 999, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, backgroundColor: on ? brand[50] : ink[900] }} scale={0.98}
+        style={{ height: 46, borderRadius: 999, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, backgroundColor: on ? brand[50] : brand[600] }} scale={0.98}
       >
         {on ? <Check size={16} color={brand[700]} /> : <BellRing size={16} color="#fff" />}
-        <Text style={{ fontFamily: font.semibold, fontSize: 14.5, color: on ? brand[700] : "#fff" }}>{on ? "You're on the list" : "Tell me when it's live"}</Text>
+        <Text style={{ fontFamily: font.semibold, fontSize: 15, color: on ? brand[700] : "#fff" }}>{on ? "You're on the list" : "Tell me when it's live"}</Text>
       </Tap>
     </Shell>
   );
@@ -224,27 +224,27 @@ export function BookedCard({ event, onOpen }: { event: BookedEvent; onOpen?: (ro
       accessibilityRole="button"
       disabled={!onOpen}
       onPress={() => onOpen?.(event.route)}
-      style={({ pressed }) => [glassShadow, { borderRadius: 22, backgroundColor: pressed ? brand[50] : "#fff", borderWidth: 1, borderColor: glass.rim, padding: 14, gap: 10 }]}
+      style={({ pressed }) => [glassShadow, { borderRadius: 24, backgroundColor: pressed ? brand[50] : "#fff", borderWidth: 1, borderColor: glass.rim, padding: 14, gap: 10 }]}
     >
       <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
-        <View style={{ width: 40, height: 40, borderRadius: 13, backgroundColor: brand[600], alignItems: "center", justifyContent: "center" }}>
+        <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: brand[600], alignItems: "center", justifyContent: "center" }}>
           <Icon size={18} color="#fff" />
         </View>
         <View style={{ flex: 1, minWidth: 0 }}>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
             <CalendarCheck2 size={12} color={brand[600]} />
-            <Text style={{ fontFamily: font.semibold, fontSize: 10.5, letterSpacing: 0.9, textTransform: "uppercase", color: brand[600] }}>Booked</Text>
+            <Text style={{ fontFamily: font.semibold, fontSize: 11, letterSpacing: 0.9, textTransform: "uppercase", color: brand[600] }}>Booked</Text>
           </View>
           <Text numberOfLines={2} style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900], marginTop: 1 }}>{event.title}</Text>
-          <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 12.5, color: ink[500], marginTop: 1 }}>{event.when} · {event.where}</Text>
+          <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 1 }}>{event.when} · {event.where}</Text>
         </View>
         {onOpen ? <ChevronRight size={18} color={ink[300]} /> : null}
       </View>
       {event.note?.length ? (
-        <View style={{ borderRadius: 14, backgroundColor: surface.tint, padding: 10, gap: 4 }}>
+        <View style={{ borderRadius: 16, backgroundColor: surface.tint, padding: 10, gap: 4 }}>
           <Text style={{ fontFamily: font.semibold, fontSize: 12, color: ink[900] }}>Note sent to the doctor</Text>
           {event.note.map((l) => (
-            <Text key={l} style={{ fontFamily: font.regular, fontSize: 12.5, lineHeight: 17, color: ink[700] }}>{l}</Text>
+            <Text key={l} style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 17, color: ink[700] }}>{l}</Text>
           ))}
         </View>
       ) : null}

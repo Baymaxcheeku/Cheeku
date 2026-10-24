@@ -1,7 +1,7 @@
 import { useRouter } from "expo-router";
 import { Building2, CalendarCheck2, Check, ClipboardCheck, Clock3, MapPin, MessageCircleHeart, MonitorPlay, Ticket } from "lucide-react-native";
 import { useEffect } from "react";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { ScrollView, Text, View } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -19,9 +19,10 @@ import { PillButton } from "@/components/ui/screen";
 import { SPECIALTIES, doctorById } from "@/lib/booking/catalog";
 import { useBookingDraft } from "@/lib/booking/draft";
 import { doctorFace } from "@/lib/booking/faces";
-import { brand, ink } from "@/theme/tokens";
+import { brand, ink, lilac, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
 import { feel } from "@/lib/feel";
+import { Tap } from "@/components/ui/tap";
 
 /*
  * Book a doctor — done.
@@ -63,9 +64,9 @@ export default function Confirmed() {
     return (
       <View className="flex-1 items-center justify-center bg-canvas px-8">
         <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>No booking to show</Text>
-        <Pressable onPress={home} className="mt-4">
+        <Tap onPress={home} className="mt-4">
           <Text style={{ fontFamily: font.semibold, fontSize: 15, color: brand[600] }}>Back to home</Text>
-        </Pressable>
+        </Tap>
       </View>
     );
   }
@@ -90,7 +91,7 @@ export default function Confirmed() {
   return (
     <View className="flex-1 bg-canvas">
       <View pointerEvents="none" style={{ position: "absolute", top: 0, left: 0, right: 0, height: 460 }}>
-        <Gradient from="#e6defe" to="#fafafe" angle="vertical" glow="#ffffff" />
+        <Gradient from={lilac.violet} to={surface.canvas} angle="vertical" glow="#ffffff" />
       </View>
 
       <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingTop: insets.top + 28, paddingBottom: 20 }} showsVerticalScrollIndicator={false}>
@@ -103,15 +104,15 @@ export default function Confirmed() {
           <Text style={{ fontFamily: font.semibold, fontSize: 28, letterSpacing: -0.8, color: ink[900], marginTop: 18, textAlign: "center" }}>
             You&apos;re booked{intake?.forName && intake.forName !== "Me" ? ` for ${intake.forName}` : ""}!
           </Text>
-          <Text style={{ fontFamily: font.regular, fontSize: 13.5, color: ink[500], marginTop: 4, textAlign: "center" }}>
+          <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 4, textAlign: "center" }}>
             Preview booking. No real appointment was made.
           </Text>
         </View>
 
         {/* The ticket. */}
-        <Glass strong className="mt-6 overflow-hidden rounded-[28px]">
+        <Glass strong className="mt-6 overflow-hidden rounded-2xl">
           <View className="flex-row items-center gap-3.5 p-4">
-            <View className="overflow-hidden rounded-[18px]" style={{ width: 60, height: 60, backgroundColor: face?.background }}>
+            <View className="overflow-hidden rounded-lg" style={{ width: 60, height: 60, backgroundColor: face?.background }}>
               {face ? <SvgXml xml={face.svg} width={64} height={64} /> : null}
             </View>
             <View className="min-w-0 flex-1">
@@ -128,9 +129,9 @@ export default function Confirmed() {
 
           {/* The tear line: two notches and a dashed rule, so it reads as a ticket. */}
           <View className="flex-row items-center">
-            <View style={{ width: 14, height: 28, borderTopRightRadius: 14, borderBottomRightRadius: 14, backgroundColor: "#f3f0fe", marginLeft: -1 }} />
+            <View style={{ width: 14, height: 28, borderTopRightRadius: 999, borderBottomRightRadius: 999, backgroundColor: brand[50], marginLeft: -1 }} />
             <View className="mx-2 flex-1" style={{ borderTopWidth: 1.5, borderStyle: "dashed", borderColor: "rgba(15,16,48,0.14)" }} />
-            <View style={{ width: 14, height: 28, borderTopLeftRadius: 14, borderBottomLeftRadius: 14, backgroundColor: "#f3f0fe", marginRight: -1 }} />
+            <View style={{ width: 14, height: 28, borderTopLeftRadius: 999, borderBottomLeftRadius: 999, backgroundColor: brand[50], marginRight: -1 }} />
           </View>
 
           <View className="gap-3 p-4">
@@ -139,9 +140,9 @@ export default function Confirmed() {
             {online ? null : (
               <Line icon={<MapPin size={17} color={ink[700]} />} label="Clinic" value={`${doctor.clinic.name}, ${doctor.clinic.area}`} />
             )}
-            <View className="mt-1 flex-row items-center justify-between rounded-[16px] px-3.5 py-3" style={{ backgroundColor: "#f6f4ff" }}>
-              <Text style={{ fontFamily: font.medium, fontSize: 13.5, color: ink[700] }}>{online ? "Consultation fee" : "Pay at the clinic"}</Text>
-              <Text style={{ fontFamily: font.semibold, fontSize: 16, color: ink[900] }}>₹{doctor.fee[booking.mode]}</Text>
+            <View className="mt-1 flex-row items-center justify-between rounded-lg px-3.5 py-3" style={{ backgroundColor: lilac.mist }}>
+              <Text style={{ fontFamily: font.medium, fontSize: 13, color: ink[700] }}>{online ? "Consultation fee" : "Pay at the clinic"}</Text>
+              <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>₹{doctor.fee[booking.mode]}</Text>
             </View>
           </View>
         </Glass>
@@ -151,8 +152,8 @@ export default function Confirmed() {
             <MascotBust size={52} moment="celebrate" />
           </View>
           <BubblePop delay={0.5} from="left" style={{ flexShrink: 1, marginBottom: 6 }}>
-            <Glass strong className="rounded-[18px] px-3.5 py-2.5" style={{ borderBottomLeftRadius: 6 }}>
-              <Text style={{ fontFamily: font.medium, fontSize: 13.5, color: ink[900] }}>
+            <Glass strong className="rounded-lg px-3.5 py-2.5" style={{ borderBottomLeftRadius: 6 }}>
+              <Text style={{ fontFamily: font.medium, fontSize: 13, color: ink[900] }}>
                 All set! Here&apos;s what happens next.
               </Text>
             </Glass>
@@ -161,11 +162,11 @@ export default function Confirmed() {
 
         <View className="mt-3 gap-2">
           {next.map(([icon, text]) => (
-            <Glass key={text} className="flex-row items-center gap-3 rounded-[18px] px-3.5 py-3">
+            <Glass key={text} className="flex-row items-center gap-3 rounded-lg px-3.5 py-3">
               <View className="h-8 w-8 items-center justify-center rounded-pill" style={{ backgroundColor: brand[50] }}>
                 {icon}
               </View>
-              <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 13.5, lineHeight: 19, color: ink[700] }}>{text}</Text>
+              <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 13, lineHeight: 19, color: ink[700] }}>{text}</Text>
             </Glass>
           ))}
         </View>
@@ -176,7 +177,6 @@ export default function Confirmed() {
           Home
         </PillButton>
         <PillButton
-          tone="dark"
           style={{ flex: 1.6 }}
           onPress={() => {
             const id = booking.appointmentId;
@@ -195,8 +195,8 @@ function Line({ icon, label, value }: { icon: React.ReactNode; label: string; va
   return (
     <View className="flex-row items-center gap-3">
       {icon}
-      <Text style={{ width: 108, fontFamily: font.regular, fontSize: 13.5, color: ink[500] }}>{label}</Text>
-      <Text style={{ flex: 1, fontFamily: font.semibold, fontSize: 14, color: ink[900] }}>{value}</Text>
+      <Text style={{ width: 108, fontFamily: font.regular, fontSize: 13, color: ink[500] }}>{label}</Text>
+      <Text style={{ flex: 1, fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{value}</Text>
     </View>
   );
 }

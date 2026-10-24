@@ -8,7 +8,7 @@ import { Portrait } from "@/components/ui/screen";
 import { countdown, joinWindow, whenLabel, type Appointment } from "@/lib/booking/appointments";
 import { SPECIALTIES, doctorById } from "@/lib/booking/catalog";
 import { doctorFace } from "@/lib/booking/faces";
-import { brand, ink } from "@/theme/tokens";
+import { brand, hue, ink, lilac } from "@/theme/tokens";
 import { font } from "@/theme/type";
 
 /**
@@ -34,13 +34,13 @@ export function AppointmentCard({ appt, hero }: { appt: Appointment; hero?: bool
       <Portrait face={face} size={hero ? 58 : 52} radius={hero ? 18 : 16} />
       <View className="min-w-0 flex-1">
         <View className="flex-row items-center gap-1.5">
-          {online ? <MonitorPlay size={13} color={brand[600]} /> : <Building2 size={13} color="#c2650b" />}
+          {online ? <MonitorPlay size={13} color={brand[600]} /> : <Building2 size={13} color={hue.orange.fg} />}
           <Text style={{ fontFamily: font.semibold, fontSize: 12, color: online ? brand[700] : "#a3530a" }}>
             {online ? "Video call" : "Clinic visit"}
             {cancelled ? " · Cancelled" : ""}
           </Text>
         </View>
-        <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 16, color: ink[900], marginTop: 2 }}>
+        <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900], marginTop: 2 }}>
           {doctor.name}
         </Text>
         <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 1 }}>
@@ -54,7 +54,7 @@ export function AppointmentCard({ appt, hero }: { appt: Appointment; hero?: bool
   if (!hero) {
     return (
       <Tap accessibilityRole="button" onPress={go} style={{ opacity: cancelled ? 0.6 : 1 }} scale={0.98}>
-        <Glass strong className="rounded-[24px] p-3 pr-4">
+        <Glass strong className="rounded-xl p-3 pr-4">
           {body}
         </Glass>
       </Tap>
@@ -63,8 +63,8 @@ export function AppointmentCard({ appt, hero }: { appt: Appointment; hero?: bool
 
   return (
     <Tap accessibilityRole="button" accessibilityLabel={`Upcoming appointment with ${doctor.name}, ${whenLabel(appt)}`} onPress={go} scale={0.98}>
-      <View className="overflow-hidden rounded-[28px] p-3.5" style={glassShadow}>
-        <Gradient from={online ? "#e8e2ff" : "#ffe7d8"} to={online ? "#f7f5ff" : "#fff5ee"} glow="#ffffff" />
+      <View className="overflow-hidden rounded-2xl p-3.5" style={glassShadow}>
+        <Gradient from={online ? lilac.violet : hue.orange.bg} to={online ? lilac.mist : hue.orange.wash} glow="#ffffff" />
         <View className="mb-3 flex-row items-center justify-between">
           <Text style={{ fontFamily: font.semibold, fontSize: 13, color: ink[700] }}>Upcoming</Text>
           <Glass className="rounded-pill px-2.5 py-1">

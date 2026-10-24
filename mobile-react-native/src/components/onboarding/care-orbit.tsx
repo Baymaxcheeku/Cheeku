@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Image, Pressable, View, type ImageSourcePropType } from "react-native";
+import { Image, View, type ImageSourcePropType } from "react-native";
 import Animated, {
   Easing,
   interpolate,
@@ -16,7 +16,7 @@ import Animated, {
 import Svg, { Circle, Defs, RadialGradient, Stop } from "react-native-svg";
 
 import { useReducedMotion } from "@/components/ui/motion";
-import { brand, ink, shadow } from "@/theme/tokens";
+import { brand, ink, lilac, shadow } from "@/theme/tokens";
 import { font } from "@/theme/type";
 
 import careDoctor from "../../../assets/care/doctor.png";
@@ -24,6 +24,7 @@ import careLab from "../../../assets/care/lab.png";
 import careMedicines from "../../../assets/care/medicines.png";
 import careSpecialist from "../../../assets/care/specialist.png";
 import careTherapy from "../../../assets/care/therapy.png";
+import { Tap } from "@/components/ui/tap";
 
 /*
  * THE CIRCLE OF CARE, the picture on welcome panel 4.
@@ -214,7 +215,7 @@ function Tag({ label, hl, small }: { label: string; hl: SharedValue<number>; sma
   const text = useAnimatedStyle(() => ({ color: interpolateColor(hl.value, [0, 1], [ink[700], "#ffffff"]) }));
   return (
     <Animated.View style={[shadow.e1, { borderRadius: 999, paddingHorizontal: small ? 10 : 12, paddingVertical: 4 }, box]}>
-      <Animated.Text style={[{ fontFamily: font.bold, fontSize: small ? 11 : 11.5 }, text]}>{label}</Animated.Text>
+      <Animated.Text style={[{ fontFamily: font.bold, fontSize: small ? 11 : 12 }, text]}>{label}</Animated.Text>
     </Animated.View>
   );
 }
@@ -273,7 +274,7 @@ function Face({
 
   return (
     <Animated.View style={[{ position: "absolute", left: cx - w / 2, top: cy - size / 2 - 3, width: w, alignItems: "center" }, body]}>
-      <Pressable accessibilityRole="button" accessibilityLabel={person.label} onPress={onPress} hitSlop={6} style={{ alignItems: "center" }}>
+      <Tap accessibilityRole="button" accessibilityLabel={person.label} onPress={onPress} hitSlop={6} style={{ alignItems: "center" }}>
         <View>
           <Animated.View
             pointerEvents="none"
@@ -286,7 +287,7 @@ function Face({
         <View style={{ marginTop: -10 }}>
           <Tag label={person.label} hl={hl} small />
         </View>
-      </Pressable>
+      </Tap>
     </Animated.View>
   );
 }
@@ -330,8 +331,8 @@ function Centre({ c, disc, still, active, onPress }: { c: number; disc: number; 
         </>
       )}
       <Animated.View style={[{ position: "absolute", left: c - disc / 2, top: c - disc / 2, width: disc, alignItems: "center" }, discStyle]}>
-        <Pressable accessibilityRole="button" accessibilityLabel="Medicines" onPress={onPress} style={{ alignItems: "center" }}>
-          <View className="items-center justify-center" style={{ width: disc, height: disc, borderRadius: disc / 2, backgroundColor: "#efebff" }}>
+        <Tap accessibilityRole="button" accessibilityLabel="Medicines" onPress={onPress} style={{ alignItems: "center" }}>
+          <View className="items-center justify-center" style={{ width: disc, height: disc, borderRadius: disc / 2, backgroundColor: lilac.base }}>
             <Animated.View style={bagStyle}>
               <Image alt="" source={careMedicines} style={{ width: disc * 0.74, height: disc * 0.76, marginTop: -4 }} resizeMode="contain" />
             </Animated.View>
@@ -339,7 +340,7 @@ function Centre({ c, disc, still, active, onPress }: { c: number; disc: number; 
           <View style={{ marginTop: -16 }}>
             <Tag label="Medicines" hl={hl} />
           </View>
-        </Pressable>
+        </Tap>
       </Animated.View>
     </>
   );

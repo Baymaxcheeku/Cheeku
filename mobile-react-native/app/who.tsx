@@ -1,7 +1,7 @@
 import { useRouter } from "expo-router";
 import { Check, ShieldCheck, Users, type LucideIcon } from "lucide-react-native";
 import { useMemo, useState } from "react";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AvatarFamily, AvatarSolo } from "@/components/illustrations/avatar-cluster";
@@ -14,6 +14,7 @@ import { setAudience, type Audience } from "@/lib/auth/audience";
 import { avatarPicks } from "@/lib/profiles/avatar";
 import { brand, ink, shadow, surface } from "@/theme/tokens";
 import { font, type } from "@/theme/type";
+import { Tap } from "@/components/ui/tap";
 
 const OPTIONS: readonly {
   value: Audience;
@@ -108,13 +109,13 @@ export default function Who() {
             const Badge = option.badge.icon;
             return (
               <Boop key={option.value} trigger={selected ? audience : null}>
-                <Pressable
+                <Tap scale={0.98}
                   accessibilityRole="radio"
                   accessibilityState={{ selected }}
                   aria-checked={selected}
                   accessibilityLabel={`${option.title}. ${option.body}`}
                   onPress={() => setAudienceChoice(option.value)}
-                  className="flex-row items-center gap-4 rounded-[24px] p-4 pr-12"
+                  className="flex-row items-center gap-4 rounded-xl p-4 pr-12"
                   style={[
                     {
                       borderWidth: 2,
@@ -165,12 +166,12 @@ export default function Who() {
                       style={{ backgroundColor: selected ? surface.base : brand[50] }}
                     >
                       <Badge size={12} color={brand[700]} />
-                      <Text style={{ fontFamily: font.semibold, fontSize: 11.5, color: brand[700] }} numberOfLines={1}>
+                      <Text style={{ fontFamily: font.semibold, fontSize: 12, color: brand[700] }} numberOfLines={1}>
                         {option.badge.label}
                       </Text>
                     </View>
                   </View>
-                </Pressable>
+                </Tap>
               </Boop>
             );
           })}
@@ -203,7 +204,7 @@ export default function Who() {
               {picks.map((pick) => {
                 const on = avatar === pick.id;
                 return (
-                  <Pressable
+                  <Tap
                     key={pick.id}
                     accessibilityRole="radio"
                     accessibilityState={{ selected: on }}
@@ -230,7 +231,7 @@ export default function Who() {
                         </View>
                       ) : null}
                     </Boop>
-                  </Pressable>
+                  </Tap>
                 );
               })}
             </ScrollView>

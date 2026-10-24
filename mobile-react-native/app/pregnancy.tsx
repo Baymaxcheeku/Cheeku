@@ -13,7 +13,7 @@ import { readPregnancy } from "@/lib/memory/subjects";
 import { runOptimistic } from "@/lib/optimistic";
 import { refreshRoster, useFamily, useSwitchMember } from "@/lib/profiles/family";
 import { shortDate } from "@/lib/records/details";
-import { brand, ink } from "@/theme/tokens";
+import { brand, ink, semantic } from "@/theme/tokens";
 import { font } from "@/theme/type";
 
 /*
@@ -135,7 +135,7 @@ export default function PregnancyScreen() {
         <Backdrop />
         <ScreenHeader fallback="/memory" />
         <View style={{ flex: 1, padding: 24, justifyContent: "center", gap: 14 }}>
-          <View style={{ width: 64, height: 64, borderRadius: 22, backgroundColor: brand[50], alignItems: "center", justifyContent: "center" }}>
+          <View style={{ width: 64, height: 64, borderRadius: 24, backgroundColor: brand[50], alignItems: "center", justifyContent: "center" }}>
             <Baby size={30} color={brand[600]} />
           </View>
           <PageTitle title={`Welcome, ${born.name}`} line={`${born.name} is in the family now, and starts life with what the pregnancy knew: weeks at birth, delivery, weight, and ${name}'s blood group. Day-by-day newborn limits apply from today.`} />
@@ -190,9 +190,9 @@ export default function PregnancyScreen() {
               />
               <Field label="First day of the last period" value={lmp} onChangeText={setLmp} placeholder={existing?.pregnancy.lmp ?? "2026-03-05"} icon={CalendarDays} autoCapitalize="none" />
               <Field label="Due date, if the doctor gave one" value={edd} onChangeText={setEdd} placeholder={existing?.pregnancy.edd ?? (lmp && valid(lmp) ? eddFromLmp(lmp) : "2026-12-10")} icon={CalendarDays} autoCapitalize="none" />
-              <View style={{ gap: 10, borderRadius: 20, backgroundColor: brand[50], padding: 14 }}>
-                <Text style={{ fontFamily: font.semibold, fontSize: 14, color: ink[900] }}>A scan&apos;s dating</Text>
-                <Text style={{ fontFamily: font.regular, fontSize: 12.5, lineHeight: 18, color: ink[500] }}>The scan report prints the gestational age it measured, like &quot;12w 3d&quot;.</Text>
+              <View style={{ gap: 10, borderRadius: 24, backgroundColor: brand[50], padding: 14 }}>
+                <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>A scan&apos;s dating</Text>
+                <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[500] }}>The scan report prints the gestational age it measured, like &quot;12w 3d&quot;.</Text>
                 <Field label="Scan date" value={scanDate} onChangeText={setScanDate} placeholder="2026-05-20" icon={ScanLine} autoCapitalize="none" />
                 <View style={{ flexDirection: "row", gap: 10 }}>
                   <View style={{ flex: 1 }}>
@@ -209,7 +209,7 @@ export default function PregnancyScreen() {
           )}
 
           {error ? (
-            <Text accessibilityRole="alert" style={{ fontFamily: font.medium, fontSize: 13, color: "#c00a1c" }}>
+            <Text accessibilityRole="alert" style={{ fontFamily: font.medium, fontSize: 13, color: semantic.dangerText }}>
               {error}
             </Text>
           ) : null}
