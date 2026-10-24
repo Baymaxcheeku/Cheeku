@@ -111,7 +111,9 @@ the latest notification migration; extend it when you add a new kind of copy.
 
 The team tracks launch work in a live page:
 https://claude.ai/artifact/FWQhpm3j1KJWiNrCgpraHe. Tasks are split
-between Athar (app and backend) and Suraj (AI integration). When a change
+between Athar (app, product and design), Archit (backend, security, sign-in,
+scale, the app to AI API layer and the marketplace) and Suraj (AI models and
+pipelines); a task's `with` names who works on it alongside the owner. When a change
 you make completes, starts or blocks one of its tasks, update that task in
 the same session with the `ArtifactData` tool and add a `log` entry, as
 described in `../docs/launch-tracker/README.md`, which also lists every

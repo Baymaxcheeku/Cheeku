@@ -159,7 +159,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .tag.link { background: var(--brand-soft); color: var(--brand); }
 .tag.svc { background: var(--partner-soft); color: var(--partner); }
 .who { width: 26px; height: 26px; border-radius: 9px; display: grid; place-items: center; font-size: 11px; font-weight: 700; color: #fff; flex: none; }
-.who.athar { background: var(--brand); } .who.suraj { background: #0f1030; color: var(--lime); } .who.founder { background: #c2410c; } .who.labstack { background: var(--partner); }
+.who.athar { background: var(--brand); } .who.archit { background: #0e6e8c; } .who.suraj { background: #0f1030; color: var(--lime); } .who.founder { background: #c2410c; } .who.labstack { background: var(--partner); }
 :root:not([data-theme="light"]) .who.suraj { border: 1px solid var(--line); }
 .t-side { display: flex; align-items: center; gap: 10px; }
 .expand { width: 28px; height: 28px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); cursor: pointer; display: grid; place-items: center; color: var(--muted); }
@@ -308,8 +308,9 @@ td small { display: block; color: var(--muted); font-size: 12px; }
 <script>
 (() => {
   const OWNERS = {
-    athar: { name: "Athar", role: "App and backend", i: "A" },
-    suraj: { name: "Suraj", role: "AI integration", i: "S" },
+    athar: { name: "Athar", role: "App, product and design", i: "A" },
+    archit: { name: "Archit", role: "Backend, security, AI APIs, marketplace", i: "Ar" },
+    suraj: { name: "Suraj", role: "AI models and pipelines", i: "S" },
     founder: { name: "Founder", role: "Commercials, legal, partner", i: "F" },
     labstack: { name: "LabStack", role: "Partner deliverable", i: "L" },
   };
@@ -488,6 +489,7 @@ td small { display: block; color: var(--muted); font-size: 12px; }
     const kv = el("dl", "kv");
     const add = (k, v, mono) => { if (!v) return; kv.append(el("dt", null, k), el("dd", mono ? "mono" : null, v)); };
     add("Owner", `${OWNERS[t.owner]?.name}, ${OWNERS[t.owner]?.role}`);
+    add("Working with", (t.with || []).map((k) => OWNERS[k]?.name ?? k).join(", "));
     add("Plugs into", t.plugsInto, true);
     add("Ask of LabStack", t.partnerAsk);
     add("Launch tracker", (t.mainTaskIds || []).join(", "), true);

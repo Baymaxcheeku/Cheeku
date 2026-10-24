@@ -3075,3 +3075,23 @@ skeletons. **Needs a phone:** a fling to dismiss, a slow full pull, pulling
 up, the keyboard with a sheet open on iOS, every press, and haptics (still
 waiting on a new `eas build` from batch 1).
 
+
+## Archit joins; trackers re-audited · 2026-10-24
+
+Archit (full stack and AI engineering) now owns backend, security, sign-in,
+database, scale, the app to AI API layer and the LabStack marketplace end to
+end. In the launch tracker 38 tasks moved to him and 10 were added for gaps the
+19 Oct audit missed: his onboarding, Google and Apple sign-in, sessions and
+recovery, a secrets inventory, a job queue, Edge Function standards, data
+retention, a scale plan, a versioned app to AI contract, and streamed chat
+answers. In the LabStack tracker 30 tasks moved to him and contract tests were
+added. Athar keeps the app, product and design; Suraj keeps the models and
+pipelines. Work that crosses lines keeps one owner and lists the others in a
+new `with` field, shown on both pages as "Working with". Ownership is
+summarised in `docs/launch-tracker/README.md`.
+
+Two judgement calls. Tasks already in progress kept their owner (Suraj's
+reader, memory and resolver work, Athar's chat metering and delete-account
+close-out) with Archit added alongside, so nothing in flight changes hands.
+Google sign-in waits on the bundle rename, because OAuth client ids are tied
+to the bundle id and Apple requires Sign in with Apple once Google is offered.

@@ -4,7 +4,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Instrument+Serif:ital@1&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-/* Layout: a sticky brand bar, a readiness band (overall, milestones, the two owners), then the
+/* Layout: a sticky brand bar, a readiness band (overall and milestones, then one card per owner), then the
    task board on the left and the platform map plus activity on the right; one column on phones. */
 :root {
   --bg: #f5f4fd;
@@ -80,9 +80,11 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .wrap { padding-block: 22px 56px; display: grid; gap: 22px; }
 
 /* Readiness band */
-.band { display: grid; grid-template-columns: 1.15fr 1fr 1fr; gap: 16px; }
+.band { display: grid; gap: 16px; }
+.owners { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
 .card { background: var(--surface); border: 1px solid var(--line); border-radius: 20px; box-shadow: var(--shadow); }
-.ready { padding: 20px; display: grid; gap: 16px; position: relative; overflow: hidden; }
+.ready { padding: 20px; display: grid; grid-template-columns: minmax(220px, 300px) minmax(0, 1fr); gap: 16px 32px; align-items: center; position: relative; overflow: hidden; }
+.ready-lead { display: grid; gap: 10px; }
 .ready::after { content: ""; position: absolute; right: -60px; top: -60px; width: 220px; height: 220px; border-radius: 50%; background: radial-gradient(circle, var(--brand-soft), transparent 70%); pointer-events: none; }
 .eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 1.1px; text-transform: uppercase; color: var(--brand); }
 .big { display: flex; align-items: baseline; gap: 10px; }
@@ -102,6 +104,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .avatar { width: 42px; height: 42px; border-radius: 14px; display: grid; place-items: center; font-weight: 700; font-size: 16px; color: #fff; flex: none; }
 .avatar.athar { background: var(--brand); }
 .avatar.suraj { background: #0f1030; color: var(--lime); }
+.avatar.archit { background: #0e6e8c; }
 :root[data-theme="dark"] .avatar.suraj, :root:not([data-theme="light"]) .avatar.suraj { border: 1px solid var(--line); }
 .owner-head h3 { margin: 0; font-size: 16px; }
 .owner-head p { margin: 0; color: var(--muted); font-size: 12.5px; }
@@ -185,6 +188,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .who { width: 26px; height: 26px; border-radius: 9px; display: grid; place-items: center; font-size: 11px; font-weight: 700; color: #fff; }
 .who.athar { background: var(--brand); }
 .who.suraj { background: #0f1030; color: var(--lime); }
+.who.archit { background: #0e6e8c; }
 .t-side { display: flex; align-items: center; gap: 10px; }
 .expand { width: 28px; height: 28px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); cursor: pointer; display: grid; place-items: center; color: var(--muted); }
 .expand svg { transition: transform .2s ease; }
@@ -229,13 +233,12 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .toast { position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom, 0px) + 20px); transform: translateX(-50%); background: var(--ink); color: var(--surface); padding: 10px 16px; border-radius: 12px; font-size: 13px; box-shadow: var(--shadow); z-index: 20; }
 
 @media (max-width: 1080px) {
-  .band { grid-template-columns: 1fr 1fr; }
-  .ready { grid-column: 1 / -1; }
+  .ready { grid-template-columns: 1fr; }
   .main { grid-template-columns: 1fr; }
   .side { position: static; }
 }
 @media (max-width: 680px) {
-  .band, .attention { grid-template-columns: 1fr; }
+  .owners, .attention { grid-template-columns: 1fr; }
   .task-row { grid-template-columns: minmax(0, 1fr) auto; }
   .task-row .status-cell { grid-column: 1 / -1; max-width: 150px; }
   .t-detail { padding-left: 16px; }
@@ -259,12 +262,13 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 <main class="wrap">
   <section class="band" aria-label="Readiness">
     <div class="card ready">
-      <div class="eyebrow">Launch readiness</div>
-      <div class="big num"><b id="overall-pct">0%</b><span id="overall-sub">0 of 0 tasks done</span></div>
+      <div class="ready-lead">
+        <div class="eyebrow">Launch readiness</div>
+        <div class="big num"><b id="overall-pct">0%</b><span id="overall-sub">0 of 0 tasks done</span></div>
+      </div>
       <div class="ms" id="milestones"></div>
     </div>
-    <div class="card owner" id="owner-athar"></div>
-    <div class="card owner" id="owner-suraj"></div>
+    <div class="owners" id="owners"></div>
   </section>
 
   <section class="attention" aria-label="Needs attention">
@@ -326,9 +330,11 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 <script>
 (() => {
   const OWNERS = {
-    athar: { name: "Athar", role: "App and backend", initial: "A" },
-    suraj: { name: "Suraj", role: "AI integration", initial: "S" },
+    athar: { name: "Athar", role: "App, product and design", initial: "A" },
+    archit: { name: "Archit", role: "Backend, security, AI APIs, marketplace", initial: "Ar" },
+    suraj: { name: "Suraj", role: "AI models and pipelines", initial: "S" },
   };
+  const names = (keys) => (Array.isArray(keys) ? keys : []).map((k) => OWNERS[k]?.name ?? k).join(", ");
   const STATUS = [
     { v: "todo", label: "To do" },
     { v: "doing", label: "In progress" },
@@ -346,6 +352,8 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
     ["ops", "Launch operations", "Environments, migrations, monitoring, CI"],
     ["security", "Security and privacy", "Data, accounts, listings and DPDP"],
     ["ratelimit", "Rate limits and abuse", "What a single account can cost us"],
+    ["backend", "Backend platform", "Jobs, queues, function standards, retention"],
+    ["ai-api", "AI: app and API layer", "How the app talks to the models"],
     ["payments", "Payments", "Subscriptions and care bookings"],
     ["integrations", "Partner integrations", "Labs, doctors, services, devices"],
     ["loop", "Daily loop", "The P0 product features still open"],
@@ -393,7 +401,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
       if (state.statuses.size && !state.statuses.has(t.status)) return false;
       if (state.prios.size && !state.prios.has(t.priority)) return false;
       if (q) {
-        const hay = [t.title, t.detail, t.evidence, t.decision, AREA[t.area]?.title, t.id].join(" ").toLowerCase();
+        const hay = [t.title, t.detail, t.evidence, t.decision, AREA[t.area]?.title, t.id, names(t.with)].join(" ").toLowerCase();
         if (!hay.includes(q)) return false;
       }
       return true;
@@ -430,6 +438,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
       ms.appendChild(row);
     }
 
+    const owners = $("owners"); owners.replaceChildren();
     for (const key of Object.keys(OWNERS)) {
       const o = OWNERS[key];
       const ts = all.filter((t) => t.owner === key);
@@ -437,7 +446,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
       const p0 = ts.filter((t) => t.priority === "P0" && t.status !== "done").length;
       const blocked = ts.filter((t) => t.status === "blocked" || (t.decision && t.status !== "done")).length;
       const doing = ts.filter((t) => t.status === "doing").length;
-      const box = $("owner-" + key); box.replaceChildren();
+      const box = el("div", "card owner"); box.id = "owner-" + key; owners.appendChild(box);
       const head = el("div", "owner-head");
       const av = el("div", "avatar " + key, o.initial);
       const txt = el("div"); txt.append(el("h3", null, o.name), el("p", null, o.role));
@@ -491,7 +500,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
   function renderControls() {
     const seg = $("owner-seg"); seg.replaceChildren();
     const base = state.tasks.filter((t) => t.area !== "shipped");
-    for (const [k, label] of [["all", "Everyone"], ["athar", "Athar"], ["suraj", "Suraj"]]) {
+    for (const [k, label] of [["all", "Everyone"], ...Object.entries(OWNERS).map(([k, o]) => [k, o.name])]) {
       const open = base.filter((t) => (k === "all" || t.owner === k) && t.status !== "done").length;
       const b = el("button"); b.type = "button"; b.setAttribute("aria-pressed", String(state.owner === k));
       b.append(document.createTextNode(label), el("span", "n num", String(open)));
@@ -592,6 +601,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
     const add = (k, v, mono) => { if (!v) return; kv.append(el("dt", null, k)); const dd = el("dd", mono ? "mono" : null, v); kv.appendChild(dd); };
     add("Area", AREA[t.area]?.title);
     add("Owner", `${OWNERS[t.owner]?.name ?? ""}, ${OWNERS[t.owner]?.role ?? ""}`);
+    add("Working with", names(t.with));
     add("Evidence", t.evidence, true);
     add("Decision", t.decision);
     if (Array.isArray(t.dependsOn) && t.dependsOn.length) add("Depends on", t.dependsOn.map((id) => state.tasks.find((x) => x.id === id)?.title ?? id).join("; "));
