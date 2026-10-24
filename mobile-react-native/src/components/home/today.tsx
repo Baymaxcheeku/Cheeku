@@ -31,6 +31,7 @@ import { Glass, Gradient, glassShadow } from "@/components/ui/glass";
 import { BreathIcon, MindIcon, type AppIcon } from "@/components/ui/icons";
 import { Meter, PopIn } from "@/components/ui/motion";
 import { PILLARS, UNLOCK_COPY, unlockRows, viaLine, type Pillar, type UnlockRow } from "@/lib/home/content";
+import { WINDOW_LABEL } from "@/lib/home/catalog";
 import type { HomeSignals, UnlockedVia } from "@/lib/home/rules";
 import type { Plan, PlanTask } from "@/lib/home/plan";
 import type { DueRow, Streak, WeekDay } from "@/lib/home/today";
@@ -597,7 +598,7 @@ export function PlanPreview({ plan, skip, onOpen }: { plan: Plan; skip: string |
                   {t.title}
                 </Text>
                 <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 12, color: t.personal ? brand[700] : ink[500], marginTop: 1 }}>
-                  {t.personal ? (t.reason ?? "For you") : `Healthy living · ${PILLARS.find((p) => p.key === t.pillar)?.label}`}
+                  {[t.goal ? "Your goal" : t.personal ? (t.reason ?? "For you") : null, PILLARS.find((p) => p.key === t.pillar)?.label, t.window !== "anytime" ? WINDOW_LABEL[t.window] : null].filter(Boolean).join(" · ")}
                 </Text>
               </View>
               <ChevronRight size={16} color={ink[300]} />

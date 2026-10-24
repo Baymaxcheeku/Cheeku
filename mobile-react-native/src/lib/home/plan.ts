@@ -4,6 +4,7 @@ import type { Series } from "@/lib/memory/series";
 
 import { BREATHING, HABITS, MEALS, READINGS, SLEEP_RATING, STEPS_TASK, taskByKey, windowAt, type CatalogTask, type Window } from "./catalog";
 import { AREA_LABEL, PILLARS, type Area, type Pillar } from "./content";
+import { goalByKey, goalsFor, goalStreak, goalTaskKeys, goalTitle, readGoalPrefs, type Goal, type GoalView } from "./goals";
 import type { PlateTag } from "./meals";
 import { areaReasons, areasFromConditions, areasFromReadings, slug, type TodayAction } from "./today";
 
@@ -24,6 +25,8 @@ import { areaReasons, areasFromConditions, areasFromReadings, slug, type TodayAc
  *                          for them; medicines when they take any
  *   personal habits        aimed at what their readings and conditions say,
  *                          at most four, two per area, rotating daily
+ *   their goal             two to four check-ins for the one goal they
+ *                          picked (goals.ts), tagged and ranked after due
  *   general habits         one per pillar, rotating, so the plan is never
  *                          only about what is wrong
  *
@@ -51,7 +54,8 @@ export type DailyLog = {
   createdAt: string;
 };
 
-export type DailyPrefs = { steps_goal?: number; veg?: boolean };
+/** `goal` is read through readGoalPrefs: it is jsonb a person's own client wrote. */
+export type DailyPrefs = { steps_goal?: number; veg?: boolean; goal?: unknown };
 
 export type PlanInput = {
   profileId: string;
@@ -82,6 +86,8 @@ export type PlanTask = CatalogTask & {
   chip: string;
   /** A test or follow-up that is due. */
   due?: boolean;
+  /** One of the check-ins for the goal they picked. */
+  goal?: boolean;
   dueLabel?: string;
   cta?: { label: string; route: string };
   /** Steps: count so far against today's target. */
@@ -102,6 +108,10 @@ export type Plan = {
   steps: StepsTarget | null;
   areas: Area[];
   now: Exclude<Window, "anytime">;
+  /** The running goal, if any. */
+  goal: GoalView | null;
+  /** Goals this member can pick. */
+  goals: Goal[];
 };
 
 // ---------------------------------------------------------------- helpers --
@@ -201,7 +211,7 @@ export function buildPlan(input: PlanInput): Plan {
 
   // 1. What is due, always first.
   for (const l of input.loops) add(dueTask(l));
-  if (baby) return finish(out, marks, now, null, areas);
+  if (baby) return finish(out, marks, now, null, areas, null, []);
 
   // 2. The spine.
   let steps: StepsTarget | null = null;
@@ -236,6 +246,34 @@ export function buildPlan(input: PlanInput): Plan {
     }
   }
 
+  // 3b. Their goal: tag what the plan already holds, add the rest.
+  const gate = { baby, gentle, allowed: (k: string) => { const t = taskByKey(k); return Boolean(t && t.kind !== "steps" && allowed(t)); } };
+  const goals = goalsFor(gate);
+  const goalPrefs = readGoalPrefs(input.prefs.goal);
+  const goal = goalPrefs ? goalByKey(goalPrefs.key) : null;
+  let goalKeys: string[] = [];
+  if (goal && goalPrefs && goals.includes(goal)) {
+    goalKeys = goalTaskKeys(goal, goalPrefs.answers, gate);
+    for (const k of goalKeys) {
+      const held = out.find((t) => t.key === k);
+      // The "Your goal" pill says why; a reason line would repeat it. A task
+      // that was already there for their own numbers keeps that reason.
+      if (held) Object.assign(held, { goal: true, personal: true });
+      else add(taskByKey(k), { goal: true, personal: true });
+    }
+  }
+  const goalInfo =
+    goal && goalPrefs && goalKeys.length
+      ? {
+          goal,
+          keys: goalKeys,
+          since: goalPrefs.since,
+          title: goalTitle(goal, goalPrefs.answers),
+          streak: goalStreak({ profileId, today, since: goalPrefs.since, taskKeys: goalKeys, actions: input.actions, logs: input.logs }),
+          day: Math.max(1, daysBetween(goalPrefs.since, today) + 1),
+        }
+      : null;
+
   // 4. Personal habits, aimed at what their numbers say.
   let personal = 0;
   for (const area of areas) {
@@ -255,7 +293,7 @@ export function buildPlan(input: PlanInput): Plan {
     for (const h of rotate(pool, n).slice(0, GENERAL_PER_PILLAR[p.key])) add(h);
   }
 
-  return finish(out, marks, now, steps, areas);
+  return finish(out, marks, now, steps, areas, goalInfo, goals);
 }
 
 const WINDOW_RANK = (w: Window, now: Exclude<Window, "anytime">): number => {
@@ -273,13 +311,30 @@ function statusOf(t: PlanTask, marks: ReadonlyMap<string, "done" | "later">): Ta
   return mark ?? "open";
 }
 
-function finish(tasks: PlanTask[], marks: ReadonlyMap<string, "done" | "later">, now: Exclude<Window, "anytime">, steps: StepsTarget | null, areas: Area[]): Plan {
+type GoalInfo = { goal: Goal; keys: string[]; since: string; title: string; streak: number; day: number };
+
+function finish(
+  tasks: PlanTask[],
+  marks: ReadonlyMap<string, "done" | "later">,
+  now: Exclude<Window, "anytime">,
+  steps: StepsTarget | null,
+  areas: Area[],
+  goalInfo: GoalInfo | null,
+  goals: Goal[],
+): Plan {
   const withStatus = tasks.map((t) => ({ ...t, status: statusOf(t, marks) }));
-  const ordered = [...withStatus].sort((a, b) => Number(Boolean(b.due)) - Number(Boolean(a.due)) || WINDOW_RANK(a.window, now) - WINDOW_RANK(b.window, now) || Number(b.personal) - Number(a.personal));
+  const ordered = [...withStatus].sort(
+    (a, b) =>
+      Number(Boolean(b.due)) - Number(Boolean(a.due)) ||
+      WINDOW_RANK(a.window, now) - WINDOW_RANK(b.window, now) ||
+      Number(Boolean(b.goal)) - Number(Boolean(a.goal)) ||
+      Number(b.personal) - Number(a.personal),
+  );
 
   const open = ordered.filter((t) => t.status === "open");
   const hero =
     open.find((t) => t.due) ??
+    open.find((t) => t.goal && WINDOW_RANK(t.window, now) <= 1) ??
     open.find((t) => t.personal && t.kind === "habit" && WINDOW_RANK(t.window, now) <= 1) ??
     open.find((t) => t.kind === "steps") ??
     open.find((t) => t.kind !== "meal") ??
@@ -289,7 +344,39 @@ function finish(tasks: PlanTask[], marks: ReadonlyMap<string, "done" | "later">,
   const byPillar = Object.fromEntries(PILLARS.map((p) => [p.key, ordered.filter((t) => t.pillar === p.key)])) as Record<Pillar, PlanTask[]>;
   const pillarProgress = Object.fromEntries(PILLARS.map((p) => [p.key, { done: byPillar[p.key].filter((t) => t.status === "done").length, total: byPillar[p.key].length }])) as Plan["pillarProgress"];
   const done = ordered.filter((t) => t.status === "done").length;
-  return { tasks: ordered, hero, byPillar, pillarProgress, done, total: ordered.length, steps, areas, now };
+  const goalTasks = ordered.filter((t) => t.goal);
+  const goal: GoalView | null = goalInfo
+    ? {
+        key: goalInfo.goal.key,
+        title: goalInfo.title,
+        noun: goalInfo.goal.noun,
+        line: goalInfo.goal.line,
+        day: goalInfo.day,
+        streak: goalInfo.streak,
+        doneToday: goalTasks.filter((t) => t.status === "done").length,
+        totalToday: goalTasks.length,
+        taskKeys: goalInfo.keys,
+      }
+    : null;
+  return { tasks: ordered, hero, byPillar, pillarProgress, done, total: ordered.length, steps, areas, now, goal, goals };
+}
+
+/**
+ * The few that matter right now, for the top of Today: what is due, then the
+ * goal's check-ins that fit this part of the day, then the plan's own order
+ * (which already puts this window first). Everything else folds under
+ * "Later today".
+ */
+export function nowTasks(plan: Plan, n = 3): PlanTask[] {
+  const open = plan.tasks.filter((t) => t.status === "open");
+  const picked: PlanTask[] = [];
+  const take = (t: PlanTask) => {
+    if (picked.length < n && !picked.includes(t)) picked.push(t);
+  };
+  open.filter((t) => t.due).forEach(take);
+  open.filter((t) => t.goal && WINDOW_RANK(t.window, plan.now) <= 1).forEach(take);
+  open.forEach(take);
+  return picked;
 }
 
 /** The tags logged for each meal today, for the day's plate line. */

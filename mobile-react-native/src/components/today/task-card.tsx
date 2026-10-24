@@ -114,11 +114,14 @@ export function TaskCard({
         <View className="min-w-0 flex-1">
           <Text style={{ fontFamily: font.semibold, fontSize: 15, lineHeight: 20, color: done ? ink[500] : ink[900] }}>{task.title}</Text>
           <View className="mt-1 flex-row items-center gap-1.5">
-            <View className="rounded-pill px-2 py-0.5" style={{ backgroundColor: task.due ? (task.dueLabel === "Overdue" ? semantic.dangerBg : semantic.cautionBg) : task.personal ? brand[600] : surface.tint }}>
-              <Text style={{ fontFamily: font.semibold, fontSize: 11, color: task.due ? (task.dueLabel === "Overdue" ? semantic.dangerText : semantic.cautionText) : task.personal ? "#fff" : ink[700] }}>
-                {task.due ? task.dueLabel : task.personal ? "For you" : "Healthy living"}
-              </Text>
-            </View>
+            {/* A pill only when it says something: due, a goal, or for you. "Healthy living" on every general card was noise (UI audit). */}
+            {task.due || task.personal ? (
+              <View className="rounded-pill px-2 py-0.5" style={{ backgroundColor: task.due ? (task.dueLabel === "Overdue" ? semantic.dangerBg : semantic.cautionBg) : brand[600] }}>
+                <Text style={{ fontFamily: font.semibold, fontSize: 11, color: task.due ? (task.dueLabel === "Overdue" ? semantic.dangerText : semantic.cautionText) : "#fff" }}>
+                  {task.due ? task.dueLabel : task.goal ? "Your goal" : "For you"}
+                </Text>
+              </View>
+            ) : null}
             <Text numberOfLines={1} style={{ flexShrink: 1, fontFamily: font.medium, fontSize: 12, color: ink[500] }}>
               {task.chip}
               {task.minutes ? ` · ${task.minutes} min` : ""}
@@ -221,6 +224,39 @@ export function TaskCard({
         {task.status === "later" ? <SmallButton label="Bring it back" icon={Undo2} onPress={onUndo} /> : null}
         {done && task.kind === "habit" ? <SmallButton label="Undo" icon={Undo2} onPress={onUndo} /> : null}
       </View>
+    </View>
+  );
+}
+
+/**
+ * One task folded into a line, for "Later today" (UI batch 4). Tap the line
+ * to open the full card in place; a plain habit can be ticked from here.
+ */
+export function TaskRow({ task, onExpand, onDone }: { task: PlanTask; onExpand: () => void; onDone: () => void }) {
+  const done = task.status === "done";
+  const Icon = task.due ? CalendarClock : (KIND_ICON[task.kind] ?? PILLAR_ICON[task.pillar]);
+  const quick = task.kind === "habit" && !task.due && !done;
+  const meta = [task.status === "later" ? "Later" : null, task.goal ? "Your goal" : task.personal ? "For you" : null, task.chip, task.window !== "anytime" ? WINDOW_LABEL[task.window] : null].filter(Boolean).join(" · ");
+  return (
+    <View className="flex-row items-center gap-3 py-2.5">
+      <Tap accessibilityRole="button" accessibilityLabel={`${task.title}. Show details`} onPress={onExpand} scale={0.98} className="min-w-0 flex-1 flex-row items-center gap-3">
+        <View className="h-9 w-9 items-center justify-center rounded-md" style={{ backgroundColor: done ? brand[600] : brand[50] }}>
+          {done ? <Check size={16} color="#fff" strokeWidth={3} /> : <Icon size={17} color={brand[600]} strokeWidth={1.9} />}
+        </View>
+        <View className="min-w-0 flex-1">
+          <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 15, color: done ? ink[500] : ink[900] }}>
+            {task.title}
+          </Text>
+          <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 12, color: ink[500], marginTop: 1 }}>
+            {meta}
+          </Text>
+        </View>
+      </Tap>
+      {quick ? (
+        <Tap accessibilityRole="button" accessibilityLabel={`Done: ${task.title}`} onPress={onDone} scale={0.95} hitSlop={6} className="h-9 w-9 items-center justify-center rounded-pill" style={{ borderWidth: 1.5, borderColor: brand[200] }}>
+          <Check size={16} color={brand[600]} strokeWidth={2.6} />
+        </Tap>
+      ) : null}
     </View>
   );
 }

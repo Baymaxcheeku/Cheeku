@@ -343,11 +343,15 @@ haptics has to be seen on a simulator or a device before it counts as done.
 - **Haptics need a new native build.** `expo-haptics` (UI batch 1) is a native
   module: installed builds ignore it until the next `eas build`; web is a
   no-op by design. All calls go through `src/lib/feel.ts`.
-- **UI batch 4 is open** (`ui-b4-today`, a calmer Today); the audit is
-  `../docs/audits/2026-10-ui-ux-audit.md`. Batch 3 left 54 raw hex colours
-  (illustration faces, Learn category art, chart gradients) as lint warnings;
-  move them onto tokens when those files are next touched. The sheet drag,
-  every press, and the new type sizes on a small Android all need a phone.
+- **UI audit batches 1 to 4 are built** (`../docs/audits/2026-10-ui-ux-audit.md`).
+  Batch 3 left 54 raw hex colours (illustration faces, Learn category art,
+  chart gradients) as lint warnings; move them onto tokens when those files
+  are next touched.
+- **Goals live in `profiles.daily_prefs.goal`** (no migration). The daily
+  goal reminder is a local notification, so it exists only on the phone that
+  set it: a second phone, or a reinstall, needs the goal saved again to get
+  it back. Streaks read 35 days of `today_actions` and 7 days of
+  `daily_logs`, so a streak over a week counts habits only.
 - **Ideas from the AQ / Ant Afu research** are in the launch tracker:
   goal cards first (`loop-goal-cards`, M2), then food scan, device sync,
   staged symptom check, medicine box photo, privacy blur and partner

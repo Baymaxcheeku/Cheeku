@@ -114,6 +114,9 @@ judgement. Never "High priority", "High risk", "Borderline" or "Alert".
   Each task has `title`, `why` (the card line) and `more` (the detail).
 - Personal reasons: `src/lib/home/today.ts` and `plan.ts`.
 - On-phone reminders: `src/lib/notifications/push.ts`.
+- Goals: `src/lib/home/goals.ts` (title 30, line 60, question 40, chip 24;
+  `goals.test.ts` holds them to it). A goal's lock-screen reminder never names
+  the goal: "Steady sugar" on a lock screen is health information.
 - Inbox and push notifications from the server: the `notify_*` functions,
   latest wording in `supabase/migrations/0036_notification_copy.sql`.
 

@@ -27,7 +27,12 @@ called out where they matter.
   selected), 186 more pressables onto `<Tap>` (241 in all; the 62 left have
   their own press state or are backdrops), and an ESLint guard. 54 raw hex
   colours remain as warnings. Needs a phone check.
-- Batch 4 (Today) is open in the launch tracker.
+- **Batch 4 (calmer Today, with goal cards): built, 24 Oct.** Three tasks
+  for right now, the rest folded under "Later today" and "Done today", a
+  progress ring, no repeated "Healthy living" pill, and Done folds the card
+  away with one haptic. Goal cards (`loop-goal-cards`): five goals, two
+  questions each, check-ins in the plan, a streak and a daily reminder.
+- Batches 1 to 3 were checked on a phone on 24 Oct and are done.
 
 ## Verdict
 

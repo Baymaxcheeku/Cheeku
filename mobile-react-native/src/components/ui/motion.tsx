@@ -12,6 +12,7 @@ import Animated, {
   withTiming,
   type SharedValue,
 } from "react-native-reanimated";
+import { scheduleOnRN } from "react-native-worklets";
 import { useState } from "react";
 
 import { EASE_SETTLE, brand, ink, semantic, surface } from "@/theme/tokens";
@@ -466,5 +467,39 @@ export function Meter({ value, total }: { value: number; total: number }) {
         ]}
       />
     </View>
+  );
+}
+
+/**
+ * Folds a finished card away before the list moves on (UI audit batch 4).
+ * When `gone` turns true the card's own height closes to nothing while it
+ * fades and dips, then `onGone` fires and the caller writes the change, so
+ * the cards below slide up into the gap instead of jumping. 220ms, strong
+ * ease-out. Reduce Motion: a quick fade, no height change.
+ */
+export function Fold({ gone, onGone, children }: { gone: boolean; onGone: () => void; children: React.ReactNode }) {
+  const still = useReducedMotion();
+  const [height, setHeight] = useState<number | null>(null);
+  const h = useSharedValue(1);
+  const o = useSharedValue(1);
+
+  useEffect(() => {
+    if (!gone) return;
+    const done = () => onGone();
+    o.value = withTiming(0, { duration: still ? 120 : 180, easing: EASE_OUT });
+    h.value = withTiming(0, { duration: still ? 120 : 220, easing: EASE_OUT }, (finished) => {
+      if (finished) scheduleOnRN(done);
+    });
+  }, [gone, still, h, o, onGone]);
+
+  const animated = useAnimatedStyle(() => {
+    if (!gone || height === null || still) return { opacity: o.value };
+    return { opacity: o.value, height: height * h.value, transform: [{ scale: 0.97 + 0.03 * h.value }], overflow: "hidden" };
+  });
+
+  return (
+    <Animated.View onLayout={(e) => (height === null || !gone) && setHeight(e.nativeEvent.layout.height)} style={animated}>
+      {children}
+    </Animated.View>
   );
 }
