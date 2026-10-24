@@ -3208,3 +3208,29 @@ streak, Later today open, a card folding away and the ring after it, and a
 pillar view. **Needs a phone:** the fold timing, the reminder firing at the
 right hour, and the swipe through the goal cards.
 
+## What's built, on the launch tracker · 2026-10-24
+
+The launch tracker now ends with **What's built**, so Athar, Archit and Suraj
+start from the same picture. It was audited from this file, the app's screens,
+the 37 migrations and the three Edge Functions.
+
+It lists 34 features in eight groups. Each one says:
+- its honest state: 24 live, 3 built and waiting on a phone check, 6 running
+  on sample data or a mock, and 1 partly live
+- where its code lives
+- who looks after it
+- the open tracker tasks that carry it on
+
+"On sample data" is said out loud on purpose: labs, doctors, services,
+billing, the chat model and the report reader all work end to end but are
+not real yet, and nobody joining should mistake them for done.
+
+Two parts keep it current without anyone editing it:
+- A `built` feature turns Live by itself when all of its linked tasks are
+  done.
+- Every task marked done appears in "Completed in this tracker", newest
+  first.
+
+The data lives in the artifact's `features` collection, with a copy in
+`docs/launch-tracker/features.json`.
+

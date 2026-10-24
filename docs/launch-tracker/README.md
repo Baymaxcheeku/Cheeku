@@ -11,6 +11,13 @@ When a change in this repo completes, starts or blocks a task below, update it i
 2. `ArtifactData` `update` with `if_version`: `{ status: "done" | "doing" | "blocked" | "todo", updatedAt, completedAt }` (completedAt only for done).
 3. Add one `log` document: `{ at, taskId, title, from, to, by: "claude", note }`, where note names the commit.
 4. New work the audit missed: `set` a new `tasks` document with the same fields (owner `athar`, `archit` or `suraj`; optional `with`, a list of the others who work on it).
+5. When a feature ships or changes state, keep **What's built** current: `set` or `update` its document in the `features` collection. The fields are `{ id, group, title, what, state, where, shipped, owner, next, order }`.
+   - `group` is one of `accounts`, `records`, `ai`, `loop`, `care`, `design`, `platform` or `gtm`.
+   - `state` is `live`, `built` (built, waiting for a phone check or a deploy), `standin` (works on sample data or a mock) or `partial`.
+   - `next` lists the tracker task ids that carry the feature on. A `built` feature shows as Live by itself once all of its `next` tasks are done.
+   - `docs/launch-tracker/features.json` is the copy in the repo. Change both together.
+
+The **Completed in this tracker** list under What's built needs no upkeep: any task marked done appears there, newest first.
 
 Never mark a task done that is only built in the web preview: device verification is part of done for app work.
 
