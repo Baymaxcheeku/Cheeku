@@ -11,7 +11,6 @@ import {
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
-  Modal,
   Pressable,
   ScrollView,
   Text,
@@ -19,6 +18,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { Sheet, useSheetMax } from "@/components/ui/sheet";
 import { MascotFigure } from "@/components/illustrations/sprout";
 import { Brand } from "@/components/ui/brand";
 import { Gradient, glassShadow } from "@/components/ui/glass";
@@ -118,6 +118,7 @@ export function Paywall({
   reason?: Reason;
 }) {
   const insets = useSafeAreaInsets();
+  const sheetMax92 = useSheetMax(0.92);
   const [stage, setStage] = useState<Stage>("plans");
   const [selected, setSelected] = useState<Plan>(PLANS.family);
   const [error, setError] = useState<string | null>(null);
@@ -153,26 +154,13 @@ export function Paywall({
   }
 
   return (
-    <Modal
-      visible={open}
-      transparent
-      animationType="slide"
-      onRequestClose={() => {
+    <Sheet open={open} onClose={() => {
         reset();
         onClose();
-      }}
-    >
-      <Pressable
-        accessibilityLabel="Close"
-        onPress={() => {
-          reset();
-          onClose();
-        }}
-        style={{ flex: 1, backgroundColor: "rgba(15,16,48,0.4)" }}
-      />
+      }} label="Close">
       <View
         className="rounded-t-sheet bg-canvas"
-        style={{ maxHeight: "92%", paddingTop: 16, paddingBottom: insets.bottom + 12 }}
+        style={{ maxHeight: sheetMax92, paddingTop: 16, paddingBottom: insets.bottom + 12 }}
       >
         <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
           {stage === "plans" ? (
@@ -209,7 +197,7 @@ export function Paywall({
           )}
         </ScrollView>
       </View>
-    </Modal>
+    </Sheet>
   );
 }
 

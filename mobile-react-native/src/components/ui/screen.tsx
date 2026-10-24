@@ -1,9 +1,10 @@
 import { useRouter } from "expo-router";
 import { ChevronLeft } from "lucide-react-native";
-import { ActivityIndicator, Pressable, Text, View, type ViewProps } from "react-native";
+import { ActivityIndicator, Text, View, type ViewProps } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SvgXml } from "react-native-svg";
 
+import { Tap } from "@/components/ui/tap";
 import { brandify } from "@/components/ui/brand";
 import { GlassCircle, Gradient, glassShadow } from "@/components/ui/glass";
 import { brand, ink } from "@/theme/tokens";
@@ -121,12 +122,12 @@ export function PillButton({
   const bg = { dark: ink[900], brand: brand[600], light: "#ffffff", danger: "#fef1f3" }[tone];
   const fg = { dark: "#ffffff", brand: "#ffffff", light: ink[900], danger: "#c00a1c" }[tone];
   return (
-    <Pressable
+    <Tap
       accessibilityRole="button"
       accessibilityState={{ disabled: disabled || loading }}
       disabled={disabled || loading}
       onPress={onPress}
-      style={({ pressed }) => [
+      style={[
         tone === "light" ? glassShadow : null,
         {
           height: 54,
@@ -139,15 +140,13 @@ export function PillButton({
           backgroundColor: bg,
           opacity: disabled ? 0.45 : 1,
           borderWidth: tone === "light" ? 1 : 0,
-          borderColor: "rgba(15,16,48,0.08)",
-          transform: [{ scale: pressed ? 0.98 : 1 }],
-        },
+          borderColor: "rgba(15,16,48,0.08)" },
         style,
-      ]}
+      ]} scale={0.98}
     >
       {loading ? <ActivityIndicator color={fg} /> : icon}
       <Text style={{ fontFamily: font.semibold, fontSize: 15.5, color: fg }}>{brandify(children, { onDark: tone === "dark" || tone === "brand" })}</Text>
-    </Pressable>
+    </Tap>
   );
 }
 

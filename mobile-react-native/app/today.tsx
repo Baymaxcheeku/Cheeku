@@ -2,9 +2,11 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useLocalSearchParams } from "expo-router";
 import { Check, LayoutGrid, SlidersHorizontal } from "lucide-react-native";
 import { useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, Pressable, ScrollView, Text, View } from "react-native";
+import { Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { CardListSkeleton } from "@/components/ui/skeleton";
+import { Tap } from "@/components/ui/tap";
 import { firstName } from "@/components/home/ask-hero";
 import { MascotFigure } from "@/components/illustrations/sprout";
 import { BreathingSheet, MealSheet, ReadingSheet, Sheet, StepsSheet } from "@/components/today/sheets";
@@ -107,7 +109,7 @@ export default function TodayPlan() {
       <View className="flex-1 bg-canvas">
         <Backdrop />
         <ScreenHeader title="Today's plan" />
-        <View className="flex-1 items-center justify-center">{loading || family.isPending ? <ActivityIndicator color={brand[600]} /> : <Text style={{ color: ink[500] }}>Nothing to plan yet.</Text>}</View>
+        <View className="flex-1 items-center justify-center">{loading || family.isPending ? <View style={{ alignSelf: "stretch", paddingHorizontal: 20 }}><CardListSkeleton count={3} /></View> : <Text style={{ color: ink[500] }}>Nothing to plan yet.</Text>}</View>
       </View>
     );
   }
@@ -165,7 +167,7 @@ export default function TodayPlan() {
             const prog = k === "all" ? { done: plan.done, total: plan.total } : plan.pillarProgress[k];
             const complete = prog.total > 0 && prog.done === prog.total;
             return (
-              <Pressable
+              <Tap
                 key={k}
                 accessibilityRole="tab"
                 accessibilityState={{ selected: on }}
@@ -174,7 +176,7 @@ export default function TodayPlan() {
                   if (k !== pillar) feel.tick();
                   setPillar(k);
                 }}
-                style={({ pressed }) => [
+                style={[
                   on ? null : glassShadow,
                   {
                     flex: 1,
@@ -186,9 +188,9 @@ export default function TodayPlan() {
                     backgroundColor: on ? ink[900] : "#fff",
                     borderWidth: on ? 0 : 1,
                     borderColor: surface.line,
-                    transform: [{ scale: pressed ? 0.95 : 1 }],
                   },
                 ]}
+                scale={0.95}
               >
                 <Icon size={18} color={on ? "#fff" : brand[600]} strokeWidth={2} />
                 <Text style={{ fontFamily: font.semibold, fontSize: 11.5, color: on ? "#fff" : ink[900] }}>{label}</Text>
@@ -199,7 +201,7 @@ export default function TodayPlan() {
                 ) : (
                   <Text style={{ fontFamily: font.medium, fontSize: 10.5, color: on ? "rgba(255,255,255,0.75)" : ink[500] }}>{`${prog.done}/${prog.total}`}</Text>
                 )}
-              </Pressable>
+              </Tap>
             );
           })}
         </View>

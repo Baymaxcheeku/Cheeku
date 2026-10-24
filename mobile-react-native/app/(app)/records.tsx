@@ -1,8 +1,9 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocalSearchParams } from "expo-router";
 import { useEffect, useRef, useState } from "react";
-import { ActivityIndicator, RefreshControl, ScrollView, Text, View } from "react-native";
+import { RefreshControl, ScrollView, Text, View } from "react-native";
 
+import { CardListSkeleton } from "@/components/ui/skeleton";
 import { OfflineBanner } from "@/components/app/offline-banner";
 import { RecordsHeader } from "@/components/records/chrome";
 import { Backdrop } from "@/components/ui/screen";
@@ -144,8 +145,8 @@ export default function Records() {
       />
 
       {records.isPending ? (
-        <View className="mt-10 items-center">
-          <ActivityIndicator color={brand[600]} />
+        <View className="px-5">
+          <CardListSkeleton />
         </View>
       ) : records.isError ? (
         /* Same rule as Home: a failed fetch is not an empty account, and

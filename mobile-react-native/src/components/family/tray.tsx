@@ -1,12 +1,14 @@
 import { Check, Lock, MessagesSquare, Plus, Settings2, ShieldCheck, Users, X } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
-import { Modal, Pressable, ScrollView, Text, View } from "react-native";
+import { Pressable, ScrollView, Text, View } from "react-native";
 import Animated from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { Tap } from "@/components/ui/tap";
+import { Sheet, useSheetMax } from "@/components/ui/sheet";
 import { Avatar } from "@/components/ui/avatar";
 import { Glass, Gradient, glass, glassShadow } from "@/components/ui/glass";
-import { ENTER_QUICK, ENTER_SOFT, useReducedMotion } from "@/components/ui/motion";
+import { Enter, useReducedMotion } from "@/components/ui/motion";
 import { PillButton } from "@/components/ui/screen";
 import { formatPrice, PLANS } from "@/lib/billing/plans";
 import type { ActiveProfile } from "@/lib/profiles/context";
@@ -76,6 +78,7 @@ export function FamilyTray({
   onUpgrade: () => void;
 }) {
   const insets = useSafeAreaInsets();
+  const sheetMax86 = useSheetMax(0.86);
   const still = useReducedMotion();
   const [picked, setPicked] = useState(activeId);
   const closing = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -106,13 +109,11 @@ export function FamilyTray({
   }
 
   return (
-    <Modal visible={open} transparent animationType="slide" onRequestClose={onClose}>
-      <Pressable accessibilityLabel="Close" onPress={onClose} style={{ flex: 1, backgroundColor: "rgba(15,16,48,0.38)" }} />
-      <View style={{ maxHeight: "86%", borderTopLeftRadius: 32, borderTopRightRadius: 32, overflow: "hidden", backgroundColor: "#fafafe", paddingBottom: insets.bottom + 12 }}>
+    <Sheet open={open} onClose={onClose} label="Close">
+      <View style={{ maxHeight: sheetMax86, borderTopLeftRadius: 32, borderTopRightRadius: 32, overflow: "hidden", backgroundColor: "#fafafe", paddingBottom: insets.bottom + 12 }}>
         <View pointerEvents="none" style={{ position: "absolute", top: 0, left: 0, right: 0, height: 260 }}>
           <Gradient from="#ebe6ff" to="#fafafe" angle="vertical" />
         </View>
-        <View style={{ alignSelf: "center", width: 40, height: 5, borderRadius: 3, backgroundColor: "rgba(15,16,48,0.12)", marginTop: 8 }} />
 
         <View className="flex-row items-start gap-3 px-5 pt-4">
           <View className="min-w-0 flex-1">
@@ -188,19 +189,18 @@ export function FamilyTray({
           </Pressable>
         </ScrollView>
       </View>
-    </Modal>
+    </Sheet>
   );
 }
 
 function MemberCard({ profile, active, onPress }: { profile: ActiveProfile; active: boolean; onPress: () => void }) {
-  const still = useReducedMotion();
   return (
-    <Pressable
+    <Tap
       accessibilityRole="radio"
       accessibilityState={{ selected: active }}
       accessibilityLabel={active ? `${profile.name}, viewing now` : `Switch to ${profile.name}`}
       onPress={onPress}
-      style={({ pressed }) => [glassShadow, {
+      style={[glassShadow, {
         height: 158,
         borderRadius: 26,
         overflow: "hidden",
@@ -208,7 +208,6 @@ function MemberCard({ profile, active, onPress }: { profile: ActiveProfile; acti
         borderWidth: active ? 2 : 1,
         borderColor: active ? brand[600] : glass.rim,
         backgroundColor: "#fff",
-        transform: [{ scale: pressed ? 0.97 : 1 }],
       }]}
     >
       <Gradient from={profile.avatarBackground} to="#ffffff" angle="vertical" />
@@ -217,11 +216,10 @@ function MemberCard({ profile, active, onPress }: { profile: ActiveProfile; acti
           <Avatar svg={profile.avatar} photo={profile.photo} image={profile.avatarImage} background={profile.avatarBackground} size={62} />
         </View>
         {active ? (
-          <Animated.View entering={still ? undefined : ENTER_QUICK}>
-            <View style={{ width: 26, height: 26, borderRadius: 13, backgroundColor: brand[600], alignItems: "center", justifyContent: "center" }}>
-              <Check size={15} color="#fff" strokeWidth={3} />
-            </View>
-          </Animated.View>
+          // No entrance: picking a person is frequent, so the tick is simply there.
+          <View style={{ width: 26, height: 26, borderRadius: 13, backgroundColor: brand[600], alignItems: "center", justifyContent: "center" }}>
+            <Check size={15} color="#fff" strokeWidth={3} />
+          </View>
         ) : null}
       </View>
       <View style={{ flex: 1 }} />
@@ -231,7 +229,7 @@ function MemberCard({ profile, active, onPress }: { profile: ActiveProfile; acti
       <Text numberOfLines={1} style={{ fontFamily: font.medium, fontSize: 12.5, color: active ? brand[700] : ink[500], marginTop: 1 }}>
         {active ? "Viewing now" : profile.isPrimary ? "You" : (profile.relationship ?? "Family")}
       </Text>
-    </Pressable>
+    </Tap>
   );
 }
 
@@ -324,7 +322,6 @@ export function FamilyUpsellSheet({
   onCompare: () => void;
 }) {
   const insets = useSafeAreaInsets();
-  const still = useReducedMotion();
   // A grandparent, a parent and a child from the picker's own set.
   const faces = GHOSTS.map((id) => catalogFace(id)).filter((f): f is Face => Boolean(f));
   const step = PLANS.family.priceInPaise - PLANS.solo.priceInPaise;
@@ -336,10 +333,8 @@ export function FamilyUpsellSheet({
   ];
 
   return (
-    <Modal visible={open} transparent animationType="slide" onRequestClose={onClose}>
-      <Pressable accessibilityLabel="Close" onPress={onClose} style={{ flex: 1, backgroundColor: "rgba(15,16,48,0.38)" }} />
+    <Sheet open={open} onClose={onClose} label="Close">
       <View style={{ borderTopLeftRadius: 32, borderTopRightRadius: 32, overflow: "hidden", backgroundColor: "#fafafe", paddingBottom: insets.bottom + 14 }}>
-        <View style={{ alignSelf: "center", width: 40, height: 5, borderRadius: 3, backgroundColor: "rgba(15,16,48,0.12)", marginTop: 8 }} />
 
         {/* The picture: you, with three empty places beside you. */}
         <View style={{ marginHorizontal: 16, marginTop: 12, height: 150, borderRadius: 28, overflow: "hidden", alignItems: "center", justifyContent: "center" }}>
@@ -348,9 +343,9 @@ export function FamilyUpsellSheet({
             {faces.slice(0, 1).map((f, i) => (
               <Ghost key={`l${i}`} face={f} tilt={-8} />
             ))}
-            <Animated.View entering={still ? undefined : ENTER_SOFT} style={{ marginHorizontal: -6, zIndex: 2, borderRadius: 999, borderWidth: 4, borderColor: "#fff" }}>
+            <Enter kind="soft" style={{ marginHorizontal: -6, zIndex: 2, borderRadius: 999, borderWidth: 4, borderColor: "#fff" }}>
               <Avatar svg={me.avatar} photo={me.photo} image={me.avatarImage} background={me.avatarBackground} size={78} />
-            </Animated.View>
+            </Enter>
             {faces.slice(1, 3).map((f, i) => (
               <Ghost key={`r${i}`} face={f} tilt={i === 0 ? 6 : 10} />
             ))}
@@ -395,7 +390,7 @@ export function FamilyUpsellSheet({
           </Pressable>
         </View>
       </View>
-    </Modal>
+    </Sheet>
   );
 }
 

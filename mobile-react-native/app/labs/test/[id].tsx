@@ -3,6 +3,7 @@ import { Check, ChevronRight, Clock3, Droplet, Hourglass, ListChecks, Plus } fro
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { Tap } from "@/components/ui/tap";
 import { artFor, PartnerBadge, RatingLine, rupees, SampleNote } from "@/components/labs/parts";
 import { Glass, Gradient, glass, glassShadow } from "@/components/ui/glass";
 import { ScreenHeader } from "@/components/ui/screen";
@@ -161,14 +162,14 @@ export default function LabTestDetail() {
         <View style={[glassShadow, { height: 58, paddingHorizontal: 20, borderRadius: 999, backgroundColor: "#fff", justifyContent: "center" }]}>
           <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>{cheapest ? rupees(cheapest.price) : "-"}</Text>
         </View>
-        <Pressable
+        <Tap
           accessibilityRole="button"
           onPress={() => (added ? router.push("/labs/choose") : cart.toggle(test.id))}
-          style={({ pressed }) => [glassShadow, { flex: 1, height: 58, borderRadius: 999, backgroundColor: brand[600], flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, transform: [{ scale: pressed ? 0.98 : 1 }] }]}
+          style={[glassShadow, { flex: 1, height: 58, borderRadius: 999, backgroundColor: brand[600], flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8 }]} scale={0.98}
         >
           {added ? <Check size={18} color="#fff" strokeWidth={2.6} /> : <Plus size={18} color="#fff" strokeWidth={2.6} />}
           <Text style={{ fontFamily: font.semibold, fontSize: 16, color: "#fff" }}>{added ? `In cart · Choose lab` : "Add to cart"}</Text>
-        </Pressable>
+        </Tap>
       </View>
     </View>
   );

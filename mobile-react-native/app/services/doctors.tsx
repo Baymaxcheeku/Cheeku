@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { Tap } from "@/components/ui/tap";
 import { MascotFigure } from "@/components/illustrations/sprout";
 import { Grid2, SPECIALTY_ICON } from "@/components/services/parts";
 import { Brand } from "@/components/ui/brand";
@@ -51,7 +52,7 @@ export default function DoctorsHub() {
       <Backdrop />
       <ScreenHeader title="Doctors" subtitle="Every specialty, online or at a clinic" fallback="/services" />
       <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: insets.bottom + 32, gap: 12 }} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
-        <Pressable accessibilityRole="button" onPress={() => book()} style={({ pressed }) => [glassShadow, { borderRadius: 28, overflow: "hidden", marginTop: 6, borderWidth: 1, borderColor: "#e4defd", transform: [{ scale: pressed ? 0.985 : 1 }] }]}>
+        <Tap accessibilityRole="button" onPress={() => book()} style={[glassShadow, { borderRadius: 28, overflow: "hidden", marginTop: 6, borderWidth: 1, borderColor: "#e4defd" }]} scale={0.98}>
           {/*
            * Clean white, not dark violet: the mascot is lilac, and on a
            * violet card it disappeared. On white it is the most colourful
@@ -74,7 +75,7 @@ export default function DoctorsHub() {
               <MascotFigure size={100} moment="think" hop />
             </View>
           </View>
-        </Pressable>
+        </Tap>
 
         <View style={[glassShadow, { flexDirection: "row", alignItems: "center", gap: 10, height: 50, paddingHorizontal: 16, borderRadius: 999, backgroundColor: "#fff", borderWidth: 1, borderColor: glass.rim }]}>
           <Search size={18} color={ink[500]} />
@@ -123,7 +124,7 @@ function SpecialtyTile({ s, onPress }: { s: Specialty; onPress: () => void }) {
   const tint = TINT[s.group];
   const count = DOCTORS.filter((d) => d.specialty === s.id).length;
   return (
-    <Pressable accessibilityRole="button" accessibilityLabel={`${s.label}. ${s.line}`} onPress={onPress} style={({ pressed }) => [glassShadow, { flex: 1, minHeight: 128, borderRadius: 24, padding: 14, backgroundColor: "#fff", borderWidth: 1, borderColor: glass.rim, overflow: "hidden", transform: [{ scale: pressed ? 0.97 : 1 }] }]}>
+    <Tap accessibilityRole="button" accessibilityLabel={`${s.label}. ${s.line}`} onPress={onPress} style={[glassShadow, { flex: 1, minHeight: 128, borderRadius: 24, padding: 14, backgroundColor: "#fff", borderWidth: 1, borderColor: glass.rim, overflow: "hidden" }]}>
       <Gradient from={tint.from} to="#ffffff" angle="vertical" />
       <View style={{ width: 40, height: 40, borderRadius: 13, backgroundColor: "#fff", alignItems: "center", justifyContent: "center" }}>
         <Icon size={20} color={tint.fg} strokeWidth={1.8} />
@@ -131,6 +132,6 @@ function SpecialtyTile({ s, onPress }: { s: Specialty; onPress: () => void }) {
       <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 14.5, color: ink[900], marginTop: 10 }}>{s.label}</Text>
       <Text numberOfLines={2} style={{ fontFamily: font.regular, fontSize: 12, lineHeight: 16, color: ink[500], marginTop: 2 }}>{s.line}</Text>
       {count ? <Text style={{ fontFamily: font.medium, fontSize: 11, color: tint.fg, marginTop: 6 }}>{count} available</Text> : null}
-    </Pressable>
+    </Tap>
   );
 }

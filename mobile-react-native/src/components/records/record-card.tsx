@@ -14,8 +14,9 @@ import {
   Tablets,
   type LucideIcon,
 } from "lucide-react-native";
-import { Pressable, Text, View } from "react-native";
+import { Text, View } from "react-native";
 
+import { Tap } from "@/components/ui/tap";
 import { Avatar } from "@/components/ui/avatar";
 import { Gradient } from "@/components/ui/glass";
 import { font } from "@/theme/type";
@@ -94,13 +95,13 @@ export function RecordCard({
    * the type mark and the person's face, and a round glass chevron.
    */
   return (
-    <Pressable
+    <Tap
       accessibilityRole="button"
       accessibilityLabel={`${style.label}. ${record.title}. ${record.profileName}. ${
         severity ? severity.label : SEVERITY_LABEL.normal
       }`}
       onPress={() => router.push(`/records/${record.id}`)}
-      style={({ pressed }) => ({ transform: [{ scale: pressed ? 0.985 : 1 }] })}
+      scale={0.98}
     >
       <View className="flex-row items-center gap-3.5 overflow-hidden rounded-[26px] p-2.5 pr-3" style={shadow.e1}>
         <Gradient from={style.wash} to="#ffffff" />
@@ -148,7 +149,7 @@ export function RecordCard({
           <ChevronRight size={17} color={ink[700]} />
         </View>
       </View>
-    </Pressable>
+    </Tap>
   );
 }
 

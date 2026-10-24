@@ -1,9 +1,10 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useFocusEffect, useRouter } from "expo-router";
-import { ActivityIndicator, RefreshControl, ScrollView, Text, View } from "react-native";
+import { RefreshControl, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { HomeSkeleton } from "@/components/ui/skeleton";
 import { FamilyTray, FamilyUpsellSheet } from "@/components/family/tray";
 import { SwitchPulse } from "@/components/family/switch-pulse";
 import { Paywall } from "@/components/billing/paywall";
@@ -129,9 +130,7 @@ export default function Home() {
 
   if (context.isPending) {
     return (
-      <View className="flex-1 items-center justify-center bg-canvas">
-        <ActivityIndicator color={brand[600]} />
-      </View>
+      <HomeSkeleton topInset={insets.top} />
     );
   }
 
@@ -156,11 +155,7 @@ export default function Home() {
     // profile" that is being refreshed (an old session's, say) keeps the
     // loader up instead of flashing onboarding at someone with a family.
     if (context.isFetching) {
-      return (
-        <View className="flex-1 items-center justify-center bg-canvas">
-          <ActivityIndicator color={brand[600]} />
-        </View>
-      );
+      return <HomeSkeleton topInset={insets.top} />;
     }
     return <NoProfile topInset={insets.top} />;
   }

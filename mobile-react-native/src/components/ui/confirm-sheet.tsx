@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { ActivityIndicator, Modal, Pressable, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { Sheet } from "@/components/ui/sheet";
 import { ink, semantic, surface } from "@/theme/tokens";
 import { feel } from "@/lib/feel";
 
@@ -60,12 +61,7 @@ export function ConfirmSheet({
   }
 
   return (
-    <Modal visible={open} transparent animationType="slide" onRequestClose={onClose}>
-      <Pressable
-        accessibilityLabel={cancelLabel}
-        onPress={busy ? undefined : onClose}
-        style={{ flex: 1, backgroundColor: "rgba(15,16,48,0.4)" }}
-      />
+    <Sheet open={open} onClose={onClose} label={cancelLabel} dismissible={!busy}>
       <View
         className="rounded-t-sheet bg-canvas px-5 pt-5"
         style={{ paddingBottom: insets.bottom + 16 }}
@@ -108,6 +104,6 @@ export function ConfirmSheet({
           </Pressable>
         </View>
       </View>
-    </Modal>
+    </Sheet>
   );
 }

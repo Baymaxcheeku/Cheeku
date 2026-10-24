@@ -20,6 +20,7 @@ import {
 import { useState } from "react";
 import { Image, Pressable, Text, View } from "react-native";
 
+import { Tap } from "@/components/ui/tap";
 import { MealReadCard } from "@/components/today/sheets";
 import { glassShadow } from "@/components/ui/glass";
 import { BreathIcon, MindIcon, type AppIcon } from "@/components/ui/icons";
@@ -50,11 +51,11 @@ function Thumb({ log }: { log: DailyLog }) {
 
 function SmallButton({ label, onPress, dark, icon: Icon }: { label: string; onPress: () => void; dark?: boolean; icon?: LucideIcon }) {
   return (
-    <Pressable
+    <Tap
       accessibilityRole="button"
       accessibilityLabel={label}
       onPress={onPress}
-      style={({ pressed }) => ({
+      style={{
         height: 40,
         paddingHorizontal: 14,
         borderRadius: 999,
@@ -64,12 +65,11 @@ function SmallButton({ label, onPress, dark, icon: Icon }: { label: string; onPr
         backgroundColor: dark ? ink[900] : "#fff",
         borderWidth: dark ? 0 : 1,
         borderColor: surface.line,
-        transform: [{ scale: pressed ? 0.97 : 1 }],
-      })}
+      }}
     >
       {Icon ? <Icon size={15} color={dark ? "#fff" : ink[900]} strokeWidth={2.4} /> : null}
       <Text style={{ fontFamily: font.semibold, fontSize: 13.5, color: dark ? "#fff" : ink[900] }}>{label}</Text>
-    </Pressable>
+    </Tap>
   );
 }
 

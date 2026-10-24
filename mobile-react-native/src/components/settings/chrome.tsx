@@ -1,8 +1,9 @@
 import { useRouter } from "expo-router";
 import { ChevronLeft, type LucideIcon } from "lucide-react-native";
-import { ActivityIndicator, Pressable, Text, View } from "react-native";
+import { ActivityIndicator, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { Tap } from "@/components/ui/tap";
 import { Glass, GlassCircle, glass, glassShadow } from "@/components/ui/glass";
 import { RevealScroll } from "@/components/ui/reveal";
 import { Backdrop } from "@/components/ui/screen";
@@ -146,12 +147,12 @@ export function SaveButton({
   label?: string;
 }) {
   return (
-    <Pressable
+    <Tap
       accessibilityRole="button"
       accessibilityLabel={label}
       disabled={pending}
       onPress={onPress}
-      style={({ pressed }) => ({
+      style={{
         height: 54,
         borderRadius: 999,
         alignItems: "center",
@@ -159,8 +160,8 @@ export function SaveButton({
         // Brand, never green, for "Saved": green means a health result here.
         backgroundColor: saved ? brand[600] : ink[900],
         opacity: pending ? 0.6 : 1,
-        transform: [{ scale: pressed ? 0.98 : 1 }],
-      })}
+      }}
+      scale={0.98}
     >
       {pending ? (
         <ActivityIndicator color="#fff" />
@@ -169,6 +170,6 @@ export function SaveButton({
           {saved ? "Saved ✓" : label}
         </Text>
       )}
-    </Pressable>
+    </Tap>
   );
 }

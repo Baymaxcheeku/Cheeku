@@ -6,6 +6,7 @@ import { Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SvgXml } from "react-native-svg";
 
+import { Tap } from "@/components/ui/tap";
 import { ReviewList, ReviewSheet, SampleNote, Stars } from "@/components/labs/parts";
 import { Glass, Gradient, glass, glassShadow } from "@/components/ui/glass";
 import { ScreenHeader } from "@/components/ui/screen";
@@ -168,9 +169,9 @@ export default function DoctorProfile() {
         <View style={[glassShadow, { height: 58, paddingHorizontal: 22, borderRadius: 999, backgroundColor: "#fff", justifyContent: "center" }]}>
           <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>₹{d.fee[mode]}</Text>
         </View>
-        <Pressable accessibilityRole="button" onPress={book} style={({ pressed }) => [glassShadow, { flex: 1, height: 58, borderRadius: 999, backgroundColor: brand[600], alignItems: "center", justifyContent: "center", transform: [{ scale: pressed ? 0.98 : 1 }] }]}>
+        <Tap accessibilityRole="button" onPress={book} style={[glassShadow, { flex: 1, height: 58, borderRadius: 999, backgroundColor: brand[600], alignItems: "center", justifyContent: "center" }]} scale={0.98}>
           <Text style={{ fontFamily: font.semibold, fontSize: 16, color: "#fff" }}>{mode === "online" ? "Book a video slot" : "Book a clinic visit"}</Text>
-        </Pressable>
+        </Tap>
       </View>
 
       <ReviewSheet

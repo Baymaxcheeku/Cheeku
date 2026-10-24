@@ -1,9 +1,10 @@
 import { useRouter } from "expo-router";
 import { Bell } from "lucide-react-native";
 import { useEffect, useRef } from "react";
-import { Pressable, Text } from "react-native";
+import { Text } from "react-native";
 import Animated, { useAnimatedStyle, useSharedValue, withSequence, withSpring, withTiming } from "react-native-reanimated";
 
+import { Tap } from "@/components/ui/tap";
 import { glass, glassShadow } from "@/components/ui/glass";
 import { useReducedMotion } from "@/components/ui/motion";
 import { useUnreadCount } from "@/lib/notifications/use-inbox";
@@ -47,12 +48,12 @@ export function NotificationsBell() {
   const bellStyle = useAnimatedStyle(() => ({ transform: [{ rotate: `${swing.value}deg` }] }));
 
   return (
-    <Pressable
+    <Tap
       accessibilityRole="button"
       accessibilityLabel={count > 0 ? `Notifications, ${count} unread` : "Notifications"}
       onPress={() => router.push("/notifications")}
       hitSlop={4}
-      style={({ pressed }) => [
+      style={[
         glassShadow,
         {
           width: 48,
@@ -63,9 +64,9 @@ export function NotificationsBell() {
           backgroundColor: glass.fillStrong,
           borderWidth: 1,
           borderColor: glass.rim,
-          transform: [{ scale: pressed ? 0.94 : 1 }],
         },
       ]}
+      scale={0.95}
     >
       <Animated.View style={bellStyle}>
         <Bell size={20} color={ink[900]} strokeWidth={1.8} />
@@ -93,6 +94,6 @@ export function NotificationsBell() {
           <Text style={{ fontFamily: font.bold, fontSize: 10, lineHeight: 12, color: "#fff" }}>{count > 9 ? "9+" : count}</Text>
         </Animated.View>
       ) : null}
-    </Pressable>
+    </Tap>
   );
 }

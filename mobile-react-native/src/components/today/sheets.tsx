@@ -1,10 +1,11 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { Camera, Check, ImagePlus, Watch, X } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
-import { Image, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { Image, Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import Animated, { cancelAnimation, Easing, useAnimatedStyle, useSharedValue, withRepeat, withSequence, withTiming } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { Sheet as BaseSheet, useSheetMax } from "@/components/ui/sheet";
 import { MascotFigure } from "@/components/illustrations/sprout";
 import { Glass, Gradient } from "@/components/ui/glass";
 import { useReducedMotion } from "@/components/ui/motion";
@@ -24,11 +25,10 @@ import { font } from "@/theme/type";
 
 export function Sheet({ open, title, line, onClose, children }: { open: boolean; title: string; line?: string; onClose: () => void; children: React.ReactNode }) {
   const insets = useSafeAreaInsets();
+  const sheetMax88 = useSheetMax(0.88);
   return (
-    <Modal visible={open} transparent animationType="slide" onRequestClose={onClose}>
-      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={{ flex: 1 }}>
-        <Pressable accessibilityLabel="Close" onPress={onClose} style={{ flex: 1, backgroundColor: "rgba(15,16,48,0.4)" }} />
-        <View className="rounded-t-sheet bg-canvas" style={{ maxHeight: "88%", paddingBottom: insets.bottom + 14 }}>
+    <BaseSheet open={open} onClose={onClose} label="Close">
+        <View className="rounded-t-sheet bg-canvas" style={{ maxHeight: sheetMax88, paddingBottom: insets.bottom + 14 }}>
           <View className="flex-row items-start gap-3 px-5 pb-2 pt-5">
             <View className="min-w-0 flex-1">
               <Text accessibilityRole="header" style={{ fontFamily: font.semibold, fontSize: 20, letterSpacing: -0.4, color: ink[900] }}>
@@ -44,8 +44,8 @@ export function Sheet({ open, title, line, onClose, children }: { open: boolean;
             {children}
           </ScrollView>
         </View>
-      </KeyboardAvoidingView>
-    </Modal>
+      
+    </BaseSheet>
   );
 }
 

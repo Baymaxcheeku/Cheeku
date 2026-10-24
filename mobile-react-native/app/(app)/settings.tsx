@@ -24,7 +24,6 @@ import { useState } from "react";
 
 import {
   ActivityIndicator,
-  Modal,
   Pressable,
   ScrollView,
   Text,
@@ -39,6 +38,8 @@ import {
   exportAccount,
   shareExport,
 } from "@/lib/account/actions";
+import { Tap } from "@/components/ui/tap";
+import { Sheet } from "@/components/ui/sheet";
 import { CheekuPeek } from "@/components/mascot/lottie";
 import { Avatar } from "@/components/ui/avatar";
 import { Glass, Gradient, glass, glassShadow } from "@/components/ui/glass";
@@ -172,11 +173,11 @@ export default function Settings() {
           </View>
         </View>
 
-        <Pressable
+        <Tap
           accessibilityRole="button"
           accessibilityLabel={`${plan.name}. Opens your subscription`}
           onPress={() => router.push("/settings/subscription")}
-          style={({ pressed }) => [
+          style={[
             glassShadow,
             {
               marginTop: 14,
@@ -189,9 +190,9 @@ export default function Settings() {
               backgroundColor: glass.fillStrong,
               borderWidth: 1,
               borderColor: glass.rim,
-              transform: [{ scale: pressed ? 0.985 : 1 }],
             },
           ]}
+          scale={0.98}
         >
           <View className="h-10 w-10 items-center justify-center rounded-pill" style={{ backgroundColor: ink[900] }}>
             <Crown size={17} color="#fff" />
@@ -206,7 +207,7 @@ export default function Settings() {
           </View>
           <Text style={{ fontFamily: font.semibold, fontSize: 13.5, color: brand[600] }}>{canUpgrade ? "Upgrade" : "Manage"}</Text>
           <ChevronRight size={15} color={brand[600]} />
-        </Pressable>
+        </Tap>
       </View>
       </View>
 
@@ -502,18 +503,7 @@ function AccountData({ onDeleted }: { onDeleted: () => void }) {
         ) : null}
       </View>
 
-      <Modal
-        visible={confirmOpen}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setConfirmOpen(false)}
-      >
-        <Pressable
-          accessibilityLabel="Cancel"
-          onPress={() => setConfirmOpen(false)}
-          className="flex-1"
-          style={{ backgroundColor: "rgba(15,16,48,0.4)" }}
-        />
+      <Sheet open={confirmOpen} onClose={() => setConfirmOpen(false)} label="Cancel">
         <View
           className="rounded-t-sheet bg-canvas px-5 pt-4"
           style={{ paddingBottom: insets.bottom + 16 }}
@@ -582,7 +572,7 @@ function AccountData({ onDeleted }: { onDeleted: () => void }) {
             </Pressable>
           </View>
         </View>
-      </Modal>
+      </Sheet>
     </>
   );
 }
@@ -650,11 +640,11 @@ function CareTile({
 }) {
   const router = useRouter();
   return (
-    <Pressable
+    <Tap
       accessibilityRole="button"
       accessibilityLabel={`${title}. ${line}`}
       onPress={() => router.push(href as never)}
-      style={({ pressed }) => ({ flex: 1, transform: [{ scale: pressed ? 0.97 : 1 }] })}
+      style={{ flex: 1 }}
     >
       <View className="overflow-hidden rounded-[24px] p-3.5" style={glassShadow}>
         <Gradient from={tint} to="#ffffff" />
@@ -664,6 +654,6 @@ function CareTile({
         <Text style={{ fontFamily: font.semibold, fontSize: 15.5, color: ink[900], marginTop: 12 }}>{title}</Text>
         <Text style={{ fontFamily: font.regular, fontSize: 12.5, color: ink[500], marginTop: 1 }}>{line}</Text>
       </View>
-    </Pressable>
+    </Tap>
   );
 }

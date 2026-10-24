@@ -1,7 +1,7 @@
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 
-import { useReducedMotion } from "@/components/ui/motion";
+import { EASE_OUT, useReducedMotion } from "@/components/ui/motion";
 import { brand } from "@/theme/tokens";
 
 /*
@@ -27,7 +27,7 @@ export function Button({
   const pressed = useSharedValue(0);
 
   const animated = useAnimatedStyle(() => ({
-    transform: [{ scale: 1 - pressed.value * 0.02 }],
+    transform: [{ scale: 1 - pressed.value * 0.03 }],
   }));
 
   const primary = variant === "primary";
@@ -40,10 +40,10 @@ export function Button({
         disabled={off}
         onPress={onPress}
         onPressIn={() => {
-          if (!still) pressed.value = withTiming(1, { duration: 90 });
+          if (!still) pressed.value = withTiming(1, { duration: 120, easing: EASE_OUT });
         }}
         onPressOut={() => {
-          if (!still) pressed.value = withTiming(0, { duration: 140 });
+          if (!still) pressed.value = withTiming(0, { duration: 160, easing: EASE_OUT });
         }}
         style={{
           height: 52,

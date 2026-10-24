@@ -20,6 +20,7 @@ import { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Alert, Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { Tap } from "@/components/ui/tap";
 import { MascotFigure } from "@/components/illustrations/sprout";
 import { Avatar } from "@/components/ui/avatar";
 import { Glass, Gradient, glass, glassShadow } from "@/components/ui/glass";
@@ -439,14 +440,14 @@ export default function Scan() {
 
       <View className="mt-5 gap-2.5">
         {sources.map((src) => (
-          <Pressable
+          <Tap
             key={src.key}
             accessibilityRole="button"
             accessibilityLabel={`${src.title}. ${src.line}`}
             accessibilityState={{ disabled: !profileId }}
             disabled={!profileId}
             onPress={() => void src.onPress()}
-            style={({ pressed }) => ({ opacity: profileId ? 1 : 0.5, transform: [{ scale: pressed ? 0.985 : 1 }] })}
+            style={{ opacity: profileId ? 1 : 0.5 }} scale={0.98}
           >
             <View className="flex-row items-center gap-3.5 overflow-hidden rounded-[26px] p-2.5 pr-3" style={glassShadow}>
               <Gradient from={src.from} to="#ffffff" />
@@ -466,7 +467,7 @@ export default function Scan() {
                 <ChevronRight size={18} color={ink[700]} />
               </View>
             </View>
-          </Pressable>
+          </Tap>
         ))}
       </View>
       <Text style={{ fontFamily: font.regular, fontSize: 12, color: ink[300], textAlign: "center", marginTop: 10 }}>

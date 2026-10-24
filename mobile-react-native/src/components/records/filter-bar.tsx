@@ -8,9 +8,10 @@ import {
   X,
 } from "lucide-react-native";
 import { useState } from "react";
-import { Modal, Pressable, ScrollView, Text, View } from "react-native";
+import { Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { Sheet, useSheetMax } from "@/components/ui/sheet";
 import { DOC_TYPE_LABEL, DOC_TYPES, type DocType } from "@/lib/records/types";
 import { brand, ink, shadow, surface } from "@/theme/tokens";
 
@@ -251,20 +252,14 @@ function OptionSheet({
   onClose: () => void;
 }) {
   const insets = useSafeAreaInsets();
+  const sheetMax70 = useSheetMax(0.70);
 
   return (
-    <Modal visible={open} transparent animationType="slide" onRequestClose={onClose}>
-      <Pressable
-        accessibilityLabel="Close"
-        onPress={onClose}
-        className="flex-1"
-        style={{ backgroundColor: "rgba(15,16,48,0.35)" }}
-      />
+    <Sheet open={open} onClose={onClose} label="Close">
       <View
         className="rounded-t-sheet bg-canvas px-5 pt-2"
-        style={{ maxHeight: "70%", paddingBottom: insets.bottom + 16 }}
+        style={{ maxHeight: sheetMax70, paddingBottom: insets.bottom + 16 }}
       >
-        <View className="h-1 w-10 self-center rounded-pill" style={{ backgroundColor: surface.line }} />
         <Text className="mt-3 text-[18px] font-bold text-ink-900">{title}</Text>
 
         <ScrollView className="mt-3 rounded-card bg-surface" style={shadow.e1}>
@@ -295,6 +290,6 @@ function OptionSheet({
           })}
         </ScrollView>
       </View>
-    </Modal>
+    </Sheet>
   );
 }

@@ -23,6 +23,8 @@ import { useState } from "react";
 import { ActivityIndicator, Modal, Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { Tap } from "@/components/ui/tap";
+import { Sheet } from "@/components/ui/sheet";
 import { Paywall } from "@/components/billing/paywall";
 import { SettingsScreen } from "@/components/settings/chrome";
 import { Body, Eyebrow, Questions, Title, type QA } from "@/components/settings/editorial";
@@ -428,12 +430,12 @@ function PlanCard({ plan, current, from, onPress }: { plan: Plan; current: boole
   const fg = featured ? "#fff" : ink[900];
   const soft = featured ? "rgba(255,255,255,0.75)" : ink[500];
   return (
-    <Pressable
+    <Tap
       accessibilityRole="button"
       accessibilityState={{ disabled: current, selected: current }}
       disabled={current}
       onPress={onPress}
-      style={({ pressed }) => [glassShadow, {
+      style={[glassShadow, {
         width: CARD_W,
         padding: 18,
         borderRadius: 28,
@@ -441,8 +443,8 @@ function PlanCard({ plan, current, from, onPress }: { plan: Plan; current: boole
         backgroundColor: featured ? brand[700] : "#fff",
         borderWidth: current ? 2 : 0,
         borderColor: featured ? BRAND_ON_DARK : brand[500],
-        transform: [{ scale: pressed ? 0.98 : 1 }],
       }]}
+      scale={0.98}
     >
       {featured ? <Gradient from={brand[800]} to={brand[500]} glow="#8a82f5" /> : null}
       <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
@@ -493,7 +495,7 @@ function PlanCard({ plan, current, from, onPress }: { plan: Plan; current: boole
         {current ? <Check size={15} color={featured ? "#fff" : brand[700]} strokeWidth={2.8} /> : up ? <ArrowUpRight size={16} color={featured ? brand[700] : "#fff"} /> : <ArrowDownRight size={16} color={ink[700]} />}
         <Text style={{ fontFamily: font.semibold, fontSize: 14.5, color: current ? (featured ? "#fff" : brand[700]) : featured ? brand[700] : up ? "#fff" : ink[700] }}>{label}</Text>
       </View>
-    </Pressable>
+    </Tap>
   );
 }
 
@@ -609,10 +611,8 @@ function ChangeSheet({
       : `Switch to ${target.name}?`;
 
   return (
-    <Modal visible transparent animationType="slide" onRequestClose={onClose}>
-      <Pressable accessibilityLabel="Close" onPress={onClose} style={{ flex: 1, backgroundColor: "rgba(15,16,48,0.38)" }} />
+    <Sheet open={true} onClose={onClose} label="Close">
       <View style={{ borderTopLeftRadius: 32, borderTopRightRadius: 32, backgroundColor: "#fafafe", paddingHorizontal: 22, paddingTop: 10, paddingBottom: insets.bottom + 14 }}>
-        <View style={{ alignSelf: "center", width: 40, height: 5, borderRadius: 3, backgroundColor: "rgba(15,16,48,0.12)" }} />
         <Text style={{ fontFamily: font.semibold, fontSize: 12.5, color: brand[700], marginTop: 16 }}>
           {target.priceInPaise === 0 ? "₹0" : `${formatPrice(target.priceInPaise)}/${target.period}`}
         </Text>
@@ -641,7 +641,7 @@ function ChangeSheet({
           <Text style={{ fontFamily: font.semibold, fontSize: 14.5, color: ink[500] }}>{upgrade ? "Not now" : "Keep my plan"}</Text>
         </Pressable>
       </View>
-    </Modal>
+    </Sheet>
   );
 }
 

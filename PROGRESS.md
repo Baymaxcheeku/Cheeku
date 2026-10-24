@@ -3018,3 +3018,60 @@ on controls.
 screenshots of sign-in, Ask, Today, Health file and Records (worst-case
 names), Choose a lab, Home and Scan. **Needs a phone:** every haptic (timing
 and strength), the entrance feel, and a new native build for expo-haptics.
+
+## UI batch 2: one sheet, one press, skeletons · 2026-10-24
+
+Batch 2 of the UI audit (`docs/audits/2026-10-ui-ux-audit.md`): the
+primitives every later screen builds on.
+
+**Sheet.** All 13 bottom sheets were a `Modal` with `animationType="slide"`
+and the dark layer inside it, so the backdrop slid up with the sheet like a
+web modal, and every sheet drew a grabber that did nothing. Now there is one
+`<Sheet>` (`components/ui/sheet.tsx`). The backdrop fades and never moves. The
+sheet rises on a spring (300ms, damping 0.9) and leaves faster than it came
+(220ms), because the app answering should feel quicker than the person
+deciding. The top centre strip, where the grabber is drawn once for every
+sheet, drags: release past 40% of the height, or a flick that would carry it
+there, closes it with the release speed handed to the spring so there is no
+seam; pulled up, it rubber-bands. The drag zone is only the grabber strip so
+it never fights a close button or a list's own scroll. `dismissible={false}`
+holds it while something is in flight. Reduce Motion fades instead of
+sliding. Percent `maxHeight`s stopped working inside it (the box is sized by
+its content, so "86%" had nothing to be a percent of); `useSheetMax(0.86)`
+turns them into points. The consent gate stays a native full-screen and page
+sheet on purpose: it is not dismissible by design.
+
+**Tap.** About a third of the pressables reacted to a touch, with nine
+different scales that snapped instantly. `<Tap>` (`components/ui/tap.tsx`)
+dips to 0.97 on press-in in 120ms with a strong ease-out and comes back in
+160ms, on the UI thread, with no re-render. Big cards use 0.98, small round
+buttons 0.95; those three values are the only ones left. 55 surfaces moved,
+the tab bar included. About 250 raw `Pressable`s remain for batch 3. Reduce
+Motion dims instead of scaling.
+
+**Skeletons.** Home, Records, Health file, Ask and Today showed a centred
+spinner on first load. Each now shows its own shape (`ui/skeleton.tsx`) with
+a slow pulse, so nothing jumps when the data lands. The pulse is the one loop
+that runs until it is done, because it means "still loading"; under Reduce
+Motion it is still.
+
+**Blur, withdrawn.** The audit asked for a blur behind the floating tab bar.
+Looking closer, no screen scrolls content under it: every screen pads its
+list above the bar. A blur over the plain canvas does nothing but cost a
+native module, so `expo-blur` was installed and taken out again.
+
+**Batch 1's keyframes were broken on web.** The `ENTER_*` Reanimated
+`Keyframe`s from batch 1 left their view collapsed or displaced on web: the
+member page avatar sat on top of the name and the tray checkmark jumped.
+They are replaced by `<Enter kind="quick|soft|pop">` in `motion.tsx`, plain
+shared values with the same timings, which render the same everywhere. The
+tray checkmark now has no entrance at all. PLAN rule 7 says not to use
+`Keyframe`.
+
+**Verified here:** typecheck, lint, 418 tests; web screenshots of every
+sheet opening with the fading backdrop, a slow drag following the pointer and
+snapping back, the member page and tray after the `Enter` fix, and the four
+skeletons. **Needs a phone:** a fling to dismiss, a slow full pull, pulling
+up, the keyboard with a sheet open on iOS, every press, and haptics (still
+waiting on a new `eas build` from batch 1).
+

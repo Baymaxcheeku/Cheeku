@@ -4,6 +4,7 @@ import { BellRing, Check, ChevronRight, FileHeart, Lock, Phone, ShieldCheck, Ste
 import { Linking, Pressable, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { Tap } from "@/components/ui/tap";
 import { SERVICE_ICON, ServiceArt } from "@/components/services/parts";
 import { Brand } from "@/components/ui/brand";
 import { Gradient, glass, glassShadow } from "@/components/ui/glass";
@@ -174,9 +175,9 @@ function Waitlist({ id }: { id: string }) {
     void joinWaitlist(id);
   }
   return (
-    <Pressable accessibilityRole="button" disabled={on} onPress={join} style={({ pressed }) => ({ height: 54, borderRadius: 999, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, backgroundColor: on ? "#fff" : ink[900], borderWidth: on ? 1.5 : 0, borderColor: brand[200], transform: [{ scale: pressed ? 0.98 : 1 }] })}>
+    <Tap accessibilityRole="button" disabled={on} onPress={join} style={{ height: 54, borderRadius: 999, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, backgroundColor: on ? "#fff" : ink[900], borderWidth: on ? 1.5 : 0, borderColor: brand[200] }} scale={0.98}>
       {on ? <Check size={18} color={brand[700]} strokeWidth={3} /> : <BellRing size={18} color="#fff" />}
       <Text style={{ fontFamily: font.semibold, fontSize: 15.5, color: on ? brand[700] : "#fff" }}>{on ? "You're on the list" : "Tell me when it's open"}</Text>
-    </Pressable>
+    </Tap>
   );
 }

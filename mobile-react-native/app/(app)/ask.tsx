@@ -16,9 +16,10 @@ import {
   X,
   type LucideIcon,
 } from "lucide-react-native";
+import { AskSkeleton } from "@/components/ui/skeleton";
 import { MemoryIcon, ReadsIcon, type AppIcon } from "@/components/ui/icons";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ProductAssessmentCard } from "@/components/ai/product-assessment-card";
@@ -310,19 +311,11 @@ export default function Ask() {
   }, [q, memory.data, thread.data]);
 
   if (family.isPending || (memberId && (memory.isPending || thread.isPending))) {
-    return (
-      <View className="flex-1 items-center justify-center bg-canvas">
-        <ActivityIndicator color={brand[600]} />
-      </View>
-    );
+    return <AskSkeleton topInset={insets.top} bottomInset={insets.bottom} />;
   }
 
   if (!member && family.isFetching) {
-    return (
-      <View className="flex-1 items-center justify-center bg-canvas">
-        <ActivityIndicator color={brand[600]} />
-      </View>
-    );
+    return <AskSkeleton topInset={insets.top} bottomInset={insets.bottom} />;
   }
 
   if (!member) {

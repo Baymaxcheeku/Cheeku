@@ -2,6 +2,7 @@ import { useRouter } from "expo-router";
 import { CalendarClock, ChevronRight, FlaskConical, FolderHeart, ShieldAlert } from "lucide-react-native";
 import { Pressable, ScrollView, Text, View } from "react-native";
 
+import { Tap } from "@/components/ui/tap";
 import { ArticlePill } from "@/components/learn/parts";
 import { CheekuPeek } from "@/components/mascot/lottie";
 import { Avatar } from "@/components/ui/avatar";
@@ -98,11 +99,11 @@ export function FileCard({ file, member, loading }: { file: HealthFile | null | 
     : [];
 
   return (
-    <Pressable
+    <Tap
       accessibilityRole="button"
       accessibilityLabel={`${whose}. ${stats.map((s) => s.join(" ")).join(", ")}`}
       onPress={() => router.push("/health-file")}
-      style={({ pressed }) => ({ marginHorizontal: 20, marginTop: 52, transform: [{ scale: pressed ? 0.985 : 1 }] })}
+      style={{ marginHorizontal: 20, marginTop: 52 }} scale={0.98}
     >
       {/* Cheeku peeks over the card's top edge every few seconds, glancing
           about, then ducks back down: Home's quiet sign of life. */}
@@ -144,6 +145,6 @@ export function FileCard({ file, member, loading }: { file: HealthFile | null | 
           </View>
         ) : null}
       </Glass>
-    </Pressable>
+    </Tap>
   );
 }

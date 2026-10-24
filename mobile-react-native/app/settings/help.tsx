@@ -18,6 +18,7 @@ import {
 import { useState } from "react";
 import { Linking, Pressable, Text, TextInput, View } from "react-native";
 
+import { Tap } from "@/components/ui/tap";
 import { MascotFigure } from "@/components/illustrations/sprout";
 import { SettingsScreen } from "@/components/settings/chrome";
 import { Body, Eyebrow, Questions, Title, type QA } from "@/components/settings/editorial";
@@ -402,16 +403,15 @@ export default function Help() {
 
 function TopicTile({ icon: Icon, title, note, selected, onPress }: { icon: LucideIcon; title: string; note: string; selected: boolean; onPress: () => void }) {
   return (
-    <Pressable
+    <Tap
       accessibilityRole="button"
       accessibilityState={{ selected }}
       onPress={onPress}
-      style={({ pressed }) => [glassShadow, {
+      style={[glassShadow, {
         flex: 1,
         padding: 14,
         borderRadius: 22,
         backgroundColor: selected ? brand[600] : "#fff",
-        transform: [{ scale: pressed ? 0.97 : 1 }],
       }]}
     >
       <View style={{ width: 38, height: 38, borderRadius: 13, alignItems: "center", justifyContent: "center", backgroundColor: selected ? "rgba(255,255,255,0.18)" : brand[50] }}>
@@ -419,7 +419,7 @@ function TopicTile({ icon: Icon, title, note, selected, onPress }: { icon: Lucid
       </View>
       <Text style={{ fontFamily: font.semibold, fontSize: 14, color: selected ? "#fff" : ink[900], marginTop: 10 }}>{brandify(title, { onDark: selected })}</Text>
       <Text style={{ fontFamily: font.regular, fontSize: 12, color: selected ? "rgba(255,255,255,0.8)" : ink[500], marginTop: 2 }}>{note}</Text>
-    </Pressable>
+    </Tap>
   );
 }
 

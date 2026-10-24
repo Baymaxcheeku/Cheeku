@@ -218,6 +218,11 @@ in a shell. See `../SHIPPING.md`.
    health models, says how urgent it looks in one of four tiers, and writes
    out what to tell the doctor. Naming a diagnosis or changing a dose is a
    bug. Hard-stops and the safety lexicon always beat the model.
+7. Every bottom sheet is `<Sheet>` (`components/ui/sheet.tsx`), never a raw
+   `Modal`; new tappable surfaces use `<Tap>` (`components/ui/tap.tsx`) at
+   0.97, 0.98 for big cards, 0.95 for small round buttons. No Reanimated
+   `Keyframe` entrances: they leave the view collapsed on web; use `<Enter>`
+   from `components/ui/motion.tsx`. Haptics only through `src/lib/feel.ts`.
 
 ## Running it
 
@@ -330,9 +335,11 @@ haptics has to be seen on a simulator or a device before it counts as done.
 - **Haptics need a new native build.** `expo-haptics` (UI batch 1) is a native
   module: installed builds ignore it until the next `eas build`; web is a
   no-op by design. All calls go through `src/lib/feel.ts`.
-- **UI batches 2 to 4 are open** (`ui-b2-primitives`, `ui-b3-system`,
-  `ui-b4-today` in the launch tracker); the audit is
-  `../docs/audits/2026-10-ui-ux-audit.md`.
+- **UI batches 3 and 4 are open** (`ui-b3-system`, `ui-b4-today` in the
+  launch tracker); the audit is `../docs/audits/2026-10-ui-ux-audit.md`.
+  Batch 2 left about 250 raw `Pressable`s (some with their own press
+  state); batch 3 moves them to `<Tap>` screen by screen. The sheet drag (fling, slow pull, pull up)
+  and every press feel need a phone.
 - **Ideas from the AQ / Ant Afu research** are in the launch tracker:
   goal cards first (`loop-goal-cards`, M2), then food scan, device sync,
   staged symptom check, medicine box photo, privacy blur and partner
