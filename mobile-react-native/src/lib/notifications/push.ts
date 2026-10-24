@@ -256,3 +256,36 @@ export async function hasRecordReminder(id: string): Promise<boolean> {
     return false;
   }
 }
+
+// ------------------------------------------------------------ goal reminders --
+
+/*
+ * One repeating reminder per member with a running goal (UI batch 4), at the
+ * hour their answers point to. Set again on every save, so changing the goal
+ * or its hour replaces it; cleared when the goal stops. Lock-screen text
+ * stays general and never names the goal: "Steady sugar" on a lock screen is
+ * health information.
+ */
+const goalReminderId = (profileId: string) => `goal-${profileId}`;
+
+export async function setGoalReminder(profileId: string, hour: number): Promise<ReminderOutcome> {
+  if (!native) return "unsupported";
+  try {
+    const permission = await enablePush();
+    if (permission !== "granted") return permission === "unsupported" ? "unsupported" : "denied";
+    await Notifications.cancelScheduledNotificationAsync(goalReminderId(profileId)).catch(() => undefined);
+    await Notifications.scheduleNotificationAsync({
+      identifier: goalReminderId(profileId),
+      content: { title: "Two minutes for your goal", body: "One small step today keeps your streak going.", sound: "default", data: { url: "/today" } },
+      trigger: { type: Notifications.SchedulableTriggerInputTypes.DAILY, hour, minute: 0, channelId: "default" },
+    });
+    return "set";
+  } catch {
+    return "unsupported";
+  }
+}
+
+export async function clearGoalReminder(profileId: string): Promise<void> {
+  if (!native) return;
+  await Notifications.cancelScheduledNotificationAsync(goalReminderId(profileId)).catch(() => undefined);
+}

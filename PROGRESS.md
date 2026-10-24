@@ -3154,3 +3154,57 @@ colours and arbitrary size classes. These are warnings, not errors, so the
 the new sizes on a small Android (14 to 15 is the biggest jump, in about 200
 places), purple buttons on the glass cards, and every press.
 
+## UI batch 4: a calmer Today, and goal cards · 2026-10-24
+
+Batch 4 of the UI audit, built together with `loop-goal-cards`. Batches 1 to
+3 passed Athar's phone check the same day.
+
+**Three, not fifteen.** "All" on Today used to be about fifteen equal cards,
+each with a "Healthy living" pill and a filled button. Now it shows the three
+that matter right now (`nowTasks` in `plan.ts`): anything due, then the
+goal's check-ins that fit this part of the day, then the plan's own order,
+which already puts the current window first. Everything else folds under
+"Later today" and "Done today" as one-line rows. A row opens into the full
+card in place, and a plain habit can be ticked from the row. A single pillar
+is short enough (two to five tasks) to keep showing whole.
+
+**Done folds the card.** Done or Later on one of the three plays one haptic
+and folds the card away: its height closes over 220ms while it fades and
+dips (`Fold` in `motion.tsx`). Only then is the change written, so the
+next card rises into the gap instead of the list jumping. The write waits
+220ms, which is invisible next to a network call. Reduce Motion: a quick
+fade.
+
+**Less noise.** The pill appears only when it says something: Overdue or Due
+soon, "Your goal", or "For you". Home's plan rows lose "Healthy living" the
+same way. The header's bar became a ring, with "A fresh start", "Keep going"
+or "All done today" beside it.
+
+**Goals.** Five goals: Sleep better, Lose a few kilos, Steady sugar, Stronger
+legs, Calmer mind. Each has two quick questions whose answers pick its daily
+check-ins from habits that already exist (nothing new to write or review).
+The plan tags those tasks, adds the missing ones, and ranks them after
+anything due. Rules:
+- Weight and sugar are for adults only and never in pregnancy; those are a
+  doctor's call. Every goal task still goes through the plan's own `allowed`
+  gate, so a child only gets gentle habits. A goal left with nothing for
+  this person is not offered, and babies get no goals at all.
+- A saved goal that is no longer allowed (say, someone becomes pregnant) is
+  simply not run. It is not deleted.
+- The goal lives in `profiles.daily_prefs.goal`, so there is no migration.
+  It is read through `readGoalPrefs`, because that jsonb was written by a
+  client.
+- The streak counts days in a row with at least one check-in. A habit counts
+  through `today_actions`, a meal, reading or timer through `daily_logs`. An
+  unfinished today does not break it.
+- The optional daily reminder is a local notification at the hour the
+  answers point to (an hour before the bedtime they gave, for sleep). On the
+  lock screen it says "Two minutes for your goal" and never names the goal.
+
+**Verified here:** typecheck, lint, 434 tests (16 new, covering goal copy
+limits, who can pick what, tasks from answers, plan integration, ordering and
+the streak). Web screenshots of the picker, the sheet, a running goal with a
+streak, Later today open, a card folding away and the ring after it, and a
+pillar view. **Needs a phone:** the fold timing, the reminder firing at the
+right hour, and the swipe through the goal cards.
+
