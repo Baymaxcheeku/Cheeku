@@ -18,6 +18,8 @@ const eslintConfig = [
       ".designvenv/**",
       // Deno code, deployed to Supabase, with its own imports and globals.
       "supabase/functions/**",
+      // Node and k6 scripts with their own tsconfig and globals (__ENV, open).
+      "loadtest/**",
     ],
   },
   ...compat.extends("next/core-web-vitals", "next/typescript"),

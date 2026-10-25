@@ -3208,3 +3208,53 @@ streak, Later today open, a card folding away and the ring after it, and a
 pillar view. **Needs a phone:** the fold timing, the reminder firing at the
 right hour, and the swipe through the goal cards.
 
+
+## AI at scale: the plan and a load-test kit · 2026-10-25
+
+Tracker: `perf-scale-plan`, `perf-loadtest` (Archit). The plan is
+`docs/ai-at-scale.md`; the runnable half is `loadtest/`.
+
+**The plan, in one line each.** Supabase stays the system of record. One new
+service, the AI gateway on Cloud Run in Mumbai, is the API the conversation
+plugs into (`POST /v1/turns`): it runs the same `src/lib/memory` code the
+phone runs, decides whose memory a message goes to with the same rules,
+builds that one member's context on the server, and saves the turn as the
+user so RLS and the triggers stay the gate. Memory becomes a versioned
+snapshot per member instead of `memory_bundle` on every read. A router puts
+Gemini (Vertex, Mumbai), our fine-tuned model and the on-device stand-in
+behind one contract. Documents are read by queue workers that check whose
+name is on the report before anything is filed. Switching looks the same to
+the person using it; the server's answer wins when the two disagree.
+
+**Why the context moves to the server.** Today the phone builds the digest
+and sends it, so a tampered phone could send any digest, and every rule change
+needs an app release because `expo-updates` is not installed. The gateway
+fixes both, and is where a snapshot cache and per-model capacity limits can
+live. An Edge Function would cap a turn at 2 s of CPU and give no connection
+pool or keyless route to Vertex, so `cheeku-chat` stays only as a shim during
+migration.
+
+**The kit tests the app's own code, not a copy.** `samples/build.ts` makes a
+seeded population (members share first names, have babies, have grandparents,
+are paused by their plan), writes sample messages with an answer key, and
+runs the real `memberIntent` and `planTurn` over them. The recorded
+`ModelRequest`s are byte for byte what the phone sends today. Every member's
+records carry a canary code, so a leak is a string match, cheap enough to run
+on every response of a million-turn soak. k6 aborts on the first one.
+
+**What the sample set found** (seed 42, 20,000 messages): 0 leaks in 15,632
+model requests, 0 of 687 emergencies reached the model, and 3.6% of messages
+about another person filed under the wrong member. Six of the emergencies
+were about a member the plan has paused: the emergency screen showed, but the
+turn was never saved, because the Ask screen stops at the plan check. The misses are almost all
+grandparents (stored as "Grandparent", which `grand(mother|ma)` never matches)
+and first-person questions typed in a child's thread. All three are listed
+in PLAN.md Open, not fixed here: this change is the plan and the measurement.
+
+**Verified here:** the generator (20,000 turns in 10 s, type-checked with the
+mobile sources it imports), the fake model, k6 model mode (500 turns/s for
+40 s with 1,194 calls in flight and 0 violations; a deliberate 5% leak aborted
+the run in about 2 s; a 400-call capacity cap at 300/s gave 38% 429s, as it
+should), k6 extract mode, and the generated PDFs parse. **Not verified:** the
+staging seeder, k6 edge, gateway and staging-upload modes, and
+`check/isolation.sql`, because there is no staging project yet (`ops-envs`).

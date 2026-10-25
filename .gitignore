@@ -44,3 +44,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 __pycache__/
+
+# load test samples, tokens and results (loadtest/README.md)
+/loadtest/out/

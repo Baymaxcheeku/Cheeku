@@ -283,6 +283,24 @@ haptics has to be seen on a simulator or a device before it counts as done.
   The chat model contract is `src/lib/memory/model.ts` (ModelRequest in,
   ModelReply out); turn it on with `EXPO_PUBLIC_CHAT_MODEL=edge` and the
   `cheeku-chat` Edge Function secrets. Until then the stand-in answers.
+- **AI at scale: plan and load-test kit** (`../docs/ai-at-scale.md`,
+  `../loadtest/`). The AI gateway (`POST /v1/turns`), memory snapshots, the
+  model router, the extraction queue, and the pre-launch tests T1 to T12.
+  The sample set runs today's `memberIntent` and `planTurn` over 20,000
+  messages with an answer key: 0 cross-member leaks, 0 emergencies to the
+  model, but **3.6% of messages about another person land in the wrong
+  member's memory**, from two gaps to fix before launch:
+  - "dadi", "nani" and "grandma" never match a member saved as Grandparent
+    (`RELATION_WORDS` in `src/lib/memory/intent.ts` looks for
+    `grand(mother|ma)`);
+  - "my BP", "my last HbA1c" typed in a child's thread stays in the child's
+    memory (only "for me", "about me", "myself" and "my own" switch back).
+  Doctor bookings also find the member by first name
+  (`app/book/slot.tsx` `memberFor`); they should carry the profile id. And
+  an emergency about a member the plan has paused shows the emergency
+  screen but is never saved: `send()` in `app/(app)/ask.tsx` returns at the
+  plan check after the gate, so the escalation goes unrecorded.
+  Staging (`ops-envs`) is needed before the edge, gateway and upload runs.
 - **Clinical sign-off for the memory layer.** The clock-keyed limits in
   `src/lib/memory/thresholds.ts` (newborn bilirubin rows are examples from
   the reference thread, not a guideline), the hard-stop rules in
