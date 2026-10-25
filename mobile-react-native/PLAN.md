@@ -276,13 +276,10 @@ haptics has to be seen on a simulator or a device before it counts as done.
 
 ## Open
 
-- **Family care needs its database steps and a phone check** (loop-caregiver,
-  2026-10-25). Until `supabase/manual/0038-step-1..3` are run, no caregiver
-  alert or server nudge exists: step 1 is the migration, step 2 schedules the
-  sweep (enable pg_cron first), step 3 is the push webhook (with
-  PUSH_WEBHOOK_SECRET set and push-dispatch redeployed). Then check on a
-  phone: Family care cards, an alert 90 minutes after a member's unticked
-  slot, tapping it opens Family care without switching member.
+- **Phones buzz only with push credentials.** Migration 0038, the care-sweep
+  cron job and the push webhook are live on production (2026-10-25). A
+  server notification reaches a phone once the app build has an EAS project
+  id and APNs/FCM keys; until then it lands in the in-app inbox.
 - **Caregiver alerts go to every phone on the account**, the parent's own
   included when they use the same login. A "this phone is Papa's" setting
   would let push-dispatch skip theirs; not built.

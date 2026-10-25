@@ -8,11 +8,17 @@
 --   3. EAS: the app needs an EAS project id and APNs/FCM credentials before a
 --      phone can have a push token at all (see push.ts, registerThisDevice).
 --
--- Then EITHER create the webhook in the Dashboard (Database > Webhooks > Create:
--- table notifications, event Insert, type Supabase Edge Functions,
--- push-dispatch, POST, header x-webhook-secret = the same string),
--- OR replace the two placeholders below and Run this. Both make the same
--- trigger. Never commit the filled-in version: it contains the secret.
+-- Then create the webhook in the Dashboard. This is the way that worked on
+-- production (2026-10-25):
+--   Integrations > Database Webhooks (enable it if asked) > Webhooks >
+--   Create a new hook: table public.notifications, event Insert only, type
+--   Supabase Edge Functions, push-dispatch, POST, timeout 5000, extra header
+--   x-webhook-secret = the same string. Also turn off "Enforce JWT
+--   verification" on the push-dispatch function.
+--
+-- The SQL below only works AFTER Database Webhooks has been enabled once
+-- (before that, "schema supabase_functions does not exist"). Never commit a
+-- filled-in copy: it contains the secret.
 
 drop trigger if exists push_dispatch_webhook on public.notifications;
 
