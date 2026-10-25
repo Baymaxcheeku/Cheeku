@@ -285,10 +285,9 @@ haptics has to be seen on a simulator or a device before it counts as done.
 
 - **Fitness runs on sample studios.** Everything from location to check-in
   works against the preview network (marked "Sample", nothing charged) until
-  the partner's master API arrives (`int-fitness`). Migration 0039 must be
-  applied (`supabase/manual/0039-step-1-of-1.sql`, then `0039-check.sql`)
-  or booking says it switches on with the next update. `expo-location` is a
-  new native module: the phone needs a new dev build or `eas build`.
+  the partner's master API arrives (`int-fitness`). Migration 0039 is live
+  on production (2026-10-25, check all yes). `expo-location` is a new
+  native module: the phone needs a new dev build or `eas build`.
 - **Phones buzz only with push credentials.** Migration 0038, the care-sweep
   cron job and the push webhook are live on production (2026-10-25). A
   server notification reaches a phone once the app build has an EAS project
