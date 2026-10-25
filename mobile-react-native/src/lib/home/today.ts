@@ -139,7 +139,7 @@ export function pillarsThisWeek(log: readonly TodayAction[], today: string): Set
   const out = new Set<Pillar>();
   for (const a of log) {
     if (a.status !== "done" || !week.has(a.day)) continue;
-    if (a.stepKey.startsWith("due:")) out.add("check");
+    if (a.stepKey.startsWith("due:") || a.stepKey.startsWith("dose:")) out.add("check");
     else {
       const t = taskByKey(a.stepKey);
       if (t) out.add(t.pillar);

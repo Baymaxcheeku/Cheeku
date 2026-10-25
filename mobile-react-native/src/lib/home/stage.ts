@@ -167,6 +167,35 @@ export async function logStep(qc: QueryClient, a: Omit<TodayAction, "day"> & { d
   return { ok: true };
 }
 
+/** Several steps done at once, in one write: "Take all" on a dose card. */
+export async function logSteps(qc: QueryClient, profileId: string, stepKeys: readonly string[]): Promise<{ ok: true } | { ok: false; message: string }> {
+  if (!stepKeys.length) return { ok: true };
+  const day = todayIso();
+  const rows: TodayAction[] = stepKeys.map((stepKey) => ({ profileId, day, stepKey, status: "done" }));
+  const before = qc.getQueryData<TodayAction[]>(todayLogKey) ?? [];
+  const keys = new Set(stepKeys);
+  const next = [...rows, ...before.filter((x) => !(x.profileId === profileId && x.day === day && keys.has(x.stepKey)))];
+  qc.setQueryData(todayLogKey, next);
+
+  const me = await sessionUser();
+  if (!me) {
+    qc.setQueryData(todayLogKey, before);
+    return { ok: false, message: "Your session expired. Please sign in again." };
+  }
+  const { error } = await supabase
+    .from("today_actions")
+    .upsert(rows.map((r) => ({ user_id: me.id, profile_id: r.profileId, day: r.day, step_key: r.stepKey, status: r.status })), { onConflict: "profile_id,day,step_key" });
+  if (error) {
+    if (missing(error.message)) {
+      memoryLog = next;
+      return { ok: true };
+    }
+    qc.setQueryData(todayLogKey, before);
+    return { ok: false, message: "Couldn't save that. Check your connection and try again." };
+  }
+  return { ok: true };
+}
+
 /** Takes a mark back ("Undo"). */
 export async function unlogStep(qc: QueryClient, a: { profileId: string; stepKey: string; day?: string }): Promise<void> {
   const day = a.day ?? todayIso();

@@ -164,7 +164,8 @@ export function GoalSheet({ goalKey, profileId, onClose }: { goalKey: GoalKey | 
     setBusy(false);
     if (!ok) return;
     feel.success();
-    if (remind) void setGoalReminder(profileId, reminderHour(goal, answers));
+    // The reminder itself is planned with the day's nudges (use-engagement.ts).
+    if (remind) void setGoalReminder(profileId).then(() => qc.invalidateQueries({ queryKey: ["push-permission"] }));
     else void clearGoalReminder(profileId);
     onClose();
   }

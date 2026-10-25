@@ -113,7 +113,10 @@ judgement. Never "High priority", "High risk", "Borderline" or "Alert".
   (`NUDGES`, unlock card, milestones) and `catalog.ts` (the plan's tasks).
   Each task has `title`, `why` (the card line) and `more` (the detail).
 - Personal reasons: `src/lib/home/today.ts` and `plan.ts`.
-- On-phone reminders: `src/lib/notifications/push.ts`.
+- On-phone reminders: `src/lib/notifications/push.ts` (appointments, labs,
+  records) and `src/lib/notifications/engage.ts` (doses, refills and the
+  day's nudges; `engage.test.ts` holds them to the limits and the never-list).
+  A dose reminder says "Time for your morning medicines", never which one.
 - Goals: `src/lib/home/goals.ts` (title 30, line 60, question 40, chip 24;
   `goals.test.ts` holds them to it). A goal's lock-screen reminder never names
   the goal: "Steady sugar" on a lock screen is health information.

@@ -1,4 +1,5 @@
 import { dayNumber, daysBetween } from "@/lib/memory/clock";
+import type { LedgerEntry } from "@/lib/memory/ledger";
 import type { LoopView } from "@/lib/memory/loops";
 import type { Series } from "@/lib/memory/series";
 
@@ -6,6 +7,7 @@ import { BREATHING, HABITS, MEALS, READINGS, SLEEP_RATING, STEPS_TASK, taskByKey
 import { AREA_LABEL, PILLARS, type Area, type Pillar } from "./content";
 import { goalByKey, goalsFor, goalStreak, goalTaskKeys, goalTitle, readGoalPrefs, type Goal, type GoalView } from "./goals";
 import type { PlateTag } from "./meals";
+import { SLOT_LABEL, medsToday, readMedPrefs, type DoseView, type MedsToday, type Slot } from "./meds";
 import { areaReasons, areasFromConditions, areasFromReadings, slug, type TodayAction } from "./today";
 
 /*
@@ -22,7 +24,10 @@ import { areaReasons, areasFromConditions, areasFromReadings, slug, type TodayAc
  *   the daily spine        steps (or active play for children), four meals,
  *                          last night's sleep, two minutes of breathing
  *   their own checks       BP, sugar or weight readings when an area calls
- *                          for them; medicines when they take any
+ *                          for them; medicines when they take any, one
+ *                          card per part of the day with each dose on it
+ *                          (meds.ts), or a single tick when the schedule
+ *                          is not known yet
  *   personal habits        aimed at what their readings and conditions say,
  *                          at most four, two per area, rotating daily
  *   their goal             two to four check-ins for the one goal they
@@ -54,8 +59,11 @@ export type DailyLog = {
   createdAt: string;
 };
 
-/** `goal` is read through readGoalPrefs: it is jsonb a person's own client wrote. */
-export type DailyPrefs = { steps_goal?: number; veg?: boolean; goal?: unknown };
+/** `goal` and `meds` are read through readGoalPrefs and readMedPrefs: jsonb a person's own client wrote. */
+export type DailyPrefs = { steps_goal?: number; veg?: boolean; goal?: unknown; meds?: unknown };
+
+/** What the plan needs from a ledger entry. Older callers pass name and status only. */
+export type PlanMedicine = Pick<LedgerEntry, "name" | "status"> & Partial<Pick<LedgerEntry, "key" | "schedule" | "dose" | "timing" | "asNeeded" | "unitsPerDay">>;
 
 export type PlanInput = {
   profileId: string;
@@ -63,7 +71,7 @@ export type PlanInput = {
   hour: number;
   loops: readonly LoopView[];
   series: ReadonlyMap<string, Series>;
-  ledger: readonly { name: string; status: string }[];
+  ledger: readonly PlanMedicine[];
   conditions: readonly string[];
   lifeStage: string;
   ageYears: number | null;
@@ -94,6 +102,8 @@ export type PlanTask = CatalogTask & {
   progress?: { value: number; target: number };
   /** Today's logs for this task. */
   logs: DailyLog[];
+  /** A dose card: its part of the day, the time, and each medicine's dose. */
+  dose?: { slot: Slot; time: string; doses: DoseView[] };
 };
 
 export type StepsTarget = { goal: number; target: number; ramping: boolean; line: string };
@@ -112,6 +122,8 @@ export type Plan = {
   goal: GoalView | null;
   /** Goals this member can pick. */
   goals: Goal[];
+  /** Today's doses, stock and refills; null when they take nothing with a schedule. */
+  meds: MedsToday | null;
 };
 
 // ---------------------------------------------------------------- helpers --
@@ -211,7 +223,8 @@ export function buildPlan(input: PlanInput): Plan {
 
   // 1. What is due, always first.
   for (const l of input.loops) add(dueTask(l));
-  if (baby) return finish(out, marks, now, null, areas, null, []);
+  const meds = buildMeds(input);
+  if (baby) return finish(out, marks, now, null, areas, null, [], meds);
 
   // 2. The spine.
   let steps: StepsTarget | null = null;
@@ -235,11 +248,17 @@ export function buildPlan(input: PlanInput): Plan {
   if (areas.includes("sugar") && dayNumber(today) % 2 === 0) add(READINGS.sugar, { personal: true, reason: reasons.get("sugar") ?? null });
   if (!gentle && weekday(today) === READINGS.weight.weekday) add(READINGS.weight, areas.includes("weight") ? { personal: true, reason: reasons.get("weight") ?? null } : {});
   if (activeMeds.length) {
-    // One name and a count: "Atorvastatin and 2 more". Two names ran long and
-    // cut brand names in half ("Vitamin" for "Vitamin D3").
-    const first = activeMeds[0]?.name.trim() ?? "";
-    const meds = HABITS.find((h) => h.key === "meds_taken");
-    if (meds) add(meds, { personal: true, reason: activeMeds.length > 1 ? `${first} and ${activeMeds.length - 1} more` : `For your ${first}` });
+    // One card per part of the day, each dose ticked on its own.
+    for (const slot of meds?.slots ?? []) add(doseTask(slot));
+    // With no schedule known for any of them, the single tick stays. Once
+    // some have dose cards, the rest (often weekly) are set up on Your
+    // medicines instead: a daily tick next to "Morning medicines" confused,
+    // and is wrong for a weekly sachet. One name and a count: "Atorvastatin
+    // and 2 more". Two names ran long and cut brand names in half.
+    const loose = meds?.slots.length ? [] : activeMeds;
+    const first = loose[0]?.name.trim() ?? "";
+    const tick = HABITS.find((h) => h.key === "meds_taken");
+    if (tick && loose.length) add(tick, { personal: true, reason: loose.length > 1 ? `${first} and ${loose.length - 1} more` : `For your ${first}` });
     if (onThyroid) {
       const t = HABITS.find((h) => h.key === "thyroid_same_time");
       if (t) add(t, { personal: true, reason: "For your thyroid tablet" });
@@ -293,7 +312,44 @@ export function buildPlan(input: PlanInput): Plan {
     for (const h of rotate(pool, n).slice(0, GENERAL_PER_PILLAR[p.key])) add(h);
   }
 
-  return finish(out, marks, now, steps, areas, goalInfo, goals);
+  return finish(out, marks, now, steps, areas, goalInfo, goals, meds);
+}
+
+// ------------------------------------------------------------------ doses --
+
+const SLOT_WINDOW: Record<Slot, Exclude<Window, "anytime">> = { morning: "morning", afternoon: "midday", night: "evening" };
+
+function buildMeds(input: PlanInput): MedsToday | null {
+  const entries = input.ledger
+    .filter((e) => e.key)
+    .map((e) => ({ key: e.key as string, name: e.name, status: e.status, schedule: e.schedule ?? null, dose: e.dose ?? null, timing: e.timing ?? "any", asNeeded: e.asNeeded ?? false, unitsPerDay: e.unitsPerDay ?? null }));
+  if (!entries.length) return null;
+  const meds = medsToday({ profileId: input.profileId, today: input.today, ledger: entries, actions: input.actions, prefs: readMedPrefs(input.prefs.meds) });
+  return meds.meds.length || meds.unscheduled.length ? meds : null;
+}
+
+const clock = (hhmm: string) => {
+  const [h, m] = hhmm.split(":").map(Number);
+  const hour = h ?? 0;
+  return `${hour % 12 || 12}${m ? `:${String(m).padStart(2, "0")}` : ""} ${hour < 12 ? "am" : "pm"}`;
+};
+
+/** "Morning medicines", "2 doses around 8 am." The names are on the card, never in the title. */
+function doseTask(s: MedsToday["slots"][number]): CatalogTask & Partial<PlanTask> {
+  const n = s.doses.length;
+  return {
+    key: `dose:${s.slot}`,
+    pillar: "check",
+    kind: "dose",
+    area: "medicines",
+    window: SLOT_WINDOW[s.slot],
+    gentle: true,
+    title: `${SLOT_LABEL[s.slot]} medicines`,
+    why: `${n === 1 ? "1 dose" : `${n} doses`} around ${clock(s.time)}. Tick each one.`,
+    more: "Ticked doses build your week, so the doctor sees how it really went. Cheeku never changes a dose; ask your doctor first.",
+    personal: true,
+    dose: { slot: s.slot, time: s.time, doses: s.doses },
+  };
 }
 
 const WINDOW_RANK = (w: Window, now: Exclude<Window, "anytime">): number => {
@@ -308,6 +364,7 @@ function statusOf(t: PlanTask, marks: ReadonlyMap<string, "done" | "later">): Ta
   if (mark === "done") return "done";
   if (t.kind === "steps") return t.progress && t.progress.target > 0 && t.progress.value >= t.progress.target ? "done" : (mark ?? "open");
   if ((t.kind === "meal" || t.kind === "reading" || t.kind === "rating" || t.kind === "timer") && t.logs.length) return "done";
+  if (t.kind === "dose") return t.dose && t.dose.doses.every((d) => d.taken) ? "done" : (mark ?? "open");
   return mark ?? "open";
 }
 
@@ -321,6 +378,7 @@ function finish(
   areas: Area[],
   goalInfo: GoalInfo | null,
   goals: Goal[],
+  meds: MedsToday | null,
 ): Plan {
   const withStatus = tasks.map((t) => ({ ...t, status: statusOf(t, marks) }));
   const ordered = [...withStatus].sort(
@@ -358,7 +416,7 @@ function finish(
         taskKeys: goalInfo.keys,
       }
     : null;
-  return { tasks: ordered, hero, byPillar, pillarProgress, done, total: ordered.length, steps, areas, now, goal, goals };
+  return { tasks: ordered, hero, byPillar, pillarProgress, done, total: ordered.length, steps, areas, now, goal, goals, meds };
 }
 
 /**

@@ -73,12 +73,14 @@ export function usePushSetup() {
   useEffect(() => {
     if (!native) return;
     function handle(response: Notifications.NotificationResponse) {
-      const data = response.notification.request.content.data as { url?: unknown; notificationId?: unknown } | undefined;
+      const data = response.notification.request.content.data as { url?: unknown; notificationId?: unknown; profileId?: unknown } | undefined;
       const route = typeof data?.url === "string" && data.url.startsWith("/") ? data.url : "/notifications";
       const id = typeof data?.notificationId === "string" ? data.notificationId : null;
       // A remote push carries ids only; who it is about comes from the inbox.
       const known = id ? qc.getQueryData<InboxItem[]>(INBOX_KEY)?.find((i) => i.id === id) : undefined;
-      open({ id: id ?? "", route, profileId: known?.profileId ?? null, readAt: id ? null : "local" });
+      // A dose or a nudge planned on this phone says whose it is.
+      const own = typeof data?.profileId === "string" ? data.profileId : null;
+      open({ id: id ?? "", route, profileId: known?.profileId ?? own, readAt: id ? null : "local" });
     }
 
     // The tap that launched the app from cold, handled once.

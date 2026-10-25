@@ -58,14 +58,14 @@ describe("reminderPlan", () => {
   it("gives an online call three reminders: day before, hour before, room open", () => {
     const start = new Date(2026, 9, 2, 10, 30);
     const plan = reminderPlan({ id: "a1", mode: "online", start, time: "10:30 am" }, NOW);
-    expect(plan.map((r) => r.id)).toEqual(["appt-a1-day", "appt-a1-hour", "appt-a1-join"]);
+    expect(plan.map((r) => r.id)).toEqual(["appt-a1-day", "appt-a1-hour", "appt-a1-join", "appt-a1-after"]);
     expect(plan[2]?.at.getTime()).toBe(start.getTime() - 15 * 60_000);
   });
 
   it("gives a clinic visit a day-before and a time-to-leave reminder", () => {
     const start = new Date(2026, 9, 2, 18, 0);
     const plan = reminderPlan({ id: "c1", mode: "clinic", start, time: "6:00 pm" }, NOW);
-    expect(plan.map((r) => r.id)).toEqual(["appt-c1-day", "appt-c1-leave"]);
+    expect(plan.map((r) => r.id)).toEqual(["appt-c1-day", "appt-c1-leave", "appt-c1-after"]);
   });
 
   it("moves a night-time day-before reminder to 8 pm the evening before", () => {
@@ -78,7 +78,14 @@ describe("reminderPlan", () => {
   it("skips reminders that are already in the past", () => {
     const start = new Date(2026, 8, 30, 15, 30); // in 30 minutes
     const plan = reminderPlan({ id: "s1", mode: "online", start, time: "3:30 pm" }, NOW);
-    expect(plan.map((r) => r.id)).toEqual(["appt-s1-join"]);
+    expect(plan.map((r) => r.id)).toEqual(["appt-s1-join", "appt-s1-after"]);
+  });
+
+  it("asks for the prescription two hours after, or next morning after a late visit", () => {
+    const late = reminderPlan({ id: "l1", mode: "clinic", start: new Date(2026, 9, 2, 20, 30), time: "8:30 pm" }, NOW).find((r) => r.id === "appt-l1-after");
+    expect([late?.at.getDate(), late?.at.getHours()]).toEqual([3, 9]);
+    const day = reminderPlan({ id: "d1", mode: "online", start: new Date(2026, 9, 2, 11, 0), time: "11:00 am" }, NOW).find((r) => r.id === "appt-d1-after");
+    expect(day?.at.getHours()).toBe(13);
   });
 
   it("never puts a doctor or a department in the text", () => {

@@ -73,6 +73,12 @@ export const DEFAULT_PREFS: NotificationPrefs = {
   // Someone who booked a call expects to be told when it starts. The text of
   // the reminder is generic ("Your video call starts in 15 minutes").
   appointmentReminders: true,
+  // Dose times and refills the person set up themselves; generic on the lock
+  // screen ("Time for your morning medicines"), never a medicine's name.
+  medicineReminders: true,
+  // The day's few nudges, planned on the phone (engage.ts): at most four a
+  // day, never between 10 pm and 7:30 am, each only while it still matters.
+  dailyNudges: true,
   productUpdates: false,
   tipsReminders: false,
   checkinReminders: false,

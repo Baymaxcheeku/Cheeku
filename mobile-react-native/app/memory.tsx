@@ -180,7 +180,13 @@ export default function MemoryScreen() {
                 <LedgerRow key={e.key} entry={e} first={i === 0} />
               ))}
             </Card>
-          ) : (
+          ) : null}
+          {ledger.some((e) => e.status === "active") ? (
+            <View style={{ flexDirection: "row" }}>
+              <Pill label="Doses, refills and reminders" icon={PillBottle} dark onPress={() => router.push("/medicines")} />
+            </View>
+          ) : null}
+          {ledger.length ? null : (
             <Empty text={`No medicines on file for ${name}. A prescription, a pharmacy bill or a photo of the box all add to this.`} />
           )}
         </Section>

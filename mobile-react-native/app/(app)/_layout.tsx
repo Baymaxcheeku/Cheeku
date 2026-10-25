@@ -3,6 +3,7 @@ import { Tabs } from "expo-router";
 import { TabBar } from "@/components/app/tab-bar";
 import { useToast } from "@/components/notifications/toast";
 import { useInboxLive } from "@/lib/notifications/use-inbox";
+import { useEngagement } from "@/lib/notifications/use-engagement";
 import { usePushSetup } from "@/lib/notifications/use-push";
 
 /*
@@ -26,6 +27,8 @@ export default function AppLayout() {
   const show = useToast((s) => s.show);
   useInboxLive(show);
   usePushSetup();
+  // The active member's doses and the day's nudges, planned on this phone.
+  useEngagement();
 
   return (
     <Tabs

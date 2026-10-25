@@ -13,6 +13,7 @@ import {
   Lock,
   MessageCircle,
   Moon,
+  Pill,
   Salad,
   Sparkles,
   Stethoscope,
@@ -398,7 +399,7 @@ export function StepCard({
   const PillarIcon = PILLAR_ICON[step.pillar];
   const due = Boolean(step.due);
   // A task that needs more than a tap (steps, a meal, a reading) opens its sheet in the plan.
-  const action = step.cta ?? (step.kind !== "habit" ? { label: ACTION_LABEL[step.kind], route: `/today?task=${encodeURIComponent(step.key)}` } : null);
+  const action = step.cta ?? (step.kind === "dose" ? { label: ACTION_LABEL.dose, route: "/medicines" } : step.kind !== "habit" ? { label: ACTION_LABEL[step.kind], route: `/today?task=${encodeURIComponent(step.key)}` } : null);
   return (
     <View className="overflow-hidden rounded-2xl" style={[glassShadow, { minHeight: 300 }]}>
       <Gradient from={lilac.base} to={lilac.deep} glow="#ffffff" />
@@ -464,7 +465,7 @@ export function StepCard({
   );
 }
 
-const ACTION_LABEL: Record<PlanTask["kind"], string> = { habit: "Done", steps: "Log steps", meal: "Add a photo", reading: "Log reading", rating: "Rate last night", timer: "Start" };
+const ACTION_LABEL: Record<PlanTask["kind"], string> = { habit: "Done", steps: "Log steps", meal: "Add a photo", reading: "Log reading", rating: "Rate last night", timer: "Start", dose: "Tick doses" };
 
 const DUE_ICON: Record<string, typeof FlaskConical> = {
   test_ordered: FlaskConical,
@@ -554,7 +555,7 @@ export function DueThisWeek({ rows, onPress }: { rows: DueRow[]; onPress: (r: Du
   );
 }
 
-const KIND_ICON: Partial<Record<PlanTask["kind"], AppIcon>> = { steps: Footprints, meal: Salad, reading: Stethoscope, rating: Moon, timer: BreathIcon };
+const KIND_ICON: Partial<Record<PlanTask["kind"], AppIcon>> = { steps: Footprints, meal: Salad, reading: Stethoscope, rating: Moon, timer: BreathIcon, dose: Pill };
 
 /**
  * Today's action plan, in brief: how much of the day is done, and the next
@@ -587,7 +588,7 @@ export function PlanPreview({ plan, skip, onOpen }: { plan: Plan; skip: string |
               key={t.key}
               accessibilityRole="button"
               accessibilityLabel={t.title}
-              onPress={() => onOpen(t.kind === "habit" ? `/today?pillar=${t.pillar}` : `/today?task=${encodeURIComponent(t.key)}`)}
+              onPress={() => onOpen(t.kind === "dose" ? "/medicines" : t.kind === "habit" ? `/today?pillar=${t.pillar}` : `/today?task=${encodeURIComponent(t.key)}`)}
               style={({ pressed }) => ({ flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 11, borderTopWidth: i === 0 ? 0 : 1, borderTopColor: surface.line, opacity: pressed ? 0.7 : 1 })}
             >
               <View className="h-9 w-9 items-center justify-center rounded-md" style={{ backgroundColor: brand[50] }}>

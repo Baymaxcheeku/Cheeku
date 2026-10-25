@@ -234,6 +234,13 @@ in a shell. See `../SHIPPING.md`.
    `text-[13px]`. One primary: filled brand-600 means "do it"; ink-900 means
    "selected" (chips, segments) and the centre +. ESLint warns on anything
    off the scales.
+9. Anything that buzzes a phone goes through the planner
+   (`src/lib/notifications/engage.ts`) or push.ts's resync functions, under
+   a stable id, so planning again replaces rather than doubles. Never ask the
+   OS for permission without a tap on our own card first. The lock screen
+   never names a medicine, a condition, a reading or a goal. A dose is a
+   `today_actions` row `dose:<medicine>:<slot>`; Cheeku never sets or
+   changes a dose, only reminds.
 
 ## Running it
 
@@ -266,6 +273,11 @@ Anything about layout, cold-start routing, gestures, camera, biometrics or
 haptics has to be seen on a simulator or a device before it counts as done.
 
 ## Open
+
+- **Medicines and nudges need a phone check** (loop-meds, 2026-10-25): dose
+  reminders at the set time, the check an hour later, a refill nudge, the
+  Android "Medicine reminders" channel, a tap opening the right member, and
+  the "Turn on" card on Today. None of it runs in the web build.
 
 - **Rename.** "Baymax" is Disney's character and blocks store submission. It is
   currently the Expo `name`, `slug`, `scheme` and both bundle identifiers.

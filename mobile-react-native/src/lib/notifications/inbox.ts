@@ -103,6 +103,7 @@ function outOfQuietHours(at: Date, start: Date): Date {
  *
  * Online: the day before, an hour before, and when the room opens.
  * Clinic: the day before, and two hours before, to leave time to travel.
+ * Both: two hours after, asking for the prescription (loop-meds).
  * Anything already in the past, or less than a minute away, is skipped.
  */
 export function reminderPlan(
@@ -141,5 +142,18 @@ export function reminderPlan(
       body: "Tap to join. Find a quiet spot with good network.",
     });
   }
+  // After the visit: the prescription is what turns into dose reminders, so
+  // ask for it while it is still in their hand. A late visit asks next morning.
+  const after = new Date(s + 2 * 60 * 60_000);
+  if (after.getHours() >= 22 || after.getHours() < 7) {
+    if (after.getHours() >= 22) after.setDate(after.getDate() + 1);
+    after.setHours(9, 0, 0, 0);
+  }
+  plan.push({
+    id: `appt-${appt.id}-after`,
+    at: after,
+    title: "How did the visit go?",
+    body: "Snap the prescription and I'll set up the doses and reminders.",
+  });
   return plan.filter((r) => r.at.getTime() > now.getTime() + 60_000);
 }
