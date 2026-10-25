@@ -6,6 +6,7 @@ import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { LocationChip } from "@/components/location/location-chip";
 import { Tap } from "@/components/ui/tap";
 import { Sheet } from "@/components/ui/sheet";
 import { CartBar, rupees, SampleNote, TestArt } from "@/components/labs/parts";
@@ -83,6 +84,9 @@ export default function Labs() {
           Tests at home,{"\n"}
           <Text style={{ fontFamily: font.italic, color: brand[600] }}>results in {member?.isPrimary === false ? `${first}'s` : "your"} file.</Text>
         </Text>
+        <View style={{ marginTop: 12 }}>
+          <LocationChip profileId={member?.id} prefix="Collecting near" />
+        </View>
 
         {/* Search. */}
         <View style={[glassShadow, { marginTop: 18, height: 54, borderRadius: 999, backgroundColor: glass.fillStrong, borderWidth: 1, borderColor: glass.rim, flexDirection: "row", alignItems: "center", paddingHorizontal: 18, gap: 10 }]}>

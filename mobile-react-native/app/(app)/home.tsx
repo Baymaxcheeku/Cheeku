@@ -11,6 +11,7 @@ import { Paywall } from "@/components/billing/paywall";
 import { OfflineBanner } from "@/components/app/offline-banner";
 import { AskBar, CheekuCard, HomeHeadline, ProfileChip, firstName } from "@/components/home/ask-hero";
 import { CareSection } from "@/components/home/care";
+import { LocationPrimer } from "@/components/location/primer";
 import { FamilyCareCard } from "@/components/care/family-care";
 import { AskRow, DueThisWeek, FamilyAlertCard, LockedPreview, PlanPreview, ProgressStrip, StepCard, TodayHeadline, UnlockCard, UnlockMoment } from "@/components/home/today";
 import { AppointmentCard } from "@/components/booking/appointment-card";
@@ -345,6 +346,7 @@ export default function Home() {
           refreshRoster(queryClient);
         }}
       />
+      <LocationPrimer />
     </ScrollView>
   );
 }

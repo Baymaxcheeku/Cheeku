@@ -19,6 +19,7 @@ import {
   UserCog,
   UserPlus,
   type LucideIcon,
+  MapPin,
 } from "lucide-react-native";
 import { useState } from "react";
 
@@ -58,7 +59,9 @@ import {
   type ActiveProfile,
 } from "@/lib/profiles/context";
 import { listProfileRecords, statsFrom } from "@/lib/records/queries";
-import { refreshRoster } from "@/lib/profiles/family";
+import { useNearbyPlace } from "@/lib/location/live";
+import { freshness } from "@/lib/location/rules";
+import { refreshRoster, useFamily } from "@/lib/profiles/family";
 import { brand, hue, ink, lilac, semantic, shadow, surface } from "@/theme/tokens";
 import { Brand, brandify } from "@/components/ui/brand";
 import { feel } from "@/lib/feel";
@@ -243,6 +246,7 @@ export default function Settings() {
       <Group label="Account">
         <Row icon={UserCog} title="Personal information" body="Name, date of birth and contact" href="/settings/personal" />
         <Row icon={HeartPulse} title="Health profile" body="Conditions, allergies and medicines" href="/settings/health" />
+        <LocationRow />
         <Row icon={ShieldCheck} title="Security" body="App lock, password and sign-ins" href="/settings/security" />
         <Row icon={LockKeyhole} title="Privacy & consent" body="Your choices, documents and rights" href="/settings/privacy" />
         <Row icon={Crown} title="Subscription" body="Your plan, seats and billing" href="/settings/subscription" />
@@ -624,6 +628,13 @@ function Row({
       <ChevronRight size={17} color={ink[300]} />
     </Tap>
   );
+}
+
+/** Location, with the live place in the line so Profile shows it at a glance. */
+function LocationRow() {
+  const near = useNearbyPlace(useFamily().data?.access.all.find((m) => m.isPrimary)?.id);
+  const body = near.place ? `${near.place.label} · ${freshness(near.updatedAt)}` : near.locating ? "Finding you" : "Not set: tap to share or pick a place";
+  return <Row icon={MapPin} title="Location" body={body} href="/settings/location" />;
 }
 
 /** A quick tile for the places people return to. */

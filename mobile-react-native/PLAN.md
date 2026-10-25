@@ -248,8 +248,13 @@ in a shell. See `../SHIPPING.md`.
    `fitnessNetwork()`; the partner API replaces the preview network there.
    The price on screen is `priceFor()`, and the server prices again from
    `app_config.fitness_pricing` (migration 0039), so a client never names
-   one. Location is asked only from our own card, while the screen is open,
-   and kept on the phone rounded to about 100 m.
+   one. The place comes from `src/lib/location` like everywhere else.
+11. Location has one source of truth: `src/lib/location` (`useNearbyPlace`
+   for a member, `useLiveLocation` in the shell). No screen calls
+   expo-location or a maps provider itself; addresses come from the `geo`
+   Edge Function (Ola Maps, then OpenStreetMap), which holds the only key.
+   The system prompt only ever follows a tap on our own card. Never read
+   location in the background.
 
 ## Running it
 
@@ -283,11 +288,24 @@ haptics has to be seen on a simulator or a device before it counts as done.
 
 ## Open
 
+- **Location needs three steps on Supabase** (PR for loc-live): run
+  `supabase/manual/0040-step-1-of-1.sql`, deploy the function with
+  `supabase functions deploy geo` (JWT verification on), then
+  `0040-check.sql`. Optional: `supabase secrets set OLA_MAPS_API_KEY=...`
+  from maps.olakrutrim.com; without it addresses come from OpenStreetMap.
+  Until the function is deployed, phones fall back to the system geocoder
+  and the web shows "Near you" with the point still saved.
+- **Everyone re-agrees once** to the privacy policy of 2026-10-25, which now
+  mentions location (material change).
 - **Fitness runs on sample studios.** Everything from location to check-in
   works against the preview network (marked "Sample", nothing charged) until
   the partner's master API arrives (`int-fitness`). Migration 0039 is live
   on production (2026-10-25, check all yes). `expo-location` is a new
   native module: the phone needs a new dev build or `eas build`.
+- **Doctors and labs are not sorted by real distance yet.** Their sample
+  data has no coordinates; the chip shows the person's real place and the
+  ranking arrives with each partner's API (`int-doctors`, `int-lab-partner`)
+  through `distanceKm` in `src/lib/location/rules.ts`.
 - **Phones buzz only with push credentials.** Migration 0038, the care-sweep
   cron job and the push webhook are live on production (2026-10-25). A
   server notification reaches a phone once the app build has an EAS project

@@ -2,6 +2,7 @@ import { Tabs } from "expo-router";
 
 import { TabBar } from "@/components/app/tab-bar";
 import { useToast } from "@/components/notifications/toast";
+import { useLiveLocation } from "@/lib/location/live";
 import { useInboxLive } from "@/lib/notifications/use-inbox";
 import { useEngagement } from "@/lib/notifications/use-engagement";
 import { usePushSetup } from "@/lib/notifications/use-push";
@@ -29,6 +30,8 @@ export default function AppLayout() {
   usePushSetup();
   // The active member's doses and the day's nudges, planned on this phone.
   useEngagement();
+  // Where the phone is, kept fresh while the app is open (never in the background).
+  useLiveLocation();
 
   return (
     <Tabs

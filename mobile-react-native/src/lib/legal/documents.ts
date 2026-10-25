@@ -181,12 +181,12 @@ const PRIVACY: LegalDocument = {
   kind: "privacy",
   title: "Privacy Policy",
   short: "Privacy",
-  version: "2026-10-08",
-  effectiveOn: "2026-10-08",
+  version: "2026-10-25",
+  effectiveOn: "2026-10-25",
   material: true,
   summary:
     "We collect what Cheeku needs to keep your family's health records and answer your questions, and nothing for advertising. We never sell your data, and you can see, correct, export or delete it at any time.",
-  changes: [],
+  changes: ["Location: if you allow it, where your phone is while the app is open, and places you pick for family members, so we can show care nearby and fill in addresses."],
   sections: [
     {
       id: "scope",
@@ -206,12 +206,13 @@ const PRIVACY: LegalDocument = {
             "Family profiles: names, relationship to you, and optional details such as date of birth, sex, blood group, height, weight, conditions, allergies and medicines.",
             "Health records: documents and photos you upload, the values read from them, readings and symptoms you enter, appointments and bookings.",
             "Conversations: the questions you ask Cheeku and its replies, including the urgency it gave.",
+            "Location, only if you allow it: where your phone is while the app is open, and places you pick for family members. We keep the latest place for each person, not a history, and use it to show care nearby and fill in addresses for home visits.",
             "Device and security data: device type, operating system, app version, notification token, sign-in times and security events such as a password reset.",
             "Support messages you send us.",
           ],
         },
         { p: "Most profile details are optional; leave out what you do not want to share. We remove location (GPS) data from photos on your phone before they are uploaded, and we do not keep the original file name." },
-        { note: "We do not collect your contacts, precise location, advertising ID, or browsing activity in other apps." },
+        { note: "We do not collect your contacts, advertising ID, or browsing activity in other apps. We never read your location in the background, and you can turn it off or wipe it in Profile, Location." },
       ],
     },
     {
@@ -232,7 +233,7 @@ const PRIVACY: LegalDocument = {
         { note: "We never sell your personal data, and we never use your health data to show you advertising." },
         {
           list: [
-            "Service providers (Data Processors) who host our database and files, run AI models, send notifications and process payments. They act only on our written instructions, under contract, and may not use your data for themselves.",
+            "Service providers (Data Processors) who host our database and files, run AI models, send notifications, turn a map point into an address and process payments. They act only on our written instructions, under contract, and may not use your data for themselves. A map point is sent from our server, never with your name.",
             "Care partners, only for a booking you make, and only what that booking needs.",
             "Research, public-health or insurance partners, only if you turn on research and insights, and only de-identified and aggregated data that does not identify you.",
             "Authorities, when the law requires it.",
@@ -435,7 +436,7 @@ export const CONSENTED_KINDS: readonly LegalKind[] = ["terms", "privacy", "healt
  */
 export const DOCUMENT_HASHES: Record<LegalKind, string> = {
   terms: "8270910757f13fa373ecd94f1e99b039727f1763867f906d025b795ef5e0b2c2",
-  privacy: "fb3f50715e1b565df45ddfa3c6741d7fb165e9f9c15948cb2eada519ca5db5b4",
+  privacy: "4102c77321e9586f8b997bc162b52e60ba8b9b7884e5bdf953749d54425938da",
   health_consent: "f2d3608573bcc82426941ce699189d2c728cf6e1cac951c28fdec7b955e54756",
   storage: "51dee9ee8cb660445b6fd5ee7b8f5d391b9963cfa6b9bfaa4e35720b51f3f4bf",
 };
