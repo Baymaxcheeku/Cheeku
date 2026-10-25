@@ -8,6 +8,7 @@ import {
   Footprints,
   Image as ImageIcon,
   Moon,
+  Pill,
   Plus,
   Salad,
   Sparkles,
@@ -26,15 +27,18 @@ import { glassShadow } from "@/components/ui/glass";
 import { BreathIcon, MindIcon, type AppIcon } from "@/components/ui/icons";
 import { WINDOW_LABEL } from "@/lib/home/catalog";
 import type { Area, Pillar } from "@/lib/home/content";
+import { feel } from "@/lib/feel";
 import { addDailyLog, usePhotoUrl } from "@/lib/home/logs";
+import { TIMING_SHORT, type DoseView } from "@/lib/home/meds";
 import { readPlate, type PlateTag } from "@/lib/home/meals";
 import type { DailyLog, PlanTask } from "@/lib/home/plan";
+import { logStep, unlogStep } from "@/lib/home/stage";
 import { brand, ink, semantic, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
 
 export const PILLAR_ICON: Record<Pillar, AppIcon> = { move: Footprints, eat: Salad, sleep: Moon, mind: MindIcon, check: Stethoscope };
 
-const KIND_ICON: Partial<Record<PlanTask["kind"], AppIcon>> = { steps: Footprints, meal: Utensils, reading: Activity, rating: Moon, timer: BreathIcon };
+export const KIND_ICON: Partial<Record<PlanTask["kind"], AppIcon>> = { steps: Footprints, meal: Utensils, reading: Activity, rating: Moon, timer: BreathIcon, dose: Pill };
 
 export const SLEEP_LABELS = ["Badly", "Restless", "Okay", "Well", "Great"] as const;
 
@@ -190,6 +194,9 @@ export function TaskCard({
         </Text>
       ) : null}
 
+      {/* doses: each medicine ticked on its own */}
+      {task.kind === "dose" && task.dose ? <DoseList profileId={profileId} doses={task.dose.doses} /> : null}
+
       {/* sleep: one tap */}
       {task.kind === "rating" ? (
         <View className="mt-3 flex-row gap-1.5">
@@ -218,12 +225,55 @@ export function TaskCard({
         {task.kind === "meal" ? <SmallButton dark={!done} label={task.logs.length ? "Add more" : "Add photo"} icon={Plus} onPress={() => onOpen("meal")} /> : null}
         {task.kind === "reading" && !done ? <SmallButton dark label="Log reading" icon={Plus} onPress={() => onOpen("reading")} /> : null}
         {task.kind === "timer" && !done ? <SmallButton dark label="Start" icon={Timer} onPress={() => onOpen("timer")} /> : null}
+        {task.kind === "dose" && !done ? <SmallButton dark label="Took them all" icon={Check} onPress={onDone} /> : null}
+        {task.kind === "dose" ? <SmallButton label="Your medicines" onPress={() => router.push("/medicines" as never)} /> : null}
         {task.kind === "habit" && !done && !task.due ? <SmallButton dark label="Done" icon={Check} onPress={onDone} /> : null}
         {task.kind === "habit" && task.due && !done ? <SmallButton label="Mark done" icon={Check} onPress={onDone} /> : null}
-        {!done && task.kind !== "rating" && task.status !== "later" ? <SmallButton label="Later" onPress={onLater} /> : null}
+        {!done && task.kind !== "rating" && task.kind !== "dose" && task.status !== "later" ? <SmallButton label="Later" onPress={onLater} /> : null}
         {task.status === "later" ? <SmallButton label="Bring it back" icon={Undo2} onPress={onUndo} /> : null}
         {done && task.kind === "habit" ? <SmallButton label="Undo" icon={Undo2} onPress={onUndo} /> : null}
       </View>
+    </View>
+  );
+}
+
+/**
+ * The doses in one part of the day. A tap ticks one, a second tap takes it
+ * back, so a wrong tick costs nothing. Names show here, in the app, and never
+ * on the lock screen.
+ */
+export function DoseList({ profileId, doses }: { profileId: string; doses: readonly DoseView[] }) {
+  const qc = useQueryClient();
+  return (
+    <View className="mt-3 gap-2">
+      {doses.map((d) => {
+        const how = [d.dose, TIMING_SHORT[d.timing]].filter(Boolean).join(" · ");
+        return (
+          <Tap
+            key={d.stepKey}
+            accessibilityRole="checkbox"
+            accessibilityState={{ checked: d.taken }}
+            accessibilityLabel={`${d.name}${how ? `, ${how}` : ""}`}
+            onPress={() => {
+              feel.tick();
+              void (d.taken ? unlogStep(qc, { profileId, stepKey: d.stepKey }) : logStep(qc, { profileId, stepKey: d.stepKey, status: "done" }));
+            }}
+            scale={0.98}
+            className="flex-row items-center gap-3 rounded-lg px-3 py-2.5"
+            style={{ backgroundColor: d.taken ? brand[50] : surface.tint }}
+          >
+            <View className="min-w-0 flex-1">
+              <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 15, color: d.taken ? ink[500] : ink[900] }}>
+                {d.name}
+              </Text>
+              {how ? <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 12, color: ink[500], marginTop: 1 }}>{how}</Text> : null}
+            </View>
+            <View className="h-8 w-8 items-center justify-center rounded-pill" style={d.taken ? { backgroundColor: brand[600] } : { borderWidth: 1.5, borderColor: brand[200], backgroundColor: "#fff" }}>
+              {d.taken ? <Check size={15} color="#fff" strokeWidth={3} /> : null}
+            </View>
+          </Tap>
+        );
+      })}
     </View>
   );
 }
@@ -235,7 +285,7 @@ export function TaskCard({
 export function TaskRow({ task, onExpand, onDone }: { task: PlanTask; onExpand: () => void; onDone: () => void }) {
   const done = task.status === "done";
   const Icon = task.due ? CalendarClock : (KIND_ICON[task.kind] ?? PILLAR_ICON[task.pillar]);
-  const quick = task.kind === "habit" && !task.due && !done;
+  const quick = (task.kind === "habit" || task.kind === "dose") && !task.due && !done;
   const meta = [task.status === "later" ? "Later" : null, task.goal ? "Your goal" : task.personal ? "For you" : null, task.chip, task.window !== "anytime" ? WINDOW_LABEL[task.window] : null].filter(Boolean).join(" · ");
   return (
     <View className="flex-row items-center gap-3 py-2.5">

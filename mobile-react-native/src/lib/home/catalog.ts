@@ -14,12 +14,13 @@ import { NUDGES, type Area, type Nudge, type Pillar } from "./content";
  *            their chart in memory
  *   rating   how last night's sleep felt
  *   timer    a short guided session (breathing) that finishes itself
+ *   dose     one part of the day's medicines, ticked dose by dose (meds.ts)
  *
  * The habits are content.ts's NUDGES, given a time of day here. The plan
  * (plan.ts) decides which of all this a given person sees today.
  */
 
-export type TaskKind = "habit" | "steps" | "meal" | "reading" | "rating" | "timer";
+export type TaskKind = "habit" | "steps" | "meal" | "reading" | "rating" | "timer" | "dose";
 export type Window = "morning" | "midday" | "evening" | "anytime";
 export type MealSlot = "breakfast" | "lunch" | "snacks" | "dinner";
 

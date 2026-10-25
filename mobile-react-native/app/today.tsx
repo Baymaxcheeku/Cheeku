@@ -11,6 +11,7 @@ import { firstName } from "@/components/home/ask-hero";
 import { MascotFigure } from "@/components/illustrations/sprout";
 import { BreathingSheet, MealSheet, ReadingSheet, Sheet, StepsSheet } from "@/components/today/sheets";
 import { GoalBanner, GoalPicker, GoalSheet } from "@/components/today/goals";
+import { RemindersPrompt } from "@/components/today/reminders-prompt";
 import { PILLAR_ICON, TaskCard, TaskRow, type TaskAction } from "@/components/today/task-card";
 import { GlassCircle, Gradient, glassShadow } from "@/components/ui/glass";
 import { Enter, Fold, StaggerItem } from "@/components/ui/motion";
@@ -22,7 +23,7 @@ import { saveDailyPrefs, useDailyPrefs } from "@/lib/home/logs";
 import { dayPlate } from "@/lib/home/meals";
 import type { GoalKey } from "@/lib/home/goals";
 import { mealsToday, nowTasks, type PlanTask } from "@/lib/home/plan";
-import { logStep, unlogStep, useHomeStage } from "@/lib/home/stage";
+import { logStep, logSteps, unlogStep, useHomeStage } from "@/lib/home/stage";
 import { usePlan } from "@/lib/home/use-plan";
 import { useFamily } from "@/lib/profiles/family";
 import { brand, ink, lilac, surface } from "@/theme/tokens";
@@ -133,13 +134,18 @@ export default function TodayPlan() {
     );
   }
 
+  // A dose card is done when every dose on it is, so "done" ticks each one.
+  const write = (t: PlanTask, status: "done" | "later") => {
+    if (t.kind === "dose" && status === "done" && t.dose) void logSteps(qc, profile.id, t.dose.doses.filter((d) => !d.taken).map((d) => d.stepKey));
+    else void logStep(qc, { profileId: profile.id, stepKey: t.key, status });
+  };
   const mark = (t: PlanTask, status: "done" | "later") => {
     if (status === "done") {
       // The last step of the day is the one worth celebrating.
       if (plan.done + 1 >= plan.total) feel.success();
       else feel.tap();
     }
-    void logStep(qc, { profileId: profile.id, stepKey: t.key, status });
+    write(t, status);
   };
   const fold = (t: PlanTask, status: "done" | "later") => {
     if (status === "done") {
@@ -155,7 +161,8 @@ export default function TodayPlan() {
       n.delete(key);
       return n;
     });
-    if (status) void logStep(qc, { profileId: profile.id, stepKey: key, status });
+    const t = plan.tasks.find((x) => x.key === key);
+    if (status && t) write(t, status);
   };
   const card = (t: PlanTask, onDone: () => void, onLater: () => void) => (
     <TaskCard
@@ -277,6 +284,7 @@ export default function TodayPlan() {
 
         {pillar === "all" ? (
           <>
+            <RemindersPrompt meds={Boolean(plan.meds?.slots.length)} />
             {plan.goal ? <GoalBanner goal={plan.goal} onPress={() => setGoalSheet(plan.goal?.key ?? null)} /> : <GoalPicker goals={plan.goals} onPick={setGoalSheet} />}
 
             <View className="mt-6 px-5">

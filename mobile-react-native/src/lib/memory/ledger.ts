@@ -1,4 +1,4 @@
-import { addDays, dosesPerDay, readDetails, sameMedicine, type Medicine, type PackInfo, type RegulatoryClass } from "@/lib/records/details";
+import { addDays, dosesPerDay, readDetails, sameMedicine, type Medicine, type MedTiming, type PackInfo, type RegulatoryClass } from "@/lib/records/details";
 import type { DocType } from "@/lib/records/types";
 
 import type { ResolvedClock } from "./clock";
@@ -45,6 +45,14 @@ export type LedgerEntry = {
   excipients: string[];
   /** How much of each ingredient a day, where the label and schedule allow. */
   perDay: Record<string, number>;
+  /** Doses morning, afternoon, night (1-0-1 is [1, 0, 1]); null when not known. */
+  schedule: [number, number, number] | null;
+  /** "1 tablet", "5 ml". */
+  dose: string | null;
+  timing: MedTiming;
+  asNeeded: boolean;
+  /** Tablets, capsules or ml a day, for refill dates; null when not known. */
+  unitsPerDay: number | null;
   sources: { documentId: string | null; date: string | null; kind: "prescription" | "discharge" | "pack" | "list" | "declared" }[];
 };
 
@@ -84,6 +92,27 @@ const KNOWN: { match: RegExp; ingredients: { key: string; name: string; amount?:
   { match: /\bcodeine\b/i, ingredients: [{ key: "codeine", name: "Codeine" }] },
   { match: /\bbenzocaine\b/i, ingredients: [{ key: "benzocaine", name: "Benzocaine" }] },
 ];
+
+/**
+ * A schedule from how people write frequency: "1-0-1", "OD", "BD", "TDS",
+ * "twice a day", "at night". Null when it says nothing usable.
+ */
+export function parseFrequency(text: string | null | undefined): [number, number, number] | null {
+  const t = (text ?? "").toLowerCase().trim();
+  if (!t) return null;
+  // Weekly and monthly doses are not a daily schedule; better none than every day.
+  if (/\b(week|weekly|month|monthly|alternate|sos|as needed)\b/.test(t)) return null;
+  const pattern = t.match(/\b(\d)\s*-\s*(\d)\s*-\s*(\d)\b/);
+  if (pattern) {
+    const s: [number, number, number] = [Number(pattern[1]), Number(pattern[2]), Number(pattern[3])];
+    return s[0] + s[1] + s[2] > 0 ? s : null;
+  }
+  if (/\b(tds|tid|thrice|three times)\b/.test(t)) return [1, 1, 1];
+  if (/\b(bd|bid|twice|two times)\b/.test(t)) return [1, 0, 1];
+  if (/\b(hs|bedtime|at night|night|nightly)\b/.test(t)) return [0, 0, 1];
+  if (/\b(od|qd|once|daily|every day|morning|1x)\b/.test(t)) return [1, 0, 0];
+  return null;
+}
 
 const keyOf = (name: string) =>
   name.toLowerCase().replace(/vitamin\s*d3?|cholecalciferol/, "vitamin_d").replace(/[^a-z0-9_]+/g, "_").replace(/^_|_$/g, "");
@@ -153,6 +182,7 @@ export function buildLedger(documents: readonly DocRow[], declared: unknown, tod
     const parsed = parseStrength(m.strength ?? m.name);
     const ingredients = ingredientsOf(m.name, m.strength, m.pack ?? null);
     const units = unitsPerDay(m, basisMl(m.strength) ?? parsed?.perMl ?? null);
+    const schedule = dosesPerDay(m) > 0 ? m.schedule : parseFrequency(m.note);
     const perDay: Record<string, number> = {};
     for (const i of ingredients) if (i.amount !== null && units !== null) perDay[i.key] = Math.round(i.amount * units * 10) / 10;
 
@@ -164,6 +194,13 @@ export function buildLedger(documents: readonly DocRow[], declared: unknown, tod
         existing.end = end;
         existing.status = status;
         if (Object.keys(perDay).length) existing.perDay = perDay;
+        if (schedule) {
+          existing.schedule = schedule;
+          existing.dose = m.dose ?? existing.dose;
+          existing.timing = m.timing;
+          existing.asNeeded = m.asNeeded;
+          existing.unitsPerDay = units ?? existing.unitsPerDay;
+        }
       }
       if (m.pack) {
         existing.ingredients = ingredients;
@@ -192,6 +229,11 @@ export function buildLedger(documents: readonly DocRow[], declared: unknown, tod
       batch: m.pack?.batch ?? null,
       excipients: m.pack?.excipients ?? [],
       perDay,
+      schedule,
+      dose: m.dose,
+      timing: m.timing,
+      asNeeded: m.asNeeded,
+      unitsPerDay: units ?? (schedule ? schedule[0] + schedule[1] + schedule[2] : null),
       sources: [src],
     });
   };
