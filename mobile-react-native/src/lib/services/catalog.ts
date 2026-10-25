@@ -11,10 +11,11 @@ import { brand, hue, lilac, surface } from "@/theme/tokens";
  *
  * THE SHELVES, in the order people reach for them:
  *
- *   core        Doctors, Lab tests, Medicines, Health insurance (4th, by ask)
+ *   core        Doctors, Lab tests, Medicines, Fitness (4th: single classes at
+ *               a partner gym and studio network, /fitness, since 2026-10-25)
  *   mind+body   Mental health, Dental, Eye care, Physiotherapy
  *   at home     Home care, Ambulance
- *   soon        Fitness classes (not in the partner network)
+ *   soon        Health insurance (the next stage)
  *
  * DOCTORS ARE ONE SEGMENT. Gynaecologists, dieticians, psychologists and every
  * other specialty live inside Doctors and its pre-consultation flow; they are
@@ -132,18 +133,19 @@ export const SERVICES: readonly Service[] = [
     keywords: ["medicine", "medicines", "pharmacy", "tablets", "refill", "meds", "chemist"],
   },
   {
-    id: "insurance",
-    title: "Health insurance",
-    line: "Compare family floater plans",
-    promise: "Compare health cover for your family, with your records ready for the claim when you need it.",
+    id: "fitness",
+    title: "Fitness",
+    line: "Gyms and studios near you",
+    promise: "Book a single class at a gym or studio near you, matched to your health profile. Yoga, swimming, strength, dance and more, no membership.",
     shelf: "core",
-    network: "insurance",
-    status: "locked",
-    icon: "ShieldCheck",
-    tint: { from: hue.blue.wash, to: surface.tint, fg: "#2b5fb8" },
+    network: "wellness",
+    status: "live",
+    route: "/fitness",
+    icon: "Dumbbell",
+    tint: { from: lilac.base, to: surface.tint, fg: "#3f5bd9" },
     offerings: [],
-    steps: ["Tell us who to cover", "Compare plans", "Buy and keep the policy on file"],
-    keywords: ["insurance", "policy", "cover", "floater", "claim"],
+    steps: ["Pick a class near you", "Book one session", "Show the code at the desk"],
+    keywords: ["fitness", "yoga", "gym", "trainer", "workout", "pilates", "zumba", "swimming", "swim", "dance", "aerobics", "class", "studio"],
   },
   {
     id: "mental",
@@ -259,23 +261,23 @@ export const SERVICES: readonly Service[] = [
     urgent: [{ title: "Is this an emergency?", text: "Don't fill a form. Call now.", call: "108", label: "Call 108" }],
   },
   {
-    id: "fitness",
-    title: "Fitness classes",
-    line: "Yoga, strength, prenatal",
-    promise: "Classes and trainers, online or at home, that fit around your routine.",
+    id: "insurance",
+    title: "Health insurance",
+    line: "Compare family floater plans",
+    promise: "Compare health cover for your family, with your records ready for the claim when you need it.",
     shelf: "soon",
-    network: "wellness",
+    network: "insurance",
     status: "soon",
-    icon: "Dumbbell",
-    tint: { from: lilac.base, to: surface.tint, fg: "#3f5bd9" },
+    icon: "ShieldCheck",
+    tint: { from: hue.blue.wash, to: surface.tint, fg: "#2b5fb8" },
     offerings: [],
-    steps: [],
-    keywords: ["fitness", "yoga", "gym", "trainer", "workout", "pilates", "zumba"],
+    steps: ["Tell us who to cover", "Compare plans", "Buy and keep the policy on file"],
+    keywords: ["insurance", "policy", "cover", "floater", "claim"],
   },
 ];
 
 export const SHELVES: { id: Shelf; title: string; line: string }[] = [
-  { id: "core", title: "Everyday care", line: "Doctors, tests, medicines and cover" },
+  { id: "core", title: "Everyday care", line: "Doctors, tests, medicines and fitness" },
   { id: "mindbody", title: "Mind and body", line: "Therapy, teeth, eyes and movement" },
   { id: "athome", title: "At home and on the way", line: "Nurses, caregivers and transport" },
   { id: "soon", title: "Coming soon", line: "Not open yet: we'll tell you" },

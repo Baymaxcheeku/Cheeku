@@ -22,10 +22,11 @@ import { Tap } from "@/components/ui/tap";
  * is open from day one instead of a list of "soon" cards. Layout, top down:
  *
  *   prompt    a dark card: book anything by telling Cheeku in a sentence
- *   core      Doctors, Lab tests, Medicines, Health insurance (fourth, by ask),
+ *   core      Doctors, Lab tests, Medicines, Fitness (fourth; it took health
+ *             insurance's place on 2026-10-25, insurance comes later),
  *             as big two-up tiles
  *   more      mental health, dental, eye care, physio, home care, ambulance,
- *             fitness: one swipeable row
+ *             insurance (soon): one swipeable row
  *
  * Doctors are one segment now: gynaecologists, dieticians, psychologists and
  * every other specialty sit inside it (/services/doctors), not as tiles.
