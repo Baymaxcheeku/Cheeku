@@ -25,6 +25,7 @@ import {
   Check,
   CheckCheck,
   CircleDot,
+  Dumbbell,
   X,
   type LucideIcon,
 } from "lucide-react-native";
@@ -109,6 +110,8 @@ export const KIND_STYLE: Record<NotificationKind, Tone> = {
   retest_due: { bg: hue.teal.bg, fg: hue.teal.fg, icon: CalendarClock },
   sunday_review: { bg: lilac.base, fg: brand[600], icon: CalendarDays },
   parent_alert: { bg: hue.rose.bg, fg: hue.rose.fg, icon: HeartHandshake },
+  fitness_booked: { bg: hue.teal.bg, fg: hue.teal.fg, icon: Dumbbell },
+  fitness_cancelled: { bg: hue.slate.bg, fg: ink[500], icon: Dumbbell },
 };
 
 export type Member = {

@@ -8,21 +8,31 @@ import {
   Dumbbell,
   FlaskConical,
   Hourglass,
+  LocateFixed,
   Stethoscope,
 } from "lucide-react-native";
+import { useState } from "react";
 import { Tap } from "@/components/ui/tap";
 import type { AppIcon } from "@/components/ui/icons";
 import { Pressable, Text, View } from "react-native";
 
+import { BookSheet } from "@/components/fitness/book-sheet";
+import { SessionRow } from "@/components/fitness/parts";
 import { SERVICE_ICON } from "@/components/services/parts";
 import { glass, glassShadow } from "@/components/ui/glass";
+import { LinesSkeleton } from "@/components/ui/skeleton";
 import { SPECIALTIES, type SpecialtyId } from "@/lib/booking/catalog";
+import { activityById } from "@/lib/fitness/catalog";
+import type { Match } from "@/lib/fitness/match";
+import { useFitnessFit, useMatches, useStudiosNear } from "@/lib/fitness/use-fitness";
+import { useWhere } from "@/lib/fitness/where";
 import { fromPrice } from "@/lib/labs/logic";
 import { useCatalog } from "@/lib/labs/queries";
 import type { BookingIntent } from "@/lib/memory/intent";
 import type { BookedEvent } from "@/lib/memory/thread";
 import { fetchWaitlist } from "@/lib/notifications/queries";
 import { useJoinWaitlist } from "@/lib/notifications/waitlist";
+import { useFamily } from "@/lib/profiles/family";
 import { serviceById } from "@/lib/services/catalog";
 import { brand, ink, semantic, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
@@ -42,12 +52,13 @@ import { font } from "@/theme/type";
 
 type Booking = BookingIntent & { forName: string };
 
-const WAITLIST_ID: Record<string, string> = { fitness: "fitness" };
+const WAITLIST_ID: Record<string, string> = {};
 
 export function BookingCard({ booking, onStart }: { booking: Booking; onStart?: (b: Booking) => void }) {
   if (booking.service === "lab") return <LabCard booking={booking} onStart={onStart} />;
   if (booking.service === "doctor") return <DoctorCard booking={booking} onStart={onStart} />;
   if (booking.service === "medicine" || booking.service === "care") return <ServiceLinkCard booking={booking} onStart={onStart} />;
+  if (booking.service === "fitness") return <FitnessCard booking={booking} onStart={onStart} />;
   return <SoonCard booking={booking} />;
 }
 
@@ -72,6 +83,55 @@ function ServiceLinkCard({ booking, onStart }: { booking: Booking; onStart?: (b:
       </View>
       <Steps items={svc.steps.length ? svc.steps : ["Pick what you need", "When and where", `Filed in ${booking.forName}'s memory`]} />
       <Cta label={`Open ${svc.title.toLowerCase()}`} onPress={onStart ? () => onStart(booking) : undefined} />
+    </Shell>
+  );
+}
+
+/**
+ * Fitness, in the thread: the three best classes near the person for their
+ * profile, bookable right here in the same sheet the fitness screen uses.
+ * No place yet: one tap for location, or the full screen to pick a city.
+ */
+function FitnessCard({ booking, onStart }: { booking: Booking; onStart?: (b: Booking) => void }) {
+  const family = useFamily();
+  const member = family.data?.profile;
+  const { fit } = useFitnessFit(member?.id);
+  const { where, loaded, state, locate } = useWhere();
+  const studios = useStudiosNear(where);
+  const { matches, loading } = useMatches({ fit, place: where, studios: studios.data, activity: booking.activity ?? null, limit: 3 });
+  const [picked, setPicked] = useState<Match | null>(null);
+  const named = activityById(booking.activity);
+  const title = named ? `${named.label} near ${booking.forName}` : `Classes for ${booking.forName}`;
+
+  return (
+    <Shell icon={Dumbbell} eyebrow="Fitness" title={title} sub={where ? `Near ${where.label} · one class at a time` : "Gyms and studios near you"}>
+      {!loaded ? null : !where ? (
+        <View style={{ gap: 10 }}>
+          <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[700] }}>Share your location to see studios close by. It stays on this phone.</Text>
+          <Tap
+            accessibilityRole="button"
+            disabled={state === "locating"}
+            onPress={() => void locate()}
+            style={{ height: 46, borderRadius: 999, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, backgroundColor: brand[50] }}
+            scale={0.98}
+          >
+            <LocateFixed size={16} color={brand[700]} />
+            <Text style={{ fontFamily: font.semibold, fontSize: 15, color: brand[700] }}>{state === "locating" ? "Finding you" : state === "denied" ? "Location is off" : "Use my location"}</Text>
+          </Tap>
+        </View>
+      ) : loading || studios.isPending ? (
+        <LinesSkeleton lines={3} />
+      ) : matches.length ? (
+        <View style={{ gap: 8 }}>
+          {matches.map((m) => (
+            <SessionRow key={m.session.id} session={m.session} studio={m.studio} km={m.km} reason={m.reason} showDay onPress={() => setPicked(m)} />
+          ))}
+        </View>
+      ) : (
+        <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[500] }}>Nothing that suits {booking.forName} in the next two days nearby. See every studio below.</Text>
+      )}
+      <Cta label={where ? "See all nearby" : "Pick a city"} onPress={onStart ? () => onStart(booking) : undefined} />
+      <BookSheet open={Boolean(picked)} onClose={() => setPicked(null)} session={picked?.session ?? null} studio={picked?.studio ?? null} place={where} />
     </Shell>
   );
 }
@@ -218,7 +278,7 @@ function SoonCard({ booking }: { booking: Booking }) {
 
 /** A booking made somewhere in the app, filed in this person's thread. */
 export function BookedCard({ event, onOpen }: { event: BookedEvent; onOpen?: (route: string) => void }) {
-  const Icon = event.kind === "lab" ? FlaskConical : event.kind === "service" ? CalendarCheck2 : Stethoscope;
+  const Icon = event.kind === "lab" ? FlaskConical : event.kind === "service" ? CalendarCheck2 : event.kind === "fitness" ? Dumbbell : Stethoscope;
   return (
     <Pressable
       accessibilityRole="button"

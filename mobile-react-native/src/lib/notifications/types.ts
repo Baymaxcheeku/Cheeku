@@ -33,7 +33,10 @@ export type NotificationKind =
   | "daily_nudge"
   | "retest_due"
   | "sunday_review"
-  | "parent_alert";
+  | "parent_alert"
+  // Written by create/cancel_fitness_booking (migration 0039).
+  | "fitness_booked"
+  | "fitness_cancelled";
 
 export type NotificationCategory = "reports" | "appointments" | "family" | "account" | "updates" | "medicines" | "nudges" | "care";
 
@@ -94,4 +97,5 @@ export const ACTION_LABEL: Partial<Record<NotificationKind, string>> = {
   retest_due: "Plan it",
   sunday_review: "Plan the week",
   parent_alert: "See family",
+  fitness_booked: "View",
 };
