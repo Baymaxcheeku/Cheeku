@@ -13,6 +13,9 @@ import { fastingFor, quote, windowsFor, type SlotWindow } from "@/lib/labs/logic
 import { BOOKINGS_KEY, bookLab, useCatalog, useLabCart } from "@/lib/labs/queries";
 import { recordBooking, threadKey } from "@/lib/memory/store";
 import { useFamily } from "@/lib/profiles/family";
+import { UseMyAddress } from "@/components/location/use-address";
+import { useNearbyPlace } from "@/lib/location/live";
+import { addressFrom } from "@/lib/location/rules";
 import { kv } from "@/lib/storage";
 import { brand, hue, ink, semantic, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
@@ -70,10 +73,14 @@ export default function BookLab() {
 
   const saved = useQuery({ queryKey: ["lab-address"], queryFn: () => kv.get(ADDRESS_KEY) });
   const [address, setAddress] = useState("");
+  const here = useNearbyPlace(who?.id).place;
   useEffect(() => {
-    if (saved.data && !address) setAddress(saved.data);
+    if (saved.isPending || address) return;
+    // The last address used, else the one we know for this member.
+    if (saved.data) setAddress(saved.data);
+    else if (here && here.provider !== "none") setAddress(addressFrom(here));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [saved.data]);
+  }, [saved.data, saved.isPending, here]);
 
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -193,6 +200,7 @@ export default function BookLab() {
             <MapPin size={17} color={brand[600]} style={{ marginTop: 2 }} />
             <TextInput value={address} onChangeText={setAddress} placeholder="Flat, building, street, area, pincode" placeholderTextColor={ink[300]} multiline maxLength={300} style={{ flex: 1, minHeight: 60, fontFamily: font.regular, fontSize: 15, lineHeight: 21, color: ink[900], textAlignVertical: "top" }} />
           </View>
+          <UseMyAddress profileId={who?.id} onUse={(a) => setAddress(a)} />
         </Section>
 
         {cart.prescriptionId ? (

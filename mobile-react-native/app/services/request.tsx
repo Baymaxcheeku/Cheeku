@@ -17,6 +17,7 @@ import { detect, type SafetyResult } from "@/lib/safety/detect";
 import { MODE_LABEL, serviceById, type VisitMode } from "@/lib/services/catalog";
 import { marketplace } from "@/lib/services/provider";
 import { useServiceRequests, whenText } from "@/lib/services/requests";
+import { UseMyAddress } from "@/components/location/use-address";
 import { kv } from "@/lib/storage";
 import { brand, ink, semantic, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
@@ -224,6 +225,7 @@ export default function ServiceRequestScreen() {
         {needsAddress ? (
           <Section title={transport ? "Pick-up address" : "Address"}>
             <Field value={address} onChangeText={setAddress} placeholder="House, street, area, landmark" multiline />
+            <UseMyAddress profileId={who?.id} onUse={(a) => setAddress(a)} />
           </Section>
         ) : null}
         {transport ? (

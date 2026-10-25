@@ -16,7 +16,7 @@ import { activityById, type ActivityId } from "@/lib/fitness/catalog";
 import { allows, reasonFor } from "@/lib/fitness/match";
 import { distanceKm, distanceLabel, type Session } from "@/lib/fitness/provider";
 import { useFitnessFit, useStudio, useStudioSessions } from "@/lib/fitness/use-fitness";
-import { useWhere } from "@/lib/fitness/where";
+import { useNearbyPlace } from "@/lib/location/live";
 import { useFamily } from "@/lib/profiles/family";
 import { brand, hue, ink, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
@@ -33,10 +33,10 @@ const week = () => Array.from({ length: 7 }, (_, i) => new Date(Date.now() + i *
 export default function StudioScreen() {
   const insets = useSafeAreaInsets();
   const { id, activity: activityParam } = useLocalSearchParams<{ id: string; activity?: string }>();
-  const { where } = useWhere();
-  const studio = useStudio(id, where);
   const family = useFamily();
   const member = family.data?.profile;
+  const where = useNearbyPlace(member?.id).place;
+  const studio = useStudio(id, where);
   const first = member?.name.split(" ")[0] ?? "you";
   const { fit } = useFitnessFit(member?.id);
   const days = useMemo(week, []);

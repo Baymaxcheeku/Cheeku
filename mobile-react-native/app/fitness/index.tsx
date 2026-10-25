@@ -1,15 +1,16 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { ChevronRight, LocateFixed, MapPin, Search, Stethoscope, Ticket, X } from "lucide-react-native";
+import { ChevronRight, Search, Stethoscope, Ticket, X } from "lucide-react-native";
 import { useMemo, useState } from "react";
 import { ScrollView, Text, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { BookSheet } from "@/components/fitness/book-sheet";
+import { LocationChip } from "@/components/location/location-chip";
+import { PlaceSheet } from "@/components/location/place-sheet";
 import { ActivityArt, ActivityChip, dayLabel, LocateCard, SessionRow, StudioCard, timeLabel } from "@/components/fitness/parts";
 import { GlassCircle, Gradient, glassShadow } from "@/components/ui/glass";
 import { StaggerItem } from "@/components/ui/motion";
 import { Backdrop, ScreenHeader, SectionTitle } from "@/components/ui/screen";
-import { Sheet } from "@/components/ui/sheet";
 import { CardListSkeleton } from "@/components/ui/skeleton";
 import { Tap } from "@/components/ui/tap";
 import { feel } from "@/lib/feel";
@@ -17,7 +18,7 @@ import { activityById, activityIn, type ActivityId } from "@/lib/fitness/catalog
 import { NEED_PHRASE, rankStudios, type Match } from "@/lib/fitness/match";
 import { useFitnessBookings, upcoming } from "@/lib/fitness/queries";
 import { useFitnessFit, useMatches, useStudiosNear } from "@/lib/fitness/use-fitness";
-import { CITIES, useWhere } from "@/lib/fitness/where";
+import { useNearbyPlace } from "@/lib/location/live";
 import { useFamily } from "@/lib/profiles/family";
 import { brand, ink, lilac, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
@@ -47,7 +48,9 @@ export default function Fitness() {
   const member = family.data?.profile;
   const first = member?.name.split(" ")[0] ?? "you";
   const { fit } = useFitnessFit(member?.id);
-  const { where, loaded, state, locate, pickCity } = useWhere();
+  const near = useNearbyPlace(member?.id);
+  const where = near.place;
+  const loaded = near.loaded;
   const studios = useStudiosNear(where);
   const bookings = useFitnessBookings();
 
@@ -93,24 +96,16 @@ export default function Fitness() {
               {lead ? `Picked from ${first === "you" ? "your" : `${first}'s`} health profile, with ${NEED_PHRASE[lead]} first. One class at a time, no membership.` : "Yoga, gym, swimming, dance and more. One class at a time, no membership."}
             </Text>
             {where ? (
-              <Tap
-                accessibilityRole="button"
-                accessibilityLabel={`Looking near ${where.label}. Change`}
-                onPress={() => setCityOpen(true)}
-                style={{ alignSelf: "flex-start", marginTop: 14, height: 36, paddingHorizontal: 12, borderRadius: 999, backgroundColor: "#fff", flexDirection: "row", alignItems: "center", gap: 6 }}
-                scale={0.96}
-              >
-                <MapPin size={14} color={brand[600]} />
-                <Text style={{ fontFamily: font.semibold, fontSize: 13, color: ink[900] }}>{where.label}</Text>
-                <Text style={{ fontFamily: font.medium, fontSize: 12, color: brand[600] }}>Change</Text>
-              </Tap>
+              <View style={{ marginTop: 14 }}>
+                <LocationChip profileId={member?.id} />
+              </View>
             ) : null}
           </View>
         </StaggerItem>
 
         {loaded && !where ? (
           <StaggerItem index={1}>
-            <LocateCard locating={state === "locating"} denied={state === "denied"} onLocate={() => void locate()} onPickCity={() => setCityOpen(true)} />
+            <LocateCard locating={near.locating} denied={near.permission === "denied"} onLocate={() => void near.locate()} onPickCity={() => setCityOpen(true)} />
           </StaggerItem>
         ) : null}
 
@@ -224,40 +219,7 @@ export default function Fitness() {
         ) : null}
       </ScrollView>
 
-      <Sheet open={cityOpen} onClose={() => setCityOpen(false)} label="Close city picker">
-        <View style={{ borderTopLeftRadius: 32, borderTopRightRadius: 32, backgroundColor: surface.canvas, paddingHorizontal: 20, paddingTop: 28, paddingBottom: insets.bottom + 16, gap: 12 }}>
-          <Text style={{ fontFamily: font.semibold, fontSize: 20, letterSpacing: -0.3, color: ink[900] }}>Where should we look?</Text>
-          <Tap
-            accessibilityRole="button"
-            onPress={() => {
-              setCityOpen(false);
-              void locate();
-            }}
-            style={{ height: 48, borderRadius: 999, backgroundColor: brand[50], flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8 }}
-            scale={0.98}
-          >
-            <LocateFixed size={16} color={brand[600]} />
-            <Text style={{ fontFamily: font.semibold, fontSize: 15, color: brand[700] }}>Use my location</Text>
-          </Tap>
-          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
-            {CITIES.map((c) => (
-              <Tap
-                key={c.label}
-                accessibilityRole="button"
-                onPress={() => {
-                  feel.tick();
-                  pickCity(c);
-                  setCityOpen(false);
-                }}
-                style={{ height: 40, paddingHorizontal: 14, borderRadius: 999, borderWidth: 1, borderColor: where?.label === c.label ? brand[600] : surface.line, backgroundColor: where?.label === c.label ? brand[50] : "#fff", justifyContent: "center" }}
-                scale={0.95}
-              >
-                <Text style={{ fontFamily: font.semibold, fontSize: 13, color: ink[900] }}>{c.label}</Text>
-              </Tap>
-            ))}
-          </View>
-        </View>
-      </Sheet>
+      <PlaceSheet open={cityOpen} onClose={() => setCityOpen(false)} near={where} onLocate={() => void near.locate()} onPick={(p, how) => void near.pick(p, how)} />
 
       <BookSheet open={Boolean(picked)} onClose={() => setPicked(null)} session={picked?.session ?? null} studio={picked?.studio ?? null} place={where} />
     </View>
