@@ -3422,3 +3422,76 @@ supabase_functions does not exist"). 0038-check.sql said yes on all six rows
 and a test row reached push-dispatch. loop-caregiver, loop-notifs and
 ops-push-webhook are done; loop-cron is under way (lab status sweep and
 retention cleanup remain). Phones buzz once the app build has push keys.
+
+## Fitness classes take insurance's place · 2026-10-25
+
+The fitness partner's VP said yes to tiering up: they quote a base price per
+session across their network (200+ cities), Cheeku adds its markup and sells
+single classes. Athar asked for the whole flow now, with the master API to
+follow, and for Fitness to replace Health insurance on Home. Insurance moves
+to Coming soon for the next stage.
+
+**The seam.** Every screen calls `fitnessNetwork()` (src/lib/fitness/
+provider.ts). Today that is a preview network: 14 sample studios per ~2 km
+cell around wherever the person is, deterministic so the same place shows
+the same studios, with sample sessions and plausible base prices. They have
+no address, phone or brand and every screen says "Sample". The partner's API
+becomes a second FitnessNetwork and that one function returns it.
+
+**Price.** 15% on the base, at least Rs 25, the total rounded up to the next
+Rs 10 (`priceFor`, `MARKUP`). The server applies the same rule from
+`app_config.fitness_pricing` when it records the booking, so the client never
+names a price. The screen shows one price, not the split.
+
+**Matching, on the phone.** `match.ts` turns the profile into needs:
+conditions in the person's own words (obesity, PCOS, diabetes, BP, heart,
+arthritis or knee pain, anxiety, insomnia), a BMI of 27.5 or more (Asian
+cut-off), the Today goal, age and pregnancy. Each need ranks activities, can
+cap intensity (BP moderate, heart gentle) and can rule out jumping (knees,
+60+). Pregnancy shows prenatal yoga and meditation only. A doctor line shows
+for pregnancy, a heart condition or 60 and over. Sessions are scored by fit,
+distance and how soon they start, and the top picks are mixed so one studio
+or one activity cannot fill the list. Women-only studios are hidden from
+men. Reasons are card reasons (36 characters) and describe the class, never
+an outcome. Nothing about health leaves the phone: the network sees a place.
+
+**Flow.** Home tile, then `/fitness`: our own location card first (expo-
+location, while in use only, kept on the phone rounded to ~100 m, listed in
+the storage registry), or pick one of 16 cities. Then "Classes for Aarav"
+with the lead need, search (an activity word or a studio name), chips in the
+order that suits the person, the next booked class, "Picked for Aarav" and
+studios ranked by fit then distance. A studio page has seven days of classes,
+the suitable ones first and the rest under "Also here". The booking sheet
+picks the family member (matching redone for them, with a plain warning if
+the class is harder than their profile suggests), shows one price and books.
+The ticket page has the check-in code, directions and cancel (up to an hour
+before). Your classes lists upcoming and past.
+
+**Chat.** "Any yoga near me", "find a gym", "suggest a swimming session for
+Papa" become a fitness intent with the activity, even as a question; "is
+yoga good for BP?" stays a question. The reply is written from the profile
+("For the knees and joints, aqua aerobics, swimming, yoga suit Papa best")
+and the card under it shows the three best classes nearby, bookable in the
+same sheet without leaving the thread. A booking is filed in that member's
+thread like labs and doctors.
+
+**Server (0039).** `fitness_bookings` (read own rows only), with a snapshot
+of the studio and session, the price split, the check-in code and the
+reason. `create_fitness_booking` checks sign-in, consent, a covered member,
+a start between 15 minutes and 15 days out, no overlapping class for that
+member and at most 12 upcoming, then prices and writes an inbox row.
+`cancel_fitness_booking` up to an hour before. Two kinds, fitness_booked and
+fitness_cancelled, on the appointments shelf; the lock screen gets
+push-dispatch's generic appointment line, so "Prenatal yoga" never shows on a
+locked phone. Phone reminders an hour before and half an hour after, with no
+activity named.
+
+**Verified here:** typecheck, lint (no new warnings), 501 tests (25 new for
+fitness, intent and copy), the migration applied twice to a local Postgres
+16 and the scenarios in `supabase/manual/local-check/0039-fitness-scenarios.sql`
+(prices, overlap, too soon, an invented activity, direct insert refused,
+cancel, another family's booking, a paused member, no consent, titles within
+40 and bodies within 90). Web screenshots of Home, location, discover, the
+sheet, Papa's view, a studio, the ticket, the list and a filtered view.
+**Not verified:** location, haptics and the sheet on a phone (needs a new
+dev build for expo-location), and anything against the real partner.

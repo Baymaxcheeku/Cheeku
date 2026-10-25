@@ -68,6 +68,19 @@ describe("notification copy follows the content system", () => {
     expect(pairs.length).toBeGreaterThanOrEqual(8);
   });
 
+  it("keeps the fitness booking words short and calm (0039)", () => {
+    const fit = readFileSync(resolve(__dirname, "../../../../supabase/migrations/0039_fitness.sql"), "utf8");
+    const words = [...fit.matchAll(/perform notify_user\(([\s\S]*?)\);/g)].flatMap((m) => [...(m[1] ?? "").matchAll(/'((?:[^']|'')*)'/g)].map((x) => (x[1] ?? "").replace(/''/g, "'")));
+    expect(words.length).toBeGreaterThan(6);
+    for (const w of words) clean("fitness notification", w);
+    // The longest activity and a 10-letter name still fit.
+    within("fitness title", "Your prenatal yoga class is booked", LIMIT.notifyTitle);
+    within("fitness title", "Class booked for Abcdefghij", LIMIT.notifyTitle);
+    within("fitness title", "Prenatal yoga class cancelled", LIMIT.notifyTitle);
+    within("fitness body", `Prenatal yoga, Wed 28 Oct, 12:30 pm at ${"S".repeat(28)}. Code ABCDEF.`, LIMIT.notifyBody);
+    within("fitness body", `Wed 28 Oct, 12:30 pm at ${"S".repeat(28)}. Show code ABCDEF at the desk.`, LIMIT.notifyBody);
+  });
+
   it("keeps the fixed words short and calm", () => {
     // A case expression holds one variant per branch: check each on its own.
     // Anything else is one string built from pieces: check the pieces joined.

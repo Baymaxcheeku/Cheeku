@@ -243,6 +243,13 @@ in a shell. See `../SHIPPING.md`.
    changes a dose, only reminds. The server side (migration 0038,
    `run_care_sweep`) only ever writes inbox rows; push-dispatch decides what
    buzzes, and a row with `data.quiet` never does.
+10. Fitness matching runs on the phone (`src/lib/fitness/match.ts`); the
+   network sees a place and a day, never a condition. Screens talk only to
+   `fitnessNetwork()`; the partner API replaces the preview network there.
+   The price on screen is `priceFor()`, and the server prices again from
+   `app_config.fitness_pricing` (migration 0039), so a client never names
+   one. Location is asked only from our own card, while the screen is open,
+   and kept on the phone rounded to about 100 m.
 
 ## Running it
 
@@ -276,6 +283,12 @@ haptics has to be seen on a simulator or a device before it counts as done.
 
 ## Open
 
+- **Fitness runs on sample studios.** Everything from location to check-in
+  works against the preview network (marked "Sample", nothing charged) until
+  the partner's master API arrives (`int-fitness`). Migration 0039 must be
+  applied (`supabase/manual/0039-step-1-of-1.sql`, then `0039-check.sql`)
+  or booking says it switches on with the next update. `expo-location` is a
+  new native module: the phone needs a new dev build or `eas build`.
 - **Phones buzz only with push credentials.** Migration 0038, the care-sweep
   cron job and the push webhook are live on production (2026-10-25). A
   server notification reaches a phone once the app build has an EAS project

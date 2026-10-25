@@ -72,8 +72,25 @@ describe("booking intent", () => {
   });
 
   it("services that are not live yet are still recognised", () => {
-    expect(bookingIntent("book a prenatal yoga class", empty)?.service).toBe("fitness");
+    expect(bookingIntent("book a prenatal yoga class", empty)).toMatchObject({ service: "fitness", activity: "prenatal_yoga" });
     expect(bookingIntent("order my medicines", empty)?.service).toBe("medicine");
+  });
+});
+
+describe("fitness intent", () => {
+  const empty = { loops: [], series: new Map() };
+
+  it("finds a class when someone is looking, even as a question", () => {
+    expect(bookingIntent("any yoga classes near me?", empty)).toMatchObject({ service: "fitness", activity: "yoga" });
+    expect(bookingIntent("find a gym nearby", empty)).toMatchObject({ service: "fitness", activity: "gym" });
+    expect(bookingIntent("suggest a swimming session for Papa", empty)).toMatchObject({ service: "fitness", activity: "swimming" });
+    expect(bookingIntent("book a fitness class", empty)).toMatchObject({ service: "fitness", activity: null });
+  });
+
+  it("leaves questions about exercise to the answer", () => {
+    expect(bookingIntent("is yoga good for BP?", empty)).toBeNull();
+    expect(bookingIntent("my knee hurts after gym sessions", empty)).toBeNull();
+    expect(bookingIntent("how many calories does swimming burn", empty)).toBeNull();
   });
 });
 

@@ -59,6 +59,12 @@
         {
           "color": "#4a2ade"
         }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Cheeku AI uses your location only while you look for fitness classes, to show studios near you. It is never stored on our servers."
+        }
       ]
     ],
     "experiments": {

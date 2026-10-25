@@ -99,6 +99,15 @@ export const STORAGE_REGISTRY: readonly StoredItem[] = [
     lasts: "Until you sign out",
   },
   {
+    key: "cheeku.fitness.where",
+    label: "Where to look for classes",
+    why: "Shows fitness studios near the place you last chose, so you are not asked again. Rounded to about 100 metres and never sent to our servers.",
+    where: "keychain",
+    contains: "personal",
+    scope: "account",
+    lasts: "Until you change it or sign out",
+  },
+  {
     key: "cheeku.serviceAddress",
     label: "Delivery and visit address",
     why: "Saves typing it again for the next booking.",

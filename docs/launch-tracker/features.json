@@ -378,6 +378,21 @@
   "order": 23
  },
  {
+  "id": "fitness",
+  "group": "care",
+  "title": "Fitness classes",
+  "what": "Book one class at a gym or studio near you, matched to the person's profile (weight, sugar, BP, knees, age, pregnancy) on the phone. Location with our own explainer or a city pick, search and chips, studio pages with a week of classes, a booking sheet for any family member, a ticket with a check-in code, cancel, inbox rows, reminders and a chat card. It replaced health insurance on Home; insurance moves to Coming soon. Runs on sample studios until the partner's API is connected.",
+  "state": "standin",
+  "where": "app/fitness, src/lib/fitness, src/components/fitness, migration 0039",
+  "shipped": "2026-10-25",
+  "owner": "athar",
+  "next": [
+   "loop-fitness",
+   "int-fitness"
+  ],
+  "order": 23.5
+ },
+ {
   "id": "billing",
   "group": "care",
   "title": "Plans and paywall",
