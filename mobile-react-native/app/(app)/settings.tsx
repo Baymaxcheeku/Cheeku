@@ -249,7 +249,8 @@ export default function Settings() {
       </Group>
 
       <Group label="Preferences">
-        <Row icon={Bell} title="Notifications" body="Your inbox and phone alerts" href="/notifications" />
+        {/* The settings, not the inbox: the inbox has the bell on Home, and a link at the foot of this page. */}
+        <Row icon={Bell} title="Notifications" body="Reminders, nudges and alerts" href="/settings/notifications" />
         <Row icon={Globe} title="Language" body="English" href="/settings/language" />
         <Row icon={HardDrive} title="Storage & cache" body="Offline copies and what's on this phone" href="/settings/storage" />
       </Group>
