@@ -16,7 +16,7 @@ import {
   type LucideIcon,
 } from "lucide-react-native";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, Linking, Pressable, Text, View } from "react-native";
+import { Linking, Pressable, Text, View } from "react-native";
 
 import { Panel, Section, SettingsScreen } from "@/components/settings/chrome";
 import { SpringSwitch } from "@/components/ui/motion";
@@ -28,6 +28,7 @@ import { DEFAULT_PREFS, ownFamily } from "@/lib/settings/queries";
 import type { NotificationPrefs } from "@/lib/settings/schemas";
 import { brand, hue, ink, lilac } from "@/theme/tokens";
 import { font } from "@/theme/type";
+import { ListSkeleton } from "@/components/ui/skeleton";
 
 type Key = keyof NotificationPrefs;
 
@@ -165,8 +166,8 @@ export default function NotificationSettings() {
   return (
     <SettingsScreen title="Notifications" eyebrow="What reaches your phone" icon={Bell}>
       {family.isPending ? (
-        <View className="mt-16 items-center">
-          <ActivityIndicator color={brand[600]} />
+        <View className="px-5">
+          <ListSkeleton rows={6} />
         </View>
       ) : (
         <>

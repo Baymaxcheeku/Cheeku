@@ -18,6 +18,7 @@ import { formatEventDate } from "@/lib/records/grouping";
 import { brand, ink, semantic } from "@/theme/tokens";
 import { font } from "@/theme/type";
 import { Tap } from "@/components/ui/tap";
+import { DetailSkeleton, ScreenSkeleton } from "@/components/ui/skeleton";
 
 /*
  * One lab booking, from "booked" to "report ready".
@@ -58,6 +59,13 @@ export default function LabBooking() {
     feel.success();
   }, [fresh, ready]);
 
+  if ((!b || !partner) && (bookings.isPending || catalog.isPending)) {
+    return (
+      <ScreenSkeleton title="Lab booking">
+        <DetailSkeleton hero={200} />
+      </ScreenSkeleton>
+    );
+  }
   if (!b || !partner) {
     return (
       <View className="flex-1 bg-canvas">

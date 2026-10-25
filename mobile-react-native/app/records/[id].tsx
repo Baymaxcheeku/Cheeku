@@ -2,7 +2,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ArrowRightLeft, BadgeCheck, FileType2, Lightbulb, MessageCircle, MoreHorizontal, Stethoscope, Trash2 } from "lucide-react-native";
-import { ActivityIndicator, ScrollView, Text, View } from "react-native";
+import { ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { FileChip } from "@/components/records/chrome";
@@ -30,6 +30,7 @@ import { DOC_TYPE_LABEL, DOC_TYPES, type DocType, type RecordDetail as Detail } 
 import { brand, ink, lilac, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
 import { Tap } from "@/components/ui/tap";
+import { DetailSkeleton, ScreenSkeleton } from "@/components/ui/skeleton";
 
 /**
  * One record, in the layout its kind deserves.
@@ -145,9 +146,9 @@ export default function RecordDetailScreen() {
 
   if (query.isPending) {
     return (
-      <View className="flex-1 items-center justify-center bg-canvas">
-        <ActivityIndicator color={brand[600]} />
-      </View>
+      <ScreenSkeleton>
+        <DetailSkeleton hero={220} />
+      </ScreenSkeleton>
     );
   }
 

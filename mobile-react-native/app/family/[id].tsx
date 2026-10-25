@@ -37,6 +37,7 @@ import { brand, hue, ink, lilac, semantic } from "@/theme/tokens";
 import { font } from "@/theme/type";
 import { Brand } from "@/components/ui/brand";
 import { Tap } from "@/components/ui/tap";
+import { DetailSkeleton, ScreenSkeleton } from "@/components/ui/skeleton";
 
 /*
  * One family member: switch to them, change their face or details, or remove
@@ -126,6 +127,13 @@ export default function Member() {
     setSeed(member.avatarSeed ?? "");
   }, [member]);
 
+  if (!member && members.isPending) {
+    return (
+      <ScreenSkeleton title="Family member">
+        <DetailSkeleton hero={220} round />
+      </ScreenSkeleton>
+    );
+  }
   if (!member) {
     return (
       <View className="flex-1 bg-canvas">

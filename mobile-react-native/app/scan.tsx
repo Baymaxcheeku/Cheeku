@@ -34,6 +34,7 @@ import { stripImageMetadata } from "@/lib/upload/strip-exif";
 import { brand, hue, ink, lilac, semantic } from "@/theme/tokens";
 import { useFamily } from "@/lib/profiles/family";
 import { feel } from "@/lib/feel";
+import { LinesSkeleton, ListSkeleton, ScreenSkeleton } from "@/components/ui/skeleton";
 
 type Phase = "pick" | "working" | "error";
 
@@ -267,9 +268,10 @@ export default function Scan() {
 
   if (context.isPending) {
     return (
-      <View className="flex-1 items-center justify-center bg-canvas">
-        <ActivityIndicator color={brand[600]} />
-      </View>
+      <ScreenSkeleton>
+        <ListSkeleton rows={3} />
+        <LinesSkeleton lines={3} style={{ marginTop: 18 }} />
+      </ScreenSkeleton>
     );
   }
 

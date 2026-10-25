@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { HeartPulse, Info, Pill, ShieldAlert, ShieldCheck, Stethoscope, type LucideIcon } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
-import { ActivityIndicator, Text, View } from "react-native";
+import { Text, View } from "react-native";
 
 import { HealthEditor } from "@/components/family/health-editor";
 import { SaveButton, SettingsScreen } from "@/components/settings/chrome";
@@ -14,6 +14,7 @@ import { activeProfile } from "@/lib/profiles/context";
 import { ageFrom, checkMemberHealth, EMPTY_HEALTH, loadMemberHealth, saveMemberHealth, type MemberHealth } from "@/lib/profiles/health";
 import { brand, ink, semantic } from "@/theme/tokens";
 import { font } from "@/theme/type";
+import { FormSkeleton } from "@/components/ui/skeleton";
 
 /*
  * Health profile, for whoever is being viewed.
@@ -85,8 +86,8 @@ export default function HealthProfile() {
   if (context.isPending) {
     return (
       <SettingsScreen title="Health profile" eyebrow="Conditions, allergies and medicines" icon={HeartPulse}>
-        <View className="mt-16 items-center">
-          <ActivityIndicator color={brand[600]} />
+        <View className="px-5">
+          <FormSkeleton fields={5} />
         </View>
       </SettingsScreen>
     );

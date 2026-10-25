@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { MessageCircle } from "lucide-react-native";
-import { ActivityIndicator, ScrollView, Text, View } from "react-native";
+import { ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ProductAssessmentCard } from "@/components/ai/product-assessment-card";
@@ -10,8 +10,9 @@ import { Backdrop, PillButton, ScreenHeader } from "@/components/ui/screen";
 import { fetchSitting } from "@/lib/memory/store";
 import { withDayBreaks } from "@/lib/memory/thread";
 import { useFamily } from "@/lib/profiles/family";
-import { brand, ink, surface } from "@/theme/tokens";
+import { ink, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
+import { ChatSkeleton } from "@/components/ui/skeleton";
 
 /*
  * One past sitting, read-only, exactly as it was answered: the tier, what was
@@ -31,7 +32,9 @@ export default function Sitting() {
       <Backdrop height={300} />
       <ScreenHeader title="Conversation" fallback="/chats" />
       {sitting.isPending ? (
-        <ActivityIndicator color={brand[600]} style={{ marginTop: 40 }} />
+        <View style={{ paddingHorizontal: 18 }}>
+          <ChatSkeleton />
+        </View>
       ) : (
         <ScrollView contentContainerStyle={{ paddingHorizontal: 18, paddingBottom: insets.bottom + 32, gap: 14 }}>
           {withDayBreaks(sitting.data ?? []).map((item) => {

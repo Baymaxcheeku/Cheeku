@@ -2,7 +2,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Bookmark, BookmarkCheck, ChevronLeft, ExternalLink, MessageCircle, MessageCircleQuestion, Share2, ShieldCheck } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
-import { ActivityIndicator, Linking, Pressable, ScrollView, Share, Text, View, type NativeScrollEvent, type NativeSyntheticEvent } from "react-native";
+import { Linking, Pressable, ScrollView, Share, Text, View, type NativeScrollEvent, type NativeSyntheticEvent } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ArticleRow, CATEGORY_STYLE, Emblem, Eyebrow, type CategoryStyle } from "@/components/learn/parts";
@@ -16,6 +16,7 @@ import { shortDate } from "@/lib/records/details";
 import { brand, ink, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
 import { Tap } from "@/components/ui/tap";
+import { DetailSkeleton, ScreenSkeleton } from "@/components/ui/skeleton";
 
 /*
  * THE READER.
@@ -79,9 +80,9 @@ export default function ArticleReader() {
 
   if (article.isPending) {
     return (
-      <View className="flex-1 items-center justify-center bg-canvas">
-        <ActivityIndicator color={brand[600]} />
-      </View>
+      <ScreenSkeleton>
+        <DetailSkeleton hero={260} />
+      </ScreenSkeleton>
     );
   }
 

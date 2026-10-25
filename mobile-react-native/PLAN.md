@@ -223,6 +223,9 @@ in a shell. See `../SHIPPING.md`.
    0.97, 0.98 for big cards, 0.95 for small round buttons. No Reanimated
    `Keyframe` entrances: they leave the view collapsed on web; use `<Enter>`
    from `components/ui/motion.tsx`. Haptics only through `src/lib/feel.ts`.
+   A screen arriving shows a skeleton from `components/ui/skeleton.tsx`,
+   never a spinner; `ActivityIndicator` is only for an action in progress
+   (a button, an upload, a save).
 8. Design values come from `src/theme/tokens.ts`: font sizes from `type`
    (11, 12, 13, 15, 17, 20, 24, 28, 34; 10 for counters, 36 and up for
    display), radii from `radius` (8, 12, 16, 24, 32, pill; 6 and under for

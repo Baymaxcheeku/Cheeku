@@ -33,6 +33,7 @@ import { supabase } from "@/lib/supabase/client";
 import { brand, ink, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
 import { Tap } from "@/components/ui/tap";
+import { LinesSkeleton } from "@/components/ui/skeleton";
 
 const DOC_ICON: Record<LegalKind, LucideIcon> = { terms: ScrollText, privacy: ShieldCheck, health_consent: FileText, storage: Cookie };
 
@@ -153,7 +154,7 @@ export default function PrivacySettings() {
       <Section>
         <Panel>
           {consent.isPending ? (
-            <ActivityIndicator color={brand[600]} />
+            <LinesSkeleton lines={3} />
           ) : !state?.available ? (
             <StatusLine
               icon={Clock3}

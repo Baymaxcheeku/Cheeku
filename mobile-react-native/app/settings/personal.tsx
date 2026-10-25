@@ -2,7 +2,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { CalendarHeart, ChevronRight, Dna, HeartPulse, IdCard, Mail, ShieldCheck, UserCog } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
-import { ActivityIndicator, Pressable, Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 
 import { SaveButton, SettingsScreen } from "@/components/settings/chrome";
 import { Eyebrow, PersonHero, Reason, Title } from "@/components/settings/editorial";
@@ -17,6 +17,7 @@ import { accountEmail, profileDetail } from "@/lib/settings/queries";
 import { personalInfoSchema } from "@/lib/settings/schemas";
 import { brand, ink, semantic, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
+import { FormSkeleton } from "@/components/ui/skeleton";
 
 const SEXES = [
   ["female", "Female"],
@@ -121,8 +122,8 @@ export default function PersonalInfo() {
   if (context.isPending) {
     return (
       <SettingsScreen title="Personal information" eyebrow="Name, date of birth and contact" icon={UserCog}>
-        <View className="mt-16 items-center">
-          <ActivityIndicator color={brand[600]} />
+        <View className="px-5">
+          <FormSkeleton fields={5} />
         </View>
       </SettingsScreen>
     );

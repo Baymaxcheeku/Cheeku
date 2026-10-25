@@ -13,6 +13,7 @@ import { fetchReviews, postReview, useCatalog, useLabBookings, useLabCart, useRa
 import { useFamily } from "@/lib/profiles/family";
 import { brand, ink } from "@/theme/tokens";
 import { font } from "@/theme/type";
+import { DetailSkeleton, ScreenSkeleton } from "@/components/ui/skeleton";
 
 /*
  * A lab's own page: who they are, what they cost, what people say.
@@ -36,6 +37,13 @@ export default function LabPartner() {
   const [writing, setWriting] = useState(false);
 
   const p = catalog.data?.partners.find((x) => x.id === id);
+  if (!catalog.data && catalog.isPending) {
+    return (
+      <ScreenSkeleton title="Lab">
+        <DetailSkeleton hero={240} round />
+      </ScreenSkeleton>
+    );
+  }
   if (!p || !catalog.data) {
     return (
       <View className="flex-1 bg-canvas">

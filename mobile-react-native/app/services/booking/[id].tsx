@@ -13,6 +13,7 @@ import { useServiceRequestList, whenText } from "@/lib/services/requests";
 import { brand, ink, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
 import { Tap } from "@/components/ui/tap";
+import { DetailSkeleton, ScreenSkeleton } from "@/components/ui/skeleton";
 
 /*
  * One service request: where it is now, the details, and a way out. Opened
@@ -26,12 +27,19 @@ export default function ServiceBooking() {
   const store = useServiceRequestList();
   const r = store.items.find((x) => x.id === id);
 
+  if (!r && !store.loaded) {
+    return (
+      <ScreenSkeleton title="Booking">
+        <DetailSkeleton hero={200} />
+      </ScreenSkeleton>
+    );
+  }
   if (!r) {
     return (
       <View className="flex-1 bg-canvas">
         <Backdrop />
         <ScreenHeader title="Booking" fallback="/services" />
-        <Text style={{ marginTop: 40, textAlign: "center", fontFamily: font.regular, fontSize: 15, color: ink[500] }}>{store.loaded ? "This booking isn't on this phone." : "Loading…"}</Text>
+        <Text style={{ marginTop: 40, textAlign: "center", fontFamily: font.regular, fontSize: 15, color: ink[500] }}>This booking isn&apos;t on this phone.</Text>
       </View>
     );
   }

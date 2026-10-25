@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { Award, Bookmark } from "lucide-react-native";
 import { useState } from "react";
-import { ActivityIndicator, RefreshControl, ScrollView, Text, View } from "react-native";
+import { RefreshControl, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Tap } from "@/components/ui/tap";
@@ -14,6 +14,7 @@ import { allArticles } from "@/lib/knowledge/queries";
 import { useFamily } from "@/lib/profiles/family";
 import { brand, ink, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
+import { GridSkeleton } from "@/components/ui/skeleton";
 
 /*
  * THE LIBRARY. Everything the health desk has published.
@@ -65,7 +66,7 @@ export default function Learn() {
           ))}
         </ScrollView>
 
-        {library.isPending ? <ActivityIndicator color={brand[600]} style={{ marginTop: 40 }} /> : null}
+        {library.isPending ? <GridSkeleton tiles={4} height={170} /> : null}
         {library.isSuccess && cards.length === 0 ? <Empty text="Nothing published yet. New explainers land here as the team writes them." /> : null}
 
         {filter === "all" && cards.length ? (

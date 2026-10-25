@@ -13,6 +13,7 @@ import { useCatalog, useLabCart, useRatings } from "@/lib/labs/queries";
 import { brand, hue, ink } from "@/theme/tokens";
 import { font } from "@/theme/type";
 import { Tap } from "@/components/ui/tap";
+import { CardListSkeleton } from "@/components/ui/skeleton";
 
 /*
  * Choose a lab for everything in the cart.
@@ -45,7 +46,7 @@ export default function ChooseLab() {
         {/* With nothing in the cart every lab "does all of it" for ₹0, which is
             true and useless. The title and the list wait for a test. */}
         <PageTitle
-          title={empty ? "Pick a test first" : `${ranked.length} ${ranked.length === 1 ? "lab does" : "labs do"} all of it`}
+          title={empty ? "Pick a test first" : !catalog.data ? "Finding your labs" : `${ranked.length} ${ranked.length === 1 ? "lab does" : "labs do"} all of it`}
           line={empty ? "Then we'll show every lab that does it, cheapest first." : "Prices include the home visit. Tap a lab to see reviews."}
           style={{ marginTop: 6 }}
         />
@@ -72,6 +73,7 @@ export default function ChooseLab() {
         ) : null}
 
         <View style={{ marginTop: 18, gap: 12 }}>
+          {!empty && !catalog.data ? <CardListSkeleton count={3} /> : null}
           {(empty ? [] : ranked).map(({ partner: p, quote: q }, i) => (
             <Animated.View key={p.id} entering={still ? undefined : FadeInDown.delay(i * 50).duration(260)}>
               <Pressable accessibilityRole="button" onPress={() => router.push({ pathname: "/labs/partner/[id]", params: { id: p.id } })} style={({ pressed }) => [glassShadow, { borderRadius: 24, padding: 14, backgroundColor: pressed ? "#fff" : glass.fillStrong, borderWidth: i === 0 ? 2 : 1, borderColor: i === 0 ? brand[500] : glass.rim }]}>

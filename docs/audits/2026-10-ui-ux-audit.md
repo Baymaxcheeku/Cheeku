@@ -33,6 +33,10 @@ called out where they matter.
   away with one haptic. Goal cards (`loop-goal-cards`): five goals, two
   questions each, check-ins in the plan, a streak and a daily reminder.
 - Batches 1 to 3 were checked on a phone on 24 Oct and are done.
+- **First load everywhere: built, 25 Oct.** Every screen that waits on data
+  now shows a skeleton shaped like it, not a spinner: 17 spinners replaced,
+  11 screens that flashed empty or "not found" given one. Spinners remain
+  only inside buttons and uploads.
 
 ## Verdict
 

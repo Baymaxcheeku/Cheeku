@@ -20,7 +20,7 @@ import {
   type LucideIcon,
 } from "lucide-react-native";
 import { useState } from "react";
-import { ActivityIndicator, Modal, Pressable, ScrollView, Text, View } from "react-native";
+import { Modal, Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Tap } from "@/components/ui/tap";
@@ -54,6 +54,7 @@ import { profileAccess, type ActiveProfile } from "@/lib/profiles/context";
 import { joinNames, planChange, refreshRoster } from "@/lib/profiles/family";
 import { brand, hue, ink, lilac, semantic, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
+import { DetailSkeleton } from "@/components/ui/skeleton";
 
 /*
  * YOUR PLAN. Rebuilt 2026-10 as a page that sells by being straight with
@@ -145,8 +146,8 @@ export default function Subscription() {
   if (context.isPending) {
     return (
       <SettingsScreen title="Your plan" eyebrow="What you get and who it covers" icon={Crown}>
-        <View className="mt-16 items-center">
-          <ActivityIndicator color={brand[600]} />
+        <View className="px-5">
+          <DetailSkeleton hero={180} />
         </View>
       </SettingsScreen>
     );
