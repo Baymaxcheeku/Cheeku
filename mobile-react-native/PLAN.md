@@ -274,10 +274,6 @@ haptics has to be seen on a simulator or a device before it counts as done.
 
 ## Open
 
-- **Medicines and nudges need a phone check** (loop-meds, 2026-10-25): dose
-  reminders at the set time, the check an hour later, a refill nudge, the
-  Android "Medicine reminders" channel, a tap opening the right member, and
-  the "Turn on" card on Today. None of it runs in the web build.
 
 - **Rename.** "Baymax" is Disney's character and blocks store submission. It is
   currently the Expo `name`, `slug`, `scheme` and both bundle identifiers.

@@ -3349,3 +3349,10 @@ Your medicines with each sheet, Home, memory and Notifications settings.
 **Needs a phone:** every notification. The web build schedules nothing, so
 none of the timing, the Android "Medicine reminders" channel, the tap routing
 into the right member, or the permission card could be seen from here.
+
+**Phone check, same day.** Profile → Notifications opened the inbox, so the
+new switches were only reachable through the inbox's settings button; the
+row now opens Notification settings (PR #47). Athar then checked medicines
+and nudges on a phone and everything worked: loop-meds and loop-nudges are
+done. Matching ledger lines to LabStack's drugMasterId, for exact-pack
+refills, rides with ai-brand-salt.
