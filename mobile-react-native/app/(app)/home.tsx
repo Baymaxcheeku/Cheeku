@@ -11,6 +11,7 @@ import { Paywall } from "@/components/billing/paywall";
 import { OfflineBanner } from "@/components/app/offline-banner";
 import { AskBar, CheekuCard, HomeHeadline, ProfileChip, firstName } from "@/components/home/ask-hero";
 import { CareSection } from "@/components/home/care";
+import { FamilyCareCard } from "@/components/care/family-care";
 import { AskRow, DueThisWeek, FamilyAlertCard, LockedPreview, PlanPreview, ProgressStrip, StepCard, TodayHeadline, UnlockCard, UnlockMoment } from "@/components/home/today";
 import { AppointmentCard } from "@/components/booking/appointment-card";
 import { isUpcoming, startsAt, useAppointmentList } from "@/lib/booking/appointments";
@@ -497,6 +498,15 @@ function TodayBody({
             {alerts.map((a) => (
               <FamilyAlertCard key={a.id} row={a} member={byId.get(a.profileId) ?? null} onPress={() => onOpenRow(a)} />
             ))}
+          </View>
+        </StaggerItem>
+      ) : null}
+
+      {/* The account holder looks after everyone else: one line each. */}
+      {profile.isPrimary && members.some((m) => !m.isPrimary) ? (
+        <StaggerItem index={4}>
+          <View className="mt-4 px-5">
+            <FamilyCareCard members={members.filter((m) => !m.isPrimary)} onOpen={() => router.push("/care")} />
           </View>
         </StaggerItem>
       ) : null}

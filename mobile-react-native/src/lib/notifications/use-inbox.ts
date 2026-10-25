@@ -177,7 +177,10 @@ export function useOpenNotification() {
 
       if (item.route) router.push(item.route as never);
 
-      if (item.profileId && item.profileId !== activeId) void switchMember(item.profileId);
+      // Family care is about everyone and opens from the account holder's
+      // side; switching to the member it names would hide the others.
+      const careWide = item.route?.startsWith("/care") ?? false;
+      if (item.profileId && item.profileId !== activeId && !careWide) void switchMember(item.profileId);
     },
     [qc, router, markRead, switchMember],
   );

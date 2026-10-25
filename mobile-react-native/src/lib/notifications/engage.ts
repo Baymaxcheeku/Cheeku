@@ -11,6 +11,9 @@
  *               the doses are still not ticked, and a refill nudge while a
  *               strip has five days or fewer left. "Medicine reminders" in
  *               settings, and the member's own switch on Your medicines.
+ *               For a family member, only the dose reminder: the check and
+ *               the refill come from the server as caregiver alerts, because
+ *               it sees ticks from every phone (migration 0038).
  *   daily       the morning plan, what's due, the lunch photo, the evening
  *               walk, the goal check-in, a streak about to break, and the
  *               Sunday reset. "Daily nudges" in settings. The account holder
@@ -136,8 +139,10 @@ export function engagementPlan(input: EngageInput): Nudge[] {
             channel: "medicines",
           });
         }
+        // A family member's check comes from the server instead (parent_alert,
+        // migration 0038): it sees ticks made on any phone, this one does not.
         const again = new Date(when.getTime() + 60 * 60_000);
-        if (again.getTime() > soon && !quiet(again)) {
+        if (input.primary && again.getTime() > soon && !quiet(again)) {
           placed.push({
             id: id(`dose-${s.slot}-check`),
             kind: "dose_check",
@@ -153,7 +158,8 @@ export function engagementPlan(input: EngageInput): Nudge[] {
 
     // 2. Everything else, most useful first, under the cap and the gap.
     const wanted: Candidate[] = [];
-    const low = input.meds && input.switches.medicineReminders ? input.meds.low.map((n) => n - d) : [];
+    // Refills for a family member reach the account holder from the server too.
+    const low = input.meds && input.switches.medicineReminders && input.primary ? input.meds.low.map((n) => n - d) : [];
     if (low.length) {
       const least = Math.max(0, Math.min(...low));
       wanted.push({

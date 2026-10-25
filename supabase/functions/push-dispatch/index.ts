@@ -24,9 +24,11 @@ type Row = {
   id: string;
   user_id: string;
   kind: string;
-  category: "reports" | "appointments" | "family" | "account" | "updates";
+  category: "reports" | "appointments" | "family" | "account" | "updates" | "medicines" | "nudges" | "care";
   title: string;
+  body: string;
   route: string | null;
+  data: Record<string, unknown> | null;
   created_at: string;
   read_at: string | null;
 };
@@ -37,6 +39,9 @@ const PREF_FOR: Record<Row["category"], string> = {
   family: "familyActivity",
   account: "accountSecurity",
   updates: "productUpdates",
+  medicines: "medicineReminders",
+  nudges: "dailyNudges",
+  care: "caregiverAlerts",
 };
 
 // Kept in step with DEFAULT_PREFS in the app (src/lib/settings/queries.ts).
@@ -46,7 +51,16 @@ const DEFAULTS: Record<string, boolean> = {
   familyActivity: false,
   accountSecurity: true,
   productUpdates: false,
+  medicineReminders: true,
+  dailyNudges: true,
+  caregiverAlerts: true,
 };
+
+// Rows the family-care sweep writes (migration 0038) are worded for a locked
+// screen from the start: no medicine, condition or reading, a family member
+// by first name only. Those go out as written. A due test is not one of them,
+// because its title names the test.
+const OWN_WORDS = new Set(["dose_due", "refill_due", "daily_nudge", "sunday_review", "parent_alert"]);
 
 const COPY: Record<Row["category"], { title: string; body: string }> = {
   reports: { title: "Cheeku has an update on a report", body: "Tap to see it in the app." },
@@ -54,6 +68,9 @@ const COPY: Record<Row["category"], { title: string; body: string }> = {
   family: { title: "Something new in your family's files", body: "Tap to have a look." },
   account: { title: "An update on your account", body: "Tap to review it in Cheeku AI." },
   updates: { title: "News from Cheeku", body: "Tap to have a look." },
+  medicines: { title: "Time for your medicines", body: "Tap to tick them off." },
+  nudges: { title: "Something on your list is due", body: "Tap to plan it." },
+  care: { title: "An update on your family", body: "Tap to see how everyone's doing." },
 };
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
@@ -90,6 +107,9 @@ Deno.serve(async (req) => {
     return new Response("stale", { status: 200 });
   }
 
+  // Inbox only: a phone in use already showed it (the sweep marks these).
+  if (row.data?.quiet === true) return new Response("quiet", { status: 200 });
+
   const famRes = await rest(`families?owner_id=eq.${row.user_id}&select=notification_prefs`);
   const fam = ((await famRes.json()) as { notification_prefs: Record<string, boolean> | null }[])[0];
   const key = PREF_FOR[row.category];
@@ -100,14 +120,19 @@ Deno.serve(async (req) => {
   const devices = (await devRes.json()) as { token: string }[];
   if (devices.length === 0) return new Response("no devices", { status: 200 });
 
-  const copy = row.category === "updates" ? { title: row.title, body: COPY.updates.body } : COPY[row.category];
+  const copy =
+    row.category === "updates"
+      ? { title: row.title, body: COPY.updates.body }
+      : OWN_WORDS.has(row.kind)
+        ? { title: row.title, body: row.body }
+        : (COPY[row.category] ?? COPY.updates);
 
   const messages = devices.map((d) => ({
     to: d.token,
     title: copy.title,
     body: copy.body,
     sound: "default",
-    channelId: row.category === "appointments" ? "appointments" : "default",
+    channelId: row.category === "appointments" ? "appointments" : row.category === "medicines" || row.category === "care" ? "medicines" : "default",
     // Ids only. The app looks the row up after the lock, it does not trust
     // anything a push carried.
     data: { notificationId: row.id, url: row.route ?? "/notifications" },

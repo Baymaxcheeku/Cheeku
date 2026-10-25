@@ -7,6 +7,7 @@ import {
   CalendarClock,
   ChevronRight,
   FileText,
+  HeartHandshake,
   Inbox,
   KeyRound,
   Lock,
@@ -74,6 +75,14 @@ const GROUPS: { title: string; rows: { key: Key; icon: LucideIcon; tint: string;
         fg: hue.teal.fg,
         title: "Daily nudges",
         body: "A few a day for your plan, goal and streak. Never after 10 pm.",
+      },
+      {
+        key: "caregiverAlerts",
+        icon: HeartHandshake,
+        tint: hue.rose.bg,
+        fg: hue.rose.fg,
+        title: "Family care alerts",
+        body: "When someone's doses go unticked, a strip runs low or a test is overdue.",
       },
       {
         key: "reportNotifications",

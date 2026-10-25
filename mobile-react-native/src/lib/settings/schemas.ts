@@ -74,6 +74,7 @@ export const notificationPrefsSchema = z.object({
   appointmentReminders: z.boolean(),
   medicineReminders: z.boolean(),
   dailyNudges: z.boolean(),
+  caregiverAlerts: z.boolean(),
   productUpdates: z.boolean(),
   tipsReminders: z.boolean(),
   checkinReminders: z.boolean(),

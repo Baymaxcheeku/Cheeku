@@ -80,9 +80,9 @@ describe("the day's nudges", () => {
     expect(r[0]?.url).toBe("/medicines");
   });
 
-  it("gives a family member doses, refills and what's due, never the daily habit nudges", () => {
+  it("gives a family member their dose reminders and what's due; the check and refills come from the server", () => {
     const kinds = new Set(engagementPlan(base({ primary: false, name: "Papa Sharma", profileId: "papa" })).map((n) => n.kind));
-    expect([...kinds].sort()).toEqual(["dose", "dose_check", "due"]);
+    expect([...kinds].sort()).toEqual(["dose", "due"]);
     const title = engagementPlan(base({ primary: false, name: "Papa Sharma", profileId: "papa" })).find((n) => n.kind === "dose")?.title;
     expect(title).toBe("Papa's morning doses are due");
   });

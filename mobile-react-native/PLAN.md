@@ -240,7 +240,9 @@ in a shell. See `../SHIPPING.md`.
    OS for permission without a tap on our own card first. The lock screen
    never names a medicine, a condition, a reading or a goal. A dose is a
    `today_actions` row `dose:<medicine>:<slot>`; Cheeku never sets or
-   changes a dose, only reminds.
+   changes a dose, only reminds. The server side (migration 0038,
+   `run_care_sweep`) only ever writes inbox rows; push-dispatch decides what
+   buzzes, and a row with `data.quiet` never does.
 
 ## Running it
 
@@ -273,6 +275,17 @@ Anything about layout, cold-start routing, gestures, camera, biometrics or
 haptics has to be seen on a simulator or a device before it counts as done.
 
 ## Open
+
+- **Family care needs its database steps and a phone check** (loop-caregiver,
+  2026-10-25). Until `supabase/manual/0038-step-1..3` are run, no caregiver
+  alert or server nudge exists: step 1 is the migration, step 2 schedules the
+  sweep (enable pg_cron first), step 3 is the push webhook (with
+  PUSH_WEBHOOK_SECRET set and push-dispatch redeployed). Then check on a
+  phone: Family care cards, an alert 90 minutes after a member's unticked
+  slot, tapping it opens Family care without switching member.
+- **Caregiver alerts go to every phone on the account**, the parent's own
+  included when they use the same login. A "this phone is Papa's" setting
+  would let push-dispatch skip theirs; not built.
 
 
 - **Rename.** "Baymax" is Disney's character and blocks store submission. It is

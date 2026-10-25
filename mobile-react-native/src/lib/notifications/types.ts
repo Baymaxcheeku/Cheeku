@@ -2,7 +2,9 @@
  * The inbox vocabulary. Mirrors `public.notifications` (migration 0024).
  *
  * Rows are written by database triggers for everything the server owns
- * (records, family, plans, support, launches) and by the app only for what
+ * (records, family, plans, support, launches), by the family-care sweep
+ * every 15 minutes (doses, refills, nudges, parent alerts; migration 0038),
+ * and by the app only for what
  * lives on the phone (appointments, a password change it just made). The
  * database derives `category` from `kind`, so the two cannot disagree.
  */
@@ -24,9 +26,16 @@ export type NotificationKind =
   | "password_changed"
   | "support_update"
   | "service_live"
-  | "welcome";
+  | "welcome"
+  // Written by the family-care sweep (migration 0038).
+  | "dose_due"
+  | "refill_due"
+  | "daily_nudge"
+  | "retest_due"
+  | "sunday_review"
+  | "parent_alert";
 
-export type NotificationCategory = "reports" | "appointments" | "family" | "account" | "updates";
+export type NotificationCategory = "reports" | "appointments" | "family" | "account" | "updates" | "medicines" | "nudges" | "care";
 
 /** The kinds the app itself may write. Everything else is refused by RLS. */
 export type DeviceEventKind = Extract<
@@ -58,6 +67,9 @@ export const CATEGORY_LABEL: Record<NotificationCategory, string> = {
   family: "Family",
   account: "Account",
   updates: "Updates",
+  medicines: "Medicines",
+  nudges: "Reminders",
+  care: "Family care",
 };
 
 /*
@@ -76,4 +88,10 @@ export const ACTION_LABEL: Partial<Record<NotificationKind, string>> = {
   lab_booked: "Track",
   lab_update: "Track",
   service_live: "Book now",
+  dose_due: "Tick doses",
+  refill_due: "Refill",
+  daily_nudge: "Open today",
+  retest_due: "Plan it",
+  sunday_review: "Plan the week",
+  parent_alert: "See family",
 };
