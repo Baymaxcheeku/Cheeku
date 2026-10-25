@@ -3414,3 +3414,11 @@ Family care, Home and Notifications settings.
 **Not verified:** pg_cron and the webhook (neither exists on a plain
 Postgres), and any real push. Both need the 0038 editor steps on Supabase
 and a phone with an EAS build.
+
+**Live, same day.** Athar applied 0038 steps 1 and 2 on production and
+created the push webhook from Integrations > Database Webhooks (the SQL
+version of step 3 fails until webhooks are enabled once: "schema
+supabase_functions does not exist"). 0038-check.sql said yes on all six rows
+and a test row reached push-dispatch. loop-caregiver, loop-notifs and
+ops-push-webhook are done; loop-cron is under way (lab status sweep and
+retention cleanup remain). Phones buzz once the app build has push keys.
