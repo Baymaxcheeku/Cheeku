@@ -117,6 +117,11 @@ judgement. Never "High priority", "High risk", "Borderline" or "Alert".
   records) and `src/lib/notifications/engage.ts` (doses, refills and the
   day's nudges; `engage.test.ts` holds them to the limits and the never-list).
   A dose reminder says "Time for your morning medicines", never which one.
+- Server-side nudges and caregiver alerts: `run_care_sweep` in
+  `supabase/migrations/0038_family_care.sql` ("Papa hasn't ticked morning
+  doses", first name only, at most 10 characters). Its scenarios in
+  `supabase/manual/local-check/0038-family-care-scenarios.sql` hold them to
+  40 and 90 and check no medicine is named.
 - Goals: `src/lib/home/goals.ts` (title 30, line 60, question 40, chip 24;
   `goals.test.ts` holds them to it). A goal's lock-screen reminder never names
   the goal: "Steady sugar" on a lock screen is health information.

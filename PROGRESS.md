@@ -3356,3 +3356,61 @@ row now opens Notification settings (PR #47). Athar then checked medicines
 and nudges on a phone and everything worked: loop-meds and loop-nudges are
 done. Matching ledger lines to LabStack's drugMasterId, for exact-pack
 refills, rides with ai-brand-salt.
+
+## Family care: caregiver view, alerts and server-side nudges · 2026-10-25
+
+Athar asked for the caregiver view, parent alerts and server-side nudges
+together. Every family member lives under the account holder's login (one
+user_id, many profiles), so the account holder is the caregiver and alerts go
+to their phones.
+
+**Why the server.** The on-phone planner (engage.ts) reaches only people who
+opened the app in the last two days, and it cannot know that Papa's evening
+doses were not ticked on Papa's phone. The server sees every tick.
+
+**How it works.**
+- Each phone already works out a member's dose plan (meds.ts). It now writes
+  a small copy to `profiles.care_plan` (src/lib/care): slot times, ledger
+  keys, the last day each counted strip lasts, and two switches. Keys only,
+  never a medicine's name, at most 2,000 bytes. Written when it changes, from
+  the shell for the active member and from Family care for everyone.
+- `run_care_sweep()` (migration 0038) runs every 15 minutes through pg_cron,
+  in India time, never between 22:45 and 07:30, and writes inbox rows:
+  - **parent_alert** to the account holder: a member's slot still unticked
+    90 minutes on, a strip with three days or fewer left, or two days with
+    nothing ticked after a week of ticking. Only for members being tracked
+    (a dose ticked in the last two days), so nobody gets an alert every few
+    hours about a parent nobody ticks for.
+  - **dose_due, refill_due, daily_nudge, sunday_review** only for accounts
+    nobody has opened in 36 hours. A phone in use plans these itself. Daily
+    nudges go out on days 2, 3, 5, 8 and 13 of quiet, then stop.
+  - **retest_due** for a test or follow-up due within three days or up to a
+    month overdue, once a week each. Always in the inbox; `data.quiet` keeps
+    the account holder's own one from buzzing while their phone is in use.
+  - Paused members (beyond the plan's seats) and accounts without the
+    required consent get nothing.
+- push-dispatch learns three shelves (medicines, nudges, care) and three
+  switches (Medicine reminders, Daily nudges, Family care alerts, all on by
+  default). Rows the sweep writes go out as worded, since they are written
+  for a lock screen; a due test is replaced by a generic line because its
+  title names the test.
+- On the phone, a family member's local plan keeps only their dose
+  reminder. The check an hour later and the refill nudge now come from the
+  server as caregiver alerts, so they are never sent twice.
+
+**The view.** Family care (`app/care.tsx`): a card per member with today's
+doses by slot, the week, their latest BP and sugar, what needs you (late
+doses, overdue tests, low strips, quiet days), Call (from their saved phone
+number), Open their day, and an alerts switch per member. Home shows one line
+per member with a status dot. A caregiver alert opens Family care without
+switching member.
+
+**Verified here:** typecheck, lint (no new warnings), 476 tests, the
+migration applied twice to a local Postgres 16, and 24 sweep scenarios in
+`supabase/manual/local-check/0038-family-care-scenarios.sql` across a
+caregiver, a quiet account, a paused member and an account without consent
+(all pass). push-dispatch typechecks with a Deno shim. Web screenshots of
+Family care, Home and Notifications settings.
+**Not verified:** pg_cron and the webhook (neither exists on a plain
+Postgres), and any real push. Both need the 0038 editor steps on Supabase
+and a phone with an EAS build.
