@@ -125,6 +125,12 @@ judgement. Never "High priority", "High risk", "Borderline" or "Alert".
 - Goals: `src/lib/home/goals.ts` (title 30, line 60, question 40, chip 24;
   `goals.test.ts` holds them to it). A goal's lock-screen reminder never names
   the goal: "Steady sugar" on a lock screen is health information.
+- Fitness: reasons in `src/lib/fitness/match.ts` (`NEED_RULES`, card reason
+  36, they describe the class, never an outcome), chips in `catalog.ts`
+  (16), inbox rows in `supabase/migrations/0039_fitness.sql` ("Class booked
+  for Papa", checked in `copy.test.ts`) and phone reminders in `push.ts`
+  ("Your class starts in an hour", never the activity: "Prenatal yoga" on a
+  lock screen says too much).
 - Inbox and push notifications from the server: the `notify_*` functions,
   latest wording in `supabase/migrations/0036_notification_copy.sql`.
 
