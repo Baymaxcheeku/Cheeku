@@ -393,6 +393,20 @@
   "order": 23.5
  },
  {
+  "id": "location",
+  "group": "care",
+  "title": "Location and nearby",
+  "what": "Where the phone is, live while the app is open, and where each family member lives, saved to the account (latest place only). Addresses from our own geo function (Ola Maps, then OpenStreetMap) with a 30-day cache and a daily cap. A Home primer asks once; a chip on Home, Fitness, Labs, Doctors and Services shows and changes the place; Profile shows it with its age; lab and service addresses fill from it.",
+  "state": "built",
+  "where": "src/lib/location, src/components/location, app/settings/location.tsx, supabase/functions/geo, migration 0040",
+  "shipped": "2026-10-25",
+  "owner": "athar",
+  "next": [
+   "loc-live"
+  ],
+  "order": 23.6
+ },
+ {
   "id": "billing",
   "group": "care",
   "title": "Plans and paywall",

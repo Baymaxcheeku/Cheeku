@@ -3499,3 +3499,67 @@ dev build for expo-location), and anything against the real partner.
 **Live, same day.** Athar applied 0039 on production; 0039-check.sql said yes
 on every row. Booking now records for real (on sample studios). What is left
 for `loop-fitness` is the phone check on a new dev build.
+
+## Location, live and saved (loc-live) · 2026-10-25
+
+Athar checked fitness on the phone (web build) and found "Near you" where a
+place should be, and nothing in Profile. Two causes: the web has no system
+geocoder, so expo-location's reverse lookup returns nothing there; and the
+place lived only on the phone, so no other screen or the server knew it.
+
+**Provider.** Ola Maps (Krutrim) first: built on Indian data with
+localities and pincodes, free up to at least 500,000 calls a month per API
+at the time of writing (its pricing moved to prepaid credits from 1 Sep 2026
+with the free allowance kept; the exact tier should be checked on the
+console). OpenStreetMap Nominatim behind it: free, keyless, light use only.
+Google gives 70,000 free Essentials calls a month on India pricing but needs
+billing on the account; Mappls's free tier is undocumented. So: Ola for
+quality, OSM so it works on day one with no key.
+
+**Server.** A `geo` Edge Function holds the key and answers reverse lookups
+and place search in one shape (`supabase/functions/geo/parse.ts`, tested from
+the app suite). Every answer is cached for 30 days (reverse by ~110 m cell,
+search by words and rough area) and each person gets 300 provider calls a
+day; cache hits are free. Migration 0040 adds `member_locations`: one latest
+place per family member (no history), rounded to 4 decimals, written only by
+`set_member_location`, which skips GPS jitter under 100 m within 2 minutes,
+caps 200 writes a day, cleans the address and drops a stale one when the
+point moves. `forget_member_location` wipes one or all; account deletion
+cascades.
+
+**Live.** `useLiveLocation` in the signed-in shell takes a fix on open and
+when the app comes back to the front, and watches for 200 m moves while it
+is open. A new address is looked up only after 250 m; the server is written
+after 250 m, a new pincode, or 30 minutes. Never in the background: that
+needs "Always" permission and is more than booking needs. A picked place
+holds for two hours so booking for elsewhere is not overridden.
+
+**Asking.** A Home sheet a moment after the first open (sign-up lands
+there): what location is for, that it is saved to the account, then the
+system prompt. "Not now" waits a week; a city works instead. Booking
+screens ask in place through the same chip.
+
+**Everywhere.** The chip ("Indiranagar, Bengaluru · Change") on Home's Book
+services, Fitness, Labs, Doctors and Services; Profile shows the place with
+its age; Profile, Location has the live switch, each family member's place
+("Papa lives in Lucknow", used when booking for him), and "Forget all".
+Lab and service address fields fill from the place, with a one-tap "Use
+Indiranagar, 560038".
+
+**Privacy.** The policy said "we do not collect precise location". It now
+says we do, when allowed, and the change is material: everyone agrees again
+once (new version 2026-10-25, hash in 0040). A point goes to the maps
+provider from our server, never with a name or user id.
+
+**Verified here:** typecheck, lint (no new errors), 516 tests (16 new: the
+parsers against Ola and OSM shapes, cache keys, the move and save rules,
+words), 0040 applied twice on local Postgres 16 with its scenarios (save,
+jitter skipped, stale address dropped, family place, nonsense refused, RLS,
+other family refused, no consent refused, daily cap, quota, cascade on
+account deletion) and the check (all yes). The function typechecks with a
+Deno shim. Web screenshots with a fake GPS fix: the Home primer, Home with
+the live chip, Profile, Profile Location, place search, Fitness, Labs and
+Doctors.
+**Not verified:** the deployed function against the real Ola and OSM APIs
+(this container cannot reach them), and location on a phone (needs the new
+dev build from the fitness change).

@@ -78,6 +78,7 @@ Milestone `V2` holds ideas saved for after launch. The page shows them in their 
 | `loop-cron` | Archit | P0 | M2 | Scheduled jobs for the daily loop |
 | `loop-caregiver` | Athar | P0 | M3 | Caregiver view and parent alerts |
 | `loop-fitness` | Athar | P0 | M3 | Fitness classes: discover, match, book, remind |
+| `loc-live` | Athar | P0 | M3 | Live location, saved per member, nearby across services |
 | `loop-scan-ux` | Athar | P0 | M2 | Scan: Report or Prescription, whose is it, confirm step |
 | `loop-reading-v2` | Athar | P0 | M3 | Report reading v2 and prescription scorecard screens |
 | `loop-chat-chips` | Athar | P1 | M3 | Chat: context chips and one next-step chip |

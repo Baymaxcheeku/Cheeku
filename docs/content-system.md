@@ -131,6 +131,10 @@ judgement. Never "High priority", "High risk", "Borderline" or "Alert".
   for Papa", checked in `copy.test.ts`) and phone reminders in `push.ts`
   ("Your class starts in an hour", never the activity: "Prenatal yoga" on a
   lock screen says too much).
+- Location: the Home primer and chip in `src/components/location`
+  ("Care near you", "Indiranagar, Bengaluru · Change"), Profile, Location in
+  `app/settings/location.tsx`. A place label is at most 80 characters from
+  the geo function and is truncated on one line in a chip.
 - Inbox and push notifications from the server: the `notify_*` functions,
   latest wording in `supabase/migrations/0036_notification_copy.sql`.
 
