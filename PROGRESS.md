@@ -3495,3 +3495,7 @@ cancel, another family's booking, a paused member, no consent, titles within
 sheet, Papa's view, a studio, the ticket, the list and a filtered view.
 **Not verified:** location, haptics and the sheet on a phone (needs a new
 dev build for expo-location), and anything against the real partner.
+
+**Live, same day.** Athar applied 0039 on production; 0039-check.sql said yes
+on every row. Booking now records for real (on sample studios). What is left
+for `loop-fitness` is the phone check on a new dev build.
