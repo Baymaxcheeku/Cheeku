@@ -18,6 +18,7 @@ import { fetchReviews, postReview, useRatings } from "@/lib/labs/queries";
 import { useFamily } from "@/lib/profiles/family";
 import { brand, hue, ink, lilac } from "@/theme/tokens";
 import { font } from "@/theme/type";
+import { LinesSkeleton } from "@/components/ui/skeleton";
 
 /*
  * A doctor's profile, in the reference's detail layout:
@@ -156,7 +157,7 @@ export default function DoctorProfile() {
               </Tap>
             ) : null}
           </View>
-          <ReviewList reviews={reviews.data ?? []} empty="No reviews yet." />
+          {reviews.isPending ? <LinesSkeleton lines={3} /> : <ReviewList reviews={reviews.data ?? []} empty="No reviews yet." />}
 
           <View style={{ marginTop: 18 }}>
             <SampleNote text="Preview · a sample doctor. Nothing is booked for real yet." />

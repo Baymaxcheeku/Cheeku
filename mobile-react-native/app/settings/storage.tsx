@@ -13,6 +13,7 @@ import { STORAGE_REGISTRY, WHERE_LABEL, type StoredItem } from "@/lib/privacy/st
 import { brand, ink, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
 import { Tap } from "@/components/ui/tap";
+import { LinesSkeleton } from "@/components/ui/skeleton";
 
 /**
  * Storage and cache: what this app keeps on the phone, and the controls.
@@ -66,7 +67,7 @@ export default function StorageSettings() {
         <Panel>
           <Text style={{ fontFamily: font.bold, fontSize: 11, letterSpacing: 1.2, color: ink[500] }}>ON THIS PHONE</Text>
           {usage.isPending ? (
-            <ActivityIndicator style={{ marginTop: 14 }} color={brand[600]} />
+            <LinesSkeleton style={{ marginTop: 10 }} />
           ) : (
             <>
               <Text style={{ fontFamily: font.semibold, fontSize: 28, letterSpacing: -0.8, color: ink[900], marginTop: 6 }}>

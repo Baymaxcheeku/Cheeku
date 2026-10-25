@@ -20,6 +20,7 @@ import { formatEventDate } from "@/lib/records/grouping";
 import { listProfileRecords } from "@/lib/records/queries";
 import { brand, hue, ink, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
+import { CardListSkeleton } from "@/components/ui/skeleton";
 
 /*
  * Lab tests at home: find a test, pick a lab, book a collection, get the
@@ -169,6 +170,8 @@ export default function Labs() {
             {results.length ? `${results.length} ${results.length === 1 ? "match" : "matches"}` : "Nothing matches that. Try the test's common name, like sugar or thyroid."}
           </Text>
         )}
+
+        {catalog.isPending ? <CardListSkeleton count={4} /> : null}
 
         {/* Packages as cards. */}
         {packages.length ? (

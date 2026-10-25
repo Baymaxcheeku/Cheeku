@@ -11,6 +11,7 @@ import { quote } from "@/lib/labs/logic";
 import { useCatalog, useLabCart, useRatings } from "@/lib/labs/queries";
 import { brand, hue, ink } from "@/theme/tokens";
 import { font } from "@/theme/type";
+import { DetailSkeleton, ScreenSkeleton } from "@/components/ui/skeleton";
 
 /*
  * One test or package, in the reference's detail layout:
@@ -35,6 +36,13 @@ export default function LabTestDetail() {
   const cart = useLabCart();
 
   const test = catalog.data?.tests.find((t) => t.id === id);
+  if (!catalog.data && catalog.isPending) {
+    return (
+      <ScreenSkeleton title="Lab test">
+        <DetailSkeleton hero={260} />
+      </ScreenSkeleton>
+    );
+  }
   if (!test || !catalog.data) {
     return (
       <View className="flex-1 bg-canvas">

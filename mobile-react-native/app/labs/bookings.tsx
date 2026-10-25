@@ -12,6 +12,7 @@ import { useFamily } from "@/lib/profiles/family";
 import { formatEventDate } from "@/lib/records/grouping";
 import { brand, ink } from "@/theme/tokens";
 import { font } from "@/theme/type";
+import { CardListSkeleton } from "@/components/ui/skeleton";
 
 /*
  * Every lab booking on the account, whoever it was for: the ones still in
@@ -66,6 +67,7 @@ export default function LabBookings() {
         <View style={{ gap: 10 }}>{open.map((b) => <Row key={b.id} b={b} />)}</View>
         {done.length ? <Text style={{ fontFamily: font.semibold, fontSize: 13, color: ink[500], marginTop: 20, marginBottom: 8 }}>Earlier</Text> : null}
         <View style={{ gap: 10 }}>{done.map((b) => <Row key={b.id} b={b} />)}</View>
+        {bookings.isPending ? <CardListSkeleton count={3} /> : null}
         {bookings.isSuccess && all.length === 0 ? (
           <Glass strong className="mt-6 items-center rounded-2xl px-6 py-8">
             <FlaskConical size={30} color={brand[600]} />

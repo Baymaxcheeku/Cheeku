@@ -15,6 +15,7 @@ import { refreshRoster, useFamily, useSwitchMember } from "@/lib/profiles/family
 import { shortDate } from "@/lib/records/details";
 import { brand, ink, semantic } from "@/theme/tokens";
 import { font } from "@/theme/type";
+import { FormSkeleton, ScreenSkeleton } from "@/components/ui/skeleton";
 
 /*
  * A PREGNANCY, AND THE BIRTH.
@@ -153,6 +154,15 @@ export default function PregnancyScreen() {
           </PillButton>
         </View>
       </View>
+    );
+  }
+
+  // Editing a saved pregnancy: wait for it, rather than flash an empty form.
+  if (id && memory.isPending) {
+    return (
+      <ScreenSkeleton>
+        <FormSkeleton fields={4} />
+      </ScreenSkeleton>
     );
   }
 

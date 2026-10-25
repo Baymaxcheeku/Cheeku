@@ -3234,3 +3234,40 @@ Two parts keep it current without anyone editing it:
 The data lives in the artifact's `features` collection, with a copy in
 `docs/launch-tracker/features.json`.
 
+## Skeletons on every first load · 2026-10-25
+
+Batch 2 gave Home, Records, Health file, Ask and Today skeletons; the rest of
+the app still showed a centred spinner, or nothing. Athar asked for the grey
+shapes everywhere.
+
+**The audit.** Two kinds of gap.
+- **A spinner, often on a bare canvas with no way back (17 places):** scan,
+  a record, an article, Learn, both chat screens, memory, the Profile tab
+  (twice), and the settings pages for plan, health, personal details,
+  notifications, privacy, storage and security (twice).
+- **No loading state at all:** these screens flashed an empty list, a blank
+  page with only a header, "This booking isn't here any more", or "Family
+  Plan, 0 of 1 seat" until their data arrived. They are the labs home, Choose
+  a lab, a lab partner, a lab test, lab bookings and a booking, the family
+  list and a member's page, a doctor's reviews, editing a pregnancy, a
+  service booking (which said "Loading…") and appointments.
+
+**The kit** (`components/ui/skeleton.tsx`):
+- `ScreenSkeleton` keeps the real header and back button, so a slow screen
+  is never a dead end.
+- Shapes: `ListSkeleton`, `FormSkeleton`, `DetailSkeleton` (with a round
+  variant for people and labs), `GridSkeleton`, `ChatSkeleton` and
+  `LinesSkeleton` for a few lines inside a card that is already on screen.
+- All of them share the existing pulse, which stays still under Reduce
+  Motion.
+
+**The rule** (PLAN rule 7): a screen arriving gets a skeleton; a spinner is
+only for an action in progress. Twenty-two spinners remain, all of them
+inside buttons, uploads and saves. "Not found" now appears only after the
+data has actually come back empty.
+
+**Verified here:** typecheck, lint, 434 tests, and web screenshots of 26
+screens with their data held back for nine seconds by the fake backend.
+**Needs a phone:** the same screens on a slow connection (in Developer
+options, or use airplane mode then reconnect).
+

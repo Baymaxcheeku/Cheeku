@@ -1,8 +1,10 @@
 import { useEffect } from "react";
-import { View, type DimensionValue, type ViewStyle } from "react-native";
+import { ScrollView, View, type DimensionValue, type StyleProp, type ViewStyle } from "react-native";
 import Animated, { useAnimatedStyle, useSharedValue, withRepeat, withSequence, withTiming } from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useReducedMotion } from "@/components/ui/motion";
+import { Backdrop, ScreenHeader } from "@/components/ui/screen";
 import { radius, surface } from "@/theme/tokens";
 
 /*
@@ -11,6 +13,13 @@ import { radius, surface } from "@/theme/tokens";
  * where your things will be", and the layout does not jump when they land.
  * The pulse is a loading signal, so unlike decorative loops it runs until the
  * data arrives. Reduce Motion: still.
+ *
+ * EVERY FIRST LOAD (UI batch 5). Screens use the shaped skeletons below
+ * (Home, a card list, the health file, Ask) or compose one from the kit:
+ * ListSkeleton, FormSkeleton, DetailSkeleton, GridSkeleton, ChatSkeleton and
+ * LinesSkeleton, inside ScreenSkeleton when the whole screen is waiting so
+ * the header and the way back are already there. A spinner is only for an
+ * action in progress (a button, an upload), never for a screen arriving.
  */
 
 function usePulse() {
@@ -23,7 +32,7 @@ function usePulse() {
   return useAnimatedStyle(() => ({ opacity: o.get() }));
 }
 
-function Bone({ w = "100%", h, r = 8, tint = false, style }: { w?: DimensionValue; h: number; r?: number; tint?: boolean; style?: ViewStyle }) {
+export function Bone({ w = "100%", h, r = 8, tint = false, style }: { w?: DimensionValue; h: number; r?: number; tint?: boolean; style?: ViewStyle }) {
   return <View style={[{ width: w, height: h, borderRadius: r, backgroundColor: tint ? surface.tint : surface.line }, style]} />;
 }
 
@@ -157,3 +166,126 @@ export function AskSkeleton({ topInset, bottomInset }: { topInset: number; botto
     </View>
   );
 }
+
+// ------------------------------------------------------------------ kit --
+
+/** The pulse as a wrapper, for building a skeleton inside an existing layout. */
+export function Pulse({ children, style }: { children: React.ReactNode; style?: StyleProp<ViewStyle> }) {
+  const pulse = usePulse();
+  return (
+    <Animated.View accessibilityLabel="Loading" style={[style, pulse]}>
+      {children}
+    </Animated.View>
+  );
+}
+
+/** A whole screen waiting: the real header and back button, the shape below. */
+export function ScreenSkeleton({ title, header = true, children }: { title?: string; header?: boolean; children: React.ReactNode }) {
+  const insets = useSafeAreaInsets();
+  return (
+    <View className="flex-1 bg-canvas">
+      <Backdrop />
+      {header ? <ScreenHeader title={title} /> : null}
+      <ScrollView scrollEnabled={false} contentContainerStyle={{ paddingHorizontal: 20, paddingTop: header ? 8 : insets.top + 12, paddingBottom: insets.bottom + 24 }}>
+        {children}
+      </ScrollView>
+    </View>
+  );
+}
+
+/** Rows in a card: settings lists, chats, members, bookings. */
+export function ListSkeleton({ rows = 5, round = false, style }: { rows?: number; round?: boolean; style?: ViewStyle }) {
+  return (
+    <Pulse style={[{ marginTop: 12 }, style]}>
+      <Card style={{ gap: 16 }}>
+        {Array.from({ length: rows }, (_, i) => (
+          <View key={i} style={{ flexDirection: "row", gap: 12, alignItems: "center" }}>
+            <Bone w={40} h={40} r={round ? 20 : radius.md} />
+            <View style={{ flex: 1, gap: 7 }}>
+              <Bone w={i % 2 ? "48%" : "64%"} h={13} r={7} />
+              <Bone w={i % 2 ? "70%" : "38%"} h={11} r={6} tint />
+            </View>
+          </View>
+        ))}
+      </Card>
+    </Pulse>
+  );
+}
+
+/** Labels and fields: the settings forms. */
+export function FormSkeleton({ fields = 4, style }: { fields?: number; style?: ViewStyle }) {
+  return (
+    <Pulse style={[{ marginTop: 12, gap: 12 }, style]}>
+      <Card style={{ gap: 14 }}>
+        {Array.from({ length: fields }, (_, i) => (
+          <View key={i} style={{ gap: 8 }}>
+            <Bone w={i % 2 ? "26%" : "34%"} h={11} r={6} tint />
+            <Bone h={48} r={radius.lg} />
+          </View>
+        ))}
+      </Card>
+    </Pulse>
+  );
+}
+
+/** A hero, a few lines of text and a card of rows: a record, an article, a booking, a member. */
+export function DetailSkeleton({ hero = 200, round = false }: { hero?: number; round?: boolean }) {
+  return (
+    <Pulse style={{ gap: 14, marginTop: 4 }}>
+      <Card style={{ height: hero, alignItems: round ? "center" : "stretch", justifyContent: round ? "center" : "flex-end" }}>
+        {round ? <Bone w={88} h={88} r={44} /> : null}
+        <Bone w={round ? "52%" : "70%"} h={22} r={9} />
+        <Bone w={round ? "36%" : "46%"} h={13} r={7} tint />
+      </Card>
+      <View style={{ gap: 8, paddingHorizontal: 4 }}>
+        <Bone h={13} r={7} />
+        <Bone w="92%" h={13} r={7} />
+        <Bone w="64%" h={13} r={7} />
+      </View>
+      <Card>
+        <Row />
+        <Row />
+        <Row />
+      </Card>
+    </Pulse>
+  );
+}
+
+/** Two-up tiles: catalogues and libraries. */
+export function GridSkeleton({ tiles = 4, height = 150 }: { tiles?: number; height?: number }) {
+  return (
+    <Pulse style={{ marginTop: 12, flexDirection: "row", flexWrap: "wrap", gap: 12 }}>
+      {Array.from({ length: tiles }, (_, i) => (
+        <Card key={i} style={{ width: "47.5%", height, justifyContent: "flex-end" }}>
+          <Bone w={36} h={36} r={radius.md} tint style={{ position: "absolute", top: 16, left: 16 }} />
+          <Bone w="80%" h={14} r={7} />
+          <Bone w="50%" h={11} r={6} tint />
+        </Card>
+      ))}
+    </Pulse>
+  );
+}
+
+/** A conversation arriving: bubbles on both sides. */
+export function ChatSkeleton() {
+  const widths: [DimensionValue, boolean][] = [["62%", false], ["48%", true], ["74%", false], ["40%", true], ["66%", false]];
+  return (
+    <Pulse style={{ gap: 12, marginTop: 12 }}>
+      {widths.map(([w, mine], i) => (
+        <Bone key={i} w={w} h={i % 2 ? 44 : 64} r={radius.xl} tint={mine} style={{ alignSelf: mine ? "flex-end" : "flex-start" }} />
+      ))}
+    </Pulse>
+  );
+}
+
+/** A couple of lines inside a card that is already on screen. */
+export function LinesSkeleton({ lines = 2, style }: { lines?: number; style?: ViewStyle }) {
+  return (
+    <Pulse style={[{ gap: 8, paddingVertical: 6 }, style]}>
+      {Array.from({ length: lines }, (_, i) => (
+        <Bone key={i} w={i === lines - 1 ? "58%" : "100%"} h={12} r={6} tint={i > 0} />
+      ))}
+    </Pulse>
+  );
+}
+

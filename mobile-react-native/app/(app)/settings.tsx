@@ -62,6 +62,7 @@ import { refreshRoster } from "@/lib/profiles/family";
 import { brand, hue, ink, lilac, semantic, shadow, surface } from "@/theme/tokens";
 import { Brand, brandify } from "@/components/ui/brand";
 import { feel } from "@/lib/feel";
+import { DetailSkeleton, ListSkeleton, ScreenSkeleton } from "@/components/ui/skeleton";
 
 /**
  * I1 — profile and settings.
@@ -106,9 +107,10 @@ export default function Settings() {
 
   if (context.isPending) {
     return (
-      <View className="flex-1 items-center justify-center bg-canvas">
-        <ActivityIndicator color={brand[600]} />
-      </View>
+      <ScreenSkeleton header={false}>
+        <DetailSkeleton hero={150} round />
+        <ListSkeleton rows={5} />
+      </ScreenSkeleton>
     );
   }
 
@@ -116,9 +118,10 @@ export default function Settings() {
   if (!data?.profile && context.isFetching) {
     // A cached "no profile" being refreshed is not an answer yet.
     return (
-      <View className="flex-1 items-center justify-center bg-canvas">
-        <ActivityIndicator color={brand[600]} />
-      </View>
+      <ScreenSkeleton header={false}>
+        <DetailSkeleton hero={150} round />
+        <ListSkeleton rows={5} />
+      </ScreenSkeleton>
     );
   }
   if (!data?.profile) {

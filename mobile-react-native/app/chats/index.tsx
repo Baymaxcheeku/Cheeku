@@ -1,7 +1,7 @@
 import { useRouter } from "expo-router";
 import { ChevronRight, MessageCircle, Search } from "lucide-react-native";
 import { useMemo, useState } from "react";
-import { ActivityIndicator, Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { TierDot } from "@/components/chat/tier";
@@ -10,8 +10,9 @@ import { Backdrop, PageTitle, ScreenHeader } from "@/components/ui/screen";
 import { useSittings, type Sitting } from "@/lib/memory/store";
 import { TIER_SHORT } from "@/lib/memory/types";
 import { useFamily } from "@/lib/profiles/family";
-import { brand, ink, surface } from "@/theme/tokens";
+import { ink, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
+import { ListSkeleton } from "@/components/ui/skeleton";
 
 /*
  * EVERY CONVERSATION ABOUT ONE PERSON.
@@ -60,7 +61,7 @@ export default function Chats() {
           <TextInput value={query} onChangeText={setQuery} placeholder="Search by what was asked" placeholderTextColor={ink[300]} accessibilityLabel="Search conversations" style={{ flex: 1, fontFamily: font.regular, fontSize: 15, color: ink[900] }} />
         </View>
 
-        {sittings.isPending ? <ActivityIndicator color={brand[600]} style={{ marginTop: 30 }} /> : null}
+        {sittings.isPending ? <ListSkeleton rows={5} /> : null}
         {sittings.isSuccess && groups.length === 0 ? (
           <View style={{ alignItems: "center", gap: 10, marginTop: 30 }}>
             <MessageCircle size={26} color={ink[300]} />

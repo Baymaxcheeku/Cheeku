@@ -15,6 +15,7 @@ import { useLabBookings } from "@/lib/labs/queries";
 import { hue, ink } from "@/theme/tokens";
 import { font } from "@/theme/type";
 import { Tap } from "@/components/ui/tap";
+import { CardListSkeleton } from "@/components/ui/skeleton";
 
 /*
  * Appointments — every booking, upcoming first.
@@ -103,6 +104,7 @@ export default function Appointments() {
           })}
         </View>
 
+        {!loaded ? <CardListSkeleton count={2} /> : null}
         <View className="mt-4 gap-3">
           {list.map((a, i) => (
             <Animated.View key={a.id} entering={still ? undefined : FadeInDown.delay(i * 60).duration(300)}>

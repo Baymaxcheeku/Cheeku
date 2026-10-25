@@ -18,7 +18,7 @@ import {
   type LucideIcon,
 } from "lucide-react-native";
 import { useMemo, useState } from "react";
-import { ActivityIndicator, ScrollView, Text, TextInput, View } from "react-native";
+import { ScrollView, Text, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { TIER_STYLE } from "@/components/chat/tier";
@@ -36,6 +36,7 @@ import { shortDate } from "@/lib/records/details";
 import { brand, ink, lilac, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
 import { Tap } from "@/components/ui/tap";
+import { DetailSkeleton, ListSkeleton, ScreenSkeleton } from "@/components/ui/skeleton";
 
 /*
  * WHAT CHEEKU REMEMBERS, AND WHERE IT CAME FROM.
@@ -71,9 +72,10 @@ export default function MemoryScreen() {
 
   if (!member || memory.isPending) {
     return (
-      <View className="flex-1 items-center justify-center bg-canvas">
-        <ActivityIndicator color={brand[600]} />
-      </View>
+      <ScreenSkeleton title="Memory">
+        <DetailSkeleton hero={170} />
+        <ListSkeleton rows={3} />
+      </ScreenSkeleton>
     );
   }
   if (!ctx) {

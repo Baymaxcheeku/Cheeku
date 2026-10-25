@@ -28,6 +28,7 @@ import { supabase } from "@/lib/supabase/client";
 import { brand, ink, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
 import { Tap } from "@/components/ui/tap";
+import { LinesSkeleton } from "@/components/ui/skeleton";
 
 /**
  * Security: who can open this app, and what has happened on the account.
@@ -153,9 +154,7 @@ export default function Security() {
       <Section label="App lock">
         <Panel padded={false}>
           {state.isPending ? (
-            <View className="items-center py-7">
-              <ActivityIndicator color={brand[600]} />
-            </View>
+            <LinesSkeleton style={{ paddingHorizontal: 16, paddingVertical: 16 }} />
           ) : capability?.available ? (
             <>
               <View className="flex-row items-center gap-3.5 px-4 py-3.5">
@@ -262,9 +261,7 @@ export default function Security() {
       <Section label="Recent activity">
         <Panel padded={false}>
           {activity.isPending ? (
-            <View className="items-center py-6">
-              <ActivityIndicator color={brand[600]} />
-            </View>
+            <LinesSkeleton lines={3} style={{ paddingHorizontal: 16, paddingVertical: 16 }} />
           ) : activity.data === null ? (
             <EmptyLine text="Activity history isn't switched on for your account yet." />
           ) : !activity.data?.length ? (

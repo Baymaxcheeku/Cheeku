@@ -13,6 +13,7 @@ import { planFor } from "@/lib/billing/plans";
 import { familyMode, listMembers, useFamily } from "@/lib/profiles/family";
 import { brand, ink, lilac } from "@/theme/tokens";
 import { font } from "@/theme/type";
+import { Bone, ListSkeleton } from "@/components/ui/skeleton";
 
 /*
  * Manage family: everyone on the account, including anyone a smaller plan
@@ -61,14 +62,23 @@ export default function Family() {
               <Users size={16} color={brand[700]} />
               <Text style={{ fontFamily: font.semibold, fontSize: 15, color: brand[700] }}>{planFor(tier).name}</Text>
             </View>
-            <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>
-              {Math.min(reachable, seats)} of {seats} {seats === 1 ? "seat" : "seats"}
-            </Text>
+            {/* No seat count until the members are in: "0 of 1" while loading was wrong. */}
+            {members.isPending ? (
+              <Bone w={84} h={14} r={7} />
+            ) : (
+              <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>
+                {Math.min(reachable, seats)} of {seats} {seats === 1 ? "seat" : "seats"}
+              </Text>
+            )}
           </View>
           <View style={{ flexDirection: "row", gap: 6, marginTop: 12 }}>
-            {Array.from({ length: Math.max(seats, 1) }, (_, i) => (
-              <View key={i} style={{ flex: 1, height: 8, borderRadius: 4, backgroundColor: i < reachable ? brand[600] : "rgba(74,42,222,0.14)" }} />
-            ))}
+            {members.isPending ? (
+              <Bone h={8} r={4} />
+            ) : (
+              Array.from({ length: Math.max(seats, 1) }, (_, i) => (
+                <View key={i} style={{ flex: 1, height: 8, borderRadius: 4, backgroundColor: i < reachable ? brand[600] : "rgba(74,42,222,0.14)" }} />
+              ))
+            )}
           </View>
           {paused > 0 ? (
             <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[700], marginTop: 10 }}>
@@ -76,6 +86,8 @@ export default function Family() {
             </Text>
           ) : null}
         </View>
+
+        {members.isPending ? <ListSkeleton rows={3} round /> : null}
 
         {/* Members. */}
         <Glass strong className="mt-4 overflow-hidden rounded-xl">
