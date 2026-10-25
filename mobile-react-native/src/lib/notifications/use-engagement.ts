@@ -2,6 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AppState, Platform } from "react-native";
 
+import { readCareAlerts } from "@/lib/care/care";
+import { useCarePlanSync } from "@/lib/care/use-care";
 import { goalByKey, readGoalPrefs, reminderHour } from "@/lib/home/goals";
 import { useDailyPrefs } from "@/lib/home/logs";
 import { readMedPrefs } from "@/lib/home/meds";
@@ -85,6 +87,10 @@ export function useEngagement() {
     // `wake` is not read; it is here so a return to the app plans again from the new time.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profile, plan, loading, prefs.isFetched, prefs.data, home.state, home.stage, log.data, switches.dailyNudges, switches.medicineReminders, wake]);
+
+  // The active member's plan on the server, for caregiver alerts (0038).
+  const medPrefs = useMemo(() => readMedPrefs(prefs.data?.meds), [prefs.data]);
+  useCarePlanSync(profile?.id, plan && !loading && prefs.isFetched ? plan.meds : undefined, medPrefs, readCareAlerts(prefs.data?.care));
 
   const last = useRef(new Map<string, string>());
   useEffect(() => {

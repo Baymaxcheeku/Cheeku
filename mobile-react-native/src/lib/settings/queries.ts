@@ -79,6 +79,9 @@ export const DEFAULT_PREFS: NotificationPrefs = {
   // The day's few nudges, planned on the phone (engage.ts): at most four a
   // day, never between 10 pm and 7:30 am, each only while it still matters.
   dailyNudges: true,
+  // When a family member's doses go unticked, a strip runs low or a test is
+  // overdue (migration 0038). Names the member, never the medicine.
+  caregiverAlerts: true,
   productUpdates: false,
   tipsReminders: false,
   checkinReminders: false,

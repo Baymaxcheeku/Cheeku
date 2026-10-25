@@ -59,8 +59,8 @@ export type DailyLog = {
   createdAt: string;
 };
 
-/** `goal` and `meds` are read through readGoalPrefs and readMedPrefs: jsonb a person's own client wrote. */
-export type DailyPrefs = { steps_goal?: number; veg?: boolean; goal?: unknown; meds?: unknown };
+/** `goal`, `meds` and `care` are read through readGoalPrefs, readMedPrefs and readCareAlerts: jsonb a person's own client wrote. */
+export type DailyPrefs = { steps_goal?: number; veg?: boolean; goal?: unknown; meds?: unknown; care?: unknown };
 
 /** What the plan needs from a ledger entry. Older callers pass name and status only. */
 export type PlanMedicine = Pick<LedgerEntry, "name" | "status"> & Partial<Pick<LedgerEntry, "key" | "schedule" | "dose" | "timing" | "asNeeded" | "unitsPerDay">>;
