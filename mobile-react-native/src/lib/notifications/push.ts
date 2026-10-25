@@ -4,6 +4,7 @@ import { Platform } from "react-native";
 
 import { kv } from "@/lib/storage";
 
+import { nudgePrefix, type Nudge } from "./engage";
 import { reminderPlan } from "./inbox";
 import { forgetPushDevice, registerPushDevice } from "./queries";
 
@@ -11,9 +12,10 @@ import { forgetPushDevice, registerPushDevice } from "./queries";
  * Everything that touches the phone's own notification system.
  *
  * TWO KINDS OF BUZZ.
- *  - Local, scheduled on this phone: appointment reminders. They work with no
- *    server and no Apple/Google credentials, because appointments live on this
- *    phone too.
+ *  - Local, scheduled on this phone: appointment and lab reminders, dose
+ *    reminders, and the day's nudges (engage.ts). They work with no server
+ *    and no Apple/Google credentials, because all they need is already on
+ *    this phone.
  *  - Remote, sent by the push-dispatch Edge Function when a row lands in the
  *    inbox (a report is filed, a service went live). Needs an EAS project id
  *    in app.json and APNs/FCM credentials in EAS before a token can exist. Until
@@ -52,6 +54,11 @@ export function configureNotifications(): void {
       name: "Appointment reminders",
       importance: Notifications.AndroidImportance.HIGH,
       vibrationPattern: [0, 200, 120, 200],
+    });
+    void Notifications.setNotificationChannelAsync("medicines", {
+      name: "Medicine reminders",
+      importance: Notifications.AndroidImportance.HIGH,
+      vibrationPattern: [0, 160, 100, 160],
     });
   }
 }
@@ -104,6 +111,9 @@ export async function forgetThisDevice(): Promise<void> {
     if (token) await forgetPushDevice(token);
     await kv.remove(TOKEN_KEY);
     await cancelAppointmentReminders();
+    // Nobody else's doses or nudges stay on a phone after sign-out.
+    const scheduled = await Notifications.getAllScheduledNotificationsAsync();
+    await Promise.all(scheduled.filter((n) => /^(eng|goal|lab)-/.test(n.identifier)).map((n) => Notifications.cancelScheduledNotificationAsync(n.identifier)));
   } catch {
     // Signing out must never fail because of this.
   }
@@ -145,7 +155,8 @@ export async function syncAppointmentReminders(appts: Bookable[], enabled: boole
             title: r.title,
             body: r.body,
             sound: "default",
-            data: { url: `/appointments/${a.id}` },
+            // The after-visit one asks for the prescription, so it opens the scanner.
+            data: { url: r.id.endsWith("-after") ? "/scan" : `/appointments/${a.id}` },
           },
           trigger: {
             type: Notifications.SchedulableTriggerInputTypes.DATE,
@@ -260,25 +271,20 @@ export async function hasRecordReminder(id: string): Promise<boolean> {
 // ------------------------------------------------------------ goal reminders --
 
 /*
- * One repeating reminder per member with a running goal (UI batch 4), at the
- * hour their answers point to. Set again on every save, so changing the goal
- * or its hour replaces it; cleared when the goal stops. Lock-screen text
- * stays general and never names the goal: "Steady sugar" on a lock screen is
- * health information.
+ * The goal's daily reminder is planned with the day's other nudges now
+ * (engage.ts), so it skips a day the goal is already done and keeps its
+ * distance from a dose. Saving a goal with "Remind me" only asks for
+ * permission here and clears the old repeating reminder (`goal-<profileId>`)
+ * that UI batch 4 scheduled; the next sync puts the new one in.
  */
 const goalReminderId = (profileId: string) => `goal-${profileId}`;
 
-export async function setGoalReminder(profileId: string, hour: number): Promise<ReminderOutcome> {
+export async function setGoalReminder(profileId: string): Promise<ReminderOutcome> {
   if (!native) return "unsupported";
   try {
     const permission = await enablePush();
     if (permission !== "granted") return permission === "unsupported" ? "unsupported" : "denied";
     await Notifications.cancelScheduledNotificationAsync(goalReminderId(profileId)).catch(() => undefined);
-    await Notifications.scheduleNotificationAsync({
-      identifier: goalReminderId(profileId),
-      content: { title: "Two minutes for your goal", body: "One small step today keeps your streak going.", sound: "default", data: { url: "/today" } },
-      trigger: { type: Notifications.SchedulableTriggerInputTypes.DAILY, hour, minute: 0, channelId: "default" },
-    });
     return "set";
   } catch {
     return "unsupported";
@@ -288,4 +294,40 @@ export async function setGoalReminder(profileId: string, hour: number): Promise<
 export async function clearGoalReminder(profileId: string): Promise<void> {
   if (!native) return;
   await Notifications.cancelScheduledNotificationAsync(goalReminderId(profileId)).catch(() => undefined);
+}
+
+// ------------------------------------------------------------- daily nudges --
+
+/**
+ * Makes this phone's nudges for one member match the plan exactly: cancel
+ * every `eng-<profileId>-` notification, schedule what engage.ts says now.
+ * The same full-resync rule as appointments, so a ticked dose, a changed
+ * time or a switched-off setting never leaves a stale buzz behind. Other
+ * members' nudges are left alone.
+ *
+ * Never asks for permission: with none, it only clears.
+ */
+export async function syncNudges(profileId: string, nudges: readonly Nudge[]): Promise<void> {
+  if (!native) return;
+  try {
+    const prefix = nudgePrefix(profileId);
+    const scheduled = await Notifications.getAllScheduledNotificationsAsync();
+    await Promise.all(
+      scheduled
+        .filter((n) => n.identifier.startsWith(prefix) || n.identifier === goalReminderId(profileId))
+        .map((n) => Notifications.cancelScheduledNotificationAsync(n.identifier)),
+    );
+    if ((await pushPermission()) !== "granted") return;
+    const now = Date.now();
+    for (const n of nudges) {
+      if (n.at.getTime() <= now + 60_000) continue;
+      await Notifications.scheduleNotificationAsync({
+        identifier: n.id,
+        content: { title: n.title, body: n.body, sound: "default", data: { url: n.url, profileId } },
+        trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: n.at, channelId: n.channel },
+      });
+    }
+  } catch {
+    // A nudge that failed to schedule is not worth an error on screen.
+  }
 }

@@ -72,6 +72,8 @@ export type SupportTicketInput = z.infer<typeof supportTicketSchema>;
 export const notificationPrefsSchema = z.object({
   accountSecurity: z.boolean(),
   appointmentReminders: z.boolean(),
+  medicineReminders: z.boolean(),
+  dailyNudges: z.boolean(),
   productUpdates: z.boolean(),
   tipsReminders: z.boolean(),
   checkinReminders: z.boolean(),
