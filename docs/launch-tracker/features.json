@@ -223,7 +223,7 @@
   "id": "plan",
   "group": "loop",
   "title": "Today's action plan",
-  "what": "A daily plan across five pillars built from each person's readings, conditions, medicines and life stage: steps with proof, meal photos read against their numbers, readings, sleep and breathing.",
+  "what": "A daily plan across five pillars built from each person's readings, conditions, medicines and life stage: steps with proof, meal photos read against their numbers, readings, sleep, breathing, and a card per part of the day for medicines.",
   "state": "live",
   "where": "app/today.tsx, src/lib/home/plan.ts, migration 0034",
   "shipped": "2026-10-13",
@@ -263,15 +263,45 @@
   "order": 18
  },
  {
+  "id": "meds",
+  "group": "loop",
+  "title": "Your medicines",
+  "what": "Each dose ticked on its own, morning, afternoon and night, the week's doses, how long a strip lasts with a refill nudge, and schedule and dose-time settings.",
+  "state": "built",
+  "where": "app/medicines.tsx, src/lib/home/meds.ts",
+  "shipped": "2026-10-25",
+  "owner": "athar",
+  "next": [
+   "loop-meds"
+  ],
+  "order": 18.4
+ },
+ {
+  "id": "nudges",
+  "group": "loop",
+  "title": "Daily nudges on the phone",
+  "what": "Dose reminders, refills, the morning plan, lunch photo, evening walk, goal, streak, Sunday reset and an after-visit prescription ask, at most four a day and never after 10 pm.",
+  "state": "built",
+  "where": "src/lib/notifications/engage.ts, use-engagement.ts",
+  "shipped": "2026-10-25",
+  "owner": "athar",
+  "next": [
+   "loop-nudges",
+   "loop-notifs"
+  ],
+  "order": 18.6
+ },
+ {
   "id": "notifs",
   "group": "loop",
   "title": "Notifications",
-  "what": "An inbox with live updates, categories and read state, settings per kind, and phone reminders for appointments, lab visits, records and goals. The server push sender is written but not switched on.",
+  "what": "An inbox with live updates, categories and read state, settings per kind, and phone reminders for appointments, lab visits, records, doses, refills and the day's nudges. The server push sender is written but not switched on.",
   "state": "partial",
   "where": "app/notifications.tsx, src/lib/notifications, supabase/functions/push-dispatch",
   "shipped": "2026-10-03",
   "owner": "archit",
   "next": [
+   "loop-nudges",
    "ops-push-webhook",
    "loop-notifs"
   ],

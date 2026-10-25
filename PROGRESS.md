@@ -3271,3 +3271,81 @@ screens with their data held back for nine seconds by the fake backend.
 **Needs a phone:** the same screens on a slow connection (in Developer
 options, or use airplane mode then reconnect).
 
+
+## Medicines dose by dose, and the day's nudges · 2026-10-25
+
+Athar asked for loop-meds, and for every booking, reminder, habit and action
+to come with the notification that brings people back, several times a day.
+
+**Doses (loop-meds).** Today used to carry one "Today's medicines" tick for
+everything someone takes. The ledger already knew the schedule from a
+prescription ("1-0-1"); declared medicines only had free text, so
+`parseFrequency` now reads "BD", "twice daily", "at night" and the like into
+the same shape. It returns nothing for weekly, monthly or SOS rather than
+guess a daily dose. `src/lib/home/meds.ts` turns the active, scheduled
+medicines into slots (morning, afternoon, night), each with its doses.
+
+- A taken dose is a `today_actions` row keyed `dose:<medicine>:<slot>`. No
+  migration: the streak, the week and the goal streak count it like any step.
+- The person's own settings (slot times, a counted stock, a schedule they set
+  when the record had none, the reminder switch) live in
+  `profiles.daily_prefs.meds`, written back with only what differs from the
+  defaults so the 2,000-byte cap is safe.
+- Today gets one card per slot ("Morning medicines") with each dose ticked on
+  its own and "Took them all". The old single tick stays only when no
+  schedule is known at all; next to a dose card it confused, and it was
+  wrong for a weekly sachet.
+- New screen, Your medicines (`app/medicines.tsx`): today's slots, every
+  medicine with how it is taken, the week's doses (counted from the first
+  tick, so a new user is not shown a week of misses), and how long the strip
+  lasts. Three sheets: count what's left, set when it is taken, and the dose
+  times. A strip with five days or fewer shows a Refill banner into the
+  medicines service. Opened from the dose card, Home and the memory screen.
+- Cheeku never changes a dose. The schedule sheet says it only sets
+  reminders, and the screen ends with "ask your doctor or pharmacist before
+  taking extra".
+
+**The day's nudges.** `src/lib/notifications/engage.ts` is a pure planner:
+for one member, what to put on the lock screen over the next two days.
+`syncNudges` in push.ts schedules it as local notifications under
+`eng-<profileId>-`, cancelling and rescheduling in full like appointments, so
+a ticked dose never leaves a stale buzz. `use-engagement.ts`, mounted in the
+signed-in shell, plans again whenever the plan, the medicine settings, a
+switch or the permission changes, and every time the app comes to the front.
+
+- Medicines: a reminder at each dose time, one check an hour later only if
+  the doses are still unticked, and a refill nudge while a strip is low.
+- Daily, for the account holder once Today is unlocked: the morning plan,
+  what's due, the lunch photo, the evening walk, the goal check-in, a streak
+  about to break, and a Sunday reset. A family member gets doses, refills and
+  what's due, named by first name only.
+- Limits: four daily nudges a day at most (doses are not counted, they were
+  asked for), 90 minutes clear of anything else, quiet from 10 pm to 7:30 am,
+  and each one only while it still matters. A nudge has a few times it may
+  go; it takes the first one that fits.
+- Tomorrow is planned as if nothing is done. Doing anything means opening the
+  app, which plans again.
+- The goal reminder from batch 4 was a repeating daily notification that
+  fired even on days the goal was done. It is planned with the others now;
+  the old `goal-<profileId>` one is cleared on the next sync.
+- After any appointment, two hours later (or 9 am next day after a late
+  visit): "How did the visit go? Snap the prescription and I'll set up the
+  doses and reminders." That closes the loop from a consultation into doses.
+- Two new switches in Notifications settings, Medicine reminders and Daily
+  nudges, both on by default. They are keys in `families.notification_prefs`
+  (jsonb, no migration). Nothing asks the OS for permission on its own: a
+  small "Turn on" card on Today, the goal sheet and the medicine switch are
+  the only ways in.
+- The lock screen never names a medicine, a condition, a reading or the goal.
+  `engage.test.ts` holds every title to 40 and every body to 90.
+
+**Not here:** server push for any of this (loop-notifs, Archit). Local
+notifications cover a phone that has opened the app in the last two days;
+someone who stops opening it stops being nudged after that, which a server
+nudge would fix.
+
+**Verified here:** typecheck, lint, 465 tests, and web screenshots of Today,
+Your medicines with each sheet, Home, memory and Notifications settings.
+**Needs a phone:** every notification. The web build schedules nothing, so
+none of the timing, the Android "Medicine reminders" channel, the tap routing
+into the right member, or the permission card could be seen from here.

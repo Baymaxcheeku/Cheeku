@@ -72,6 +72,7 @@ Milestone `V2` holds ideas saved for after launch. The page shows them in their 
 | `int-wearables` | Athar | P1 | M3 | Apple Health and Health Connect |
 | `int-messaging` | Archit | P2 | M3 | WhatsApp and SMS for confirmations and caregiver alerts |
 | `loop-meds` | Athar | P0 | M2 | Your medicines: doses, Taken, refills |
+| `loop-nudges` | Athar | P0 | M2 | Local nudges for doses, habits and bookings |
 | `loop-notifs` | Archit | P0 | M2 | Six new notification kinds |
 | `loop-cron` | Archit | P0 | M2 | Scheduled jobs for the daily loop |
 | `loop-caregiver` | Athar | P0 | M3 | Caregiver view and parent alerts |
