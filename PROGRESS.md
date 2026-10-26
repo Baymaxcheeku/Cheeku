@@ -3570,3 +3570,45 @@ secret. On the phone the place now shows with its pincode. The one-file copy
 first broke the web app's production build: the root tsconfig typechecked
 `supabase/manual` and failed on `Deno`; it is now excluded like
 `supabase/functions` (PR #56). loc-live and int-ola-maps are done.
+
+## Share to Cheeku, and Check and save (int-share-target, loop-scan-ux) · 2026-10-26
+
+**Why.** Most Indian reports arrive as a WhatsApp PDF. Before this the only
+way in was to save it, open Cheeku, find Scan and pick it again, and the
+record was filed the moment the reader finished, wrong values and all.
+
+**Share target.** `expo-share-intent` (8.0.x, the line for SDK 57; 9.x needs
+SDK 58) registers Cheeku AI in the share sheet for one PDF or image (iOS
+share extension, Android intent filters for `application/pdf` and
+`image/*`). `ShareIntake` in the root layout takes the file, holds it in a
+small in-memory store (`src/lib/scan/shared.ts`, never on disk), and opens
+Scan once the person is signed in, so a share before sign-in is not lost.
+iOS opens the app with a `dataUrl=` link, which `app/+native-intent.tsx`
+turns into `/scan?shared=1`. A shared file replaces the three source cards
+with the file itself and a "Read it" button; whose it is is still asked.
+
+**Scan.** Two clear choices, Report and Prescription, with the other types
+behind "Something else" (and "Not sure, let Cheeku tell"), then the member
+pills, then the source.
+
+**Check and save.** `uploadDocument` is now `prepareUpload` (validate,
+store, read) then `fileUpload` (write the record). Between them the
+person sees what was read. Only fields under the 0.7 confidence line are
+asked about, each with an edit box and "Looks right"; the rest sit in a
+folded "N read clearly" list. Save writes the corrected extraction
+(`applyReview`: touched values get confidence 1, a changed number gets its
+flag recomputed from the report's range, date, lab and doctor follow their
+fields). Anything left unchecked files as needs_review, so the record says
+"Waiting for a check" instead of passing a guess off as read. Discard
+deletes the stored file; nothing reaches the documents table. Bulk upload
+in the member form still files directly through `uploadDocument`.
+
+**Verified here:** typecheck, lint, 523 tests (7 new: which items are asked
+about, filed vs needs_review, corrections, ranges and flags, share
+normalising and refusing a video). Web screenshots of the pick screen, the
+other types, and Check and save in its states (unsure, ticked, corrected,
+all clear for Papa) through a temporary preview route, since web cannot
+read a picked file (an old `expo-file-system` limit, noted in PLAN Open).
+**Not verified:** the share sheet itself and the whole flow on a phone.
+Both need a new dev build (`npx expo prebuild --clean`) or `eas build`.
+

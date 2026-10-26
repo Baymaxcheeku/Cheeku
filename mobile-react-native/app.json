@@ -63,7 +63,21 @@
       [
         "expo-location",
         {
-          "locationWhenInUsePermission": "Cheeku AI uses your location only while you look for fitness classes, to show studios near you. It is never stored on our servers."
+          "locationWhenInUsePermission": "Cheeku AI uses your location while the app is open to show doctors, labs, pharmacies and classes near you and to fill in home visit addresses. You can turn it off or wipe it in Profile, Location."
+        }
+      ],
+      [
+        "expo-share-intent",
+        {
+          "iosActivationRules": {
+            "NSExtensionActivationSupportsImageWithMaxCount": 1,
+            "NSExtensionActivationSupportsFileWithMaxCount": 1
+          },
+          "iosShareExtensionName": "Cheeku AI",
+          "androidIntentFilters": [
+            "image/*",
+            "application/pdf"
+          ]
         }
       ]
     ],
