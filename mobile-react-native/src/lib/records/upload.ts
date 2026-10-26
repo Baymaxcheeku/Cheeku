@@ -2,7 +2,7 @@ import { randomUUID } from "expo-crypto";
 import { File } from "expo-file-system";
 
 import { CONSENT_PAUSED, reportIfConsentRefused } from "@/lib/legal/consent";
-import { extractFromFile, routeFor } from "@/lib/ai/mock/extract";
+import { extractFromFile, routeFor, type Extraction } from "@/lib/ai/mock/extract";
 import { selectableProfiles } from "@/lib/profiles/context";
 import { supabase } from "@/lib/supabase/client";
 
@@ -61,12 +61,28 @@ export type PickedFile = {
   name: string;
 };
 
-export async function uploadDocument(
+export type Prepared = {
+  path: string;
+  profileId: string;
+  userId: string;
+  mimeType: string;
+  /** What the reader made of it; the confirm step may correct it before filing. */
+  extraction: Extraction;
+};
+
+export type PrepareResult = { ok: true; prepared: Prepared } | { ok: false; message: string };
+
+/**
+ * Checks, uploads the file and reads it, but files nothing yet. Scan shows
+ * what was read, the person checks the doubtful parts, then fileUpload()
+ * writes the record; discardUpload() removes the file if they back out.
+ */
+export async function prepareUpload(
   picked: PickedFile,
   profileId: string,
   /** What the person said it is. Omitted, the reader decides. */
   docType?: DocType,
-): Promise<UploadResult> {
+): Promise<PrepareResult> {
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -127,15 +143,32 @@ export async function uploadDocument(
   }
 
   const extraction = extractFromFile(picked.name, size, docType);
-  const status = routeFor(extraction);
+  return { ok: true, prepared: { path, profileId, userId: user.id, mimeType: picked.mimeType, extraction } };
+}
 
+/** Removes an uploaded file that was never filed. Best effort. */
+export async function discardUpload(prepared: Prepared): Promise<void> {
+  await supabase.storage.from("documents").remove([prepared.path]).then(() => undefined, () => undefined);
+}
+
+/**
+ * Writes the record from a prepared upload. `extraction` is what the person
+ * confirmed; `status` is "filed" when every doubtful item was checked, else
+ * "needs_review" so it stays visibly unverified.
+ */
+export async function fileUpload(
+  prepared: Prepared,
+  extraction: Extraction = prepared.extraction,
+  status: "filed" | "needs_review" = routeFor(extraction),
+): Promise<UploadResult> {
+  const { path, profileId, userId } = prepared;
   const { data: inserted, error: insertError } = await supabase
     .from("documents")
     .insert({
       profile_id: profileId,
-      user_id: user.id,
+      user_id: userId,
       storage_path: path,
-      mime_type: picked.mimeType,
+      mime_type: prepared.mimeType,
       doc_type: extraction.docType,
       status,
       event_date: extraction.eventDate,
@@ -188,11 +221,18 @@ export async function uploadDocument(
   const rows = entityRows(extraction).map((e) => ({
     ...e,
     profile_id: profileId,
-    user_id: user.id,
+    user_id: userId,
     document_id: documentId,
     event_date: extraction.eventDate,
   }));
   if (rows.length) await supabase.from("entities").insert(rows);
 
   return { ok: true, documentId, needsReview: status === "needs_review" };
+}
+
+/** Upload, read and file in one go, for the paths with no confirm step (bulk add). */
+export async function uploadDocument(picked: PickedFile, profileId: string, docType?: DocType): Promise<UploadResult> {
+  const res = await prepareUpload(picked, profileId, docType);
+  if (!res.ok) return res;
+  return fileUpload(res.prepared);
 }
