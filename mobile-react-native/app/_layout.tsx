@@ -14,6 +14,7 @@ import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
+import { ShareIntentProvider } from "expo-share-intent";
 import { useEffect, useState } from "react";
 import { Platform } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -21,6 +22,7 @@ import { SafeAreaProvider, type Metrics } from "react-native-safe-area-context";
 
 import { AppLock } from "@/components/app/app-lock-gate";
 import { ConsentGate } from "@/components/legal/consent-gate";
+import { ShareIntake } from "@/components/scan/share-intake";
 import { ToastHost } from "@/components/notifications/toast";
 import { SaveBar } from "@/components/ui/save-bar";
 import { persistOptions } from "@/lib/offline/cache";
@@ -102,6 +104,11 @@ export default function RootLayout() {
   if (!loaded && !error) return null;
 
   return (
+    /*
+     * Outermost, as expo-share-intent asks: a report shared from WhatsApp
+     * or Files reaches ShareIntake below, which takes it to Scan. Off on web.
+     */
+    <ShareIntentProvider>
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider initialMetrics={WEB_PREVIEW_METRICS}>
         <PersistQueryClientProvider client={client} persistOptions={persistOptions}>
@@ -138,6 +145,7 @@ export default function RootLayout() {
            * /settings/privacy). It renders nothing while signed out.
            */}
           <ConsentGate />
+          <ShareIntake />
           <ToastHost />
           <SaveBar />
           </AppLock>
@@ -145,5 +153,6 @@ export default function RootLayout() {
         </PersistQueryClientProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
+    </ShareIntentProvider>
   );
 }
