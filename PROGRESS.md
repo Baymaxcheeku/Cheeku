@@ -3563,3 +3563,10 @@ Doctors.
 **Not verified:** the deployed function against the real Ola and OSM APIs
 (this container cannot reach them), and location on a phone (needs the new
 dev build from the fitness change).
+
+**Live, next day.** Athar applied 0040 (check all yes), deployed `geo` from
+the dashboard with the one-file copy, and set the Ola key as a Supabase
+secret. On the phone the place now shows with its pincode. The one-file copy
+first broke the web app's production build: the root tsconfig typechecked
+`supabase/manual` and failed on `Deno`; it is now excluded like
+`supabase/functions` (PR #56). loc-live and int-ola-maps are done.

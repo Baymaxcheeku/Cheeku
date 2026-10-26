@@ -68,6 +68,7 @@ Milestone `V2` holds ideas saved for after launch. The page shows them in their 
 | `int-doctors` | Archit | P0 | M3 | Real doctor consults and video |
 | `int-server-bookings` | Archit | P0 | M2 | Move appointments and service requests to the server |
 | `int-services` | Archit | P1 | M3 | Services marketplace provider |
+| `int-ola-maps` | Athar | P1 | M3 | Ola Maps API key and integration |
 | `int-fitness` | Archit | P0 | M3 | Fitness partner master API: studios, sessions, booking, check-in, payouts |
 | `int-share-target` | Athar | P0 | M2 | WhatsApp and Files share-sheet target into Scan |
 | `int-wearables` | Athar | P1 | M3 | Apple Health and Health Connect |
