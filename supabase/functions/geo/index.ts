@@ -23,6 +23,8 @@
 //
 // Deploy:  supabase functions deploy geo
 //          (JWT verification stays ON: only signed-in people can call it)
+//          From the dashboard instead: paste supabase/manual/0040-geo-function-paste.ts
+//          (this file and parse.ts joined) into Edge Functions > Via Editor.
 // Secrets: supabase secrets set OLA_MAPS_API_KEY=<key from maps.olakrutrim.com>
 //          (optional; without it OpenStreetMap answers)
 // Needs:   migration 0040 (geo_cache, geo_quota, geo_take_quota, geo_prune).
