@@ -288,13 +288,11 @@ haptics has to be seen on a simulator or a device before it counts as done.
 
 ## Open
 
-- **Location needs three steps on Supabase** (PR for loc-live): run
-  `supabase/manual/0040-step-1-of-1.sql`, deploy the function with
-  `supabase functions deploy geo` (JWT verification on), then
-  `0040-check.sql`. Optional: `supabase secrets set OLA_MAPS_API_KEY=...`
-  from maps.olakrutrim.com; without it addresses come from OpenStreetMap.
-  Until the function is deployed, phones fall back to the system geocoder
-  and the web shows "Near you" with the point still saved.
+- **Location is live on production** (2026-10-26): 0040 applied and checked,
+  the `geo` function deployed, `OLA_MAPS_API_KEY` set (Ola Maps credential
+  `cheeku-geo-server`). Watch usage in the Ola console against the free
+  allowance. To redeploy from the dashboard, paste
+  `supabase/manual/0040-geo-function-paste.ts`.
 - **Everyone re-agrees once** to the privacy policy of 2026-10-25, which now
   mentions location (material change).
 - **Fitness runs on sample studios.** Everything from location to check-in
