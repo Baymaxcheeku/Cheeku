@@ -256,6 +256,14 @@ in a shell. See `../SHIPPING.md`.
    The system prompt only ever follows a tap on our own card. Never read
    location in the background.
 
+12. **Nothing from a scan is filed before the person sees it.** Scan uploads
+   the file and reads it, then shows Check and save: only what the reader
+   was unsure of (confidence under 0.7) is asked about, with an edit box
+   and "Looks right". Save writes the record; Discard deletes the stored
+   file. Anything left unchecked is filed as needs_review ("Waiting for a
+   check"), never as filed. A shared file waits in memory, never on disk,
+   until whose it is has been answered.
+
 ## Running it
 
 Web preview (fast, and NOT sufficient — see below):
@@ -288,6 +296,17 @@ haptics has to be seen on a simulator or a device before it counts as done.
 
 ## Open
 
+- **Share to Cheeku needs a new build** (2026-10-26). `expo-share-intent`
+  adds an iOS share extension and Android intent filters (PDF and images),
+  so Expo Go and the current dev build will not show Cheeku AI in the share
+  sheet: run `npx expo prebuild --clean` then a new dev build, or
+  `eas build`. On iOS the extension is a second target with its own
+  bundle id and an App Group; let EAS create their credentials on the
+  first build (see the expo-share-intent README). Untested on a phone.
+- **On web, picking a file in Scan says it could not be read.**
+  `expo-file-system`'s `File` cannot open a browser blob URL. This was true
+  before the share work too; the phone is the real path. Fix with a web
+  branch in `prepareUpload` when web upload matters.
 - **Location is live on production** (2026-10-26): 0040 applied and checked,
   the `geo` function deployed, `OLA_MAPS_API_KEY` set (Ola Maps credential
   `cheeku-geo-server`). Watch usage in the Ola console against the free

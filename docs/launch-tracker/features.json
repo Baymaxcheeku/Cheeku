@@ -102,9 +102,9 @@
   "id": "upload",
   "group": "records",
   "title": "Scan and upload",
-  "what": "Camera, photos or a PDF, whose report it is, and a type picker; files go to private storage with EXIF stripped. The reader behind it is still a stand-in.",
+  "what": "Report or Prescription, whose it is, then camera, photos, a PDF or a file shared from WhatsApp. Check and save asks only about values the reader was unsure of; nothing is filed before that. The reader behind it is still a stand-in.",
   "state": "standin",
-  "where": "app/scan.tsx, src/lib/upload",
+  "where": "app/scan.tsx, src/components/scan, src/lib/scan, src/lib/records/upload.ts",
   "shipped": "2026-09-30",
   "owner": "athar",
   "next": [
