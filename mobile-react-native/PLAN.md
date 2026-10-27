@@ -264,6 +264,11 @@ in a shell. See `../SHIPPING.md`.
    check"), never as filed. A shared file waits in memory, never on disk,
    until whose it is has been answered.
 
+13. **A privacy request is answered through `answer_privacy_request`, never
+   by editing the row.** It checks the status, needs a reply before closing
+   and tells the person in their inbox. The notification never repeats what
+   they wrote, and neither does the alert email.
+
 ## Running it
 
 Web preview (fast, and NOT sufficient — see below):
@@ -296,6 +301,14 @@ haptics has to be seen on a simulator or a device before it counts as done.
 
 ## Open
 
+- **Privacy requests are answered from the SQL editor** (2026-10-27).
+  Migration 0041 adds `privacy_queue` and `answer_privacy_request`; the
+  weekly routine is in `docs/privacy/requests.md`. The email to
+  privacy@cheekuai.in needs the `privacy-alert` function, its webhook and a
+  Resend key with cheekuai.in verified; until then nobody is told when a
+  request arrives, so check the queue weekly. The legal entity, address and
+  courts are still placeholders until incorporation, and a lawyer has not
+  read the texts (`docs/privacy/dpdp-readiness.md`).
 - **Share to Cheeku needs a new build** (2026-10-26). `expo-share-intent`
   adds an iOS share extension and Android intent filters (PDF and images),
   so Expo Go and the current dev build will not show Cheeku AI in the share
