@@ -3612,3 +3612,62 @@ read a picked file (an old `expo-file-system` limit, noted in PLAN Open).
 **Not verified:** the share sheet itself and the whole flow on a phone.
 Both need a new dev build (`npx expo prebuild --clean`) or `eas build`.
 
+
+## DPDP readiness: requests answered, Grievance Officer named, breach plan (sec-dpdp) · 2026-10-27
+
+**Why.** Since 0031 a person could open a rights request from Settings,
+Privacy, and it went nowhere: nobody was told, there was no way to answer,
+and the person never heard back. The legal texts still said "[Grievance
+Officer name]" and the app showed support@baymax.health.
+
+**Named.** Athar Ali is the Grievance Officer, privacy@cheekuai.in and
+support@cheekuai.in are the contacts (`src/lib/legal/entity.ts`,
+`src/lib/app-meta.ts`). The legal name, address, hosting region and courts
+stay as placeholders until the company is incorporated, and the app keeps
+saying so.
+
+**Non-material legal versions.** Filling in a contact changes the text, so
+Terms, Privacy and Health Data Consent got new versions (2026-10-27) and
+hashes. They are published with `material = false`: nothing about what we
+collect or share changed, so nobody already signed in is asked to agree
+again, while new sign-ups agree to the new text. The database already
+supported this (`current_material_versions` only counts material rows and
+compares dates); the one thing in the way was a test that required every
+consented document to be material. It now checks that each kind has a
+material version in force, and that every version is published with the
+same `material` the app declares. The Privacy Policy keeps the location line
+as its first "what changed", because anyone who has not yet agreed to the
+2026-10-25 version still sees the gate, and the gate shows the first change.
+
+**Answering.** Migration 0041: `privacy_queue` (open requests, oldest due
+first, days left, overdue; team only, revoked from the app roles),
+`answer_privacy_request(id, status, reply, handled_by)` (the only way to move
+one on: checks the status, needs a reply before closing, stamps
+resolved_at), and a trigger that drops a note in the person's inbox when the
+status changes. The note uses the existing `support_update` kind (account
+category), so it follows their account notification setting and the push
+shows the generic account line. It never repeats what they wrote; a copy
+test checks the words and that `details` is never put into a body.
+
+**Alerting.** `privacy-alert` Edge Function, fired by a Database Webhook on
+INSERT, emails privacy@cheekuai.in through Resend: kind, received, due date,
+id, and the two SQL lines to handle it. Never the text or the account email.
+Without a Resend key it does nothing and says so, so the webhook can exist
+before the mail account does.
+
+**Written.** `docs/privacy/requests.md` (weekly routine, what each kind
+needs), `docs/privacy/breach-runbook.md` (first hour, CERT-In in 6 hours,
+people without delay, Board without delay and a full report within 72
+hours), `docs/privacy/dpdp-readiness.md` (every duty and where it stands, the
+questions for the lawyer, what is left).
+
+**Verified here:** typecheck, lint, tests (legal and copy tests extended),
+0041 applied twice on local Postgres 16 with scenarios: queue shows a new
+request with 90 days left, closing without a reply refused, a bad status
+refused, in_progress then resolved each notify once with the right words, a
+closed request cannot be answered again, nothing the person wrote reaches a
+notification, the app roles cannot read the queue or call the function, and
+current material versions are unchanged. The check file says yes on all six
+rows. The function typechecks and its email carries no request text.
+**Not verified:** the function against Resend (no key, no network here), and
+the webhook on the real project.
