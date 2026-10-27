@@ -19,7 +19,9 @@ import { OPTIONAL_PURPOSES, PURPOSE_COPY, REQUIRED_PURPOSES } from "./purposes";
  *   4. Add a row for the new version to `legal_documents` in a migration.
  *   5. Set `material: true` if people must agree again (anything that widens
  *      what is collected or who it is shared with). The app then asks every
- *      signed-in person once, on their next launch.
+ *      signed-in person once, on their next launch. A fix that changes no
+ *      right or use (a typo, a contact address) is `material: false`: new
+ *      sign-ups agree to it, and nobody already signed in is asked again.
  * The tests fail at step 3 and step 4 if either is forgotten.
  *
  * WRITING RULES. Plain words, short sentences, second person. Say what
@@ -63,12 +65,12 @@ const TERMS: LegalDocument = {
   kind: "terms",
   title: "Terms of Use",
   short: "Terms",
-  version: "2026-10-08",
-  effectiveOn: "2026-10-08",
-  material: true,
+  version: "2026-10-27",
+  effectiveOn: "2026-10-27",
+  material: false,
   summary:
     "These terms are the agreement between you and us for using Cheeku AI. Cheeku helps you understand and organise health information; it does not diagnose, prescribe or replace a doctor.",
-  changes: [],
+  changes: ["Contact details: our Grievance Officer is named, with privacy and support email addresses."],
   sections: [
     {
       id: "who",
@@ -181,12 +183,15 @@ const PRIVACY: LegalDocument = {
   kind: "privacy",
   title: "Privacy Policy",
   short: "Privacy",
-  version: "2026-10-25",
-  effectiveOn: "2026-10-25",
-  material: true,
+  version: "2026-10-27",
+  effectiveOn: "2026-10-27",
+  material: false,
   summary:
     "We collect what Cheeku needs to keep your family's health records and answer your questions, and nothing for advertising. We never sell your data, and you can see, correct, export or delete it at any time.",
-  changes: ["Location: if you allow it, where your phone is while the app is open, and places you pick for family members, so we can show care nearby and fill in addresses."],
+  changes: [
+    "Location: if you allow it, where your phone is while the app is open, and places you pick for family members, so we can show care nearby and fill in addresses.",
+    "Contact details: our Grievance Officer is named, with privacy and support email addresses.",
+  ],
   sections: [
     {
       id: "scope",
@@ -314,12 +319,12 @@ const HEALTH_CONSENT: LegalDocument = {
   kind: "health_consent",
   title: "Health Data Consent",
   short: "Health data consent",
-  version: "2026-10-08",
-  effectiveOn: "2026-10-08",
-  material: true,
+  version: "2026-10-27",
+  effectiveOn: "2026-10-27",
+  material: false,
   summary:
     "This is the consent notice under India's DPDP Act. It lists exactly what Cheeku does with your family's health data when you tick the box, and the optional uses that stay off unless you turn them on.",
-  changes: [],
+  changes: ["Contact details: our Grievance Officer is named, with privacy and support email addresses."],
   sections: [
     {
       id: "notice",
@@ -431,13 +436,13 @@ export const CONSENTED_KINDS: readonly LegalKind[] = ["terms", "privacy", "healt
 
 /**
  * SHA-256 of `canonical(doc)` for each document, as published in
- * `legal_documents.text_sha256` (migration 0031). Checked by documents.test.ts:
+ * `legal_documents.text_sha256` (migrations 0031, 0040, 0041). Checked by documents.test.ts:
  * edit a text without updating this and the tests fail.
  */
 export const DOCUMENT_HASHES: Record<LegalKind, string> = {
-  terms: "8270910757f13fa373ecd94f1e99b039727f1763867f906d025b795ef5e0b2c2",
-  privacy: "4102c77321e9586f8b997bc162b52e60ba8b9b7884e5bdf953749d54425938da",
-  health_consent: "f2d3608573bcc82426941ce699189d2c728cf6e1cac951c28fdec7b955e54756",
+  terms: "d7d7256d59643bd576108a9db6a14be333b4f8e1f8b5190f89a8a24bcc6127a5",
+  privacy: "70a3cca6408c880fde138f2ea42de5a15d441655310808c52a63b9ebecfc7579",
+  health_consent: "6a98d33bc73a80f4d00b36fd4b7bbf6957b06f194c7997a818783cc05353f032",
   storage: "51dee9ee8cb660445b6fd5ee7b8f5d391b9963cfa6b9bfaa4e35720b51f3f4bf",
 };
 

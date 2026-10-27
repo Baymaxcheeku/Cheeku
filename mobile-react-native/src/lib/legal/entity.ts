@@ -19,9 +19,9 @@ export const LEGAL_ENTITY = {
   legalName: "[Legal entity name, on incorporation]",
   registeredAddress: "[Registered office address, India]",
   /** DPDP Act section 8(9): a person who answers questions about personal data. */
-  grievanceOfficer: "[Grievance Officer name]",
-  privacyEmail: "[privacy contact email]",
-  supportEmail: "[support email]",
+  grievanceOfficer: "Athar Ali",
+  privacyEmail: "privacy@cheekuai.in",
+  supportEmail: "support@cheekuai.in",
   /** Where the database and files are hosted. */
   hostingRegion: "[hosting region]",
   /** Courts named in the Terms. */
