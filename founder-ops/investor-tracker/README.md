@@ -9,6 +9,7 @@ The seed funnel for the ₹26 cr round: every investor, who leads the conversati
 - **Pipeline**: Target, Warming up, Intro asked, Contacted, Meeting, Diligence, Term sheet, Committed (plus Passed and Not now). Drag cards between stages.
 - **List**: sortable table of everyone.
 - **Today**: next steps due, conversations going cold, A-tier targets with no lead, latest activity.
+- **Grants**: government grants, subsidies and incentives, each with our fit, their rules, what we need first, how to apply and the official link. Track each one through To check, Preparing, Applied, Shortlisted, Won, Rejected or Skip, with an owner, next step and notes. Grants won show in the meter strip.
 - **Long list**: the 934 angels from the paid list that came with a name and contact only, plus the 53 screened out with their reason. "Add to pipeline" promotes one.
 - **Our story**: the text every draft is written from. Keep it current.
 
@@ -16,7 +17,7 @@ Open any investor for the record, the fit reasons, a fit memo (the founder-board
 
 ## Data
 
-Collections in the artifact's database: `investors`, `touches`, `pool`, `meta/context`, `meta/team`. The database is the source of truth.
+Collections in the artifact's database: `investors`, `touches`, `pool`, `grants`, `meta/context`, `meta/team`, `meta/nightly`. The database is the source of truth.
 
 The uploaded lists and the scored output are **not** in git: they hold personal emails and phone-adjacent contacts from a purchased list, and this repo is visible to the engineering team. `screening/score.py` and `screening/build_docs.py` re-run the screening from the original xlsx files if needed.
 
@@ -54,10 +55,26 @@ A Claude routine, "Cheeku nightly investor research" (`trig_015GgGQFXhzA5gbDYx3U
 
 1. Researches everything queued with the Research button.
 2. Adds up to 8 new investors a night who show recent public seed activity in health, wellness or consumer AI in India. They are tagged `sources: ["nightly research"]`, appear under Today as "Found overnight", and are checked against the full list so there are no duplicates.
-3. Writes a run log to `meta/nightly`.
+3. On Sundays, re-checks every grant we could reach (status, deadlines, amounts) and adds up to 4 new central or Haryana schemes a week. It never touches the stage, owner, next step or notes the founders set.
+4. Writes a run log to `meta/nightly`.
 
 It uses the built-in web search, so it needs no paid connector. Pause or change it from claude.ai's Routines page.
 
 ## Finding more on demand
 
 Today, **Find new investors**: an optional focus (for example "women's health angels" or "longevity funds") and a count of 3, 5 or 8. The page runs two Parallel Search searches, Claude proposes candidates named in those results as investing, and the page removes anyone already in `investors` or `pool`. The check ignores case, punctuation and titles, strips fund suffixes (Ventures, Capital, Partners and so on), and treats renames as the same firm (Peak XV and Sequoia India, Elevation and SAIF, Z47 and Matrix India, Chiratae and IDG, IAN). Candidates show with sources; **Add** or **Add all** puts them in Target with `sources: ["found in tracker"]`, and they appear under "Newly found". The nightly run uses the same rules.
+
+## Grants
+
+Seeded on 28 Oct 2026 with 13 schemes, each with its sources. The fit is set against where we are today: V1 built, not yet incorporated, Gurugram.
+
+| Fit | Schemes |
+|---|---|
+| After incorporation | Startup India Seed Fund (SISFS), Haryana seed grant, Haryana lease rental and patent reimbursement, NIDHI-SSP, ABDM DHIS |
+| After seed | IndiaAI compute subsidy, Haryana matching grant (announced, not yet notified) |
+| Long shot | BIRAC BIG (next call 1 Jan 2027), MeitY SAMRIDH |
+| Not eligible | MeitY GENESIS and TIDE 2.0 (Tier 2 and 3 cities), NIDHI PRAYAS (hardware), IndiaAI BuildAI (closed) |
+
+Nothing is open to us until three things are done: incorporate the private limited company, get DPIIT startup recognition, and register with Startup Haryana. Most schemes also pay through an incubator, so picking one with a health or AI track is the next real step.
+
+**Check for grants** on the Grants view runs two Parallel Search searches and adds only schemes that are not already listed and that come with a source. Parallel Search's free tier has a rate limit, so press it once and wait.
