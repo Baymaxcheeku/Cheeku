@@ -57,3 +57,7 @@ A Claude routine, "Cheeku nightly investor research" (`trig_015GgGQFXhzA5gbDYx3U
 3. Writes a run log to `meta/nightly`.
 
 It uses the built-in web search, so it needs no paid connector. Pause or change it from claude.ai's Routines page.
+
+## Finding more on demand
+
+Today, **Find new investors**: an optional focus (for example "women's health angels" or "longevity funds") and a count of 3, 5 or 8. The page runs two Parallel Search searches, Claude proposes candidates named in those results as investing, and the page removes anyone already in `investors` or `pool`. The check ignores case, punctuation and titles, strips fund suffixes (Ventures, Capital, Partners and so on), and treats renames as the same firm (Peak XV and Sequoia India, Elevation and SAIF, Z47 and Matrix India, Chiratae and IDG, IAN). Candidates show with sources; **Add** or **Add all** puts them in Target with `sources: ["found in tracker"]`, and they appear under "Newly found". The nightly run uses the same rules.

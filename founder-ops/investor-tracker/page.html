@@ -469,14 +469,15 @@ function renderToday() {
   const live = ['warm', 'intro', 'contacted', 'meeting', 'diligence', 'terms'];
   const stale = all.filter(i => live.includes(i.stage) && (!i.lastTouch || Date.now() - i.lastTouch > 10 * 864e5) && !(i.nextDate && i.nextDate > t)).sort((a, b) => (a.lastTouch || 0) - (b.lastTouch || 0));
   const queued = all.filter(i => i.research && i.research.status === 'queued').sort((a, b) => a.research.at - b.research.at);
-  const found = all.filter(i => (i.sources || []).includes('nightly research') && Date.now() - (i.createdAt || 0) < 7 * 864e5).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+  const found = all.filter(i => ((i.sources || []).includes('nightly research') || (i.sources || []).includes('found in tracker')) && Date.now() - (i.createdAt || 0) < 7 * 864e5).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
   const unowned = all.filter(i => i.tier === 'A' && !i.owner && (i.stage || 'target') === 'target').sort((a, b) => b.fit - a.fit);
   const recent = [...S.touches.values()].filter(x => x.type !== 'draft').sort((a, b) => b.at - a.at).slice(0, 14);
   const row = (i, sub) => `<button class="row" type="button" data-id="${esc(i.id)}">${ownerAv(i.owner)}<span class="grow"><b>${esc(i.name)}</b><span>${esc(sub)}</span></span><span class="tier ${i.tier || 'U'}">${i.tier || '?'}</span></button>`;
   return `<div class="wrap today">
+    ${findPanel()}
     <div class="panel"><h3>Due now</h3><p>Next steps dated today or earlier.</p>${due.map(i => row(i, `${fmtDate(i.nextDate)} · ${i.nextStep || 'Next step'}`)).join('') || '<p>Nothing due. Set a next step on an investor and it lands here on the day.</p>'}</div>
     <div class="panel"><h3>Going cold</h3><p>In play, no touch in 10 days and nothing scheduled.</p>${stale.map(i => row(i, i.lastTouch ? 'Last touch ' + ago(i.lastTouch) : 'Never contacted')).join('') || '<p>Every live conversation has a recent touch or a next step.</p>'}</div>
-    ${found.length ? `<div class="panel"><h3>Found overnight</h3><p>New investors the nightly research added this week. Each one says why it fits and where it came from.</p>${found.map(i => row(i, [i.title, i.firm].filter(Boolean).join(', ') || (i.why || [])[0] || '')).join('')}</div>` : ''}
+    ${found.length ? `<div class="panel"><h3>Newly found</h3><p>Added this week by the nightly research or the Find button. Each one says why it fits and where it came from.</p>${found.map(i => row(i, [i.title, i.firm].filter(Boolean).join(', ') || (i.why || [])[0] || '')).join('')}</div>` : ''}
     ${queued.length ? `<div class="panel"><h3>Waiting for research</h3><p>Queued with the Research button. The nightly run clears these after midnight, or ask Claude to "run tracker research" now.</p>${queued.map(i => row(i, [i.title, i.firm].filter(Boolean).join(', ') || i.hint || 'Queued ' + ago(i.research.at))).join('')}</div>` : ''}
     <div class="panel"><h3>Best fits with no lead</h3><p>A-tier targets nobody has picked up. Click one and choose Athar or Deepesh.</p>${unowned.slice(0, 12).map(i => row(i, (i.why || [])[1] || i.role || '')).join('') || '<p>Every A-tier target has a lead.</p>'}</div>
     <div class="panel"><h3>Latest activity</h3><p>Messages sent, notes and stage moves, newest first.</p>${recent.map(x => { const i = S.inv.get(x.investorId); return i ? `<button class="row" type="button" data-id="${esc(i.id)}">${ownerAv(x.sender, 'sm')}<span class="grow"><b>${esc(i.name)}</b><span>${esc(x.type === 'stage' ? x.body : `${labelOf(x.type)} on ${labelCh(x.channel)}`)} · ${ago(x.at)}</span></span></button>` : ''; }).join('') || '<p>Nothing logged yet.</p>'}</div>
@@ -766,6 +767,97 @@ Reply with JSON only:
   if (ok) { S.inv.set(it.id, { ...it, ...patch }); addTouch(it.id, { type: 'stage', body: `Researched from ${sources.length} public sources` }); toast('Research done'); }
   if (S.sheet === it.id) renderSheet(); scheduleRender();
 }
+// Find new investors on demand: Parallel Search for sources, Claude for candidates, local check against everyone we already have.
+const FIRM_ALIAS = [['peakxv', 'sequoiaindia', 'sequoiacapitalindia', 'sequoiasurge', 'peakxvsurge'], ['elevation', 'elevationcapital', 'saif', 'saifpartners'], ['z47', 'matrix', 'matrixpartners', 'matrixpartnersindia'], ['chiratae', 'chirataeventures', 'idgventures', 'idgventuresindia'], ['indianangelnetwork', 'indiaangelnetwork', 'ian', 'iangroup']];
+const normName = n => String(n || '').toLowerCase().replace(/\(.*?\)/g, '').replace(/^(dr|mr|ms|mrs)\.?\s+/, '').replace(/[^a-z0-9]/g, '');
+const normFund = n => normName(n).replace(/(ventures?|venturepartners|capital|partners|fund|funds|vc|advisors|management|investments?|india|group|llp|limited|ltd)+$/g, '');
+function existingKeys() {
+  const keys = new Set();
+  const add = n => { const a = normName(n), b = normFund(n); if (a) keys.add(a); if (b && b.length > 3) keys.add(b); FIRM_ALIAS.forEach(g => { if (g.includes(a) || g.includes(b)) g.forEach(k => keys.add(k)); }); };
+  S.inv.forEach(i => add(i.name)); S.pool.forEach(r => add(r.name));
+  return keys;
+}
+const isExisting = (name, keys) => { const a = normName(name), b = normFund(name); return keys.has(a) || (b.length > 3 && keys.has(b)); };
+S.find = { busy: false, focus: '', count: 5, status: '', list: [] };
+function findPanel() {
+  const f = S.find, ready = S.mcp && S.sample && S.canEdit;
+  const cands = f.list.map((c, i) => c.added ? '' : `<div class="row" style="align-items:flex-start;cursor:default"><span class="tier ${c.tier}">${c.tier}</span><span class="grow"><b>${esc(c.name)}</b><span>${esc([c.kind, c.title, c.firm].filter(Boolean).join(' · '))}</span><span style="white-space:normal;color:var(--ink-2)">${esc((c.why || []).slice(0, 2).join(' · '))}</span>${(c.sources || []).length ? `<span>${c.sources.slice(0, 2).map(s => `<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.title.slice(0, 40) || 'source')}</a>`).join(' · ')}</span>` : ''}</span><span style="display:flex;gap:4px"><button class="btn primary" data-addfind="${i}" type="button">Add</button><button class="btn ghost" data-skipfind="${i}" type="button">Skip</button></span></div>`).join('');
+  const left = f.list.filter(c => !c.added).length;
+  return `<div class="panel" style="grid-column:1 / -1"><h3>Find new investors</h3>
+    <p>Searches the web for investors writing seed cheques in Indian health, wellness or consumer AI. Anyone already in the tracker or the long list is left out.</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <input class="inp" id="findFocus" style="flex:1;min-width:220px" placeholder="Optional focus: e.g. women's health angels, longevity funds, Bengaluru operators" value="${esc(f.focus)}" ${ready ? '' : 'disabled'}>
+      <select class="inp" id="findCount" style="width:auto" ${ready ? '' : 'disabled'}>${[3, 5, 8].map(n => `<option value="${n}" ${f.count === n ? 'selected' : ''}>${n} new</option>`).join('')}</select>
+      <button class="btn lime" id="findBtn" type="button" ${ready && !f.busy ? '' : 'disabled'}>${f.busy ? 'Searching…' : 'Find investors'}</button>
+      ${left > 1 ? `<button class="btn" id="findAddAll" type="button">Add all ${left}</button>` : ''}
+    </div>
+    ${!S.canEdit ? '<p>This view is read only.</p>' : !S.mcp ? '<p>Needs the Parallel Search connector: claude.ai Settings, Connectors. The nightly run still adds new investors without it.</p>' : ''}
+    ${f.status ? `<p class="gen-status">${f.busy ? '<span class="dot"></span>' : ''}${esc(f.status)}</p>` : ''}
+    ${cands}
+  </div>`;
+}
+async function findInvestors() {
+  const f = S.find; if (f.busy || !S.mcp || !S.sample) return;
+  f.focus = ($('findFocus') || {}).value || ''; f.count = Number(($('findCount') || {}).value) || 5;
+  f.busy = true; f.list = []; f.status = 'Searching the web…'; scheduleRender();
+  const focus = f.focus.trim();
+  let results = [];
+  try {
+    const runs = await Promise.all([
+      psSearch(`Angel investors and funds that led or joined pre-seed or seed rounds of Indian healthtech, wellness, longevity or digital health startups in 2025 or 2026${focus ? '. Focus: ' + focus : ''}`, [`India healthtech seed round 2026`, `healthtech pre-seed angel investors India`, focus ? `${focus} seed investors India` : `digital health seed funding India 2025`]),
+      psSearch(`Indian seed funds and operator angels backing consumer AI or health AI startups in 2025 or 2026${focus ? '. Focus: ' + focus : ''}`, [`consumer AI seed round India 2026`, `health AI startup seed funding India`, `operator angels India consumer health`]),
+    ]);
+    const seen = new Set(); results = runs.flat().filter(r => !seen.has(r.url) && seen.add(r.url)).slice(0, 16);
+  } catch (e) { f.busy = false; f.status = researchError(e).replace(' Queued for tonight instead.', ''); scheduleRender(); return; }
+  if (!results.length) { f.busy = false; f.status = 'No useful results came back. Try another focus.'; scheduleRender(); return; }
+  f.status = `Reading ${results.length} sources…`; scheduleRender();
+  const keys = existingKeys();
+  const have = [...S.inv.values()].map(i => i.name).slice(0, 600).join('; ');
+  const prompt = `You find investors for Cheeku AI's ₹26 crore seed round. Cheeku is India's daily health companion for families (family health memory, prescription checks, care booked in chat), pre-launch, Gurgaon.
+
+From ONLY the search results below, list up to ${f.count + 4} investors (people, funds, angel networks or accelerators) who show recent pre-seed or seed activity in Indian health, wellness, longevity, health AI or consumer AI. Each one must be named in a result as investing, not just mentioned. Skip founders who are raising, journalists, and anyone named in this list we already have: ${have}
+
+Search results (number, url, title, date, excerpt):
+${results.map((r, i) => `[${i + 1}] ${r.url}\n${r.title} ${r.date ? '(' + r.date + ')' : ''}\n${r.text}`).join('\n\n')}
+
+Tiers: A = health or wellness thesis or health deals at seed. B = active early-stage consumer or AI investor. C = weaker evidence.
+No em dashes or en dashes. Never invent deals, emails or links.
+
+Reply with JSON only: {"candidates": [{"name": "", "kind": "Angel" | "VC" | "Angel network" | "Accelerator", "title": "", "firm": "", "city": "", "tier": "A" | "B" | "C", "fit": 0-100, "why": ["2 to 4 short factual lines"], "angle": "health" | "consumer" | "ai" | "program" | "general", "angleText": "what to lead with", "role": "Lead or co-lead" | "Co-invest" | "Angel cheque" | "Programme and first cheque", "portfolio": "relevant deals, per source", "summary": "one sentence", "investing": ["deal, stage, year"], "gaps": ["what is unconfirmed"], "sources": [result numbers]}]}`;
+  let out;
+  try { out = await S.sample.json(prompt, { modelTier: 'default' }); }
+  catch (e) { f.busy = false; f.status = e && e.code === 'not_granted' ? 'Finding needs your permission for Claude. Allow it and try again.' : 'Could not read the results. Try again.'; scheduleRender(); return; }
+  const clean = v => String(v ?? '').replace(/[—–]/g, ', ').slice(0, 500);
+  const arr = (v, n = 6) => (Array.isArray(v) ? v : []).map(clean).filter(Boolean).slice(0, n);
+  const picked = new Set(); let dropped = 0;
+  f.list = (out && Array.isArray(out.candidates) ? out.candidates : []).filter(c => {
+    if (!c || !c.name) return false;
+    const k = normName(c.name);
+    if (isExisting(c.name, keys) || picked.has(k)) { dropped++; return false; }
+    picked.add(k); return true;
+  }).slice(0, f.count).map(c => ({
+    name: clean(c.name).slice(0, 80), kind: ['Angel', 'VC', 'Angel network', 'Accelerator'].includes(c.kind) ? c.kind : 'Angel', title: clean(c.title), firm: clean(c.firm), city: clean(c.city),
+    tier: ['A', 'B', 'C'].includes(c.tier) ? c.tier : 'C', fit: Math.max(0, Math.min(100, Math.round(Number(c.fit) || 40))), why: arr(c.why, 4),
+    angle: ['health', 'consumer', 'ai', 'program', 'general'].includes(c.angle) ? c.angle : 'general', angleText: clean(c.angleText),
+    role: clean(c.role) || 'Angel cheque', portfolio: clean(c.portfolio), summary: clean(c.summary), investing: arr(c.investing), gaps: arr(c.gaps),
+    sources: (Array.isArray(c.sources) ? c.sources : []).map(n => results[Number(n) - 1]).filter(Boolean).map(r => ({ title: r.title.slice(0, 90), url: r.url })),
+  })).filter(c => c.sources.length);
+  f.busy = false;
+  f.status = f.list.length ? `${f.list.length} new investor${f.list.length > 1 ? 's' : ''} found${dropped ? `, ${dropped} left out because they are already in the tracker` : ''}. Add the ones worth a look.` : `Nothing new this time${dropped ? ` (${dropped} were already in the tracker)` : ''}. Try a different focus.`;
+  scheduleRender();
+}
+async function addFound(i) {
+  const c = S.find.list[i]; if (!c || c.added) return;
+  if (isExisting(c.name, existingKeys())) { c.added = true; toast(`${c.name} is already in the tracker`); return scheduleRender(); }
+  const now = Date.now();
+  const id = 'nf-' + c.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 50) + '-' + now.toString(36).slice(-3);
+  const rec = { name: c.name, kind: c.kind, title: c.title, firm: c.firm, tier: c.tier, fit: c.fit, why: c.why, flags: [], angle: c.angle, angleText: c.angleText, role: c.role,
+    people: [], email: '', linkedin: '', twitter: '', website: '', city: c.city, portfolio: c.portfolio, about: '', stageFocus: 'Seed', hint: '',
+    sources: ['found in tracker'], stage: 'target', owner: '', intro: '', nextStep: 'Review: found with the Find button', nextDate: '', lastTouch: null, amount: null, notes: '',
+    research: { status: 'done', at: now, checkedAt: now, by: (S.me && S.me.id) || null, via: 'Parallel Search', summary: c.summary, background: [], investing: c.investing, signals: [], gaps: c.gaps, sources: c.sources },
+    createdAt: now, ...stamp() };
+  if (await writeDoc('investors/' + id, rec)) { S.inv.set(id, { id, ...rec }); c.added = true; toast(`${c.name} added to Target`); scheduleRender(); }
+}
 function memoHtml(m) { return `<div><b>Why yes</b><div>${esc(m.why_yes || '')}</div></div><div><b>Expect this objection</b><div>${esc(m.objection || '')}</div></div><div><b>Open with</b><div>${esc(m.opener || '')}</div></div>${m.lens ? `<div class="muted" style="font-size:11.5px">Strongest lens: ${esc(m.lens)}</div>` : ''}`; }
 function renderTimeline() {
   const el = $('tl'); if (!el || !S.sheet) return;
@@ -898,9 +990,9 @@ function render() {
   $('meSel').value = S.meKey; $('addBtn').hidden = !S.canEdit;
   renderFilters(); renderStrip();
   const v = $('view');
-  const keep = document.activeElement && document.activeElement.id === 'poolQ';
+  const keepId = document.activeElement && ['poolQ', 'findFocus'].includes(document.activeElement.id) ? document.activeElement.id : null;
   v.innerHTML = S.view === 'list' ? renderList() : S.view === 'today' ? renderToday() : S.view === 'longlist' ? renderLong() : S.view === 'context' ? renderContext() : renderPipeline();
-  if (keep && $('poolQ')) { const e = $('poolQ'); e.focus(); e.setSelectionRange(e.value.length, e.value.length); }
+  if (keepId && $(keepId)) { const e = $(keepId); e.focus(); try { e.setSelectionRange(e.value.length, e.value.length); } catch (x) {} }
   if (S.view === 'pipeline') wireDrag();
 }
 function wireDrag() {
@@ -932,6 +1024,10 @@ document.addEventListener('click', e => {
   if (d.pool) { S.poolStatus = d.pool; S.poolLimit = 150; return scheduleRender(); }
   if (d.poolmore) { S.poolLimit += 200; return scheduleRender(); }
   if (d.promote) return promote(d.promote);
+  if (t.id === 'findBtn') return findInvestors();
+  if (d.addfind) return addFound(Number(d.addfind));
+  if (d.skipfind) { const c = S.find.list[Number(d.skipfind)]; if (c) c.added = true; return scheduleRender(); }
+  if (t.id === 'findAddAll') { (async () => { for (let i = 0; i < S.find.list.length; i++) if (!S.find.list[i].added) await addFound(i); })(); return; }
   if (t.id === 'ctxSave') { const text = $('ctxText').value; writeDoc('meta/context', { text, ...stamp() }).then(ok => ok && toast('Story saved. New drafts use it.')); return; }
   if (S.sheet) {
     const it = S.inv.get(S.sheet);
@@ -961,6 +1057,7 @@ document.addEventListener('change', e => {
 });
 document.addEventListener('input', e => {
   if (e.target.id === 'q') { S.q = e.target.value.trim().toLowerCase(); clearTimeout(window.__qt); window.__qt = setTimeout(scheduleRender, 120); }
+  if (e.target.id === 'findFocus') { S.find.focus = e.target.value; return; }
   if (e.target.id === 'poolQ') { S.poolQ = e.target.value; S.poolLimit = 150; clearTimeout(window.__pq); window.__pq = setTimeout(scheduleRender, 150); }
   if (FIELD_MAP[e.target.id] && S.sheet && S.canEdit) { const el = e.target, id = S.sheet; clearTimeout(pending.get(el.id)); saveState('Unsaved changes…'); pending.set(el.id, setTimeout(() => saveField(id, el), 800)); return; }
   if (e.target.id === 'fDraft') { S.compose.text = e.target.value; refreshSendLink(); }
