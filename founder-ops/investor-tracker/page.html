@@ -204,6 +204,11 @@ textarea { resize: vertical; line-height: 1.5; }
 .owner { display: inline-flex; gap: 4px; }
 .owner button { border: 0; border-radius: 999px; padding: 4px 10px 4px 4px; background: var(--surface-2); display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 500; }
 .owner button[aria-pressed="true"] { box-shadow: inset 0 0 0 2px var(--accent); background: var(--accent-soft); }
+.rs { background: var(--surface-2); border-radius: 12px; padding: 12px; display: grid; gap: 10px; font-size: 13px; }
+.rs ul { margin: 0; padding-left: 18px; display: grid; gap: 3px; color: var(--ink-2); }
+.rs .src { display: flex; flex-wrap: wrap; gap: 6px 12px; font-size: 12px; }
+.rs-st { font-size: 12px; color: var(--muted); }
+.rs-st.q { color: var(--warn); font-weight: 600; }
 .memo { background: var(--surface-2); border-radius: 12px; padding: 12px; font-size: 13px; display: grid; gap: 6px; }
 .memo b { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
 
@@ -368,7 +373,7 @@ let queued = false;
 function scheduleRender() { if (queued) return; queued = true; requestAnimationFrame(() => { queued = false; render(); }); }
 
 // ---------------------------------------------------------------- filters --
-function hay(it) { return [it.name, it.city, it.portfolio, it.about, it.kind, it.intro, it.notes, (it.people || []).map(p => p.name).join(' ')].join(' ').toLowerCase(); }
+function hay(it) { return [it.name, it.firm, it.title, it.research && it.research.summary, it.city, it.portfolio, it.about, it.kind, it.intro, it.notes, (it.people || []).map(p => p.name).join(' ')].join(' ').toLowerCase(); }
 function visible(it, ignoreStage) {
   if (S.q && !hay(it).includes(S.q)) return false;
   if (S.kinds.size && !S.kinds.has(it.kind)) return false;
@@ -414,7 +419,8 @@ function card(it) {
   return `<button class="card" type="button" draggable="${S.canEdit}" data-id="${esc(it.id)}">
     ${watchers.length ? `<span class="watch">${watchers.slice(0, 2).map(p => face(p.by, 'sm')).join('')}</span>` : ''}
     <span class="card-t"><span class="tier ${t}" title="Fit tier">${t === 'U' ? '?' : t}</span><b>${esc(it.name)}</b>${ownerAv(it.owner, 'sm')}</span>
-    <span class="card-m"><span class="pill k-${esc((it.kind || 'VC').replace(/ /g, '-'))}">${esc(it.kind || 'VC')}</span>${it.fit != null ? `<span class="num">fit ${it.fit}</span>` : ''}${it.amount ? `<span class="num">${fmtLakh(Number(it.amount))}</span>` : ''}${(it.flags || []).length ? `<span class="flag" title="${esc(it.flags.join('. '))}">⚑</span>` : ''}</span>
+    ${it.firm || it.title ? `<span class="card-m" style="color:var(--ink-2)">${esc([it.title, it.firm].filter(Boolean).join(', '))}</span>` : ''}
+    <span class="card-m"><span class="pill k-${esc((it.kind || 'VC').replace(/ /g, '-'))}">${esc(it.kind || 'VC')}</span>${it.research && it.research.status === 'queued' ? '<span class="due" title="Waiting for Claude to research">researching</span>' : ''}${it.fit != null ? `<span class="num">fit ${it.fit}</span>` : ''}${it.amount ? `<span class="num">${fmtLakh(Number(it.amount))}</span>` : ''}${(it.flags || []).length ? `<span class="flag" title="${esc(it.flags.join('. '))}">⚑</span>` : ''}</span>
     ${it.nextStep || nd ? `<span class="card-m"><span class="${late ? 'due late' : dueToday ? 'due' : ''}">${nd ? fmtDate(nd) + ' · ' : ''}</span>${esc((it.nextStep || '').slice(0, 60))}</span>` : ''}
   </button>`;
 }
@@ -459,12 +465,14 @@ function renderToday() {
   const due = all.filter(i => i.nextDate && i.nextDate <= t && !['passed', 'later', 'committed'].includes(i.stage)).sort((a, b) => a.nextDate.localeCompare(b.nextDate));
   const live = ['warm', 'intro', 'contacted', 'meeting', 'diligence', 'terms'];
   const stale = all.filter(i => live.includes(i.stage) && (!i.lastTouch || Date.now() - i.lastTouch > 10 * 864e5) && !(i.nextDate && i.nextDate > t)).sort((a, b) => (a.lastTouch || 0) - (b.lastTouch || 0));
+  const queued = all.filter(i => i.research && i.research.status === 'queued').sort((a, b) => a.research.at - b.research.at);
   const unowned = all.filter(i => i.tier === 'A' && !i.owner && (i.stage || 'target') === 'target').sort((a, b) => b.fit - a.fit);
   const recent = [...S.touches.values()].filter(x => x.type !== 'draft').sort((a, b) => b.at - a.at).slice(0, 14);
   const row = (i, sub) => `<button class="row" type="button" data-id="${esc(i.id)}">${ownerAv(i.owner)}<span class="grow"><b>${esc(i.name)}</b><span>${esc(sub)}</span></span><span class="tier ${i.tier || 'U'}">${i.tier || '?'}</span></button>`;
   return `<div class="wrap today">
     <div class="panel"><h3>Due now</h3><p>Next steps dated today or earlier.</p>${due.map(i => row(i, `${fmtDate(i.nextDate)} · ${i.nextStep || 'Next step'}`)).join('') || '<p>Nothing due. Set a next step on an investor and it lands here on the day.</p>'}</div>
     <div class="panel"><h3>Going cold</h3><p>In play, no touch in 10 days and nothing scheduled.</p>${stale.map(i => row(i, i.lastTouch ? 'Last touch ' + ago(i.lastTouch) : 'Never contacted')).join('') || '<p>Every live conversation has a recent touch or a next step.</p>'}</div>
+    ${queued.length ? `<div class="panel"><h3>Waiting for research</h3><p>Queued with the Research button. Ask Claude to "run tracker research" to clear these now.</p>${queued.map(i => row(i, [i.title, i.firm].filter(Boolean).join(', ') || i.hint || 'Queued ' + ago(i.research.at))).join('')}</div>` : ''}
     <div class="panel"><h3>Best fits with no lead</h3><p>A-tier targets nobody has picked up. Click one and choose Athar or Deepesh.</p>${unowned.slice(0, 12).map(i => row(i, (i.why || [])[1] || i.role || '')).join('') || '<p>Every A-tier target has a lead.</p>'}</div>
     <div class="panel"><h3>Latest activity</h3><p>Messages sent, notes and stage moves, newest first.</p>${recent.map(x => { const i = S.inv.get(x.investorId); return i ? `<button class="row" type="button" data-id="${esc(i.id)}">${ownerAv(x.sender, 'sm')}<span class="grow"><b>${esc(i.name)}</b><span>${esc(x.type === 'stage' ? x.body : `${labelOf(x.type)} on ${labelCh(x.channel)}`)} · ${ago(x.at)}</span></span></button>` : ''; }).join('') || '<p>Nothing logged yet.</p>'}</div>
   </div>`;
@@ -547,6 +555,7 @@ function renderSheet() {
     <div class="sh-b">
       <div class="sh-l">
         <div><span class="lbl">Who leads</span><div class="owner">${['athar', 'deepesh'].map(k => `<button type="button" data-owner-set="${k}" aria-pressed="${it.owner === k}" ${ro}>${ownerAv(k, 'sm')}${esc((S.team[k] || {}).name || k)}</button>`).join('')}</div></div>
+        ${researchBlock(it, ro)}
         <div class="grid2">
           <label><span class="lbl">Next step</span><input class="inp" id="fNext" value="${esc(it.nextStep || '')}" placeholder="Send the deck" ${ro}></label>
           <label><span class="lbl">By</span><input class="inp" id="fDate" type="date" value="${esc(it.nextDate || '')}" ${ro}></label>
@@ -554,7 +563,7 @@ function renderSheet() {
           <label><span class="lbl">Cheque, ₹ lakh</span><input class="inp num" id="fAmt" type="number" min="0" step="5" value="${it.amount ?? ''}" placeholder="50" ${ro}></label>
         </div>
         <div class="fit">${it.fit != null ? `<div class="ring" style="--p:${it.fit}"><b class="num">${it.fit}</b></div>` : '<div class="ring"><b>?</b></div>'}
-          <div><span class="lbl">Why they fit · ${esc(it.role || '')}</span><div style="font-size:13px;color:var(--ink-2)">${esc(ANGLES[it.angle] || ANGLES.general)}</div></div></div>
+          <div><span class="lbl">Why they fit · ${esc(it.role || '')}</span><div style="font-size:13px;color:var(--ink-2)">${esc(it.angleText || ANGLES[it.angle] || ANGLES.general)}</div></div></div>
         ${(it.why || []).length ? `<ul class="why">${it.why.map(w => `<li>${esc(w)}</li>`).join('')}</ul>` : ''}
         ${(it.flags || []).length ? `<div class="flags">${it.flags.map(f => `<span>⚑ ${esc(f)}</span>`).join('')}</div>` : ''}
         <div class="memo" id="memoBox">${it.memo ? memoHtml(it.memo) : `<span class="muted" style="font-size:12.5px">A fit memo reads this investor's record through the board's three lenses: why they would say yes, the objection to expect and the line to open with.</span>`}
@@ -611,6 +620,33 @@ function sendLink(it) {
   }
   return '';
 }
+function researchBlock(it, ro) {
+  const r = it.research || {};
+  const st = r.status === 'queued' ? `<span class="rs-st q">Queued ${r.at ? fmtTime(r.at) : ''}. Claude looks it up on the web and fills this in.</span>`
+    : r.status === 'done' ? `<span class="rs-st">Researched ${fmtTime(r.checkedAt || r.at)} from public sources. Check anything you rely on.</span>`
+    : r.status === 'failed' ? `<span class="rs-st q">${esc(r.error || 'Could not find enough on this person. Add a company or LinkedIn link and try again.')}</span>`
+    : `<span class="rs-st">Not researched yet. Add what you know, then press Research.</span>`;
+  const list = (title, xs) => (xs && xs.length) ? `<div><span class="lbl">${title}</span><ul>${xs.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>` : '';
+  return `<div class="rs">
+    <div class="grid2">
+      <label><span class="lbl">Role</span><input class="inp" id="fTitle" value="${esc(it.title || '')}" placeholder="CEO, Partner, angel" ${ro}></label>
+      <label><span class="lbl">Firm or company</span><input class="inp" id="fFirm" value="${esc(it.firm || '')}" placeholder="TestMu AI" ${ro}></label>
+    </div>
+    <label><span class="lbl">Who is this?</span><input class="inp" id="fHint" value="${esc(it.hint || '')}" placeholder="Anything that pins them down: company, past companies, LinkedIn link, how you know them" ${ro}></label>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button class="btn ${r.status === 'done' ? 'ghost' : 'primary'}" id="researchBtn" type="button" ${ro}>${r.status === 'done' ? 'Research again' : r.status === 'queued' ? 'Queued' : 'Research ' + esc(it.name.split(' ')[0])}</button>${st}</div>
+    ${r.summary ? `<div style="color:var(--ink)">${esc(r.summary)}</div>` : ''}
+    ${list('Background', r.background)}${list('Investing record', r.investing)}${list('Signals for Cheeku', r.signals)}${list('Could not confirm', r.gaps)}
+    ${(r.sources || []).length ? `<div><span class="lbl">Sources</span><div class="src">${r.sources.map(x => `<a href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.title || x.url.replace(/^https?:\/\/(www\.)?/, '').split('/')[0])}</a>`).join('')}</div></div>` : ''}
+  </div>`;
+}
+async function queueResearch() {
+  const it = S.inv.get(S.sheet); if (!it) return;
+  const hint = ($('fHint') || {}).value || it.hint || '';
+  const firm = ($('fFirm') || {}).value || it.firm || '';
+  const title = ($('fTitle') || {}).value || it.title || '';
+  await setInv(it.id, { hint, firm, title, research: { ...(it.research || {}), status: 'queued', at: Date.now(), by: (S.me && S.me.id) || null } }, 'Queued for research');
+  toast('Queued. Ask Claude to "run tracker research", or it runs on the schedule.'); renderSheet();
+}
 function memoHtml(m) { return `<div><b>Why yes</b><div>${esc(m.why_yes || '')}</div></div><div><b>Expect this objection</b><div>${esc(m.objection || '')}</div></div><div><b>Open with</b><div>${esc(m.opener || '')}</div></div>${m.lens ? `<div class="muted" style="font-size:11.5px">Strongest lens: ${esc(m.lens)}</div>` : ''}`; }
 function renderTimeline() {
   const el = $('tl'); if (!el || !S.sheet) return;
@@ -624,7 +660,9 @@ function renderTimeline() {
 // --------------------------------------------------------------- generate --
 function investorBrief(it) {
   return JSON.stringify({ name: it.name, type: it.kind, people: (it.people || []).map(p => p.name).filter(Boolean), city: it.city, fit_reasons: it.why, flags: it.flags,
-    portfolio_as_listed: it.portfolio, about_as_listed: it.about, our_angle: ANGLES[it.angle], what_we_want_from_them: it.role, warm_intro_through: it.intro, notes: it.notes, stage: it.stage }, null, 1);
+    role: it.title, firm_or_company: it.firm, who_this_is: it.hint,
+    research: it.research && it.research.status === 'done' ? { summary: it.research.summary, background: it.research.background, investing_record: it.research.investing, signals_for_cheeku: it.research.signals, unconfirmed: it.research.gaps } : undefined,
+    portfolio_as_listed: it.portfolio, about_as_listed: it.about, our_angle: it.angleText || ANGLES[it.angle], what_we_want_from_them: it.role, warm_intro_through: it.intro, notes: it.notes, stage: it.stage }, null, 1);
 }
 function historyBrief(id) {
   return touchesFor(id).filter(t => t.type !== 'draft').slice(0, 6).map(t => `- ${new Date(t.at).toDateString()} · ${labelOf(t.type)}${t.channel ? ' on ' + labelCh(t.channel) : ''} by ${(S.team[t.sender] || {}).name || 'us'}: ${(t.subject ? t.subject + ' | ' : '') + (t.body || '').slice(0, 500)}`).join('\n') || '(nothing yet)';
@@ -784,6 +822,7 @@ document.addEventListener('click', e => {
     if (d.channel) { S.compose.channel = d.channel; S.compose.extra = ($('fExtra') || {}).value || ''; S.compose.text = ($('fDraft') || {}).value || ''; return renderSheet(); }
     if (t.id === 'genBtn') { S.compose.extra = ($('fExtra') || {}).value || ''; return generate(); }
     if (t.id === 'memoBtn') return writeMemo();
+    if (t.id === 'researchBtn') return queueResearch();
     if (t.id === 'copyBtn') { const s = ($('fSubject') || {}).value; const b = $('fDraft').value; return copyText(S.compose.channel === 'email' && s ? `Subject: ${s}\n\n${b}` : b, $('fDraft')); }
     if (d.copy) return copyText(d.copy);
     if (t.id === 'sentBtn') return logSent();
@@ -798,7 +837,7 @@ document.addEventListener('change', e => {
   const it = S.sheet && S.inv.get(S.sheet);
   if (e.target.id === 'meSel') { S.meKey = e.target.value; savePrefs(); return; }
   if (!it) return;
-  const map = { fNext: 'nextStep', fDate: 'nextDate', fIntro: 'intro', fNotes: 'notes' };
+  const map = { fNext: 'nextStep', fDate: 'nextDate', fIntro: 'intro', fNotes: 'notes', fTitle: 'title', fFirm: 'firm', fHint: 'hint' };
   if (map[e.target.id]) return setInv(it.id, { [map[e.target.id]]: e.target.value });
   if (e.target.id === 'fAmt') return setInv(it.id, { amount: e.target.value === '' ? null : Number(e.target.value) });
   if (e.target.id === 'fSender') { S.compose.sender = e.target.value; return; }
@@ -815,7 +854,7 @@ async function addInvestor() {
   const name = (S.q && S.q.length > 2 ? S.q : '').replace(/\b\w/g, c => c.toUpperCase()) || 'New investor';
   const id = 'inv-' + Date.now().toString(36);
   const rec = { name, kind: 'Angel', tier: 'U', fit: null, why: ['Added by hand'], flags: [], angle: 'general', role: 'Angel cheque', people: [], email: '', linkedin: '', twitter: '', website: '', city: '', portfolio: '', about: '', stageFocus: '',
-    sources: ['added by hand'], stage: 'target', owner: S.meKey, intro: '', nextStep: '', nextDate: '', lastTouch: null, amount: null, notes: '', createdAt: Date.now(), ...stamp() };
+    title: '', firm: '', hint: '', sources: ['added by hand'], stage: 'target', owner: S.meKey, intro: '', nextStep: '', nextDate: '', lastTouch: null, amount: null, notes: '', createdAt: Date.now(), ...stamp() };
   if (await writeDoc('investors/' + id, rec)) { S.inv.set(id, { id, ...rec }); openSheet(id); renameInline(id); }
 }
 function renameInline(id) {

@@ -31,3 +31,16 @@ Three uploads: 99 funds with type, stage and partner emails; 177 funds with a de
 - **Unscreened** (934): name and contact only.
 
 Flags call out what the lists cannot know: funds that renamed (Sequoia India is Peak XV, SAIF is Elevation, Matrix India is Z47), investors backing a close competitor (HealthifyMe, Eka Care, Practo), and roles that changed. The lists are dated, so check each fund's current focus before writing.
+
+## Researching an investor
+
+In any investor's sheet, fill in **Role**, **Firm or company** and **Who is this?** (a past company or a LinkedIn link is enough to pin the person down), then press **Research**. That marks the record `research.status: "queued"`, and it shows under Today, "Waiting for research".
+
+To clear the queue, ask Claude in a session to **"run tracker research"**. Claude then:
+
+1. Queries `investors` where `research.status == "queued"`.
+2. For each one, searches the public web for the person and their firm: role, companies, funding, angel or fund investments, health or consumer bets, and anything that links them to us.
+3. Writes back with `if_version` set: `title`, `firm`, `why`, `flags`, `tier`, `fit`, `angle`, `angleText` (the opening angle for drafts), and `research` with `summary`, `background`, `investing`, `signals`, `gaps` and `sources` (title and URL).
+4. Reports only what a source supports. Anything it could not confirm goes in `gaps`, and conflicting figures go in `flags`.
+
+Drafts and fit memos read the research automatically.
