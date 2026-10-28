@@ -44,3 +44,13 @@ To clear the queue, ask Claude in a session to **"run tracker research"**. Claud
 4. Reports only what a source supports. Anything it could not confirm goes in `gaps`, and conflicting figures go in `flags`.
 
 Drafts and fit memos read the research automatically.
+
+## Nightly run
+
+A Claude routine, "Cheeku nightly investor research" (`trig_015GgGQFXhzA5gbDYx3Uv59C`), runs every night at 00:37 IST in a fresh session. It:
+
+1. Researches everything queued with the Research button.
+2. Adds up to 8 new investors a night who show recent public seed activity in health, wellness or consumer AI in India. They are tagged `sources: ["nightly research"]`, appear under Today as "Found overnight", and are checked against the full list so there are no duplicates.
+3. Writes a run log to `meta/nightly`.
+
+It uses the built-in web search, so it needs no paid connector. Pause or change it from claude.ai's Routines page.

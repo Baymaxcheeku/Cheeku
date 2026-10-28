@@ -466,13 +466,15 @@ function renderToday() {
   const live = ['warm', 'intro', 'contacted', 'meeting', 'diligence', 'terms'];
   const stale = all.filter(i => live.includes(i.stage) && (!i.lastTouch || Date.now() - i.lastTouch > 10 * 864e5) && !(i.nextDate && i.nextDate > t)).sort((a, b) => (a.lastTouch || 0) - (b.lastTouch || 0));
   const queued = all.filter(i => i.research && i.research.status === 'queued').sort((a, b) => a.research.at - b.research.at);
+  const found = all.filter(i => (i.sources || []).includes('nightly research') && Date.now() - (i.createdAt || 0) < 7 * 864e5).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
   const unowned = all.filter(i => i.tier === 'A' && !i.owner && (i.stage || 'target') === 'target').sort((a, b) => b.fit - a.fit);
   const recent = [...S.touches.values()].filter(x => x.type !== 'draft').sort((a, b) => b.at - a.at).slice(0, 14);
   const row = (i, sub) => `<button class="row" type="button" data-id="${esc(i.id)}">${ownerAv(i.owner)}<span class="grow"><b>${esc(i.name)}</b><span>${esc(sub)}</span></span><span class="tier ${i.tier || 'U'}">${i.tier || '?'}</span></button>`;
   return `<div class="wrap today">
     <div class="panel"><h3>Due now</h3><p>Next steps dated today or earlier.</p>${due.map(i => row(i, `${fmtDate(i.nextDate)} · ${i.nextStep || 'Next step'}`)).join('') || '<p>Nothing due. Set a next step on an investor and it lands here on the day.</p>'}</div>
     <div class="panel"><h3>Going cold</h3><p>In play, no touch in 10 days and nothing scheduled.</p>${stale.map(i => row(i, i.lastTouch ? 'Last touch ' + ago(i.lastTouch) : 'Never contacted')).join('') || '<p>Every live conversation has a recent touch or a next step.</p>'}</div>
-    ${queued.length ? `<div class="panel"><h3>Waiting for research</h3><p>Queued with the Research button. Ask Claude to "run tracker research" to clear these now.</p>${queued.map(i => row(i, [i.title, i.firm].filter(Boolean).join(', ') || i.hint || 'Queued ' + ago(i.research.at))).join('')}</div>` : ''}
+    ${found.length ? `<div class="panel"><h3>Found overnight</h3><p>New investors the nightly research added this week. Each one says why it fits and where it came from.</p>${found.map(i => row(i, [i.title, i.firm].filter(Boolean).join(', ') || (i.why || [])[0] || '')).join('')}</div>` : ''}
+    ${queued.length ? `<div class="panel"><h3>Waiting for research</h3><p>Queued with the Research button. The nightly run clears these after midnight, or ask Claude to "run tracker research" now.</p>${queued.map(i => row(i, [i.title, i.firm].filter(Boolean).join(', ') || i.hint || 'Queued ' + ago(i.research.at))).join('')}</div>` : ''}
     <div class="panel"><h3>Best fits with no lead</h3><p>A-tier targets nobody has picked up. Click one and choose Athar or Deepesh.</p>${unowned.slice(0, 12).map(i => row(i, (i.why || [])[1] || i.role || '')).join('') || '<p>Every A-tier target has a lead.</p>'}</div>
     <div class="panel"><h3>Latest activity</h3><p>Messages sent, notes and stage moves, newest first.</p>${recent.map(x => { const i = S.inv.get(x.investorId); return i ? `<button class="row" type="button" data-id="${esc(i.id)}">${ownerAv(x.sender, 'sm')}<span class="grow"><b>${esc(i.name)}</b><span>${esc(x.type === 'stage' ? x.body : `${labelOf(x.type)} on ${labelCh(x.channel)}`)} · ${ago(x.at)}</span></span></button>` : ''; }).join('') || '<p>Nothing logged yet.</p>'}</div>
   </div>`;
@@ -645,7 +647,7 @@ async function queueResearch() {
   const firm = ($('fFirm') || {}).value || it.firm || '';
   const title = ($('fTitle') || {}).value || it.title || '';
   await setInv(it.id, { hint, firm, title, research: { ...(it.research || {}), status: 'queued', at: Date.now(), by: (S.me && S.me.id) || null } }, 'Queued for research');
-  toast('Queued. Ask Claude to "run tracker research", or it runs on the schedule.'); renderSheet();
+  toast('Queued. It is researched tonight after midnight, or ask Claude to "run tracker research" now.'); renderSheet();
 }
 function memoHtml(m) { return `<div><b>Why yes</b><div>${esc(m.why_yes || '')}</div></div><div><b>Expect this objection</b><div>${esc(m.objection || '')}</div></div><div><b>Open with</b><div>${esc(m.opener || '')}</div></div>${m.lens ? `<div class="muted" style="font-size:11.5px">Strongest lens: ${esc(m.lens)}</div>` : ''}`; }
 function renderTimeline() {
