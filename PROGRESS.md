@@ -3705,3 +3705,36 @@ at the view-only level; `sync.py pull` of the live data matches the seed
 (`diff` empty) and `build` reproduces the published page byte for byte.
 **Not verified:** two people editing at once, presence and comments in the
 real viewer.
+
+## Vision board v2: built for the weekly sync on a big screen · 2026-10-28
+
+**Why.** The first board was too crowded to talk over: a fixed lane rail ate
+a fifth of the width, every column header carried six numbers and a bar, and
+every card showed everything at once. The founders wanted a calm surface on a
+laptop or a TV, with one card at a time to discuss.
+
+**What changed** (same URL, same data, same model engine):
+- No lane rail. Lanes are thin bands with a sticky label, a status bar and a
+  collapse toggle, so 4 to 5 quarters fit on a laptop instead of 3.
+- Column headers show two numbers and up to two events; the rest is a click
+  away in a popover.
+- Cards are compact by default and expand in place (chevron per card, or
+  Expand all). Low-signal marks are gone: no P2 badge, no "planned" status,
+  no kind label on plain initiatives.
+- A discussion sheet: the card grows out of the board into a large centred
+  sheet, with arrow keys to walk the plan quarter by quarter, E to edit in
+  place and Esc to shrink back into the card. Discuss starts from this
+  quarter. Editing cards and risks happens in the same sheet.
+- Filters, levers and the change feed moved into popovers off one
+  translucent toolbar; the plan strip keeps four headline numbers, active
+  filter tokens and the what-if state.
+- Motion: model-placed cards glide to their new quarter when a lever moves
+  (FLIP, interruptible), popovers scale from their buttons, cards stagger in
+  on view changes, press feedback on every control, all off under reduced
+  motion. System type with size-specific tracking; Apple greys.
+
+**Verified here:** every view, the sheet (view, next and previous, edit),
+risk editing, the lever glide, filters, collapse and expand, against a mock
+runtime with the seed data at 1440 and 1280 (light) and 390 (dark): no script
+errors and no sideways scroll. `sync.py build` reproduces the published page
+byte for byte. **Not verified:** presence and comments in the real viewer.
