@@ -209,6 +209,9 @@ textarea { resize: vertical; line-height: 1.5; }
 .rs .src { display: flex; flex-wrap: wrap; gap: 6px 12px; font-size: 12px; }
 .rs-st { font-size: 12px; color: var(--muted); }
 .rs-st.q { color: var(--warn); font-weight: 600; }
+.save-st { font-weight: 600; color: var(--muted); }
+.save-st.ok { color: var(--good); } .save-st.ok::before { content: "✓ "; }
+.save-st.err { color: var(--bad); }
 .memo { background: var(--surface-2); border-radius: 12px; padding: 12px; font-size: 13px; display: grid; gap: 6px; }
 .memo b { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
 
@@ -534,8 +537,24 @@ function openSheet(id) {
   presence({ viewing: id });
   renderSheet();
 }
-function closeSheet() { if (S.compose.ctl) S.compose.ctl.abort(); S.sheet = null; $('sheetRoot').innerHTML = ''; presence({ viewing: null }); scheduleRender(); }
+// Fields save as you type (after a short pause) and when you leave them. The sheet shows the state.
+const FIELD_MAP = { fNext: 'nextStep', fDate: 'nextDate', fIntro: 'intro', fNotes: 'notes', fTitle: 'title', fFirm: 'firm', fHint: 'hint', fAmt: 'amount' };
+const pending = new Map();
+function saveState(text, cls) { const el = $('saveState'); if (el) { el.textContent = text; el.className = 'save-st ' + (cls || ''); } }
+async function saveField(id, el) {
+  clearTimeout(pending.get(el.id)); pending.delete(el.id);
+  const it = S.inv.get(id); if (!it || !S.canEdit) return;
+  const key = FIELD_MAP[el.id]; if (!key) return;
+  const val = key === 'amount' ? (el.value === '' ? null : Number(el.value)) : el.value;
+  if ((it[key] ?? (key === 'amount' ? null : '')) === val) { if (!pending.size) saveState('Saved', 'ok'); return; }
+  saveState('Saving…');
+  const ok = await setInv(id, { [key]: val });
+  if (!pending.size) saveState(ok ? 'Saved' : 'Not saved. Check your connection and try again.', ok ? 'ok' : 'err');
+}
+function flushPending() { const id = S.sheet; for (const elId of [...pending.keys()]) { const el = $(elId); if (el && id) saveField(id, el); } }
+function closeSheet() { flushPending(); if (S.compose.ctl) S.compose.ctl.abort(); S.sheet = null; $('sheetRoot').innerHTML = ''; presence({ viewing: null }); scheduleRender(); }
 function renderSheet() {
+  if (pending.size) flushPending();
   const it = S.inv.get(S.sheet); if (!it) return closeSheet();
   const st = it.stage || 'target';
   const contacts = [
@@ -574,8 +593,8 @@ function renderSheet() {
         ${peopleNames.length ? `<div><span class="lbl">People</span><div style="font-size:13px">${esc(peopleNames.join(', '))}</div></div>` : ''}
         ${it.portfolio ? `<div><span class="lbl">Portfolio, as listed</span><div style="font-size:13px;color:var(--ink-2)">${esc(it.portfolio)}</div></div>` : ''}
         ${it.about ? `<div><span class="lbl">About, as listed</span><div style="font-size:13px;color:var(--ink-2)">${esc(it.about)}</div></div>` : ''}
-        <label><span class="lbl">Notes</span><textarea id="fNotes" rows="4" placeholder="What they care about, what they said, who else is in" ${ro}>${esc(it.notes || '')}</textarea></label>
-        <div class="muted" style="font-size:11.5px">Source: ${esc((it.sources || []).join(', '))}${it.updatedAt ? ' · last changed ' + fmtTime(it.updatedAt) : ''}</div>
+        <label><span class="lbl" style="display:flex;justify-content:space-between"><span>Notes</span>${S.canEdit ? '<span class="muted" style="text-transform:none;letter-spacing:0;font-weight:500">Saves as you type</span>' : ''}</span><textarea id="fNotes" rows="4" placeholder="What they care about, what they said, who else is in" ${ro}>${esc(it.notes || '')}</textarea></label>
+        <div class="muted" style="font-size:11.5px;display:flex;gap:8px;flex-wrap:wrap;justify-content:space-between"><span>Source: ${esc((it.sources || []).join(', '))}${it.updatedAt ? ' · last changed ' + fmtTime(it.updatedAt) : ''}</span>${S.canEdit ? '<span id="saveState" class="save-st">Changes save automatically</span>' : ''}</div>
       </div>
       <div class="sh-r">
         <div class="compose">
@@ -937,14 +956,13 @@ document.addEventListener('change', e => {
   const it = S.sheet && S.inv.get(S.sheet);
   if (e.target.id === 'meSel') { S.meKey = e.target.value; savePrefs(); return; }
   if (!it) return;
-  const map = { fNext: 'nextStep', fDate: 'nextDate', fIntro: 'intro', fNotes: 'notes', fTitle: 'title', fFirm: 'firm', fHint: 'hint' };
-  if (map[e.target.id]) return setInv(it.id, { [map[e.target.id]]: e.target.value });
-  if (e.target.id === 'fAmt') return setInv(it.id, { amount: e.target.value === '' ? null : Number(e.target.value) });
+  if (FIELD_MAP[e.target.id]) return saveField(it.id, e.target);
   if (e.target.id === 'fSender') { S.compose.sender = e.target.value; return; }
 });
 document.addEventListener('input', e => {
   if (e.target.id === 'q') { S.q = e.target.value.trim().toLowerCase(); clearTimeout(window.__qt); window.__qt = setTimeout(scheduleRender, 120); }
   if (e.target.id === 'poolQ') { S.poolQ = e.target.value; S.poolLimit = 150; clearTimeout(window.__pq); window.__pq = setTimeout(scheduleRender, 150); }
+  if (FIELD_MAP[e.target.id] && S.sheet && S.canEdit) { const el = e.target, id = S.sheet; clearTimeout(pending.get(el.id)); saveState('Unsaved changes…'); pending.set(el.id, setTimeout(() => saveField(id, el), 800)); return; }
   if (e.target.id === 'fDraft') { S.compose.text = e.target.value; refreshSendLink(); }
   if (e.target.id === 'fSubject') { S.compose.subject = e.target.value; refreshSendLink(); }
 });
