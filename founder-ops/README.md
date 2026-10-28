@@ -52,6 +52,15 @@ The `library/` files are text snapshots taken on 28 Oct 2026, for search and his
 
 `node founder-ops/model/report.js` prints the bear, base and bull cases (users, paying accounts, revenue, EBITDA, cash, team, cap table) from the same engine the board uses.
 
+## Founder skill pack
+
+Eleven skills in `.claude/skills/founder-*`: board, competitors, consumer panel, pricing, offer, CFO, marketing, brand, ops, launch and plan. Run them as `/founder-board`, `/founder-consumer`, and so on.
+
+- Source: https://github.com/Jakeschincariol/founder-skill, MIT, pinned at commit `fd9385b0cfe1b96bebce3898fbd506d73eff5a9d` (6 Oct 2026). It was reviewed before install: the Python helpers use only the standard library, make no network calls and run no shell commands, and the prompts contain no hidden or injected instructions.
+- One local change: upstream writes to `founder/` at the repo root. Ours write to `founder-ops/pack/`, so the pack's output stays inside this folder. Re-apply that change if you ever update the pack from upstream, and review the new commit first.
+- Fit for Cheeku: the board, competitor scan, consumer panel and offer work are useful as they are. The CFO and plan tools model a single-unit, single-location business in dollars, so for Cheeku's numbers use the financial model instead.
+- A full consumer panel is 100 sub-agent runs. Start with `--quick` (20).
+
 ## Open conflicts across the material (28 Oct 2026)
 
 1. DD deck, cap table slide: shows the bear seed terms (₹90 cr pre, 22.4%, founders 43.2% after B). Base model: ₹104 cr pre, 20%, founders 44.5%.
