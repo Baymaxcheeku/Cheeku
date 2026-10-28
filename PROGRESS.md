@@ -3738,3 +3738,20 @@ risk editing, the lever glide, filters, collapse and expand, against a mock
 runtime with the seed data at 1440 and 1280 (light) and 390 (dark): no script
 errors and no sideways scroll. `sync.py build` reproduces the published page
 byte for byte. **Not verified:** presence and comments in the real viewer.
+
+## Vision board v3: tags, the card sheet, a live trajectory, three new moats · 2026-10-28
+
+**Why.** After v2 the founders asked for: a visible way to open one card on the board; type and layer tags so product work reads at a glance; a better card layout for discussion; a Trajectory page you can play with rather than read; and three more pillars of defensibility.
+
+**What changed** (same URL; the data change went in through the board's database, pinned to the versions read first, so a teammate's edit to "Incorporate the company" was kept):
+- An eye at the bottom of every card opens that card's why, done-when and confidence in place.
+- Tags now have groups. Type: Feature, Product addition, New product (solid pills). Layer: App, B2B, Model, Hardware (tinted pills). 73 cards are tagged, every product card has a type, and the filter and the editor show the groups.
+- The card sheet is rebuilt. A lane-tinted header holds the pills, the title, four facts (owner, when, priority, a confidence ring) and a status track. The body has why, how as numbered steps when written as a list, a finish-line block, the card on a five-year timeline with now and model events, a connections flow (needs first, this card, then unlocks), risks, moat and decision votes.
+- Trajectory is interactive. A month cursor drives six KPI tiles with sparklines and year-on-year change, a play button and scrubber with model events, crosshairs and tooltips on all three charts, legend toggles, a scenario switch on the page, the period column lit in the tables, and milestones under the users chart. Charts grow in on entry and tween between scenarios.
+- Moats: three new pillars with live model numbers, nine new cards and 14 cards re-linked:
+  - **Insurance risk infrastructure.** Metric: insurance revenue a year. New cards: corporate agent licence, claims help in chat, family floater priced from our risk score.
+  - **Connected ecosystem in one app.** Metric: share of revenue from in-app services. New cards: one home for every service, family wallet, Cheeku ID.
+  - **Pendant for elder parents.** Metric: pendants with elder parents. New cards: a 1,000-parent pilot, fall detection and SOS, the pendant through employers and insurers.
+
+**Verified here:** the page against a mock runtime with the live data plus these writes, at 1440 and 1280 (light) and 390 (dark). I checked the board, the eye toggle, four card sheets (initiative with steps, model-placed milestone, decision, pendant), trajectory draw-in, hover on users and revenue, play, legend toggle, the bear tween and moats. There were no script errors and no sideways scroll. Both write batches committed atomically. `board.json` is pulled from the live board afterwards, and `sync.py build` reproduces the published page byte for byte. **Not verified:** the new pages in the real viewer with two people at once.
+
