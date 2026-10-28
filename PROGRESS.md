@@ -3671,3 +3671,37 @@ current material versions are unchanged. The check file says yes on all six
 rows. The function typechecks and its email carries no request text.
 **Not verified:** the function against Resend (no key, no network here), and
 the webhook on the real project.
+
+## Vision board: the 5-year plan, live and in git · 2026-10-28
+
+**Why.** Athar, Suraj and Deepesh needed one place to brainstorm, prioritise
+and stay in sync on the next five years: product, AI, supply, growth, revenue,
+employers and insurers, funding, team and trust. The financial model says what
+the numbers do; nothing said who does what, when, and what it depends on.
+
+**What.** A live board at https://claude.ai/artifact/KUeA2YYdL4CmUKWhK3faAE,
+mirrored in `docs/vision-board/`. Nine lanes across Q4 2026 (pre-launch),
+quarters to 2029 and half-years for 2030 and 2031, the grain the founders
+picked. 93 cards, 12 risks, 6 moat pillars and 10 tags from the first fill.
+
+**The decision that shapes it.** The board runs the financial model's own
+engine (`docs/vision-board/engine.js`, v2). Every column header shows that
+period's users, revenue, EBITDA, cash and team, and a card can be placed by
+the model instead of a date: "Employers go live", "Series B + 3 months",
+"monthly users reach 50 lakh". Those cards move by themselves when a lever
+changes, so a slower Series A or a dearer CAC visibly pushes the work that
+depends on it. Levers are a private what-if until someone makes them the
+plan for everyone.
+
+**Data.** The artifact's shared database is the live record (only editors of
+the artifact can read or write it). `board.json` is the git copy, synced by
+Claude with `sync.py` (pull, push, diff); the README has both directions.
+Owners are the three founders by name, as agreed; Archit is not on it.
+
+**Verified here:** the page against a mock runtime with the seed data at
+desktop (light) and phone (dark) widths, every view, no script errors and no
+sideways scroll; the published seed read back at the editor level and hidden
+at the view-only level; `sync.py pull` of the live data matches the seed
+(`diff` empty) and `build` reproduces the published page byte for byte.
+**Not verified:** two people editing at once, presence and comments in the
+real viewer.

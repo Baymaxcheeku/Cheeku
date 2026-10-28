@@ -1,0 +1,2162 @@
+{
+ "board": {
+  "plan": {
+   "drv": {},
+   "scenario": "base"
+  }
+ },
+ "items": {
+  "a-adapted": {
+   "confidence": 55,
+   "deps": [
+    "a-evals",
+    "a-gpu"
+   ],
+   "how": "Adapt an open-weight model on consented, doctor-reviewed data.",
+   "kind": "gate",
+   "kpi": "Wins 70% of India evals",
+   "lane": "ai",
+   "moat": "m-model",
+   "order": 21,
+   "owner": "suraj",
+   "period": "2028Q1",
+   "priority": "P0",
+   "status": "planned",
+   "tags": [],
+   "title": "Adapted model becomes default in chat",
+   "why": "Gate: it wins 70% of India evals or it does not ship."
+  },
+  "a-cheeku-h": {
+   "confidence": 40,
+   "deps": [
+    "a-adapted",
+    "f-series-b"
+   ],
+   "gate": {
+    "event": "seriesB",
+    "offset": 3,
+    "type": "event"
+   },
+   "how": "250k H100-hours a run, about ₹2.3 cr at IndiaAI rates; ₹33 cr cap over 5 years.",
+   "kind": "bet",
+   "kpi": "Beats the adapted model on India evals",
+   "lane": "ai",
+   "moat": "m-model",
+   "order": 24,
+   "owner": "suraj",
+   "priority": "P1",
+   "status": "planned",
+   "tags": [
+    "t-bet",
+    "t-investor"
+   ],
+   "title": "Train CHEEKU-H, our 15–22B health model",
+   "why": "India's own health model: our base weights plus specialist adapters, trained on consented family histories and ABDM records."
+  },
+  "a-data": {
+   "confidence": 50,
+   "deps": [
+    "tr-iso"
+   ],
+   "how": "Aggregation layer, k-anonymity, consent purpose checks, audit log.",
+   "kind": "initiative",
+   "kpi": "First insurer cohort report delivered",
+   "lane": "ai",
+   "moat": "m-memory",
+   "order": 22,
+   "owner": "suraj",
+   "period": "2028Q2",
+   "priority": "P1",
+   "status": "planned",
+   "tags": [],
+   "title": "Consented data platform for cohorts",
+   "why": "Insurers and states buy anonymised, consented signals. Never raw chats."
+  },
+  "a-evals": {
+   "confidence": 70,
+   "deps": [],
+   "how": "Doctor-written cases across labs, Rx, symptoms, pregnancy, elders; 5 languages.",
+   "kind": "initiative",
+   "kpi": "5,000 cases, doctor reviewed",
+   "lane": "ai",
+   "moat": "m-model",
+   "order": 18,
+   "owner": "suraj",
+   "period": "2027Q1",
+   "priority": "P0",
+   "status": "planned",
+   "tags": [],
+   "title": "India eval set: 5,000 cases in 5 languages",
+   "why": "No model ships unless it beats frontier APIs on our own evals."
+  },
+  "a-gpu": {
+   "confidence": 60,
+   "deps": [
+    "f-indiaai"
+   ],
+   "gate": {
+    "event": "ownGpu",
+    "offset": 0,
+    "type": "event"
+   },
+   "how": "Tuned open model on owned or IndiaAI-subsidised H100s.",
+   "kind": "milestone",
+   "kpi": "p95 latency under 2.5 s at ₹0.10 an answer",
+   "lane": "ai",
+   "moat": "m-model",
+   "order": 19,
+   "owner": "suraj",
+   "priority": "P1",
+   "status": "planned",
+   "tags": [],
+   "title": "Own GPUs serve chat: ₹0.30 → ₹0.10 an answer",
+   "why": "Chat cost falls by two thirds overnight, which is what makes 20 free chats a day affordable."
+  },
+  "a-reports": {
+   "confidence": 70,
+   "deps": [],
+   "how": "Per-lab templates, unit normalisation, confidence threshold, human fallback.",
+   "kind": "initiative",
+   "kpi": "95% of values extracted right on the top 20 labs",
+   "lane": "ai",
+   "moat": "m-memory",
+   "order": 17,
+   "owner": "suraj",
+   "period": "2026Q4",
+   "priority": "P0",
+   "status": "in_progress",
+   "tags": [
+    "t-launch"
+   ],
+   "title": "Production report reading on Indian lab formats",
+   "why": "Every report read into coded values is a fact in the family file."
+  },
+  "a-risk-score": {
+   "confidence": 40,
+   "deps": [
+    "a-data"
+   ],
+   "how": "Adherence, retests and activity into a consented score; rewards only, never a premium rise.",
+   "kind": "initiative",
+   "kpi": "Score validated on one insurer's claims data",
+   "lane": "ai",
+   "moat": "m-distribution",
+   "order": 23,
+   "owner": "suraj",
+   "period": "2028Q3",
+   "priority": "P1",
+   "status": "planned",
+   "tags": [],
+   "title": "Risk score that updates, for insurers",
+   "why": "The underwriting layer insurers do not have: a score that moves as families get healthier."
+  },
+  "a-router": {
+   "confidence": 95,
+   "deps": [],
+   "how": "Model adapter, 4 urgency tiers, hard-stops before the model.",
+   "kind": "initiative",
+   "kpi": "Built in V1",
+   "lane": "ai",
+   "moat": "m-trust",
+   "order": 16,
+   "owner": "suraj",
+   "period": "2026Q4",
+   "priority": "P1",
+   "status": "done",
+   "tags": [],
+   "title": "Frontier models behind our safety router",
+   "why": "Safe answers on day one while our own model is trained."
+  },
+  "a-scale": {
+   "confidence": 55,
+   "deps": [],
+   "gate": {
+    "metric": "mau",
+    "offset": 0,
+    "type": "reach",
+    "value": 5000000
+   },
+   "how": "Read replicas, edge caching, India region, cost per user dashboards.",
+   "kind": "initiative",
+   "kpi": "p95 under 300 ms at 2x peak load",
+   "lane": "ai",
+   "moat": null,
+   "order": 25,
+   "owner": "suraj",
+   "priority": "P1",
+   "status": "planned",
+   "tags": [
+    "t-dependency"
+   ],
+   "title": "Ready for 1 crore users",
+   "why": "Start the work when we cross 50 lakh so it is done before 1 crore."
+  },
+  "a-six-paise": {
+   "confidence": 45,
+   "deps": [],
+   "how": "CHEEKU-H in production plus distillation for simple turns.",
+   "kind": "milestone",
+   "kpi": "₹0.06 an answer",
+   "lane": "ai",
+   "moat": "m-model",
+   "order": 26,
+   "owner": "suraj",
+   "period": "2031H1",
+   "priority": "P1",
+   "status": "planned",
+   "tags": [],
+   "title": "Six paise an answer on our own model",
+   "why": "4x cheaper than frontier APIs; the margin behind 20 free chats a day."
+  },
+  "a-voice": {
+   "confidence": 55,
+   "deps": [],
+   "how": "Speech in and out for 5 languages, tuned on Indian accents and medical terms.",
+   "kind": "initiative",
+   "kpi": "₹0.35 a voice minute by 2031",
+   "lane": "ai",
+   "moat": "m-model",
+   "order": 20,
+   "owner": "suraj",
+   "period": "2027Q3",
+   "priority": "P1",
+   "status": "planned",
+   "tags": [],
+   "title": "Indic speech on our own stack",
+   "why": "Voice is the biggest serving cost line; 77% cheaper a minute on our stack."
+  },
+  "b-corp-live": {
+   "confidence": 55,
+   "deps": [
+    "g-lakh",
+    "b-corp-team"
+   ],
+   "gate": {
+    "event": "corpLive",
+    "offset": 0,
+    "type": "event"
+   },
+   "how": "Direct sales to HR: ₹174 a month per employee, or the employer pays for everyone.",
+   "kind": "milestone",
+   "kpi": "First company signed",
+   "lane": "b2b",
+   "moat": "m-distribution",
+   "order": 56,
+   "owner": "deepesh",
+   "priority": "P0",
+   "status": "planned",
+   "tags": [
+    "t-investor"
+   ],
+   "title": "Employers go live: Family plan at 30% off for staff",
+   "why": "Starts two months after the app passes 1 lakh users. ₹75 cr by 2031, 9% of revenue."
+  },
+  "b-corp-team": {
+   "confidence": 60,
+   "deps": [
+    "g-lakh"
+   ],
+   "gate": {
+    "event": "corpLive",
+    "offset": -1,
+    "type": "event"
+   },
+   "how": "Two account executives and one benefits-platform partnerships lead.",
+   "kind": "initiative",
+   "kpi": "3 hired a month before go-live",
+   "lane": "team",
+   "moat": "m-distribution",
+   "order": 55,
+   "owner": "deepesh",
+   "priority": "P1",
+   "status": "planned",
+   "tags": [],
+   "title": "Corporate sales: first 3 hires",
+   "why": "The team has to be in seat when the vertical opens."
+  },
+  "b-diwali": {
+   "confidence": 50,
+   "deps": [],
+   "how": "Gift codes, HR dashboard for activations, Oct–Nov campaign.",
+   "kind": "initiative",
+   "kpi": "3,000 plans gifted, 70% activated",
+   "lane": "b2b",
+   "moat": null,
+   "order": 59,
+   "owner": "deepesh",
+   "period": "2027Q4",
+   "priority": "P1",
+   "status": "planned",
+   "tags": [
+    "t-experiment"
+   ],
+   "title": "First Diwali gifting season",
+   "why": "Year-long Family plans bought in bulk, paid up front: cash arrives before revenue."
+  },
+  "b-first-insurer": {
+   "confidence": 50,
+   "deps": [],
+   "how": "",
+   "kind": "decision",
+   "kpi": "",
+   "lane": "b2b",
+   "moat": null,
+   "options": "Large private general insurer · standalone health insurer · group cover through an employer client",
+   "order": 69,
+   "outcome": "",
+   "owner": "deepesh",
+   "period": "2028Q2",
+   "priority": "P1",
+   "status": "planned",
+   "tags": [
+    "t-decision"
+   ],
+   "title": "Which insurer do we pilot with first?",
+   "why": "The pilot decides the risk layer's first two years."
+  },
+  "b-hr": {
+   "confidence": 50,
+   "deps": [],
+   "gate": {
+    "event": "corpLive",
+    "offset": 3,
+    "type": "event"
+   },
+   "how": "List in flexi-benefits and group insurance catalogues.",
+   "kind": "initiative",
+   "kpi": "1 platform live, 2% attach",
+   "lane": "b2b",
+   "moat": "m-distribution",
+   "order": 57,
+   "owner": "deepesh",
+   "priority": "P1",
+   "status": "planned",
+   "tags": [],
+   "title": "First HR benefits platform listing",
+   "why": "Benefits platforms put Cheeku in front of lakhs of covered lives; they keep 25%."
+  },
+  "b-hundred": {
+   "confidence": 50,
+   "deps": [],
+   "gate": {
+    "metric": "corpClients",
+    "offset": 0,
+    "type": "reach",
+    "value": 100
+   },
+   "how": "",
+   "kind": "milestone",
+   "kpi": "100 companies",
+   "lane": "b2b",
+   "moat": "m-distribution",
+   "order": 60,
+   "owner": "deepesh",
+   "priority": "P1",
+   "status": "planned",
+   "tags": [],
+   "title": "100 companies",
+   "why": ""
+  },
+  "b-insurer-pilot": {
+   "confidence": 45,
+   "deps": [
+    "b-loi",
+    "tr-iso"
+   ],
+   "how": "10,000 members, funded tests, renewal rewards.",
+   "kind": "initiative",
+   "kpi": "10,000 members enrolled",
+   "lane": "b2b",
+   "moat": "m-distribution",
+   "order": 62,
+   "owner": "deepesh",
+   "period": "2028Q4",
+   "priority": "P1",
+   "status": "planned",
+   "tags": [],
+   "title": "Insurer wellness pilot",
+   "why": "Year one of the risk layer: a companion for the insurer's members."
+  },
+  "b-insurer-rev": {
+   "confidence": 45,
+   "deps": [
+    "b-insurer-pilot",
+    "a-risk-score"
+   ],
+   "gate": {
+    "event": "insurerFirst",
+    "offset": 0,
+    "type": "event"
+   },
+   "how": "Cohort analytics linked to premiums and claims.",
+   "kind": "milestone",
+   "kpi": "First paid insurer contract",
+   "lane": "b2b",
+   "moat": "m-distribution",
+   "order": 63,
+   "owner": "deepesh",
+   "priority": "P1",
+   "status": "planned",
+   "tags": [
+    "t-investor"
+   ],
+   "title": "Insurer risk-layer revenue starts",
+   "why": "₹84 cr by 2031 from 7 insurers."
+  },
+  "b-llm": {
+   "confidence": 35,
+   "deps": [
+    "a-cheeku-h"
+   ],
+   "gate": {
+    "event": "llmFirst",
+    "offset": 0,
+    "type": "event"
+   },
+   "how": "API access to CHEEKU-H with India evals as the sales proof.",
+   "kind": "milestone",
+   "kpi": "First paid API client",
+   "lane": "b2b",
+   "moat": "m-model",
+   "order": 65,
+   "owner": "athar",
+   "priority": "P1",
+   "status": "planned",
+   "tags": [
+    "t-bet"
+   ],
+   "title": "Model licensing to hospitals and healthtechs",
+   "why": "₹51 cr by 2031 from 40 API clients."
+  },
+  "b-loi": {
+   "confidence": 45,
+   "deps": [],
+   "how": "Wellness-partner pitch with retention and adherence data.",
+   "kind": "gate",
+   "kpi": "Signed LOI by Sep 2028",
+   "lane": "b2b",
+   "moat": "m-distribution",
+   "order": 61,
+   "owner": "deepesh",
+   "period": "2028Q3",
+   "priority": "P0",
+   "status": "planned",
+   "tags": [
+    "t-risk",
+    "t-investor"
+   ],
+   "title": "1 insurer letter of intent",
+   "why": "Roadmap gate for the insurer track. Miss it and the track slows."
+  },
+  "b-pricing": {
+   "confidence": 50,
+   "deps": [],
+   "how": "",
+   "kind": "decision",
+   "kpi": "",
+   "lane": "b2b",
+   "moat": null,
+   "options": "30% off, employee pays · employer pays ₹174 a seat · flat ₹99 per employee a month, no family",
+   "order": 68,
+   "outcome": "",
+   "owner": "deepesh",
+   "period": "2027Q1",
+   "priority": "P1",
+   "status": "planned",
+   "tags": [
+    "t-decision"
+   ],
+   "title": "Employer pricing: 30% off for staff, or a flat fee per seat?",
+   "why": "The model assumes 30% off the Family plan, employees paying unless the employer covers everyone."
+  },
+  "b-sandbox": {
+   "confidence": 30,
+   "deps": [
+    "b-insurer-rev"
+   ],
+   "how": "Consented health passport and an updating risk score, inside the sandbox.",
+   "kind": "bet",
+   "kpi": "Sandbox approval",
+   "lane": "b2b",
+   "moat": "m-trust",
+   "order": 66,
+   "owner": "deepesh",
+   "period": "2030H1",
+   "priority": "P2",
+   "status": "planned",
+   "tags": [
+    "t-regulatory",
+    "t-bet"
+   ],
+   "title": "IRDAI sandbox: the underwriting layer",
+   "why": "Year three of the insurer track: cover that gets cheaper as families get healthier."
+  },
+  "b-seven": {
+   "confidence": 35,
+   "deps": [],
+   "how": "",
+   "kind": "milestone",
+   "kpi": "7 insurers",
+   "lane": "b2b",
+   "moat": "m-distribution",
+   "order": 67,
+   "owner": "deepesh",
+   "period": "2031H2",
+   "priority": "P1",
+   "status": "planned",
+   "tags": [],
+   "title": "7 insurers on the risk layer",
+   "why": ""
+  },
+  "b-state": {
+   "confidence": 35,
+   "deps": [
+    "p-abha"
+   ],
+   "gate": {
+    "event": "stateFirst",
+    "offset": 0,
+    "type": "event"
+   },
+   "how": "Pilot with one state health mission, consented ABHA-linked memory.",
+   "kind": "milestone",
+   "kpi": "First state contract",
+   "lane": "b2b",
+   "moat": "m-memory",
+   "order": 64,
+   "owner": "athar",
+   "priority": "P1",
+   "status": "planned",
+   "tags": [
+    "t-bet"
+   ],
+   "title": "First state licenses the memory layer on ABHA",
+   "why": "Continuity of care for public programmes. ₹46 cr by 2031 from 4 states."
+  },
+  "b-ten": {
+   "confidence": 55,
+   "deps": [],
+   "gate": {
+    "metric": "corpClients",
+    "offset": 0,
+    "type": "reach",
+    "value": 10
+   },
+   "how": "",
+   "kind": "milestone",
+   "kpi": "10 companies",
+   "lane": "b2b",
+   "moat": null,
+   "order": 58,
+   "owner": "deepesh",
+   "priority": "P1",
+   "status": "planned",
+   "tags": [
+    "t-investor"
+   ],
+   "title": "First 10 companies",
+   "why": ""
+  },
+  "f-a-proof": {
+   "confidence": 50,
+   "deps": [
+    "g-retention",
+    "r-subs"
+   ],
+   "gate": {
+    "event": "seriesA",
+    "offset": -3,
+    "type": "event"
+   },
+   "how": "Data room, cohort charts, eval results.",
+   "kind": "gate",
+   "kpi": "All four proof points met",
+   "lane": "funding",
+   "moat": null,
+   "order": 75,
+   "owner": "athar",
+   "priority": "P0",
+   "status": "planned",
+   "tags": [
+    "t-investor"
+   ],
+   "title": "Series A proof points in hand",
+   "why": "What the seed must buy: 5.9 lakh monthly users, 10,000+ payers, 25% D30, care booked weekly."
+  },
+  "f-bridge": {
+   "confidence": 50,
+   "deps": [],
+   "how": "",
+   "kind": "decision",
+   "kpi": "",
+   "lane": "funding",
+   "moat": null,
+   "options": "Venture debt · insider bridge · deeper cuts in 2031",
+   "order": 79,
+   "outcome": "",
+   "owner": "athar",
+   "period": "2029Q4",
+   "priority": "P2",
+   "status": "planned",
+   "tags": [
+    "t-decision",
+    "t-risk"
+   ],
+   "title": "Line up a ₹10–15 cr bridge option for the bear case",
+   "why": "In the bear case cash dips to about −₹7 cr in Sep 2031."
+  },
+  "f-incorporate": {
+   "confidence": 80,
+   "deps": [],
+   "how": "Private limited, founder agreements, ESOP pool, DPIIT recognition.",
+   "kind": "initiative",
+   "kpi": "Certificate of incorporation",
+   "lane": "funding",
+   "moat": null,
+   "order": 70,
+   "owner": "athar",
+   "period": "2026Q4",
+   "priority": "P0",
+   "status": "planned",
+   "tags": [
+    "t-launch",
+    "t-dependency"
+   ],
+   "title": "Incorporate the company",
+   "why": "Not yet incorporated. The seed, legal texts and partner contracts need the entity."
+  },
+  "f-indiaai": {
+   "confidence": 50,
+   "deps": [],
+   "how": "IndiaAI Mission compute application with the eval plan.",
+   "kind": "initiative",
+   "kpi": "Allocation approved",
+   "lane": "funding",
+   "moat": "m-model",
+   "order": 74,
+   "owner": "suraj",
+   "period": "2027Q1",
+   "priority": "P1",
+   "status": "planned",
+   "tags": [],
+   "title": "Apply for IndiaAI compute",
+   "why": "H100s at about ₹92 an hour make our own model affordable."
+  },
+  "f-low": {
+   "confidence": 55,
+   "deps": [],
+   "gate": {
+    "event": "minCash",
+    "offset": 0,
+    "type": "event"
+   },
+   "how": "Marketing to 35%, model spend halved, hiring frozen until the round lands.",
+   "kind": "gate",
+   "kpi": "Never under 6 months of cash",
+   "lane": "funding",
+   "moat": null,
+   "order": 76,
+   "owner": "athar",
+   "priority": "P0",
+   "status": "planned",
+   "tags": [
+    "t-risk"
+   ],
+   "title": "Lowest cash month: hold the 6-month runway rule",
+   "why": "Cash dips to about ₹11 cr just before the Series A. Under 6 months of cash, cuts start."
+  },
+  "f-seed": {
+   "confidence": 60,
+   "deps": [
+    "f-incorporate",
+    "f-seed-terms"
+   ],
+   "how": "35% people, 33% growth, 18% model, 14% ops.",
+   "kind": "milestone",
+   "kpi": "₹26 cr in the bank",
+   "lane": "funding",
+   "moat": null,
+   "order": 72,
+   "owner": "athar",
+   "period": "2027Q1",
+   "priority": "P0",
+   "status": "planned",
+   "tags": [
+    "t-investor"
+   ],
+   "title": "Close the seed: ₹26 cr",
+   "why": "17 months of runway to the Series A."
+  },
+  "f-seed-terms": {
+   "confidence": 60,
+   "deps": [],
+   "how": "",
+   "kind": "decision",
+   "kpi": "",
+   "lane": "funding",
+   "moat": null,
+   "options": "17% at ₹127 cr pre · 20% at ₹104 cr pre · 22.4% at ₹90 cr pre",
+   "order": 71,
+   "outcome": "",
+   "owner": "athar",
+   "period": "2026Q4",
+   "priority": "P0",
+   "status": "planned",
+   "tags": [
+    "t-decision",
+    "t-investor"
+   ],
+   "title": "Seed terms: aim for 20%, walk away above 22.4%",
+   "why": "Same ₹26 cr in every case; only the price moves. 22.4% is the ceiling we show investors."
+  },
+  "f-series-a": {
+   "confidence": 50,
+   "deps": [
+    "f-a-proof"
+   ],
+   "gate": {
+    "event": "seriesA",
+    "offset": 0,
+    "type": "event"
+   },
+   "how": "",
+   "kind": "milestone",
+   "kpi": "₹70 cr at ₹250 cr pre",
+   "lane": "funding",
+   "moat": null,
+   "order": 77,
+   "owner": "athar",
+   "priority": "P0",
+   "status": "planned",
+   "tags": [
+    "t-investor"
+   ],
+   "title": "Series A: ₹70 cr",
+   "why": "Funds the adapted model, voice, tier 2 and the insurer track."
+  },
+  "f-series-b": {
+   "confidence": 45,
+   "deps": [
+    "f-series-a"
+   ],
+   "gate": {
+    "event": "seriesB",
+    "offset": 0,
+    "type": "event"
+   },
+   "how": "",
+   "kind": "milestone",
+   "kpi": "₹150 cr at ₹750 cr pre",
+   "lane": "funding",
+   "moat": null,
+   "order": 78,
+   "owner": "athar",
+   "priority": "P1",
+   "status": "planned",
+   "tags": [
+    "t-investor"
+   ],
+   "title": "Series B: ₹150 cr",
+   "why": "Funds CHEEKU-H, the pendant and the institution sales team. Last round in the plan."
+  },
+  "f-update": {
+   "confidence": 80,
+   "deps": [],
+   "endPeriod": "2031H2",
+   "how": "Auto-filled from the analytics stack on the 5th of each month.",
+   "kind": "initiative",
+   "kpi": "Sent every month",
+   "lane": "funding",
+   "moat": null,
+   "order": 73,
+   "owner": "athar",
+   "period": "2027Q1",
+   "priority": "P1",
+   "status": "planned",
+   "tags": [
+    "t-quickwin"
+   ],
+   "title": "Monthly investor update on 8 numbers",
+   "why": "MAU, D30 retention, paying share, bookings per user, CAC, cost per answer, eval win rate, safety incidents."
+  },
+  "g-cac": {
+   "confidence": 60,
+   "deps": [],
+   "endPeriod": "2031H2",
+   "how": "Monthly CAC review; the runway rule cuts paid spend first.",
+   "kind": "initiative",
+   "kpi": "Blended CAC ≤ ₹60",
+   "lane": "growth",
+   "moat": null,
+   "order": 44,
+   "owner": "athar",
+   "period": "2027Q3",
+   "priority": "P1",
+   "status": "planned",
+   "tags": [],
+   "title": "Keep blended cost per new user under ₹60",
+   "why": "Paid LTV/CAC is only 1.8x by 2031; organic carries the model."
+  },
+  "g-cities": {
+   "confidence": 65,
+   "deps": [],
+   "how": "₹40 lakh a month, ₹120 paid CAC, creators and parent groups.",
+   "kind": "initiative",
+   "kpi": "4.9 lakh monthly users by Dec 2027",
+   "lane": "growth",
+   "moat": null,
+   "order": 36,
+   "owner": "athar",
+   "period": "2027Q1",
+   "priority": "P0",
+   "status": "planned",
+   "tags": [],
+   "title": "Launch in Delhi NCR, Bengaluru, Mumbai, Pune, Hyderabad",
+   "why": "Wave one: adults caring for parents, and new parents."
+  },
+  "g-crore": {
+   "confidence": 50,
+   "deps": [],
+   "gate": {
+    "event": "crore",
+    "offset": 0,
+    "type": "event"
+   },
+   "how": "",
+   "kind": "milestone",
+   "kpi": "1 crore monthly users",
+   "lane": "growth",
+   "moat": "m-habit",
+   "order": 43,
+   "owner": "athar",
+   "priority": "P1",
+   "status": "planned",
+   "tags": [
+    "t-bet"
+   ],
+   "title": "1 crore monthly users: replace Google for health at home",
+   "why": "The point where Cheeku is the default first stop for a health question in Indian homes."
+  },
+  "g-lakh": {
+   "confidence": 70,
+   "deps": [],
+   "gate": {
+    "event": "lakh",
+    "offset": 0,
+    "type": "event"
+   },
+   "how": "",
+   "kind": "milestone",
+   "kpi": "1 lakh monthly users",
+   "lane": "growth",
+   "moat": "m-habit",
+   "order": 40,
+   "owner": "athar",
+   "priority": "P1",
+   "status": "planned",
+   "tags": [
+    "t-investor"
+   ],
+   "title": "1 lakh consumer users",
+   "why": "Also the trigger for the employer vertical."
+  },
+  "g-pages": {
+   "confidence": 60,
+   "deps": [],
+   "how": "Answer pages from real questions, reviewed by doctors, in 5 languages later.",
+   "kind": "initiative",
+   "kpi": "1 lakh monthly organic visits by Q3",
+   "lane": "growth",
+   "moat": "m-habit",
+   "order": 37,
+   "owner": "athar",
+   "period": "2027Q1",
+   "priority": "P1",
+   "status": "planned",
+   "tags": [
+    "t-quickwin"
+   ],
+   "title": "Health answer pages that rank",
+   "why": "Organic does the heavy lifting: 49% of new users in 2027, 74% by 2031."
+  },
+  "g-referral": {
+   "confidence": 50,
+   "deps": [],
+   "how": "Invite from a report or Rx check, caregiver view.",
+   "kind": "initiative",
+   "kpi": "0.3 invites accepted per active a month",
+   "lane": "growth",
+   "moat": null,
+   "order": 38,
+   "owner": "athar",
+   "period": "2027Q2",
+   "priority": "P1",
+   "status": "planned",
+   "tags": [
+    "t-experiment"
+   ],
+   "title": "Invite your parents loop",
+   "why": "The launch ICP cares for parents; the parents are the next users."
+  },
+  "g-retention": {
+   "confidence": 55,
+   "deps": [],
+   "how": "Cohort dashboard, weekly retention review, cut paid if it slips.",
+   "kind": "gate",
+   "kpi": "Day-30 retention 25%+",
+   "lane": "growth",
+   "moat": null,
+   "order": 39,
+   "owner": "athar",
+   "period": "2027Q2",
+   "priority": "P0",
+   "status": "planned",
+   "tags": [
+    "t-investor",
+    "t-risk"
+   ],
+   "title": "25% day-30 retention before we scale spend",
+   "why": "Gate on the roadmap: no spend scale-up before the habit holds."
+  },
+  "g-tenlakh": {
+   "confidence": 65,
+   "deps": [],
+   "gate": {
+    "event": "tenLakh",
+    "offset": 0,
+    "type": "event"
+   },
+   "how": "",
+   "kind": "milestone",
+   "kpi": "",
+   "lane": "growth",
+   "moat": null,
+   "order": 42,
+   "owner": "athar",
+   "priority": "P1",
+   "status": "planned",
+   "tags": [
+    "t-investor"
+   ],
+   "title": "10 lakh monthly users",
+   "why": ""
+  },
+  "g-tier2": {
+   "confidence": 50,
+   "deps": [
+    "a-voice"
+   ],
+   "how": "Voice in 5 languages, regional creators, WhatsApp-first.",
+   "kind": "initiative",
+   "kpi": "30% of new users from tier 2",
+   "lane": "growth",
+   "moat": null,
+   "order": 41,
+   "owner": "athar",
+   "period": "2028Q2",
+   "priority": "P1",
+   "status": "planned",
+   "tags": [],
+   "title": "Tier 2 cities with voice",
+   "why": "Wave two: every member, every language."
+  },
+  "p-abha": {
+   "confidence": 50,
+   "deps": [],
+   "how": "ABDM PHR integration, consent artefacts per member, records land as typed facts.",
+   "kind": "initiative",
+   "kpi": "25% of families link at least one ABHA",
+   "lane": "product",
+   "moat": "m-memory",
+   "order": 9,
+   "owner": "athar",
+   "period": "2027Q2",
+   "priority": "P1",
+   "status": "planned",
+   "tags": [
+    "t-regulatory",
+    "t-dependency"
+   ],
+   "title": "ABHA link and ABDM record pull",
+   "why": "79.7 cr ABHA ids, records stuck in silos. Consented pulls fill the family file without uploads."
+  },
+  "p-billing": {
+   "confidence": 70,
+   "deps": [],
+   "how": "Store billing for Family, Solo and Daily Pass; UPI checkout on web at 2% fees.",
+   "kind": "initiative",
+   "kpi": "First paid Family plan through the store",
+   "lane": "product",
+   "moat": null,
+   "order": 2,
+   "owner": "athar",
+   "period": "2026Q4",
+   "priority": "P0",
+   "status": "planned",
+   "tags": [
+    "t-launch",
+    "t-dependency"
+   ],
+   "title": "Real billing: store subscriptions and UPI on web",
+   "why": "Plans run on a stand-in today. Paying share is the first number investors check."
+  },
+  "p-device-qa": {
+   "confidence": 80,
+   "deps": [],
+   "how": "Run every core flow on 3 iPhones and 3 Androids from the Vercel and native builds.",
+   "kind": "initiative",
+   "kpi": "Every launch flow signed off on 6 devices",
+   "lane": "product",
+   "moat": null,
+   "order": 0,
+   "owner": "athar",
+   "period": "2026Q4",
+   "priority": "P0",
+   "status": "in_progress",
+   "tags": [
+    "t-launch"
+   ],
+   "title": "Device QA of V1 on iPhone and Android",
+   "why": "Two layout bugs looked fine in the browser and broke on iOS. Device checks are part of done."
+  },
+  "p-food": {
+   "confidence": 60,
+   "deps": [],
+   "how": "Indian meals in real portions fit to the person's numbers; fitness classes suggested from the plan.",
+   "kind": "initiative",
+   "kpi": "40% of weekly actives log a meal or class",
+   "lane": "product",
+   "moat": "m-habit",
+   "order": 6,
+   "owner": "athar",
+   "period": "2027Q2",
+   "priority": "P1",
+   "status": "planned",
+   "tags": [],
+   "title": "Food and fitness in the daily plan",
+   "why": "Daily reasons to open the app between consults."
+  },
+  "p-household": {
+   "confidence": 60,
+   "deps": [],
+   "how": "Invite flows for parents and spouse, caregiver alerts.",
+   "kind": "initiative",
+   "kpi": "50% of paying accounts on Family",
+   "lane": "growth",
+   "moat": "m-habit",
+   "order": 12,
+   "owner": "athar",
+   "period": "2028Q1",
+   "priority": "P1",
+   "status": "planned",
+   "tags": [],
+   "title": "Household invites onto the Family plan",
+   "why": "One member brings the household; Family plan ARPU is 2.5x Solo."
+  },
+  "p-insurer-app": {
+   "confidence": 45,
+   "deps": [
+    "b-insurer-pilot"
+   ],
+   "how": "Reward ledger, insurer-funded retests, consent per purpose.",
+   "kind": "initiative",
+   "kpi": "Pilot members active weekly above 40%",
+   "lane": "product",
+   "moat": null,
+   "order": 13,
+   "owner": "athar",
+   "period": "2028Q4",
+   "priority": "P1",
+   "status": "planned",
+   "tags": [],
+   "title": "Insurer member experience: rewards and funded tests",
+   "why": "The pilot needs an in-app experience the insurer can show its members."
+  },
+  "p-launch": {
+   "confidence": 70,
+   "deps": [
+    "p-store",
+    "s-lab-live",
+    "f-seed"
+   ],
+   "gate": {
+    "event": "launch",
+    "offset": 0,
+    "type": "event"
+   },
+   "how": "Launch with the daily plan, Rx check, care booked in chat and fitness in 200 cities.",
+   "kind": "milestone",
+   "kpi": "30k monthly users in Jan 2027",
+   "lane": "product",
+   "moat": "m-habit",
+   "order": 4,
+   "owner": "athar",
+   "priority": "P0",
+   "status": "planned",
+   "tags": [
+    "t-investor"
+   ],
+   "title": "Public launch: the daily health companion",
+   "why": "Day one of the plan: 30,000 monthly users in the launch month across five metros."
+  },
+  "p-memory-v2": {
+   "confidence": 60,
+   "deps": [],
+   "how": "Timeline per member, trends by system, open loops, corrections.",
+   "kind": "initiative",
+   "kpi": "Median family file: 25+ facts after 6 months",
+   "lane": "product",
+   "moat": "m-memory",
+   "order": 11,
+   "owner": "athar",
+   "period": "2027Q4",
+   "priority": "P1",
+   "status": "planned",
+   "tags": [],
+   "title": "Memory timeline v2: every event, every member, over years",
+   "why": "The memory is the moat. Make its depth visible so families feel what they would lose."
+  },
+  "p-pendant": {
+   "confidence": 40,
+   "deps": [
+    "p-pendant-partner",
+    "tr-cdsco"
+   ],
+   "gate": {
+    "event": "pendant",
+    "offset": 0,
+    "type": "event"
+   },
+   "how": "Launch in the 5 wave-one metros through the Family plan.",
+   "kind": "milestone",
+   "kpi": "30% weekly voice use",
+   "lane": "product",
+   "moat": null,
+   "order": 15,
+   "owner": "athar",
+   "priority": "P2",
+   "status": "planned",
+   "tags": [
+    "t-bet"
+   ],
+   "title": "Pendant launch for elders",
+   "why": "6,000 units a month by 2031 at ₹4,999; also the strongest elder-care moat."
+  },
+  "p-pendant-partner": {
+   "confidence": 40,
+   "deps": [],
+   "how": "Partner builds the device; we own voice, memory and safety.",
+   "kind": "milestone",
+   "kpi": "Partner signed with unit cost under ₹4,000",
+   "lane": "product",
+   "moat": null,
+   "order": 14,
+   "owner": "athar",
+   "period": "2028Q3",
+   "priority": "P2",
+   "status": "planned",
+   "tags": [
+    "t-bet"
+   ],
+   "title": "Pendant: sign a hardware partner",
+   "why": "Elders who will never type get a voice companion that shares the family memory."
+  },
+  "p-rename": {
+   "confidence": 85,
+   "deps": [],
+   "how": "Ops rename: app name, bundle id, domains, store assets, legal entity references.",
+   "kind": "initiative",
+   "kpi": "No old name left in app, store or emails",
+   "lane": "product",
+   "moat": null,
+   "order": 1,
+   "owner": "athar",
+   "period": "2026Q4",
+   "priority": "P1",
+   "status": "planned",
+   "tags": [
+    "t-launch",
+    "t-quickwin"
+   ],
+   "title": "Rename to Cheeku AI everywhere",
+   "why": "Store listing, bundle id, emails and legal texts must carry one name before review."
+  },
+  "p-rx-ten": {
+   "confidence": 60,
+   "deps": [
+    "tr-clinical"
+   ],
+   "how": "License a drug database, map brands to salts, MD signs each rule, every flag cites a source.",
+   "kind": "initiative",
+   "kpi": "10 of 10 checks signed, 0 unsafe flags in review",
+   "lane": "product",
+   "moat": "m-trust",
+   "order": 5,
+   "owner": "suraj",
+   "period": "2027Q1",
+   "priority": "P0",
+   "status": "planned",
+   "tags": [
+    "t-risk"
+   ],
+   "title": "Prescription check: all 10 checks signed, licensed drug data",
+   "why": "The medication ledger is built; production needs licensed drug data and clinician sign-off on all 10 checks."
+  },
+  "p-store": {
+   "confidence": 65,
+   "deps": [
+    "p-device-qa",
+    "p-rename",
+    "p-billing"
+   ],
+   "how": "Bundle id, privacy labels, health disclaimers, review notes, staged rollout.",
+   "kind": "milestone",
+   "kpi": "Approved on App Store and Play Store",
+   "lane": "product",
+   "moat": null,
+   "order": 3,
+   "owner": "athar",
+   "period": "2026Q4",
+   "priority": "P0",
+   "status": "planned",
+   "tags": [
+    "t-launch"
+   ],
+   "title": "Store release: review and submit",
+   "why": "No launch without both stores approving a health app with consent and safety copy in order."
+  },
+  "p-wearables": {
+   "confidence": 55,
+   "deps": [],
+   "how": "Health Connect and HealthKit; readings go to the member's memory.",
+   "kind": "initiative",
+   "kpi": "20% of actives connect a device",
+   "lane": "product",
+   "moat": "m-memory",
+   "order": 10,
+   "owner": "athar",
+   "period": "2027Q3",
+   "priority": "P2",
+   "status": "planned",
+   "tags": [],
+   "title": "Wearables sync",
+   "why": "Steps, sleep and BP flow in without typing."
+  },
+  "p-weekly": {
+   "confidence": 65,
+   "deps": [],
+   "how": "Sunday 60-second review, retest due card, change card after results.",
+   "kind": "initiative",
+   "kpi": "30% of actives finish a weekly review",
+   "lane": "product",
+   "moat": "m-habit",
+   "order": 8,
+   "owner": "athar",
+   "period": "2027Q1",
+   "priority": "P1",
+   "status": "planned",
+   "tags": [],
+   "title": "Weekly review and quarterly retest loop",
+   "why": "The daily loop builds habit; the weekly and 90-day loops prove it works."
+  },
+  "p-whatsapp": {
+   "confidence": 55,
+   "deps": [],
+   "how": "Shareable Rx checks and report summaries; ask Cheeku from a WhatsApp thread.",
+   "kind": "initiative",
+   "kpi": "15% of new users arrive from a share",
+   "lane": "product",
+   "moat": null,
+   "order": 7,
+   "owner": "athar",
+   "period": "2027Q2",
+   "priority": "P1",
+   "status": "planned",
+   "tags": [
+    "t-experiment"
+   ],
+   "title": "WhatsApp: share answers, ask from chat",
+   "why": "Answers and reports already travel on WhatsApp. Make that the growth loop."
+  },
+  "r-100": {
+   "confidence": 60,
+   "deps": [],
+   "gate": {
+    "metric": "revRunRate",
+    "offset": 0,
+    "type": "reach",
+    "value": 100
+   },
+   "how": "",
+   "kind": "milestone",
+   "kpi": "₹100 cr a year run rate",
+   "lane": "revenue",
+   "moat": null,
+   "order": 51,
+   "owner": "athar",
+   "priority": "P1",
+   "status": "planned",
+   "tags": [
+    "t-investor"
+   ],
+   "title": "₹100 cr revenue run rate",
+   "why": ""
+  },
+  "r-1000": {
+   "confidence": 40,
+   "deps": [],
+   "gate": {
+    "metric": "revRunRate",
+    "offset": 0,
+    "type": "reach",
+    "value": 1000
+   },
+   "how": "",
+   "kind": "milestone",
+   "kpi": "₹1,000 cr a year run rate",
+   "lane": "revenue",
+   "moat": null,
+   "order": 53,
+   "owner": "athar",
+   "priority": "P1",
+   "status": "planned",
+   "tags": [
+    "t-bet"
+   ],
+   "title": "₹1,000 cr revenue run rate",
+   "why": ""
+  },
+  "r-ads": {
+   "confidence": 50,
+   "deps": [],
+   "how": "Sponsored products and services, labelled, relevance-checked.",
+   "kind": "initiative",
+   "kpi": "₹0.6 a user a month in 2028",
+   "lane": "revenue",
+   "moat": null,
+   "order": 49,
+   "owner": "deepesh",
+   "period": "2028Q1",
+   "priority": "P1",
+   "status": "planned",
+   "tags": [],
+   "title": "Labelled ads in non-urgent chats",
+   "why": "₹87 cr by 2031; never in red-flag chats."
+  },
+  "r-bookings": {
+   "confidence": 60,
+   "deps": [
+    "s-lab-live"
+   ],
+   "how": "Partner price plus 10–13% take, one price, one slot.",
+   "kind": "initiative",
+   "kpi": "3% of users book each month in 2027",
+   "lane": "revenue",
+   "moat": "m-supply",
+   "order": 46,
+   "owner": "deepesh",
+   "period": "2027Q1",
+   "priority": "P0",
+   "status": "planned",
+   "tags": [],
+   "title": "Care bookings earn our markup in chat",
+   "why": "Largest engine: ₹247 cr in 2031."
+  },
+  "r-fitness": {
+   "confidence": 60,
+   "deps": [],
+   "how": "Markup of 15%, at least ₹25 a class.",
+   "kind": "initiative",
+   "kpi": "0.5% of users book a class each month",
+   "lane": "revenue",
+   "moat": "m-supply",
+   "order": 47,
+   "owner": "deepesh",
+   "period": "2027Q1",
+   "priority": "P1",
+   "status": "planned",
+   "tags": [],
+   "title": "Fitness classes at 15% markup",
+   "why": "₹41 cr by 2031 from classes in 200 cities."
+  },
+  "r-listings": {
+   "confidence": 50,
+   "deps": [],
+   "how": "Licensed partner, comparison from the family's own needs.",
+   "kind": "initiative",
+   "kpi": "0.3 policies per 1,000 users a month",
+   "lane": "revenue",
+   "moat": null,
+   "order": 50,
+   "owner": "deepesh",
+   "period": "2028Q1",
+   "priority": "P1",
+   "status": "planned",
+   "tags": [],
+   "title": "Insurance listings in the app",
+   "why": "₹61 cr by 2031 from 0.3 → 0.7 policies per 1,000 users a month."
+  },
+  "r-price": {
+   "confidence": 50,
+   "deps": [],
+   "how": "",
+   "kind": "decision",
+   "kpi": "",
+   "lane": "revenue",
+   "moat": null,
+   "options": "Raise for new users only · raise for all with 3 months notice · hold and add a premium tier",
+   "order": 54,
+   "outcome": "",
+   "owner": "athar",
+   "period": "2028Q4",
+   "priority": "P2",
+   "status": "planned",
+   "tags": [
+    "t-decision"
+   ],
+   "title": "Raise prices 10% as memory deepens?",
+   "why": "The plan assumes +10% in 2029, +20% in 2030, +30% in 2031 over launch."
+  },
+  "r-profit": {
+   "confidence": 55,
+   "deps": [],
+   "gate": {
+    "event": "breakeven",
+    "offset": 0,
+    "type": "event"
+   },
+   "how": "",
+   "kind": "milestone",
+   "kpi": "Every month EBITDA positive after this",
+   "lane": "revenue",
+   "moat": null,
+   "order": 52,
+   "owner": "athar",
+   "priority": "P0",
+   "status": "planned",
+   "tags": [
+    "t-investor"
+   ],
+   "title": "EBITDA positive for good",
+   "why": "Self-funding from here; no round needed after Series B."
+  },
+  "r-subs": {
+   "confidence": 65,
+   "deps": [
+    "p-billing"
+   ],
+   "how": "Plans, upgrades and Daily Pass at the free limit.",
+   "kind": "milestone",
+   "kpi": "1% of users paying by Dec 2027",
+   "lane": "revenue",
+   "moat": null,
+   "order": 45,
+   "owner": "athar",
+   "period": "2027Q1",
+   "priority": "P0",
+   "status": "planned",
+   "tags": [],
+   "title": "Subscriptions live: Family ₹249, Solo ₹99, Daily Pass ₹29",
+   "why": "Paying share grows from 1.1% to 3.0%; many upgrade after hitting 20 chats a day."
+  },
+  "r-web-upi": {
+   "confidence": 55,
+   "deps": [],
+   "how": "Web checkout, renewal reminders, family billing.",
+   "kind": "initiative",
+   "kpi": "20% of plans paid on web by Dec 2028",
+   "lane": "revenue",
+   "moat": null,
+   "order": 48,
+   "owner": "athar",
+   "period": "2028Q1",
+   "priority": "P1",
+   "status": "planned",
+   "tags": [
+    "t-quickwin"
+   ],
+   "title": "Move plans to UPI on web: fees 15% → 2%",
+   "why": "Half of plans on web by 2031 saves about 6 points of margin on subscriptions."
+  },
+  "s-care-cats": {
+   "confidence": 55,
+   "deps": [],
+   "how": "Add categories through the same provider layer.",
+   "kind": "initiative",
+   "kpi": "6% of users book each month",
+   "lane": "supply",
+   "moat": "m-supply",
+   "order": 32,
+   "owner": "deepesh",
+   "period": "2027Q3",
+   "priority": "P1",
+   "status": "planned",
+   "tags": [],
+   "title": "More care: dietitians, physio, elder care at home",
+   "why": "Roadmap gate: 6% of users book monthly."
+  },
+  "s-doctors": {
+   "confidence": 65,
+   "deps": [],
+   "how": "Partner booking API, pre-consult summary from memory, Rx back into the ledger.",
+   "kind": "initiative",
+   "kpi": "Consult booked to Rx filed in under 24 h",
+   "lane": "supply",
+   "moat": null,
+   "order": 30,
+   "owner": "deepesh",
+   "period": "2027Q1",
+   "priority": "P1",
+   "status": "planned",
+   "tags": [
+    "t-regulatory"
+   ],
+   "title": "Doctor consults through registered partners",
+   "why": "Telemedicine rules 2020: consults only with registered doctors on the partner network."
+  },
+  "s-fitness": {
+   "confidence": 95,
+   "deps": [],
+   "how": "Discover, book and track classes in the app.",
+   "kind": "initiative",
+   "kpi": "Live",
+   "lane": "supply",
+   "moat": "m-supply",
+   "order": 28,
+   "owner": "deepesh",
+   "period": "2026Q4",
+   "priority": "P1",
+   "status": "done",
+   "tags": [],
+   "title": "Fitness and healthy living in 200 cities",
+   "why": "Partnership with India's leading fitness platform; 15% markup per class."
+  },
+  "s-hospitals": {
+   "confidence": 30,
+   "deps": [],
+   "how": "Packages with hospital chains, surgery counselling from memory.",
+   "kind": "bet",
+   "kpi": "₹20 cr GMV in the first year",
+   "lane": "supply",
+   "moat": null,
+   "order": 35,
+   "owner": "deepesh",
+   "period": "2029Q1",
+   "priority": "P2",
+   "status": "idea",
+   "tags": [
+    "t-bet"
+   ],
+   "title": "Hospital partners for procedures and second opinions",
+   "why": "High-value bookings once families trust Cheeku with big decisions."
+  },
+  "s-lab-live": {
+   "confidence": 70,
+   "deps": [],
+   "how": "Partner pricing plus our markup, paid in chat, results filed back to the member.",
+   "kind": "initiative",
+   "kpi": "First paid home collection end to end",
+   "lane": "supply",
+   "moat": "m-supply",
+   "order": 29,
+   "owner": "deepesh",
+   "period": "2026Q4",
+   "priority": "P0",
+   "status": "in_progress",
+   "tags": [
+    "t-launch"
+   ],
+   "title": "Lab partner live with markup and payments",
+   "why": "Care bookings are the largest revenue engine. They must work on day one."
+  },
+  "s-medicines": {
+   "confidence": 45,
+   "deps": [],
+   "how": "Pharmacy partner, Rx from the ledger, generics suggested.",
+   "kind": "initiative",
+   "kpi": "20% of chronic patients refill through Cheeku",
+   "lane": "supply",
+   "moat": null,
+   "order": 33,
+   "owner": "deepesh",
+   "period": "2027Q4",
+   "priority": "P2",
+   "status": "planned",
+   "tags": [
+    "t-regulatory"
+   ],
+   "title": "Medicines delivered from chat",
+   "why": "Refills are the most frequent need for families caring for parents."
+  },
+  "s-pincodes": {
+   "confidence": 95,
+   "deps": [],
+   "how": "Provider API layer; swapping a partner touches only that layer.",
+   "kind": "initiative",
+   "kpi": "Live",
+   "lane": "supply",
+   "moat": "m-supply",
+   "order": 27,
+   "owner": "deepesh",
+   "period": "2026Q4",
+   "priority": "P1",
+   "status": "done",
+   "tags": [],
+   "title": "Care in 12,000+ pincodes: labs, doctors, medicines",
+   "why": "Supply on day one through partner APIs, at zero cost to build."
+  },
+  "s-second": {
+   "confidence": 55,
+   "deps": [],
+   "how": "Same provider API, routing by price, slot and SLA.",
+   "kind": "initiative",
+   "kpi": "Two live partners in labs, doctors, medicines",
+   "lane": "supply",
+   "moat": null,
+   "order": 34,
+   "owner": "deepesh",
+   "period": "2028Q2",
+   "priority": "P1",
+   "status": "planned",
+   "tags": [
+    "t-risk"
+   ],
+   "title": "A second partner in every care category",
+   "why": "Reliance on one partner is a medium risk on the register."
+  },
+  "s-sla": {
+   "confidence": 60,
+   "deps": [],
+   "how": "Partner SLAs, webhooks, nudges when a result is late.",
+   "kind": "initiative",
+   "kpi": "90% of lab results filed within 24 h",
+   "lane": "supply",
+   "moat": null,
+   "order": 31,
+   "owner": "deepesh",
+   "period": "2027Q2",
+   "priority": "P1",
+   "status": "planned",
+   "tags": [],
+   "title": "Result back in the thread within 24 hours",
+   "why": "The promise is the loop: book, test, result explained, next step."
+  },
+  "t-b2b": {
+   "confidence": 50,
+   "deps": [],
+   "how": "",
+   "kind": "initiative",
+   "kpi": "4 people by Dec 2028",
+   "lane": "team",
+   "moat": "m-distribution",
+   "order": 85,
+   "owner": "deepesh",
+   "period": "2028Q2",
+   "priority": "P1",
+   "status": "planned",
+   "tags": [],
+   "title": "Institution sales team for insurers and states",
+   "why": "B2B team grows from 1 to 22 by 2031."
+  },
+  "t-deepesh": {
+   "confidence": 95,
+   "deps": [],
+   "how": "",
+   "kind": "milestone",
+   "kpi": "Done",
+   "lane": "team",
+   "moat": "m-distribution",
+   "order": 80,
+   "owner": "deepesh",
+   "period": "2026Q4",
+   "priority": "P1",
+   "status": "done",
+   "tags": [],
+   "title": "Deepesh joins as co-founder and CBO",
+   "why": "GTM, enterprise sales and distribution: Pine Labs and Practo."
+  },
+  "t-engs": {
+   "confidence": 60,
+   "deps": [],
+   "how": "CTC about ₹30 lakh plus ESOP.",
+   "kind": "initiative",
+   "kpi": "4 in seat by Mar 2027",
+   "lane": "team",
+   "moat": null,
+   "order": 82,
+   "owner": "suraj",
+   "period": "2027Q1",
+   "priority": "P0",
+   "status": "planned",
+   "tags": [],
+   "title": "Four founding engineers",
+   "why": "Mobile, backend, infra: the team that takes V1 to 5 lakh users."
+  },
+  "t-esop": {
+   "confidence": 60,
+   "deps": [],
+   "how": "",
+   "kind": "decision",
+   "kpi": "",
+   "lane": "team",
+   "moat": null,
+   "options": "10% + 5% as modelled · 12% up front, no top-up",
+   "order": 81,
+   "outcome": "",
+   "owner": "athar",
+   "period": "2026Q4",
+   "priority": "P1",
+   "status": "planned",
+   "tags": [
+    "t-decision"
+   ],
+   "title": "ESOP pool: 10% before seed, 5% top-up before A",
+   "why": "Founding hires in 2027 need meaningful equity."
+  },
+  "t-hundred": {
+   "confidence": 60,
+   "deps": [],
+   "gate": {
+    "metric": "headcount",
+    "offset": 0,
+    "type": "reach",
+    "value": 100
+   },
+   "how": "Second layer of leaders in every function.",
+   "kind": "milestone",
+   "kpi": "100 on payroll",
+   "lane": "team",
+   "moat": null,
+   "order": 86,
+   "owner": "athar",
+   "priority": "P1",
+   "status": "planned",
+   "tags": [],
+   "title": "100 people",
+   "why": ""
+  },
+  "t-md": {
+   "confidence": 65,
+   "deps": [],
+   "how": "Part-time MD lead first, full-time by Q3.",
+   "kind": "initiative",
+   "kpi": "MD lead signed before launch",
+   "lane": "team",
+   "moat": "m-trust",
+   "order": 84,
+   "owner": "athar",
+   "period": "2027Q1",
+   "priority": "P0",
+   "status": "planned",
+   "tags": [
+    "t-launch"
+   ],
+   "title": "MD clinical lead and two reviewers",
+   "why": "Every rule and every Rx check needs a clinical sign-off owner."
+  },
+  "t-ml": {
+   "confidence": 55,
+   "deps": [],
+   "how": "Head of ML, eval lead, Indic voice engineer.",
+   "kind": "initiative",
+   "kpi": "Head of ML signed",
+   "lane": "team",
+   "moat": "m-model",
+   "order": 83,
+   "owner": "suraj",
+   "period": "2027Q1",
+   "priority": "P0",
+   "status": "planned",
+   "tags": [],
+   "title": "Head of ML and the eval team",
+   "why": "5 people in AI and data by Dec 2027."
+  },
+  "tr-audit": {
+   "confidence": 60,
+   "deps": [],
+   "how": "Third-party pen test, fixes, retest.",
+   "kind": "initiative",
+   "kpi": "No high findings open",
+   "lane": "trust",
+   "moat": null,
+   "order": 90,
+   "owner": "suraj",
+   "period": "2027Q2",
+   "priority": "P1",
+   "status": "planned",
+   "tags": [
+    "t-risk"
+   ],
+   "title": "External security audit and pen test",
+   "why": "Breach risk is high impact. Employers and insurers will ask."
+  },
+  "tr-cdsco": {
+   "confidence": 40,
+   "deps": [],
+   "how": "Regulatory counsel, classification, clinical evidence plan.",
+   "kind": "initiative",
+   "kpi": "Classification confirmed",
+   "lane": "trust",
+   "moat": "m-trust",
+   "order": 92,
+   "owner": "athar",
+   "period": "2029Q1",
+   "priority": "P2",
+   "status": "planned",
+   "tags": [
+    "t-regulatory"
+   ],
+   "title": "CDSCO path for the pendant and any diagnostic claim",
+   "why": "App and pendant stay a wellness companion until certified."
+  },
+  "tr-clinical": {
+   "confidence": 65,
+   "deps": [
+    "t-md"
+   ],
+   "how": "Rule registry with signer and date, weekly review of flagged answers.",
+   "kind": "initiative",
+   "kpi": "100% of rules signed; review every week",
+   "lane": "trust",
+   "moat": "m-trust",
+   "order": 89,
+   "owner": "suraj",
+   "period": "2027Q1",
+   "priority": "P0",
+   "status": "planned",
+   "tags": [],
+   "title": "Clinician-signed rules and weekly doctor review",
+   "why": "Rules decide, the model explains. Rules need a doctor's signature."
+  },
+  "tr-dpdp": {
+   "confidence": 90,
+   "deps": [],
+   "how": "Done in V1: migration 0041, privacy alerts, breach runbook.",
+   "kind": "initiative",
+   "kpi": "Done",
+   "lane": "trust",
+   "moat": "m-trust",
+   "order": 87,
+   "owner": "athar",
+   "period": "2026Q4",
+   "priority": "P1",
+   "status": "done",
+   "tags": [],
+   "title": "DPDP readiness: consent ledger, privacy requests, breach plan",
+   "why": "Consent per purpose, a named Grievance Officer and a 90-day request clock."
+  },
+  "tr-hosting": {
+   "confidence": 70,
+   "deps": [],
+   "how": "Move database, storage and functions to an India region.",
+   "kind": "initiative",
+   "kpi": "All personal data in India",
+   "lane": "trust",
+   "moat": null,
+   "order": 88,
+   "owner": "suraj",
+   "period": "2026Q4",
+   "priority": "P0",
+   "status": "planned",
+   "tags": [
+    "t-launch",
+    "t-regulatory"
+   ],
+   "title": "India-region hosting",
+   "why": "Health data stays in India for DPDP, insurers and states."
+  },
+  "tr-iso": {
+   "confidence": 50,
+   "deps": [],
+   "how": "Policies, controls, audit.",
+   "kind": "initiative",
+   "kpi": "Certified",
+   "lane": "trust",
+   "moat": "m-trust",
+   "order": 91,
+   "owner": "suraj",
+   "period": "2028Q1",
+   "priority": "P1",
+   "status": "planned",
+   "tags": [
+    "t-dependency"
+   ],
+   "title": "ISO 27001 for employer and insurer contracts",
+   "why": "Procurement gate for insurers, large employers and states."
+  }
+ },
+ "moats": {
+  "m-distribution": {
+   "metric": "distribution",
+   "name": "Employer and insurer distribution",
+   "order": 3,
+   "thesis": "Companies, benefits platforms and insurers bring families in at near-zero CAC on multi-year contracts."
+  },
+  "m-habit": {
+   "metric": "habit",
+   "name": "Daily habit",
+   "order": 4,
+   "thesis": "One useful nudge every morning and 20 free chats a day. The reason families open Cheeku before Google."
+  },
+  "m-memory": {
+   "metric": "memory",
+   "name": "Family health memory",
+   "order": 0,
+   "thesis": "Years of each family's reports, medicines and choices in one place. Leaving means starting from zero."
+  },
+  "m-model": {
+   "metric": "model",
+   "name": "Our own India health model",
+   "order": 1,
+   "thesis": "Trained on consented family histories and ABDM records. Cheaper per answer and better on India evals than frontier APIs."
+  },
+  "m-supply": {
+   "metric": "supply",
+   "name": "Care network in chat",
+   "order": 2,
+   "thesis": "Labs, doctors, medicines and fitness in 12,000+ pincodes and 200 cities, booked from the same memory."
+  },
+  "m-trust": {
+   "metric": "none",
+   "name": "Consent, safety and regulation",
+   "order": 5,
+   "thesis": "DPDP-grade consent ledger, clinician-signed rules, IRDAI sandbox and a CDSCO path. Slow and costly to copy."
+  }
+ },
+ "risks": {
+  "r-advice": {
+   "impact": 5,
+   "items": [
+    "a-router",
+    "tr-clinical",
+    "a-evals",
+    "t-md"
+   ],
+   "likelihood": 2,
+   "mitigation": "Hard-stops before the model, clinician-signed rules, India evals, weekly doctor review.",
+   "owner": "suraj",
+   "short": "Unsafe advice",
+   "signal": "Flagged answers in weekly review rise",
+   "status": "mitigating",
+   "title": "Wrong or unsafe advice"
+  },
+  "r-breach": {
+   "impact": 5,
+   "items": [
+    "tr-audit",
+    "tr-iso",
+    "tr-dpdp",
+    "tr-hosting"
+   ],
+   "likelihood": 2,
+   "mitigation": "Row-level security per member, India hosting, audits, breach runbook.",
+   "owner": "suraj",
+   "short": "Breach",
+   "signal": "Pen test high findings, unusual access",
+   "status": "mitigating",
+   "title": "Health data breach"
+  },
+  "r-cac": {
+   "impact": 4,
+   "items": [
+    "g-pages",
+    "g-referral",
+    "p-whatsapp",
+    "g-cac"
+   ],
+   "likelihood": 3,
+   "mitigation": "Organic-first channels; the runway rule cuts paid spend first.",
+   "owner": "athar",
+   "short": "CAC",
+   "signal": "Paid CAC above ₹160 in 2027",
+   "status": "open",
+   "title": "Paid growth gets costly"
+  },
+  "r-corp": {
+   "impact": 2,
+   "items": [
+    "b-hr",
+    "b-diwali",
+    "b-corp-team"
+   ],
+   "likelihood": 3,
+   "mitigation": "Benefits platforms and gifting run alongside direct sales.",
+   "owner": "deepesh",
+   "short": "Employer cycle",
+   "signal": "Under 10 companies 6 months after go-live",
+   "status": "open",
+   "title": "Employer sales take longer than planned"
+  },
+  "r-focus": {
+   "impact": 3,
+   "items": [
+    "t-engs",
+    "t-ml",
+    "t-b2b"
+   ],
+   "likelihood": 3,
+   "mitigation": "Owners per lane, gates that stop tracks, weekly sync on this board.",
+   "owner": "athar",
+   "short": "Focus",
+   "signal": "More than 3 open P0s per founder in a quarter",
+   "status": "open",
+   "title": "Founder bandwidth across too many tracks"
+  },
+  "r-institutions": {
+   "impact": 3,
+   "items": [
+    "b-loi",
+    "b-insurer-pilot",
+    "tr-iso"
+   ],
+   "likelihood": 4,
+   "mitigation": "Bear case delays deals 6 months; families and employers are 79% of 2031 revenue.",
+   "owner": "deepesh",
+   "short": "Slow B2B",
+   "signal": "No insurer LOI by Sep 2028",
+   "status": "open",
+   "title": "Institutions buy slowly"
+  },
+  "r-model": {
+   "impact": 3,
+   "items": [
+    "a-evals",
+    "a-adapted",
+    "f-indiaai"
+   ],
+   "likelihood": 3,
+   "mitigation": "Adapted model first; train from scratch only if it wins; ₹33 cr cap.",
+   "owner": "suraj",
+   "short": "Model slips",
+   "signal": "Adapted model under 60% eval wins in Q4 2027",
+   "status": "open",
+   "title": "Own model costs more or slips"
+  },
+  "r-partner": {
+   "impact": 3,
+   "items": [
+    "s-second",
+    "s-sla"
+   ],
+   "likelihood": 3,
+   "mitigation": "Provider API layer is built; a second partner per category by 2028.",
+   "owner": "deepesh",
+   "short": "One partner",
+   "signal": "Partner SLA misses two months running",
+   "status": "open",
+   "title": "Reliance on one care partner"
+  },
+  "r-reg": {
+   "impact": 4,
+   "items": [
+    "tr-dpdp",
+    "tr-hosting",
+    "tr-cdsco"
+   ],
+   "likelihood": 2,
+   "mitigation": "Consent ledger, no diagnosis claims, companion positioning, counsel from seed.",
+   "owner": "athar",
+   "short": "Regulation",
+   "signal": "New DPDP rules or telemedicine guidance",
+   "status": "mitigating",
+   "title": "Regulation tightens"
+  },
+  "r-retention": {
+   "impact": 5,
+   "items": [
+    "g-retention",
+    "p-weekly",
+    "p-memory-v2",
+    "p-food"
+   ],
+   "likelihood": 3,
+   "mitigation": "Memory gets more useful every month; no spend scale-up before 25% day-30.",
+   "owner": "athar",
+   "short": "Retention",
+   "signal": "Day-30 retention under 20% for two cohorts",
+   "status": "open",
+   "title": "Families do not stay"
+  },
+  "r-runway": {
+   "impact": 5,
+   "items": [
+    "f-a-proof",
+    "f-low",
+    "f-update"
+   ],
+   "likelihood": 3,
+   "mitigation": "Six-month runway rule, proof points tracked monthly, bridge options ready.",
+   "owner": "athar",
+   "short": "Runway",
+   "signal": "Proof points behind plan by Q3 2027",
+   "status": "open",
+   "title": "Series A slips past the lowest cash month"
+  },
+  "r-rx": {
+   "impact": 5,
+   "items": [
+    "p-rx-ten",
+    "tr-clinical"
+   ],
+   "likelihood": 2,
+   "mitigation": "Never says stop or rates the doctor; licensed drug data, signed rules, a source on every flag.",
+   "owner": "suraj",
+   "short": "Rx check",
+   "signal": "Any unsafe flag reaching a family",
+   "status": "open",
+   "title": "Prescription check is wrong"
+  }
+ },
+ "tags": {
+  "t-bet": {
+   "color": "#D3478C",
+   "label": "Big bet",
+   "order": 1
+  },
+  "t-decision": {
+   "color": "#DB8418",
+   "label": "Needs a call",
+   "order": 4
+  },
+  "t-dependency": {
+   "color": "#9A6A2A",
+   "label": "Dependency",
+   "order": 3
+  },
+  "t-experiment": {
+   "color": "#0B9C9C",
+   "label": "Experiment",
+   "order": 8
+  },
+  "t-investor": {
+   "color": "#2F6FDE",
+   "label": "Investor proof",
+   "order": 5
+  },
+  "t-launch": {
+   "color": "#7C3AED",
+   "label": "Launch blocker",
+   "order": 9
+  },
+  "t-moat": {
+   "color": "#5B4EF0",
+   "label": "Moat",
+   "order": 0
+  },
+  "t-quickwin": {
+   "color": "#3C9A4B",
+   "label": "Quick win",
+   "order": 7
+  },
+  "t-regulatory": {
+   "color": "#7A7D95",
+   "label": "Regulatory",
+   "order": 6
+  },
+  "t-risk": {
+   "color": "#C94A1C",
+   "label": "Risk",
+   "order": 2
+  }
+ }
+}
