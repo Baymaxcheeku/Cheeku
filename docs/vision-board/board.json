@@ -22,7 +22,9 @@
    "period": "2028Q1",
    "priority": "P0",
    "status": "planned",
-   "tags": [],
+   "tags": [
+    "t-l-model"
+   ],
    "title": "Adapted model becomes default in chat",
    "why": "Gate: it wins 70% of India evals or it does not ship."
   },
@@ -47,6 +49,8 @@
    "priority": "P1",
    "status": "planned",
    "tags": [
+    "t-newprod",
+    "t-l-model",
     "t-bet",
     "t-investor"
    ],
@@ -68,7 +72,9 @@
    "period": "2028Q2",
    "priority": "P1",
    "status": "planned",
-   "tags": [],
+   "tags": [
+    "t-l-model"
+   ],
    "title": "Consented data platform for cohorts",
    "why": "Insurers and states buy anonymised, consented signals. Never raw chats."
   },
@@ -85,7 +91,9 @@
    "period": "2027Q1",
    "priority": "P0",
    "status": "planned",
-   "tags": [],
+   "tags": [
+    "t-l-model"
+   ],
    "title": "India eval set: 5,000 cases in 5 languages",
    "why": "No model ships unless it beats frontier APIs on our own evals."
   },
@@ -108,7 +116,9 @@
    "owner": "suraj",
    "priority": "P1",
    "status": "planned",
-   "tags": [],
+   "tags": [
+    "t-l-model"
+   ],
    "title": "Own GPUs serve chat: ₹0.30 → ₹0.10 an answer",
    "why": "Chat cost falls by two thirds overnight, which is what makes 20 free chats a day affordable."
   },
@@ -126,6 +136,8 @@
    "priority": "P0",
    "status": "in_progress",
    "tags": [
+    "t-feature",
+    "t-l-model",
     "t-launch"
    ],
    "title": "Production report reading on Indian lab formats",
@@ -140,13 +152,17 @@
    "kind": "initiative",
    "kpi": "Score validated on one insurer's claims data",
    "lane": "ai",
-   "moat": "m-distribution",
+   "moat": "m-insurance",
    "order": 23,
    "owner": "suraj",
    "period": "2028Q3",
    "priority": "P1",
    "status": "planned",
-   "tags": [],
+   "tags": [
+    "t-newprod",
+    "t-l-model",
+    "t-l-b2b"
+   ],
    "title": "Risk score that updates, for insurers",
    "why": "The underwriting layer insurers do not have: a score that moves as families get healthier."
   },
@@ -163,7 +179,9 @@
    "period": "2026Q4",
    "priority": "P1",
    "status": "done",
-   "tags": [],
+   "tags": [
+    "t-l-model"
+   ],
    "title": "Frontier models behind our safety router",
    "why": "Safe answers on day one while our own model is trained."
   },
@@ -204,7 +222,9 @@
    "period": "2031H1",
    "priority": "P1",
    "status": "planned",
-   "tags": [],
+   "tags": [
+    "t-l-model"
+   ],
    "title": "Six paise an answer on our own model",
    "why": "4x cheaper than frontier APIs; the margin behind 20 free chats a day."
   },
@@ -221,7 +241,11 @@
    "period": "2027Q3",
    "priority": "P1",
    "status": "planned",
-   "tags": [],
+   "tags": [
+    "t-feature",
+    "t-l-model",
+    "t-l-app"
+   ],
    "title": "Indic speech on our own stack",
    "why": "Voice is the biggest serving cost line; 77% cheaper a minute on our stack."
   },
@@ -246,6 +270,8 @@
    "priority": "P0",
    "status": "planned",
    "tags": [
+    "t-newprod",
+    "t-l-b2b",
     "t-investor"
    ],
    "title": "Employers go live: Family plan at 30% off for staff",
@@ -270,7 +296,9 @@
    "owner": "deepesh",
    "priority": "P1",
    "status": "planned",
-   "tags": [],
+   "tags": [
+    "t-l-b2b"
+   ],
    "title": "Corporate sales: first 3 hires",
    "why": "The team has to be in seat when the vertical opens."
   },
@@ -288,6 +316,8 @@
    "priority": "P1",
    "status": "planned",
    "tags": [
+    "t-addition",
+    "t-l-b2b",
     "t-experiment"
    ],
    "title": "First Diwali gifting season",
@@ -300,7 +330,7 @@
    "kind": "decision",
    "kpi": "",
    "lane": "b2b",
-   "moat": null,
+   "moat": "m-insurance",
    "options": "Large private general insurer · standalone health insurer · group cover through an employer client",
    "order": 69,
    "outcome": "",
@@ -309,10 +339,38 @@
    "priority": "P1",
    "status": "planned",
    "tags": [
+    "t-l-b2b",
     "t-decision"
    ],
    "title": "Which insurer do we pilot with first?",
    "why": "The pilot decides the risk layer's first two years."
+  },
+  "b-floater": {
+   "confidence": 35,
+   "deps": [
+    "a-risk-score",
+    "b-sandbox"
+   ],
+   "endPeriod": null,
+   "gate": null,
+   "how": "Co-design with the pilot insurer; price from the live risk score; claims-light and cashless through our care network.",
+   "kind": "bet",
+   "kpi": "First 1,000 families covered",
+   "lane": "b2b",
+   "moat": "m-insurance",
+   "order": 901,
+   "owner": "deepesh",
+   "period": "2031H1",
+   "priority": "P1",
+   "status": "planned",
+   "tags": [
+    "t-newprod",
+    "t-l-b2b",
+    "t-l-model",
+    "t-moat"
+   ],
+   "title": "Family floater with an insurer, priced from our risk score",
+   "why": "Families who stay healthy pay less every year. The insurer carries the risk; we price it and keep the family."
   },
   "b-hr": {
    "confidence": 50,
@@ -331,7 +389,9 @@
    "owner": "deepesh",
    "priority": "P1",
    "status": "planned",
-   "tags": [],
+   "tags": [
+    "t-l-b2b"
+   ],
    "title": "First HR benefits platform listing",
    "why": "Benefits platforms put Cheeku in front of lakhs of covered lives; they keep 25%."
   },
@@ -353,7 +413,9 @@
    "owner": "deepesh",
    "priority": "P1",
    "status": "planned",
-   "tags": [],
+   "tags": [
+    "t-l-b2b"
+   ],
    "title": "100 companies",
    "why": ""
   },
@@ -367,13 +429,16 @@
    "kind": "initiative",
    "kpi": "10,000 members enrolled",
    "lane": "b2b",
-   "moat": "m-distribution",
+   "moat": "m-insurance",
    "order": 62,
    "owner": "deepesh",
    "period": "2028Q4",
    "priority": "P1",
    "status": "planned",
-   "tags": [],
+   "tags": [
+    "t-newprod",
+    "t-l-b2b"
+   ],
    "title": "Insurer wellness pilot",
    "why": "Year one of the risk layer: a companion for the insurer's members."
   },
@@ -392,12 +457,13 @@
    "kind": "milestone",
    "kpi": "First paid insurer contract",
    "lane": "b2b",
-   "moat": "m-distribution",
+   "moat": "m-insurance",
    "order": 63,
    "owner": "deepesh",
    "priority": "P1",
    "status": "planned",
    "tags": [
+    "t-l-b2b",
     "t-investor"
    ],
    "title": "Insurer risk-layer revenue starts",
@@ -423,6 +489,9 @@
    "priority": "P1",
    "status": "planned",
    "tags": [
+    "t-newprod",
+    "t-l-model",
+    "t-l-b2b",
     "t-bet"
    ],
    "title": "Model licensing to hospitals and healthtechs",
@@ -435,18 +504,48 @@
    "kind": "gate",
    "kpi": "Signed LOI by Sep 2028",
    "lane": "b2b",
-   "moat": "m-distribution",
+   "moat": "m-insurance",
    "order": 61,
    "owner": "deepesh",
    "period": "2028Q3",
    "priority": "P0",
    "status": "planned",
    "tags": [
+    "t-l-b2b",
     "t-risk",
     "t-investor"
    ],
    "title": "1 insurer letter of intent",
    "why": "Roadmap gate for the insurer track. Miss it and the track slows."
+  },
+  "b-pendant-b2b": {
+   "confidence": 35,
+   "deps": [
+    "p-pendant",
+    "b-corp-live"
+   ],
+   "endPeriod": null,
+   "gate": {
+    "event": "pendant",
+    "offset": 6,
+    "type": "event"
+   },
+   "how": "Bundle in the employer Family plan; insurer co-pay for members over 60; a Diwali gifting push.",
+   "kind": "initiative",
+   "kpi": "30% of pendants paid by an employer or insurer",
+   "lane": "b2b",
+   "moat": "m-pendant",
+   "order": 909,
+   "owner": "deepesh",
+   "priority": "P2",
+   "status": "planned",
+   "tags": [
+    "t-addition",
+    "t-l-b2b",
+    "t-l-hw"
+   ],
+   "title": "Pendant for parents through employers and insurers",
+   "why": "Employees buy it for parents as a benefit; insurers fund it for members over 60 because it lowers claims."
   },
   "b-pricing": {
    "confidence": 50,
@@ -464,6 +563,7 @@
    "priority": "P1",
    "status": "planned",
    "tags": [
+    "t-l-b2b",
     "t-decision"
    ],
    "title": "Employer pricing: 30% off for staff, or a flat fee per seat?",
@@ -478,13 +578,15 @@
    "kind": "bet",
    "kpi": "Sandbox approval",
    "lane": "b2b",
-   "moat": "m-trust",
+   "moat": "m-insurance",
    "order": 66,
    "owner": "deepesh",
    "period": "2030H1",
    "priority": "P2",
    "status": "planned",
    "tags": [
+    "t-newprod",
+    "t-l-b2b",
     "t-regulatory",
     "t-bet"
    ],
@@ -498,13 +600,15 @@
    "kind": "milestone",
    "kpi": "7 insurers",
    "lane": "b2b",
-   "moat": "m-distribution",
+   "moat": "m-insurance",
    "order": 67,
    "owner": "deepesh",
    "period": "2031H2",
    "priority": "P1",
    "status": "planned",
-   "tags": [],
+   "tags": [
+    "t-l-b2b"
+   ],
    "title": "7 insurers on the risk layer",
    "why": ""
   },
@@ -528,6 +632,8 @@
    "priority": "P1",
    "status": "planned",
    "tags": [
+    "t-newprod",
+    "t-l-b2b",
     "t-bet"
    ],
    "title": "First state licenses the memory layer on ABHA",
@@ -552,6 +658,7 @@
    "priority": "P1",
    "status": "planned",
    "tags": [
+    "t-l-b2b",
     "t-investor"
    ],
    "title": "First 10 companies",
@@ -606,15 +713,17 @@
    "why": "In the bear case cash dips to about −₹7 cr in Sep 2031."
   },
   "f-incorporate": {
-   "confidence": 80,
+   "confidence": 100,
    "deps": [],
+   "endPeriod": null,
+   "gate": null,
    "how": "Private limited, founder agreements, ESOP pool, DPIIT recognition.",
    "kind": "initiative",
    "kpi": "Certificate of incorporation",
    "lane": "funding",
    "moat": null,
    "order": 70,
-   "owner": "athar",
+   "owner": "deepesh",
    "period": "2026Q4",
    "priority": "P0",
    "status": "planned",
@@ -638,7 +747,9 @@
    "period": "2027Q1",
    "priority": "P1",
    "status": "planned",
-   "tags": [],
+   "tags": [
+    "t-l-model"
+   ],
    "title": "Apply for IndiaAI compute",
    "why": "H100s at about ₹92 an hour make our own model affordable."
   },
@@ -874,6 +985,8 @@
    "priority": "P1",
    "status": "planned",
    "tags": [
+    "t-feature",
+    "t-l-app",
     "t-quickwin"
    ],
    "title": "Health answer pages that rank",
@@ -893,6 +1006,8 @@
    "priority": "P1",
    "status": "planned",
    "tags": [
+    "t-feature",
+    "t-l-app",
     "t-experiment"
    ],
    "title": "Invite your parents loop",
@@ -956,7 +1071,9 @@
    "period": "2028Q2",
    "priority": "P1",
    "status": "planned",
-   "tags": [],
+   "tags": [
+    "t-l-app"
+   ],
    "title": "Tier 2 cities with voice",
    "why": "Wave two: every member, every language."
   },
@@ -974,6 +1091,8 @@
    "priority": "P1",
    "status": "planned",
    "tags": [
+    "t-feature",
+    "t-l-app",
     "t-regulatory",
     "t-dependency"
    ],
@@ -994,11 +1113,38 @@
    "priority": "P0",
    "status": "planned",
    "tags": [
+    "t-feature",
+    "t-l-app",
     "t-launch",
     "t-dependency"
    ],
    "title": "Real billing: store subscriptions and UPI on web",
    "why": "Plans run on a stand-in today. Paying share is the first number investors check."
+  },
+  "p-claims": {
+   "confidence": 45,
+   "deps": [
+    "p-insurer-app"
+   ],
+   "endPeriod": null,
+   "gate": null,
+   "how": "Pre-auth packet built from records; hospital network status; a claim tracker in the thread.",
+   "kind": "initiative",
+   "kpi": "Median pre-auth under 2 hours",
+   "lane": "product",
+   "moat": "m-insurance",
+   "order": 903,
+   "owner": "athar",
+   "period": "2029Q2",
+   "priority": "P1",
+   "status": "planned",
+   "tags": [
+    "t-addition",
+    "t-l-app",
+    "t-l-b2b"
+   ],
+   "title": "Claims help in chat: cashless pre-auth from the family file",
+   "why": "The worst moment with insurance is a claim. If Cheeku fills it from the family file, families never leave."
   },
   "p-device-qa": {
    "confidence": 80,
@@ -1014,10 +1160,41 @@
    "priority": "P0",
    "status": "in_progress",
    "tags": [
+    "t-feature",
+    "t-l-app",
     "t-launch"
    ],
    "title": "Device QA of V1 on iPhone and Android",
    "why": "Two layout bugs looked fine in the browser and broke on iOS. Device checks are part of done."
+  },
+  "p-fall": {
+   "confidence": 45,
+   "deps": [
+    "p-pendant-partner"
+   ],
+   "endPeriod": null,
+   "gate": {
+    "event": "pendant",
+    "offset": 0,
+    "type": "event"
+   },
+   "how": "On-device fall model; an SOS button; a call ladder to family, then a local emergency partner.",
+   "kind": "initiative",
+   "kpi": "Under 1 false alarm a month per pendant",
+   "lane": "product",
+   "moat": "m-pendant",
+   "order": 907,
+   "owner": "athar",
+   "priority": "P1",
+   "status": "planned",
+   "tags": [
+    "t-feature",
+    "t-l-hw",
+    "t-l-app",
+    "t-moat"
+   ],
+   "title": "Fall detection and SOS into the family thread",
+   "why": "Children worry most about a fall nobody sees. An alert with location and the parent's file in the thread is the reason to buy."
   },
   "p-food": {
    "confidence": 60,
@@ -1032,9 +1209,34 @@
    "period": "2027Q2",
    "priority": "P1",
    "status": "planned",
-   "tags": [],
+   "tags": [
+    "t-addition",
+    "t-l-app"
+   ],
    "title": "Food and fitness in the daily plan",
    "why": "Daily reasons to open the app between consults."
+  },
+  "p-home": {
+   "confidence": 55,
+   "deps": [],
+   "endPeriod": null,
+   "gate": null,
+   "how": "Services hub on home, ordered by open loops in the family memory; one checkout for every service.",
+   "kind": "initiative",
+   "kpi": "40% of paying families use 2+ services a quarter",
+   "lane": "product",
+   "moat": "m-ecosystem",
+   "order": 904,
+   "owner": "athar",
+   "period": "2027Q4",
+   "priority": "P1",
+   "status": "planned",
+   "tags": [
+    "t-feature",
+    "t-l-app"
+   ],
+   "title": "One home for every service, ranked by the family's memory",
+   "why": "Labs, doctors, medicines, fitness and cover each live in a different app today. One screen that knows the family beats five that do not."
   },
   "p-household": {
    "confidence": 60,
@@ -1049,9 +1251,37 @@
    "period": "2028Q1",
    "priority": "P1",
    "status": "planned",
-   "tags": [],
+   "tags": [
+    "t-feature",
+    "t-l-app"
+   ],
    "title": "Household invites onto the Family plan",
    "why": "One member brings the household; Family plan ARPU is 2.5x Solo."
+  },
+  "p-id": {
+   "confidence": 40,
+   "deps": [
+    "p-abha"
+   ],
+   "endPeriod": null,
+   "gate": null,
+   "how": "Consent-based sign-in for partners; ABHA linked; per-partner data scopes from the consent ledger.",
+   "kind": "initiative",
+   "kpi": "10 partners accept Cheeku ID",
+   "lane": "product",
+   "moat": "m-ecosystem",
+   "order": 906,
+   "owner": "suraj",
+   "period": "2029Q1",
+   "priority": "P2",
+   "status": "planned",
+   "tags": [
+    "t-feature",
+    "t-l-app",
+    "t-l-b2b"
+   ],
+   "title": "Cheeku ID: one login across partners, ABHA and insurers",
+   "why": "When partners and insurers accept our login and consent, the ecosystem runs through us."
   },
   "p-insurer-app": {
    "confidence": 45,
@@ -1062,13 +1292,17 @@
    "kind": "initiative",
    "kpi": "Pilot members active weekly above 40%",
    "lane": "product",
-   "moat": null,
+   "moat": "m-insurance",
    "order": 13,
    "owner": "athar",
    "period": "2028Q4",
    "priority": "P1",
    "status": "planned",
-   "tags": [],
+   "tags": [
+    "t-addition",
+    "t-l-app",
+    "t-l-b2b"
+   ],
    "title": "Insurer member experience: rewards and funded tests",
    "why": "The pilot needs an in-app experience the insurer can show its members."
   },
@@ -1094,6 +1328,8 @@
    "priority": "P0",
    "status": "planned",
    "tags": [
+    "t-newprod",
+    "t-l-app",
     "t-investor"
    ],
    "title": "Public launch: the daily health companion",
@@ -1112,7 +1348,10 @@
    "period": "2027Q4",
    "priority": "P1",
    "status": "planned",
-   "tags": [],
+   "tags": [
+    "t-feature",
+    "t-l-app"
+   ],
    "title": "Memory timeline v2: every event, every member, over years",
    "why": "The memory is the moat. Make its depth visible so families feel what they would lose."
   },
@@ -1131,12 +1370,14 @@
    "kind": "milestone",
    "kpi": "30% weekly voice use",
    "lane": "product",
-   "moat": null,
+   "moat": "m-pendant",
    "order": 15,
    "owner": "athar",
    "priority": "P2",
    "status": "planned",
    "tags": [
+    "t-newprod",
+    "t-l-hw",
     "t-bet"
    ],
    "title": "Pendant launch for elders",
@@ -1149,17 +1390,46 @@
    "kind": "milestone",
    "kpi": "Partner signed with unit cost under ₹4,000",
    "lane": "product",
-   "moat": null,
+   "moat": "m-pendant",
    "order": 14,
    "owner": "athar",
    "period": "2028Q3",
    "priority": "P2",
    "status": "planned",
    "tags": [
+    "t-newprod",
+    "t-l-hw",
     "t-bet"
    ],
    "title": "Pendant: sign a hardware partner",
    "why": "Elders who will never type get a voice companion that shares the family memory."
+  },
+  "p-pendant-pilot": {
+   "confidence": 50,
+   "deps": [
+    "p-pendant-partner"
+   ],
+   "endPeriod": null,
+   "gate": {
+    "event": "pendant",
+    "offset": -4,
+    "type": "event"
+   },
+   "how": "1,000 units to Family plan members with parents over 65; weekly calls; a return-and-fix loop.",
+   "kind": "milestone",
+   "kpi": "70% still wearing it after 60 days",
+   "lane": "product",
+   "moat": "m-pendant",
+   "order": 908,
+   "owner": "athar",
+   "priority": "P1",
+   "status": "planned",
+   "tags": [
+    "t-newprod",
+    "t-l-hw"
+   ],
+   "title": "Pendant pilot with 1,000 elder parents",
+   "why": "Proves daily wear, battery life and the alert loop before mass production."
   },
   "p-rename": {
    "confidence": 85,
@@ -1175,6 +1445,8 @@
    "priority": "P1",
    "status": "planned",
    "tags": [
+    "t-feature",
+    "t-l-app",
     "t-launch",
     "t-quickwin"
    ],
@@ -1197,6 +1469,8 @@
    "priority": "P0",
    "status": "planned",
    "tags": [
+    "t-feature",
+    "t-l-app",
     "t-risk"
    ],
    "title": "Prescription check: all 10 checks signed, licensed drug data",
@@ -1220,10 +1494,34 @@
    "priority": "P0",
    "status": "planned",
    "tags": [
+    "t-feature",
+    "t-l-app",
     "t-launch"
    ],
    "title": "Store release: review and submit",
    "why": "No launch without both stores approving a health app with consent and safety copy in order."
+  },
+  "p-wallet": {
+   "confidence": 45,
+   "deps": [],
+   "endPeriod": null,
+   "gate": null,
+   "how": "UPI autopay; a family balance; GST invoices per member; employer and insurer credits land here.",
+   "kind": "initiative",
+   "kpi": "30% of care and fitness spend paid from the wallet",
+   "lane": "product",
+   "moat": "m-ecosystem",
+   "order": 905,
+   "owner": "athar",
+   "period": "2028Q2",
+   "priority": "P2",
+   "status": "planned",
+   "tags": [
+    "t-addition",
+    "t-l-app"
+   ],
+   "title": "Family wallet: one balance for plans, care and cover",
+   "why": "One payment method and one history across every service makes switching away expensive."
   },
   "p-wearables": {
    "confidence": 55,
@@ -1232,13 +1530,17 @@
    "kind": "initiative",
    "kpi": "20% of actives connect a device",
    "lane": "product",
-   "moat": "m-memory",
+   "moat": "m-ecosystem",
    "order": 10,
    "owner": "athar",
    "period": "2027Q3",
    "priority": "P2",
    "status": "planned",
-   "tags": [],
+   "tags": [
+    "t-addition",
+    "t-l-app",
+    "t-l-hw"
+   ],
    "title": "Wearables sync",
    "why": "Steps, sleep and BP flow in without typing."
   },
@@ -1255,7 +1557,10 @@
    "period": "2027Q1",
    "priority": "P1",
    "status": "planned",
-   "tags": [],
+   "tags": [
+    "t-feature",
+    "t-l-app"
+   ],
    "title": "Weekly review and quarterly retest loop",
    "why": "The daily loop builds habit; the weekly and 90-day loops prove it works."
   },
@@ -1273,6 +1578,8 @@
    "priority": "P1",
    "status": "planned",
    "tags": [
+    "t-addition",
+    "t-l-app",
     "t-experiment"
    ],
    "title": "WhatsApp: share answers, ask from chat",
@@ -1339,7 +1646,10 @@
    "period": "2028Q1",
    "priority": "P1",
    "status": "planned",
-   "tags": [],
+   "tags": [
+    "t-addition",
+    "t-l-app"
+   ],
    "title": "Labelled ads in non-urgent chats",
    "why": "₹87 cr by 2031; never in red-flag chats."
   },
@@ -1358,7 +1668,10 @@
    "period": "2027Q1",
    "priority": "P0",
    "status": "planned",
-   "tags": [],
+   "tags": [
+    "t-addition",
+    "t-l-app"
+   ],
    "title": "Care bookings earn our markup in chat",
    "why": "Largest engine: ₹247 cr in 2031."
   },
@@ -1375,7 +1688,10 @@
    "period": "2027Q1",
    "priority": "P1",
    "status": "planned",
-   "tags": [],
+   "tags": [
+    "t-addition",
+    "t-l-app"
+   ],
    "title": "Fitness classes at 15% markup",
    "why": "₹41 cr by 2031 from classes in 200 cities."
   },
@@ -1386,13 +1702,16 @@
    "kind": "initiative",
    "kpi": "0.3 policies per 1,000 users a month",
    "lane": "revenue",
-   "moat": null,
+   "moat": "m-insurance",
    "order": 50,
    "owner": "deepesh",
    "period": "2028Q1",
    "priority": "P1",
    "status": "planned",
-   "tags": [],
+   "tags": [
+    "t-addition",
+    "t-l-app"
+   ],
    "title": "Insurance listings in the app",
    "why": "₹61 cr by 2031 from 0.3 → 0.7 policies per 1,000 users a month."
   },
@@ -1455,7 +1774,10 @@
    "period": "2027Q1",
    "priority": "P0",
    "status": "planned",
-   "tags": [],
+   "tags": [
+    "t-feature",
+    "t-l-app"
+   ],
    "title": "Subscriptions live: Family ₹249, Solo ₹99, Daily Pass ₹29",
    "why": "Paying share grows from 1.1% to 3.0%; many upgrade after hitting 20 chats a day."
   },
@@ -1473,6 +1795,8 @@
    "priority": "P1",
    "status": "planned",
    "tags": [
+    "t-feature",
+    "t-l-app",
     "t-quickwin"
    ],
    "title": "Move plans to UPI on web: fees 15% → 2%",
@@ -1491,7 +1815,10 @@
    "period": "2027Q3",
    "priority": "P1",
    "status": "planned",
-   "tags": [],
+   "tags": [
+    "t-addition",
+    "t-l-app"
+   ],
    "title": "More care: dietitians, physio, elder care at home",
    "why": "Roadmap gate: 6% of users book monthly."
   },
@@ -1509,6 +1836,8 @@
    "priority": "P1",
    "status": "planned",
    "tags": [
+    "t-addition",
+    "t-l-app",
     "t-regulatory"
    ],
    "title": "Doctor consults through registered partners",
@@ -1527,7 +1856,10 @@
    "period": "2026Q4",
    "priority": "P1",
    "status": "done",
-   "tags": [],
+   "tags": [
+    "t-addition",
+    "t-l-app"
+   ],
    "title": "Fitness and healthy living in 200 cities",
    "why": "Partnership with India's leading fitness platform; 15% markup per class."
   },
@@ -1545,6 +1877,8 @@
    "priority": "P2",
    "status": "idea",
    "tags": [
+    "t-addition",
+    "t-l-app",
     "t-bet"
    ],
    "title": "Hospital partners for procedures and second opinions",
@@ -1564,6 +1898,8 @@
    "priority": "P0",
    "status": "in_progress",
    "tags": [
+    "t-addition",
+    "t-l-app",
     "t-launch"
    ],
    "title": "Lab partner live with markup and payments",
@@ -1576,13 +1912,15 @@
    "kind": "initiative",
    "kpi": "20% of chronic patients refill through Cheeku",
    "lane": "supply",
-   "moat": null,
+   "moat": "m-ecosystem",
    "order": 33,
    "owner": "deepesh",
    "period": "2027Q4",
    "priority": "P2",
    "status": "planned",
    "tags": [
+    "t-addition",
+    "t-l-app",
     "t-regulatory"
    ],
    "title": "Medicines delivered from chat",
@@ -1601,7 +1939,9 @@
    "period": "2026Q4",
    "priority": "P1",
    "status": "done",
-   "tags": [],
+   "tags": [
+    "t-l-app"
+   ],
    "title": "Care in 12,000+ pincodes: labs, doctors, medicines",
    "why": "Supply on day one through partner APIs, at zero cost to build."
   },
@@ -1637,7 +1977,9 @@
    "period": "2027Q2",
    "priority": "P1",
    "status": "planned",
-   "tags": [],
+   "tags": [
+    "t-l-app"
+   ],
    "title": "Result back in the thread within 24 hours",
    "why": "The promise is the loop: book, test, result explained, next step."
   },
@@ -1654,7 +1996,9 @@
    "period": "2028Q2",
    "priority": "P1",
    "status": "planned",
-   "tags": [],
+   "tags": [
+    "t-l-b2b"
+   ],
    "title": "Institution sales team for insurers and states",
    "why": "B2B team grows from 1 to 22 by 2031."
   },
@@ -1767,7 +2111,9 @@
    "period": "2027Q1",
    "priority": "P0",
    "status": "planned",
-   "tags": [],
+   "tags": [
+    "t-l-model"
+   ],
    "title": "Head of ML and the eval team",
    "why": "5 people in AI and data by Dec 2027."
   },
@@ -1790,6 +2136,28 @@
    "title": "External security audit and pen test",
    "why": "Breach risk is high impact. Employers and insurers will ask."
   },
+  "tr-broking": {
+   "confidence": 55,
+   "deps": [],
+   "endPeriod": null,
+   "gate": null,
+   "how": "IRDAI corporate agent (composite) registration, a principal officer, compliant sales flows in chat.",
+   "kind": "initiative",
+   "kpi": "Licence granted",
+   "lane": "trust",
+   "moat": "m-insurance",
+   "order": 902,
+   "owner": "deepesh",
+   "period": "2028Q2",
+   "priority": "P1",
+   "status": "planned",
+   "tags": [
+    "t-regulatory",
+    "t-l-b2b"
+   ],
+   "title": "Corporate agent licence to sell cover in the app",
+   "why": "Listing policies is not enough to own the insurance relationship. A licence lets us advise and sell within IRDAI rules."
+  },
   "tr-cdsco": {
    "confidence": 40,
    "deps": [],
@@ -1797,13 +2165,14 @@
    "kind": "initiative",
    "kpi": "Classification confirmed",
    "lane": "trust",
-   "moat": "m-trust",
+   "moat": "m-pendant",
    "order": 92,
    "owner": "athar",
    "period": "2029Q1",
    "priority": "P2",
    "status": "planned",
    "tags": [
+    "t-l-hw",
     "t-regulatory"
    ],
    "title": "CDSCO path for the pendant and any diagnostic claim",
@@ -1879,6 +2248,7 @@
    "priority": "P1",
    "status": "planned",
    "tags": [
+    "t-l-b2b",
     "t-dependency"
    ],
    "title": "ISO 27001 for employer and insurer contracts",
@@ -1892,11 +2262,23 @@
    "order": 3,
    "thesis": "Companies, benefits platforms and insurers bring families in at near-zero CAC on multi-year contracts."
   },
+  "m-ecosystem": {
+   "metric": "ecosystem",
+   "name": "Connected ecosystem in one app",
+   "order": 7,
+   "thesis": "Records, answers, labs, doctors, medicines, fitness, cover and devices behind one login, one wallet and one family memory. Every service added makes the others harder to leave."
+  },
   "m-habit": {
    "metric": "habit",
    "name": "Daily habit",
    "order": 4,
    "thesis": "One useful nudge every morning and 20 free chats a day. The reason families open Cheeku before Google."
+  },
+  "m-insurance": {
+   "metric": "insurance",
+   "name": "Insurance risk infrastructure",
+   "order": 6,
+   "thesis": "We help insurers carry family health risk: the family memory becomes a live risk score, cover is priced from it through the IRDAI sandbox, and claims run from the family file. Licences, data and insurer contracts a newcomer cannot buy."
   },
   "m-memory": {
    "metric": "memory",
@@ -1909,6 +2291,12 @@
    "name": "Our own India health model",
    "order": 1,
    "thesis": "Trained on consented family histories and ABDM records. Cheaper per answer and better on India evals than frontier APIs."
+  },
+  "m-pendant": {
+   "metric": "pendant",
+   "name": "Pendant for elder parents",
+   "order": 8,
+   "thesis": "A wearable for parents who will never install an app. Falls, SOS, vitals and medicine reminders flow into the memory their children already use. Hardware, CDSCO clearance and the family habit together are very hard to copy."
   },
   "m-supply": {
    "metric": "supply",
@@ -2108,6 +2496,13 @@
   }
  },
  "tags": {
+  "t-addition": {
+   "color": "#059669",
+   "group": "type",
+   "label": "Product addition",
+   "order": 21,
+   "short": "Addition"
+  },
   "t-bet": {
    "color": "#D3478C",
    "label": "Big bet",
@@ -2128,10 +2523,45 @@
    "label": "Experiment",
    "order": 8
   },
+  "t-feature": {
+   "color": "#2563EB",
+   "group": "type",
+   "label": "Feature",
+   "order": 20,
+   "short": "Feature"
+  },
   "t-investor": {
    "color": "#2F6FDE",
    "label": "Investor proof",
    "order": 5
+  },
+  "t-l-app": {
+   "color": "#7C3AED",
+   "group": "layer",
+   "label": "App layer",
+   "order": 30,
+   "short": "App"
+  },
+  "t-l-b2b": {
+   "color": "#0369A1",
+   "group": "layer",
+   "label": "B2B",
+   "order": 31,
+   "short": "B2B"
+  },
+  "t-l-hw": {
+   "color": "#C2410C",
+   "group": "layer",
+   "label": "Hardware",
+   "order": 33,
+   "short": "Hardware"
+  },
+  "t-l-model": {
+   "color": "#0D9488",
+   "group": "layer",
+   "label": "Model",
+   "order": 32,
+   "short": "Model"
   },
   "t-launch": {
    "color": "#7C3AED",
@@ -2142,6 +2572,13 @@
    "color": "#5B4EF0",
    "label": "Moat",
    "order": 0
+  },
+  "t-newprod": {
+   "color": "#DB2777",
+   "group": "type",
+   "label": "New product",
+   "order": 22,
+   "short": "New product"
   },
   "t-quickwin": {
    "color": "#3C9A4B",

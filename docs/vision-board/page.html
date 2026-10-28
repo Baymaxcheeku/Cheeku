@@ -190,7 +190,7 @@ svg.i { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor;
 .card.st-done .c-title { color: var(--muted); }
 .card.st-dropped { opacity: .5; }
 .card.st-dropped .c-title { text-decoration: line-through; }
-.c-top { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; color: var(--muted); letter-spacing: .01em; min-height: 16px; }
+.c-top { display: flex; flex-wrap: wrap; row-gap: 5px; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; color: var(--muted); letter-spacing: .01em; min-height: 16px; }
 .glyph { width: 10px; height: 10px; flex: none; }
 .when { margin-left: auto; display: inline-flex; align-items: center; gap: 3px; height: 18px; padding: 0 6px; border-radius: 6px; background: var(--accent-soft); color: var(--accent-2); font-size: 11px; font-weight: 600; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .when svg { width: 10px; height: 10px; }
@@ -210,14 +210,12 @@ svg.i { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor;
 .tg i { width: 6px; height: 6px; border-radius: 2px; display: inline-block; }
 .deps { display: inline-flex; align-items: center; gap: 3px; }
 .deps svg { width: 12px; height: 12px; }
-.c-exp { margin-left: auto; width: 22px; height: 22px; border-radius: 6px; border: 0; background: transparent; color: var(--faint); display: grid; place-items: center; padding: 0; opacity: 0; transition: opacity 120ms ease, background-color 120ms ease, color 120ms ease; }
-.c-exp svg { width: 14px; height: 14px; transition: transform 220ms var(--ease-out); }
-.card.open .c-exp { opacity: 1; }
-.card.open .c-exp svg { transform: rotate(180deg); }
+.c-exp { margin-left: auto; width: 24px; height: 22px; border-radius: 7px; border: 0; background: transparent; color: var(--faint); display: grid; place-items: center; padding: 0; transition: background-color 120ms ease, color 120ms ease, transform 120ms var(--ease-out); }
+.c-exp:active { transform: scale(.9); }
+.c-exp svg { width: 15px; height: 15px; }
+.card.open .c-exp { color: var(--accent-2); background: var(--accent-soft); }
 .c-exp:hover { background: var(--surface-3); color: var(--ink); }
-@media (hover: hover) and (pointer: fine) { .card:hover .c-exp { opacity: 1; } }
-@media (hover: none) { .c-exp { opacity: 1; } }
-.card .c-exp:focus-visible { opacity: 1; }
+@media (hover: hover) and (pointer: fine) { .card:hover .c-exp { color: var(--muted); } .card:hover .c-exp:hover, .card.open .c-exp:hover { color: var(--accent-2); background: var(--accent-soft); } }
 .card.sel { box-shadow: 0 0 0 2px var(--accent), var(--sh-2); }
 .c-more { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 240ms var(--ease-out); }
 .card.open .c-more { grid-template-rows: 1fr; }
@@ -379,6 +377,141 @@ table.kpi thead th { color: var(--muted); font-weight: 600; font-size: 11.5px; }
 .toast { position: fixed; left: 50%; bottom: calc(22px + env(safe-area-inset-bottom, 0px)); z-index: 60; transform: translate(-50%, 16px); opacity: 0; pointer-events: none; background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 12px; font-weight: 600; font-size: 13px; transition: opacity 160ms ease-out, transform 220ms var(--ease-out); max-width: calc(100% - 32px); box-shadow: var(--sh-2); }
 .toast.on { opacity: 1; transform: translate(-50%, 0); }
 
+
+/* Tag pills: type is solid, layer is tinted */
+.pill { display: inline-flex; align-items: center; height: 18px; padding: 0 7px; border-radius: 999px; font-size: 10.5px; font-weight: 650; letter-spacing: .01em; white-space: nowrap; flex: none; }
+.pill.type { background: var(--c); color: #fff; }
+.pill.layer { background: color-mix(in srgb, var(--c) 12%, var(--surface)); color: color-mix(in srgb, var(--c) 85%, var(--ink)); box-shadow: inset 0 0 0 0.5px color-mix(in srgb, var(--c) 35%, transparent); }
+:root[data-theme="dark"] .pill.layer { color: color-mix(in srgb, var(--c) 45%, white); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .pill.layer { color: color-mix(in srgb, var(--c) 45%, white); } }
+.pill.lg { height: 24px; padding: 0 10px; font-size: 12px; }
+.c-top .kind { display: inline-flex; align-items: center; gap: 5px; }
+.chip .pill { height: 16px; font-size: 10px; padding: 0 6px; }
+
+/* Sheet v3 */
+.sh-body.sx { padding: 0; }
+.sx-hero { padding: 26px 32px 22px; background: linear-gradient(180deg, color-mix(in srgb, var(--lc) 11%, var(--surface)) 0%, var(--surface) 100%); border-bottom: 0.5px solid var(--line); }
+.sx-tagrow { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 14px; }
+.sx-kind { display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 10px 0 8px; border-radius: 999px; background: var(--surface); box-shadow: 0 0 0 0.5px var(--line-2); font-size: 12px; font-weight: 600; color: var(--ink-2); }
+.sx-tagrow .tg { font-size: 12px; color: var(--ink-2); margin-left: 4px; }
+.sx-title { font: 650 32px/1.12 var(--display); letter-spacing: -0.024em; margin: 0 0 20px; max-width: 32ch; }
+.sx-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); background: var(--surface); border-radius: 14px; box-shadow: var(--sh-1); }
+.sx-stat { padding: 12px 16px; min-width: 0; display: flex; flex-direction: column; gap: 5px; }
+.sx-stat + .sx-stat { border-left: 0.5px solid var(--line-2); }
+.sx-stat small { font-size: 10.5px; font-weight: 650; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.sx-stat b { font: 600 15px/1.25 var(--display); display: flex; align-items: center; gap: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: -0.01em; min-height: 30px; }
+.sx-stat b .av { width: 24px; height: 24px; font-size: 11px; }
+.sx-stat .sx-sub { font-size: 11.5px; color: var(--muted); font-weight: 500; }
+.sx-stat .pri { height: 20px; font-size: 11px; }
+.ring { flex: none; }
+.ring circle + circle { transition: stroke-dasharray 500ms var(--ease-out); }
+.sx-track { display: flex; align-items: center; margin-top: 18px; }
+.sx-step { display: flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 600; color: var(--faint); flex: none; }
+.sx-step i { width: 18px; height: 18px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px currentColor; display: grid; place-items: center; }
+.sx-step i svg { width: 12px; height: 12px; stroke-width: 2.6; }
+.sx-step.done { color: var(--ink-2); } .sx-step.done i { background: var(--accent); box-shadow: none; color: #fff; }
+.sx-step.cur { color: var(--accent-2); } .sx-step.cur i { box-shadow: inset 0 0 0 5px var(--accent); }
+.sx-line { flex: 1; height: 2px; min-width: 18px; margin: 0 10px; border-radius: 1px; background: var(--line-2); }
+.sx-line.done { background: var(--accent); }
+.sx-flag { margin-left: 14px; display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 10px; border-radius: 999px; font-size: 12px; font-weight: 650; flex: none; background: color-mix(in srgb, var(--fc) 13%, var(--surface)); color: var(--fc); }
+.sx-body { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(280px, 1fr); gap: 30px; padding: 26px 32px 28px; }
+.sx-sec { margin-bottom: 26px; }
+.sx-h { display: flex; align-items: center; gap: 8px; font-size: 11.5px; font-weight: 650; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 0 0 10px; }
+.sx-h svg { width: 15px; height: 15px; color: var(--lc); }
+.sx-lead { font-size: 17px; line-height: 1.55; color: var(--ink); margin: 0; max-width: 60ch; }
+.sx-lead.sx-empty { color: var(--faint); font-size: 14px; }
+.sx-steps { list-style: none; margin: 0; padding: 0; counter-reset: s; }
+.sx-steps li { position: relative; padding: 1px 0 14px 38px; font-size: 15.5px; line-height: 1.5; color: var(--ink); counter-increment: s; }
+.sx-steps li::before { content: counter(s); position: absolute; left: 0; top: 0; width: 24px; height: 24px; border-radius: 50%; background: color-mix(in srgb, var(--lc) 14%, var(--surface)); color: color-mix(in srgb, var(--lc) 80%, var(--ink)); font-size: 12px; font-weight: 700; display: grid; place-items: center; }
+.sx-steps li::after { content: ""; position: absolute; left: 11.5px; top: 28px; bottom: 2px; width: 1px; background: var(--line-2); }
+.sx-steps li:last-child { padding-bottom: 0; } .sx-steps li:last-child::after { display: none; }
+.sx-goal { display: flex; gap: 14px; align-items: center; padding: 16px 18px; border-radius: 16px; background: color-mix(in srgb, var(--good) 8%, var(--surface)); box-shadow: inset 0 0 0 0.5px color-mix(in srgb, var(--good) 28%, transparent); }
+.sx-goal .ico { width: 38px; height: 38px; border-radius: 50%; background: color-mix(in srgb, var(--good) 16%, var(--surface)); color: var(--good); display: grid; place-items: center; flex: none; }
+.sx-goal .ico svg { width: 20px; height: 20px; }
+.sx-goal p { margin: 0; font-size: 16px; font-weight: 600; line-height: 1.4; }
+.sx-goal small { display: block; font-size: 12px; color: var(--muted); font-weight: 500; margin-bottom: 2px; }
+.sx-goal.empty { background: var(--surface-2); box-shadow: none; } .sx-goal.empty .ico { background: var(--surface-3); color: var(--faint); } .sx-goal.empty p { color: var(--muted); font-weight: 500; font-size: 14px; }
+.sx-opts { display: grid; gap: 8px; }
+.sx-opt { display: flex; gap: 10px; align-items: flex-start; padding: 10px 14px; border-radius: 12px; background: var(--surface-2); font-size: 14.5px; line-height: 1.4; }
+.sx-opt b { width: 20px; height: 20px; border-radius: 6px; background: var(--surface); box-shadow: 0 0 0 0.5px var(--line-2); font-size: 11px; display: grid; place-items: center; flex: none; margin-top: 1px; }
+.sx-out { margin-top: 10px; padding: 12px 14px; border-radius: 12px; background: color-mix(in srgb, var(--good) 9%, var(--surface)); color: var(--good); font-weight: 650; }
+.sx-card { background: var(--surface-2); border-radius: 16px; padding: 16px; margin-bottom: 14px; }
+.sx-card .sx-h { margin-bottom: 12px; }
+.sx-when { font: 650 22px/1.15 var(--display); letter-spacing: -0.018em; display: flex; align-items: baseline; gap: 8px; }
+.sx-when span { font: 500 13px var(--font); color: var(--muted); letter-spacing: 0; }
+.sx-note { font-size: 12.5px; color: var(--muted); line-height: 1.45; margin: 10px 0 0; }
+.sx-tl { position: relative; height: 44px; margin: 14px 4px 0; }
+.sx-tl .base { position: absolute; left: 0; right: 0; top: 14px; height: 4px; border-radius: 2px; background: var(--surface-3); }
+.sx-tl .past { position: absolute; left: 0; top: 14px; height: 4px; border-radius: 2px; background: color-mix(in srgb, var(--ink) 16%, transparent); }
+.sx-tl .tick { position: absolute; top: 11px; width: 1px; height: 10px; background: var(--line-2); }
+.sx-tl .yr { position: absolute; top: 26px; font-size: 10.5px; color: var(--muted); transform: translateX(-50%); font-variant-numeric: tabular-nums; }
+.sx-tl .span { position: absolute; top: 12px; height: 8px; border-radius: 4px; background: color-mix(in srgb, var(--lc) 40%, transparent); }
+.sx-tl .sx-ev { position: absolute; top: 12px; width: 8px; height: 8px; margin-left: -4px; transform: rotate(45deg); background: var(--navy); opacity: .45; }
+.sx-tl .now { position: absolute; top: 6px; width: 2px; height: 20px; margin-left: -1px; border-radius: 1px; background: var(--accent); }
+.sx-tl .me { position: absolute; top: 8px; width: 16px; height: 16px; margin-left: -8px; border-radius: 50%; background: var(--lc); box-shadow: 0 0 0 3px var(--surface-2), 0 0 0 5px color-mix(in srgb, var(--lc) 30%, transparent); animation: sx-pulse 2.4s var(--ease-out) 2; }
+@keyframes sx-pulse { 50% { box-shadow: 0 0 0 3px var(--surface-2), 0 0 0 9px color-mix(in srgb, var(--lc) 12%, transparent); } }
+.sx-flow { display: flex; flex-direction: column; gap: 6px; }
+.sx-flow .lbl { font-size: 11px; font-weight: 600; color: var(--muted); margin: 4px 0 0; }
+.sx-node { display: flex; gap: 8px; align-items: center; width: 100%; padding: 8px 10px; border: 0; border-radius: 10px; background: var(--surface); box-shadow: var(--sh-1); font-size: 13px; text-align: left; color: var(--ink); transition: box-shadow 160ms var(--ease-out), transform 120ms var(--ease-out); }
+button.sx-node:hover { box-shadow: var(--sh-2); } button.sx-node:active { transform: scale(.98); }
+.sx-node .t { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sx-node .p { font-size: 11.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.sx-node.me { background: color-mix(in srgb, var(--lc) 13%, var(--surface)); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--lc) 45%, transparent); font-weight: 650; }
+.sx-arrow { align-self: center; color: var(--faint); display: flex; }
+.sx-arrow svg { width: 14px; height: 14px; }
+.sx-score { min-width: 24px; height: 20px; border-radius: 6px; font-size: 11.5px; font-weight: 700; display: grid; place-items: center; color: #fff; }
+.sx-moat b { display: block; font: 650 15px/1.3 var(--display); letter-spacing: -0.01em; }
+.sx-moat p { margin: 6px 0 0; font-size: 13px; color: var(--muted); line-height: 1.45; }
+.sx-tally { display: flex; height: 8px; border-radius: 4px; overflow: hidden; background: var(--surface-3); gap: 2px; margin-top: 12px; }
+.sx-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-top: 6px; }
+
+/* Trajectory v3 */
+.tj-hero { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 20px 32px; align-items: center; }
+.tj-time { display: flex; align-items: center; gap: 14px; }
+.tj-play { width: 46px; height: 46px; border-radius: 50%; border: 0; background: var(--accent); color: var(--on-accent); display: grid; place-items: center; flex: none; box-shadow: 0 6px 18px color-mix(in srgb, var(--accent) 35%, transparent); transition: transform 120ms var(--ease-out), background-color 140ms ease; }
+.tj-play:hover { background: var(--accent-2); } .tj-play:active { transform: scale(.93); }
+.tj-play svg { width: 18px; height: 18px; fill: currentColor; stroke: none; }
+.tj-month { font: 650 26px/1.05 var(--display); letter-spacing: -0.02em; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.tj-sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
+.tj-scrub { position: relative; padding-top: 38px; }
+.tj-scrub input { width: 100%; accent-color: var(--accent); margin: 0; display: block; }
+.tj-evt { position: absolute; transform: translateX(-50%); border: 0; background: transparent; padding: 0 2px; font-size: 10.5px; font-weight: 650; color: var(--accent-2); white-space: nowrap; line-height: 14px; }
+.tj-evt:hover { color: var(--ink); }
+.tj-evt::after { content: ""; position: absolute; left: 50%; top: 14px; width: 1px; height: var(--stem, 10px); background: currentColor; opacity: .35; }
+.tj-kpis { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; }
+.tj-kpi { background: var(--surface-2); border-radius: 14px; padding: 12px 14px 8px; min-width: 0; }
+.tj-kpi small { font-size: 11.5px; color: var(--muted); font-weight: 600; white-space: nowrap; }
+.tj-kpi b { display: block; font: 650 22px/1.15 var(--display); letter-spacing: -0.02em; font-variant-numeric: tabular-nums; margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tj-kpi b.neg { color: var(--bad); }
+.tj-kpi .d { font-size: 11.5px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; min-height: 16px; }
+.tj-kpi .d.up { color: var(--good); } .tj-kpi .d.down { color: var(--bad); }
+.tj-kpi svg { width: 100%; height: 30px; display: block; margin-top: 6px; overflow: visible; }
+.tj-plot { position: relative; touch-action: pan-y; cursor: crosshair; }
+.tj-plot svg { display: block; width: 100%; height: auto; }
+.tj-ov { position: absolute; inset: 0; pointer-events: none; }
+.tj-cur { position: absolute; top: 0; bottom: 0; width: 1px; margin-left: -0.5px; background: var(--ink); opacity: .28; pointer-events: none; }
+.tj-dot { position: absolute; width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--surface); transform: translate(-50%, -50%); pointer-events: none; box-shadow: 0 0 0 0.5px rgba(0, 0, 0, .25), 0 2px 6px rgba(0, 0, 0, .15); }
+.tj-tip { position: absolute; top: 6px; z-index: 3; pointer-events: none; background: var(--surface); border-radius: 12px; box-shadow: var(--sh-2); padding: 10px 12px; font-size: 12px; min-width: 228px; opacity: 0; transition: opacity 120ms ease; }
+.tj-plot.hover .tj-tip { opacity: 1; }
+.tj-tip h6 { margin: 0 0 6px; font-size: 12.5px; font-weight: 650; }
+.tj-tip div { display: flex; align-items: center; gap: 12px; justify-content: space-between; font-variant-numeric: tabular-nums; line-height: 1.6; }
+.tj-tip div > :last-child { white-space: nowrap; }
+.tj-tip div span { display: inline-flex; gap: 6px; align-items: center; color: var(--muted); }
+.tj-tip div.tot { border-top: 0.5px solid var(--line-2); margin-top: 4px; padding-top: 4px; font-weight: 650; }
+.legend button { border: 0; background: transparent; display: inline-flex; gap: 6px; align-items: center; font-size: 12px; color: var(--muted); padding: 3px 7px; margin-left: -7px; border-radius: 6px; transition: opacity 140ms ease, background-color 140ms ease; }
+.legend button[aria-pressed="false"] { opacity: .38; }
+.legend button:hover { background: var(--surface-2); }
+.tj-ms { position: relative; height: 30px; margin-top: 4px; border-top: 0.5px dashed var(--line-2); }
+.tj-msd { position: absolute; top: 8px; width: 12px; height: 12px; margin-left: -6px; border-radius: 50%; border: 2px solid var(--surface); padding: 0; box-shadow: 0 0 0 0.5px rgba(0, 0, 0, .2); transition: transform 140ms var(--ease-out); }
+.tj-msd:hover { transform: scale(1.4); z-index: 2; }
+.tj-msd.gate { border-radius: 3px; }
+.tj-msd.r1 { top: 18px; }
+.tj-mshead { display: flex; justify-content: space-between; font-size: 11.5px; color: var(--muted); margin-top: 8px; }
+table.kpi .cur { background: var(--accent-soft) !important; }
+table.kpi td, table.kpi th { transition: background-color 160ms ease; }
+@media (max-width: 1000px) { .tj-kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); } .tj-hero { grid-template-columns: 1fr; } }
+@media (max-width: 860px) { .sx-stats { grid-template-columns: 1fr 1fr; } .sx-stat:nth-child(3) { border-left: 0; } .sx-stat:nth-child(n+3) { border-top: 0.5px solid var(--line-2); } .sx-body { grid-template-columns: minmax(0, 1fr); padding: 20px 18px; } .sx-hero { padding: 20px 18px 18px; } .sx-title { font-size: 25px; } .sx-step span { display: none; } }
+@media (max-width: 600px) { .tj-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } .tj-evt { font-size: 0; width: 10px; height: 14px; } .tj-evt::before { content: ""; position: absolute; left: 2px; top: 4px; width: 6px; height: 6px; border-radius: 50%; background: currentColor; } }
 @media (max-width: 1400px) { .tools .lbl-opt, .brand span { display: none; } }
 @media (max-width: 860px) {
   :root { --colw: 230px; }
@@ -948,6 +1081,9 @@ const MOAT_METRICS = {
   supply: { label: 'Care and fitness booked a year', fmt: v => '₹' + fmtCr(v) + ' cr' },
   distribution: { label: 'Corporate seats', fmt: v => fmtBig(v) },
   habit: { label: 'Paying accounts', fmt: v => fmtBig(v) },
+  insurance: { label: 'Insurance revenue a year', fmt: v => '₹' + fmtCr(v) + ' cr' },
+  ecosystem: { label: 'Revenue from in-app services', fmt: v => Math.round(v * 100) + '%' },
+  pendant: { label: 'Pendants with elder parents', fmt: v => fmtBig(v) },
   none: { label: '', fmt: () => '' },
 };
 
@@ -1037,6 +1173,16 @@ const ICONS = {
   link: '<path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/>',
   check: '<circle cx="12" cy="12" r="9"/><path d="m8.5 12.5 2.5 2.5 4.5-5"/>', plus: '<path d="M12 5v14M5 12h14"/>',
   filter: '<path d="M3 6h18M6.5 12h11M10 18h4"/>', download: '<path d="M12 4v11m0 0-4-4m4 4 4-4M5 20h14"/>',
+  eye: '<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>',
+  eyeOff: '<path d="M9.9 4.2A10 10 0 0 1 12 4c6.4 0 10 8 10 8a17 17 0 0 1-2.2 3.2M6.6 6.6C3.6 8.5 2 12 2 12s3.6 8 10 8a9.7 9.7 0 0 0 5.4-1.6"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2M2 2l20 20"/>',
+  tick: '<path d="m5 12.5 4.5 4.5L19 7.5"/>', spark: '<path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M6 18l2.5-2.5M15.5 8.5 18 6"/>',
+  route: '<circle cx="6" cy="19" r="2.5"/><circle cx="18" cy="5" r="2.5"/><path d="M8.5 19H16a3.5 3.5 0 0 0 0-7H8a3.5 3.5 0 0 1 0-7h7.5"/>',
+  target: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/>',
+  scale: '<path d="M12 3v18M7 21h10M5 7h14M5 7l-3 7a3.5 3.5 0 0 0 6 0Zm14 0-3 7a3.5 3.5 0 0 0 6 0Z"/>',
+  clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>', shield: '<path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/>',
+  castle: '<path d="M4 21V9h3V5h2v2h2V5h2v2h2V5h2v4h3v12Z"/><path d="M10 21v-5a2 2 0 0 1 4 0v5"/>', flag: '<path d="M5 21V4h11l-2 4 2 4H5"/>',
+  arrowDown: '<path d="M12 5v14m0 0-5-5m5 5 5-5"/>', play: '<path d="M8 5.5v13l10.5-6.5z"/>', pause: '<path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"/>',
+  sliders: '<path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/>',
 };
 const ic = n => `<svg class="i" viewBox="0 0 24 24" aria-hidden="true">${ICONS[n]}</svg>`;
 const BOLT = '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M7 0 L1.5 7 H5.5 L4.5 12 L10.5 4.5 H6.5Z" fill="currentColor"/></svg>';
@@ -1054,6 +1200,13 @@ function glyph(kind, lane) {
   return `<svg class="glyph" viewBox="0 0 10 10"><rect x="0" y="2" width="10" height="6" rx="2" fill="${c}"/></svg>`;
 }
 function face(by) { const pr = S.profiles[by]; if (pr && pr.avatarUrl) return `<img alt="" src="${esc(pr.avatarUrl)}">`; const n = (pr && pr.name) || '?'; return `<span class="av none" title="${esc(n)}">${esc(n[0].toUpperCase())}</span>`; }
+function tagGroups(it) {
+  const G = { type: [], layer: [], plain: [] };
+  (it.tags || []).forEach(id => { const t = S.tags.get(id); if (t) (G[t.group === 'type' || t.group === 'layer' ? t.group : 'plain']).push({ id, ...t }); });
+  G.layer.sort((a, b) => (a.order ?? 99) - (b.order ?? 99));
+  return G;
+}
+function pillHTML(t, lg) { return `<span class="pill ${t.group}${lg ? ' lg' : ''}" style="--c:${esc(t.color || '#7A7D95')}" title="${esc(t.label)}">${esc(lg ? t.label : (t.short || t.label))}</span>`; }
 function tagChip(id) { const t = S.tags.get(id); return t ? `<span class="tg"><i style="background:${esc(t.color || '#7A7D95')}"></i>${esc(t.label)}</span>` : ''; }
 function toast(msg) { const el = $('toast'); el.textContent = msg; el.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(() => el.classList.remove('on'), 2600); }
 function matches(it) {
@@ -1153,10 +1306,11 @@ function renderFilterPop() {
   const f = S.filters;
   const chip = (attr, key, on, inner) => `<button type="button" class="chip" data-${attr}="${esc(key)}" aria-pressed="${on}">${inner}</button>`;
   const tags = [...S.tags.values()].sort((a, b) => (a.order ?? 99) - (b.order ?? 99));
+  const tsec = (title, list, pills) => list.length ? `<section><h5>${title}</h5><div class="chips">${list.map(t => chip('ft', t.id, f.tags.has(t.id), pills ? pillHTML(t) + (t.short && t.short !== t.label ? '' : '') : `<i class="dot" style="background:${esc(t.color)};border-radius:2px"></i>${esc(t.label)}`)).join('')}</div></section>` : '';
   $('popFilter').innerHTML = `<section><h5>Owner</h5><div class="chips">${[...OWNERS, { id: 'none', name: 'No owner' }].map(o => chip('fo', o.id, f.owners.has(o.id), (o.id === 'none' ? '' : ownerAv(o.id)) + esc(o.name))).join('')}</div></section>
     <section><h5>Priority</h5><div class="chips">${PRIS.map(p => chip('fp', p, f.pri.has(p), p)).join('')}</div></section>
     <section><h5>Status</h5><div class="chips">${STATUSES.filter(s => s[0] !== 'dropped').map(([k, l]) => chip('fs', k, f.status.has(k), `<i class="sdot s-${k}"></i>${l}`)).join('')}</div></section>
-    ${tags.length ? `<section><h5>Tags</h5><div class="chips">${tags.map(t => chip('ft', t.id, f.tags.has(t.id), `<i class="dot" style="background:${esc(t.color)};border-radius:2px"></i>${esc(t.label)}`)).join('')}</div></section>` : ''}
+    ${tsec('Type', tags.filter(t => t.group === 'type'), true)}${tsec('Layer', tags.filter(t => t.group === 'layer'), true)}${tsec('Tags', tags.filter(t => t.group !== 'type' && t.group !== 'layer'), false)}
     <section style="display:flex;align-items:center;gap:8px">${chip('act', 'hideDone', f.hideDone, 'Hide done')}<span class="spacer"></span><button type="button" class="btn ghost" data-act="fClear">Clear all</button></section>`;
 }
 function renderLeversPop() {
@@ -1210,21 +1364,22 @@ function withFlip(fn) {
 
 // ----------------------------------------------------------------- board --
 function cardHTML(it, pl, i, o = {}) {
-  const st = it.status || 'idea', kind = it.kind || 'initiative', lane = laneOf(it.lane);
+  const st = it.status || 'idea', kind = it.kind || 'initiative', lane = laneOf(it.lane), G = tagGroups(it);
   const open = (S.density === 'detailed') !== S.expanded.has(it.id);
   const span = it.endPeriod && !pl.auto && PIDX[it.endPeriod] > PIDX[pl.period] ? `to ${periodLabel(it.endPeriod)}` : '';
   const label = o.lane ? lane.label : kind !== 'initiative' ? KIND_LABEL[kind] : '';
-  const top = label || span || pl.auto ? `<div class="c-top">${glyph(kind, it.lane)}<span>${esc(label)}${label && span ? ' · ' : ''}${esc(span)}</span>${pl.auto ? `<span class="when" title="Placed by the model: ${esc(gateText(it))}">${BOLT}${esc(monthShort(pl.month))}</span>` : ''}</div>` : '';
-  const tags = (it.tags || []).filter(t => S.tags.has(t));
+  const pills = [...G.type, ...G.layer].map(t => pillHTML(t)).join('');
+  const top = pills || label || span || pl.auto ? `<div class="c-top">${pills}${label || span ? `<span class="kind">${glyph(kind, it.lane)}${esc(label)}${label && span ? ' · ' : ''}${esc(span)}</span>` : ''}${pl.auto ? `<span class="when" title="Placed by the model: ${esc(gateText(it))}">${BOLT}${esc(monthShort(pl.month))}</span>` : ''}</div>` : '';
   const deps = (it.deps || []).filter(d => S.items.has(d)).length;
   const more = (it.why ? `<div class="c-why">${esc(it.why)}</div>` : '') + (it.kpi ? `<div class="c-done">${ic('check')}<span>${esc(it.kpi)}</span></div>` : '') + (it.confidence != null ? `<div class="conf">Confidence<span><i style="width:${Number(it.confidence) || 0}%"></i></span>${Number(it.confidence) || 0}%</div>` : '');
   const watchers = S.peers.filter(p => !p.isMe && p.presence && (p.presence.viewing === it.id || p.presence.editing === it.id));
   const peek = watchers.length ? `<span class="peek">${watchers.slice(0, 3).map(p => `<span title="${esc(personName(p.by))} is ${p.presence.editing === it.id ? 'editing' : 'looking at'} this" style="display:contents">${face(p.by)}</span>`).join('')}</span>` : '';
   return `<div class="card st-${esc(st)}${open && more ? ' open' : ''}${S.sheet && S.sheet.id === it.id ? ' sel' : ''}" data-id="${esc(it.id)}" data-comment-target draggable="${S.canEdit && !pl.auto && !o.lane}" tabindex="0" aria-label="${esc(it.title || 'Untitled')}" style="--i:${Math.min(i, 24)}">${peek}${top}
     <div class="c-title">${esc(it.title || 'Untitled')}</div>
-    <div class="c-meta">${ownerAv(it.owner)}${it.priority === 'P0' || it.priority === 'P1' ? `<span class="pri ${it.priority}">${it.priority}</span>` : ''}${st !== 'planned' ? `<span class="st"><i class="sdot s-${esc(st)}"></i>${esc(STATUS_LABEL[st] || 'Idea')}</span>` : ''}${tags.slice(0, 2).map(tagChip).join('')}${tags.length > 2 ? `<span class="tg">+${tags.length - 2}</span>` : ''}${deps ? `<span class="deps" title="Depends on ${deps} card${deps > 1 ? 's' : ''}">${ic('link')}${deps}</span>` : ''}${more ? `<button type="button" class="c-exp" aria-label="${open ? 'Show less' : 'Show more'}" aria-expanded="${open}">${ic('down')}</button>` : ''}</div>
+    <div class="c-meta">${ownerAv(it.owner)}${it.priority === 'P0' || it.priority === 'P1' ? `<span class="pri ${it.priority}">${it.priority}</span>` : ''}${st !== 'planned' ? `<span class="st"><i class="sdot s-${esc(st)}"></i>${esc(STATUS_LABEL[st] || 'Idea')}</span>` : ''}${G.plain.slice(0, 2).map(t => tagChip(t.id)).join('')}${G.plain.length > 2 ? `<span class="tg">+${G.plain.length - 2}</span>` : ''}${deps ? `<span class="deps" title="Depends on ${deps} card${deps > 1 ? 's' : ''}">${ic('link')}${deps}</span>` : ''}${more ? `<button type="button" class="c-exp" aria-label="${open ? 'Hide details' : 'Show details'}" title="${open ? 'Hide details' : 'Peek at why, done-when and confidence'}" aria-expanded="${open}">${ic(open ? 'eyeOff' : 'eye')}</button>` : ''}</div>
     ${more ? `<div class="c-more"><div>${more}</div></div>` : ''}</div>`;
 }
+
 function eventsBy() {
   const by = {};
   for (const [k, t] of Object.entries(S.model.ev)) { if (t == null || k === 'minCash') continue; (by[periodOfMonth(t)] = by[periodOfMonth(t)] || []).push([k, t]); }
@@ -1297,84 +1452,6 @@ function renderOwners() {
   return `<div class="wrap view"><div class="vhead"><h2>Who owns <i>what, when.</i></h2><p>Each founder's cards in time order. Start the weekly sync here: this quarter, then the next.</p></div><div class="cols">${cols}</div></div>`;
 }
 
-// ------------------------------------------------------------ trajectory --
-// Charts are drawn at the width they will show at, so text stays at its set size.
-function chartW(half) { const m = $('main'), inner = (m ? m.clientWidth : 1200) - 40; return Math.max(260, Math.round(half && innerWidth > 1000 ? (inner - 16) / 2 - 40 : inner - 40)); }
-function svgFrame(w, h) { return { w, h, pad: { l: 52, r: 14, t: 16, b: 26 } }; }
-function monthAxis(F, x) {
-  let s = '';
-  for (const p of PERIODS) { if (p.start < 0 || p.start >= 60) continue; const xx = x(p.start); s += `<line x1="${xx}" x2="${xx}" y1="${F.pad.t}" y2="${F.h - F.pad.b}" stroke="var(--line)" stroke-width="${p.start % 12 === 0 ? 1.4 : .6}"/>`; if (p.start % 12 === 0) s += `<text x="${xx + 4}" y="${F.h - 8}">${2027 + p.start / 12}</text>`; }
-  return s;
-}
-function eventMarks(F, x) {
-  let s = ''; const M = S.model;
-  const names = F.w < 640 ? { seriesA: 'A', seriesB: 'B', corpLive: 'Emp.', breakeven: 'Profit' } : { seriesA: 'Series A', seriesB: 'Series B', corpLive: 'Employers', breakeven: 'Profitable' };
-  ['corpLive', 'seriesA', 'seriesB', 'breakeven'].forEach((k, i) => { const t = M.ev[k]; if (t == null) return; const xx = x(t + .5); s += `<line x1="${xx}" x2="${xx}" y1="${F.pad.t}" y2="${F.h - F.pad.b}" stroke="var(--accent)" stroke-dasharray="3 3" stroke-width="1.2"/><text x="${xx + 3}" y="${F.pad.t + 10 + (i % 2) * 13}" style="fill:var(--accent);font-weight:700">${esc(names[k])}</text>`; });
-  return s;
-}
-function niceMax(v) { const p = Math.pow(10, Math.floor(Math.log10(v || 1))); for (const m of [1, 1.2, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10]) if (m * p >= v) return m * p; return 10 * p; }
-function chartUsers() {
-  const M = S.model, F = svgFrame(chartW(false), 300);
-  const x = t => F.pad.l + (t / 60) * (F.w - F.pad.l - F.pad.r);
-  const total = M.rows.map(r => r.mau), ymax = niceMax(Math.max(...total));
-  const y = v => F.h - F.pad.b - (v / ymax) * (F.h - F.pad.t - F.pad.b);
-  const years = [2027, 2028, 2029, 2030, 2031], shades = ['var(--accent)', 'color-mix(in srgb, var(--accent) 72%, var(--surface))', 'color-mix(in srgb, var(--accent) 50%, var(--surface))', 'color-mix(in srgb, var(--accent) 32%, var(--surface))', 'color-mix(in srgb, var(--accent) 18%, var(--surface))'];
-  const byYear = years.map(yr => new Array(60).fill(0).map((_, t) => M.cohortKeys.filter(k => PERIODS[PIDX[k]].year === yr).reduce((a, k) => a + M.layers[k][t], 0)));
-  const corp = M.rows.map(r => r.mauCorp);
-  let base = new Array(60).fill(0), s = '';
-  const band = (vals, fill) => { const top = vals.map((v, t) => base[t] + v); const d = 'M' + top.map((v, t) => `${x(t).toFixed(1)} ${y(v).toFixed(1)}`).join(' L') + ' L' + base.map((v, t) => `${x(59 - t).toFixed(1)} ${y(base[59 - t]).toFixed(1)}`).join(' L') + 'Z'; base = top; return `<path d="${d}" fill="${fill}"/>`; };
-  byYear.forEach((v, i) => s += band(v, shades[i]));
-  s += band(corp, 'var(--lime)');
-  let grid = ''; for (let i = 1; i <= 4; i++) { const v = ymax * i / 4; grid += `<line x1="${F.pad.l}" x2="${F.w - F.pad.r}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/><text x="${F.pad.l - 6}" y="${y(v) + 4}" text-anchor="end">${fmtBig(v)}</text>`; }
-  const legend = years.map((yr, i) => `<span><i class="dot" style="background:${shades[i]};border-radius:2px"></i>Joined in ${yr}</span>`).join('') + `<span><i class="dot" style="background:var(--lime);border-radius:2px"></i>Corporate members</span>`;
-  return `<div class="panel chart"><h3>Monthly users by the year they joined</h3><svg viewBox="0 0 ${F.w} ${F.h}" role="img" aria-label="Monthly users stacked by joining cohort, reaching ${fmtBig(total[59])} in Dec 2031">${grid}${monthAxis(F, x)}${s}${eventMarks(F, x)}</svg><div class="legend">${legend}</div></div>`;
-}
-function chartRevenue() {
-  const M = S.model, F = svgFrame(chartW(true), 300), P = M.per.filter(p => !p.empty);
-  const groups = [['Subscriptions', r => r.rSub, 'var(--accent)'], ['Care and fitness', r => r.rMkt + r.rFit, 'color-mix(in srgb, var(--accent) 55%, var(--surface))'], ['Ads and listings', r => r.rAds + r.rIns, 'color-mix(in srgb, var(--accent) 28%, var(--surface))'], ['Employers', r => r.rCorp, 'var(--lime)'], ['Institutions and pendant', r => r.rInsurer + r.rState + r.rLlm + r.rHw, 'var(--navy)']];
-  // Monthly average in each period, so quarters and halves compare fairly.
-  const vals = P.map(p => { const R = M.rows.slice(p.start, Math.min(60, p.end)); return groups.map(g => R.reduce((a, r) => a + g[1](r), 0) / R.length / 1e7); });
-  const eb = P.map(p => { const R = M.rows.slice(p.start, Math.min(60, p.end)); return R.reduce((a, r) => a + r.ebitda, 0) / R.length / 1e7; });
-  const ymax = niceMax(Math.max(...vals.map(v => v.reduce((a, b) => a + b, 0)), ...eb)), ymin = Math.min(0, ...eb);
-  const y = v => F.pad.t + (ymax - v) / (ymax - ymin) * (F.h - F.pad.t - F.pad.b);
-  const bw = (F.w - F.pad.l - F.pad.r) / P.length;
-  let s = '', grid = '';
-  for (let i = 0; i <= 4; i++) { const v = ymax * i / 4; grid += `<line x1="${F.pad.l}" x2="${F.w - F.pad.r}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/><text x="${F.pad.l - 6}" y="${y(v) + 4}" text-anchor="end">₹${fmtCr(v)}</text>`; }
-  const every = bw < 34 ? 4 : bw < 60 ? 2 : 1;
-  P.forEach((p, i) => { let acc = 0; const x0 = F.pad.l + i * bw + bw * .18; vals[i].forEach((v, j) => { s += `<rect x="${x0}" y="${y(acc + v)}" width="${bw * .64}" height="${Math.max(0, y(acc) - y(acc + v))}" fill="${groups[j][2]}"><title>${p.label} ${groups[j][0]}: ₹${v.toFixed(2)} cr a month</title></rect>`; acc += v; }); if (i % every === 0) s += `<text x="${x0 + bw * .32}" y="${F.h - 8}" text-anchor="middle">${p.label}</text>`; });
-  const line = eb.map((v, i) => `${(F.pad.l + i * bw + bw / 2).toFixed(1)} ${y(v).toFixed(1)}`).join(' L');
-  s += `<path d="M${line}" fill="none" stroke="var(--bad)" stroke-width="2"/>` + eb.map((v, i) => `<circle cx="${F.pad.l + i * bw + bw / 2}" cy="${y(v)}" r="3.5" fill="${v < 0 ? 'var(--bad)' : 'var(--good)'}"/>`).join('');
-  const legend = groups.map(g => `<span><i class="dot" style="background:${g[2]};border-radius:2px"></i>${g[0]}</span>`).join('') + `<span><i class="dot" style="background:var(--bad)"></i>EBITDA</span>`;
-  return `<div class="panel chart"><h3>Revenue a month, ₹ cr, by engine (average in each period)</h3><svg viewBox="0 0 ${F.w} ${F.h}" role="img" aria-label="Average monthly revenue by engine for each period, with EBITDA">${grid}<line x1="${F.pad.l}" x2="${F.w - F.pad.r}" y1="${y(0)}" y2="${y(0)}" stroke="var(--faint)"/>${s}</svg><div class="legend">${legend}</div></div>`;
-}
-function chartCash() {
-  const M = S.model, F = svgFrame(chartW(true), 300);
-  const x = t => F.pad.l + (t / 60) * (F.w - F.pad.l - F.pad.r);
-  const c = M.rows.map(r => r.cash / 1e7), ymax = niceMax(Math.max(...c)), ymin = Math.min(0, ...c);
-  const y = v => F.pad.t + (ymax - v) / (ymax - ymin) * (F.h - F.pad.t - F.pad.b);
-  let grid = ''; for (let i = 0; i <= 4; i++) { const v = ymin + (ymax - ymin) * i / 4; grid += `<text x="${F.pad.l - 6}" y="${y(v) + 4}" text-anchor="end">₹${fmtCr(v)}</text><line x1="${F.pad.l}" x2="${F.w - F.pad.r}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/>`; }
-  const shade = M.rows.map((r, t) => r.defending ? `<rect x="${x(t)}" y="${F.pad.t}" width="${x(1) - x(0)}" height="${F.h - F.pad.t - F.pad.b}" fill="var(--warn)" opacity=".16"/>` : '').join('');
-  const d = 'M' + c.map((v, t) => `${x(t).toFixed(1)} ${y(v).toFixed(1)}`).join(' L');
-  const mt = M.m.minAt;
-  return `<div class="panel chart"><h3>Cash in the bank, month by month</h3><svg viewBox="0 0 ${F.w} ${F.h}" role="img" aria-label="Month-end cash; lowest ₹${fmtCr(M.m.minCash / 1e7)} crore in ${monthLabel(mt)}">${grid}${shade}${monthAxis(F, x)}<line x1="${F.pad.l}" x2="${F.w - F.pad.r}" y1="${y(0)}" y2="${y(0)}" stroke="var(--faint)" stroke-width="1.4"/><path d="${d}" fill="none" stroke="var(--accent)" stroke-width="2.5"/><circle cx="${x(mt)}" cy="${y(c[mt])}" r="5" fill="${c[mt] < 0 ? 'var(--bad)' : 'var(--warn)'}"/><text x="${x(mt) + 8}" y="${y(c[mt]) - 6}" style="font-weight:700;fill:var(--ink)">Low ₹${fmtCr(c[mt])} cr, ${monthLabel(mt)}</text>${eventMarks(F, x)}</svg><div class="legend"><span><i class="dot" style="background:var(--warn);opacity:.5;border-radius:2px"></i>Spending cuts on (under 6 months of cash)</span></div></div>`;
-}
-function tableKpi() {
-  const P = S.model.per.filter(p => !p.empty);
-  const row = (label, f) => `<tr><td>${label}</td>${P.map(p => `<td>${f(p)}</td>`).join('')}</tr>`;
-  return `<div class="panel"><h3>The plan, period by period</h3><div class="tbl-wrap"><table class="kpi"><thead><tr><th></th>${P.map(p => `<th>${p.label}</th>`).join('')}</tr></thead><tbody>
-    ${row('Monthly users, end', p => fmtBig(p.mau))}${row('of which corporate', p => fmtBig(p.mauCorp))}${row('Paying accounts', p => fmtBig(p.subs))}${row('Companies signed', p => Math.round(p.corp))}
-    ${row('Revenue, ₹ cr', p => fmtCr(p.rev))}${row('EBITDA, ₹ cr', p => `<span style="color:${p.ebitda < 0 ? 'var(--bad)' : 'var(--good)'}">${fmtCr(p.ebitda)}</span>`)}${row('Cash, end, ₹ cr', p => fmtCr(p.cash))}${row('Team, end', p => Math.round(p.hc))}
-  </tbody></table></div></div>`;
-}
-function tableCohorts() {
-  const C = S.model.cohorts, mx = Math.max(...C.map(c => c.size));
-  const pct = v => v == null ? '<span class="muted">–</span>' : `<span style="display:inline-block;min-width:44px;padding:1px 6px;border-radius:6px;background:color-mix(in srgb, var(--accent) ${Math.round(v * 60)}%, transparent)">${Math.round(v * 100)}%</span>`;
-  return `<div class="panel"><h3>Quarterly cohorts: who joins, who stays</h3><div class="tbl-wrap"><table class="kpi"><thead><tr><th>Joined in</th><th>New users</th><th></th><th>Still active 3 mo later</th><th>6 mo</th><th>12 mo</th><th>Active, Dec 2031</th></tr></thead><tbody>${C.map(c => `<tr><td>${c.label}</td><td>${fmtBig(c.size)}</td><td style="width:120px"><div class="prog" style="margin:0"><i style="width:${(100 * c.size / mx).toFixed(1)}%;background:var(--accent)"></i></div></td><td>${pct(c.a3)}</td><td>${pct(c.a6)}</td><td>${pct(c.a12)}</td><td>${fmtBig(c.dec31)}</td></tr>`).join('')}</tbody></table></div><p class="meta" style="margin:10px 0 0">Consumer app only, counted from the end of the joining period. Retention follows the plan's monthly churn (12% falling to 7%), so a lever change reshapes every row.</p></div>`;
-}
-function renderTrajectory() {
-  return `<div class="wrap view"><div class="vhead"><h2>Where the plan <i>takes us.</i></h2><p>Drawn live from the financial model with the plan's levers. Move a lever above and these charts, the board ribbon and every model-gated card move together.</p></div>${chartUsers()}<div class="cols2 even">${chartRevenue()}${chartCash()}</div>${tableKpi()}${tableCohorts()}</div>`;
-}
-
 // ----------------------------------------------------------------- risks --
 function riskScore(r) { return (Number(r.likelihood) || 1) * (Number(r.impact) || 1); }
 function riskProgress(r) { const ids = (r.items || []).filter(id => S.items.has(id)); if (!ids.length) return null; const done = ids.filter(id => S.items.get(id).status === 'done').length; return { done, n: ids.length }; }
@@ -1408,6 +1485,9 @@ function moatSeries(key) {
   if (key === 'supply') return rows.map(r => r.gmv * 12 / 1e7);
   if (key === 'distribution') return rows.map(r => r.seats);
   if (key === 'habit') return rows.map(r => r.subs);
+  if (key === 'insurance') return rows.map(r => (r.rInsurer + r.rIns) * 12 / 1e7);
+  if (key === 'ecosystem') return rows.map(r => r.rev ? (r.rMkt + r.rFit + r.rIns + r.rInsurer + r.rHw) / r.rev : 0);
+  if (key === 'pendant') { let c = 0; return rows.map(r => (c += r.rHw ? M.s.pendantUnits[r.y] : 0)); }
   return null;
 }
 function renderMoats() {
@@ -1447,6 +1527,187 @@ function renderDecisions() {
 }
 
 
+// ------------------------------------------------------------ trajectory --
+// One month cursor drives everything: the tiles, the charts' crosshairs and the tables. Hover a chart, drag the scrubber or
+// press play to watch the plan unfold. Data changes (scenario, levers) tween from what is on screen to the new numbers.
+const TJ = { t: 59, playing: false, raf: 0, tween: 0, D: null, hide: new Set(), P: [] };
+const TJ_YEARS = [2027, 2028, 2029, 2030, 2031];
+const U_COL = ['var(--accent)', 'color-mix(in srgb, var(--accent) 72%, var(--surface))', 'color-mix(in srgb, var(--accent) 50%, var(--surface))', 'color-mix(in srgb, var(--accent) 32%, var(--surface))', 'color-mix(in srgb, var(--accent) 18%, var(--surface))', 'var(--lime)'];
+const U_LAB = [...TJ_YEARS.map(y => `Joined in ${y}`), 'Corporate members'];
+const REV = [['Subscriptions', r => r.rSub, 'var(--accent)'], ['Care and fitness', r => r.rMkt + r.rFit, 'color-mix(in srgb, var(--accent) 55%, var(--surface))'], ['Ads and listings', r => r.rAds + r.rIns, 'color-mix(in srgb, var(--accent) 28%, var(--surface))'], ['Employers', r => r.rCorp, 'var(--lime)'], ['Institutions and pendant', r => r.rInsurer + r.rState + r.rLlm + r.rHw, 'var(--navy)']];
+const TJ_EV = { corpLive: 'Employers', seriesA: 'Series A', tenLakh: '10 lakh users', seriesB: 'Series B', pendant: 'Pendant', breakeven: 'Profitable', crore: '1 crore users' };
+const TILES = [
+  ['Monthly users', r => r.mau, v => fmtBig(v), 'x'], ['Paying accounts', r => r.subs, v => fmtBig(v), 'x'],
+  ['Revenue run rate', r => r.rev * 12 / 1e7, v => `₹${fmtCr(v)} cr`, 'x'], ['EBITDA this month', r => r.ebitda / 1e7, v => `₹${fmtCr(v)} cr`, 'd'],
+  ['Cash in the bank', r => r.cash / 1e7, v => `₹${fmtCr(v)} cr`, 'd'], ['Team', r => r.hcTotal, v => String(Math.round(v)), 'd'],
+];
+function niceMax(v) { const p = Math.pow(10, Math.floor(Math.log10(v || 1))); for (const m of [1, 1.2, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10]) if (m * p >= v) return m * p; return 10 * p; }
+function tjW(half) { const m = $('main'), inner = (m ? m.clientWidth : 1200) - 40; return Math.max(260, Math.round(half && innerWidth > 1000 ? (inner - 16) / 2 - 40 : inner - 40)); }
+const avgOf = (M, p, f) => { const R = M.rows.slice(p.start, Math.min(60, p.end)); return R.reduce((a, r) => a + f(r), 0) / R.length / 1e7; };
+function tjData(M) {
+  const byYear = TJ_YEARS.map(yr => M.rows.map((_, t) => M.cohortKeys.filter(k => PERIODS[PIDX[k]].year === yr).reduce((a, k) => a + M.layers[k][t], 0)));
+  const u = [...byYear, M.rows.map(r => r.mauCorp)].map((s, i) => TJ.hide.has('u' + i) ? s.map(() => 0) : s);
+  const tot = M.rows.map((_, t) => u.reduce((a, s) => a + s[t], 0));
+  const rv = TJ.P.map(p => REV.map((g, j) => TJ.hide.has('r' + j) ? 0 : avgOf(M, p, g[1])));
+  const eb = TJ.P.map(p => avgOf(M, p, r => r.ebitda));
+  const cash = M.rows.map(r => r.cash / 1e7);
+  return { u, uMax: niceMax(Math.max(...tot, 1)), rv, eb, rMax: niceMax(Math.max(...rv.map(v => v.reduce((a, b) => a + b, 0)), ...eb, .01)), rMin: Math.min(0, ...eb), cash, cMax: niceMax(Math.max(...cash, 1)), cMin: Math.min(0, ...cash) };
+}
+function tjZero(D) { const z = x => Array.isArray(x) ? x.map(z) : 0; return { ...D, u: z(D.u), rv: z(D.rv), eb: z(D.eb), cash: z(D.cash), rMin: 0, cMin: 0 }; }
+function lerpD(a, b, e) { if (typeof b === 'number') return a + (b - a) * e; if (Array.isArray(b)) return b.map((x, i) => lerpD(a[i], x, e)); const o = {}; for (const k in b) o[k] = lerpD(a[k], b[k], e); return o; }
+const FR = { u: { h: 300, pad: { l: 54, r: 16, t: 18, b: 26 } }, r: { h: 280, pad: { l: 54, r: 14, t: 16, b: 26 } }, c: { h: 280, pad: { l: 54, r: 14, t: 16, b: 26 } } };
+function frame(k) { const F = FR[k]; F.w = TJ.frames[k] || 800; return F; }
+TJ.frames = {};
+const xm = (F, t) => F.pad.l + (t / 59) * (F.w - F.pad.l - F.pad.r);
+function evLines(F) {
+  const M = S.model, names = F.w < 640 ? { corpLive: 'Emp.', seriesA: 'A', seriesB: 'B', breakeven: 'Profit' } : { corpLive: 'Employers', seriesA: 'Series A', seriesB: 'Series B', breakeven: 'Profitable' };
+  return Object.keys(names).map((k, i) => { const t = M.ev[k]; if (t == null) return ''; const x = xm(F, t); return `<line x1="${x}" x2="${x}" y1="${F.pad.t}" y2="${F.h - F.pad.b}" stroke="var(--accent)" stroke-dasharray="3 3" stroke-width="1.1" opacity=".7"/><text x="${x + 4}" y="${F.pad.t + 10 + (i % 2) * 13}" style="fill:var(--accent-2);font-weight:650">${names[k]}</text>`; }).join('');
+}
+function yearAxis(F) { let s = ''; for (let y = 0; y < 5; y++) { const x = xm(F, y * 12); s += `<line x1="${x}" x2="${x}" y1="${F.pad.t}" y2="${F.h - F.pad.b}" stroke="var(--line)"/><text x="${x + 4}" y="${F.h - 8}">${2027 + y}</text>`; } return s; }
+function drawUsers(D) {
+  const F = frame('u'), y = v => F.h - F.pad.b - (v / D.uMax) * (F.h - F.pad.t - F.pad.b);
+  let base = new Array(60).fill(0), s = '';
+  D.u.forEach((vals, i) => {
+    const top = vals.map((v, t) => base[t] + v);
+    s += `<path d="M${top.map((v, t) => `${xm(F, t).toFixed(1)} ${y(v).toFixed(1)}`).join(' L')} L${base.map((v, t) => `${xm(F, 59 - t).toFixed(1)} ${y(base[59 - t]).toFixed(1)}`).join(' L')}Z" fill="${U_COL[i]}"/>`;
+    base = top;
+  });
+  let grid = ''; for (let i = 1; i <= 4; i++) { const v = D.uMax * i / 4; grid += `<line x1="${F.pad.l}" x2="${F.w - F.pad.r}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/><text x="${F.pad.l - 8}" y="${y(v) + 4}" text-anchor="end">${fmtBig(v)}</text>`; }
+  return `<svg viewBox="0 0 ${F.w} ${F.h}" role="img" aria-label="Monthly users stacked by the year they joined">${grid}${yearAxis(F)}${s}${evLines(F)}</svg>`;
+}
+function drawRevenue(D) {
+  const F = frame('r'), P = TJ.P, y = v => F.pad.t + (D.rMax - v) / (D.rMax - D.rMin) * (F.h - F.pad.t - F.pad.b), bw = (F.w - F.pad.l - F.pad.r) / P.length;
+  let s = '', grid = '';
+  for (let i = 0; i <= 4; i++) { const v = D.rMax * i / 4; grid += `<line x1="${F.pad.l}" x2="${F.w - F.pad.r}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/><text x="${F.pad.l - 8}" y="${y(v) + 4}" text-anchor="end">₹${fmtCr(v)}</text>`; }
+  const every = bw < 34 ? 4 : bw < 60 ? 2 : 1;
+  P.forEach((p, i) => { let acc = 0; const x0 = F.pad.l + i * bw + bw * .16; s += `<g data-i="${i}">`; D.rv[i].forEach((v, j) => { s += `<rect x="${x0.toFixed(1)}" y="${y(acc + v).toFixed(1)}" width="${(bw * .68).toFixed(1)}" height="${Math.max(0, y(acc) - y(acc + v)).toFixed(1)}" rx="1.5" fill="${REV[j][2]}"/>`; acc += v; }); s += '</g>'; if (i % every === 0) s += `<text x="${x0 + bw * .34}" y="${F.h - 8}" text-anchor="middle">${p.label}</text>`; });
+  const line = D.eb.map((v, i) => `${(F.pad.l + i * bw + bw / 2).toFixed(1)} ${y(v).toFixed(1)}`).join(' L');
+  s += `<path d="M${line}" fill="none" stroke="var(--bad)" stroke-width="2"/>` + D.eb.map((v, i) => `<circle cx="${F.pad.l + i * bw + bw / 2}" cy="${y(v)}" r="3.5" fill="${v < 0 ? 'var(--bad)' : 'var(--good)'}"/>`).join('');
+  return `<svg viewBox="0 0 ${F.w} ${F.h}" role="img" aria-label="Average monthly revenue by engine for each period, with EBITDA">${grid}<line x1="${F.pad.l}" x2="${F.w - F.pad.r}" y1="${y(0)}" y2="${y(0)}" stroke="var(--faint)"/>${s}</svg>`;
+}
+function drawCash(D) {
+  const F = frame('c'), M = S.model, y = v => F.pad.t + (D.cMax - v) / (D.cMax - D.cMin) * (F.h - F.pad.t - F.pad.b);
+  let grid = ''; for (let i = 0; i <= 4; i++) { const v = D.cMin + (D.cMax - D.cMin) * i / 4; grid += `<text x="${F.pad.l - 8}" y="${y(v) + 4}" text-anchor="end">₹${fmtCr(v)}</text><line x1="${F.pad.l}" x2="${F.w - F.pad.r}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/>`; }
+  const cut = M.rows.map((r, t) => r.defending ? `<rect x="${xm(F, t) - 2}" y="${F.pad.t}" width="${xm(F, 1) - xm(F, 0) + 1}" height="${F.h - F.pad.t - F.pad.b}" fill="var(--warn)" opacity=".14"/>` : '').join('');
+  const pts = D.cash.map((v, t) => `${xm(F, t).toFixed(1)} ${y(v).toFixed(1)}`);
+  return `<svg viewBox="0 0 ${F.w} ${F.h}" role="img" aria-label="Month-end cash">${grid}${cut}${yearAxis(F)}<line x1="${F.pad.l}" x2="${F.w - F.pad.r}" y1="${y(0)}" y2="${y(0)}" stroke="var(--faint)" stroke-width="1.2"/><path d="M${pts.join(' L')} L${xm(F, 59)} ${y(Math.max(0, D.cMin))} L${xm(F, 0)} ${y(Math.max(0, D.cMin))}Z" fill="color-mix(in srgb, var(--accent) 10%, transparent)"/><path d="M${pts.join(' L')}" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linejoin="round"/>${evLines(F)}</svg>`;
+}
+function spark(vals, t) {
+  const W = 120, H = 30, mx = Math.max(...vals), mn = Math.min(0, ...vals), y = v => H - 2 - (v - mn) / ((mx - mn) || 1) * (H - 4), x = i => i / 59 * W;
+  return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true"><path d="M${vals.map((v, i) => `${x(i).toFixed(1)} ${y(v).toFixed(1)}`).join(' L')}" fill="none" stroke="var(--accent)" stroke-width="1.6" vector-effect="non-scaling-stroke" opacity=".85"/><line class="sl" x1="${x(t)}" x2="${x(t)}" y1="0" y2="${H}" stroke="var(--ink)" stroke-width="1" vector-effect="non-scaling-stroke" opacity=".25"/></svg>`;
+}
+function tableKpi() {
+  const P = S.model.per.filter(p => !p.empty);
+  const row = (label, f) => `<tr><td>${label}</td>${P.map(p => `<td data-p="${p.key}">${f(p)}</td>`).join('')}</tr>`;
+  return `<div class="panel"><h3>The plan, period by period</h3><div class="tbl-wrap"><table class="kpi"><thead><tr><th></th>${P.map(p => `<th data-p="${p.key}">${p.label}</th>`).join('')}</tr></thead><tbody>
+    ${row('Monthly users, end', p => fmtBig(p.mau))}${row('of which corporate', p => fmtBig(p.mauCorp))}${row('Paying accounts', p => fmtBig(p.subs))}${row('Companies signed', p => Math.round(p.corp))}
+    ${row('Revenue, ₹ cr', p => fmtCr(p.rev))}${row('EBITDA, ₹ cr', p => `<span style="color:${p.ebitda < 0 ? 'var(--bad)' : 'var(--good)'}">${fmtCr(p.ebitda)}</span>`)}${row('Cash, end, ₹ cr', p => fmtCr(p.cash))}${row('Team, end', p => Math.round(p.hc))}
+  </tbody></table></div></div>`;
+}
+function tableCohorts() {
+  const C = S.model.cohorts, mx = Math.max(...C.map(c => c.size));
+  const pct = v => v == null ? '<span class="muted">–</span>' : `<span style="display:inline-block;min-width:44px;padding:1px 6px;border-radius:6px;background:color-mix(in srgb, var(--accent) ${Math.round(v * 60)}%, transparent)">${Math.round(v * 100)}%</span>`;
+  return `<div class="panel"><h3>Quarterly cohorts: who joins, who stays</h3><div class="tbl-wrap"><table class="kpi"><thead><tr><th>Joined in</th><th>New users</th><th></th><th>Still active 3 mo later</th><th>6 mo</th><th>12 mo</th><th>Active, Dec 2031</th></tr></thead><tbody>${C.map(c => `<tr data-p="${c.key}"><td>${c.label}</td><td>${fmtBig(c.size)}</td><td style="width:120px"><div class="prog" style="margin:0"><i style="width:${(100 * c.size / mx).toFixed(1)}%;background:var(--accent)"></i></div></td><td>${pct(c.a3)}</td><td>${pct(c.a6)}</td><td>${pct(c.a12)}</td><td>${fmtBig(c.dec31)}</td></tr>`).join('')}</tbody></table></div><p class="meta" style="margin:10px 0 0">Consumer app only, counted from the end of the joining period. Retention follows the plan's monthly churn, so a lever change reshapes every row.</p></div>`;
+}
+function renderTrajectory() {
+  const M = S.model, p = activePlan();
+  TJ.P = M.per.filter(x => !x.empty); TJ.frames = { u: tjW(false), r: tjW(true), c: tjW(true) };
+  const evs = Object.entries(TJ_EV).map(([k, l]) => [k, l, M.ev[k]]).filter(e => e[2] != null).sort((a, b) => a[2] - b[2]);
+  let lastX = [-99, -99];
+  const evH = evs.map(([k, l, t]) => { const x = t / 59 * 100; const row = x - lastX[0] < 11 ? (x - lastX[1] < 11 ? 0 : 1) : 0; lastX[row] = x; return `<button type="button" class="tj-evt" data-tjt="${t}" style="left:${x.toFixed(2)}%;top:${row ? 0 : 16}px;--stem:${row ? 26 : 10}px" title="${esc(EVENTS[k])}, ${monthLabel(t)}">${esc(l)}</button>`; }).join('');
+  const tiles = TILES.map((d, i) => `<div class="tj-kpi"><small>${d[0]}</small><b id="tjK${i}">–</b><span class="d" id="tjD${i}"></span><span id="tjS${i}">${spark(M.rows.map(d[1]), Math.round(TJ.t))}</span></div>`).join('');
+  const ms = [...S.items.values()].filter(it => (it.kind === 'milestone' || it.kind === 'gate') && it.status !== 'dropped').map(it => { const pl = placeOf(it); return { it, t: cardMonth(it, pl), pl }; }).filter(x => x.pl.period !== 'later').sort((a, b) => a.t - b.t);
+  let last = [-9, -9];
+  const msH = ms.map(({ it, t }) => { const tt = Math.max(0, Math.min(59, t)), row = tt - last[0] < 1.4 ? 1 : 0; last[row] = tt; const F = frame('u'); return `<button type="button" class="tj-msd${it.kind === 'gate' ? ' gate' : ''}${row ? ' r1' : ''}" data-id="${esc(it.id)}" style="left:${(xm(F, tt) / F.w * 100).toFixed(2)}%;background:var(--l-${esc(it.lane)})" title="${esc(it.title)} · ${esc(periodLabel(placeOf(it).period))}" aria-label="${esc(it.title)}"></button>`; }).join('');
+  const legend = (pre, labels, cols) => labels.map((l, i) => `<button type="button" data-tjhide="${pre}${i}" aria-pressed="${!TJ.hide.has(pre + i)}"><i class="dot" style="background:${cols[i]};border-radius:2px"></i>${l}</button>`).join('');
+  return `<div class="wrap view" id="traj"><div class="vhead"><h2>Where the plan <i>takes us.</i></h2><p>Live from the financial model. Press play to watch five years unfold, hover any chart, or switch the case and watch every number move.</p>
+      <span class="spacer"></span><div class="seg" role="group" aria-label="Scenario">${['bear', 'base', 'bull'].map(k => `<button type="button" data-sc="${k}" aria-pressed="${p.scenario === k}">${k[0].toUpperCase() + k.slice(1)}</button>`).join('')}</div><button type="button" class="ibtn" data-act="levers">${ic('sliders')}Levers</button></div>
+    <div class="panel tj-hero">
+      <div class="tj-time"><button type="button" class="tj-play" id="tjPlay" aria-label="Play the plan">${ic(TJ.playing ? 'pause' : 'play')}</button><div><div class="tj-month" id="tjMonth">${monthLabel(Math.round(TJ.t))}</div><div class="tj-sub" id="tjSub"></div></div></div>
+      <div class="tj-scrub">${evH}<input type="range" id="tjRange" min="0" max="59" step="1" value="${Math.round(TJ.t)}" aria-label="Month"></div>
+      <div class="tj-kpis">${tiles}</div>
+    </div>
+    <div class="panel chart"><h3>Monthly users by the year they joined</h3><div class="tj-plot" data-plot="u"><div id="tjU"></div><div class="tj-ov" id="tjUo"></div></div>
+      <div class="tj-ms" aria-label="Milestones">${msH}</div><div class="tj-mshead"><span>Milestones and gates on the board, by lane colour. Click one to open it.</span></div>
+      <div class="legend">${legend('u', U_LAB, U_COL)}</div></div>
+    <div class="cols2 even"><div class="panel chart"><h3>Revenue a month by engine, ₹ cr</h3><div class="tj-plot" data-plot="r"><div id="tjR"></div><div class="tj-ov" id="tjRo"></div></div><div class="legend">${legend('r', REV.map(g => g[0]), REV.map(g => g[2]))}<span><i class="dot" style="background:var(--bad)"></i>EBITDA</span></div></div>
+      <div class="panel chart"><h3>Cash in the bank</h3><div class="tj-plot" data-plot="c"><div id="tjC"></div><div class="tj-ov" id="tjCo"></div></div><div class="legend"><span><i class="dot" style="background:var(--warn);opacity:.5;border-radius:2px"></i>Spending cuts on (under 6 months of cash)</span></div></div></div>
+    ${tableKpi()}${tableCohorts()}</div>`;
+}
+function trajMount() {
+  if (!$('traj')) return;
+  const D1 = tjData(S.model), from = TJ.D || tjZero(D1);
+  cancelAnimationFrame(TJ.tween);
+  if (reduceMotion() || JSON.stringify(from) === JSON.stringify(D1)) { TJ.D = D1; tjDraw(); return; }
+  const dur = TJ.D ? 520 : 1100, t0 = performance.now(), ease = p => 1 - Math.pow(1 - p, 3);
+  const step = now => { const p = Math.min(1, (now - t0) / dur); TJ.D = p >= 1 ? D1 : lerpD(from, D1, ease(p)); tjDraw(); if (p < 1) TJ.tween = requestAnimationFrame(step); };
+  step(t0);
+}
+function tjDraw() {
+  if (!$('tjU')) return;
+  $('tjU').innerHTML = drawUsers(TJ.D); $('tjR').innerHTML = drawRevenue(TJ.D); $('tjC').innerHTML = drawCash(TJ.D);
+  tjCursor();
+}
+function tjCursor() {
+  if (!$('tjU') || !TJ.D) return;
+  const M = S.model, D = TJ.D, tf = Math.max(0, Math.min(59, TJ.t)), t = Math.round(tf), r = M.rows[t];
+  const pct = (F, x) => (x / F.w * 100).toFixed(3) + '%', ypct = (F, y) => (y / F.h * 100).toFixed(3) + '%';
+  const tipSide = (F, x) => x / F.w > .62 ? 'transform:translateX(calc(-100% - 14px))' : 'transform:translateX(14px)';
+  // users
+  { const F = frame('u'), x = xm(F, tf), y = v => F.h - F.pad.b - (v / D.uMax) * (F.h - F.pad.t - F.pad.b);
+    const vals = D.u.map(s => s[t]), tot = vals.reduce((a, b) => a + b, 0);
+    $('tjUo').innerHTML = `<span class="tj-cur" style="left:${pct(F, x)};top:${ypct(F, F.pad.t)};bottom:${(F.pad.b / F.h * 100).toFixed(2)}%"></span><span class="tj-dot" style="left:${pct(F, x)};top:${ypct(F, y(tot))};background:var(--accent)"></span>
+      <div class="tj-tip" style="left:${pct(F, x)};${tipSide(F, x)}"><h6>${monthLabel(t)}</h6>${vals.map((v, i) => TJ.hide.has('u' + i) ? '' : `<div><span><i class="dot" style="background:${U_COL[i]};border-radius:2px"></i>${U_LAB[i]}</span>${fmtBig(v)}</div>`).reverse().join('')}<div class="tot"><span>Total</span>${fmtBig(tot)}</div></div>`; }
+  // revenue
+  { const F = frame('r'), i = Math.max(0, TJ.P.findIndex(p => t >= p.start && t < p.end)), p = TJ.P[i], bw = (F.w - F.pad.l - F.pad.r) / TJ.P.length, x = F.pad.l + i * bw + bw / 2;
+    document.querySelectorAll('#tjR g[data-i]').forEach(g => g.setAttribute('opacity', Number(g.dataset.i) === i ? 1 : .45));
+    $('tjRo').innerHTML = `<div class="tj-tip" style="left:${pct(F, x)};${tipSide(F, x)}"><h6>${esc(p.label)}, a month on average</h6>${REV.map((g, j) => TJ.hide.has('r' + j) ? '' : `<div><span><i class="dot" style="background:${g[2]};border-radius:2px"></i>${g[0]}</span>₹${D.rv[i][j].toFixed(2)} cr</div>`).reverse().join('')}<div class="tot"><span>EBITDA</span><b style="color:${D.eb[i] < 0 ? 'var(--bad)' : 'var(--good)'}">₹${D.eb[i].toFixed(2)} cr</b></div></div>`; }
+  // cash
+  { const F = frame('c'), x = xm(F, tf), y = v => F.pad.t + (D.cMax - v) / (D.cMax - D.cMin) * (F.h - F.pad.t - F.pad.b), c = D.cash[t];
+    $('tjCo').innerHTML = `<span class="tj-cur" style="left:${pct(F, x)};top:${ypct(F, F.pad.t)};bottom:${(F.pad.b / F.h * 100).toFixed(2)}%"></span><span class="tj-dot" style="left:${pct(F, x)};top:${ypct(F, y(c))};background:${c < 0 ? 'var(--bad)' : 'var(--accent)'}"></span>
+      <div class="tj-tip" style="left:${pct(F, x)};${tipSide(F, x)}"><h6>${monthLabel(t)}</h6><div><span>Cash, month end</span><b>₹${fmtCr(c)} cr</b></div><div><span>Burn or profit</span>₹${fmtCr(r.ebitda / 1e7)} cr</div>${r.defending ? '<div><span style="color:var(--warn)">Spending cuts on</span></div>' : ''}</div>`; }
+  // tiles, scrubber, tables
+  TILES.forEach((d, i) => {
+    const v = d[1](r), b = $('tjK' + i); b.textContent = d[2](v); b.classList.toggle('neg', v < 0);
+    const prev = t >= 12 ? d[1](M.rows[t - 12]) : null, el = $('tjD' + i);
+    if (prev == null) { el.textContent = t === 0 ? 'Launch month' : `${t + 1} months in`; el.className = 'd'; }
+    else if (d[3] === 'x' && prev > 0) { const k = v / prev; el.textContent = `${k >= 1.95 ? k.toFixed(1) + '×' : (k >= 1 ? '+' : '') + Math.round((k - 1) * 100) + '%'} in a year`; el.className = 'd ' + (k >= 1 ? 'up' : 'down'); }
+    else { const dv = v - prev; el.textContent = `${dv >= 0 ? '+' : '−'}${d[2](Math.abs(dv))} in a year`; el.className = 'd ' + (dv >= 0 ? 'up' : 'down'); }
+    const sl = document.querySelector(`#tjS${i} .sl`); if (sl) { sl.setAttribute('x1', tf / 59 * 120); sl.setAttribute('x2', tf / 59 * 120); }
+  });
+  $('tjMonth').textContent = monthLabel(t);
+  $('tjSub').textContent = TJ.playing ? 'Playing the plan' : `Month ${t + 1} of 60 · ${activePlan().scenario[0].toUpperCase() + activePlan().scenario.slice(1)} case${S.whatIf ? ', what-if' : ''}`;
+  const rg = $('tjRange'); if (document.activeElement !== rg) rg.value = t;
+  const pk = periodOfMonth(t);
+  document.querySelectorAll('#traj table.kpi .cur').forEach(e => e.classList.remove('cur'));
+  document.querySelectorAll(`#traj table.kpi [data-p="${pk}"]`).forEach(e => e.classList.add('cur'));
+  $('tjPlay').innerHTML = ic(TJ.playing ? 'pause' : 'play'); $('tjPlay').setAttribute('aria-label', TJ.playing ? 'Pause' : 'Play the plan');
+}
+function tjPlay() {
+  if (TJ.playing) { TJ.playing = false; cancelAnimationFrame(TJ.raf); TJ.t = Math.round(TJ.t); return tjCursor(); }
+  if (reduceMotion()) { TJ.t = 59; return tjCursor(); }
+  const t0 = TJ.t >= 58.5 ? 0 : TJ.t, dur = (59 - t0) * 105; let start = null;
+  TJ.playing = true; TJ.t = t0;
+  const step = ts => { if (!TJ.playing) return; if (start == null) start = ts; const p = Math.min(1, (ts - start) / dur); TJ.t = t0 + (59 - t0) * p; if (p >= 1) { TJ.playing = false; TJ.t = 59; } if ($('tjU')) tjCursor(); else TJ.playing = false; if (TJ.playing) TJ.raf = requestAnimationFrame(step); };
+  TJ.raf = requestAnimationFrame(step); tjCursor();
+}
+function tjStop() { if (TJ.playing) { TJ.playing = false; cancelAnimationFrame(TJ.raf); TJ.t = Math.round(TJ.t); } }
+function tjPointer(e) {
+  const plot = e.target.closest && e.target.closest('.tj-plot'); if (!plot) return;
+  const svg = plot.querySelector('svg'); if (!svg) return;
+  const k = plot.dataset.plot, F = frame(k), rc = svg.getBoundingClientRect(), vx = (e.clientX - rc.left) / rc.width * F.w;
+  tjStop(); plot.classList.add('hover');
+  if (k === 'r') { const bw = (F.w - F.pad.l - F.pad.r) / TJ.P.length, i = Math.max(0, Math.min(TJ.P.length - 1, Math.floor((vx - F.pad.l) / bw))), p = TJ.P[i]; if (!(TJ.t >= p.start && TJ.t < p.end)) TJ.t = Math.min(59, p.end - 1); }
+  else TJ.t = Math.max(0, Math.min(59, Math.round((vx - F.pad.l) / (F.w - F.pad.l - F.pad.r) * 59)));
+  tjCursor();
+}
+document.addEventListener('pointermove', e => { if (S.view === 'trajectory') tjPointer(e); });
+document.addEventListener('pointerout', e => { const p = e.target.closest && e.target.closest('.tj-plot'); if (p && !p.contains(e.relatedTarget)) p.classList.remove('hover'); });
+document.addEventListener('keydown', e => {
+  if (S.view !== 'trajectory' || sheetOpen() || (e.target.closest && e.target.closest('input:not([type=range]), textarea, select'))) return;
+  if (e.key === ' ' && !(e.target.closest && e.target.closest('button'))) { e.preventDefault(); tjPlay(); }
+});
+
 // ---------------------------------------------------------------- render --
 function render() {
   $('tabs').querySelectorAll('a').forEach(a => a.setAttribute('aria-current', a.getAttribute('href') === '#' + S.view ? 'page' : 'false'));
@@ -1462,6 +1723,7 @@ function renderMainOnly() {
   if (ns && sc && renderMainOnly.last === v) { ns.scrollLeft = sx; ns.scrollTop = sy; }
   else if (ns && v === 'board' && S.zoom === 'all') { const now = ns.querySelector('.ph.now'); if (now) ns.scrollLeft = Math.max(0, now.offsetLeft - 24); }
   renderMainOnly.last = v;
+  if (v === 'trajectory') trajMount();
   if (S.openHeader) { const ph = document.querySelector(`.ph[data-ph="${S.openHeader}"]`); if (ph) ph.insertAdjacentHTML('beforeend', headerPop(S.openHeader)); else S.openHeader = null; }
   if (v === 'decisions') { const ids = []; for (const it of S.items.values()) Object.keys(it.votes || {}).forEach(u => ids.push(u)); profilesFor(ids).then(ps => { if (Object.keys(ps).some(k => !renderMainOnly.seen?.[k])) { renderMainOnly.seen = { ...ps }; scheduleRender(); } }); }
 }
@@ -1549,39 +1811,86 @@ function sheetTop(crumb, nav) {
     ${nav && S.canEdit ? `<button class="ibtn" type="button" data-act="shEdit">${ic('edit')}<span class="label">Edit</span></button>` : ''}${nav && S.comments ? `<button class="ibtn" type="button" data-act="shComment">${ic('comment')}<span class="label">Comment</span></button>` : ''}
     <button class="ibtn" type="button" data-act="shClose" aria-label="Close">${ic('x')}</button></div>`;
 }
+function ring(p, c) {
+  const r = 12, C = 2 * Math.PI * r, v = Math.max(0, Math.min(100, Number(p) || 0));
+  return `<svg class="ring" viewBox="0 0 30 30" width="30" height="30" aria-hidden="true"><circle cx="15" cy="15" r="${r}" fill="none" stroke="var(--surface-3)" stroke-width="4"/><circle cx="15" cy="15" r="${r}" fill="none" stroke="${c}" stroke-width="4" stroke-linecap="round" stroke-dasharray="${(C * v / 100).toFixed(1)} ${C.toFixed(1)}" transform="rotate(-90 15 15)"/></svg>`;
+}
+// "How" written as a sentence list becomes numbered steps; a single sentence stays prose.
+function howSteps(txt) {
+  const s = String(txt || '').trim(); if (!s) return null;
+  let parts = s.split(/;\s+|\.\s+(?=[A-Z0-9₹])/).map(x => x.replace(/\.$/, '').trim()).filter(Boolean);
+  if (parts.length < 2) { const c = s.replace(/\.$/, '').split(/,\s+/); if (c.length >= 3 && c.every(x => x.length >= 3 && x.length < 90)) parts = c; }
+  return parts.length >= 2 ? parts.map(x => x[0].toUpperCase() + x.slice(1)) : null;
+}
+const PRI_WORD = { P0: 'Must do', P1: 'Should do', P2: 'Nice to have' };
+const tlPos = t => `${Math.max(0, Math.min(100, (t + 3) / 66 * 100)).toFixed(2)}%`;
+function cardMonth(it, pl) {
+  if (pl.auto) return pl.month == null ? 63 : pl.month;
+  const p = PERIODS[PIDX[pl.period]]; if (!p || p.key === 'later') return 63;
+  return p.start + (p.end - p.start) / 2;
+}
 function fillSheet() {
   const sh = $('sheet'), it = S.sheet && S.items.get(S.sheet.id);
   if (!it) { if (sheetOpen() && !S.editing) closeSheet(); return; }
   const body = sh.querySelector('.sh-body'), keep = body ? body.scrollTop : 0, same = sh.dataset.id === it.id;
-  const pl = placeOf(it), lane = laneOf(it.lane), st = it.status || 'idea', owner = OWNERS.find(o => o.id === it.owner);
-  const link = x => `<button type="button" data-go="${esc(x.id)}"><i class="sdot s-${esc(x.status || 'idea')}"></i><span class="t">${esc(x.title)}</span><span class="p">${esc(periodLabel(placeOf(x).period))}</span></button>`;
+  const pl = placeOf(it), lane = laneOf(it.lane), st = it.status || 'idea', owner = OWNERS.find(o => o.id === it.owner), G = tagGroups(it);
+  const node = x => `<button type="button" class="sx-node" data-go="${esc(x.id)}"><i class="sdot s-${esc(x.status || 'idea')}"></i><span class="t">${esc(x.title)}</span><span class="p">${esc(periodLabel(placeOf(x).period))}</span></button>`;
   const deps = (it.deps || []).map(d => S.items.get(d)).filter(Boolean), unlocks = [...S.items.values()].filter(x => (x.deps || []).includes(it.id));
   const risks = [...S.risks.values()].filter(r => (r.items || []).includes(it.id)), moat = it.moat && S.moats.get(it.moat);
-  const when = pl.auto
-    ? `<p>${BOLT.replace('<svg', '<svg width="11" height="11" style="vertical-align:-1px;color:var(--accent)"')} Placed by the model: ${esc(gateText(it))}. Under ${S.whatIf ? 'this what-if' : 'the plan'} that is <b style="color:var(--ink)">${esc(monthLabel(pl.month))}</b>, and the card moves when the plan does.</p>`
-    : `<p>${it.endPeriod && PIDX[it.endPeriod] > PIDX[pl.period] ? `Runs until ${esc(periodLabel(it.endPeriod))}. ` : ''}A fixed quarter: drag the card on the board to move it.</p>`;
-  const blk = (h, v) => `<div class="blk"><h6>${h}</h6>${v ? `<p>${esc(v)}</p>` : '<p class="empty">Not written yet.</p>'}</div>`;
-  const v = it.votes || {}, me = S.me && S.me.id;
-  const votes = it.kind === 'decision' ? `<div class="box"><h6>Where we lean</h6>${S.canEdit && me && st !== 'done' ? `<div class="vote-row">${['for', 'unsure', 'against'].map(c => `<button type="button" class="vbtn" data-vote="${esc(it.id)}|${c}" aria-pressed="${v[me] === c}">${c[0].toUpperCase() + c.slice(1)}</button>`).join('')}</div>` : ''}<div class="vfaces" style="margin-top:10px;flex-wrap:wrap">${Object.entries(v).map(([u, c]) => `<span>${face(u)} ${esc(personName(u))}: ${esc(c)}</span>`).join('') || 'No one has leaned yet.'}</div></div>` : '';
-  const tags = (it.tags || []).filter(t => S.tags.has(t));
+  const conf = it.confidence != null ? Number(it.confidence) || 0 : null;
+  // status track
+  const STEPS = [['idea', 'Idea'], ['planned', 'Planned'], ['in_progress', 'In progress'], ['done', 'Done']];
+  const cur = st === 'done' ? 3 : st === 'in_progress' || st === 'at_risk' || st === 'blocked' ? 2 : st === 'planned' ? 1 : st === 'idea' ? 0 : -1;
+  const track = STEPS.map(([k, l], i) => `${i ? `<span class="sx-line${i <= cur ? ' done' : ''}"></span>` : ''}<span class="sx-step${i < cur || (i === 3 && cur === 3) ? ' done' : i === cur ? ' cur' : ''}"><i>${i < cur || (i === 3 && cur === 3) ? ic('tick') : ''}</i><span>${l}</span></span>`).join('');
+  const flag = st === 'at_risk' ? ['At risk', 'var(--risk)'] : st === 'blocked' ? ['Blocked', 'var(--bad)'] : st === 'dropped' ? ['Dropped', 'var(--muted)'] : null;
+  // timeline
+  const tm = cardMonth(it, pl), endP = !pl.auto && it.endPeriod && PIDX[it.endPeriod] > PIDX[pl.period] ? PERIODS[PIDX[it.endPeriod]] : null, startP = PERIODS[PIDX[pl.period]];
+  const evs = ['corpLive', 'seriesA', 'seriesB', 'breakeven', 'pendant'].map(k => [k, S.model.ev[k]]).filter(([, t]) => t != null);
+  const tl = `<div class="sx-tl" aria-hidden="true"><span class="base"></span><span class="past" style="width:${tlPos(Math.max(-3, Math.min(63, NOW_T)))}"></span>
+    ${[0, 12, 24, 36, 48].map(t => `<span class="tick" style="left:${tlPos(t)}"></span><span class="yr" style="left:${tlPos(t + 6)}">'${27 + t / 12}</span>`).join('')}
+    ${evs.map(([k, t]) => `<span class="sx-ev" style="left:${tlPos(t)}" title="${esc(EVENTS[k])}, ${monthLabel(t)}"></span>`).join('')}
+    ${endP ? `<span class="span" style="left:${tlPos(startP.start)};width:calc(${tlPos(Math.min(63, endP.end))} - ${tlPos(startP.start)})"></span>` : ''}
+    <span class="now" style="left:${tlPos(Math.max(-3, Math.min(63, NOW_T)))}" title="Now"></span><span class="me" style="left:${tlPos(tm)}"></span></div>`;
+  const whenNote = pl.auto
+    ? `${BOLT.replace('<svg', '<svg width="11" height="11" style="vertical-align:-1px;color:var(--accent)"')} Placed by the model: <b style="color:var(--ink-2)">${esc(gateText(it))}</b>. It moves when the plan does.`
+    : `${endP ? `Runs until ${esc(endP.label)}. ` : ''}A fixed quarter. Drag the card on the board to move it.`;
+  const steps = howSteps(it.how);
+  const v = it.votes || {}, me = S.me && S.me.id, cnt = { for: 0, unsure: 0, against: 0 }; Object.values(v).forEach(c => { if (cnt[c] != null) cnt[c]++; });
+  const nV = cnt.for + cnt.unsure + cnt.against;
+  const votes = it.kind === 'decision' ? `<div class="sx-card"><h6 class="sx-h">${ic('scale')}Where we lean</h6>
+      ${S.canEdit && me && st !== 'done' ? `<div class="vote-row" style="margin-top:0">${['for', 'unsure', 'against'].map(c => `<button type="button" class="vbtn" data-vote="${esc(it.id)}|${c}" aria-pressed="${v[me] === c}">${c[0].toUpperCase() + c.slice(1)} · ${cnt[c]}</button>`).join('')}</div>` : ''}
+      <div class="sx-tally">${nV ? `<i style="flex:${cnt.for};background:var(--good)"></i><i style="flex:${cnt.unsure};background:var(--warn)"></i><i style="flex:${cnt.against};background:var(--bad)"></i>` : ''}</div>
+      <div class="vfaces" style="margin-top:10px;flex-wrap:wrap">${Object.entries(v).map(([u, c]) => `<span>${face(u)} ${esc(personName(u))}: ${esc(c)}</span>`).join('') || 'No one has leaned yet.'}</div></div>` : '';
+  const opts = it.kind === 'decision' && it.options ? String(it.options).split(/\s+·\s+|;\s+|\n+/).filter(Boolean) : [];
+  const riskCol = r => riskScore(r) >= 15 ? 'var(--bad)' : riskScore(r) >= 8 ? 'var(--warn)' : 'var(--good)';
   sh.dataset.id = it.id;
-  sh.innerHTML = sheetTop(`<span class="lane-sw" style="background:var(--l-${lane.id})"></span><b>${esc(lane.label)}</b><span>${esc(periodLabel(pl.period))}</span>`, true) + `<div class="sh-body"><div class="sh-grid"><div>
-      <div class="sh-kind">${glyph(it.kind, it.lane)}${esc(KIND_LABEL[it.kind] || 'Initiative')}</div>
-      <h2 class="sh-title">${esc(it.title || 'Untitled')}</h2>
-      <div class="facts"><span class="fact">${ownerAv(it.owner)}${esc(owner ? owner.name : 'No owner')}</span><span class="fact"><i class="sdot s-${esc(st)}"></i>${esc(STATUS_LABEL[st] || 'Idea')}</span><span class="fact">${esc(it.priority || 'P2')} priority</span>${it.confidence != null ? `<span class="fact">${Number(it.confidence) || 0}% confident</span>` : ''}</div>
-      ${blk('Why it matters', it.why)}${blk("How we'll do it", it.how)}
-      <div class="blk"><h6>Done when</h6>${it.kpi ? `<div class="donebox">${ic('check')}<span>${esc(it.kpi)}</span></div>` : '<p class="empty">No finish line yet. Add the number or proof that says it is done.</p>'}</div>
-      ${it.kind === 'decision' ? blk('Options on the table', it.options) + (it.outcome ? `<div class="blk"><h6>Decided</h6><p style="color:var(--good);font-weight:600">${esc(it.outcome)}</p></div>` : '') : ''}
-      <div class="keys"><span><kbd>←</kbd><kbd>→</kbd>previous, next</span>${S.canEdit ? '<span><kbd>E</kbd>edit</span>' : ''}<span><kbd>Esc</kbd>close</span></div>
-      <div class="sh-foot" id="shMeta"></div>
-    </div><div class="side">
-      <div class="box"><h6>When</h6><div class="big-when">${esc(periodLabel(pl.period))}${pl.auto ? `<span style="font-size:15px;color:var(--muted);font-weight:500"> · ${esc(monthLabel(pl.month))}</span>` : ''}</div>${when}</div>
+  sh.innerHTML = sheetTop(`<span class="lane-sw" style="background:var(--l-${lane.id})"></span><b>${esc(lane.label)}</b><span>${esc(periodLabel(pl.period))}</span>`, true) + `<div class="sh-body sx" style="--lc:var(--l-${lane.id})">
+    <div class="sx-hero">
+      <div class="sx-tagrow"><span class="sx-kind">${glyph(it.kind, it.lane)}${esc(KIND_LABEL[it.kind] || 'Initiative')}</span>${[...G.type, ...G.layer].map(t => pillHTML(t, true)).join('')}${G.plain.map(t => tagChip(t.id)).join('')}</div>
+      <h2 class="sx-title">${esc(it.title || 'Untitled')}</h2>
+      <div class="sx-stats">
+        <div class="sx-stat"><small>Owner</small><b>${ownerAv(it.owner)}${esc(owner ? owner.name : 'No owner')}</b></div>
+        <div class="sx-stat"><small>When</small><b>${pl.auto ? BOLT.replace('<svg', '<svg width="13" height="13" style="color:var(--accent);flex:none"') : ''}${esc(periodLabel(pl.period))}</b><span class="sx-sub">${pl.auto ? esc(monthLabel(pl.month)) : startP && startP.key !== 'later' && startP.start >= 0 ? `${MON[startP.start % 12]} to ${MON[(Math.min(startP.end, 60) - 1) % 12]} ${2027 + Math.floor(startP.start / 12)}` : esc(startP ? startP.sub || '' : '')}</span></div>
+        <div class="sx-stat"><small>Priority</small><b><span class="pri ${esc(it.priority === 'P2' || !it.priority ? 'P1' : it.priority)}">${esc(it.priority || 'P2')}</span>${esc(PRI_WORD[it.priority] || PRI_WORD.P2)}</b></div>
+        <div class="sx-stat"><small>Confidence</small><b>${conf != null ? `${ring(conf, conf >= 70 ? 'var(--good)' : conf >= 45 ? 'var(--accent)' : 'var(--warn)')}${conf}%` : '<span class="muted" style="font-weight:500">Not set</span>'}</b></div>
+      </div>
+      <div class="sx-track" aria-label="Status: ${esc(STATUS_LABEL[st] || 'Idea')}">${track}${flag ? `<span class="sx-flag" style="--fc:${flag[1]}">${ic('flag')}${flag[0]}</span>` : ''}</div>
+    </div>
+    <div class="sx-body"><div>
+      <div class="sx-sec"><h6 class="sx-h">${ic('spark')}Why it matters</h6>${it.why ? `<p class="sx-lead">${esc(it.why)}</p>` : '<p class="sx-lead sx-empty">Not written yet.</p>'}</div>
+      <div class="sx-sec"><h6 class="sx-h">${ic('route')}How we'll do it</h6>${steps ? `<ol class="sx-steps">${steps.map(x => `<li>${esc(x)}</li>`).join('')}</ol>` : it.how ? `<p class="sx-lead" style="font-size:15.5px;color:var(--ink-2)">${esc(it.how)}</p>` : '<p class="sx-lead sx-empty">Not written yet.</p>'}</div>
+      <div class="sx-sec"><h6 class="sx-h">${ic('target')}Done when</h6><div class="sx-goal${it.kpi ? '' : ' empty'}"><span class="ico">${ic('target')}</span><p>${it.kpi ? `<small>The finish line</small>${esc(it.kpi)}` : 'No finish line yet. Add the number or proof that says it is done.'}</p></div></div>
+      ${it.kind === 'decision' ? `<div class="sx-sec"><h6 class="sx-h">${ic('scale')}Options on the table</h6>${opts.length ? `<div class="sx-opts">${opts.map((x, i) => `<div class="sx-opt"><b>${String.fromCharCode(65 + i)}</b><span>${esc(x)}</span></div>`).join('')}</div>` : '<p class="sx-lead sx-empty">No options written yet.</p>'}${it.outcome ? `<div class="sx-out">Decided: ${esc(it.outcome)}</div>` : ''}</div>` : ''}
+      <div class="sx-foot"><div class="keys"><span><kbd>←</kbd><kbd>→</kbd>previous, next</span>${S.canEdit ? '<span><kbd>E</kbd>edit</span>' : ''}<span><kbd>Esc</kbd>close</span></div><div class="sh-foot" id="shMeta" style="margin:0"></div></div>
+    </div><div>
+      <div class="sx-card"><h6 class="sx-h">${ic('clock')}On the timeline</h6><div class="sx-when">${esc(periodLabel(pl.period))}<span>${pl.auto ? esc(monthLabel(pl.month)) : ''}</span></div>${tl}<p class="sx-note">${whenNote}</p></div>
       ${votes}
-      ${deps.length ? `<div class="box"><h6>Depends on</h6><div class="links">${deps.map(link).join('')}</div></div>` : ''}
-      ${unlocks.length ? `<div class="box"><h6>Unlocks</h6><div class="links">${unlocks.map(link).join('')}</div></div>` : ''}
-      ${risks.length ? `<div class="box"><h6>Reduces risk</h6><div class="links">${risks.map(r => `<button type="button" data-risk="${esc(r.id)}"><b class="num" style="min-width:20px;color:${riskScore(r) >= 15 ? 'var(--bad)' : riskScore(r) >= 8 ? 'var(--warn)' : 'var(--good)'}">${riskScore(r)}</b><span class="t">${esc(r.title)}</span></button>`).join('')}</div></div>` : ''}
-      ${moat ? `<div class="box"><h6>Builds the moat</h6><b style="font-size:14px">${esc(moat.name)}</b>${moat.thesis ? `<p>${esc(moat.thesis)}</p>` : ''}</div>` : ''}
-      ${tags.length ? `<div class="box"><h6>Tags</h6><div class="c-meta" style="font-size:12.5px;color:var(--ink-2)">${tags.map(tagChip).join('')}</div></div>` : ''}
+      <div class="sx-card"><h6 class="sx-h">${ic('link')}Connections</h6>${deps.length || unlocks.length ? `<div class="sx-flow">
+        ${deps.length ? `<span class="lbl">Needs first</span>${deps.map(node).join('')}<span class="sx-arrow">${ic('arrowDown')}</span>` : ''}
+        <div class="sx-node me"><i class="sdot" style="background:var(--lc)"></i><span class="t">This card</span></div>
+        ${unlocks.length ? `<span class="sx-arrow">${ic('arrowDown')}</span><span class="lbl">Then unlocks</span>${unlocks.map(node).join('')}` : ''}</div>` : '<p class="sx-note" style="margin:0">Nothing depends on this card yet, and it depends on nothing.</p>'}</div>
+      ${risks.length ? `<div class="sx-card"><h6 class="sx-h">${ic('shield')}Reduces risk</h6><div class="sx-flow">${risks.map(r => `<button type="button" class="sx-node" data-risk="${esc(r.id)}"><span class="sx-score" style="background:${riskCol(r)}">${riskScore(r)}</span><span class="t">${esc(r.title)}</span></button>`).join('')}</div></div>` : ''}
+      ${moat ? `<div class="sx-card sx-moat"><h6 class="sx-h">${ic('castle')}Builds the moat</h6><b>${esc(moat.name)}</b>${moat.thesis ? `<p>${esc(moat.thesis)}</p>` : ''}</div>` : ''}
     </div></div></div>`;
   if (same) sh.querySelector('.sh-body').scrollTop = keep;
   if (it.updatedAt) profilesFor([it.updatedBy]).then(ps => { const m = $('shMeta'); if (m) m.textContent = `Last changed ${new Date(it.updatedAt).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}${it.updatedBy ? ' by ' + ((ps[it.updatedBy] || {}).name || 'someone') : ''}`; });
@@ -1597,7 +1906,10 @@ function editItem(id, preset, origin) {
   S.sheet = { id: it.id };
   presence({ viewing: id || null, editing: id || null });
   const d = S.editing.draft, g = d.gate || {}, lane = laneOf(d.lane);
-  const tagChips = [...S.tags.values()].sort((a, b) => (a.order ?? 99) - (b.order ?? 99)).map(t => `<button type="button" class="tchip" data-tag="${esc(t.id)}" aria-pressed="${(d.tags || []).includes(t.id)}"><i style="background:${esc(t.color)}"></i>${esc(t.label)}</button>`).join('');
+  const allTags = [...S.tags.values()].sort((a, b) => (a.order ?? 99) - (b.order ?? 99));
+  const tchips = list => list.map(t => `<button type="button" class="tchip" data-tag="${esc(t.id)}" aria-pressed="${(d.tags || []).includes(t.id)}"><i style="background:${esc(t.color)}"></i>${esc(t.label)}</button>`).join('');
+  const tgrp = (lab, list) => list.length ? `<div style="display:flex;flex-direction:column;gap:6px"><span class="muted" style="font-size:12px;font-weight:600">${lab}</span><div class="chips">${tchips(list)}</div></div>` : '';
+  const tagChips = tgrp('Type', allTags.filter(t => t.group === 'type')) + tgrp('Layer', allTags.filter(t => t.group === 'layer')) + `<div style="display:flex;flex-direction:column;gap:6px"><span class="muted" style="font-size:12px;font-weight:600">Tags</span><div class="chips" id="tagChips">${tchips(allTags.filter(t => t.group !== 'type' && t.group !== 'layer'))}</div></div>`;
   const deps = [...S.items.values()].filter(x => x.id !== d.id).sort((a, b) => (a.title || '').localeCompare(b.title || '')).map(x => `<label><input type="checkbox" data-dep="${esc(x.id)}"${(d.deps || []).includes(x.id) ? ' checked' : ''}><span class="dot" style="background:var(--l-${esc(x.lane)})"></span>${esc(x.title)}</label>`).join('');
   const moats = [...S.moats.values()].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
   const seg = (attr, cur, opts) => `<div class="seg" role="group">${opts.map(([k, l]) => `<button type="button" data-${attr}="${k}" aria-pressed="${cur === k}">${l}</button>`).join('')}</div>`;
@@ -1609,7 +1921,7 @@ function editItem(id, preset, origin) {
       <div class="field"><label for="fHow">How we'll do it</label><textarea id="fHow" rows="4">${esc(d.how || '')}</textarea></div>
       <div class="field"><label for="fKpi">Done when</label><input type="text" id="fKpi" value="${esc(d.kpi || '')}" placeholder="The number or proof that says it is done"></div>
       <div class="field" id="decFields"${d.kind === 'decision' ? '' : ' hidden'}><label for="fOpts">Options on the table</label><textarea id="fOpts">${esc(d.options || '')}</textarea><label for="fOut" style="margin-top:8px">Outcome</label><input type="text" id="fOut" value="${esc(d.outcome || '')}"></div>
-      <div class="field"><span class="flabel">Tags</span><div class="chips" id="tagChips">${tagChips}</div><div style="display:flex;gap:8px"><input type="text" id="newTag" placeholder="New tag" maxlength="24" style="flex:1"><button class="btn" type="button" data-act="addTag">Add tag</button></div></div>
+      <div class="field"><span class="flabel">Tags</span>${tagChips}<div style="display:flex;gap:8px"><input type="text" id="newTag" placeholder="New tag" maxlength="24" style="flex:1"><button class="btn" type="button" data-act="addTag">Add tag</button></div></div>
       <div class="field"><span class="flabel">Depends on</span><input type="text" id="depFilter" placeholder="Filter cards"><div class="deplist" id="depList">${deps || '<span class="muted">No other cards yet.</span>'}</div></div>
     </div>
     <div class="col">
@@ -1710,7 +2022,7 @@ async function saveRisk() {
 function presence(patch) { S.presence = { ...(S.presence || {}), ...patch, view: S.view }; if (S.room) S.room.presence(S.presence).catch(() => {}); }
 
 // ---------------------------------------------------------------- events --
-function route() { const h = (location.hash || '').slice(1); const v = ['board', 'owners', 'trajectory', 'risks', 'moats', 'decisions'].includes(h) ? h : 'board'; const changed = v !== S.view; S.view = v; S.openHeader = null; presence({}); render(); if (changed || !route.did) enterView(); route.did = true; }
+function route() { const h = (location.hash || '').slice(1); const v = ['board', 'owners', 'trajectory', 'risks', 'moats', 'decisions'].includes(h) ? h : 'board'; const changed = v !== S.view; S.view = v; if (changed) { tjStop(); if (v === 'trajectory') TJ.D = null; } S.openHeader = null; presence({}); render(); if (changed || !route.did) enterView(); route.did = true; }
 window.addEventListener('hashchange', () => { if (sheetOpen()) closeSheet(); route(); });
 const toggle = (set, v) => { set.has(v) ? set.delete(v) : set.add(v); };
 function setPressed(t) { t.parentElement.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', b === t)); }
@@ -1730,6 +2042,10 @@ document.addEventListener('click', async e => {
     return openCard(start, el || t);
   }
   if (act === 'export') return exportBoard();
+  if (t.id === 'tjPlay') return tjPlay();
+  if (ds.tjt) { tjStop(); TJ.t = Number(ds.tjt); return tjCursor(); }
+  if (ds.tjhide) { toggle(TJ.hide, ds.tjhide); t.setAttribute('aria-pressed', !TJ.hide.has(ds.tjhide)); return trajMount(); }
+  if (act === 'levers') { e.stopPropagation(); return openPop('popLevers'); }
   if (ds.sc) { startWhatIf(); S.whatIf.scenario = ds.sc; recompute(); withFlip(() => render()); return; }
   if (act === 'wiDrop') { S.whatIf = null; recompute(); withFlip(() => render()); return; }
   if (act === 'wiSave') { const p = S.whatIf; if (p && await writeDoc('board/plan', { scenario: p.scenario, drv: p.drv, ...stamp() }, `changed the plan levers (${p.scenario} case)`)) { S.whatIf = null; recompute(); render(); toast('Plan updated for everyone'); } return; }
@@ -1802,6 +2118,7 @@ document.addEventListener('input', e => {
   const t = e.target;
   if (t.id === 'q') { S.filters.q = t.value; clearTimeout(document.qT); document.qT = setTimeout(renderMainOnly, 140); return; }
   if (t.dataset && t.dataset.lv) return onLever(t.dataset.lv, Number(t.value));
+  if (t.id === 'tjRange') { tjStop(); TJ.t = Number(t.value); return tjCursor(); }
   if (t.id === 'fConf') { $('oConf').textContent = t.value + '%'; return; }
   if (t.id === 'depFilter') { const q = t.value.toLowerCase(); document.querySelectorAll('#depList label').forEach(l => l.hidden = !l.textContent.toLowerCase().includes(q)); return; }
   if (t.dataset && t.dataset.dep && S.editing) { const d = S.editing.draft; d.deps = d.deps || []; if (t.checked) d.deps.push(t.dataset.dep); else d.deps = d.deps.filter(x => x !== t.dataset.dep); return; }
