@@ -305,7 +305,7 @@ const S = {
   view: 'pipeline', q: '', kinds: new Set(), tiers: new Set(['A', 'B']), owner: 'all', showClosed: false,
   sort: { key: 'fit', dir: -1 }, poolQ: '', poolStatus: 'Unscreened', poolLimit: 150, colLimit: {},
   sheet: null, compose: { action: 'outreach', channel: 'email', sender: null, text: '', busy: false, ctl: null, extra: '' },
-  db: null, user: null, room: null, sample: null, me: null, canEdit: false, live: false, peers: [], profiles: {},
+  db: null, user: null, room: null, sample: null, mcp: null, me: null, canEdit: false, live: false, peers: [], profiles: {},
   meKey: 'athar',
 };
 try { const p = JSON.parse(localStorage.getItem('cheeku-rt-prefs') || 'null'); if (p) { S.meKey = p.meKey || 'athar'; if (p.tiers) S.tiers = new Set(p.tiers); if (p.owner) S.owner = p.owner; } } catch (e) {}
@@ -625,9 +625,9 @@ function sendLink(it) {
 function researchBlock(it, ro) {
   const r = it.research || {};
   const st = r.status === 'queued' ? `<span class="rs-st q">Queued ${r.at ? fmtTime(r.at) : ''}. Claude looks it up on the web and fills this in.</span>`
-    : r.status === 'done' ? `<span class="rs-st">Researched ${fmtTime(r.checkedAt || r.at)} from public sources. Check anything you rely on.</span>`
+    : r.status === 'done' ? `<span class="rs-st">Researched ${fmtTime(r.checkedAt || r.at)}${r.via ? ' with ' + esc(r.via) : ''} from public sources. Check anything you rely on.</span>`
     : r.status === 'failed' ? `<span class="rs-st q">${esc(r.error || 'Could not find enough on this person. Add a company or LinkedIn link and try again.')}</span>`
-    : `<span class="rs-st">Not researched yet. Add what you know, then press Research.</span>`;
+    : `<span class="rs-st">${S.mcp ? 'Searches the web now with Parallel Search, about 30 seconds.' : 'Not researched yet. Without Parallel Search it is queued for tonight.'}</span>`;
   const list = (title, xs) => (xs && xs.length) ? `<div><span class="lbl">${title}</span><ul>${xs.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>` : '';
   return `<div class="rs">
     <div class="grid2">
@@ -635,7 +635,7 @@ function researchBlock(it, ro) {
       <label><span class="lbl">Firm or company</span><input class="inp" id="fFirm" value="${esc(it.firm || '')}" placeholder="TestMu AI" ${ro}></label>
     </div>
     <label><span class="lbl">Who is this?</span><input class="inp" id="fHint" value="${esc(it.hint || '')}" placeholder="Anything that pins them down: company, past companies, LinkedIn link, how you know them" ${ro}></label>
-    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button class="btn ${r.status === 'done' ? 'ghost' : 'primary'}" id="researchBtn" type="button" ${ro}>${r.status === 'done' ? 'Research again' : r.status === 'queued' ? 'Queued' : 'Research ' + esc(it.name.split(' ')[0])}</button>${st}</div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button class="btn ${r.status === 'done' ? 'ghost' : 'primary'}" id="researchBtn" type="button" ${ro}>${r.status === 'done' ? 'Research again' : r.status === 'queued' ? 'Research now' : 'Research ' + esc(it.name.split(' ')[0])}</button>${st}</div>
     ${r.summary ? `<div style="color:var(--ink)">${esc(r.summary)}</div>` : ''}
     ${list('Background', r.background)}${list('Investing record', r.investing)}${list('Signals for Cheeku', r.signals)}${list('Could not confirm', r.gaps)}
     ${(r.sources || []).length ? `<div><span class="lbl">Sources</span><div class="src">${r.sources.map(x => `<a href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.title || x.url.replace(/^https?:\/\/(www\.)?/, '').split('/')[0])}</a>`).join('')}</div></div>` : ''}
@@ -648,6 +648,104 @@ async function queueResearch() {
   const title = ($('fTitle') || {}).value || it.title || '';
   await setInv(it.id, { hint, firm, title, research: { ...(it.research || {}), status: 'queued', at: Date.now(), by: (S.me && S.me.id) || null } }, 'Queued for research');
   toast('Queued. It is researched tonight after midnight, or ask Claude to "run tracker research" now.'); renderSheet();
+}
+// Research in the page: Parallel Search finds public sources, Claude turns them into a profile.
+const PS = 'Parallel Search';
+const PS_SESSION = 'cheeku-raise-' + Math.random().toString(16).slice(2) + Date.now().toString(16);
+async function psSearch(objective, queries) {
+  const res = await S.mcp.callTool(PS, 'web_search', { objective, search_queries: queries.slice(0, 3), session_id: PS_SESSION });
+  const pl = res && res.payload;
+  const list = (pl && Array.isArray(pl.results)) ? pl.results : [];
+  return list.map(r => ({ url: String(r.url || ''), title: String(r.title || ''), date: r.publish_date || '', text: (Array.isArray(r.excerpts) ? r.excerpts.join(' … ') : String(r.excerpts || '')).slice(0, 1400) })).filter(r => /^https?:\/\//.test(r.url));
+}
+function researchError(e) {
+  const c = e && e.code;
+  if (c === 'server_not_connected') return 'Parallel Search is not connected for you. Add it in claude.ai Settings, Connectors, then reload. Queued for tonight instead.';
+  if (c === 'needs_reauth') return 'Reconnect Parallel Search in claude.ai Settings, Connectors. Queued for tonight instead.';
+  if (c === 'not_in_manifest' || c === 'not_granted') return 'Web search is not allowed for this page in your view. Queued for tonight instead.';
+  if (c === 'tool_error') return 'Parallel Search could not run this search: ' + String(e.message || '').slice(0, 120);
+  if (c === 'cancelled') return 'Stopped.';
+  return 'Research did not finish. Queued for tonight instead.';
+}
+async function researchNow() {
+  const it = S.inv.get(S.sheet); if (!it) return;
+  const hint = ($('fHint') || {}).value || it.hint || '';
+  const firm = ($('fFirm') || {}).value || it.firm || '';
+  const title = ($('fTitle') || {}).value || it.title || '';
+  if (!S.mcp || !S.sample) return queueResearch();
+  const btn = $('researchBtn'); const st = btn && btn.nextElementSibling;
+  const say = msg => { if (st) { st.className = 'rs-st q'; st.textContent = msg; } };
+  if (btn) btn.disabled = true;
+  await setInv(it.id, { hint, firm, title });
+  const who = [it.name, title, firm].filter(Boolean).join(' ');
+  let results = [];
+  try {
+    say('Searching the web…');
+    const [a, b] = await Promise.all([
+      psSearch(`Who is ${who}? Current role, company, past companies and exits. ${hint}`.trim(), [`${it.name} ${firm}`.trim(), `${it.name} ${title} ${firm}`.trim(), `${it.name} profile`]),
+      psSearch(`Startups ${it.name}${firm ? ' of ' + firm : ''} has invested in as an angel or through a fund, especially health, consumer or AI in India`, [`${it.name} angel investor`, `${it.name} invested seed round`, `${it.name} portfolio startups`]),
+    ]);
+    const seen = new Set(); results = [...a, ...b].filter(r => !seen.has(r.url) && seen.add(r.url)).slice(0, 14);
+  } catch (e) {
+    const msg = researchError(e); say(msg);
+    if (e && e.code !== 'tool_error' && e.code !== 'cancelled') await queueResearch();
+    if (btn) btn.disabled = false; return;
+  }
+  if (!results.length) { await setInv(it.id, { research: { ...(it.research || {}), status: 'failed', at: Date.now(), error: 'Nothing public came up. Add their company or a LinkedIn link under "Who is this?" and try again.' } }); if (S.sheet === it.id) renderSheet(); return; }
+  say(`Reading ${results.length} sources…`);
+  const prompt = `You research investors for Cheeku AI's seed raise. Using ONLY the search results below, profile this person and judge their fit.
+
+Cheeku, in brief:
+${(S.context || '').slice(0, 2500)}
+
+The person, as the founders entered them: ${JSON.stringify({ name: it.name, role: title, firm, who_this_is: hint, kind: it.kind, notes: it.notes, warm_intro: it.intro })}
+
+Search results (number, url, title, date, excerpt):
+${results.map((r, i) => `[${i + 1}] ${r.url}\n${r.title} ${r.date ? '(' + r.date + ')' : ''}\n${r.text}`).join('\n\n')}
+
+Rules:
+- Use only facts these results support. Never invent investments, numbers, emails or links. If results disagree, say so in "flags".
+- If the results are about several different people with this name and you cannot tell which one the founders mean, set "identified" to false.
+- Tiers: A = health or wellness in their thesis or portfolio and invests at seed. B = active early-stage investor in consumer or AI, or an operator with real angel activity. C = generalist or little evidence of investing.
+- No em dashes or en dashes. Short, plain sentences.
+
+Reply with JSON only:
+{"identified": true or false, "unclear_why": "if not identified, what extra detail would pin them down",
+ "title": "current role", "firm": "current company or fund", "kind": "Angel" | "VC" | "Angel network" | "Accelerator", "city": "",
+ "tier": "A" | "B" | "C", "fit": 0-100,
+ "why": ["3 to 5 short factual reasons, each traceable to a result"],
+ "flags": ["conflicts such as backing HealthifyMe, Eka Care or Practo; conflicting figures; role changes"],
+ "angle": "health" | "consumer" | "ai" | "program" | "general",
+ "angleText": "one or two sentences: what the founders should lead with for this person",
+ "summary": "two sentences", "background": ["..."], "investing": ["company, stage, year, per source"], "signals": ["what this means for Cheeku"], "gaps": ["what the results do not confirm"],
+ "linkedin": "their LinkedIn URL only if it appears in the results, else empty",
+ "sources": [numbers of the results you relied on]}`;
+  let out;
+  try { out = await S.sample.json(prompt, { modelTier: 'default' }); }
+  catch (e) { say(e && e.code === 'not_granted' ? 'Research needs your permission for Claude. Allow it and try again.' : 'Could not write the profile. Try again.'); if (btn) btn.disabled = false; return; }
+  const clean = v => String(v ?? '').replace(/[—–]/g, ', ').slice(0, 600);
+  const arr = (v, n = 8) => (Array.isArray(v) ? v : []).map(clean).filter(Boolean).slice(0, n);
+  const now = Date.now();
+  if (!out || out.identified === false) {
+    await setInv(it.id, { research: { status: 'failed', at: now, error: clean(out && out.unclear_why) || 'Could not tell which person this is. Add their company or a LinkedIn link and try again.' } });
+    if (S.sheet === it.id) renderSheet(); return;
+  }
+  const used = (Array.isArray(out.sources) ? out.sources : []).map(n => results[Number(n) - 1]).filter(Boolean);
+  const sources = (used.length ? used : results.slice(0, 5)).map(r => ({ title: r.title.slice(0, 90), url: r.url }));
+  const li = String(out.linkedin || ''); const liOk = li && results.some(r => r.url.replace(/^https?:\/\/(www\.)?/, '') === li.replace(/^https?:\/\/(www\.)?/, ''));
+  const tier = ['A', 'B', 'C'].includes(out.tier) ? out.tier : (it.tier || 'U');
+  const patch = {
+    title: clean(out.title) || title, firm: clean(out.firm) || firm, tier, fit: Math.max(0, Math.min(100, Math.round(Number(out.fit) || 0))) || it.fit,
+    why: arr(out.why, 6), flags: arr(out.flags, 6), angle: ['health', 'consumer', 'ai', 'program', 'general'].includes(out.angle) ? out.angle : (it.angle || 'general'),
+    angleText: clean(out.angleText), memo: null,
+    research: { status: 'done', at: now, checkedAt: now, by: (S.me && S.me.id) || null, via: 'Parallel Search', summary: clean(out.summary), background: arr(out.background), investing: arr(out.investing), signals: arr(out.signals), gaps: arr(out.gaps), sources },
+  };
+  if (out.kind && ['Angel', 'VC', 'Angel network', 'Accelerator'].includes(out.kind)) patch.kind = out.kind;
+  if (out.city && !it.city) patch.city = clean(out.city);
+  if (liOk && !it.linkedin) patch.linkedin = li;
+  const ok = await patchDoc('investors/' + it.id, { ...patch, ...stamp() });
+  if (ok) { S.inv.set(it.id, { ...it, ...patch }); addTouch(it.id, { type: 'stage', body: `Researched from ${sources.length} public sources` }); toast('Research done'); }
+  if (S.sheet === it.id) renderSheet(); scheduleRender();
 }
 function memoHtml(m) { return `<div><b>Why yes</b><div>${esc(m.why_yes || '')}</div></div><div><b>Expect this objection</b><div>${esc(m.objection || '')}</div></div><div><b>Open with</b><div>${esc(m.opener || '')}</div></div>${m.lens ? `<div class="muted" style="font-size:11.5px">Strongest lens: ${esc(m.lens)}</div>` : ''}`; }
 function renderTimeline() {
@@ -824,7 +922,7 @@ document.addEventListener('click', e => {
     if (d.channel) { S.compose.channel = d.channel; S.compose.extra = ($('fExtra') || {}).value || ''; S.compose.text = ($('fDraft') || {}).value || ''; return renderSheet(); }
     if (t.id === 'genBtn') { S.compose.extra = ($('fExtra') || {}).value || ''; return generate(); }
     if (t.id === 'memoBtn') return writeMemo();
-    if (t.id === 'researchBtn') return queueResearch();
+    if (t.id === 'researchBtn') return researchNow();
     if (t.id === 'copyBtn') { const s = ($('fSubject') || {}).value; const b = $('fDraft').value; return copyText(S.compose.channel === 'email' && s ? `Subject: ${s}\n\n${b}` : b, $('fDraft')); }
     if (d.copy) return copyText(d.copy);
     if (t.id === 'sentBtn') return logSent();
@@ -881,6 +979,7 @@ route();
   if (user) { try { S.me = await user.me(); S.canEdit = !!S.me.canEdit; const n = (S.me.name || '').toLowerCase(); let had = null; try { had = localStorage.getItem('cheeku-rt-prefs'); } catch (e) {} if (!had) { if (n.includes('deepesh')) S.meKey = 'deepesh'; else if (n.includes('athar')) S.meKey = 'athar'; } } catch (e) {} }
   setSync(); if (db) subscribe(); render();
   c.use('sample').then(s => { S.sample = s; if (S.sheet) renderSheet(); });
+  c.use('mcp').then(m => { S.mcp = m; if (S.sheet) renderSheet(); });
   c.use('room').then(room => { S.room = room; if (!room) return; presence({}); room.onPeers(ch => { S.peers = ch.peers || []; profilesFor(S.peers.map(p => p.by)).then(() => { renderPeers(); if (S.view === 'pipeline') scheduleRender(); }); }, () => {}); });
 })();
 </script>

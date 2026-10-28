@@ -34,7 +34,10 @@ Flags call out what the lists cannot know: funds that renamed (Sequoia India is 
 
 ## Researching an investor
 
-In any investor's sheet, fill in **Role**, **Firm or company** and **Who is this?** (a past company or a LinkedIn link is enough to pin the person down), then press **Research**. That marks the record `research.status: "queued"`, and it shows under Today, "Waiting for research".
+In any investor's sheet, fill in **Role**, **Firm or company** and **Who is this?** (a past company or a LinkedIn link is enough to pin the person down), then press **Research**.
+
+- **With Parallel Search connected** (free, claude.ai Settings, Connectors), the page runs two web searches through the connector, then asks Claude to turn the results into the profile below. It takes about 30 seconds and writes straight to the record. Each founder connects it on their own account; the first run asks for permission.
+- **Without it**, or if the search fails, the record is marked `research.status: "queued"` and shows under Today, "Waiting for research", for the nightly run.
 
 To clear the queue, ask Claude in a session to **"run tracker research"**. Claude then:
 
