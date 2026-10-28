@@ -6,12 +6,13 @@ It is the internal 3 to 5 year plan for Athar, Suraj and Deepesh: what we do, wh
 
 ## What is on it
 
-- **Board.** Nine lanes (product, AI and tech, supply, growth, revenue, employers and B2B, funding, team, trust) across 18 columns. Every column header carries the financial model for that period: users, revenue, EBITDA, cash, team and companies at period end, plus the model's events (Series A, employers going live, profitable for good).
-- **Cards.** Kind (milestone, initiative, bet, decision, gate), owner, priority, status, tags, why, how, a "done when" line, confidence, dependencies and the moat pillar it builds. Drag a card to move it.
-- **Cards the model places.** A card can hang off a model event ("Employers go live", "Series B + 3 months") or a number ("monthly users reach 50 lakh"). It then shows a lightning mark and moves on its own when the plan changes. These cannot be dragged; change the trigger in the card.
-- **Model levers.** The same engine as the financial model (`finance/`, base case v2). Scenario and levers are a private what-if until someone presses **Make it the plan**; the plan is shared.
+- **Board.** Nine lanes (product, AI and tech, supply, growth, revenue, employers and B2B, funding, team, trust) as thin bands across 18 columns. Each column header shows that period's users and revenue from the financial model and its events (Series A, employers going live, profitable for good); click a header for the full set: paying accounts, EBITDA, cash, team and companies. Collapse any lane you are not discussing; zoom to the next five quarters, 2027, to 2028 or all.
+- **Cards.** Compact by default: title, owner, priority (P0 and P1 only), status when it is not just "planned", tags and dependencies. The chevron on a card opens why, done-when and confidence in place; **Expand all** does it for the whole board. Drag a card to move it.
+- **Discuss.** Click a card, or press **Discuss** to start from this quarter, and it opens large in the middle of the screen for the conversation: why, how, done-when, timing, what it depends on, what it unlocks, the risks it reduces, the moat it builds, and votes on decisions. Arrow keys move to the next or previous card, quarter by quarter; **E** edits in place; **Esc** closes back into the board. Made for a laptop or a bigger screen.
+- **Cards the model places.** A card can hang off a model event ("Employers go live", "Series B + 3 months") or a number ("monthly users reach 50 lakh"). It shows a lightning mark with its month and glides to its new quarter when the plan changes. These cannot be dragged; change the trigger in the card.
+- **Levers.** The same engine as the financial model (`finance/`, base case v2), in the Levers popover. Scenario and levers are a private what-if until someone presses **Save as plan**; the plan is shared.
 - **Owners, Trajectory, Risks, Moats, Decisions.** One founder's cards in time order; users by joining cohort, revenue by engine, cash and a quarterly cohort table; a 5x5 risk heat map whose bars fill as linked cards get done; defensibility pillars with a live number each; open calls with a for, unsure or against from each of us.
-- Presence (who is looking, who is editing a card), a recent-changes feed, comments on any card, and an export of the whole board as JSON.
+- Filters (owner, priority, status, tags, hide done) and search (press **/**), presence (who is looking at or editing which card), a recent-changes feed with a JSON export, and comments on any card.
 
 ## Files
 
