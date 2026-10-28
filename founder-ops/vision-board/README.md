@@ -35,14 +35,14 @@ It is the internal 3 to 5 year plan for Athar, Suraj and Deepesh: what we do, wh
 **Through git.** Edit `board.json` in a PR. After it merges, ask Claude to push it to the board:
 
 1. `ArtifactData` `list` each collection with `out_dir` set to a scratch folder.
-2. `python3 docs/vision-board/sync.py diff <that folder>` to see what the live board has that git does not. Anything there is someone's edit on the page: bring it into the PR first or it is lost.
-3. `python3 docs/vision-board/sync.py push <scratch>` writes one file per document and `writes.json`.
+2. `python3 founder-ops/vision-board/sync.py diff <that folder>` to see what the live board has that git does not. Anything there is someone's edit on the page: bring it into the PR first or it is lost.
+3. `python3 founder-ops/vision-board/sync.py push <scratch>` writes one file per document and `writes.json`.
 4. `ArtifactData` `batch` the writes, 50 at a time, with `if_version` from step 1 for documents that exist.
 
-**Syncing the page back to git.** Ask Claude to "sync the vision board to git": steps 1 and 2 above, then `python3 docs/vision-board/sync.py pull <that folder>` and a PR with the new `board.json`. Do this after each weekly sync so the history of the plan lives in git.
+**Syncing the page back to git.** Ask Claude to "sync the vision board to git": steps 1 and 2 above, then `python3 founder-ops/vision-board/sync.py pull <that folder>` and a PR with the new `board.json`. Do this after each weekly sync so the history of the plan lives in git.
 
 ## Changing the page itself
 
-Edit `page.template.html` (or `engine.js` when the model changes), run `python3 docs/vision-board/sync.py build -`, check it renders, and publish it to the same artifact URL. The data lives in the artifact's database, so republishing never loses cards.
+Edit `page.template.html` (or `engine.js` when the model changes), run `python3 founder-ops/vision-board/sync.py build -`, check it renders, and publish it to the same artifact URL. The data lives in the artifact's database, so republishing never loses cards.
 
 The board carries seed terms and round plans. It is internal: keep it out of anything that goes to investors.

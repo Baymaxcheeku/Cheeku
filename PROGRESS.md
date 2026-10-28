@@ -3680,12 +3680,12 @@ employers and insurers, funding, team and trust. The financial model says what
 the numbers do; nothing said who does what, when, and what it depends on.
 
 **What.** A live board at https://claude.ai/artifact/KUeA2YYdL4CmUKWhK3faAE,
-mirrored in `docs/vision-board/`. Nine lanes across Q4 2026 (pre-launch),
+mirrored in `founder-ops/vision-board/`. Nine lanes across Q4 2026 (pre-launch),
 quarters to 2029 and half-years for 2030 and 2031, the grain the founders
 picked. 93 cards, 12 risks, 6 moat pillars and 10 tags from the first fill.
 
 **The decision that shapes it.** The board runs the financial model's own
-engine (`docs/vision-board/engine.js`, v2). Every column header shows that
+engine (`founder-ops/vision-board/engine.js`, v2). Every column header shows that
 period's users, revenue, EBITDA, cash and team, and a card can be placed by
 the model instead of a date: "Employers go live", "Series B + 3 months",
 "monthly users reach 50 lakh". Those cards move by themselves when a lever
@@ -3755,3 +3755,15 @@ byte for byte. **Not verified:** presence and comments in the real viewer.
 
 **Verified here:** the page against a mock runtime with the live data plus these writes, at 1440 and 1280 (light) and 390 (dark). I checked the board, the eye toggle, four card sheets (initiative with steps, model-placed milestone, decision, pendant), trajectory draw-in, hover on users and revenue, play, legend toggle, the bear tween and moats. There were no script errors and no sideways scroll. Both write batches committed atomically. `board.json` is pulled from the live board afterwards, and `sync.py build` reproduces the published page byte for byte. **Not verified:** the new pages in the real viewer with two people at once.
 
+
+## Founder ops folder · 28 Oct 2026
+
+Founders' planning material now lives in `founder-ops/`, outside the app. The
+vision board moved there from `docs/vision-board/`. `founder-ops/library/` holds
+text snapshots of the seed and DD decks v2, the founders' note, longevity thesis
+v2, build list v2 and the launch readiness plan, with superseded docs under
+`archive/`. `founder-ops/model/report.js` prints bear, base and bull from the
+board's engine. ESLint and TypeScript skip the folder, and
+`founder-ops/check-isolation.sh` fails a branch that mixes ops files with app
+code. The launch and LabStack trackers stay in `docs/` because engineers update
+them with app work. See `founder-ops/README.md`.

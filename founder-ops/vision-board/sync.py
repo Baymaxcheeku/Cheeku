@@ -1,4 +1,4 @@
-"""Keep docs/vision-board/board.json and the live board in step.
+"""Keep founder-ops/vision-board/board.json and the live board in step.
 
 The live board keeps its cards in the artifact's shared database. Claude moves
 data between the two with the ArtifactData tool; this script does the file
