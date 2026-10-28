@@ -1,0 +1,19 @@
+Cheeku AI (cheekuai.in): India's daily health companion for families. One memory per family holds every report, prescription and reading, per person. Each day Cheeku answers against that memory, checks prescriptions (10 checks against published standards), decides the next step with the family and books the care in chat: home lab tests, doctors, dietitians, physio, elder care. Clinician-signed rules decide; the model only explains. It never diagnoses or prescribes.
+
+Stage: V1 built end to end with ₹0 raised. 54 screens, 278 tests, care partners live across 12,000+ pincodes and fitness classes in 200 cities. Store launch Jan to Feb 2027. 2-minute demo: youtu.be/mI4FmQt_8Qk
+
+Raise: ₹26 crore seed (about $3M), 17 months of runway, Series A planned around Feb 2028. Use: 35% people, 33% growth, 18% model (own GPUs, tuning, India evals), 14% ops and clinical safety.
+By the Series A: 5.9 lakh monthly users, 10,000+ paying, 25% day-30 retention target, care booked in chat every week, a first insurer wellness pilot, and a tuned model that beats frontier APIs on India health evals.
+
+Plan (base case, our model): ₹862 crore revenue in 2031 at 72% gross margin, EBITDA positive from May 2030. Ten engines: care bookings (largest), subscriptions (Free 20 chats a day, Solo ₹99, Family ₹249), fitness, employers, ads, insurance listings, insurer risk layer, state memory layer, model licensing and an elder pendant. 74% of new users organic by 2031.
+
+Why now: Ant Group's Afu has served 15 crore people in China; 23 crore people a week ask ChatGPT health questions. India has 79.7 crore ABHA IDs with records still in silos, under 1 doctor per 1,000 people, 2-minute consults, and 39.4% of health spend paid out of pocket.
+
+Moat: the family memory compounds; our own small India health model (15 to 22B) from 2029; zero supply capex through partners; insurer risk layer as the endgame.
+
+Founders:
+- Athar Ali, CEO: second-time founder, product at Meta (Instagram computer vision) and Practo (launched Surgicare), built Cheeku V1 end to end. Gurgaon.
+- Suraj Mondal, CTO: IISc MTech (Research), clinical-grade AI on real blood samples at SigTuple, GenAI in production at Cimpress.
+- Deepesh Mahajan, CBO: twelve years in healthcare commercial technology. At Pine Labs built the Healthcare and Wellness Pay Later vertical and owned over ₹1,000 crore of revenue across eight verticals; at Practo grew the enterprise book from ₹10.8 crore to ₹24 crore.
+
+Contact: athar@cheekuai.in
