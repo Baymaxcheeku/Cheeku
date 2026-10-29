@@ -13,6 +13,8 @@ The seed funnel for the ₹26 cr round: every investor, who leads the conversati
 - **Long list**: the 934 angels from the paid list that came with a name and contact only, plus the 53 screened out with their reason. "Add to pipeline" promotes one.
 - **Our story**: the text every draft is written from. Keep it current.
 
+**Add investor** opens a blank record. It is saved the moment it has a name, lands in Target, and always shows there whatever the tier filter. Close it without a name and nothing is added. Every field on a record saves as you type; the **Save** button at the top (or Ctrl or Cmd+S) writes all of them at once and shows whether it worked.
+
 Open any investor for the record, the fit reasons, a fit memo (the founder-board lenses: why yes, the likely objection, the opening line), contacts and the composer. Drafts are never sent from the page: copy, send from your own account, then **Log as sent**, which records the touch, moves the stage and sets the follow-up.
 
 ## Data

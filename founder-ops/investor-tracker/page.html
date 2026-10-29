@@ -179,8 +179,10 @@ textarea { resize: vertical; line-height: 1.5; }
 @keyframes fade { from { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .sheet, .scrim { animation: none; } .card, .meter i { transition: none; } }
 .sh-h { padding: 16px 20px 12px; border-bottom: 0.5px solid var(--line); display: grid; gap: 8px; }
-.sh-top { display: flex; align-items: center; gap: 10px; }
-.sh-top h2 { font-size: 22px; font-weight: 650; letter-spacing: -0.02em; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sh-top { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; row-gap: 6px; }
+.sh-h, .sh-b { min-width: 0; }
+@media (max-width: 600px) { .sh-top h2 { flex: 1 1 calc(100% - 80px); } .sh-top .save-st { flex: 1; font-size: 12px; } }
+.sh-top h2 { font-size: 22px; font-weight: 650; letter-spacing: -0.02em; flex: 1 1 160px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .x { border: 0; background: var(--surface-3); width: 30px; height: 30px; border-radius: 50%; font-size: 16px; line-height: 1; }
 .track { display: flex; gap: 3px; flex-wrap: wrap; }
 .track button { border: 0; padding: 4px 9px; border-radius: 7px; background: var(--surface-2); font-size: 12px; color: var(--muted); font-weight: 500; }
@@ -341,7 +343,17 @@ async function writeDoc(path, data) {
 }
 async function patchDoc(path, patch) {
   if (!S.db || !S.canEdit) { toast('This view is read only.'); return false; }
+  const m = /^investors\/(.+)$/.exec(path); if (m && (S.inv.get(m[1]) || {})._draft) return persistDraft(m[1]);
   try { await S.db.doc(path).update(patch); return true; } catch (e) { toast('Could not save. Try again.'); return false; }
+}
+// A new investor lives only on the page until it has a name; then the whole record is written at once.
+async function persistDraft(id) {
+  const it = S.inv.get(id); if (!it) return false;
+  if (!String(it.name || '').trim()) { saveState('Add a name to save this investor', 'err'); return false; }
+  const { id: _i, _draft, ...rec } = it;
+  const ok = await writeDoc('investors/' + id, rec);
+  if (ok) { const cur = S.inv.get(id); if (cur) delete cur._draft; toast(`${it.name} added to Target`); scheduleRender(); }
+  return ok;
 }
 function touchesFor(id) { return [...S.touches.values()].filter(t => t.investorId === id).sort((a, b) => b.at - a.at); }
 async function addTouch(investorId, t) {
@@ -366,7 +378,9 @@ async function moveStage(id, stage) {
 
 function subscribe() {
   S.db.collection('investors').onSnapshot(snap => {
+    const drafts = [...S.inv.values()].filter(x => x._draft);
     S.inv.clear(); snap.docs.forEach(d => S.inv.set(d.id, { id: d.id, ...d.data() }));
+    drafts.forEach(x => { if (!S.inv.has(x.id)) S.inv.set(x.id, x); });
     S.live = true; setSync(); scheduleRender();
   }, () => setSync(true));
   S.db.collection('touches').onSnapshot(snap => {
@@ -394,8 +408,9 @@ function hay(it) { return [it.name, it.firm, it.title, it.research && it.researc
 function visible(it, ignoreStage) {
   if (S.q && !hay(it).includes(S.q)) return false;
   if (S.kinds.size && !S.kinds.has(it.kind)) return false;
-  const tier = it.tier || 'U';
-  if (S.tiers.size && !S.tiers.has(tier) && (it.stage || 'target') === 'target') return false; // tiers filter the Target pile; anyone in play always shows
+  if (it._draft) return false;
+  const tier = it.tier || 'U', byHand = (it.sources || []).includes('added by hand');
+  if (S.tiers.size && !S.tiers.has(tier) && !byHand && (it.stage || 'target') === 'target') return false; // tiers filter the Target pile; anyone in play always shows
   if (S.owner === 'none' && it.owner) return false;
   if (S.owner !== 'all' && S.owner !== 'none' && it.owner !== S.owner) return false;
   return true;
@@ -655,21 +670,35 @@ function openSheet(id) {
   renderSheet();
 }
 // Fields save as you type (after a short pause) and when you leave them. The sheet shows the state.
-const FIELD_MAP = { fNext: 'nextStep', fDate: 'nextDate', fIntro: 'intro', fNotes: 'notes', fTitle: 'title', fFirm: 'firm', fHint: 'hint', fAmt: 'amount' };
+const FIELD_MAP = { fName: 'name', fKind: 'kind', fLinkedin: 'linkedin', fEmail: 'email', fNext: 'nextStep', fDate: 'nextDate', fIntro: 'intro', fNotes: 'notes', fTitle: 'title', fFirm: 'firm', fHint: 'hint', fAmt: 'amount' };
 const pending = new Map();
 function saveState(text, cls) { const el = $('saveState'); if (el) { el.textContent = text; el.className = 'save-st ' + (cls || ''); } }
 async function saveField(id, el) {
   clearTimeout(pending.get(el.id)); pending.delete(el.id);
   const it = S.inv.get(id); if (!it || !S.canEdit) return;
   const key = FIELD_MAP[el.id]; if (!key) return;
-  const val = key === 'amount' ? (el.value === '' ? null : Number(el.value)) : el.value;
-  if ((it[key] ?? (key === 'amount' ? null : '')) === val) { if (!pending.size) saveState('Saved', 'ok'); return; }
+  const val = key === 'amount' ? (el.value === '' ? null : Number(el.value)) : key === 'name' ? el.value.trim() : el.value;
+  if (key === 'name' && !val) { saveState(it._draft ? 'Add a name to save this investor' : 'A name is needed. The old name is kept.', 'err'); return; }
+  if (!it._draft && (it[key] ?? (key === 'amount' ? null : '')) === val) { if (!pending.size) saveState('Saved', 'ok'); return; }
   saveState('Saving…');
   const ok = await setInv(id, { [key]: val });
   if (!pending.size) saveState(ok ? 'Saved' : 'Not saved. Check your connection and try again.', ok ? 'ok' : 'err');
 }
+// The Save button and Ctrl or Cmd+S: write every field on the sheet now, whatever autosave has done.
+async function saveNow() {
+  const id = S.sheet, it = S.inv.get(id); if (!it || !S.canEdit) return;
+  for (const t of pending.values()) clearTimeout(t); pending.clear();
+  const patch = {};
+  for (const [elId, key] of Object.entries(FIELD_MAP)) { const el = $(elId); if (!el) continue; patch[key] = key === 'amount' ? (el.value === '' ? null : Number(el.value)) : key === 'name' ? el.value.trim() : el.value; }
+  if ('name' in patch && !patch.name) { saveState('Add a name first', 'err'); $('fName').focus(); return; }
+  saveState('Saving…'); const btn = $('saveNow'); if (btn) btn.disabled = true;
+  const ok = await setInv(id, patch);
+  if (btn) btn.disabled = false;
+  if (ok) renderSheet();
+  saveState(ok ? 'Saved' : 'Not saved. Check your connection and press Save again.', ok ? 'ok' : 'err');
+}
 function flushPending() { const id = S.sheet; for (const elId of [...pending.keys()]) { const el = $(elId); if (el && id) saveField(id, el); } }
-function closeSheet() { flushPending(); if (S.compose.ctl) S.compose.ctl.abort(); S.sheet = null; $('sheetRoot').innerHTML = ''; presence({ viewing: null }); scheduleRender(); }
+function closeSheet() { flushPending(); const cur = S.inv.get(S.sheet); if (cur && cur._draft && !String(cur.name || '').trim()) { S.inv.delete(cur.id); toast('Not added. An investor needs a name.'); } if (S.compose.ctl) S.compose.ctl.abort(); S.sheet = null; $('sheetRoot').innerHTML = ''; presence({ viewing: null }); scheduleRender(); }
 function renderSheet() {
   if (pending.size) flushPending();
   const it = S.inv.get(S.sheet); if (!it) return closeSheet();
@@ -686,8 +715,10 @@ function renderSheet() {
   $('sheetRoot').innerHTML = `<div class="scrim" data-act="close"></div>
   <aside class="sheet" role="dialog" aria-modal="true" aria-labelledby="shName">
     <div class="sh-h">
-      <div class="sh-top"><span class="tier ${it.tier || 'U'}">${it.tier && it.tier !== 'U' ? it.tier : '?'}</span><h2 id="shName">${esc(it.name)}</h2>
-        <span class="pill k-${esc((it.kind || 'VC').replace(/ /g, '-'))}">${esc(it.kind)}</span><button class="x" data-act="close" aria-label="Close">×</button></div>
+      <div class="sh-top"><span class="tier ${it.tier || 'U'}">${it.tier && it.tier !== 'U' ? it.tier : '?'}</span><h2 id="shName">${esc(it.name || 'New investor')}</h2>
+        <span class="pill k-${esc((it.kind || 'VC').replace(/ /g, '-'))}">${esc(it.kind)}</span>
+        ${S.canEdit ? `<span id="saveState" class="save-st ${it._draft ? 'err' : ''}">${it._draft ? 'Not saved yet' : 'Saves automatically'}</span><button class="btn ${it._draft ? 'primary' : 'ghost'}" id="saveNow" type="button" title="Save every field now (Ctrl or Cmd+S)">${it._draft ? 'Save investor' : 'Save'}</button>` : ''}
+        <button class="x" data-act="close" aria-label="Close">×</button></div>
       <div class="track">${ALL_STAGES.map(s => `<button type="button" data-stage="${s.id}" class="${CLOSED.some(c => c.id === s.id) ? 'closed' : ''} ${STAGE_IDX[s.id] < STAGE_IDX[st] && !CLOSED.some(c => c.id === st) ? 'done' : ''}" aria-pressed="${s.id === st}" ${ro}>${s.label}</button>`).join('')}</div>
     </div>
     <div class="sh-b">
@@ -711,7 +742,7 @@ function renderSheet() {
         ${it.portfolio ? `<div><span class="lbl">Portfolio, as listed</span><div style="font-size:13px;color:var(--ink-2)">${esc(it.portfolio)}</div></div>` : ''}
         ${it.about ? `<div><span class="lbl">About, as listed</span><div style="font-size:13px;color:var(--ink-2)">${esc(it.about)}</div></div>` : ''}
         <label><span class="lbl" style="display:flex;justify-content:space-between"><span>Notes</span>${S.canEdit ? '<span class="muted" style="text-transform:none;letter-spacing:0;font-weight:500">Saves as you type</span>' : ''}</span><textarea id="fNotes" rows="4" placeholder="What they care about, what they said, who else is in" ${ro}>${esc(it.notes || '')}</textarea></label>
-        <div class="muted" style="font-size:11.5px;display:flex;gap:8px;flex-wrap:wrap;justify-content:space-between"><span>Source: ${esc((it.sources || []).join(', '))}${it.updatedAt ? ' · last changed ' + fmtTime(it.updatedAt) : ''}</span>${S.canEdit ? '<span id="saveState" class="save-st">Changes save automatically</span>' : ''}</div>
+        <div class="muted" style="font-size:11.5px;display:flex;gap:8px;flex-wrap:wrap;justify-content:space-between"><span>Source: ${esc((it.sources || []).join(', '))}${it.updatedAt ? ' · last changed ' + fmtTime(it.updatedAt) : ''}</span></div>
       </div>
       <div class="sh-r">
         <div class="compose">
@@ -767,6 +798,10 @@ function researchBlock(it, ro) {
   const list = (title, xs) => (xs && xs.length) ? `<div><span class="lbl">${title}</span><ul>${xs.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>` : '';
   return `<div class="rs">
     <div class="grid2">
+      <label><span class="lbl">Name</span><input class="inp" id="fName" value="${esc(it.name || '')}" placeholder="Full name or fund name" autocomplete="off" ${ro}></label>
+      <label><span class="lbl">Type</span><select class="inp" id="fKind" ${ro}>${KINDS.map(k => `<option ${it.kind === k ? 'selected' : ''}>${k}</option>`).join('')}</select></label>
+      <label><span class="lbl">LinkedIn</span><input class="inp" id="fLinkedin" type="url" value="${esc(it.linkedin || '')}" placeholder="https://linkedin.com/in/…" ${ro}></label>
+      <label><span class="lbl">Email</span><input class="inp" id="fEmail" type="email" value="${esc(it.email || '')}" placeholder="name@fund.com" ${ro}></label>
       <label><span class="lbl">Role</span><input class="inp" id="fTitle" value="${esc(it.title || '')}" placeholder="CEO, Partner, angel" ${ro}></label>
       <label><span class="lbl">Firm or company</span><input class="inp" id="fFirm" value="${esc(it.firm || '')}" placeholder="TestMu AI" ${ro}></label>
     </div>
@@ -1156,6 +1191,7 @@ document.addEventListener('click', e => {
     if (d.action) { S.compose.action = d.action; S.compose.extra = ($('fExtra') || {}).value || ''; S.compose.text = ($('fDraft') || {}).value || ''; return renderSheet(); }
     if (d.channel) { S.compose.channel = d.channel; S.compose.extra = ($('fExtra') || {}).value || ''; S.compose.text = ($('fDraft') || {}).value || ''; return renderSheet(); }
     if (t.id === 'genBtn') { S.compose.extra = ($('fExtra') || {}).value || ''; return generate(); }
+    if (t.id === 'saveNow') return saveNow();
     if (t.id === 'memoBtn') return writeMemo();
     if (t.id === 'researchBtn') return researchNow();
     if (t.id === 'copyBtn') { const s = ($('fSubject') || {}).value; const b = $('fDraft').value; return copyText(S.compose.channel === 'email' && s ? `Subject: ${s}\n\n${b}` : b, $('fDraft')); }
@@ -1182,23 +1218,21 @@ document.addEventListener('input', e => {
   if (e.target.dataset && e.target.dataset.gfield && e.target.tagName !== 'SELECT') { const el = e.target, k = el.closest('[data-gid]').dataset.gid + el.dataset.gfield; clearTimeout(gPending.get(k)); gPending.set(k, setTimeout(() => saveGrantField(el), 800)); return; }
   if (e.target.id === 'findFocus') { S.find.focus = e.target.value; return; }
   if (e.target.id === 'poolQ') { S.poolQ = e.target.value; S.poolLimit = 150; clearTimeout(window.__pq); window.__pq = setTimeout(scheduleRender, 150); }
+  if (e.target.id === 'fName' && $('shName')) $('shName').textContent = e.target.value.trim() || 'New investor';
   if (FIELD_MAP[e.target.id] && S.sheet && S.canEdit) { const el = e.target, id = S.sheet; clearTimeout(pending.get(el.id)); saveState('Unsaved changes…'); pending.set(el.id, setTimeout(() => saveField(id, el), 800)); return; }
   if (e.target.id === 'fDraft') { S.compose.text = e.target.value; refreshSendLink(); }
   if (e.target.id === 'fSubject') { S.compose.subject = e.target.value; refreshSendLink(); }
 });
-document.addEventListener('keydown', e => { if (e.key === 'Escape' && S.sheet) closeSheet(); if (e.key === '/' && !/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) { e.preventDefault(); $('q').focus(); } });
+document.addEventListener('keydown', e => { if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 's' && S.sheet) { e.preventDefault(); return saveNow(); } if (e.key === 'Escape' && S.sheet) closeSheet(); if (e.key === '/' && !/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) { e.preventDefault(); $('q').focus(); } });
 async function addInvestor() {
   if (!S.canEdit) return toast('This view is read only.');
-  const name = (S.q && S.q.length > 2 ? S.q : '').replace(/\b\w/g, c => c.toUpperCase()) || 'New investor';
+  const name = (S.q && S.q.length > 2 ? S.q : '').replace(/\b\w/g, c => c.toUpperCase());
   const id = 'inv-' + Date.now().toString(36);
   const rec = { name, kind: 'Angel', tier: 'U', fit: null, why: ['Added by hand'], flags: [], angle: 'general', role: 'Angel cheque', people: [], email: '', linkedin: '', twitter: '', website: '', city: '', portfolio: '', about: '', stageFocus: '',
     title: '', firm: '', hint: '', sources: ['added by hand'], stage: 'target', owner: S.meKey, intro: '', nextStep: '', nextDate: '', lastTouch: null, amount: null, notes: '', createdAt: Date.now(), ...stamp() };
-  if (await writeDoc('investors/' + id, rec)) { S.inv.set(id, { id, ...rec }); openSheet(id); renameInline(id); }
-}
-function renameInline(id) {
-  const h = $('shName'); if (!h) return; h.contentEditable = 'true'; h.focus(); document.getSelection().selectAllChildren(h);
-  const done = () => { h.contentEditable = 'false'; const v = h.textContent.trim(); if (v && v !== S.inv.get(id).name) setInv(id, { name: v }); };
-  h.addEventListener('blur', done, { once: true }); h.addEventListener('keydown', ev => { if (ev.key === 'Enter') { ev.preventDefault(); h.blur(); } });
+  S.inv.set(id, { id, ...rec, _draft: true }); openSheet(id);
+  const f = $('fName'); if (f) { f.focus(); f.select(); }
+  if (name) persistDraft(id);
 }
 
 // --------------------------------------------------------------- presence --
