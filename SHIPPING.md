@@ -1,5 +1,9 @@
 # Shipping to the App Store and Play Store
 
+> **2026-10-30:** the Next.js app this document describes was removed from the
+> repo; the mobile app in `mobile-react-native/` is the only build. Paths into
+> the web app's `src/` refer to git history before that date.
+
 Written 2026-08-01, against the app as it stands. Read the two blockers first;
 both change decisions you would otherwise make later and expensively.
 

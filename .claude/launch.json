@@ -2,14 +2,6 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "baymax",
-      "runtimeExecutable": "pnpm",
-      "runtimeArgs": [
-        "dev"
-      ],
-      "port": 3000
-    },
-    {
       "name": "baymax-mobile",
       "runtimeExecutable": "npx",
       "runtimeArgs": [

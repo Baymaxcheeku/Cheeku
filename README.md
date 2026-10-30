@@ -7,34 +7,53 @@ from general medical knowledge.
 India-first: ₹ pricing, UPI checkout, Hindi/Hinglish in the safety lexicon,
 112/108 and Tele-MANAS as the emergency numbers.
 
+**It ships as a mobile app.** The app is `mobile-react-native/` (Expo, React
+Native); start with its `PLAN.md` and `AGENTS.md`. The Next.js web app that used
+to live at the repo root was removed on 2026-10-30 — it is in git history before
+that date. The web is served by the Expo web export of the same app.
+
 ## The five rules the code enforces
 
 These are not aspirations in a doc. Each is enforced somewhere specific, and
-most have tests whose only job is to fail if someone reverts them.
+most have tests whose only job is to fail if someone reverts them. Paths are
+under `mobile-react-native/` unless they say otherwise.
 
 1. **Never diagnoses, prescribes or gives dosages.**
-   `src/lib/ai/mock/answer.ts`, `src/lib/records/insight.ts`. Ten tests in
+   `src/lib/ai/mock/answer.ts`, `src/lib/records/insight.ts`. The tests in
    `answer.test.ts` assert the output never names a condition, a drug or a
    quantity.
-2. **The safety gate runs before any AI call** — client-side, deterministic,
-   well under 200ms. `src/lib/safety/detect.ts`, called as the first statement
-   of the chat's only send path.
+2. **The safety gate runs before any AI call** — on the device, deterministic,
+   well under 200ms. `src/lib/safety/detect.ts`.
 3. **Profiles are isolated**, enforced at the database layer.
-   `src/lib/db/profile-isolation.test.ts` proves it at runtime against a real
-   database.
+   `tests/db/profile-isolation.test.ts` (repo root) proves it at runtime
+   against a real database.
 4. **Grounded or silent.** If the records do not cover a question, the app says
    so and explains why, rather than improvising.
-5. **Never sells or leaks data.** No third-party origins in the CSP. No
-   analytics. See `PRIVACY_NOTES.md`.
+5. **Never sells or leaks data.** No analytics, no third-party SDKs. See
+   `PRIVACY_NOTES.md`.
 
-## Running it
+## How it is arranged
+
+```
+mobile-react-native/   the app (npm) — see its PLAN.md for running it
+supabase/
+  migrations/          the schema, RLS and server-side jobs
+  functions/           Edge Functions: cheeku-chat, push-dispatch, delete-account
+  manual/              migration steps sized for the Supabase SQL editor
+scripts/               migrate, seed, demo documents, SQL-editor step splitter
+tests/db/              RLS audit and runtime profile isolation
+docs/  design/         content system, specs, trackers, design frames
+```
+
+## Database tooling (repo root)
+
+The root is a small pnpm workspace for the database, nothing else.
 
 ```bash
 pnpm install
 cp .env.example .env.local        # then fill in the Supabase values
 pnpm db:migrate                   # apply migrations (idempotent)
 pnpm seed                         # optional: the demo family
-pnpm dev
 ```
 
 `.env.local` needs a Supabase project URL, its publishable and secret keys, and
@@ -43,42 +62,13 @@ Everything is documented in `.env.example`.
 
 **Demo account** after seeding: `demo@baymax.test` / `baymax-demo-2026!`
 
-## Scripts
-
 | Command | What it does |
 |---|---|
-| `pnpm dev` | Dev server |
-| `pnpm verify` | typecheck → lint → test → build. Run before committing. |
 | `pnpm db:migrate` | Applies pending migrations. Safe to re-run. |
 | `pnpm db:reset` | Drops and re-applies. **Refuses if any table has rows.** |
 | `pnpm seed` / `seed:reset` | Demo family. Refuses a non-local project without `SEED_ALLOW_REMOTE=1`. |
-| `pnpm safety:build` | Recompiles the safety lexicon from YAML. |
-| `pnpm test` | Vitest. Includes the live RLS and isolation suites. |
-
-## How it is arranged
-
-```
-src/
-  app/
-    (onboarding)/      A1–A6  splash, carousel, auth, audience, profile, first upload
-    (app)/             the signed-in shell — tab bar, offline banner, error boundary
-      home/            B1     scoped to the active family member
-      records/         D1/D2  list, and one document with its extracted values
-      timeline/        D3     the same records by month
-      scan/            C1/C2  upload, processing, extraction review
-      ask/             E1/E2  chat, grounded and cited
-      settings/        I1     plan, family, export, delete
-  components/
-    illustrations/     original SVG artwork — see "Artwork" below
-    safety/            G1 emergency escalation
-    billing/           paywall and checkout
-  lib/
-    safety/            the gate: lexicon.yaml → generated matcher → detect()
-    records/           queries, grouping, severity, insight
-    ai/mock/           extraction and answer engines behind a mock adapter
-    billing/           plans, quota, entitlement
-    account/           export and delete
-```
+| `pnpm test` | The RLS audit and the live isolation suite. |
+| `pnpm typecheck` | Typechecks the scripts and tests. |
 
 ## Design fidelity, and where it stops
 
@@ -103,7 +93,8 @@ frame's ₹499 / ₹899 is the outlier.
 
 ## Artwork
 
-All illustrations are **original SVG** in `src/components/illustrations/`. They
+All illustrations are **original** art in
+`mobile-react-native/src/components/illustrations/`. They
 were previously crops from the design mockups, which could not be made to work:
 the crop carries the frame's near-white backdrop, that backdrop cannot be keyed
 out (it sits eight levels from the mascot's white body), and the resolution is

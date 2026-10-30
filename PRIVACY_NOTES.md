@@ -53,7 +53,7 @@ rows together, platform, app version and locale. Writes go through
 metadata the form sends.
 
 **Versioned documents.** Texts are bundled in the app
-(`src/lib/legal/documents.ts`) and mirrored in `legal_documents` with the same
+(`mobile-react-native/src/lib/legal/documents.ts`) and mirrored in `legal_documents` with the same
 hash. A test fails if the two drift. A change marked `material` makes everyone
 agree again through a full-screen sheet that names what changed; a wording fix
 does not.
@@ -82,7 +82,7 @@ clear affirmative action. Accounts that withdrew are left as they are.
 ## What never leaves the device
 
 - **EXIF, including GPS.** Stripped on the phone before upload by re-encoding
-  the image (`src/lib/upload/strip-exif.ts`). A photo of a prescription carries
+  the image (`mobile-react-native/src/lib/upload/strip-exif.ts`). A photo of a prescription carries
   the coordinates of where it was taken, usually someone's home. **One gap:** if
   the re-encode fails, the original is uploaded rather than losing the
   document. The single-photo screen says so; bulk upload does not yet.
@@ -105,7 +105,7 @@ replay tool on these screens would record someone's lab results.
 
 The app sets **no cookies** and has no advertising ID access, analytics,
 crash reporter or session recording. What it does keep on the phone is listed
-in full in Settings, Storage & cache, from `src/lib/privacy/storage-registry.ts`.
+in full in Settings, Storage & cache, from `mobile-react-native/src/lib/privacy/storage-registry.ts`.
 A test scans the source for storage keys and fails if one is missing from that
 list, so the screen cannot fall behind the code.
 
@@ -170,7 +170,7 @@ asks for.
 
 - **No retention or auto-deletion policy.**
 - **No read audit log.** Nobody can answer "who opened this record and when".
-- **Legal entity details are placeholders.** `src/lib/legal/entity.ts` holds
+- **Legal entity details are placeholders.** `mobile-react-native/src/lib/legal/entity.ts` holds
   the company name, address, grievance officer and contact emails in
   [brackets], and every document shows a "draft" banner while it does. The
   texts themselves need a lawyer's read before launch.

@@ -1,5 +1,9 @@
 # Build brief — React Native rewrite
 
+> **2026-10-30:** the Next.js app this document describes was removed from the
+> repo; the mobile app in `mobile-react-native/` is the only build. Paths into
+> the web app's `src/` refer to git history before that date.
+
 You are building the native mobile app. A working Next.js web app already
 exists at `baymax-app/`; it is the specification. This document tells you what
 to port unchanged, what to rewrite, and what not to touch.
