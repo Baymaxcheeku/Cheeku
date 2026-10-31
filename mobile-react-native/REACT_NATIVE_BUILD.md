@@ -1,7 +1,7 @@
 # Build brief — React Native rewrite
 
 > **2026-10-30:** the Next.js app this document describes was removed from the
-> repo; the mobile app in `mobile-react-native/` is the only build. Paths into
+> repo; the mobile app (this folder) is the only build. Paths into
 > the web app's `src/` refer to git history before that date.
 
 You are building the native mobile app. A working Next.js web app already

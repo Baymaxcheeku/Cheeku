@@ -139,8 +139,8 @@ These are real and unfixed. They are listed rather than quietly omitted.
 ## Verifying a deployment
 
 ```bash
-pnpm typecheck && pnpm test     # repo root: RLS audit + runtime isolation proof
-cd mobile-react-native && npx tsc --noEmit && npx vitest run
+npx tsc --noEmit && npx vitest run
+npm run test:db                 # RLS audit + runtime isolation proof
 ```
 
 RLS coverage can be re-checked live against the database by querying

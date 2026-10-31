@@ -61,7 +61,7 @@ describe("card copy follows the content system", () => {
 describe("notification copy follows the content system", () => {
   // The literal titles and bodies in the latest notification migration. Names
   // and dates are added at run time, so this checks the fixed words only.
-  const sql = readFileSync(resolve(__dirname, "../../../../supabase/migrations/0036_notification_copy.sql"), "utf8");
+  const sql = readFileSync(resolve(__dirname, "../../../supabase/migrations/0036_notification_copy.sql"), "utf8");
   const pairs = [...sql.matchAll(/perform notify_user\(\s*[^,]+,[^,]+,[^,]+,\s*'[a-z_]+'[^,]*,\s*([\s\S]*?),\s*([\s\S]*?),\s*'\//g)];
 
   it("finds every notification in the migration", () => {

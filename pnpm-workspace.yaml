@@ -1,3 +1,0 @@
-allowBuilds:
-  # Bundler binary used by tsx/vitest.
-  esbuild: true

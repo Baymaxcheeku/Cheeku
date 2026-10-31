@@ -7,8 +7,8 @@ from general medical knowledge.
 India-first: ₹ pricing, UPI checkout, Hindi/Hinglish in the safety lexicon,
 112/108 and Tele-MANAS as the emergency numbers.
 
-**It ships as a mobile app.** The app is `mobile-react-native/` (Expo, React
-Native); start with its `PLAN.md` and `AGENTS.md`. The Next.js web app that used
+**It ships as a mobile app** (Expo, React Native). Everything lives in
+`mobile-react-native/`; start with `PLAN.md` and `AGENTS.md`. The Next.js web app that used
 to live at the repo root was removed on 2026-10-30 — it is in git history before
 that date. The web is served by the Expo web export of the same app.
 
@@ -16,7 +16,7 @@ that date. The web is served by the Expo web export of the same app.
 
 These are not aspirations in a doc. Each is enforced somewhere specific, and
 most have tests whose only job is to fail if someone reverts them. Paths are
-under `mobile-react-native/` unless they say otherwise.
+relative to this folder.
 
 1. **Never diagnoses, prescribes or gives dosages.**
    `src/lib/ai/mock/answer.ts`, `src/lib/records/insight.ts`. The tests in
@@ -25,7 +25,7 @@ under `mobile-react-native/` unless they say otherwise.
 2. **The safety gate runs before any AI call** — on the device, deterministic,
    well under 200ms. `src/lib/safety/detect.ts`.
 3. **Profiles are isolated**, enforced at the database layer.
-   `tests/db/profile-isolation.test.ts` (repo root) proves it at runtime
+   `tests/db/profile-isolation.test.ts` proves it at runtime
    against a real database.
 4. **Grounded or silent.** If the records do not cover a question, the app says
    so and explains why, rather than improvising.
@@ -35,40 +35,30 @@ under `mobile-react-native/` unless they say otherwise.
 ## How it is arranged
 
 ```
-mobile-react-native/   the app (npm) — see its PLAN.md for running it
+app/ src/ assets/      the app (npm) — see PLAN.md for running it
 supabase/
   migrations/          the schema, RLS and server-side jobs
   functions/           Edge Functions: cheeku-chat, push-dispatch, delete-account
   manual/              migration steps sized for the Supabase SQL editor
-scripts/               migrate, seed, demo documents, SQL-editor step splitter
-tests/db/              RLS audit and runtime profile isolation
+scripts/               lexicon build, demo family SQL, mascot and pod tooling
+tests/db/              RLS audit and runtime profile isolation (npm run test:db)
 docs/  design/         content system, specs, trackers, design frames
+.claude/skills/        the project's Claude skills
 ```
 
-## Database tooling (repo root)
+## Database
 
-The root is a small pnpm workspace for the database, nothing else.
-
-```bash
-pnpm install
-cp .env.example .env.local        # then fill in the Supabase values
-pnpm db:migrate                   # apply migrations (idempotent)
-pnpm seed                         # optional: the demo family
-```
-
-`.env.local` needs a Supabase project URL, its publishable and secret keys, and
-`DATABASE_URL` (Dashboard → Connect → Session pooler) for the migration runner.
-Everything is documented in `.env.example`.
-
-**Demo account** after seeding: `demo@baymax.test` / `baymax-demo-2026!`
+Migrations are applied in the Supabase SQL editor: `supabase/manual/*-step-*.sql`
+in order, then the matching `*-check.sql`. Edge Functions deploy from the
+dashboard or with `supabase functions deploy <name>`. The pnpm migration runner
+and seed scripts that used to live at the repo root were removed on 2026-10-31;
+they are in git history before that date.
 
 | Command | What it does |
 |---|---|
-| `pnpm db:migrate` | Applies pending migrations. Safe to re-run. |
-| `pnpm db:reset` | Drops and re-applies. **Refuses if any table has rows.** |
-| `pnpm seed` / `seed:reset` | Demo family. Refuses a non-local project without `SEED_ALLOW_REMOTE=1`. |
-| `pnpm test` | The RLS audit and the live isolation suite. |
-| `pnpm typecheck` | Typechecks the scripts and tests. |
+| `npx tsc --noEmit` | Typechecks the app, scripts and tests (not the Deno Edge Functions). |
+| `npx vitest run` | The app's logic tests. No secrets needed. |
+| `npm run test:db` | The RLS audit over `supabase/migrations`, and the live isolation proof, which runs only when `EXPO_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_ANON_KEY` and `SUPABASE_SERVICE_ROLE_KEY` are exported in the shell. Never put the service key in `.env.local`. |
 
 ## Design fidelity, and where it stops
 
@@ -94,7 +84,7 @@ frame's ₹499 / ₹899 is the outlier.
 ## Artwork
 
 All illustrations are **original** art in
-`mobile-react-native/src/components/illustrations/`. They
+`src/components/illustrations/`. They
 were previously crops from the design mockups, which could not be made to work:
 the crop carries the frame's near-white backdrop, that backdrop cannot be keyed
 out (it sits eight levels from the mascot's white body), and the resolution is

@@ -9,7 +9,7 @@ import { OPTIONAL_PURPOSES, PURPOSE_COPY, REQUIRED_PURPOSES } from "./purposes";
 
 const sha = (s: string) => createHash("sha256").update(s, "utf8").digest("hex");
 
-const migrations = resolve(__dirname, "../../../../supabase/migrations");
+const migrations = resolve(__dirname, "../../../supabase/migrations");
 const sql = readdirSync(migrations)
   .filter((f) => f.endsWith(".sql"))
   .sort()

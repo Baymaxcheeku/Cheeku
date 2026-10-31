@@ -13,8 +13,8 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
-const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const url = process.env.EXPO_PUBLIC_SUPABASE_URL;
+const anonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
 const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 const configured = Boolean(url && anonKey && serviceKey && !url.includes("placeholder"));
@@ -23,7 +23,7 @@ if (!configured) {
   console.warn(
     "\n[profile-isolation] SKIPPED. No Supabase project configured.\n" +
       "  This test is the only runtime proof that RLS isolates profiles.\n" +
-      "  Set NEXT_PUBLIC_SUPABASE_URL / _ANON_KEY / SUPABASE_SERVICE_ROLE_KEY and rerun.\n",
+      "  Export EXPO_PUBLIC_SUPABASE_URL / _ANON_KEY / SUPABASE_SERVICE_ROLE_KEY in the shell and rerun.\n",
   );
 }
 
