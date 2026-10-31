@@ -92,11 +92,13 @@ the latest notification migration; extend it when you add a new kind of copy.
   `mobile-react-native` (the Expo web export). Every push to a branch makes a
   **Preview**; a push to `main` makes **Production**
   (`cheeku-ai-mobile.vercel.app`). Nothing else is needed.
-- **The Next.js web app does not deploy any more.** The `cheeku-ai` project
-  (the repo root) is switched off by the root `vercel.json`
-  (`git.deploymentEnabled: false`), so pushes make no deployments and no
-  failure emails there. Do not remove that file, and do not add a
-  `vercel.json` to `mobile-react-native` that copies it.
+- **The Next.js web app does not deploy any more.** Switch the `cheeku-ai`
+  project off in the Vercel dashboard (its Settings, Git: disconnect the
+  repository, or set Ignored Build Step to "Don't build anything"). **Never
+  add a `vercel.json` at the repo root to do it:** `cheeku-ai-mobile` reads
+  the root file too, and a `git.deploymentEnabled: false` there stopped
+  every mobile Preview and Production build (2026-10-31, commits e58c00c to
+  303ab27, fixed by removing the file).
 - **Vercel builds a commit once.** If the same commit lands on a branch and on
   `main` at once, the branch can win and `main` gets no Production build. So
   after a PR is merged, do NOT push the working branch at `main`'s merge commit
