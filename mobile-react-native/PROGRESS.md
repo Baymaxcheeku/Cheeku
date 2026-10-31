@@ -3812,3 +3812,129 @@ Rows expand on a critically damped spring and skip motion under reduced motion. 
 ## The root vercel.json stopped the mobile deploys · 2026-10-31
 
 Commit e58c00c added a root `vercel.json` with `git.deploymentEnabled: false` to stop the Next.js `cheeku-ai` project building. `cheeku-ai-mobile` reads the root file as well, so from that commit on it made no Preview or Production deployments, including the merge of #65 (303ab27) that carried the prescription scorecard and the rename. The file is removed, and the next push to `main` builds Production again. The Next.js project is switched off in the Vercel dashboard instead (AGENTS.md, "How a merge reaches people"). The `marketing/` typecheck exclusion stays, so its builds would not fail even if it ran.
+
+## Dead code out of the mobile app · 2026-10-30
+
+A reachability pass over `mobile-react-native`: every route in `app/` as an
+entry point, imports followed through `@/` and relative paths, then knip for
+unused exports and dependencies, then `tsc --noUnusedLocals` to catch what
+each removal orphaned. Nothing a screen can reach was touched.
+
+**Removed.**
+- Files nothing imports: `components/app/coming-later.tsx` (every stub it
+  served is a real screen now), `lib/cn.ts`, and `lib/ai/mock/fixtures/family.ts`
+  (the seed data lives in the root project and `scripts/demo-family-sql.ts`).
+  Also an untracked `index.js` from the Expo template that imported a
+  non-existent `./App`; the entry is `expo-router/entry`.
+- Unreferenced components: `Bob`, `Dots`, `StatsCard` and its `STAT_CELLS`,
+  `RecordRow`, `SectionTitle`, `TapToWiggle`, `UploadScene`.
+- Unreferenced functions and constants: `addReminder`, `endPregnancy`,
+  `allFaceIds`, `isFaceId`, `canShare`, `clockTag`, `flagLabel`,
+  `forgetCarePlans`, `hasSupabaseConfig`, `inheritAtBirth` (migration 0030's
+  `promote_pregnancy` remains the one definition), `journeyFor`, `nudgeByKey`,
+  `removeDailyLog`, `duration`, `SUPPORT_RESPONSE`, `CONSENT_VERSION`,
+  `audienceSchema`, `SEVERITY_STAT_LABEL`, `SEVERITY_PILL`, `SEVERITY_DOT`,
+  `FLAG_PILL`, and unused re-exports and inferred types.
+- `changePassword` and `updateHealthProfile` with their schemas and the
+  `parseMedications` helper. Both were superseded: Security changes a password
+  by reset email, and Health profile saves through `saveMemberHealth`.
+- Dependencies nothing imports: `clsx`, `tailwind-merge`, `react-hook-form`,
+  `@hookform/resolvers`.
+
+**Kept on purpose.** Tests and their fixtures; `mascot/wasm.web.ts`, which
+knip flags but Metro picks for web; `babel-preset-expo`, used by
+`babel.config.js`; seven helpers only tests call (`NUDGE_LIMIT`, `PLAN_ORDER`,
+`courseQuantity`, `isRegistered`, `nextSlot`, `parseDoseKey`, `promptsFor`),
+because each pins a rule; and exports used inside their own file.
+
+**Found, not fixed.** `app.json` points Android's adaptive icon at
+`./assets/adaptive-icon.png`, which does not exist; the
+`android-icon-*.png` files beside it look like the intended art. A native
+Android build will need this fixed.
+
+**Verified here:** typecheck, typecheck with `--noUnusedLocals` (clean, as
+before), 476 tests, and `expo export` for iOS, Android and web.
+**Not verified:** on a device. No screen's behaviour should change, but
+nobody has looked.
+
+## The Next.js app is removed · 2026-10-30
+
+The web app at the repo root had been the reference since 2026-08-09, when
+Baymax became mobile-only. It was incomplete and unmaintained, the mobile app
+imported nothing from it, and every flow it had now runs in
+`mobile-react-native` (on the web too, through the Expo web export). So it is
+gone: `src/`, `next.config.ts`, `postcss.config.mjs`, `eslint.config.mjs`, the
+web copy of `scripts/build-lexicon.ts` (the mobile app has its own), the `pnpm
+dev` launch config, and every web dependency. It is in git history before this
+entry.
+
+**What the root keeps, because the mobile app's backend needs it.**
+`supabase/` (migrations, Edge Functions, SQL-editor steps; the mobile tests also
+read migrations from here), the migration runner and seed scripts, and the two
+database tests, moved from `src/lib/db/` to `tests/db/`. The demo-family
+fixture `scripts/seed.ts` reads moved from `src/lib/ai/mock/fixtures/` to
+`scripts/fixtures/`. The root `package.json` is now only that tooling:
+supabase-js, pg, tsx, typescript, vite (for `loadEnv`), vitest and prettier.
+`.env.example` keeps the `NEXT_PUBLIC_SUPABASE_*` names so existing
+`.env.local` files keep working, and drops the two web-only variables.
+
+**Docs updated:** the README now describes this layout; `AGENTS.md`,
+`PLAN.md`, `SECURITY.md` (test paths, the service-role key, the web-only
+headers section marked as removed) and `PRIVACY_NOTES.md` (paths now point
+at the mobile files); and a dated note on `REACT_NATIVE_BUILD.md` and
+`SHIPPING.md`, which describe the web app.
+
+**Found, not fixed: `tests/db/rls.test.ts` fails 18 checks, and did before
+this change** (same 18 at the previous commit, run from a clean worktree). All
+of them are catalog and config tables (`app_config`, `app_flags`, `articles`,
+`daily_logs`, `lab_offers`, `lab_partners`, `lab_result_templates` and
+others) whose policies do not reference `auth.uid()` or have no select
+policy. Those look intentional for public catalog tables, which would mean
+the audit's rules are stale rather than the database being open, but each
+needs checking by whoever owns the schema before the audit is relaxed.
+
+**To do outside the repo:** disconnect the `cheeku-ai` Vercel project. It
+built the repo root and has nothing left to build.
+
+**Verified here:** root typecheck; `seed.ts` resolves its moved fixture
+(stops at the missing-credentials check, as it should); the RLS audit runs
+from its new path with the same results as before; the mobile app's
+typecheck and 476 tests are unchanged.
+
+## One folder for the app, SDK 58, and main merged in · 2026-10-31
+
+**Why.** Expo Go on the owner's phone runs only SDK 58, so the app would not
+open on a phone, and the app's docs, database and tests were spread across the
+repo root, reached through `../` paths.
+
+**What moved into `mobile-react-native/`.** `supabase/` (migrations, SQL-editor
+steps, Edge Functions including the new `geo`, `rx-score` and
+`privacy-alert`), `docs/` (with `docs/privacy`), `design/`, the database tests
+(`tests/db`, run with `npm run test:db`), the root Markdown docs, every Claude
+skill (the founder skills too), and, on the owner's call, `founder-ops/` and
+`marketing/`. Those two stay walled off: excluded from `tsc`, Metro's
+`blockList` and the root ESLint, and `check-isolation.sh` was repointed.
+
+**What stays at the root, on the owner's call.** The Next.js web app (`src/`,
+`next.config.ts`, pnpm files, `scripts/`), unchanged except that `migrate.ts`,
+`sql-editor-steps.ts` and `src/lib/db/rls.test.ts` now read
+`mobile-react-native/supabase/`. It is the reference and does not deploy. The
+earlier note on this branch that it had been removed was corrected, and
+`.github/pull_request_template.md` stays at the root because GitHub only reads
+it there.
+
+**SDK 58.** Expo 58, React Native 0.88, React 19.3. Code changes: the custom
+tab bar takes `emitter` and `navigateToTab` (Expo Router dropped the
+`navigation` prop), refs are typed `ScrollViewInstance` / `TextInputInstance`,
+the data export uses `File.writeSync` (`write` is async now), `yaml` is a
+direct dev dependency, and `expo-share-intent` moved to 9.0.0 (its SDK 58
+line). That module is optional at runtime, so Expo Go opens the app and only
+the share sheet waits for a development build. `app.json` lost three keys SDK
+57 no longer accepts and points the Android icon at the files that exist.
+Expo CLI needs Node 22.13+ or 24 (not 25).
+
+**Verified here:** app typecheck, 537 tests, `expo-doctor` 20/20, an iOS
+bundle export; the web app's typecheck and tests (unchanged from main), its
+lint (fewer errors than main, since the demo code is no longer linted). The
+RLS audit fails the same 22 checks in both copies, as it does on main.
+**Not verified:** on a phone or in Expo Go.

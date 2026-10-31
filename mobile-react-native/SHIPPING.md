@@ -1,5 +1,9 @@
 # Shipping to the App Store and Play Store
 
+> **2026-10-31:** the Next.js app this document describes is still at the repo
+> root as the reference, but it is not deployed or maintained; the mobile app
+> (this folder) is the only build. Paths into `src/` mean the root web app.
+
 Written 2026-08-01, against the app as it stands. Read the two blockers first;
 both change decisions you would otherwise make later and expensively.
 

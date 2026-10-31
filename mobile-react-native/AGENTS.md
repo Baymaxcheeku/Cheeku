@@ -1,11 +1,11 @@
 # Expo HAS CHANGED
 
-Read the exact versioned docs at https://docs.expo.dev/versions/v57.0.0/ before writing any code.
+Read the exact versioned docs at https://docs.expo.dev/versions/v58.0.0/ before writing any code.
 
 # Read `PLAN.md` before changing anything
 
 Its **Rules**, **Open** and **Running it** sections are the short version of
-everything below. `../PROGRESS.md` holds the reasoning behind the surprising
+everything below. `PROGRESS.md` holds the reasoning behind the surprising
 decisions; most things that look wrong are recorded there with why.
 
 # Working in a cloud session
@@ -18,22 +18,25 @@ the middle of it. Know which side you are on before you claim something works.
     cd mobile-react-native
     npm install
     npx tsc --noEmit
-    npx vitest run          # 129 tests, no secrets needed
+    npx vitest run          # 476 tests, no secrets needed
 
 The suite is pure functions — safety detection, the prompt picker, grouping,
 insight, quota expiry — and passes with **no Supabase environment at all**
 (verified with the env vars explicitly unset). A failing test here is a real
 failure, not a missing key.
 
-The repo root is a separate pnpm workspace for the legacy Next.js build:
-`pnpm install` there, `npx vitest run` for its own suite. The mobile package
-uses **npm** and has its own `package-lock.json`. Do not mix them.
+Everything but the reference Next.js app lives in this folder: the app,
+`supabase/` (migrations, SQL-editor steps, Edge Functions), `docs/`, `design/`,
+`tests/db/`, and the founders' `founder-ops/` and `marketing/` (never app code;
+excluded from tsc, Metro and lint). The database tests run separately with
+`npm run test:db`; the RLS audit there has 22 known failures (policies added after it was last updated), recorded in `PLAN.md`.
+The package uses **npm** and its own `package-lock.json`.
 
 ## What a cloud session CANNOT do, at all
 
 - **Run the app.** `.env.local` is gitignored and holds the Supabase URL and
   anon key. Without it the app builds and immediately cannot sign in.
-- **Run or write to the database.** `DATABASE_URL` is in the root `.env.local`.
+- **Run or write to the database.** No `DATABASE_URL` is available.
   You can author a migration; you cannot apply it. Say so rather than implying
   the schema changed.
 - **See anything.** No simulator, no device, no browser preview. Layout,
@@ -45,7 +48,7 @@ uses **npm** and has its own `package-lock.json`. Do not mix them.
 Two bugs in this app looked perfect in a browser for weeks and were broken the
 first time it ran on iOS — a wrapped row that stretched its tiles to the full
 screen height in Yoga, and a stacking order that painted a "behind" element in
-front on web only. Both are written up in `../PROGRESS.md`.
+front on web only. Both are written up in `PROGRESS.md`.
 
 Write the change, run the typecheck and the tests, and hand the verification
 back explicitly: name the screen, say what should be looked at, and say that
@@ -62,7 +65,7 @@ copy only; they still do not count as device verification.
 Push a branch and open a PR rather than committing to `main`, so the local
 session can pull, run it on the simulator, and fix what the browser could never
 have shown. Migrations are the exception worth flagging loudly in the PR body:
-they are inert until somebody runs `npm run db:migrate` from the repo root, and
+they are inert until somebody runs the `supabase/manual/*-step-*.sql` files, and
 the app will behave as though the change never happened until they do.
 
 # Every change reaches `main` through a documented PR
@@ -74,13 +77,13 @@ why (with launch tracker ids), how it works, database and deploy steps in
 order, what it means for data and AI (new tables, what is and is never
 logged), what was tested and what was not. Merge commits, not squash, so the
 individual commit messages survive. In the same change, keep `PLAN.md`
-(Open/Rules), `../PROGRESS.md` (the reasoning) and the trackers current; a PR
+(Open/Rules), `PROGRESS.md` (the reasoning) and the trackers current; a PR
 that changes behaviour without them is not finished.
 
 # Words follow the content system
 
 Any string a person reads on a card, in a notification or in a small line
-around them follows `../docs/content-system.md`: who Cheeku is, the five rules,
+around them follows `docs/content-system.md`: who Cheeku is, the five rules,
 the slot limits (card title 30, card line 60, notification title 40 and body
 90), the notification formulas and the never-list. `src/lib/content/copy.test.ts`
 enforces the limits on the plan tasks, chips, milestones, the unlock card and
@@ -123,11 +126,11 @@ scale, the app to AI API layer and the marketplace) and Suraj (AI models and
 pipelines); a task's `with` names who works on it alongside the owner. When a change
 you make completes, starts or blocks one of its tasks, update that task in
 the same session with the `ArtifactData` tool and add a `log` entry, as
-described in `../docs/launch-tracker/README.md`, which also lists every
+described in `docs/launch-tracker/README.md`, which also lists every
 task id. Device verification is part of "done" for app work.
 
 The LabStack marketplace work has its own internal tracker,
 https://claude.ai/artifact/47jpFQDfdqQLKUPdNeatV1, kept in step with the
 launch tracker by hand. Changes to the partner gateway, partner orders,
 lab, consult or medicine integrations update it too, as described in
-`../docs/labstack-tracker/README.md`.
+`docs/labstack-tracker/README.md`.

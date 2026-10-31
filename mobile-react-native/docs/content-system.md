@@ -3,7 +3,7 @@
 How Cheeku talks on cards, in notifications, and in every small line around
 them. It's the rulebook for anyone writing a string the app shows: engineers,
 designers, Suraj's model prompts, and Claude sessions. The limits are enforced
-by `mobile-react-native/src/lib/content/copy.test.ts`; a string that breaks
+by `src/lib/content/copy.test.ts`; a string that breaks
 one fails the build.
 
 ## Who is talking
@@ -87,7 +87,7 @@ Emoji: at most one, only in Win notifications, never next to health results.
 ## Health meaning words
 
 One ladder for how a record or a value reads, on every screen (source:
-`SEVERITY_LABEL` in `mobile-react-native/src/lib/records/types.ts`):
+`SEVERITY_LABEL` in `src/lib/records/types.ts`):
 
 | Tier | Words | Colour |
 |---|---|---|
@@ -109,7 +109,7 @@ judgement. Never "High priority", "High risk", "Borderline" or "Alert".
 
 ## Where the strings live
 
-- Habits and the Home step card: `mobile-react-native/src/lib/home/content.ts`
+- Habits and the Home step card: `src/lib/home/content.ts`
   (`NUDGES`, unlock card, milestones) and `catalog.ts` (the plan's tasks).
   Each task has `title`, `why` (the card line) and `more` (the detail).
 - Personal reasons: `src/lib/home/today.ts` and `plan.ts`.

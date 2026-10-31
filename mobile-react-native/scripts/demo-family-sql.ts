@@ -531,7 +531,7 @@ group by p.name
 order by p.name;
 `);
 
-const dir = resolve(__dirname, "../../supabase/manual");
+const dir = resolve(__dirname, "../supabase/manual");
 for (const f of readdirSync(dir)) if (f.startsWith("demo-step-")) unlinkSync(resolve(dir, f));
 const n = steps.length;
 steps.forEach((body, i) => {

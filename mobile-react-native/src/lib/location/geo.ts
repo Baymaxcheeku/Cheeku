@@ -3,7 +3,7 @@ import { Platform } from "react-native";
 
 import { supabase } from "@/lib/supabase/client";
 
-import type { Place } from "../../../../supabase/functions/geo/parse";
+import type { Place } from "../../../supabase/functions/geo/parse";
 
 export type { Place };
 

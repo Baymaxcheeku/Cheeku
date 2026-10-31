@@ -33,5 +33,5 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules", "mobile-react-native", "marketing", "supabase/functions", "supabase/manual", "founder-ops"]
+  "exclude": ["node_modules", "mobile-react-native"]
 }

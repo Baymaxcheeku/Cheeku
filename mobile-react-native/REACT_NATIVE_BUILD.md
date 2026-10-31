@@ -1,5 +1,9 @@
 # Build brief — React Native rewrite
 
+> **2026-10-31:** the Next.js app this document describes is still at the repo
+> root as the reference, but it is not deployed or maintained; the mobile app
+> (this folder) is the only build. Paths into `src/` mean the root web app.
+
 You are building the native mobile app. A working Next.js web app already
 exists at `baymax-app/`; it is the specification. This document tells you what
 to port unchanged, what to rewrite, and what not to touch.

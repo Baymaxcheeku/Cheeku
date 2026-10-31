@@ -16,10 +16,11 @@ const eslintConfig = [
       "build/**",
       "next-env.d.ts",
       ".designvenv/**",
-      // Founders' planning material, never part of the app.
-      "founder-ops/**",
+      // Founders' planning material and the demo videos, never part of the app.
+      "mobile-react-native/founder-ops/**",
+      "mobile-react-native/marketing/**",
       // Deno code, deployed to Supabase, with its own imports and globals.
-      "supabase/functions/**",
+      "mobile-react-native/supabase/functions/**",
     ],
   },
   ...compat.extends("next/core-web-vitals", "next/typescript"),

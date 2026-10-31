@@ -7,78 +7,58 @@ from general medical knowledge.
 India-first: ₹ pricing, UPI checkout, Hindi/Hinglish in the safety lexicon,
 112/108 and Tele-MANAS as the emergency numbers.
 
+**It ships as a mobile app** (Expo, React Native). Everything lives in
+`mobile-react-native/`; start with `PLAN.md` and `AGENTS.md`. The Next.js web app at the
+repo root is kept as the reference but no longer deploys; the web is served by
+the Expo web export of this app.
+
 ## The five rules the code enforces
 
 These are not aspirations in a doc. Each is enforced somewhere specific, and
-most have tests whose only job is to fail if someone reverts them.
+most have tests whose only job is to fail if someone reverts them. Paths are
+relative to this folder.
 
 1. **Never diagnoses, prescribes or gives dosages.**
-   `src/lib/ai/mock/answer.ts`, `src/lib/records/insight.ts`. Ten tests in
+   `src/lib/ai/mock/answer.ts`, `src/lib/records/insight.ts`. The tests in
    `answer.test.ts` assert the output never names a condition, a drug or a
    quantity.
-2. **The safety gate runs before any AI call** — client-side, deterministic,
-   well under 200ms. `src/lib/safety/detect.ts`, called as the first statement
-   of the chat's only send path.
+2. **The safety gate runs before any AI call** — on the device, deterministic,
+   well under 200ms. `src/lib/safety/detect.ts`.
 3. **Profiles are isolated**, enforced at the database layer.
-   `src/lib/db/profile-isolation.test.ts` proves it at runtime against a real
-   database.
+   `tests/db/profile-isolation.test.ts` proves it at runtime
+   against a real database.
 4. **Grounded or silent.** If the records do not cover a question, the app says
    so and explains why, rather than improvising.
-5. **Never sells or leaks data.** No third-party origins in the CSP. No
-   analytics. See `PRIVACY_NOTES.md`.
-
-## Running it
-
-```bash
-pnpm install
-cp .env.example .env.local        # then fill in the Supabase values
-pnpm db:migrate                   # apply migrations (idempotent)
-pnpm seed                         # optional: the demo family
-pnpm dev
-```
-
-`.env.local` needs a Supabase project URL, its publishable and secret keys, and
-`DATABASE_URL` (Dashboard → Connect → Session pooler) for the migration runner.
-Everything is documented in `.env.example`.
-
-**Demo account** after seeding: `demo@baymax.test` / `baymax-demo-2026!`
-
-## Scripts
-
-| Command | What it does |
-|---|---|
-| `pnpm dev` | Dev server |
-| `pnpm verify` | typecheck → lint → test → build. Run before committing. |
-| `pnpm db:migrate` | Applies pending migrations. Safe to re-run. |
-| `pnpm db:reset` | Drops and re-applies. **Refuses if any table has rows.** |
-| `pnpm seed` / `seed:reset` | Demo family. Refuses a non-local project without `SEED_ALLOW_REMOTE=1`. |
-| `pnpm safety:build` | Recompiles the safety lexicon from YAML. |
-| `pnpm test` | Vitest. Includes the live RLS and isolation suites. |
+5. **Never sells or leaks data.** No analytics, no third-party SDKs. See
+   `PRIVACY_NOTES.md`.
 
 ## How it is arranged
 
 ```
-src/
-  app/
-    (onboarding)/      A1–A6  splash, carousel, auth, audience, profile, first upload
-    (app)/             the signed-in shell — tab bar, offline banner, error boundary
-      home/            B1     scoped to the active family member
-      records/         D1/D2  list, and one document with its extracted values
-      timeline/        D3     the same records by month
-      scan/            C1/C2  upload, processing, extraction review
-      ask/             E1/E2  chat, grounded and cited
-      settings/        I1     plan, family, export, delete
-  components/
-    illustrations/     original SVG artwork — see "Artwork" below
-    safety/            G1 emergency escalation
-    billing/           paywall and checkout
-  lib/
-    safety/            the gate: lexicon.yaml → generated matcher → detect()
-    records/           queries, grouping, severity, insight
-    ai/mock/           extraction and answer engines behind a mock adapter
-    billing/           plans, quota, entitlement
-    account/           export and delete
+app/ src/ assets/      the app (npm) — see PLAN.md for running it
+supabase/
+  migrations/          the schema, RLS and server-side jobs
+  functions/           Edge Functions: cheeku-chat, push-dispatch, delete-account
+  manual/              migration steps sized for the Supabase SQL editor
+scripts/               lexicon build, demo family SQL, mascot and pod tooling
+tests/db/              RLS audit and runtime profile isolation (npm run test:db)
+docs/  design/         content system, specs, trackers, design frames
+.claude/skills/        the project's Claude skills
 ```
+
+## Database
+
+Migrations are applied in the Supabase SQL editor: `supabase/manual/*-step-*.sql`
+in order, then the matching `*-check.sql`. Edge Functions deploy from the
+dashboard or with `supabase functions deploy <name>`. The root web app's pnpm
+scripts (`pnpm db:migrate`, `pnpm seed`) still work and read
+`mobile-react-native/supabase/`.
+
+| Command | What it does |
+|---|---|
+| `npx tsc --noEmit` | Typechecks the app, scripts and tests (not the Deno Edge Functions). |
+| `npx vitest run` | The app's logic tests. No secrets needed. |
+| `npm run test:db` | The RLS audit over `supabase/migrations`, and the live isolation proof, which runs only when `EXPO_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_ANON_KEY` and `SUPABASE_SERVICE_ROLE_KEY` are exported in the shell. Never put the service key in `.env.local`. |
 
 ## Design fidelity, and where it stops
 
@@ -103,7 +83,8 @@ frame's ₹499 / ₹899 is the outlier.
 
 ## Artwork
 
-All illustrations are **original SVG** in `src/components/illustrations/`. They
+All illustrations are **original** art in
+`src/components/illustrations/`. They
 were previously crops from the design mockups, which could not be made to work:
 the crop carries the frame's near-white backdrop, that backdrop cannot be keyed
 out (it sits eight levels from the mascot's white body), and the resolution is

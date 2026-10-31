@@ -8,3 +8,9 @@ ios/
 android/
 .env*.local
 expo-env.d.ts
+
+# design tooling (design/*.py)
+.designvenv/
+__pycache__/
+*.pem
+.vercel

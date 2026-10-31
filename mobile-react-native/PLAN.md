@@ -1,6 +1,8 @@
 # Execution plan — React Native app
 
 The native build of the app that lives in the repo root as a Next.js web app.
+Since 2026-10-31 everything else (docs, design, supabase, tests, founder-ops,
+marketing) lives in this folder.
 
 **THE WEB APP IS NO LONGER A TARGET.** Decided 2026-08-09: Baymax ships
 exclusively as a mobile app on the App Store and Play Store. The Next.js build
@@ -12,9 +14,9 @@ which exist on web and none of which will.
 
 Read alongside:
 
-- `../PROGRESS.md` — build log, every design decision with its reasoning
-- `../SHIPPING.md` — store submission constraints, including two blockers
-- `../REACT_NATIVE_BUILD.md` — the full brief this plan executes
+- `PROGRESS.md` — build log, every design decision with its reasoning
+- `SHIPPING.md` — store submission constraints, including two blockers
+- `REACT_NATIVE_BUILD.md` — the full brief this plan executes
 - `TOOLCHAIN.md` — install hazards specific to this package
 
 ---
@@ -176,7 +178,7 @@ Screens: `/settings` and its seven sub-screens, paywall, export, delete
 ## Phase 5 — native capability (3 weeks)
 
 Not polish. Without these, App Store Guideline 4.2 rejects the app as a website
-in a shell. See `../SHIPPING.md`.
+in a shell. See `SHIPPING.md`.
 
 1. Push: APNs and FCM. **Partly done 2026-09-30.** Appointment reminders are
    local notifications and need no credentials. Remote push is written end to
@@ -203,7 +205,7 @@ in a shell. See `../SHIPPING.md`.
 
 ## Rules
 
-1. Read `../PROGRESS.md` before changing anything that looks odd. Most
+1. Read `PROGRESS.md` before changing anything that looks odd. Most
    surprising decisions are recorded there with the reason.
 2. Ported tests are the specification. If one fails, the port is wrong.
 3. Semantic colour is health meaning only. Never a button, never a category
@@ -284,12 +286,15 @@ The locale is not optional. Without it CocoaPods dies with
 "Something went wrong running `pod install`", which looks like a dependency
 problem and is not one. The `pods` script in package.json already sets it.
 
-Expo Go cannot run this build — it is SDK 57 and Expo Go ships the SDK it was
-released with. Use the simulator, or a development build on a device.
+The app is on SDK 58 (upgraded 2026-10-31) so it opens in the current Expo Go:
+`npx expo start`, then scan the QR code. Expo Go only ever runs the latest SDK,
+so the next SDK release breaks this again. Expo CLI needs Node 22.13+ or 24+;
+odd releases (25) are unsupported. The `ios/` folder was generated for SDK 57:
+run `npx expo prebuild --clean` before the next simulator or development build.
 
-Copy `.env.example` to `.env.local` first. `DATABASE_URL` lives in the ROOT
-`.env.local`, not this one, and migrations run from the repo root with
-`npm run db:migrate`.
+Copy `.env.example` to `.env.local` first. Migrations are applied in the
+Supabase SQL editor from `supabase/manual/*-step-*.sql`, then the matching
+`*-check.sql`.
 
 **THE WEB PREVIEW IS NOT A VERIFICATION.** It is a browser: React Native Web
 maps flexbox onto CSS, and the two disagree in ways that are invisible until
@@ -301,6 +306,14 @@ haptics has to be seen on a simulator or a device before it counts as done.
 
 ## Open
 
+- **The RLS audit is stale** (2026-10-31). Everything that lived at the repo
+  root now lives in this folder, and `tests/db` runs with `npm run test:db`.
+  `rls.test.ts` fails 22 checks, as does the web app's identical copy in
+  `src/lib/db/`: tables added since (app_config, app_flags, geo_cache,
+  geo_quota, lab_*, memory_facts, open_loops, pregnancies, today_actions and
+  others) use public-read or write-free
+  policies it does not know about. Each needs a deliberate allow-list entry or
+  a policy fix; it is kept out of `npx vitest run` until then.
 - **Prescription scorecard needs 0042 and the rx-score function** (2026-10-31).
   Every prescription page now opens with a check of each medicine, read to
   its salts, on ten standards against the person's records
@@ -376,7 +389,7 @@ haptics has to be seen on a simulator or a device before it counts as done.
   Ask answers "nothing in your records" while looking at the primary.
 - **`activate_tier_demo` grants paid tiers for free** (0012, gated on
   `app_flags.demo_billing`). Drop it before real billing.
-- Real OCR and model — separate track, contract in `../REACT_NATIVE_BUILD.md`.
+- Real OCR and model — separate track, contract in `REACT_NATIVE_BUILD.md`.
   The chat model contract is `src/lib/memory/model.ts` (ModelRequest in,
   ModelReply out); turn it on with `EXPO_PUBLIC_CHAT_MODEL=edge` and the
   `cheeku-chat` Edge Function secrets. Until then the stand-in answers.
@@ -440,7 +453,7 @@ haptics has to be seen on a simulator or a device before it counts as done.
 - **Haptics need a new native build.** `expo-haptics` (UI batch 1) is a native
   module: installed builds ignore it until the next `eas build`; web is a
   no-op by design. All calls go through `src/lib/feel.ts`.
-- **UI audit batches 1 to 4 are built** (`../docs/audits/2026-10-ui-ux-audit.md`).
+- **UI audit batches 1 to 4 are built** (`docs/audits/2026-10-ui-ux-audit.md`).
   Batch 3 left 54 raw hex colours (illustration faces, Learn category art,
   chart gradients) as lint warnings; move them onto tokens when those files
   are next touched.
@@ -453,5 +466,5 @@ haptics has to be seen on a simulator or a device before it counts as done.
   goal cards first (`loop-goal-cards`, M2), then food scan, device sync,
   staged symptom check, medicine box photo, privacy blur and partner
   challenges. Doctor twins, elder mode, insurance pay and public counters
-  wait for V2. Ranking and reasons in `../docs/research/aq-ant-afu.md`.
+  wait for V2. Ranking and reasons in `docs/research/aq-ant-afu.md`.
 - Untested: sign-out then sign-in, and a session revoked server-side.

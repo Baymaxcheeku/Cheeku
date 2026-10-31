@@ -14,7 +14,7 @@ import { fileURLToPath } from "node:url";
 
 import { describe, expect, it } from "vitest";
 
-const migrationsDir = resolve(dirname(fileURLToPath(import.meta.url)), "../../../supabase/migrations");
+const migrationsDir = resolve(dirname(fileURLToPath(import.meta.url)), "../../../mobile-react-native/supabase/migrations");
 
 const files = readdirSync(migrationsDir)
   .filter((f) => f.endsWith(".sql"))

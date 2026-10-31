@@ -47,18 +47,18 @@ The `library/` files are text snapshots taken on 28 Oct 2026, for search and his
 
 - Next.js builds only `src/`. TypeScript and ESLint skip this folder (`tsconfig.json` exclude, `eslint.config.mjs` ignores), and Vitest only collects tests from `src/`.
 - No secrets, patient data or user data go into the live tools or this folder. The live tools run on claude.ai and have no connection to Supabase or the app's database.
-- A PR either changes `founder-ops/` or changes the app, never both. `bash founder-ops/check-isolation.sh` checks the current branch against `origin/main` and also fails if app code mentions `founder-ops`. Run it before every ops commit.
+- A PR either changes `founder-ops/` or changes the app, never both. `bash mobile-react-native/founder-ops/check-isolation.sh` checks the current branch against `origin/main` and also fails if app code mentions `founder-ops`. Run it before every ops commit.
 
 ## Numbers on the command line
 
-`node founder-ops/model/report.js` prints the bear, base and bull cases (users, paying accounts, revenue, EBITDA, cash, team, cap table) from the same engine the board uses.
+`node mobile-react-native/founder-ops/model/report.js` prints the bear, base and bull cases (users, paying accounts, revenue, EBITDA, cash, team, cap table) from the same engine the board uses.
 
 ## Founder skill pack
 
 Eleven skills in `.claude/skills/founder-*`: board, competitors, consumer panel, pricing, offer, CFO, marketing, brand, ops, launch and plan. Run them as `/founder-board`, `/founder-consumer`, and so on.
 
 - Source: https://github.com/Jakeschincariol/founder-skill, MIT, pinned at commit `fd9385b0cfe1b96bebce3898fbd506d73eff5a9d` (6 Oct 2026). It was reviewed before install: the Python helpers use only the standard library, make no network calls and run no shell commands, and the prompts contain no hidden or injected instructions.
-- One local change: upstream writes to `founder/` at the repo root. Ours write to `founder-ops/pack/`, so the pack's output stays inside this folder. Re-apply that change if you ever update the pack from upstream, and review the new commit first.
+- One local change: upstream writes to `founder/` at the repo root. Ours write to `mobile-react-native/founder-ops/pack/`, so the pack's output stays inside this folder. Re-apply that change if you ever update the pack from upstream, and review the new commit first.
 - Fit for Cheeku: the board, competitor scan, consumer panel and offer work are useful as they are. The CFO and plan tools model a single-unit, single-location business in dollars, so for Cheeku's numbers use the financial model instead.
 - A full consumer panel is 100 sub-agent runs. Start with `--quick` (20).
 

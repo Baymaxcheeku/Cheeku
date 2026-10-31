@@ -21,8 +21,8 @@ Verified two ways:
 
 | Check | Where |
 |---|---|
-| Static — every table has RLS, every policy references `auth.uid()`, no `using(true)`, append-only tables stay append-only | `src/lib/db/rls.test.ts` |
-| Runtime — two real users, every query path for one returns zero rows of the other's, including cross-user read, write, update, delete and signed-URL attempts | `src/lib/db/profile-isolation.test.ts` |
+| Static — every table has RLS, every policy references `auth.uid()`, no `using(true)`, append-only tables stay append-only | `tests/db/rls.test.ts` |
+| Runtime — two real users, every query path for one returns zero rows of the other's, including cross-user read, write, update, delete and signed-URL attempts | `tests/db/profile-isolation.test.ts` |
 
 The runtime test **must not be allowed to skip in CI**. It reports "skipped, no
 project configured" when credentials are absent, which for two phases looked
@@ -32,14 +32,13 @@ a skipped safety test reads exactly like a passing one.
 
 ## The service-role key
 
-The key bypasses RLS entirely. It is reachable only through
-`src/lib/supabase/admin.ts`, which is `server-only`, and is used in exactly two
-places:
-
-- `src/lib/billing/quota.ts` — `subscriptions` has no update policy by design, so
-  tier and counter writes cannot go through the anon client.
-- `src/lib/account/actions.ts` — the account delete, which must remove rows the
-  cascade owns.
+The key bypasses RLS entirely and never ships in the mobile app. Since the
+Next.js app stopped deploying (2026-10-31) it is used only server-side, in the
+Supabase Edge Functions (`supabase/functions/delete-account` for the account
+delete, which must remove what the cascade cannot reach), and by local tooling
+(`scripts/seed.ts`, `tests/db/profile-isolation.test.ts`). The list below was
+written for the web app's `src/lib/supabase/admin.ts`; the rules still apply
+to any function that holds the key.
 
 Rules for anything that imports it:
 
@@ -87,7 +86,10 @@ grep -rn "createAdminSupabase" src --include="*.ts" | grep -v "admin.ts"
 
 ## Headers
 
-Set in `next.config.ts`, verified live with `curl -sI`:
+**The Next.js app no longer deploys (2026-10-31).** This section describes what
+the root `next.config.ts` sets for the web build; the mobile app has no server of its
+own, and the Expo web export's headers are Vercel's to set. Kept as the
+standard to meet if a web surface returns:
 
 - CSP with **no third-party origins** — `default-src 'self'`, Supabase allowed
   for `img-src`/`connect-src` and nothing else. No analytics, no fonts CDN, no
@@ -137,9 +139,8 @@ These are real and unfixed. They are listed rather than quietly omitted.
 ## Verifying a deployment
 
 ```bash
-pnpm verify                      # typecheck, lint, test, build
-pnpm vitest run src/lib/db/      # RLS audit + runtime isolation proof
-curl -sI <origin>/home           # confirm all six headers
+npx tsc --noEmit && npx vitest run
+npm run test:db                 # RLS audit + runtime isolation proof
 ```
 
 RLS coverage can be re-checked live against the database by querying
