@@ -397,7 +397,7 @@ haptics has to be seen on a simulator or a device before it counts as done.
   retention) should say so when a lawyer next reads it, which means a new
   document version.
 - **Web hosting is on Vercel Hobby, which is for non-commercial use only.**
-  Before launch, move `cheeku-ai-mobile` (and `cheeku-ai`) to Vercel Pro or
+  Before launch, move `cheeku-ai-mobile` to Vercel Pro or
   to Cloudflare Pages (free plan allows commercial use; verify current terms).
   Supabase is on the free plan too, which pauses a project after a week
   without traffic: move production to Pro before real users depend on it.

@@ -88,10 +88,15 @@ the latest notification migration; extend it when you add a new kind of copy.
 
 # How a merge reaches people
 
-- **Web (Vercel).** Two Vercel projects build from this repo: `cheeku-ai` (the
-  repo root) and `cheeku-ai-mobile` (`mobile-react-native`, the Expo web
-  export). Every push to a branch makes a **Preview**; a push to `main` makes
-  **Production** (`cheeku-ai-mobile.vercel.app`). Nothing else is needed.
+- **Web (Vercel).** Only `cheeku-ai-mobile` deploys: it builds
+  `mobile-react-native` (the Expo web export). Every push to a branch makes a
+  **Preview**; a push to `main` makes **Production**
+  (`cheeku-ai-mobile.vercel.app`). Nothing else is needed.
+- **The Next.js web app does not deploy any more.** The `cheeku-ai` project
+  (the repo root) is switched off by the root `vercel.json`
+  (`git.deploymentEnabled: false`), so pushes make no deployments and no
+  failure emails there. Do not remove that file, and do not add a
+  `vercel.json` to `mobile-react-native` that copies it.
 - **Vercel builds a commit once.** If the same commit lands on a branch and on
   `main` at once, the branch can win and `main` gets no Production build. So
   after a PR is merged, do NOT push the working branch at `main`'s merge commit
