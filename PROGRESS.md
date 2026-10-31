@@ -3808,3 +3808,7 @@ Rows expand on a critically damped spring and skip motion under reduced motion. 
 - The flow in the web preview: the prescription page card, the scorecard, expanding a check, opening a source record, and three members (8 of 10, 10 of 10, 10 of 10).
 
 **Not verified:** the Deno function deployed on Supabase, a phone, and clinical sign-off of the formulary.
+
+## The root vercel.json stopped the mobile deploys · 2026-10-31
+
+Commit e58c00c added a root `vercel.json` with `git.deploymentEnabled: false` to stop the Next.js `cheeku-ai` project building. `cheeku-ai-mobile` reads the root file as well, so from that commit on it made no Preview or Production deployments, including the merge of #65 (303ab27) that carried the prescription scorecard and the rename. The file is removed, and the next push to `main` builds Production again. The Next.js project is switched off in the Vercel dashboard instead (AGENTS.md, "How a merge reaches people"). The `marketing/` typecheck exclusion stays, so its builds would not fail even if it ran.
