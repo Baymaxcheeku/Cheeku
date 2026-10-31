@@ -1,3 +1,5 @@
+import { activityById } from "@/lib/fitness/catalog";
+import { fitFor, NEED_PHRASE } from "@/lib/fitness/match";
 import { detect, type SafetyResult } from "@/lib/safety/detect";
 
 import { daysBetween } from "./clock";
@@ -308,12 +310,7 @@ export async function planTurn(args: {
 export function bookingReply(b: BookingIntent, ctx: MemoryContext): ModelReply {
   const name = ctx.subject.firstName;
   if (b.service === "fitness") {
-    return {
-      paragraphs: [`Fitness classes aren't open in Cheeku yet. Tap below and I'll tell you the day they are, with ${name}'s details ready to go.`],
-      citations: [],
-      followUps: [],
-      basis: "grounded",
-    };
+    return { paragraphs: fitnessReply(b, ctx), citations: [], followUps: [], basis: "grounded" };
   }
   if (b.service === "medicine") {
     return {
@@ -376,4 +373,31 @@ export function bookingReply(b: BookingIntent, ctx: MemoryContext): ModelReply {
     followUps: [],
     basis: "grounded",
   };
+}
+
+
+/**
+ * Fitness, in Cheeku's words: what suits this person from their own profile,
+ * the activity they named if it fits, a gentler steer if it doesn't, and the
+ * doctor line where it belongs. The card under it shows real classes nearby.
+ */
+export function fitnessReply(b: BookingIntent, ctx: MemoryContext): string[] {
+  const name = ctx.subject.firstName;
+  const fit = fitFor({ conditions: ctx.subject.conditions, goal: null, ageYears: ctx.clock.ageYears, pregnant: ctx.clock.modifiers.includes("pregnant"), bmi: null, sex: ctx.subject.sex });
+  const named = activityById(b.activity);
+  const lead = fit.needs[0];
+  const top = fit.ranked.slice(0, 3).map((a) => activityById(a)?.label.toLowerCase()).filter(Boolean);
+  const out: string[] = [];
+  if (named && !fit.ranked.includes(named.id)) {
+    out.push(`${named.label} is a hard one for ${lead ? NEED_PHRASE[lead] : name}, so I've put gentler classes near ${name} first: ${top.join(", ")}.`);
+  } else if (named) {
+    out.push(`Here are ${named.label.toLowerCase()} classes near ${name}${lead ? `, picked with ${NEED_PHRASE[lead]} in mind` : ""}.`);
+  } else if (lead) {
+    out.push(`For ${NEED_PHRASE[lead]}, ${top.join(", ")} suit ${name} best. Here are classes nearby.`);
+  } else {
+    out.push(`Here are classes near ${name}: one session at a time, no membership.`);
+  }
+  if (fit.doctorNote) out.push(`Check with ${name}'s doctor before starting, and tell the trainer on the day.`);
+  out.push(`Tap one to book. It's filed in ${name}'s memory, with a reminder an hour before.`);
+  return out;
 }

@@ -1,0 +1,9 @@
+node_modules/
+out/
+models/
+.venv/
+public/vo/
+public/mix.wav
+music.wav
+stills/
+vo_lines.json

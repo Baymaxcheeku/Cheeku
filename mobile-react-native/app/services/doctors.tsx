@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { LocationChip } from "@/components/location/location-chip";
 import { Tap } from "@/components/ui/tap";
 import { MascotFigure } from "@/components/illustrations/sprout";
 import { Grid2, SPECIALTY_ICON } from "@/components/services/parts";
@@ -52,6 +53,7 @@ export default function DoctorsHub() {
       <Backdrop />
       <ScreenHeader title="Doctors" subtitle="Every specialty, online or at a clinic" fallback="/services" />
       <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: insets.bottom + 32, gap: 12 }} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+        <LocationChip prefix="Clinics near" />
         <Tap accessibilityRole="button" onPress={() => book()} style={[glassShadow, { borderRadius: 32, overflow: "hidden", marginTop: 6, borderWidth: 1, borderColor: lilac.violet }]} scale={0.98}>
           {/*
            * Clean white, not dark violet: the mascot is lilac, and on a

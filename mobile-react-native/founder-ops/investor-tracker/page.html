@@ -1,0 +1,1257 @@
+<title>Cheeku Raise Tracker</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@1&family=Inter:opsz,wght@14..32,400..700&display=swap">
+<style>
+/* Layout: the vision board's calm surface, turned into a raise room. One translucent toolbar, a raise strip
+   (₹26 cr against what is committed), then the funnel as columns; any investor opens into a sheet with the
+   conversation timeline and an outreach composer. */
+:root {
+  --bg: #F5F5F7; --surface: #FFFFFF; --surface-2: #F2F2F5; --surface-3: #E8E8ED;
+  --ink: #1D1D1F; --ink-2: #3A3A3F; --muted: #6E6E73; --faint: #A1A1A6;
+  --line: rgba(20, 20, 40, .08); --line-2: rgba(20, 20, 40, .14);
+  --accent: #5B4EF0; --accent-2: #4536D9; --accent-soft: #EEECFF; --on-accent: #FFFFFF;
+  --lime: #E4FF7A; --lime-ink: #2F3D00; --navy: #14136B; --on-navy: #FFFFFF;
+  --good: #248A3D; --warn: #B86E00; --bad: #D70015;
+  --o-athar: #5B4EF0; --o-deepesh: #C9620F; --o-none: #A1A1A6;
+  --k-vc: #2F6FDE; --k-angel: #C8417F; --k-acc: #0A9396; --k-net: #8E6A2E;
+  --sh-1: 0 0 0 0.5px rgba(20, 20, 40, .08), 0 1px 2px rgba(20, 20, 40, .05), 0 2px 8px rgba(20, 20, 40, .035);
+  --sh-2: 0 0 0 0.5px rgba(20, 20, 40, .1), 0 6px 16px rgba(20, 20, 40, .08), 0 16px 36px rgba(20, 20, 40, .06);
+  --sh-sheet: 0 0 0 0.5px rgba(20, 20, 40, .12), 0 30px 90px rgba(20, 20, 40, .28);
+  --glass: rgba(255, 255, 255, .72); --scrim: rgba(20, 20, 30, .28);
+  --font: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', 'Segoe UI', Roboto, Arial, sans-serif;
+  --brand: 'Instrument Serif', Georgia, serif;
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1); --ease-sheet: cubic-bezier(0.32, 0.72, 0, 1);
+  --colw: 272px; --barh: 52px;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0B0B0E; --surface: #1C1C1F; --surface-2: #242428; --surface-3: #2F2F35;
+  --ink: #F5F5F7; --ink-2: #D6D6DC; --muted: #98989F; --faint: #63636B; --line: rgba(255, 255, 255, .08); --line-2: rgba(255, 255, 255, .15);
+  --accent: #8F87FF; --accent-2: #B3ADFF; --accent-soft: #24213F; --on-accent: #0B0B0E;
+  --lime: #D6F25C; --lime-ink: #1E2700; --navy: #2C2A85; --on-navy: #FFFFFF;
+  --good: #32D06A; --warn: #FFB340; --bad: #FF6B6B;
+  --o-athar: #8F87FF; --o-deepesh: #F0913C; --o-none: #63636B;
+  --k-vc: #74A3FF; --k-angel: #F07AB5; --k-acc: #3CCACC; --k-net: #D2A262;
+  --sh-1: 0 0 0 0.5px rgba(255, 255, 255, .08), 0 1px 2px rgba(0, 0, 0, .4);
+  --sh-2: 0 0 0 0.5px rgba(255, 255, 255, .12), 0 8px 24px rgba(0, 0, 0, .5);
+  --sh-sheet: 0 0 0 0.5px rgba(255, 255, 255, .12), 0 30px 90px rgba(0, 0, 0, .65);
+  --glass: rgba(28, 28, 31, .72); --scrim: rgba(0, 0, 0, .5);
+  color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #0B0B0E; --surface: #1C1C1F; --surface-2: #242428; --surface-3: #2F2F35;
+  --ink: #F5F5F7; --ink-2: #D6D6DC; --muted: #98989F; --faint: #63636B; --line: rgba(255, 255, 255, .08); --line-2: rgba(255, 255, 255, .15);
+  --accent: #8F87FF; --accent-2: #B3ADFF; --accent-soft: #24213F; --on-accent: #0B0B0E;
+  --lime: #D6F25C; --lime-ink: #1E2700; --navy: #2C2A85; --on-navy: #FFFFFF;
+  --good: #32D06A; --warn: #FFB340; --bad: #FF6B6B;
+  --o-athar: #8F87FF; --o-deepesh: #F0913C; --o-none: #63636B;
+  --k-vc: #74A3FF; --k-angel: #F07AB5; --k-acc: #3CCACC; --k-net: #D2A262;
+  --sh-1: 0 0 0 0.5px rgba(255, 255, 255, .08), 0 1px 2px rgba(0, 0, 0, .4);
+  --sh-2: 0 0 0 0.5px rgba(255, 255, 255, .12), 0 8px 24px rgba(0, 0, 0, .5);
+  --sh-sheet: 0 0 0 0.5px rgba(255, 255, 255, .12), 0 30px 90px rgba(0, 0, 0, .65);
+  --glass: rgba(28, 28, 31, .72); --scrim: rgba(0, 0, 0, .5);
+  color-scheme: dark; }
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { height: 100%; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 400 14px/1.45 var(--font); -webkit-font-smoothing: antialiased; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 40; background: var(--surface); }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 8px; }
+.wrap { padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px)); }
+.num { font-variant-numeric: tabular-nums; }
+.muted { color: var(--muted); }
+h1, h2, h3 { margin: 0; text-wrap: balance; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* Toolbar */
+.bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 30; background: var(--glass); -webkit-backdrop-filter: saturate(180%) blur(20px); backdrop-filter: saturate(180%) blur(20px); border-bottom: 0.5px solid var(--line-2); }
+.bar-in { min-height: var(--barh); display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; padding-block: 8px; }
+.brand { display: flex; align-items: baseline; gap: 8px; }
+.brand b { font: italic 400 26px/1 var(--brand); color: var(--accent); letter-spacing: -0.01em; }
+.brand span { font: 600 12px/1 var(--font); color: var(--muted); letter-spacing: .02em; white-space: nowrap; }
+.seg { display: inline-flex; background: var(--surface-3); border-radius: 9px; padding: 2px; gap: 2px; }
+nav.seg { max-width: 100%; overflow-x: auto; scrollbar-width: none; }
+.seg > a, .seg > button { border: 0; background: transparent; padding: 5px 12px; border-radius: 7px; font-weight: 500; font-size: 13px; color: var(--ink-2); text-decoration: none; white-space: nowrap; }
+.seg > [aria-current="page"], .seg > [aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 0 0 0.5px var(--line-2), 0 1px 3px rgba(0, 0, 0, .1); font-weight: 600; text-decoration: none; }
+.tools { display: flex; align-items: center; gap: 8px; margin-left: auto; flex-wrap: wrap; }
+.search { display: flex; align-items: center; gap: 6px; background: var(--surface-3); border-radius: 9px; padding: 0 10px; height: 32px; min-width: 0; }
+.search input { border: 0; background: transparent; outline: 0; width: 180px; max-width: 40vw; font-size: 13px; }
+.btn { border: 0; height: 32px; padding: 0 12px; border-radius: 9px; background: var(--surface-3); color: var(--ink); font-weight: 500; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.btn:hover { background: var(--line-2); }
+.btn.primary { background: var(--accent); color: var(--on-accent); }
+.btn.primary:hover { background: var(--accent-2); }
+.btn.lime { background: var(--lime); color: var(--lime-ink); }
+.btn.ghost { background: transparent; box-shadow: inset 0 0 0 1px var(--line-2); }
+.btn[disabled] { opacity: .5; cursor: default; }
+.sync { width: 8px; height: 8px; border-radius: 50%; background: var(--faint); }
+.sync.live { background: var(--good); box-shadow: 0 0 0 3px color-mix(in srgb, var(--good) 20%, transparent); }
+.sync.err { background: var(--bad); }
+.peers { display: flex; }
+.av { width: 24px; height: 24px; border-radius: 50%; display: inline-grid; place-items: center; font: 600 11px/1 var(--font); color: #fff; background: var(--o-none); box-shadow: 0 0 0 2px var(--surface); flex: none; }
+.av.athar { background: var(--o-athar); } .av.deepesh { background: var(--o-deepesh); }
+.av.sm { width: 20px; height: 20px; font-size: 10px; }
+.peers .av + .av { margin-left: -6px; }
+
+/* Filter row */
+.filters { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; padding-block: 0 10px; font-size: 12px; color: var(--muted); }
+.fgroup { display: inline-flex; gap: 4px; align-items: center; flex-wrap: wrap; }
+.chip { border: 0; padding: 4px 10px; border-radius: 999px; background: var(--surface-3); color: var(--ink-2); font-size: 12px; font-weight: 500; display: inline-flex; gap: 6px; align-items: center; }
+.chip[aria-pressed="true"] { background: var(--ink); color: var(--surface); }
+.chip i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+
+/* Raise strip */
+.strip { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 2fr); gap: 16px 28px; padding-block: 16px; align-items: center; }
+@media (max-width: 860px) { .strip { grid-template-columns: minmax(0, 1fr); } }
+.raise h1 { font: italic 400 34px/1.05 var(--brand); letter-spacing: -0.01em; }
+.raise h1 span { color: var(--accent); }
+.raise p { margin: 4px 0 10px; color: var(--muted); font-size: 13px; }
+.meter { height: 12px; border-radius: 6px; background: var(--surface-3); overflow: hidden; display: flex; }
+.meter i { display: block; height: 100%; transition: width .5s var(--ease-out); }
+.meter .c { background: var(--accent); } .meter .s { background: color-mix(in srgb, var(--accent) 35%, var(--surface-3)); }
+.legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; color: var(--muted); margin-top: 8px; }
+.legend b { color: var(--ink); font-weight: 600; }
+.funnel { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 6px; }
+@media (max-width: 860px) { .funnel { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.fstep { background: var(--surface); border-radius: 12px; padding: 10px 12px; box-shadow: var(--sh-1); border: 0; text-align: left; display: grid; gap: 2px; min-width: 0; }
+.fstep b { font-size: 22px; font-weight: 650; letter-spacing: -0.02em; }
+.fstep span { font-size: 11px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fstep .bar-s { height: 3px; border-radius: 2px; background: var(--accent); opacity: .8; }
+
+/* Pipeline */
+.board { overflow-x: auto; padding-bottom: 24px; }
+.cols { display: grid; grid-auto-flow: column; grid-auto-columns: var(--colw); gap: 12px; align-items: start; width: max-content; padding-right: 20px; }
+.col { background: var(--surface-2); border-radius: 14px; padding: 8px; min-height: 120px; display: flex; flex-direction: column; gap: 8px; }
+.col.over { box-shadow: inset 0 0 0 2px var(--accent); }
+.col-h { display: flex; align-items: baseline; justify-content: space-between; padding: 4px 6px 2px; gap: 8px; }
+.col-h h3 { font-size: 13px; font-weight: 650; }
+.col-h span { font-size: 12px; color: var(--muted); }
+.card { background: var(--surface); border-radius: 12px; padding: 10px 12px; box-shadow: var(--sh-1); border: 0; text-align: left; display: grid; gap: 6px; width: 100%; cursor: grab; transition: box-shadow .2s var(--ease-out), transform .2s var(--ease-out); position: relative; }
+.card:hover { box-shadow: var(--sh-2); }
+.card.dragging { opacity: .5; }
+.card-t { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.card-t b { font-weight: 600; font-size: 13.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; min-width: 0; }
+.card-m { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; font-size: 11.5px; color: var(--muted); }
+.pill { display: inline-flex; align-items: center; gap: 4px; padding: 1px 7px; border-radius: 999px; font-size: 11px; font-weight: 600; background: var(--surface-3); color: var(--ink-2); white-space: nowrap; }
+.pill.k-VC { background: color-mix(in srgb, var(--k-vc) 14%, transparent); color: var(--k-vc); }
+.pill.k-Angel { background: color-mix(in srgb, var(--k-angel) 14%, transparent); color: var(--k-angel); }
+.pill.k-Accelerator { background: color-mix(in srgb, var(--k-acc) 14%, transparent); color: var(--k-acc); }
+.pill.k-Angel-network, .pill.k-Platform { background: color-mix(in srgb, var(--k-net) 16%, transparent); color: var(--k-net); }
+.tier { width: 20px; height: 20px; border-radius: 6px; display: inline-grid; place-items: center; font-size: 11px; font-weight: 700; flex: none; background: var(--surface-3); color: var(--ink-2); }
+.tier.A { background: var(--lime); color: var(--lime-ink); } .tier.B { background: var(--accent-soft); color: var(--accent); }
+.due { color: var(--warn); font-weight: 600; } .due.late { color: var(--bad); }
+.flag { color: var(--warn); }
+.watch { position: absolute; top: -6px; right: -6px; }
+.more { border: 0; background: transparent; color: var(--accent); font-size: 12px; font-weight: 600; padding: 6px; }
+.empty-col { font-size: 12px; color: var(--faint); padding: 10px 6px; }
+
+/* List */
+.tablewrap { overflow-x: auto; background: var(--surface); border-radius: 14px; box-shadow: var(--sh-1); margin-bottom: 24px; }
+table { border-collapse: collapse; width: 100%; font-size: 13px; }
+th, td { padding: 9px 12px; text-align: left; border-bottom: 0.5px solid var(--line); white-space: nowrap; }
+th { font-size: 11.5px; color: var(--muted); font-weight: 600; position: sticky; top: 0; background: var(--surface); }
+th button { border: 0; background: none; padding: 0; color: inherit; font: inherit; }
+tbody tr { cursor: pointer; } tbody tr:hover { background: var(--surface-2); }
+td.wrapc { white-space: normal; min-width: 260px; color: var(--muted); font-size: 12px; }
+
+/* Today */
+.today { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; padding-bottom: 24px; }
+.panel { background: var(--surface); border-radius: 14px; box-shadow: var(--sh-1); padding: 14px; display: grid; gap: 8px; align-content: start; min-width: 0; }
+.panel h3 { font-size: 14px; } .panel > p { margin: 0; font-size: 12px; color: var(--muted); }
+.row { display: flex; gap: 10px; align-items: center; padding: 8px; border-radius: 10px; border: 0; background: transparent; text-align: left; width: 100%; }
+.row:hover { background: var(--surface-2); }
+.row .grow { flex: 1; min-width: 0; } .row .grow b { display: block; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.row .grow span { font-size: 12px; color: var(--muted); display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Context */
+.ctx { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 16px; padding-bottom: 24px; }
+@media (max-width: 860px) { .ctx { grid-template-columns: minmax(0, 1fr); } }
+textarea, .inp, select.inp { width: 100%; border: 0; border-radius: 10px; background: var(--surface-2); padding: 9px 11px; font-size: 13px; outline: 0; box-shadow: inset 0 0 0 1px var(--line); }
+textarea:focus, .inp:focus { box-shadow: inset 0 0 0 2px var(--accent); }
+textarea { resize: vertical; line-height: 1.5; }
+
+/* Sheet */
+.scrim { position: fixed; inset: 0; background: var(--scrim); z-index: 50; animation: fade .2s var(--ease-out); }
+.sheet { position: fixed; z-index: 51; top: max(16px, env(safe-area-inset-top, 0px)); bottom: max(16px, env(safe-area-inset-bottom, 0px)); right: max(16px, env(safe-area-inset-right, 0px)); width: min(980px, calc(100vw - 32px)); background: var(--surface); border-radius: 18px; box-shadow: var(--sh-sheet); display: grid; grid-template-rows: auto minmax(0, 1fr); overflow: hidden; animation: slide .35s var(--ease-sheet); }
+@keyframes slide { from { transform: translateX(40px); opacity: 0; } }
+@keyframes fade { from { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .sheet, .scrim { animation: none; } .card, .meter i { transition: none; } }
+.sh-h { padding: 16px 20px 12px; border-bottom: 0.5px solid var(--line); display: grid; gap: 8px; }
+.sh-top { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; row-gap: 6px; }
+.sh-h, .sh-b { min-width: 0; }
+@media (max-width: 600px) { .sh-top h2 { flex: 1 1 calc(100% - 80px); } .sh-top .save-st { flex: 1; font-size: 12px; } }
+.sh-top h2 { font-size: 22px; font-weight: 650; letter-spacing: -0.02em; flex: 1 1 160px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.x { border: 0; background: var(--surface-3); width: 30px; height: 30px; border-radius: 50%; font-size: 16px; line-height: 1; }
+.track { display: flex; gap: 3px; flex-wrap: wrap; }
+.track button { border: 0; padding: 4px 9px; border-radius: 7px; background: var(--surface-2); font-size: 12px; color: var(--muted); font-weight: 500; }
+.track button[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); font-weight: 600; }
+.track button.done { color: var(--ink-2); background: var(--accent-soft); }
+.track .closed[aria-pressed="true"] { background: var(--ink-2); color: var(--surface); }
+.sh-b { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); min-height: 0; }
+@media (max-width: 860px) { .sh-b { grid-template-columns: minmax(0, 1fr); overflow-y: auto; } .sh-b > * { overflow: visible !important; } }
+.sh-l, .sh-r { overflow-y: auto; padding: 16px 20px 24px; display: grid; gap: 14px; align-content: start; }
+.sh-r { background: var(--surface-2); }
+.lbl { font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; display: block; }
+.grid2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; }
+.fit { display: flex; gap: 12px; align-items: center; }
+.ring { --p: 0; width: 46px; height: 46px; border-radius: 50%; background: conic-gradient(var(--accent) calc(var(--p) * 1%), var(--surface-3) 0); display: grid; place-items: center; flex: none; }
+.ring b { width: 36px; height: 36px; border-radius: 50%; background: var(--surface); display: grid; place-items: center; font-size: 13px; font-weight: 700; }
+.why { margin: 0; padding-left: 18px; font-size: 13px; color: var(--ink-2); display: grid; gap: 3px; }
+.flags { display: grid; gap: 4px; font-size: 12.5px; color: var(--warn); }
+.contact { display: grid; gap: 6px; font-size: 13px; }
+.contact div { display: flex; gap: 8px; align-items: center; min-width: 0; }
+.contact span.v { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; user-select: all; }
+.copy { border: 0; background: var(--surface-3); border-radius: 6px; font-size: 11px; padding: 2px 7px; font-weight: 600; color: var(--ink-2); }
+.owner { display: inline-flex; gap: 4px; }
+.owner button { border: 0; border-radius: 999px; padding: 4px 10px 4px 4px; background: var(--surface-2); display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 500; }
+.owner button[aria-pressed="true"] { box-shadow: inset 0 0 0 2px var(--accent); background: var(--accent-soft); }
+.rs { background: var(--surface-2); border-radius: 12px; padding: 12px; display: grid; gap: 10px; font-size: 13px; }
+.rs ul { margin: 0; padding-left: 18px; display: grid; gap: 3px; color: var(--ink-2); }
+.rs .src { display: flex; flex-wrap: wrap; gap: 6px 12px; font-size: 12px; }
+.rs-st { font-size: 12px; color: var(--muted); }
+.rs-st.q { color: var(--warn); font-weight: 600; }
+.save-st { font-weight: 600; color: var(--muted); }
+.save-st.ok { color: var(--good); } .save-st.ok::before { content: "✓ "; }
+.save-st.err { color: var(--bad); }
+.grants { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 14px; padding-bottom: 24px; }
+.gcard { background: var(--surface); border-radius: 14px; box-shadow: var(--sh-1); padding: 14px; display: grid; gap: 8px; align-content: start; min-width: 0; font-size: 13px; }
+.gcard h3 { font-size: 15px; font-weight: 650; }
+.gcard .amt { font-size: 16px; font-weight: 600; letter-spacing: -0.01em; }
+.gcard ul { margin: 0; padding-left: 18px; display: grid; gap: 2px; color: var(--ink-2); }
+.gcard.muted-card { opacity: .72; }
+.fitp { display: inline-flex; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 700; }
+.fitp.now { background: var(--lime); color: var(--lime-ink); } .fitp.inc { background: var(--accent-soft); color: var(--accent); }
+.fitp.seed { background: color-mix(in srgb, var(--k-acc) 16%, transparent); color: var(--k-acc); } .fitp.long { background: var(--surface-3); color: var(--ink-2); }
+.fitp.no { background: color-mix(in srgb, var(--bad) 12%, transparent); color: var(--bad); }
+.gst { font-size: 11.5px; font-weight: 600; } .gst.open { color: var(--good); } .gst.soon { color: var(--warn); } .gst.closed { color: var(--bad); }
+.memo { background: var(--surface-2); border-radius: 12px; padding: 12px; font-size: 13px; display: grid; gap: 6px; }
+.memo b { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+
+/* Composer */
+.compose { background: var(--surface); border-radius: 14px; box-shadow: var(--sh-1); padding: 12px; display: grid; gap: 10px; }
+.acts { display: flex; flex-wrap: wrap; gap: 6px; }
+.acts .btn { height: 30px; }
+.draft { min-height: 210px; font-size: 13.5px; }
+.gen-status { font-size: 12px; color: var(--muted); display: flex; gap: 8px; align-items: center; min-height: 18px; }
+.dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: pulse 1s infinite alternate; }
+@keyframes pulse { to { opacity: .2; } }
+.tl { display: grid; gap: 8px; }
+.ev { background: var(--surface); border-radius: 12px; padding: 10px 12px; box-shadow: var(--sh-1); display: grid; gap: 4px; font-size: 13px; }
+.ev-h { display: flex; gap: 8px; align-items: center; font-size: 12px; color: var(--muted); flex-wrap: wrap; }
+.ev-h b { color: var(--ink); font-weight: 600; }
+.ev p { margin: 0; white-space: pre-wrap; color: var(--ink-2); max-height: 7.5em; overflow: hidden; }
+.ev.open p { max-height: none; }
+.ev.stage { background: transparent; box-shadow: none; padding: 2px 4px; font-size: 12px; color: var(--muted); }
+.toast { position: fixed; left: 50%; bottom: max(24px, env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--surface); padding: 9px 16px; border-radius: 10px; font-size: 13px; z-index: 80; box-shadow: var(--sh-2); }
+.emptyst { padding: 40px 20px; text-align: center; color: var(--muted); display: grid; gap: 8px; justify-items: center; }
+.emptyst b { font: italic 400 26px/1.1 var(--brand); color: var(--ink); }
+</style>
+
+<header class="bar">
+  <div class="wrap bar-in">
+    <div class="brand"><b>Cheeku</b><span>Raise tracker</span></div>
+    <nav class="seg" aria-label="Views">
+      <a href="#pipeline" data-view="pipeline">Pipeline</a>
+      <a href="#list" data-view="list">List</a>
+      <a href="#today" data-view="today">Today</a>
+      <a href="#grants" data-view="grants">Grants</a>
+      <a href="#longlist" data-view="longlist">Long list</a>
+      <a href="#context" data-view="context">Our story</a>
+    </nav>
+    <div class="tools">
+      <label class="search" for="q"><span class="muted" aria-hidden="true">⌕</span><input id="q" type="search" placeholder="Search investors, portfolio, city" autocomplete="off"></label>
+      <div class="peers" id="peers"></div>
+      <span class="sync" id="sync" title="Connecting"></span>
+      <label class="search" for="meSel" title="Who is using this screen. Drafts are written in this person's voice by default."><span class="muted">I am</span>
+        <select id="meSel" style="border:0;background:transparent;outline:0;font-weight:600"><option value="athar">Athar</option><option value="deepesh">Deepesh</option></select></label>
+      <button class="btn primary" id="addBtn" type="button">Add investor</button>
+    </div>
+  </div>
+  <div class="wrap filters" id="filters"></div>
+</header>
+
+<main>
+  <section class="wrap strip" id="strip"></section>
+  <section id="view"></section>
+</main>
+<div id="sheetRoot"></div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+// ------------------------------------------------------------- constants --
+const STAGES = [
+  { id: 'target', label: 'Target' }, { id: 'warm', label: 'Warming up' }, { id: 'intro', label: 'Intro asked' },
+  { id: 'contacted', label: 'Contacted' }, { id: 'meeting', label: 'Meeting' }, { id: 'diligence', label: 'Diligence' },
+  { id: 'terms', label: 'Term sheet' }, { id: 'committed', label: 'Committed' },
+];
+const CLOSED = [{ id: 'later', label: 'Not now' }, { id: 'passed', label: 'Passed' }];
+const ALL_STAGES = [...STAGES, ...CLOSED];
+const STAGE_IDX = Object.fromEntries(ALL_STAGES.map((s, i) => [s.id, i]));
+const TARGET_LAKH = 2600; // ₹26 crore seed
+const KINDS = ['VC', 'Angel', 'Angel network', 'Accelerator', 'Platform'];
+const TIERS = [{ id: 'A', label: 'A · best fit' }, { id: 'B', label: 'B · good' }, { id: 'C', label: 'C · long shot' }, { id: 'U', label: 'Unscreened' }];
+const TEAM_DEFAULT = { athar: { key: 'athar', name: 'Athar Ali', role: 'Co-founder and CEO' }, deepesh: { key: 'deepesh', name: 'Deepesh Mahajan', role: 'Co-founder and CBO' } };
+const ANGLES = {
+  health: 'They already back health. Lead with the family memory, the prescription check and care booked in chat.',
+  consumer: 'Consumer investor. Lead with the daily habit, organic growth and the ₹249 Family plan.',
+  ai: 'Deep tech or AI leaning. Lead with the India health model, the 5,000-case eval set and clinician-signed rules.',
+  program: 'Accelerator. Apply to the next cohort and ask how their first cheque and follow-on work.',
+  general: 'Generalist. Lead with the size of the gap (79.7 cr ABHA IDs, 2-minute consults) and the V1 already built.',
+};
+const ACTIONS = [
+  { id: 'warmup', label: 'Warm up', hint: 'No ask yet. Engage with their work and share the demo.' },
+  { id: 'outreach', label: 'Outreach', hint: 'First pitch with a 20-minute ask.' },
+  { id: 'intro', label: 'Intro request', hint: 'A forwardable note for whoever can introduce us.' },
+  { id: 'followup', label: 'Follow up', hint: 'Builds on the last touch with one new piece of progress.' },
+];
+const CHANNELS = [{ id: 'email', label: 'Email' }, { id: 'whatsapp', label: 'WhatsApp' }, { id: 'linkedin', label: 'LinkedIn' }];
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const today = () => new Date().toISOString().slice(0, 10);
+const addDays = (n) => { const d = new Date(); d.setDate(d.getDate() + n); return d.toISOString().slice(0, 10); };
+const fmtDate = s => s ? new Date(s + (String(s).length === 10 ? 'T00:00' : '')).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) : '';
+const fmtTime = t => new Date(t).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+const fmtLakh = v => v >= 100 ? '₹' + (v / 100).toFixed(v % 100 ? 2 : 0).replace(/\.?0+$/, '') + ' cr' : '₹' + Math.round(v) + ' L';
+const ago = t => { const d = Math.floor((Date.now() - t) / 864e5); return d <= 0 ? 'today' : d === 1 ? 'yesterday' : d + ' days ago'; };
+
+// ------------------------------------------------------------------ state --
+const S = {
+  inv: new Map(), touches: new Map(), grants: new Map(), gFit: 'all', pool: [], context: '', team: { ...TEAM_DEFAULT },
+  view: 'pipeline', q: '', kinds: new Set(), tiers: new Set(['A', 'B']), owner: 'all', showClosed: false,
+  sort: { key: 'fit', dir: -1 }, poolQ: '', poolStatus: 'Unscreened', poolLimit: 150, colLimit: {},
+  sheet: null, compose: { action: 'outreach', channel: 'email', sender: null, text: '', busy: false, ctl: null, extra: '' },
+  db: null, user: null, room: null, sample: null, mcp: null, me: null, canEdit: false, live: false, peers: [], profiles: {},
+  meKey: 'athar',
+};
+try { const p = JSON.parse(localStorage.getItem('cheeku-rt-prefs') || 'null'); if (p) { S.meKey = p.meKey || 'athar'; if (p.tiers) S.tiers = new Set(p.tiers); if (p.owner) S.owner = p.owner; } } catch (e) {}
+const savePrefs = () => { try { localStorage.setItem('cheeku-rt-prefs', JSON.stringify({ meKey: S.meKey, tiers: [...S.tiers], owner: S.owner })); } catch (e) {} };
+
+function toast(msg) { const t = $('toast'); t.textContent = msg; t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => { t.hidden = true; }, 2400); }
+async function copyText(text, el) {
+  try { await navigator.clipboard.writeText(text); toast('Copied'); }
+  catch (e) { if (el && el.select) { el.focus(); el.select(); toast('Selected. Press Ctrl+C or Cmd+C to copy.'); } else toast('Copy is blocked here. Select the text instead.'); }
+}
+
+// ------------------------------------------------------------- data layer --
+const stamp = () => ({ updatedAt: Date.now(), updatedBy: (S.me && S.me.id) || null });
+async function writeDoc(path, data) {
+  if (!S.db || !S.canEdit) { toast('This view is read only.'); return false; }
+  try { await S.db.doc(path).set(data); return true; } catch (e) { toast('Could not save. Try again.'); return false; }
+}
+async function patchDoc(path, patch) {
+  if (!S.db || !S.canEdit) { toast('This view is read only.'); return false; }
+  const m = /^investors\/(.+)$/.exec(path); if (m && (S.inv.get(m[1]) || {})._draft) return persistDraft(m[1]);
+  try { await S.db.doc(path).update(patch); return true; } catch (e) { toast('Could not save. Try again.'); return false; }
+}
+// A new investor lives only on the page until it has a name; then the whole record is written at once.
+async function persistDraft(id) {
+  const it = S.inv.get(id); if (!it) return false;
+  if (!String(it.name || '').trim()) { saveState('Add a name to save this investor', 'err'); return false; }
+  const { id: _i, _draft, ...rec } = it;
+  const ok = await writeDoc('investors/' + id, rec);
+  if (ok) { const cur = S.inv.get(id); if (cur) delete cur._draft; toast(`${it.name} added to Target`); scheduleRender(); }
+  return ok;
+}
+function touchesFor(id) { return [...S.touches.values()].filter(t => t.investorId === id).sort((a, b) => b.at - a.at); }
+async function addTouch(investorId, t) {
+  const id = 't' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  const doc = { investorId, at: Date.now(), by: (S.me && S.me.id) || null, sender: S.meKey, ...t };
+  S.touches.set(id, { id, ...doc });
+  return writeDoc('touches/' + id, doc);
+}
+async function setInv(id, patch, logText) {
+  const it = S.inv.get(id); if (!it) return;
+  const full = { ...patch, ...stamp() };
+  S.inv.set(id, { ...it, ...full }); scheduleRender();
+  const ok = await patchDoc('investors/' + id, full);
+  if (ok && logText) addTouch(id, { type: 'stage', body: logText });
+  return ok;
+}
+async function moveStage(id, stage) {
+  const it = S.inv.get(id); if (!it || it.stage === stage) return;
+  const lbl = (ALL_STAGES.find(s => s.id === stage) || {}).label || stage;
+  await setInv(id, { stage }, `Moved to ${lbl}`);
+}
+
+function subscribe() {
+  S.db.collection('investors').onSnapshot(snap => {
+    const drafts = [...S.inv.values()].filter(x => x._draft);
+    S.inv.clear(); snap.docs.forEach(d => S.inv.set(d.id, { id: d.id, ...d.data() }));
+    drafts.forEach(x => { if (!S.inv.has(x.id)) S.inv.set(x.id, x); });
+    S.live = true; setSync(); scheduleRender();
+  }, () => setSync(true));
+  S.db.collection('touches').onSnapshot(snap => {
+    S.touches.clear(); snap.docs.forEach(d => S.touches.set(d.id, { id: d.id, ...d.data() }));
+    scheduleRender(); if (S.sheet) renderTimeline();
+  }, () => setSync(true));
+  S.db.collection('pool').onSnapshot(snap => {
+    const rows = []; [...snap.docs].sort((a, b) => a.id.localeCompare(b.id, undefined, { numeric: true })).forEach(d => (d.data().rows || []).forEach((r, i) => rows.push({ ...r, _doc: d.id, _i: i })));
+    S.pool = rows; if (S.view === 'longlist') scheduleRender();
+  }, () => {});
+  S.db.collection('grants').onSnapshot(snap => { S.grants.clear(); snap.docs.forEach(d => S.grants.set(d.id, { id: d.id, ...d.data() })); if (S.view === 'grants' || S.view === 'pipeline') scheduleRender(); }, () => {});
+  S.db.doc('meta/context').onSnapshot(d => { S.context = d.exists ? (d.data().text || '') : ''; if (S.view === 'context') scheduleRender(); }, () => {});
+  S.db.doc('meta/team').onSnapshot(d => { if (d.exists) { const t = {}; (d.data().members || []).forEach(m => { t[m.key] = m; }); S.team = { ...TEAM_DEFAULT, ...t }; } }, () => {});
+}
+function setSync(err) {
+  const el = $('sync');
+  el.className = 'sync' + (err ? ' err' : S.live ? ' live' : '');
+  el.title = err ? 'Lost the connection to the shared tracker' : S.live ? 'Live: changes sync to Athar and Deepesh' : (S.db ? 'Connecting' : 'Shared tracker is not available in this view');
+}
+let queued = false;
+function scheduleRender() { if (queued) return; queued = true; requestAnimationFrame(() => { queued = false; render(); }); }
+
+// ---------------------------------------------------------------- filters --
+function hay(it) { return [it.name, it.firm, it.title, it.research && it.research.summary, it.city, it.portfolio, it.about, it.kind, it.intro, it.notes, (it.people || []).map(p => p.name).join(' ')].join(' ').toLowerCase(); }
+function visible(it, ignoreStage) {
+  if (S.q && !hay(it).includes(S.q)) return false;
+  if (S.kinds.size && !S.kinds.has(it.kind)) return false;
+  if (it._draft) return false;
+  const tier = it.tier || 'U', byHand = (it.sources || []).includes('added by hand');
+  if (S.tiers.size && !S.tiers.has(tier) && !byHand && (it.stage || 'target') === 'target') return false; // tiers filter the Target pile; anyone in play always shows
+  if (S.owner === 'none' && it.owner) return false;
+  if (S.owner !== 'all' && S.owner !== 'none' && it.owner !== S.owner) return false;
+  return true;
+}
+function renderFilters() {
+  const kindChips = KINDS.map(k => `<button class="chip" data-kind="${k}" aria-pressed="${S.kinds.has(k)}">${k}</button>`).join('');
+  const tierChips = TIERS.map(t => `<button class="chip" data-tier="${t.id}" aria-pressed="${S.tiers.has(t.id)}">${t.label}</button>`).join('');
+  const own = [['all', 'Everyone'], ['athar', 'Athar'], ['deepesh', 'Deepesh'], ['none', 'Unassigned']].map(([k, l]) => `<button class="chip" data-owner="${k}" aria-pressed="${S.owner === k}">${k === 'athar' || k === 'deepesh' ? `<i style="background:var(--o-${k})"></i>` : ''}${l}</button>`).join('');
+  $('filters').innerHTML = S.view === 'longlist' || S.view === 'context' || S.view === 'grants' ? '' :
+    `<span class="fgroup">Fit ${tierChips}</span><span class="fgroup">Type ${kindChips}</span><span class="fgroup">Lead ${own}</span>
+     ${S.view === 'pipeline' ? `<button class="chip" id="closedT" aria-pressed="${S.showClosed}">Show passed and not now</button>` : ''}`;
+}
+
+// ------------------------------------------------------------------ strip --
+function renderStrip() {
+  const all = [...S.inv.values()];
+  const committed = all.filter(i => i.stage === 'committed').reduce((s, i) => s + (Number(i.amount) || 0), 0);
+  const soft = all.filter(i => i.stage === 'terms' || i.stage === 'diligence').reduce((s, i) => s + (Number(i.amount) || 0), 0);
+  const counts = Object.fromEntries(STAGES.map(s => [s.id, 0])); all.forEach(i => { if (counts[i.stage || 'target'] !== undefined) counts[i.stage || 'target']++; });
+  const max = Math.max(1, ...STAGES.slice(1).map(s => counts[s.id]));
+  const pc = v => Math.min(100, v / TARGET_LAKH * 100);
+  const active = all.filter(i => !['target', 'passed', 'later'].includes(i.stage || 'target')).length;
+  $('strip').innerHTML = `
+    <div class="raise">
+      <h1>Seed · <span>₹26 crore</span></h1>
+      <p>${active} investors in play, ${all.length} in the tracker. The meter counts what investors have said yes to, in ₹ lakh on each record.</p>
+      <div class="meter" role="img" aria-label="${fmtLakh(committed)} committed and ${fmtLakh(soft)} in diligence or term sheet, of ₹26 crore"><i class="c" style="width:${pc(committed)}%"></i><i class="s" style="width:${Math.min(100 - pc(committed), pc(soft))}%"></i></div>
+      <div class="legend num"><span><b>${fmtLakh(committed)}</b> committed</span><span><b>${fmtLakh(soft)}</b> in diligence or terms</span><span><b>${fmtLakh(Math.max(0, TARGET_LAKH - committed))}</b> to go</span>${(() => { const won = [...S.grants.values()].filter(g => g.stage === 'Won').reduce((a, g) => a + (Number(g.awardLakh) || 0), 0); const live = [...S.grants.values()].filter(g => ['Preparing', 'Applied', 'Shortlisted'].includes(g.stage)).length; return won || live ? `<span><b>${fmtLakh(won)}</b> in grants won${live ? `, ${live} in progress` : ''}</span>` : ''; })()}</div>
+    </div>
+    <div class="funnel">${STAGES.map(s => `<button class="fstep" type="button" data-jump="${s.id}"><span>${s.label}</span><b class="num">${counts[s.id]}</b><i class="bar-s" style="width:${s.id === 'target' ? 100 : Math.max(4, counts[s.id] / max * 100)}%"></i></button>`).join('')}</div>`;
+}
+
+// --------------------------------------------------------------- pipeline --
+function card(it) {
+  const t = it.tier || 'U';
+  const nd = it.nextDate; const late = nd && nd < today(); const dueToday = nd === today();
+  const watchers = S.peers.filter(p => !p.isMe && p.presence && p.presence.viewing === it.id);
+  return `<button class="card" type="button" draggable="${S.canEdit}" data-id="${esc(it.id)}">
+    ${watchers.length ? `<span class="watch">${watchers.slice(0, 2).map(p => face(p.by, 'sm')).join('')}</span>` : ''}
+    <span class="card-t"><span class="tier ${t}" title="Fit tier">${t === 'U' ? '?' : t}</span><b>${esc(it.name)}</b>${ownerAv(it.owner, 'sm')}</span>
+    ${it.firm || it.title ? `<span class="card-m" style="color:var(--ink-2)">${esc([it.title, it.firm].filter(Boolean).join(', '))}</span>` : ''}
+    <span class="card-m"><span class="pill k-${esc((it.kind || 'VC').replace(/ /g, '-'))}">${esc(it.kind || 'VC')}</span>${it.research && it.research.status === 'queued' ? '<span class="due" title="Waiting for Claude to research">researching</span>' : ''}${it.fit != null ? `<span class="num">fit ${it.fit}</span>` : ''}${it.amount ? `<span class="num">${fmtLakh(Number(it.amount))}</span>` : ''}${(it.flags || []).length ? `<span class="flag" title="${esc(it.flags.join('. '))}">⚑</span>` : ''}</span>
+    ${it.nextStep || nd ? `<span class="card-m"><span class="${late ? 'due late' : dueToday ? 'due' : ''}">${nd ? fmtDate(nd) + ' · ' : ''}</span>${esc((it.nextStep || '').slice(0, 60))}</span>` : ''}
+  </button>`;
+}
+function ownerAv(key, cls = '') { if (!key) return `<span class="av ${cls}" title="No lead yet">·</span>`; const m = S.team[key] || {}; return `<span class="av ${cls} ${key}" title="${esc((m.name || key) + ' leads')}">${esc((m.name || key)[0])}</span>`; }
+function face(by, cls = '') { const p = S.profiles[by]; const n = (p && p.name) || '?'; if (p && p.avatarUrl) return `<img class="av ${cls}" alt="${esc(n)}" src="${esc(p.avatarUrl)}" style="object-fit:cover">`; return `<span class="av ${cls}" title="${esc(n)}">${esc(n[0].toUpperCase())}</span>`; }
+const byFit = (a, b) => (STAGE_IDX[b.stage] - STAGE_IDX[a.stage]) || ((b.fit ?? -1) - (a.fit ?? -1)) || a.name.localeCompare(b.name);
+function renderPipeline() {
+  const items = [...S.inv.values()].filter(it => visible(it));
+  const stages = S.showClosed ? ALL_STAGES : STAGES;
+  if (!S.inv.size) return emptyState();
+  return `<div class="board wrap"><div class="cols">${stages.map(s => {
+    const col = items.filter(it => (it.stage || 'target') === s.id).sort((a, b) => {
+      if (s.id === 'target') return (b.fit ?? -1) - (a.fit ?? -1);
+      return (a.nextDate || '9999').localeCompare(b.nextDate || '9999') || (b.fit ?? -1) - (a.fit ?? -1);
+    });
+    const lim = S.colLimit[s.id] || (s.id === 'target' ? 40 : 200);
+    return `<div class="col" data-stage="${s.id}"><div class="col-h"><h3>${s.label}</h3><span class="num">${col.length}${s.id === 'committed' ? ' · ' + fmtLakh(col.reduce((a, i) => a + (Number(i.amount) || 0), 0)) : ''}</span></div>
+      ${col.slice(0, lim).map(card).join('') || `<div class="empty-col">${s.id === 'target' ? 'No targets match the filters.' : 'Drag an investor here.'}</div>`}
+      ${col.length > lim ? `<button class="more" data-more="${s.id}">Show ${Math.min(80, col.length - lim)} more of ${col.length - lim}</button>` : ''}</div>`;
+  }).join('')}</div></div>`;
+}
+function emptyState() {
+  return `<div class="emptyst wrap"><b>No investors yet</b><span>Investors you add, or the screened lists Claude loads, show up here as cards in the funnel.</span>${S.canEdit ? '<button class="btn primary" data-act="add">Add the first investor</button>' : ''}</div>`;
+}
+
+// ------------------------------------------------------------------- list --
+function renderList() {
+  const items = [...S.inv.values()].filter(it => visible(it));
+  const k = S.sort.key, dir = S.sort.dir;
+  const val = it => k === 'stage' ? STAGE_IDX[it.stage || 'target'] : k === 'lastTouch' ? (it.lastTouch || 0) : k === 'fit' ? (it.fit ?? -1) : String(it[k] || '').toLowerCase();
+  items.sort((a, b) => (val(a) > val(b) ? 1 : val(a) < val(b) ? -1 : 0) * dir);
+  const th = (key, l) => `<th><button data-sort="${key}">${l}${S.sort.key === key ? (dir > 0 ? ' ↑' : ' ↓') : ''}</button></th>`;
+  return `<div class="wrap"><div class="tablewrap"><table><thead><tr>${th('name', 'Investor')}${th('kind', 'Type')}${th('fit', 'Fit')}${th('stage', 'Stage')}${th('owner', 'Lead')}${th('nextDate', 'Next')}${th('lastTouch', 'Last touch')}${th('city', 'City')}<th>Why they fit</th></tr></thead>
+  <tbody>${items.slice(0, 500).map(it => `<tr data-id="${esc(it.id)}"><td><span class="tier ${it.tier || 'U'}">${it.tier === 'U' || !it.tier ? '?' : it.tier}</span> <b>${esc(it.name)}</b></td><td><span class="pill k-${esc((it.kind || 'VC').replace(/ /g, '-'))}">${esc(it.kind)}</span></td><td class="num">${it.fit ?? ''}</td><td>${esc((ALL_STAGES.find(s => s.id === (it.stage || 'target')) || {}).label)}</td><td>${ownerAv(it.owner, 'sm')}</td><td class="num ${it.nextDate && it.nextDate < today() ? 'due late' : ''}">${fmtDate(it.nextDate)} ${esc((it.nextStep || '').slice(0, 40))}</td><td class="num muted">${it.lastTouch ? ago(it.lastTouch) : ''}</td><td>${esc(it.city || '')}</td><td class="wrapc">${esc((it.why || []).slice(0, 2).join('; '))}</td></tr>`).join('')}</tbody></table></div>
+  <p class="muted" style="font-size:12px">${items.length} investors${items.length > 500 ? ', first 500 shown. Narrow the filters to see the rest.' : ''}</p></div>`;
+}
+
+// ------------------------------------------------------------------ today --
+function renderToday() {
+  const all = [...S.inv.values()];
+  const t = today();
+  const due = all.filter(i => i.nextDate && i.nextDate <= t && !['passed', 'later', 'committed'].includes(i.stage)).sort((a, b) => a.nextDate.localeCompare(b.nextDate));
+  const live = ['warm', 'intro', 'contacted', 'meeting', 'diligence', 'terms'];
+  const stale = all.filter(i => live.includes(i.stage) && (!i.lastTouch || Date.now() - i.lastTouch > 10 * 864e5) && !(i.nextDate && i.nextDate > t)).sort((a, b) => (a.lastTouch || 0) - (b.lastTouch || 0));
+  const queued = all.filter(i => i.research && i.research.status === 'queued').sort((a, b) => a.research.at - b.research.at);
+  const found = all.filter(i => ((i.sources || []).includes('nightly research') || (i.sources || []).includes('found in tracker')) && Date.now() - (i.createdAt || 0) < 7 * 864e5).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+  const unowned = all.filter(i => i.tier === 'A' && !i.owner && (i.stage || 'target') === 'target').sort((a, b) => b.fit - a.fit);
+  const recent = [...S.touches.values()].filter(x => x.type !== 'draft').sort((a, b) => b.at - a.at).slice(0, 14);
+  const row = (i, sub) => `<button class="row" type="button" data-id="${esc(i.id)}">${ownerAv(i.owner)}<span class="grow"><b>${esc(i.name)}</b><span>${esc(sub)}</span></span><span class="tier ${i.tier || 'U'}">${i.tier || '?'}</span></button>`;
+  return `<div class="wrap today">
+    ${findPanel()}
+    <div class="panel"><h3>Due now</h3><p>Next steps dated today or earlier.</p>${due.map(i => row(i, `${fmtDate(i.nextDate)} · ${i.nextStep || 'Next step'}`)).join('') || '<p>Nothing due. Set a next step on an investor and it lands here on the day.</p>'}</div>
+    <div class="panel"><h3>Going cold</h3><p>In play, no touch in 10 days and nothing scheduled.</p>${stale.map(i => row(i, i.lastTouch ? 'Last touch ' + ago(i.lastTouch) : 'Never contacted')).join('') || '<p>Every live conversation has a recent touch or a next step.</p>'}</div>
+    ${found.length ? `<div class="panel"><h3>Newly found</h3><p>Added this week by the nightly research or the Find button. Each one says why it fits and where it came from.</p>${found.map(i => row(i, [i.title, i.firm].filter(Boolean).join(', ') || (i.why || [])[0] || '')).join('')}</div>` : ''}
+    ${queued.length ? `<div class="panel"><h3>Waiting for research</h3><p>Queued with the Research button. The nightly run clears these after midnight, or ask Claude to "run tracker research" now.</p>${queued.map(i => row(i, [i.title, i.firm].filter(Boolean).join(', ') || i.hint || 'Queued ' + ago(i.research.at))).join('')}</div>` : ''}
+    <div class="panel"><h3>Best fits with no lead</h3><p>A-tier targets nobody has picked up. Click one and choose Athar or Deepesh.</p>${unowned.slice(0, 12).map(i => row(i, (i.why || [])[1] || i.role || '')).join('') || '<p>Every A-tier target has a lead.</p>'}</div>
+    <div class="panel"><h3>Latest activity</h3><p>Messages sent, notes and stage moves, newest first.</p>${recent.map(x => { const i = S.inv.get(x.investorId); return i ? `<button class="row" type="button" data-id="${esc(i.id)}">${ownerAv(x.sender, 'sm')}<span class="grow"><b>${esc(i.name)}</b><span>${esc(x.type === 'stage' ? x.body : `${labelOf(x.type)} on ${labelCh(x.channel)}`)} · ${ago(x.at)}</span></span></button>` : ''; }).join('') || '<p>Nothing logged yet.</p>'}</div>
+  </div>`;
+}
+const labelOf = t => ({ warmup: 'Warm-up', outreach: 'Outreach', intro: 'Intro request', followup: 'Follow-up', note: 'Note', meeting: 'Meeting', reply: 'Their reply', stage: 'Stage' }[t] || t);
+const labelCh = c => ({ email: 'email', whatsapp: 'WhatsApp', linkedin: 'LinkedIn', call: 'a call', inperson: 'in person' }[c] || c || '');
+
+// --------------------------------------------------------------- long list --
+// ----------------------------------------------------------------- grants --
+const G_STAGES = ['To check', 'Preparing', 'Applied', 'Shortlisted', 'Won', 'Rejected', 'Skip'];
+const G_FIT = [{ id: 'Eligible now', cls: 'now' }, { id: 'After incorporation', cls: 'inc' }, { id: 'After seed', cls: 'seed' }, { id: 'Long shot', cls: 'long' }, { id: 'Not eligible', cls: 'no' }];
+const G_ORDER = Object.fromEntries(G_FIT.map((f, i) => [f.id, i]));
+const gstCls = st => /open|rolling/i.test(st) ? 'open' : /soon|watch|renewal|announced/i.test(st) ? 'soon' : /closed/i.test(st) ? 'closed' : '';
+function gcard(g) {
+  const ro = S.canEdit ? '' : 'disabled';
+  const fit = G_FIT.find(f => f.id === g.ourFit) || G_FIT[3];
+  const daysLeft = g.deadline ? Math.ceil((new Date(g.deadline + 'T23:59') - Date.now()) / 864e5) : null;
+  return `<div class="gcard ${g.ourFit === 'Not eligible' || g.stage === 'Skip' ? 'muted-card' : ''}" data-gid="${esc(g.id)}">
+    <div style="display:flex;justify-content:space-between;gap:8px;align-items:baseline;flex-wrap:wrap"><span class="fitp ${fit.cls}">${esc(fit.id)}</span><span class="gst ${gstCls(g.status || '')}">${esc(g.status || '')}${g.deadline ? ' · ' + (daysLeft < 0 ? 'closed ' : 'closes ') + fmtDate(g.deadline) + (daysLeft >= 0 && daysLeft <= 30 ? ` (${daysLeft}d)` : '') : g.opens ? ' · opens ' + fmtDate(g.opens) : ''}</span></div>
+    <h3>${esc(g.name)}</h3>
+    <div class="muted">${esc(g.agency || '')}${g.kind ? ' · ' + esc(g.kind) : ''}</div>
+    <div class="amt">${esc(g.amount || '')}</div>
+    ${g.summary ? `<div style="color:var(--ink-2)">${esc(g.summary)}</div>` : ''}
+    ${(g.eligibility || []).length ? `<div><span class="lbl">Their rules</span><ul>${g.eligibility.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>` : ''}
+    ${(g.ourGaps || []).length ? `<div><span class="lbl">What we need first</span><ul>${g.ourGaps.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>` : ''}
+    ${g.applyVia ? `<div><span class="lbl">How to apply</span><div style="color:var(--ink-2)">${esc(g.applyVia)}</div></div>` : ''}
+    <div class="src" style="display:flex;flex-wrap:wrap;gap:6px 12px;font-size:12px">${g.link ? `<a href="${esc(g.link)}" target="_blank" rel="noopener"><b>Official page</b></a>` : ''}${(g.sources || []).map(x => `<a href="${esc(x.url)}" target="_blank" rel="noopener">${esc((x.title || '').slice(0, 40) || 'source')}</a>`).join('')}</div>
+    ${g.ourFit === 'Not eligible' ? '' : `<div class="grid2">
+      <label><span class="lbl">Our status</span><select class="inp" data-gfield="stage" ${ro}>${G_STAGES.map(x => `<option ${g.stage === x ? 'selected' : ''}>${x}</option>`).join('')}</select></label>
+      <label><span class="lbl">Who owns it</span><select class="inp" data-gfield="owner" ${ro}><option value="">Nobody yet</option>${['athar', 'deepesh'].map(k => `<option value="${k}" ${g.owner === k ? 'selected' : ''}>${esc((S.team[k] || {}).name || k)}</option>`).join('')}</select></label>
+      <label><span class="lbl">Next step</span><input class="inp" data-gfield="nextStep" value="${esc(g.nextStep || '')}" placeholder="Pick an incubator" ${ro}></label>
+      <label><span class="lbl">By</span><input class="inp" type="date" data-gfield="nextDate" value="${esc(g.nextDate || '')}" ${ro}></label>
+    </div>
+    ${g.stage === 'Won' ? `<label><span class="lbl">Amount won, ₹ lakh</span><input class="inp num" type="number" min="0" data-gfield="awardLakh" value="${g.awardLakh ?? ''}" ${ro}></label>` : ''}
+    <label><span class="lbl">Notes</span><textarea rows="2" data-gfield="notes" ${ro}>${esc(g.notes || '')}</textarea></label>`}
+    <div class="muted" style="font-size:11.5px">Checked ${g.checkedAt ? fmtTime(g.checkedAt) : 'not yet'}${g.foundBy ? ' · ' + esc(g.foundBy) : ''}</div>
+  </div>`;
+}
+function renderGrants() {
+  const all = [...S.grants.values()];
+  if (!all.length) return `<div class="emptyst wrap"><b>No grants yet</b><span>Press "Check for grants" to search for live government grants we can apply for.</span></div>`;
+  const list = all.filter(g => S.gFit === 'all' ? g.ourFit !== 'Not eligible' : g.ourFit === S.gFit).sort((a, b) => (G_ORDER[a.ourFit] ?? 9) - (G_ORDER[b.ourFit] ?? 9) || (a.deadline || '9999').localeCompare(b.deadline || '9999') || (Number(b.maxLakh) || 0) - (Number(a.maxLakh) || 0));
+  const count = id => all.filter(g => g.ourFit === id).length;
+  const ready = S.mcp && S.sample && S.canEdit;
+  const potential = all.filter(g => g.ourFit !== 'Not eligible' && g.ourFit !== 'Long shot').reduce((a, g) => a + (Number(g.maxLakh) || 0), 0);
+  return `<div class="wrap" style="display:grid;gap:14px">
+    <div class="panel"><h3>Grants and government support</h3>
+      <p>Live Indian government grants, subsidies and incentives, checked against where Cheeku is today: V1 built, not yet incorporated, Gurugram, raising a ₹26 cr seed. Up to about ${fmtLakh(potential)} across the ones we can reach without a long shot. Most need three things first: a private limited company, DPIIT startup recognition and, for Haryana schemes, Startup Haryana registration.</p>
+      <div class="filters" style="padding:0"><span class="fgroup"><button class="chip" data-gfit="all" aria-pressed="${S.gFit === 'all'}">All we can reach</button>${G_FIT.map(f => `<button class="chip" data-gfit="${esc(f.id)}" aria-pressed="${S.gFit === f.id}">${esc(f.id)} · ${count(f.id)}</button>`).join('')}</span>
+        <span style="flex:1"></span><button class="btn lime" id="findGrantsBtn" type="button" ${ready && !S.gFind ? '' : 'disabled'}>${S.gFind ? 'Checking…' : 'Check for grants'}</button></div>
+      ${S.gFindStatus ? `<p class="gen-status">${S.gFind ? '<span class="dot"></span>' : ''}${esc(S.gFindStatus)}</p>` : ''}
+      ${!S.mcp ? '<p>The Check button needs Parallel Search connected. The nightly run refreshes grants on Sundays either way.</p>' : ''}
+    </div>
+    <div class="grants">${list.map(gcard).join('')}</div>
+  </div>`;
+}
+const gNorm = n => String(n || '').toLowerCase().replace(/\(.*?\)/g, '').replace(/[^a-z0-9]/g, '');
+async function findGrants() {
+  if (S.gFind || !S.mcp || !S.sample) return;
+  S.gFind = true; S.gFindStatus = 'Searching for live government grants…'; scheduleRender();
+  let results = [];
+  try {
+    const runs = await Promise.all([
+      psSearch('Indian central government grants and seed funding schemes open now for early-stage healthtech, digital health or AI startups, with amounts, eligibility and deadlines', ['startup grant India healthtech open call', 'government seed grant startups India 2026', 'DPIIT startup scheme grant apply']),
+      psSearch('Haryana and Gurugram state government startup grants, subsidies and incentives currently open, plus AI compute or digital health incentives for Indian startups', ['Startup Haryana grant 2026', 'IndiaAI startup support scheme', 'ABDM digital health incentive startups']),
+    ]);
+    const seen = new Set(); results = runs.flat().filter(r => !seen.has(r.url) && seen.add(r.url)).slice(0, 16);
+  } catch (e) { S.gFind = false; S.gFindStatus = researchError(e).replace(' Queued for tonight instead.', ''); scheduleRender(); return; }
+  S.gFindStatus = `Reading ${results.length} sources…`; scheduleRender();
+  const have = [...S.grants.values()].map(g => g.name);
+  const prompt = `You track government grants for Cheeku AI. Cheeku: consumer health AI app for Indian families (software, no hardware), V1 built, NOT yet incorporated (no company, no DPIIT recognition yet), founders in Gurugram, Haryana, raising a ₹26 crore seed in early 2027, plans its own India health AI model and ABDM integration in 2027.
+
+From ONLY these search results, list Indian government grants, subsidies or incentives (central or Haryana) that are currently open or recurring, that are NOT already in our list: ${have.join('; ')}.
+
+Results:
+${results.map((r, i) => `[${i + 1}] ${r.url}\n${r.title} ${r.date ? '(' + r.date + ')' : ''}\n${r.text}`).join('\n\n')}
+
+For each, judge our fit honestly: "Eligible now", "After incorporation" (needs a company and DPIIT), "After seed" (needs funding or revenue), "Long shot", or "Not eligible" (say why in ourGaps). Use only facts in the results. No em dashes.
+Reply JSON only: {"grants": [{"name": "", "agency": "", "kind": "Grant" | "Convertible" | "Subsidy" | "Incentive" | "Compute", "amount": "e.g. Up to ₹20 lakh", "maxLakh": number, "status": "Open" | "Rolling" | "Opens soon" | "Watch" | "Closed", "deadline": "YYYY-MM-DD or empty", "opens": "YYYY-MM-DD or empty", "summary": "one sentence", "eligibility": ["their rules"], "ourFit": "", "ourGaps": ["what we must do first"], "applyVia": "", "link": "official url from the results or empty", "sources": [result numbers]}]}`;
+  let out;
+  try { out = await S.sample.json(prompt, { modelTier: 'default' }); }
+  catch (e) { S.gFind = false; S.gFindStatus = 'Could not read the results. Try again.'; scheduleRender(); return; }
+  const clean = v => String(v ?? '').replace(/[—–]/g, ', ').slice(0, 400);
+  const arr = v => (Array.isArray(v) ? v : []).map(clean).filter(Boolean).slice(0, 6);
+  const existing = new Set([...S.grants.values()].map(g => gNorm(g.name)));
+  let added = 0;
+  for (const g of (out && Array.isArray(out.grants) ? out.grants : [])) {
+    if (!g || !g.name || existing.has(gNorm(g.name))) continue;
+    const sources = (Array.isArray(g.sources) ? g.sources : []).map(n => results[Number(n) - 1]).filter(Boolean).map(r => ({ title: r.title.slice(0, 90), url: r.url }));
+    if (!sources.length) continue;
+    const now = Date.now(), id = 'g-' + gNorm(g.name).slice(0, 40) + '-' + now.toString(36).slice(-3);
+    const rec = { name: clean(g.name), agency: clean(g.agency), kind: clean(g.kind), amount: clean(g.amount), maxLakh: Number(g.maxLakh) || null, status: clean(g.status), deadline: /^\d{4}-\d{2}-\d{2}$/.test(g.deadline || '') ? g.deadline : '', opens: /^\d{4}-\d{2}-\d{2}$/.test(g.opens || '') ? g.opens : '',
+      summary: clean(g.summary), eligibility: arr(g.eligibility), ourFit: G_FIT.some(f => f.id === g.ourFit) ? g.ourFit : 'Long shot', ourGaps: arr(g.ourGaps), applyVia: clean(g.applyVia),
+      link: sources.some(s2 => s2.url === g.link) ? g.link : '', sources, stage: 'To check', owner: '', nextStep: '', nextDate: '', notes: '', awardLakh: null, foundBy: 'found with Check for grants', checkedAt: now, createdAt: now, ...stamp() };
+    if (await writeDoc('grants/' + id, rec)) { S.grants.set(id, { id, ...rec }); existing.add(gNorm(rec.name)); added++; }
+  }
+  S.gFind = false; S.gFindStatus = added ? `${added} new grant${added > 1 ? 's' : ''} added. Check the fit and the official page before you start.` : 'Nothing new beyond what is already here.';
+  scheduleRender();
+}
+const gPending = new Map();
+async function saveGrantField(el) {
+  const card = el.closest('[data-gid]'); if (!card) return; const id = card.dataset.gid, f = el.dataset.gfield;
+  clearTimeout(gPending.get(id + f)); gPending.delete(id + f);
+  const g = S.grants.get(id); if (!g) return;
+  const val = f === 'awardLakh' ? (el.value === '' ? null : Number(el.value)) : el.value;
+  if ((g[f] ?? '') === (val ?? '')) return;
+  S.grants.set(id, { ...g, [f]: val });
+  const ok = await patchDoc('grants/' + id, { [f]: val, ...stamp() });
+  if (ok && (f === 'stage' || f === 'owner')) scheduleRender();
+}
+function renderLong() {
+  const q = S.poolQ.toLowerCase();
+  const rows = S.pool.filter(r => (!S.poolStatus || r.status === S.poolStatus) && (!q || [r.name, r.city, r.reason].join(' ').toLowerCase().includes(q)));
+  const inTracker = new Set([...S.inv.values()].map(i => i.name.toLowerCase()));
+  const counts = { Unscreened: S.pool.filter(r => r.status === 'Unscreened').length, Out: S.pool.filter(r => r.status === 'Out').length };
+  return `<div class="wrap" style="display:grid;gap:12px;padding-bottom:24px">
+    <div class="panel"><h3>Everyone else from the uploaded lists</h3>
+      <p>${counts.Unscreened} angels came with a name and contact only, so they could not be scored: open their LinkedIn, and add the ones with health, consumer or AI bets to the pipeline. ${counts.Out} were screened out, each with the reason.</p>
+      <div class="filters" style="padding:0"><span class="fgroup"><button class="chip" data-pool="Unscreened" aria-pressed="${S.poolStatus === 'Unscreened'}">Unscreened · ${counts.Unscreened}</button><button class="chip" data-pool="Out" aria-pressed="${S.poolStatus === 'Out'}">Screened out · ${counts.Out}</button></span>
+      <label class="search" for="poolQ" style="flex:1;max-width:340px"><input id="poolQ" type="search" placeholder="Search name or city" value="${esc(S.poolQ)}" style="width:100%"></label></div>
+    </div>
+    <div class="tablewrap"><table><thead><tr><th>Name</th><th>City</th><th>LinkedIn</th><th>Email</th><th>${S.poolStatus === 'Out' ? 'Why it was left out' : 'Note'}</th><th></th></tr></thead><tbody>
+    ${rows.slice(0, S.poolLimit).map(r => `<tr><td><b>${esc(r.name)}</b></td><td>${esc(r.city || '')}</td><td>${r.linkedin ? `<a href="${esc(r.linkedin)}" target="_blank" rel="noopener">Profile</a>` : ''}</td><td><span style="user-select:all">${esc(r.email || '')}</span></td><td class="wrapc">${esc(r.reason || '')}</td>
+      <td>${inTracker.has(r.name.toLowerCase()) ? '<span class="muted">In pipeline</span>' : `<button class="btn ghost" data-promote="${esc(r._doc)}|${r._i}" ${S.canEdit ? '' : 'disabled'}>Add to pipeline</button>`}</td></tr>`).join('')}
+    </tbody></table></div>
+    ${rows.length > S.poolLimit ? `<button class="btn" data-poolmore="1">Show more (${rows.length - S.poolLimit} left)</button>` : ''}
+  </div>`;
+}
+async function promote(key) {
+  const [doc, i] = key.split('|'); const r = S.pool.find(x => x._doc === doc && x._i === Number(i)); if (!r) return;
+  const id = r.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 56) + '-' + Date.now().toString(36).slice(-3);
+  const rec = { name: r.name, kind: r.kind || 'Angel', tier: 'U', fit: null, why: ['Added from the long list; not scored yet'], flags: [], angle: 'general', role: 'Angel cheque',
+    people: [], email: r.email || '', linkedin: r.linkedin || '', twitter: '', website: '', city: r.city || '', portfolio: '', about: '', stageFocus: '', sources: ['long list'],
+    stage: 'target', owner: S.meKey, intro: '', nextStep: 'Check LinkedIn for health or consumer bets', nextDate: addDays(2), lastTouch: null, amount: null, notes: '', createdAt: Date.now(), ...stamp() };
+  if (await writeDoc('investors/' + id, rec)) { S.inv.set(id, { id, ...rec }); toast(`${r.name} added to Target`); scheduleRender(); }
+}
+
+// ---------------------------------------------------------------- context --
+function renderContext() {
+  return `<div class="wrap ctx">
+    <div class="panel"><h3>Our story, as the drafts tell it</h3><p>Every generated message is written from this text plus the investor's record. Keep it current: traction, the round, what changed this week.</p>
+      <textarea id="ctxText" rows="24" ${S.canEdit ? '' : 'readonly'}>${esc(S.context)}</textarea>
+      <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn primary" id="ctxSave" ${S.canEdit ? '' : 'disabled'}>Save story</button></div></div>
+    <div class="panel"><h3>How drafts are written</h3>
+      <p>Plain, specific and short, in the voice of whoever sends it. No dashes as punctuation, no hype words, one clear ask.</p>
+      <p>They only mention what is in the investor's record or our story. Nothing about mutual friends, meetings or numbers we have not written down.</p>
+      <p>Drafts are never sent from here. Copy one, send it from your own email, WhatsApp or LinkedIn, then press <b>Log as sent</b> so the timeline and the next follow-up stay right.</p>
+      <h3 style="margin-top:8px">Stages</h3><p>${STAGES.map(s => s.label).join(' → ')}. Passed and Not now sit at the end, out of the way.</p>
+      <h3 style="margin-top:8px">Fit tiers</h3><p>A: health in the thesis or portfolio, at seed. B: early-stage consumer, AI or active seed programmes. C: early generalists. Scores come from the uploaded lists, so check each fund's current focus before you write.</p>
+    </div>
+  </div>`;
+}
+
+// ------------------------------------------------------------------ sheet --
+function openSheet(id) {
+  S.sheet = id; const it = S.inv.get(id); if (!it) return;
+  S.compose = { ...S.compose, sender: it.owner || S.meKey, text: '', subject: '', busy: false, extra: '' };
+  S.compose.action = !it.lastTouch ? (it.stage === 'target' ? 'warmup' : 'outreach') : 'followup';
+  presence({ viewing: id });
+  renderSheet();
+}
+// Fields save as you type (after a short pause) and when you leave them. The sheet shows the state.
+const FIELD_MAP = { fName: 'name', fKind: 'kind', fLinkedin: 'linkedin', fEmail: 'email', fNext: 'nextStep', fDate: 'nextDate', fIntro: 'intro', fNotes: 'notes', fTitle: 'title', fFirm: 'firm', fHint: 'hint', fAmt: 'amount' };
+const pending = new Map();
+function saveState(text, cls) { const el = $('saveState'); if (el) { el.textContent = text; el.className = 'save-st ' + (cls || ''); } }
+async function saveField(id, el) {
+  clearTimeout(pending.get(el.id)); pending.delete(el.id);
+  const it = S.inv.get(id); if (!it || !S.canEdit) return;
+  const key = FIELD_MAP[el.id]; if (!key) return;
+  const val = key === 'amount' ? (el.value === '' ? null : Number(el.value)) : key === 'name' ? el.value.trim() : el.value;
+  if (key === 'name' && !val) { saveState(it._draft ? 'Add a name to save this investor' : 'A name is needed. The old name is kept.', 'err'); return; }
+  if (!it._draft && (it[key] ?? (key === 'amount' ? null : '')) === val) { if (!pending.size) saveState('Saved', 'ok'); return; }
+  saveState('Saving…');
+  const ok = await setInv(id, { [key]: val });
+  if (!pending.size) saveState(ok ? 'Saved' : 'Not saved. Check your connection and try again.', ok ? 'ok' : 'err');
+}
+// The Save button and Ctrl or Cmd+S: write every field on the sheet now, whatever autosave has done.
+async function saveNow() {
+  const id = S.sheet, it = S.inv.get(id); if (!it || !S.canEdit) return;
+  for (const t of pending.values()) clearTimeout(t); pending.clear();
+  const patch = {};
+  for (const [elId, key] of Object.entries(FIELD_MAP)) { const el = $(elId); if (!el) continue; patch[key] = key === 'amount' ? (el.value === '' ? null : Number(el.value)) : key === 'name' ? el.value.trim() : el.value; }
+  if ('name' in patch && !patch.name) { saveState('Add a name first', 'err'); $('fName').focus(); return; }
+  saveState('Saving…'); const btn = $('saveNow'); if (btn) btn.disabled = true;
+  const ok = await setInv(id, patch);
+  if (btn) btn.disabled = false;
+  if (ok) renderSheet();
+  saveState(ok ? 'Saved' : 'Not saved. Check your connection and press Save again.', ok ? 'ok' : 'err');
+}
+function flushPending() { const id = S.sheet; for (const elId of [...pending.keys()]) { const el = $(elId); if (el && id) saveField(id, el); } }
+function closeSheet() { flushPending(); const cur = S.inv.get(S.sheet); if (cur && cur._draft && !String(cur.name || '').trim()) { S.inv.delete(cur.id); toast('Not added. An investor needs a name.'); } if (S.compose.ctl) S.compose.ctl.abort(); S.sheet = null; $('sheetRoot').innerHTML = ''; presence({ viewing: null }); scheduleRender(); }
+function renderSheet() {
+  if (pending.size) flushPending();
+  const it = S.inv.get(S.sheet); if (!it) return closeSheet();
+  const st = it.stage || 'target';
+  const contacts = [
+    it.email && `<div><span class="lbl" style="margin:0;width:64px">Email</span><span class="v">${esc(it.email)}</span><button class="copy" data-copy="${esc(it.email)}">Copy</button></div>`,
+    ...(it.people || []).filter(p => p.email && p.email !== it.email).map(p => `<div><span class="lbl" style="margin:0;width:64px">${esc((p.name || '').split(' ')[0] || 'Contact')}</span><span class="v">${esc(p.email)}</span><button class="copy" data-copy="${esc(p.email)}">Copy</button></div>`),
+    it.linkedin && `<div><span class="lbl" style="margin:0;width:64px">LinkedIn</span><a href="${esc(it.linkedin)}" target="_blank" rel="noopener" class="v">${esc(it.linkedin.replace(/^https?:\/\/(www\.)?/, ''))}</a></div>`,
+    it.twitter && `<div><span class="lbl" style="margin:0;width:64px">X</span><a href="${esc(it.twitter)}" target="_blank" rel="noopener" class="v">${esc(it.twitter.replace(/^https?:\/\/(www\.)?/, ''))}</a></div>`,
+    it.website && `<div><span class="lbl" style="margin:0;width:64px">Website</span><a href="${esc(it.website)}" target="_blank" rel="noopener" class="v">${esc(it.website.replace(/^https?:\/\/(www\.)?/, ''))}</a></div>`,
+  ].filter(Boolean).join('');
+  const peopleNames = (it.people || []).map(p => p.name).filter(Boolean);
+  const ro = S.canEdit ? '' : 'disabled';
+  $('sheetRoot').innerHTML = `<div class="scrim" data-act="close"></div>
+  <aside class="sheet" role="dialog" aria-modal="true" aria-labelledby="shName">
+    <div class="sh-h">
+      <div class="sh-top"><span class="tier ${it.tier || 'U'}">${it.tier && it.tier !== 'U' ? it.tier : '?'}</span><h2 id="shName">${esc(it.name || 'New investor')}</h2>
+        <span class="pill k-${esc((it.kind || 'VC').replace(/ /g, '-'))}">${esc(it.kind)}</span>
+        ${S.canEdit ? `<span id="saveState" class="save-st ${it._draft ? 'err' : ''}">${it._draft ? 'Not saved yet' : 'Saves automatically'}</span><button class="btn ${it._draft ? 'primary' : 'ghost'}" id="saveNow" type="button" title="Save every field now (Ctrl or Cmd+S)">${it._draft ? 'Save investor' : 'Save'}</button>` : ''}
+        <button class="x" data-act="close" aria-label="Close">×</button></div>
+      <div class="track">${ALL_STAGES.map(s => `<button type="button" data-stage="${s.id}" class="${CLOSED.some(c => c.id === s.id) ? 'closed' : ''} ${STAGE_IDX[s.id] < STAGE_IDX[st] && !CLOSED.some(c => c.id === st) ? 'done' : ''}" aria-pressed="${s.id === st}" ${ro}>${s.label}</button>`).join('')}</div>
+    </div>
+    <div class="sh-b">
+      <div class="sh-l">
+        <div><span class="lbl">Who leads</span><div class="owner">${['athar', 'deepesh'].map(k => `<button type="button" data-owner-set="${k}" aria-pressed="${it.owner === k}" ${ro}>${ownerAv(k, 'sm')}${esc((S.team[k] || {}).name || k)}</button>`).join('')}</div></div>
+        ${researchBlock(it, ro)}
+        <div class="grid2">
+          <label><span class="lbl">Next step</span><input class="inp" id="fNext" value="${esc(it.nextStep || '')}" placeholder="Send the deck" ${ro}></label>
+          <label><span class="lbl">By</span><input class="inp" id="fDate" type="date" value="${esc(it.nextDate || '')}" ${ro}></label>
+          <label><span class="lbl">Warm intro through</span><input class="inp" id="fIntro" value="${esc(it.intro || '')}" placeholder="Name, how they know them" ${ro}></label>
+          <label><span class="lbl">Cheque, ₹ lakh</span><input class="inp num" id="fAmt" type="number" min="0" step="5" value="${it.amount ?? ''}" placeholder="50" ${ro}></label>
+        </div>
+        <div class="fit">${it.fit != null ? `<div class="ring" style="--p:${it.fit}"><b class="num">${it.fit}</b></div>` : '<div class="ring"><b>?</b></div>'}
+          <div><span class="lbl">Why they fit · ${esc(it.role || '')}</span><div style="font-size:13px;color:var(--ink-2)">${esc(it.angleText || ANGLES[it.angle] || ANGLES.general)}</div></div></div>
+        ${(it.why || []).length ? `<ul class="why">${it.why.map(w => `<li>${esc(w)}</li>`).join('')}</ul>` : ''}
+        ${(it.flags || []).length ? `<div class="flags">${it.flags.map(f => `<span>⚑ ${esc(f)}</span>`).join('')}</div>` : ''}
+        <div class="memo" id="memoBox">${it.memo ? memoHtml(it.memo) : `<span class="muted" style="font-size:12.5px">A fit memo reads this investor's record through the board's three lenses: why they would say yes, the objection to expect and the line to open with.</span>`}
+          <div><button class="btn ghost" id="memoBtn" type="button" ${S.sample && S.canEdit ? '' : 'disabled'}>${it.memo ? 'Rewrite fit memo' : 'Write fit memo'}</button></div></div>
+        ${contacts ? `<div><span class="lbl">Contact</span><div class="contact">${contacts}</div></div>` : ''}
+        ${peopleNames.length ? `<div><span class="lbl">People</span><div style="font-size:13px">${esc(peopleNames.join(', '))}</div></div>` : ''}
+        ${it.portfolio ? `<div><span class="lbl">Portfolio, as listed</span><div style="font-size:13px;color:var(--ink-2)">${esc(it.portfolio)}</div></div>` : ''}
+        ${it.about ? `<div><span class="lbl">About, as listed</span><div style="font-size:13px;color:var(--ink-2)">${esc(it.about)}</div></div>` : ''}
+        <label><span class="lbl" style="display:flex;justify-content:space-between"><span>Notes</span>${S.canEdit ? '<span class="muted" style="text-transform:none;letter-spacing:0;font-weight:500">Saves as you type</span>' : ''}</span><textarea id="fNotes" rows="4" placeholder="What they care about, what they said, who else is in" ${ro}>${esc(it.notes || '')}</textarea></label>
+        <div class="muted" style="font-size:11.5px;display:flex;gap:8px;flex-wrap:wrap;justify-content:space-between"><span>Source: ${esc((it.sources || []).join(', '))}${it.updatedAt ? ' · last changed ' + fmtTime(it.updatedAt) : ''}</span></div>
+      </div>
+      <div class="sh-r">
+        <div class="compose">
+          <div class="acts" role="group" aria-label="What to write">${ACTIONS.map(a => `<button class="btn ${S.compose.action === a.id ? 'primary' : 'ghost'}" type="button" data-action="${a.id}" title="${esc(a.hint)}">${a.label}</button>`).join('')}</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+            <div class="seg">${CHANNELS.map(c => `<button type="button" data-channel="${c.id}" aria-pressed="${S.compose.channel === c.id}">${c.label}</button>`).join('')}</div>
+            <label class="muted" style="font-size:12px;display:flex;gap:6px;align-items:center" for="fSender">From
+              <select id="fSender" class="inp" style="width:auto;padding:5px 8px">${['athar', 'deepesh'].map(k => `<option value="${k}" ${S.compose.sender === k ? 'selected' : ''}>${esc((S.team[k] || {}).name || k)}</option>`).join('')}</select></label>
+          </div>
+          <input class="inp" id="fExtra" placeholder="Anything to add? e.g. we met at the AWS founders' dinner, or mention their bet on Innovaccer" value="${esc(S.compose.extra || '')}">
+          <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn lime" id="genBtn" type="button" ${S.sample ? '' : 'disabled'}>${S.compose.busy ? 'Stop' : 'Generate ' + (ACTIONS.find(a => a.id === S.compose.action) || {}).label.toLowerCase()}</button>
+            ${S.sample ? '' : '<span class="muted" style="font-size:12px;align-self:center">Drafting needs Claude, which is not available in this view.</span>'}</div>
+          <div class="gen-status" id="genStatus"></div>
+          ${S.compose.channel === 'email' ? `<input class="inp" id="fSubject" placeholder="Subject" value="${esc(S.compose.subject || '')}">` : ''}
+          <textarea class="draft" id="fDraft" placeholder="Your draft appears here. Edit it freely before you send it.">${esc(S.compose.text || '')}</textarea>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn" id="copyBtn" type="button">Copy</button>
+            ${sendLink(it)}
+            <span style="flex:1"></span>
+            <button class="btn primary" id="sentBtn" type="button" ${ro}>Log as sent</button>
+          </div>
+        </div>
+        <div class="compose">
+          <span class="lbl" style="margin:0">Log something that happened</span>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <select class="inp" id="logType" style="width:auto"><option value="reply">Their reply</option><option value="meeting">Meeting or call</option><option value="note">Note</option></select>
+            <input class="inp" id="logText" placeholder="What was said, what they asked for" style="flex:1;min-width:180px">
+            <button class="btn" id="logBtn" type="button" ${ro}>Add</button>
+          </div>
+        </div>
+        <div><span class="lbl">Conversation</span><div class="tl" id="tl"></div></div>
+      </div>
+    </div>
+  </aside>`;
+  renderTimeline();
+}
+function sendLink(it) {
+  const ch = S.compose.channel;
+  if (ch === 'whatsapp') return `<a class="btn ghost" id="openLink" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(S.compose.text || '')}">Open WhatsApp</a>`;
+  if (ch === 'linkedin' && it.linkedin) return `<a class="btn ghost" target="_blank" rel="noopener" href="${esc(it.linkedin)}">Open their LinkedIn</a>`;
+  if (ch === 'email' && (it.email || (it.people || []).some(p => p.email))) {
+    const to = it.email || it.people.find(p => p.email).email;
+    return `<a class="btn ghost" id="openLink" target="_blank" rel="noopener" href="https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(to)}&su=${encodeURIComponent(S.compose.subject || '')}&body=${encodeURIComponent(S.compose.text || '')}">Open in Gmail</a>`;
+  }
+  return '';
+}
+function researchBlock(it, ro) {
+  const r = it.research || {};
+  const st = r.status === 'queued' ? `<span class="rs-st q">Queued ${r.at ? fmtTime(r.at) : ''}. Claude looks it up on the web and fills this in.</span>`
+    : r.status === 'done' ? `<span class="rs-st">Researched ${fmtTime(r.checkedAt || r.at)}${r.via ? ' with ' + esc(r.via) : ''} from public sources. Check anything you rely on.</span>`
+    : r.status === 'failed' ? `<span class="rs-st q">${esc(r.error || 'Could not find enough on this person. Add a company or LinkedIn link and try again.')}</span>`
+    : `<span class="rs-st">${S.mcp ? 'Searches the web now with Parallel Search, about 30 seconds.' : 'Not researched yet. Without Parallel Search it is queued for tonight.'}</span>`;
+  const list = (title, xs) => (xs && xs.length) ? `<div><span class="lbl">${title}</span><ul>${xs.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>` : '';
+  return `<div class="rs">
+    <div class="grid2">
+      <label><span class="lbl">Name</span><input class="inp" id="fName" value="${esc(it.name || '')}" placeholder="Full name or fund name" autocomplete="off" ${ro}></label>
+      <label><span class="lbl">Type</span><select class="inp" id="fKind" ${ro}>${KINDS.map(k => `<option ${it.kind === k ? 'selected' : ''}>${k}</option>`).join('')}</select></label>
+      <label><span class="lbl">LinkedIn</span><input class="inp" id="fLinkedin" type="url" value="${esc(it.linkedin || '')}" placeholder="https://linkedin.com/in/…" ${ro}></label>
+      <label><span class="lbl">Email</span><input class="inp" id="fEmail" type="email" value="${esc(it.email || '')}" placeholder="name@fund.com" ${ro}></label>
+      <label><span class="lbl">Role</span><input class="inp" id="fTitle" value="${esc(it.title || '')}" placeholder="CEO, Partner, angel" ${ro}></label>
+      <label><span class="lbl">Firm or company</span><input class="inp" id="fFirm" value="${esc(it.firm || '')}" placeholder="TestMu AI" ${ro}></label>
+    </div>
+    <label><span class="lbl">Who is this?</span><input class="inp" id="fHint" value="${esc(it.hint || '')}" placeholder="Anything that pins them down: company, past companies, LinkedIn link, how you know them" ${ro}></label>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button class="btn ${r.status === 'done' ? 'ghost' : 'primary'}" id="researchBtn" type="button" ${ro}>${r.status === 'done' ? 'Research again' : r.status === 'queued' ? 'Research now' : 'Research ' + esc(it.name.split(' ')[0])}</button>${st}</div>
+    ${r.summary ? `<div style="color:var(--ink)">${esc(r.summary)}</div>` : ''}
+    ${list('Background', r.background)}${list('Investing record', r.investing)}${list('Signals for Cheeku', r.signals)}${list('Could not confirm', r.gaps)}
+    ${(r.sources || []).length ? `<div><span class="lbl">Sources</span><div class="src">${r.sources.map(x => `<a href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.title || x.url.replace(/^https?:\/\/(www\.)?/, '').split('/')[0])}</a>`).join('')}</div></div>` : ''}
+  </div>`;
+}
+async function queueResearch() {
+  const it = S.inv.get(S.sheet); if (!it) return;
+  const hint = ($('fHint') || {}).value || it.hint || '';
+  const firm = ($('fFirm') || {}).value || it.firm || '';
+  const title = ($('fTitle') || {}).value || it.title || '';
+  await setInv(it.id, { hint, firm, title, research: { ...(it.research || {}), status: 'queued', at: Date.now(), by: (S.me && S.me.id) || null } }, 'Queued for research');
+  toast('Queued. It is researched tonight after midnight, or ask Claude to "run tracker research" now.'); renderSheet();
+}
+// Research in the page: Parallel Search finds public sources, Claude turns them into a profile.
+const PS = 'Parallel Search';
+const PS_SESSION = 'cheeku-raise-' + Math.random().toString(16).slice(2) + Date.now().toString(16);
+async function psSearch(objective, queries) {
+  const res = await S.mcp.callTool(PS, 'web_search', { objective, search_queries: queries.slice(0, 3), session_id: PS_SESSION });
+  const pl = res && res.payload;
+  const list = (pl && Array.isArray(pl.results)) ? pl.results : [];
+  return list.map(r => ({ url: String(r.url || ''), title: String(r.title || ''), date: r.publish_date || '', text: (Array.isArray(r.excerpts) ? r.excerpts.join(' … ') : String(r.excerpts || '')).slice(0, 1400) })).filter(r => /^https?:\/\//.test(r.url));
+}
+function researchError(e) {
+  const c = e && e.code;
+  if (c === 'server_not_connected') return 'Parallel Search is not connected for you. Add it in claude.ai Settings, Connectors, then reload. Queued for tonight instead.';
+  if (c === 'needs_reauth') return 'Reconnect Parallel Search in claude.ai Settings, Connectors. Queued for tonight instead.';
+  if (c === 'not_in_manifest' || c === 'not_granted') return 'Web search is not allowed for this page in your view. Queued for tonight instead.';
+  if (c === 'tool_error') return 'Parallel Search could not run this search: ' + String(e.message || '').slice(0, 120);
+  if (c === 'cancelled') return 'Stopped.';
+  return 'Research did not finish. Queued for tonight instead.';
+}
+async function researchNow() {
+  const it = S.inv.get(S.sheet); if (!it) return;
+  const hint = ($('fHint') || {}).value || it.hint || '';
+  const firm = ($('fFirm') || {}).value || it.firm || '';
+  const title = ($('fTitle') || {}).value || it.title || '';
+  if (!S.mcp || !S.sample) return queueResearch();
+  const btn = $('researchBtn'); const st = btn && btn.nextElementSibling;
+  const say = msg => { if (st) { st.className = 'rs-st q'; st.textContent = msg; } };
+  if (btn) btn.disabled = true;
+  await setInv(it.id, { hint, firm, title });
+  const who = [it.name, title, firm].filter(Boolean).join(' ');
+  let results = [];
+  try {
+    say('Searching the web…');
+    const [a, b] = await Promise.all([
+      psSearch(`Who is ${who}? Current role, company, past companies and exits. ${hint}`.trim(), [`${it.name} ${firm}`.trim(), `${it.name} ${title} ${firm}`.trim(), `${it.name} profile`]),
+      psSearch(`Startups ${it.name}${firm ? ' of ' + firm : ''} has invested in as an angel or through a fund, especially health, consumer or AI in India`, [`${it.name} angel investor`, `${it.name} invested seed round`, `${it.name} portfolio startups`]),
+    ]);
+    const seen = new Set(); results = [...a, ...b].filter(r => !seen.has(r.url) && seen.add(r.url)).slice(0, 14);
+  } catch (e) {
+    const msg = researchError(e); say(msg);
+    if (e && e.code !== 'tool_error' && e.code !== 'cancelled') await queueResearch();
+    if (btn) btn.disabled = false; return;
+  }
+  if (!results.length) { await setInv(it.id, { research: { ...(it.research || {}), status: 'failed', at: Date.now(), error: 'Nothing public came up. Add their company or a LinkedIn link under "Who is this?" and try again.' } }); if (S.sheet === it.id) renderSheet(); return; }
+  say(`Reading ${results.length} sources…`);
+  const prompt = `You research investors for Cheeku AI's seed raise. Using ONLY the search results below, profile this person and judge their fit.
+
+Cheeku, in brief:
+${(S.context || '').slice(0, 2500)}
+
+The person, as the founders entered them: ${JSON.stringify({ name: it.name, role: title, firm, who_this_is: hint, kind: it.kind, notes: it.notes, warm_intro: it.intro })}
+
+Search results (number, url, title, date, excerpt):
+${results.map((r, i) => `[${i + 1}] ${r.url}\n${r.title} ${r.date ? '(' + r.date + ')' : ''}\n${r.text}`).join('\n\n')}
+
+Rules:
+- Use only facts these results support. Never invent investments, numbers, emails or links. If results disagree, say so in "flags".
+- If the results are about several different people with this name and you cannot tell which one the founders mean, set "identified" to false.
+- Tiers: A = health or wellness in their thesis or portfolio and invests at seed. B = active early-stage investor in consumer or AI, or an operator with real angel activity. C = generalist or little evidence of investing.
+- No em dashes or en dashes. Short, plain sentences.
+
+Reply with JSON only:
+{"identified": true or false, "unclear_why": "if not identified, what extra detail would pin them down",
+ "title": "current role", "firm": "current company or fund", "kind": "Angel" | "VC" | "Angel network" | "Accelerator", "city": "",
+ "tier": "A" | "B" | "C", "fit": 0-100,
+ "why": ["3 to 5 short factual reasons, each traceable to a result"],
+ "flags": ["conflicts such as backing HealthifyMe, Eka Care or Practo; conflicting figures; role changes"],
+ "angle": "health" | "consumer" | "ai" | "program" | "general",
+ "angleText": "one or two sentences: what the founders should lead with for this person",
+ "summary": "two sentences", "background": ["..."], "investing": ["company, stage, year, per source"], "signals": ["what this means for Cheeku"], "gaps": ["what the results do not confirm"],
+ "linkedin": "their LinkedIn URL only if it appears in the results, else empty",
+ "sources": [numbers of the results you relied on]}`;
+  let out;
+  try { out = await S.sample.json(prompt, { modelTier: 'default' }); }
+  catch (e) { say(e && e.code === 'not_granted' ? 'Research needs your permission for Claude. Allow it and try again.' : 'Could not write the profile. Try again.'); if (btn) btn.disabled = false; return; }
+  const clean = v => String(v ?? '').replace(/[—–]/g, ', ').slice(0, 600);
+  const arr = (v, n = 8) => (Array.isArray(v) ? v : []).map(clean).filter(Boolean).slice(0, n);
+  const now = Date.now();
+  if (!out || out.identified === false) {
+    await setInv(it.id, { research: { status: 'failed', at: now, error: clean(out && out.unclear_why) || 'Could not tell which person this is. Add their company or a LinkedIn link and try again.' } });
+    if (S.sheet === it.id) renderSheet(); return;
+  }
+  const used = (Array.isArray(out.sources) ? out.sources : []).map(n => results[Number(n) - 1]).filter(Boolean);
+  const sources = (used.length ? used : results.slice(0, 5)).map(r => ({ title: r.title.slice(0, 90), url: r.url }));
+  const li = String(out.linkedin || ''); const liOk = li && results.some(r => r.url.replace(/^https?:\/\/(www\.)?/, '') === li.replace(/^https?:\/\/(www\.)?/, ''));
+  const tier = ['A', 'B', 'C'].includes(out.tier) ? out.tier : (it.tier || 'U');
+  const patch = {
+    title: clean(out.title) || title, firm: clean(out.firm) || firm, tier, fit: Math.max(0, Math.min(100, Math.round(Number(out.fit) || 0))) || it.fit,
+    why: arr(out.why, 6), flags: arr(out.flags, 6), angle: ['health', 'consumer', 'ai', 'program', 'general'].includes(out.angle) ? out.angle : (it.angle || 'general'),
+    angleText: clean(out.angleText), memo: null,
+    research: { status: 'done', at: now, checkedAt: now, by: (S.me && S.me.id) || null, via: 'Parallel Search', summary: clean(out.summary), background: arr(out.background), investing: arr(out.investing), signals: arr(out.signals), gaps: arr(out.gaps), sources },
+  };
+  if (out.kind && ['Angel', 'VC', 'Angel network', 'Accelerator'].includes(out.kind)) patch.kind = out.kind;
+  if (out.city && !it.city) patch.city = clean(out.city);
+  if (liOk && !it.linkedin) patch.linkedin = li;
+  const ok = await patchDoc('investors/' + it.id, { ...patch, ...stamp() });
+  if (ok) { S.inv.set(it.id, { ...it, ...patch }); addTouch(it.id, { type: 'stage', body: `Researched from ${sources.length} public sources` }); toast('Research done'); }
+  if (S.sheet === it.id) renderSheet(); scheduleRender();
+}
+// Find new investors on demand: Parallel Search for sources, Claude for candidates, local check against everyone we already have.
+const FIRM_ALIAS = [['peakxv', 'sequoiaindia', 'sequoiacapitalindia', 'sequoiasurge', 'peakxvsurge'], ['elevation', 'elevationcapital', 'saif', 'saifpartners'], ['z47', 'matrix', 'matrixpartners', 'matrixpartnersindia'], ['chiratae', 'chirataeventures', 'idgventures', 'idgventuresindia'], ['indianangelnetwork', 'indiaangelnetwork', 'ian', 'iangroup']];
+const normName = n => String(n || '').toLowerCase().replace(/\(.*?\)/g, '').replace(/^(dr|mr|ms|mrs)\.?\s+/, '').replace(/[^a-z0-9]/g, '');
+const normFund = n => normName(n).replace(/(ventures?|venturepartners|capital|partners|fund|funds|vc|advisors|management|investments?|india|group|llp|limited|ltd)+$/g, '');
+function existingKeys() {
+  const keys = new Set();
+  const add = n => { const a = normName(n), b = normFund(n); if (a) keys.add(a); if (b && b.length > 3) keys.add(b); FIRM_ALIAS.forEach(g => { if (g.includes(a) || g.includes(b)) g.forEach(k => keys.add(k)); }); };
+  S.inv.forEach(i => add(i.name)); S.pool.forEach(r => add(r.name));
+  return keys;
+}
+const isExisting = (name, keys) => { const a = normName(name), b = normFund(name); return keys.has(a) || (b.length > 3 && keys.has(b)); };
+S.find = { busy: false, focus: '', count: 5, status: '', list: [] };
+function findPanel() {
+  const f = S.find, ready = S.mcp && S.sample && S.canEdit;
+  const cands = f.list.map((c, i) => c.added ? '' : `<div class="row" style="align-items:flex-start;cursor:default"><span class="tier ${c.tier}">${c.tier}</span><span class="grow"><b>${esc(c.name)}</b><span>${esc([c.kind, c.title, c.firm].filter(Boolean).join(' · '))}</span><span style="white-space:normal;color:var(--ink-2)">${esc((c.why || []).slice(0, 2).join(' · '))}</span>${(c.sources || []).length ? `<span>${c.sources.slice(0, 2).map(s => `<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.title.slice(0, 40) || 'source')}</a>`).join(' · ')}</span>` : ''}</span><span style="display:flex;gap:4px"><button class="btn primary" data-addfind="${i}" type="button">Add</button><button class="btn ghost" data-skipfind="${i}" type="button">Skip</button></span></div>`).join('');
+  const left = f.list.filter(c => !c.added).length;
+  return `<div class="panel" style="grid-column:1 / -1"><h3>Find new investors</h3>
+    <p>Searches the web for investors writing seed cheques in Indian health, wellness or consumer AI. Anyone already in the tracker or the long list is left out.</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <input class="inp" id="findFocus" style="flex:1;min-width:220px" placeholder="Optional focus: e.g. women's health angels, longevity funds, Bengaluru operators" value="${esc(f.focus)}" ${ready ? '' : 'disabled'}>
+      <select class="inp" id="findCount" style="width:auto" ${ready ? '' : 'disabled'}>${[3, 5, 8].map(n => `<option value="${n}" ${f.count === n ? 'selected' : ''}>${n} new</option>`).join('')}</select>
+      <button class="btn lime" id="findBtn" type="button" ${ready && !f.busy ? '' : 'disabled'}>${f.busy ? 'Searching…' : 'Find investors'}</button>
+      ${left > 1 ? `<button class="btn" id="findAddAll" type="button">Add all ${left}</button>` : ''}
+    </div>
+    ${!S.canEdit ? '<p>This view is read only.</p>' : !S.mcp ? '<p>Needs the Parallel Search connector: claude.ai Settings, Connectors. The nightly run still adds new investors without it.</p>' : ''}
+    ${f.status ? `<p class="gen-status">${f.busy ? '<span class="dot"></span>' : ''}${esc(f.status)}</p>` : ''}
+    ${cands}
+  </div>`;
+}
+async function findInvestors() {
+  const f = S.find; if (f.busy || !S.mcp || !S.sample) return;
+  f.focus = ($('findFocus') || {}).value || ''; f.count = Number(($('findCount') || {}).value) || 5;
+  f.busy = true; f.list = []; f.status = 'Searching the web…'; scheduleRender();
+  const focus = f.focus.trim();
+  let results = [];
+  try {
+    const runs = await Promise.all([
+      psSearch(`Angel investors and funds that led or joined pre-seed or seed rounds of Indian healthtech, wellness, longevity or digital health startups in 2025 or 2026${focus ? '. Focus: ' + focus : ''}`, [`India healthtech seed round 2026`, `healthtech pre-seed angel investors India`, focus ? `${focus} seed investors India` : `digital health seed funding India 2025`]),
+      psSearch(`Indian seed funds and operator angels backing consumer AI or health AI startups in 2025 or 2026${focus ? '. Focus: ' + focus : ''}`, [`consumer AI seed round India 2026`, `health AI startup seed funding India`, `operator angels India consumer health`]),
+    ]);
+    const seen = new Set(); results = runs.flat().filter(r => !seen.has(r.url) && seen.add(r.url)).slice(0, 16);
+  } catch (e) { f.busy = false; f.status = researchError(e).replace(' Queued for tonight instead.', ''); scheduleRender(); return; }
+  if (!results.length) { f.busy = false; f.status = 'No useful results came back. Try another focus.'; scheduleRender(); return; }
+  f.status = `Reading ${results.length} sources…`; scheduleRender();
+  const keys = existingKeys();
+  const have = [...S.inv.values()].map(i => i.name).slice(0, 600).join('; ');
+  const prompt = `You find investors for Cheeku AI's ₹26 crore seed round. Cheeku is India's daily health companion for families (family health memory, prescription checks, care booked in chat), pre-launch, Gurgaon.
+
+From ONLY the search results below, list up to ${f.count + 4} investors (people, funds, angel networks or accelerators) who show recent pre-seed or seed activity in Indian health, wellness, longevity, health AI or consumer AI. Each one must be named in a result as investing, not just mentioned. Skip founders who are raising, journalists, and anyone named in this list we already have: ${have}
+
+Search results (number, url, title, date, excerpt):
+${results.map((r, i) => `[${i + 1}] ${r.url}\n${r.title} ${r.date ? '(' + r.date + ')' : ''}\n${r.text}`).join('\n\n')}
+
+Tiers: A = health or wellness thesis or health deals at seed. B = active early-stage consumer or AI investor. C = weaker evidence.
+No em dashes or en dashes. Never invent deals, emails or links.
+
+Reply with JSON only: {"candidates": [{"name": "", "kind": "Angel" | "VC" | "Angel network" | "Accelerator", "title": "", "firm": "", "city": "", "tier": "A" | "B" | "C", "fit": 0-100, "why": ["2 to 4 short factual lines"], "angle": "health" | "consumer" | "ai" | "program" | "general", "angleText": "what to lead with", "role": "Lead or co-lead" | "Co-invest" | "Angel cheque" | "Programme and first cheque", "portfolio": "relevant deals, per source", "summary": "one sentence", "investing": ["deal, stage, year"], "gaps": ["what is unconfirmed"], "sources": [result numbers]}]}`;
+  let out;
+  try { out = await S.sample.json(prompt, { modelTier: 'default' }); }
+  catch (e) { f.busy = false; f.status = e && e.code === 'not_granted' ? 'Finding needs your permission for Claude. Allow it and try again.' : 'Could not read the results. Try again.'; scheduleRender(); return; }
+  const clean = v => String(v ?? '').replace(/[—–]/g, ', ').slice(0, 500);
+  const arr = (v, n = 6) => (Array.isArray(v) ? v : []).map(clean).filter(Boolean).slice(0, n);
+  const picked = new Set(); let dropped = 0;
+  f.list = (out && Array.isArray(out.candidates) ? out.candidates : []).filter(c => {
+    if (!c || !c.name) return false;
+    const k = normName(c.name);
+    if (isExisting(c.name, keys) || picked.has(k)) { dropped++; return false; }
+    picked.add(k); return true;
+  }).slice(0, f.count).map(c => ({
+    name: clean(c.name).slice(0, 80), kind: ['Angel', 'VC', 'Angel network', 'Accelerator'].includes(c.kind) ? c.kind : 'Angel', title: clean(c.title), firm: clean(c.firm), city: clean(c.city),
+    tier: ['A', 'B', 'C'].includes(c.tier) ? c.tier : 'C', fit: Math.max(0, Math.min(100, Math.round(Number(c.fit) || 40))), why: arr(c.why, 4),
+    angle: ['health', 'consumer', 'ai', 'program', 'general'].includes(c.angle) ? c.angle : 'general', angleText: clean(c.angleText),
+    role: clean(c.role) || 'Angel cheque', portfolio: clean(c.portfolio), summary: clean(c.summary), investing: arr(c.investing), gaps: arr(c.gaps),
+    sources: (Array.isArray(c.sources) ? c.sources : []).map(n => results[Number(n) - 1]).filter(Boolean).map(r => ({ title: r.title.slice(0, 90), url: r.url })),
+  })).filter(c => c.sources.length);
+  f.busy = false;
+  f.status = f.list.length ? `${f.list.length} new investor${f.list.length > 1 ? 's' : ''} found${dropped ? `, ${dropped} left out because they are already in the tracker` : ''}. Add the ones worth a look.` : `Nothing new this time${dropped ? ` (${dropped} were already in the tracker)` : ''}. Try a different focus.`;
+  scheduleRender();
+}
+async function addFound(i) {
+  const c = S.find.list[i]; if (!c || c.added) return;
+  if (isExisting(c.name, existingKeys())) { c.added = true; toast(`${c.name} is already in the tracker`); return scheduleRender(); }
+  const now = Date.now();
+  const id = 'nf-' + c.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 50) + '-' + now.toString(36).slice(-3);
+  const rec = { name: c.name, kind: c.kind, title: c.title, firm: c.firm, tier: c.tier, fit: c.fit, why: c.why, flags: [], angle: c.angle, angleText: c.angleText, role: c.role,
+    people: [], email: '', linkedin: '', twitter: '', website: '', city: c.city, portfolio: c.portfolio, about: '', stageFocus: 'Seed', hint: '',
+    sources: ['found in tracker'], stage: 'target', owner: '', intro: '', nextStep: 'Review: found with the Find button', nextDate: '', lastTouch: null, amount: null, notes: '',
+    research: { status: 'done', at: now, checkedAt: now, by: (S.me && S.me.id) || null, via: 'Parallel Search', summary: c.summary, background: [], investing: c.investing, signals: [], gaps: c.gaps, sources: c.sources },
+    createdAt: now, ...stamp() };
+  if (await writeDoc('investors/' + id, rec)) { S.inv.set(id, { id, ...rec }); c.added = true; toast(`${c.name} added to Target`); scheduleRender(); }
+}
+function memoHtml(m) { return `<div><b>Why yes</b><div>${esc(m.why_yes || '')}</div></div><div><b>Expect this objection</b><div>${esc(m.objection || '')}</div></div><div><b>Open with</b><div>${esc(m.opener || '')}</div></div>${m.lens ? `<div class="muted" style="font-size:11.5px">Strongest lens: ${esc(m.lens)}</div>` : ''}`; }
+function renderTimeline() {
+  const el = $('tl'); if (!el || !S.sheet) return;
+  const ts = touchesFor(S.sheet).filter(t => t.type !== 'draft');
+  el.innerHTML = ts.map(t => t.type === 'stage'
+    ? `<div class="ev stage">${ownerAv(t.sender, 'sm')} ${esc(t.body)} · ${fmtTime(t.at)}</div>`
+    : `<div class="ev" data-ev="${esc(t.id)}"><div class="ev-h">${ownerAv(t.sender, 'sm')}<b>${esc(labelOf(t.type))}</b>${t.channel ? '<span>on ' + esc(labelCh(t.channel)) + '</span>' : ''}<span>${fmtTime(t.at)}</span></div>${t.subject ? `<div style="font-weight:600">${esc(t.subject)}</div>` : ''}<p>${esc(t.body || '')}</p></div>`).join('')
+    || '<p class="muted" style="font-size:12.5px;margin:0">No touches yet. Generate a warm-up, send it from your own account, then log it here.</p>';
+}
+
+// --------------------------------------------------------------- generate --
+function investorBrief(it) {
+  return JSON.stringify({ name: it.name, type: it.kind, people: (it.people || []).map(p => p.name).filter(Boolean), city: it.city, fit_reasons: it.why, flags: it.flags,
+    role: it.title, firm_or_company: it.firm, who_this_is: it.hint,
+    research: it.research && it.research.status === 'done' ? { summary: it.research.summary, background: it.research.background, investing_record: it.research.investing, signals_for_cheeku: it.research.signals, unconfirmed: it.research.gaps } : undefined,
+    portfolio_as_listed: it.portfolio, about_as_listed: it.about, our_angle: it.angleText || ANGLES[it.angle], what_we_want_from_them: it.role, warm_intro_through: it.intro, notes: it.notes, stage: it.stage }, null, 1);
+}
+function historyBrief(id) {
+  return touchesFor(id).filter(t => t.type !== 'draft').slice(0, 6).map(t => `- ${new Date(t.at).toDateString()} · ${labelOf(t.type)}${t.channel ? ' on ' + labelCh(t.channel) : ''} by ${(S.team[t.sender] || {}).name || 'us'}: ${(t.subject ? t.subject + ' | ' : '') + (t.body || '').slice(0, 500)}`).join('\n') || '(nothing yet)';
+}
+const RULES = `Writing rules:
+- Sound like a founder writing by hand: plain Indian English, warm, direct, specific. Short sentences.
+- Never use an em dash or en dash. Use commas, full stops or "and".
+- No hype or filler: no "revolutionary", "game-changing", "excited to share", "I hope this finds you well", "leverage", "synergy", "disrupt".
+- Mention at most one specific thing about the investor, and only from their record. Never invent mutual friends, meetings, events, quotes or numbers.
+- Use only facts from our story. Rupee figures as written there.
+- One clear, low-effort ask at the end.`;
+const SHAPES = {
+  email: 'Email. First line exactly "Subject: <subject under 8 words>", then a blank line, then 90 to 150 words. Sign off with the sender\'s first name and "Cheeku AI".',
+  whatsapp: 'WhatsApp message. Under 80 words, no subject, no bullet points, no sign-off block. Can open with "Hi <first name>".',
+  linkedin: 'LinkedIn message. If this is a warm-up with no prior touch, a connection note under 280 characters. Otherwise a direct message under 110 words. No subject line.',
+};
+const JOBS = {
+  warmup: 'A warm-up. Do not ask for money or a meeting. Engage genuinely with something in their record, share one sharp insight from our story or the 2-minute demo link, and leave the door open.',
+  outreach: 'The first pitch. Why them in one line, what Cheeku is, the strongest proof (V1 built, care live in 12,000+ pincodes, the founders), the ₹26 crore seed, and ask for a 20-minute call. Include the demo link.',
+  intro: 'A note to the person who can introduce us to this investor (named in "warm_intro_through", or address them as "you" if blank). Short ask, then a 3 to 4 line blurb about Cheeku they can forward as is.',
+  followup: 'A follow-up. Refer to the last touch plainly (what and when), add one new piece of progress or value from our story, and make the next step easy. Shorter than the first message.',
+};
+async function generate() {
+  const it = S.inv.get(S.sheet); if (!it || !S.sample) return;
+  if (S.compose.busy) { S.compose.ctl && S.compose.ctl.abort(); return; }
+  const sender = S.team[S.compose.sender] || TEAM_DEFAULT.athar;
+  const prompt = `You draft investor messages for Cheeku AI's founders.
+
+Write as ${sender.name}, ${sender.role} of Cheeku AI, in first person.
+
+${JOBS[S.compose.action]}
+
+${SHAPES[S.compose.channel]}
+
+${RULES}
+
+Our story:
+${S.context || '(missing: ask the founders to fill "Our story")'}
+
+The investor (from our tracker; "as_listed" fields come from an old list and may be out of date):
+${investorBrief(it)}
+
+Conversation so far, newest first:
+${historyBrief(it.id)}
+
+${S.compose.extra ? 'Extra instruction from ' + sender.name.split(' ')[0] + ': ' + S.compose.extra + '\n' : ''}Output only the message itself.`;
+  const ctl = new AbortController(); S.compose.ctl = ctl; S.compose.busy = true; syncCompose();
+  const status = $('genStatus'); if (status) status.innerHTML = '<span class="dot"></span>Writing…';
+  try {
+    const res = await S.sample(prompt, { signal: ctl.signal, cache: false, modelTier: 'default', onText: ({ text }) => { applyDraft(text); } });
+    applyDraft(res.text); if ($('genStatus')) $('genStatus').textContent = 'Draft ready. Edit it, copy it, send it yourself, then log it.';
+  } catch (e) {
+    if (e && e.text) applyDraft(e.text);
+    const msg = e && e.code === 'cancelled' ? 'Stopped.' : e && e.code === 'not_granted' ? 'Drafting needs your permission for Claude. Allow it and try again.' : e && e.code === 'rate_limited' ? 'Too many drafts at once. Wait a minute.' : 'Could not write the draft. Try again.';
+    if ($('genStatus')) $('genStatus').textContent = msg;
+  }
+  S.compose.busy = false; S.compose.ctl = null; syncCompose();
+}
+function applyDraft(text) {
+  let body = text.replace(/[—–]/g, ', ').replace(/ ,/g, ',');
+  let subject = S.compose.subject || '';
+  const m = body.match(/^\s*Subject:\s*(.+)\n+/i);
+  if (m) { subject = m[1].trim(); body = body.slice(m[0].length); }
+  S.compose.text = body; S.compose.subject = subject;
+  const d = $('fDraft'); if (d) d.value = body;
+  const s = $('fSubject'); if (s && subject) s.value = subject;
+  refreshSendLink();
+}
+function refreshSendLink() { const it = S.inv.get(S.sheet); const old = $('openLink'); if (it && old) { const w = document.createElement('div'); w.innerHTML = sendLink(it); if (w.firstElementChild) old.replaceWith(w.firstElementChild); } }
+function syncCompose() { const b = $('genBtn'); if (b) b.textContent = S.compose.busy ? 'Stop' : 'Generate ' + (ACTIONS.find(a => a.id === S.compose.action) || {}).label.toLowerCase(); }
+async function writeMemo() {
+  const it = S.inv.get(S.sheet); if (!it || !S.sample) return;
+  const btn = $('memoBtn'); if (btn) { btn.disabled = true; btn.textContent = 'Reading through the lenses…'; }
+  const prompt = `You are on Cheeku AI's board, preparing the founders for one investor. Read the investor's record against our story through three lenses:
+- Offers lens: is the pain massive, can they believe it works, how fast is the result.
+- Monopoly lens: what small market Cheeku owns first, what is the secret, what stops a copycat.
+- Product lens: the one thing Cheeku must do brilliantly, the experience in the first five minutes.
+Use only what is written below. If the record is thin, say what to check instead of guessing. Never use em dashes.
+
+Our story:
+${S.context}
+
+Investor record:
+${investorBrief(it)}
+
+Reply as JSON only: {"why_yes": "2 sentences on why this investor would say yes", "objection": "the objection they are most likely to raise, and a one-line answer", "opener": "the first line of the first message, under 25 words", "lens": "Offers, Monopoly or Product: the lens that fits this investor best"}`;
+  try {
+    const memo = await S.sample.json(prompt, { modelTier: 'default' });
+    const clean = Object.fromEntries(Object.entries(memo || {}).map(([k, v]) => [k, String(v).replace(/[—–]/g, ', ').slice(0, 600)]));
+    await setInv(it.id, { memo: { ...clean, at: Date.now() } });
+    const box = $('memoBox'); if (box && S.sheet === it.id) renderSheet();
+  } catch (e) {
+    toast(e && e.code === 'not_granted' ? 'The memo needs your permission for Claude.' : 'Could not write the memo. Try again.');
+    if (btn) { btn.disabled = false; btn.textContent = 'Write fit memo'; }
+  }
+}
+async function logSent() {
+  const it = S.inv.get(S.sheet); if (!it) return;
+  const body = ($('fDraft') || {}).value || ''; if (!body.trim()) { toast('Write or generate a message first.'); return; }
+  const subject = ($('fSubject') || {}).value || '';
+  await addTouch(it.id, { type: S.compose.action, channel: S.compose.channel, subject, body, sender: S.compose.sender });
+  const nextStage = { warmup: 'warm', intro: 'intro', outreach: 'contacted', followup: null }[S.compose.action];
+  const patch = { lastTouch: Date.now(), nextStep: S.compose.action === 'intro' ? 'Check the intro went through' : 'Follow up if no reply', nextDate: addDays(S.compose.action === 'warmup' ? 7 : 5) };
+  if (!it.owner) patch.owner = S.compose.sender;
+  if (nextStage && STAGE_IDX[nextStage] > STAGE_IDX[it.stage || 'target'] && !['passed', 'later'].includes(it.stage)) { patch.stage = nextStage; }
+  await setInv(it.id, patch, patch.stage ? `Moved to ${ALL_STAGES.find(s => s.id === patch.stage).label}` : null);
+  S.compose.text = ''; S.compose.subject = ''; S.compose.action = 'followup';
+  toast('Logged. Follow-up set for ' + fmtDate(patch.nextDate)); renderSheet();
+}
+
+// ----------------------------------------------------------------- render --
+function render() {
+  const ae = document.activeElement;
+  if (S.view === 'grants' && ae && ae.dataset && ae.dataset.gfield && ae.tagName !== 'SELECT') { S.gDirty = true; return; } // don't redraw under someone typing
+  document.querySelectorAll('[data-view]').forEach(a => a.setAttribute('aria-current', a.dataset.view === S.view ? 'page' : 'false'));
+  $('meSel').value = S.meKey; $('addBtn').hidden = !S.canEdit;
+  renderFilters(); renderStrip();
+  const v = $('view');
+  const keepId = document.activeElement && ['poolQ', 'findFocus'].includes(document.activeElement.id) ? document.activeElement.id : null;
+  v.innerHTML = S.view === 'grants' ? renderGrants() : S.view === 'list' ? renderList() : S.view === 'today' ? renderToday() : S.view === 'longlist' ? renderLong() : S.view === 'context' ? renderContext() : renderPipeline();
+  if (keepId && $(keepId)) { const e = $(keepId); e.focus(); try { e.setSelectionRange(e.value.length, e.value.length); } catch (x) {} }
+  if (S.view === 'pipeline') wireDrag();
+}
+function wireDrag() {
+  if (!S.canEdit) return;
+  document.querySelectorAll('.card[draggable="true"]').forEach(c => {
+    c.addEventListener('dragstart', e => { e.dataTransfer.setData('text/plain', c.dataset.id); c.classList.add('dragging'); });
+    c.addEventListener('dragend', () => c.classList.remove('dragging'));
+  });
+  document.querySelectorAll('.col').forEach(col => {
+    col.addEventListener('dragover', e => { e.preventDefault(); col.classList.add('over'); });
+    col.addEventListener('dragleave', () => col.classList.remove('over'));
+    col.addEventListener('drop', e => { e.preventDefault(); col.classList.remove('over'); const id = e.dataTransfer.getData('text/plain'); if (id) moveStage(id, col.dataset.stage); });
+  });
+}
+
+// ----------------------------------------------------------------- events --
+document.addEventListener('click', e => {
+  const t = e.target.closest('button, a, tr[data-id], [data-act]'); if (!t) return;
+  const d = t.dataset;
+  if (d.act === 'close') return closeSheet();
+  if (d.act === 'add' || t.id === 'addBtn') return addInvestor();
+  if (d.kind) { S.kinds.has(d.kind) ? S.kinds.delete(d.kind) : S.kinds.add(d.kind); return scheduleRender(); }
+  if (d.tier) { S.tiers.has(d.tier) ? S.tiers.delete(d.tier) : S.tiers.add(d.tier); savePrefs(); return scheduleRender(); }
+  if (d.owner) { S.owner = d.owner; savePrefs(); return scheduleRender(); }
+  if (t.id === 'closedT') { S.showClosed = !S.showClosed; return scheduleRender(); }
+  if (d.more) { S.colLimit[d.more] = (S.colLimit[d.more] || 40) + 80; return scheduleRender(); }
+  if (d.jump) { if (S.view !== 'pipeline') location.hash = 'pipeline'; requestAnimationFrame(() => { const c = document.querySelector(`.col[data-stage="${d.jump}"]`); if (c) c.scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' }); }); return; }
+  if (d.sort) { S.sort = { key: d.sort, dir: S.sort.key === d.sort ? -S.sort.dir : (d.sort === 'name' || d.sort === 'city' ? 1 : -1) }; return scheduleRender(); }
+  if (d.gfit) { S.gFit = d.gfit; return scheduleRender(); }
+  if (t.id === 'findGrantsBtn') return findGrants();
+  if (d.pool) { S.poolStatus = d.pool; S.poolLimit = 150; return scheduleRender(); }
+  if (d.poolmore) { S.poolLimit += 200; return scheduleRender(); }
+  if (d.promote) return promote(d.promote);
+  if (t.id === 'findBtn') return findInvestors();
+  if (d.addfind) return addFound(Number(d.addfind));
+  if (d.skipfind) { const c = S.find.list[Number(d.skipfind)]; if (c) c.added = true; return scheduleRender(); }
+  if (t.id === 'findAddAll') { (async () => { for (let i = 0; i < S.find.list.length; i++) if (!S.find.list[i].added) await addFound(i); })(); return; }
+  if (t.id === 'ctxSave') { const text = $('ctxText').value; writeDoc('meta/context', { text, ...stamp() }).then(ok => ok && toast('Story saved. New drafts use it.')); return; }
+  if (S.sheet) {
+    const it = S.inv.get(S.sheet);
+    if (d.stage) return moveStage(it.id, d.stage).then(renderSheet);
+    if (d.ownerSet) return setInv(it.id, { owner: d.ownerSet }, `${(S.team[d.ownerSet] || {}).name || d.ownerSet} leads`).then(() => { S.compose.sender = d.ownerSet; renderSheet(); });
+    if (d.action) { S.compose.action = d.action; S.compose.extra = ($('fExtra') || {}).value || ''; S.compose.text = ($('fDraft') || {}).value || ''; return renderSheet(); }
+    if (d.channel) { S.compose.channel = d.channel; S.compose.extra = ($('fExtra') || {}).value || ''; S.compose.text = ($('fDraft') || {}).value || ''; return renderSheet(); }
+    if (t.id === 'genBtn') { S.compose.extra = ($('fExtra') || {}).value || ''; return generate(); }
+    if (t.id === 'saveNow') return saveNow();
+    if (t.id === 'memoBtn') return writeMemo();
+    if (t.id === 'researchBtn') return researchNow();
+    if (t.id === 'copyBtn') { const s = ($('fSubject') || {}).value; const b = $('fDraft').value; return copyText(S.compose.channel === 'email' && s ? `Subject: ${s}\n\n${b}` : b, $('fDraft')); }
+    if (d.copy) return copyText(d.copy);
+    if (t.id === 'sentBtn') return logSent();
+    if (t.id === 'logBtn') { const txt = $('logText').value.trim(); if (!txt) return; const type = $('logType').value;
+      addTouch(it.id, { type, body: txt }).then(() => setInv(it.id, { lastTouch: Date.now(), ...(type === 'meeting' && STAGE_IDX[it.stage] < STAGE_IDX.meeting ? { stage: 'meeting' } : {}) }, type === 'meeting' && STAGE_IDX[it.stage] < STAGE_IDX.meeting ? 'Moved to Meeting' : null)).then(() => { $('logText').value = ''; renderTimeline(); }); return; }
+    if (d.ev) { const ev = t.closest('.ev'); if (ev) ev.classList.toggle('open'); return; }
+  }
+  const row = t.closest('[data-id]'); if (row && row.dataset.id && !t.closest('.sheet')) { e.preventDefault(); openSheet(row.dataset.id); }
+});
+document.addEventListener('click', e => { const ev = e.target.closest('.ev[data-ev]'); if (ev && !e.target.closest('button,a')) ev.classList.toggle('open'); });
+document.addEventListener('focusout', e => { if (e.target.dataset && e.target.dataset.gfield && S.gDirty) { S.gDirty = false; setTimeout(scheduleRender, 50); } });
+document.addEventListener('change', e => {
+  if (e.target.dataset && e.target.dataset.gfield) return saveGrantField(e.target);
+  const it = S.sheet && S.inv.get(S.sheet);
+  if (e.target.id === 'meSel') { S.meKey = e.target.value; savePrefs(); return; }
+  if (!it) return;
+  if (FIELD_MAP[e.target.id]) return saveField(it.id, e.target);
+  if (e.target.id === 'fSender') { S.compose.sender = e.target.value; return; }
+});
+document.addEventListener('input', e => {
+  if (e.target.id === 'q') { S.q = e.target.value.trim().toLowerCase(); clearTimeout(window.__qt); window.__qt = setTimeout(scheduleRender, 120); }
+  if (e.target.dataset && e.target.dataset.gfield && e.target.tagName !== 'SELECT') { const el = e.target, k = el.closest('[data-gid]').dataset.gid + el.dataset.gfield; clearTimeout(gPending.get(k)); gPending.set(k, setTimeout(() => saveGrantField(el), 800)); return; }
+  if (e.target.id === 'findFocus') { S.find.focus = e.target.value; return; }
+  if (e.target.id === 'poolQ') { S.poolQ = e.target.value; S.poolLimit = 150; clearTimeout(window.__pq); window.__pq = setTimeout(scheduleRender, 150); }
+  if (e.target.id === 'fName' && $('shName')) $('shName').textContent = e.target.value.trim() || 'New investor';
+  if (FIELD_MAP[e.target.id] && S.sheet && S.canEdit) { const el = e.target, id = S.sheet; clearTimeout(pending.get(el.id)); saveState('Unsaved changes…'); pending.set(el.id, setTimeout(() => saveField(id, el), 800)); return; }
+  if (e.target.id === 'fDraft') { S.compose.text = e.target.value; refreshSendLink(); }
+  if (e.target.id === 'fSubject') { S.compose.subject = e.target.value; refreshSendLink(); }
+});
+document.addEventListener('keydown', e => { if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 's' && S.sheet) { e.preventDefault(); return saveNow(); } if (e.key === 'Escape' && S.sheet) closeSheet(); if (e.key === '/' && !/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) { e.preventDefault(); $('q').focus(); } });
+async function addInvestor() {
+  if (!S.canEdit) return toast('This view is read only.');
+  const name = (S.q && S.q.length > 2 ? S.q : '').replace(/\b\w/g, c => c.toUpperCase());
+  const id = 'inv-' + Date.now().toString(36);
+  const rec = { name, kind: 'Angel', tier: 'U', fit: null, why: ['Added by hand'], flags: [], angle: 'general', role: 'Angel cheque', people: [], email: '', linkedin: '', twitter: '', website: '', city: '', portfolio: '', about: '', stageFocus: '',
+    title: '', firm: '', hint: '', sources: ['added by hand'], stage: 'target', owner: S.meKey, intro: '', nextStep: '', nextDate: '', lastTouch: null, amount: null, notes: '', createdAt: Date.now(), ...stamp() };
+  S.inv.set(id, { id, ...rec, _draft: true }); openSheet(id);
+  const f = $('fName'); if (f) { f.focus(); f.select(); }
+  if (name) persistDraft(id);
+}
+
+// --------------------------------------------------------------- presence --
+function presence(patch) { S.presence = { ...(S.presence || {}), ...patch }; if (S.room) S.room.presence(S.presence).catch(() => {}); }
+async function profilesFor(ids) { ids = [...new Set(ids.filter(Boolean))]; if (!ids.length || !S.user) return {}; try { const ps = await S.user.profiles(ids); Object.assign(S.profiles, ps); return ps; } catch (e) { return {}; } }
+function renderPeers() { const u = []; const seen = new Set(); S.peers.forEach(p => { if (p.by && !seen.has(p.by)) { seen.add(p.by); u.push(p); } }); $('peers').innerHTML = u.slice(0, 4).map(p => face(p.by)).join(''); }
+
+// ------------------------------------------------------------------ route --
+function route() { const h = (location.hash || '').slice(1); S.view = ['pipeline', 'list', 'today', 'grants', 'longlist', 'context'].includes(h) ? h : 'pipeline'; render(); }
+window.addEventListener('hashchange', route);
+route();
+(async () => {
+  const c = window.claude; if (!c || !c.use) { setSync(); return; }
+  const [db, user] = await Promise.all([c.use('db'), c.use('user')]);
+  S.db = db; S.user = user;
+  if (user) { try { S.me = await user.me(); S.canEdit = !!S.me.canEdit; const n = (S.me.name || '').toLowerCase(); let had = null; try { had = localStorage.getItem('cheeku-rt-prefs'); } catch (e) {} if (!had) { if (n.includes('deepesh')) S.meKey = 'deepesh'; else if (n.includes('athar')) S.meKey = 'athar'; } } catch (e) {} }
+  setSync(); if (db) subscribe(); render();
+  c.use('sample').then(s => { S.sample = s; if (S.sheet) renderSheet(); });
+  c.use('mcp').then(m => { S.mcp = m; if (S.sheet) renderSheet(); });
+  c.use('room').then(room => { S.room = room; if (!room) return; presence({}); room.onPeers(ch => { S.peers = ch.peers || []; profilesFor(S.peers.map(p => p.by)).then(() => { renderPeers(); if (S.view === 'pipeline') scheduleRender(); }); }, () => {}); });
+})();
+</script>

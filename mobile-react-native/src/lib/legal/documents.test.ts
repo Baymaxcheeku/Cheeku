@@ -36,9 +36,19 @@ describe("legal documents", () => {
     expect(doc.effectiveOn).toBe(doc.version);
   });
 
-  it("every document the sign-up box agrees to is material", () => {
-    for (const k of CONSENTED_KINDS) expect(LEGAL_DOCUMENTS[k].material).toBe(true);
+  it("every document the sign-up box agrees to has a material version in force", () => {
+    // A later non-material version (a contact address) is fine, but the
+    // consent gate needs at least one material row per kind to compare with.
+    for (const k of CONSENTED_KINDS) expect(sql).toMatch(new RegExp(`\\('${k}',\\s*'\\d{4}-\\d{2}-\\d{2}',\\s*'\\d{4}-\\d{2}-\\d{2}',\\s*true,`));
     expect(Object.keys(consentedVersions()).sort()).toEqual([...CONSENTED_KINDS].sort());
+  });
+
+  it("a non-material version is published as non-material, so nobody is asked again", () => {
+    for (const k of LEGAL_ORDER) {
+      const doc = LEGAL_DOCUMENTS[k];
+      const row = new RegExp(`\\('${k}',\\s*'${doc.version}',\\s*'${doc.effectiveOn}',\\s*${doc.material},`);
+      expect(sql, `${k} ${doc.version} should be published with material = ${doc.material}`).toMatch(row);
+    }
   });
 
   it("the consent notice itemises every purpose, required and optional", () => {

@@ -1,7 +1,8 @@
 # Execution plan — React Native app
 
-The native build of the app that used to live in the repo root as a Next.js web
-app. Since 2026-10-31 everything (docs, design, supabase, tests) lives in this folder.
+The native build of the app that lives in the repo root as a Next.js web app.
+Since 2026-10-31 everything else (docs, design, supabase, tests, founder-ops,
+marketing) lives in this folder.
 
 **THE WEB APP IS NO LONGER A TARGET.** Decided 2026-08-09: Baymax ships
 exclusively as a mobile app on the App Store and Play Store. The Next.js build
@@ -244,6 +245,31 @@ in a shell. See `SHIPPING.md`.
    changes a dose, only reminds. The server side (migration 0038,
    `run_care_sweep`) only ever writes inbox rows; push-dispatch decides what
    buzzes, and a row with `data.quiet` never does.
+10. Fitness matching runs on the phone (`src/lib/fitness/match.ts`); the
+   network sees a place and a day, never a condition. Screens talk only to
+   `fitnessNetwork()`; the partner API replaces the preview network there.
+   The price on screen is `priceFor()`, and the server prices again from
+   `app_config.fitness_pricing` (migration 0039), so a client never names
+   one. The place comes from `src/lib/location` like everywhere else.
+11. Location has one source of truth: `src/lib/location` (`useNearbyPlace`
+   for a member, `useLiveLocation` in the shell). No screen calls
+   expo-location or a maps provider itself; addresses come from the `geo`
+   Edge Function (Ola Maps, then OpenStreetMap), which holds the only key.
+   The system prompt only ever follows a tap on our own card. Never read
+   location in the background.
+
+12. **Nothing from a scan is filed before the person sees it.** Scan uploads
+   the file and reads it, then shows Check and save: only what the reader
+   was unsure of (confidence under 0.7) is asked about, with an edit box
+   and "Looks right". Save writes the record; Discard deletes the stored
+   file. Anything left unchecked is filed as needs_review ("Waiting for a
+   check"), never as filed. A shared file waits in memory, never on disk,
+   until whose it is has been answered.
+
+13. **A privacy request is answered through `answer_privacy_request`, never
+   by editing the row.** It checks the status, needs a reply before closing
+   and tells the person in their inbox. The notification never repeats what
+   they wrote, and neither does the alert email.
 
 ## Running it
 
@@ -282,28 +308,75 @@ haptics has to be seen on a simulator or a device before it counts as done.
 
 - **The RLS audit is stale** (2026-10-31). Everything that lived at the repo
   root now lives in this folder, and `tests/db` runs with `npm run test:db`.
-  `rls.test.ts` fails 18 checks, the same 18 it failed before the move: tables
-  added since (app_config, app_flags, lab_*, memory_facts, open_loops,
-  pregnancies, today_actions and others) use public-read or write-free
+  `rls.test.ts` fails 22 checks, as does the web app's identical copy in
+  `src/lib/db/`: tables added since (app_config, app_flags, geo_cache,
+  geo_quota, lab_*, memory_facts, open_loops, pregnancies, today_actions and
+  others) use public-read or write-free
   policies it does not know about. Each needs a deliberate allow-list entry or
   a policy fix; it is kept out of `npx vitest run` until then.
-- **Vercel `cheeku-ai`** built the repo root, which is now empty. Delete that
-  project or point it at `mobile-react-native`; `cheeku-ai-mobile` is unaffected.
-- **Family care needs its database steps and a phone check** (loop-caregiver,
-  2026-10-25). Until `supabase/manual/0038-step-1..3` are run, no caregiver
-  alert or server nudge exists: step 1 is the migration, step 2 schedules the
-  sweep (enable pg_cron first), step 3 is the push webhook (with
-  PUSH_WEBHOOK_SECRET set and push-dispatch redeployed). Then check on a
-  phone: Family care cards, an alert 90 minutes after a member's unticked
-  slot, tapping it opens Family care without switching member.
+- **Prescription scorecard needs 0042 and the rx-score function** (2026-10-31).
+  Every prescription page now opens with a check of each medicine, read to
+  its salts, on ten standards against the person's records
+  (`app/prescription/[id].tsx`). Until migration 0042 runs the card is
+  scored every time and not kept; until `rx-score` is deployed the phone
+  scores it with the same rules (`src/lib/rx/engine.ts`, an exact copy of
+  `supabase/functions/rx-score/rx.ts`, kept in step by a test). The
+  formulary is a starter list of about 50 salts and 70 brands and is not
+  clinically signed off; brands outside it show as "couldn't check". Prices
+  are indicative. The licensed brand-to-salt resolver (ai-brand-salt)
+  replaces the list. Seen only in the web preview against a local stand-in
+  database; untested on a phone.
+- **Privacy requests are answered from the SQL editor** (2026-10-27).
+  Migration 0041 adds `privacy_queue` and `answer_privacy_request`; the
+  weekly routine is in `docs/privacy/requests.md`. The email to
+  privacy@cheekuai.in needs the `privacy-alert` function, its webhook and a
+  Resend key with cheekuai.in verified; until then nobody is told when a
+  request arrives, so check the queue weekly. The legal entity, address and
+  courts are still placeholders until incorporation, and a lawyer has not
+  read the texts (`docs/privacy/dpdp-readiness.md`).
+- **Share to Cheeku needs a new build** (2026-10-26). `expo-share-intent`
+  adds an iOS share extension and Android intent filters (PDF and images),
+  so Expo Go and the current dev build will not show Cheeku AI in the share
+  sheet: run `npx expo prebuild --clean` then a new dev build, or
+  `eas build`. On iOS the extension is a second target with its own
+  bundle id and an App Group; let EAS create their credentials on the
+  first build (see the expo-share-intent README). Untested on a phone.
+- **On web, picking a file in Scan says it could not be read.**
+  `expo-file-system`'s `File` cannot open a browser blob URL. This was true
+  before the share work too; the phone is the real path. Fix with a web
+  branch in `prepareUpload` when web upload matters.
+- **Location is live on production** (2026-10-26): 0040 applied and checked,
+  the `geo` function deployed, `OLA_MAPS_API_KEY` set (Ola Maps credential
+  `cheeku-geo-server`). Watch usage in the Ola console against the free
+  allowance. To redeploy from the dashboard, paste
+  `supabase/manual/0040-geo-function-paste.ts`.
+- **Everyone re-agrees once** to the privacy policy of 2026-10-25, which now
+  mentions location (material change).
+- **Fitness runs on sample studios.** Everything from location to check-in
+  works against the preview network (marked "Sample", nothing charged) until
+  the partner's master API arrives (`int-fitness`). Migration 0039 is live
+  on production (2026-10-25, check all yes). `expo-location` is a new
+  native module: the phone needs a new dev build or `eas build`.
+- **Doctors and labs are not sorted by real distance yet.** Their sample
+  data has no coordinates; the chip shows the person's real place and the
+  ranking arrives with each partner's API (`int-doctors`, `int-lab-partner`)
+  through `distanceKm` in `src/lib/location/rules.ts`.
+- **Phones buzz only with push credentials.** Migration 0038, the care-sweep
+  cron job and the push webhook are live on production (2026-10-25). A
+  server notification reaches a phone once the app build has an EAS project
+  id and APNs/FCM keys; until then it lands in the in-app inbox.
 - **Caregiver alerts go to every phone on the account**, the parent's own
   included when they use the same login. A "this phone is Papa's" setting
   would let push-dispatch skip theirs; not built.
 
 
-- **Rename.** "Baymax" is Disney's character and blocks store submission. It is
-  currently the Expo `name`, `slug`, `scheme` and both bundle identifiers.
-  Change before creating any store account.
+- **Renamed, needs a new build** (2026-10-31). The bundle id and Android
+  package are `in.cheekuai.app`, the slug `cheeku-ai` and the URL scheme
+  `cheekuai` (was `com.baymax.app`, `baymax`). An installed dev build keeps
+  the old id: run `npx expo prebuild --clean` and make a new dev build or
+  `eas build`. Create store listings, OAuth client ids and EAS credentials
+  against `in.cheekuai.app` only; the share extension and its App Group
+  follow the new id. Untested on a phone.
 - **The product checker is a mock.** `askAboutProduct` answers from five
   scenarios in `src/lib/ai/mock/scenarios.ts`, not a real ingredient lookup.
   The About page describes the capability without claiming "scan anything", but
@@ -353,7 +426,7 @@ haptics has to be seen on a simulator or a device before it counts as done.
   retention) should say so when a lawyer next reads it, which means a new
   document version.
 - **Web hosting is on Vercel Hobby, which is for non-commercial use only.**
-  Before launch, move `cheeku-ai-mobile` (and `cheeku-ai`) to Vercel Pro or
+  Before launch, move `cheeku-ai-mobile` to Vercel Pro or
   to Cloudflare Pages (free plan allows commercial use; verify current terms).
   Supabase is on the free plan too, which pauses a project after a week
   without traffic: move production to Pro before real users depend on it.

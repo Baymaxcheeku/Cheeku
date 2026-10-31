@@ -68,6 +68,8 @@ Milestone `V2` holds ideas saved for after launch. The page shows them in their 
 | `int-doctors` | Archit | P0 | M3 | Real doctor consults and video |
 | `int-server-bookings` | Archit | P0 | M2 | Move appointments and service requests to the server |
 | `int-services` | Archit | P1 | M3 | Services marketplace provider |
+| `int-ola-maps` | Athar | P1 | M3 | Ola Maps API key and integration |
+| `int-fitness` | Archit | P0 | M3 | Fitness partner master API: studios, sessions, booking, check-in, payouts |
 | `int-share-target` | Athar | P0 | M2 | WhatsApp and Files share-sheet target into Scan |
 | `int-wearables` | Athar | P1 | M3 | Apple Health and Health Connect |
 | `int-messaging` | Archit | P2 | M3 | WhatsApp and SMS for confirmations and caregiver alerts |
@@ -76,6 +78,8 @@ Milestone `V2` holds ideas saved for after launch. The page shows them in their 
 | `loop-notifs` | Archit | P0 | M2 | Six new notification kinds |
 | `loop-cron` | Archit | P0 | M2 | Scheduled jobs for the daily loop |
 | `loop-caregiver` | Athar | P0 | M3 | Caregiver view and parent alerts |
+| `loop-fitness` | Athar | P0 | M3 | Fitness classes: discover, match, book, remind |
+| `loc-live` | Athar | P0 | M3 | Live location, saved per member, nearby across services |
 | `loop-scan-ux` | Athar | P0 | M2 | Scan: Report or Prescription, whose is it, confirm step |
 | `loop-reading-v2` | Athar | P0 | M3 | Report reading v2 and prescription scorecard screens |
 | `loop-chat-chips` | Athar | P1 | M3 | Chat: context chips and one next-step chip |

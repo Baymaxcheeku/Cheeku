@@ -268,6 +268,10 @@ export default function Ask() {
       router.push("/services/medicines" as never);
       return;
     }
+    if (b.service === "fitness") {
+      router.push({ pathname: "/fitness", params: b.activity ? { activity: b.activity } : {} });
+      return;
+    }
     if (b.service === "care" && b.careId) {
       router.push(`/services/${b.careId}` as never);
       return;

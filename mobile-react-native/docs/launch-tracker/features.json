@@ -102,9 +102,9 @@
   "id": "upload",
   "group": "records",
   "title": "Scan and upload",
-  "what": "Camera, photos or a PDF, whose report it is, and a type picker; files go to private storage with EXIF stripped. The reader behind it is still a stand-in.",
+  "what": "Report or Prescription, whose it is, then camera, photos, a PDF or a file shared from WhatsApp. Check and save asks only about values the reader was unsure of; nothing is filed before that. The reader behind it is still a stand-in.",
   "state": "standin",
-  "where": "app/scan.tsx, src/lib/upload",
+  "where": "app/scan.tsx, src/components/scan, src/lib/scan, src/lib/records/upload.ts",
   "shipped": "2026-09-30",
   "owner": "athar",
   "next": [
@@ -292,18 +292,28 @@
   "order": 18.6
  },
  {
+  "id": "care",
+  "group": "loop",
+  "title": "Family care",
+  "what": "A card per family member with today's doses, the week, latest BP and sugar and what needs you, plus alerts when a parent's doses go unticked, a strip runs low or a test is overdue.",
+  "state": "live",
+  "where": "app/care.tsx, src/lib/care, migration 0038",
+  "shipped": "2026-10-25",
+  "owner": "athar",
+  "next": [],
+  "order": 18.8
+ },
+ {
   "id": "notifs",
   "group": "loop",
   "title": "Notifications",
-  "what": "An inbox with live updates, categories and read state, settings per kind, and phone reminders for appointments, lab visits, records, doses, refills and the day's nudges. The server push sender is written but not switched on.",
-  "state": "partial",
+  "what": "An inbox with live updates, categories and read state, settings per kind, phone reminders for appointments, lab visits, records, doses, refills and the day's nudges, and server-side nudges and caregiver alerts every 15 minutes. The push sender is wired; phones buzz once the app build has push credentials.",
+  "state": "live",
   "where": "app/notifications.tsx, src/lib/notifications, supabase/functions/push-dispatch",
   "shipped": "2026-10-03",
   "owner": "archit",
   "next": [
-   "loop-nudges",
-   "ops-push-webhook",
-   "loop-notifs"
+   "loop-cron"
   ],
   "order": 19
  },
@@ -366,6 +376,35 @@
    "int-services"
   ],
   "order": 23
+ },
+ {
+  "id": "fitness",
+  "group": "care",
+  "title": "Fitness classes",
+  "what": "Book one class at a gym or studio near you, matched to the person's profile (weight, sugar, BP, knees, age, pregnancy) on the phone. Location with our own explainer or a city pick, search and chips, studio pages with a week of classes, a booking sheet for any family member, a ticket with a check-in code, cancel, inbox rows, reminders and a chat card. It replaced health insurance on Home; insurance moves to Coming soon. Runs on sample studios until the partner's API is connected.",
+  "state": "standin",
+  "where": "app/fitness, src/lib/fitness, src/components/fitness, migration 0039",
+  "shipped": "2026-10-25",
+  "owner": "athar",
+  "next": [
+   "loop-fitness",
+   "int-fitness"
+  ],
+  "order": 23.5
+ },
+ {
+  "id": "location",
+  "group": "care",
+  "title": "Location and nearby",
+  "what": "Where the phone is, live while the app is open, and where each family member lives, saved to the account (latest place only). Addresses from our own geo function (Ola Maps, then OpenStreetMap) with a 30-day cache and a daily cap. A Home primer asks once; a chip on Home, Fitness, Labs, Doctors and Services shows and changes the place; Profile shows it with its age; lab and service addresses fill from it.",
+  "state": "live",
+  "where": "src/lib/location, src/components/location, app/settings/location.tsx, supabase/functions/geo, migration 0040",
+  "shipped": "2026-10-25",
+  "owner": "athar",
+  "next": [
+   "loc-live"
+  ],
+  "order": 23.6
  },
  {
   "id": "billing",
@@ -516,5 +555,22 @@
   "owner": "athar",
   "next": [],
   "order": 34
+ },
+ {
+  "id": "rxscore",
+  "group": "records",
+  "title": "Prescription scorecard",
+  "what": "Every medicine on a prescription read to its salts and checked on ten standards against the person's records, with questions for the doctor and same-salt prices.",
+  "state": "standin",
+  "where": "app/prescription/[id].tsx, supabase/functions/rx-score",
+  "shipped": null,
+  "owner": "athar",
+  "next": [
+   "loop-reading-v2",
+   "ai-rx-score",
+   "ai-brand-salt",
+   "ai-clinical-signoff"
+  ],
+  "order": 9.5
  }
 ]

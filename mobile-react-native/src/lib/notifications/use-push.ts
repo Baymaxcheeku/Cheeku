@@ -4,11 +4,12 @@ import { useEffect } from "react";
 import { Platform } from "react-native";
 
 import { startsAt, useAppointmentList } from "@/lib/booking/appointments";
+import { useFitnessBookings } from "@/lib/fitness/queries";
 import { fastingFor } from "@/lib/labs/logic";
 import { useCatalog, useLabBookings } from "@/lib/labs/queries";
 import { DEFAULT_PREFS, ownFamily } from "@/lib/settings/queries";
 
-import { configureNotifications, registerThisDevice, syncAppointmentReminders, syncLabReminders } from "./push";
+import { configureNotifications, registerThisDevice, syncAppointmentReminders, syncFitnessReminders, syncLabReminders } from "./push";
 import type { InboxItem } from "./types";
 import { INBOX_KEY, useOpenNotification } from "./use-inbox";
 
@@ -32,6 +33,15 @@ export function usePushSetup() {
   // Also keeps lab statuses moving: reading bookings runs the sync.
   const labs = useLabBookings();
   const catalog = useCatalog();
+  const fitness = useFitnessBookings(native);
+
+  useEffect(() => {
+    if (!fitness.data) return;
+    void syncFitnessReminders(
+      fitness.data.map((b) => ({ id: b.id, start: new Date(b.startsAt), durationMin: b.durationMin, studio: b.studioName, code: b.checkinCode, open: b.status === "booked" })),
+      remindersOn,
+    );
+  }, [fitness.data, remindersOn]);
 
   useEffect(() => {
     if (!labs.data || !catalog.data) return;

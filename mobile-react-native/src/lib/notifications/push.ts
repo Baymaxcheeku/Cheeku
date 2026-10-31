@@ -113,7 +113,7 @@ export async function forgetThisDevice(): Promise<void> {
     await cancelAppointmentReminders();
     // Nobody else's doses or nudges stay on a phone after sign-out.
     const scheduled = await Notifications.getAllScheduledNotificationsAsync();
-    await Promise.all(scheduled.filter((n) => /^(eng|goal|lab)-/.test(n.identifier)).map((n) => Notifications.cancelScheduledNotificationAsync(n.identifier)));
+    await Promise.all(scheduled.filter((n) => /^(eng|goal|lab|fit)-/.test(n.identifier)).map((n) => Notifications.cancelScheduledNotificationAsync(n.identifier)));
   } catch {
     // Signing out must never fail because of this.
   }
@@ -210,6 +210,44 @@ export async function syncLabReminders(visits: LabVisit[], enabled: boolean): Pr
     }
   } catch {
     // As with appointments: the tracker still shows the time.
+  }
+}
+
+// -------------------------------------------------------- fitness reminders --
+
+type FitClass = { id: string; start: Date; durationMin: number; studio: string; code: string; open: boolean };
+
+/**
+ * Two phone reminders per booked class: an hour before, with the studio and
+ * the check-in code, and half an hour after it ends, to book the next one.
+ * Same full-resync rule as labs. The activity is never on the lock screen:
+ * "Prenatal yoga" would say more than a reminder should.
+ */
+export async function syncFitnessReminders(classes: FitClass[], enabled: boolean): Promise<void> {
+  if (!native) return;
+  try {
+    const scheduled = await Notifications.getAllScheduledNotificationsAsync();
+    await Promise.all(scheduled.filter((n) => n.identifier.startsWith("fit-")).map((n) => Notifications.cancelScheduledNotificationAsync(n.identifier)));
+    if (!enabled || (await pushPermission()) !== "granted") return;
+    const now = Date.now();
+    for (const c of classes) {
+      if (!c.open) continue;
+      const end = c.start.getTime() + c.durationMin * 60_000;
+      const plan = [
+        { id: `fit-${c.id}-soon`, at: new Date(c.start.getTime() - 60 * 60_000), title: "Your class starts in an hour", body: `${c.studio.slice(0, 40)}. Show code ${c.code} at the desk.`, url: `/fitness/booking/${c.id}` },
+        { id: `fit-${c.id}-after`, at: new Date(end + 30 * 60_000), title: "How was today's class?", body: "Book the next one while it's fresh.", url: "/fitness" },
+      ];
+      for (const r of plan) {
+        if (r.at.getTime() <= now + 60_000) continue;
+        await Notifications.scheduleNotificationAsync({
+          identifier: r.id,
+          content: { title: r.title, body: r.body, sound: "default", data: { url: r.url } },
+          trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: r.at, channelId: "appointments" },
+        });
+      }
+    }
+  } catch {
+    // The booking page still shows the time and the code.
   }
 }
 

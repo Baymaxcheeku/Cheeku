@@ -68,6 +68,37 @@ describe("notification copy follows the content system", () => {
     expect(pairs.length).toBeGreaterThanOrEqual(8);
   });
 
+  it("keeps the fitness booking words short and calm (0039)", () => {
+    const fit = readFileSync(resolve(__dirname, "../../../supabase/migrations/0039_fitness.sql"), "utf8");
+    const words = [...fit.matchAll(/perform notify_user\(([\s\S]*?)\);/g)].flatMap((m) => [...(m[1] ?? "").matchAll(/'((?:[^']|'')*)'/g)].map((x) => (x[1] ?? "").replace(/''/g, "'")));
+    expect(words.length).toBeGreaterThan(6);
+    for (const w of words) clean("fitness notification", w);
+    // The longest activity and a 10-letter name still fit.
+    within("fitness title", "Your prenatal yoga class is booked", LIMIT.notifyTitle);
+    within("fitness title", "Class booked for Abcdefghij", LIMIT.notifyTitle);
+    within("fitness title", "Prenatal yoga class cancelled", LIMIT.notifyTitle);
+    within("fitness body", `Prenatal yoga, Wed 28 Oct, 12:30 pm at ${"S".repeat(28)}. Code ABCDEF.`, LIMIT.notifyBody);
+    within("fitness body", `Wed 28 Oct, 12:30 pm at ${"S".repeat(28)}. Show code ABCDEF at the desk.`, LIMIT.notifyBody);
+  });
+
+  it("keeps the privacy request words short, calm and free of what was asked (0041)", () => {
+    const priv = readFileSync(resolve(__dirname, "../../../supabase/migrations/0041_privacy_requests_handling.sql"), "utf8");
+    const titles = [...priv.matchAll(/v_title := '((?:[^']|'')*)'/g)].map((m) => (m[1] ?? "").replace(/''/g, "'"));
+    const bodies = [...priv.matchAll(/v_body := ([^;]*);/g)].map((m) => [...(m[1] ?? "").matchAll(/'((?:[^']|'')*)'/g)].map((x) => (x[1] ?? "").replace(/''/g, "'")).join("30 Jan"));
+    expect(titles).toHaveLength(3);
+    expect(bodies).toHaveLength(3);
+    for (const t of titles) {
+      within(`privacy title "${t}"`, t, LIMIT.notifyTitle);
+      clean("privacy notification", t);
+    }
+    for (const b of bodies) {
+      within(`privacy body "${b}"`, b, LIMIT.notifyBody);
+      clean("privacy notification", b);
+    }
+    // The person's own words never go into a notification.
+    expect(priv).not.toMatch(/v_body := [^;]*details/);
+  });
+
   it("keeps the fixed words short and calm", () => {
     // A case expression holds one variant per branch: check each on its own.
     // Anything else is one string built from pieces: check the pieces joined.

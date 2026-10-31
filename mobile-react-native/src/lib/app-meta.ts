@@ -8,7 +8,7 @@
  */
 export const APP_VERSION = "0.7 · V1 build";
 
-export const SUPPORT_EMAIL = "support@baymax.health";
+export const SUPPORT_EMAIL = "support@cheekuai.in";
 
 /** How long support currently takes to answer, stated in one place. */
 export const SUPPORT_RESPONSE = "24–48 hours";

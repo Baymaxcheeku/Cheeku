@@ -6,8 +6,11 @@ import { onShelf, routeFor, searchServices, serviceById, SERVICES } from "./cata
 import { newReference, windowsFor } from "./provider";
 
 describe("services catalogue", () => {
-  it("puts health insurance fourth on the core shelf", () => {
-    expect(onShelf("core").map((s) => s.id)).toEqual(["doctors", "labs", "medicines", "insurance"]);
+  it("puts fitness fourth on the core shelf, and keeps insurance for later", () => {
+    expect(onShelf("core").map((s) => s.id)).toEqual(["doctors", "labs", "medicines", "fitness"]);
+    expect(serviceById("insurance")).toMatchObject({ shelf: "soon", status: "soon" });
+    const fitness = serviceById("fitness");
+    expect(fitness && routeFor(fitness)).toBe("/fitness");
   });
 
   it("keeps doctors as one segment: no specialty has its own tile", () => {

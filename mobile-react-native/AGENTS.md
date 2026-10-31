@@ -25,10 +25,11 @@ insight, quota expiry — and passes with **no Supabase environment at all**
 (verified with the env vars explicitly unset). A failing test here is a real
 failure, not a missing key.
 
-Everything lives in this folder: the app, `supabase/` (migrations, SQL-editor
-steps, Edge Functions), `docs/`, `design/` and `tests/db/`. The database tests
-run separately with `npm run test:db`; the RLS audit there has 18 known
-failures (policies added after it was last updated), recorded in `PLAN.md`.
+Everything but the reference Next.js app lives in this folder: the app,
+`supabase/` (migrations, SQL-editor steps, Edge Functions), `docs/`, `design/`,
+`tests/db/`, and the founders' `founder-ops/` and `marketing/` (never app code;
+excluded from tsc, Metro and lint). The database tests run separately with
+`npm run test:db`; the RLS audit there has 22 known failures (policies added after it was last updated), recorded in `PLAN.md`.
 The package uses **npm** and its own `package-lock.json`.
 
 ## What a cloud session CANNOT do, at all
@@ -90,10 +91,17 @@ the latest notification migration; extend it when you add a new kind of copy.
 
 # How a merge reaches people
 
-- **Web (Vercel).** `cheeku-ai-mobile` builds `mobile-react-native`, the Expo web
-  export. (The `cheeku-ai` project built the repo root, which is now empty.)
-  Every push to a branch makes a **Preview**; a push to `main` makes
-  **Production** (`cheeku-ai-mobile.vercel.app`). Nothing else is needed.
+- **Web (Vercel).** Only `cheeku-ai-mobile` deploys: it builds
+  `mobile-react-native` (the Expo web export). Every push to a branch makes a
+  **Preview**; a push to `main` makes **Production**
+  (`cheeku-ai-mobile.vercel.app`). Nothing else is needed.
+- **The Next.js web app does not deploy any more.** Switch the `cheeku-ai`
+  project off in the Vercel dashboard (its Settings, Git: disconnect the
+  repository, or set Ignored Build Step to "Don't build anything"). **Never
+  add a `vercel.json` at the repo root to do it:** `cheeku-ai-mobile` reads
+  the root file too, and a `git.deploymentEnabled: false` there stopped
+  every mobile Preview and Production build (2026-10-31, commits e58c00c to
+  303ab27, fixed by removing the file).
 - **Vercel builds a commit once.** If the same commit lands on a branch and on
   `main` at once, the branch can win and `main` gets no Production build. So
   after a PR is merged, do NOT push the working branch at `main`'s merge commit

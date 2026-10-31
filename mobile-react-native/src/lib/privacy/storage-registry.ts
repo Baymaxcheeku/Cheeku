@@ -99,6 +99,25 @@ export const STORAGE_REGISTRY: readonly StoredItem[] = [
     lasts: "Until you sign out",
   },
   {
+    key: "cheeku.location",
+    label: "Your last known place",
+    why: "Shows nearby doctors, labs and classes at once on the next open, and whether to keep it up to date. The same place is saved to your account; Profile, Location wipes both.",
+    where: "keychain",
+    contains: "personal",
+    scope: "account",
+    lasts: "Until you change it, forget it or sign out",
+  },
+  {
+    key: "cheeku.locationPrimer",
+    label: "When we last asked about location",
+    why: "So the location card on Home asks at most once a week.",
+    where: "app-storage",
+    contains: "preference",
+    scope: "device",
+    lasts: "Until the app is removed",
+  },
+
+  {
     key: "cheeku.serviceAddress",
     label: "Delivery and visit address",
     why: "Saves typing it again for the next booking.",

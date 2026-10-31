@@ -3415,6 +3415,404 @@ Family care, Home and Notifications settings.
 Postgres), and any real push. Both need the 0038 editor steps on Supabase
 and a phone with an EAS build.
 
+**Live, same day.** Athar applied 0038 steps 1 and 2 on production and
+created the push webhook from Integrations > Database Webhooks (the SQL
+version of step 3 fails until webhooks are enabled once: "schema
+supabase_functions does not exist"). 0038-check.sql said yes on all six rows
+and a test row reached push-dispatch. loop-caregiver, loop-notifs and
+ops-push-webhook are done; loop-cron is under way (lab status sweep and
+retention cleanup remain). Phones buzz once the app build has push keys.
+
+## Fitness classes take insurance's place · 2026-10-25
+
+The fitness partner's VP said yes to tiering up: they quote a base price per
+session across their network (200+ cities), Cheeku adds its markup and sells
+single classes. Athar asked for the whole flow now, with the master API to
+follow, and for Fitness to replace Health insurance on Home. Insurance moves
+to Coming soon for the next stage.
+
+**The seam.** Every screen calls `fitnessNetwork()` (src/lib/fitness/
+provider.ts). Today that is a preview network: 14 sample studios per ~2 km
+cell around wherever the person is, deterministic so the same place shows
+the same studios, with sample sessions and plausible base prices. They have
+no address, phone or brand and every screen says "Sample". The partner's API
+becomes a second FitnessNetwork and that one function returns it.
+
+**Price.** 15% on the base, at least Rs 25, the total rounded up to the next
+Rs 10 (`priceFor`, `MARKUP`). The server applies the same rule from
+`app_config.fitness_pricing` when it records the booking, so the client never
+names a price. The screen shows one price, not the split.
+
+**Matching, on the phone.** `match.ts` turns the profile into needs:
+conditions in the person's own words (obesity, PCOS, diabetes, BP, heart,
+arthritis or knee pain, anxiety, insomnia), a BMI of 27.5 or more (Asian
+cut-off), the Today goal, age and pregnancy. Each need ranks activities, can
+cap intensity (BP moderate, heart gentle) and can rule out jumping (knees,
+60+). Pregnancy shows prenatal yoga and meditation only. A doctor line shows
+for pregnancy, a heart condition or 60 and over. Sessions are scored by fit,
+distance and how soon they start, and the top picks are mixed so one studio
+or one activity cannot fill the list. Women-only studios are hidden from
+men. Reasons are card reasons (36 characters) and describe the class, never
+an outcome. Nothing about health leaves the phone: the network sees a place.
+
+**Flow.** Home tile, then `/fitness`: our own location card first (expo-
+location, while in use only, kept on the phone rounded to ~100 m, listed in
+the storage registry), or pick one of 16 cities. Then "Classes for Aarav"
+with the lead need, search (an activity word or a studio name), chips in the
+order that suits the person, the next booked class, "Picked for Aarav" and
+studios ranked by fit then distance. A studio page has seven days of classes,
+the suitable ones first and the rest under "Also here". The booking sheet
+picks the family member (matching redone for them, with a plain warning if
+the class is harder than their profile suggests), shows one price and books.
+The ticket page has the check-in code, directions and cancel (up to an hour
+before). Your classes lists upcoming and past.
+
+**Chat.** "Any yoga near me", "find a gym", "suggest a swimming session for
+Papa" become a fitness intent with the activity, even as a question; "is
+yoga good for BP?" stays a question. The reply is written from the profile
+("For the knees and joints, aqua aerobics, swimming, yoga suit Papa best")
+and the card under it shows the three best classes nearby, bookable in the
+same sheet without leaving the thread. A booking is filed in that member's
+thread like labs and doctors.
+
+**Server (0039).** `fitness_bookings` (read own rows only), with a snapshot
+of the studio and session, the price split, the check-in code and the
+reason. `create_fitness_booking` checks sign-in, consent, a covered member,
+a start between 15 minutes and 15 days out, no overlapping class for that
+member and at most 12 upcoming, then prices and writes an inbox row.
+`cancel_fitness_booking` up to an hour before. Two kinds, fitness_booked and
+fitness_cancelled, on the appointments shelf; the lock screen gets
+push-dispatch's generic appointment line, so "Prenatal yoga" never shows on a
+locked phone. Phone reminders an hour before and half an hour after, with no
+activity named.
+
+**Verified here:** typecheck, lint (no new warnings), 501 tests (25 new for
+fitness, intent and copy), the migration applied twice to a local Postgres
+16 and the scenarios in `supabase/manual/local-check/0039-fitness-scenarios.sql`
+(prices, overlap, too soon, an invented activity, direct insert refused,
+cancel, another family's booking, a paused member, no consent, titles within
+40 and bodies within 90). Web screenshots of Home, location, discover, the
+sheet, Papa's view, a studio, the ticket, the list and a filtered view.
+**Not verified:** location, haptics and the sheet on a phone (needs a new
+dev build for expo-location), and anything against the real partner.
+
+**Live, same day.** Athar applied 0039 on production; 0039-check.sql said yes
+on every row. Booking now records for real (on sample studios). What is left
+for `loop-fitness` is the phone check on a new dev build.
+
+## Location, live and saved (loc-live) · 2026-10-25
+
+Athar checked fitness on the phone (web build) and found "Near you" where a
+place should be, and nothing in Profile. Two causes: the web has no system
+geocoder, so expo-location's reverse lookup returns nothing there; and the
+place lived only on the phone, so no other screen or the server knew it.
+
+**Provider.** Ola Maps (Krutrim) first: built on Indian data with
+localities and pincodes, free up to at least 500,000 calls a month per API
+at the time of writing (its pricing moved to prepaid credits from 1 Sep 2026
+with the free allowance kept; the exact tier should be checked on the
+console). OpenStreetMap Nominatim behind it: free, keyless, light use only.
+Google gives 70,000 free Essentials calls a month on India pricing but needs
+billing on the account; Mappls's free tier is undocumented. So: Ola for
+quality, OSM so it works on day one with no key.
+
+**Server.** A `geo` Edge Function holds the key and answers reverse lookups
+and place search in one shape (`supabase/functions/geo/parse.ts`, tested from
+the app suite). Every answer is cached for 30 days (reverse by ~110 m cell,
+search by words and rough area) and each person gets 300 provider calls a
+day; cache hits are free. Migration 0040 adds `member_locations`: one latest
+place per family member (no history), rounded to 4 decimals, written only by
+`set_member_location`, which skips GPS jitter under 100 m within 2 minutes,
+caps 200 writes a day, cleans the address and drops a stale one when the
+point moves. `forget_member_location` wipes one or all; account deletion
+cascades.
+
+**Live.** `useLiveLocation` in the signed-in shell takes a fix on open and
+when the app comes back to the front, and watches for 200 m moves while it
+is open. A new address is looked up only after 250 m; the server is written
+after 250 m, a new pincode, or 30 minutes. Never in the background: that
+needs "Always" permission and is more than booking needs. A picked place
+holds for two hours so booking for elsewhere is not overridden.
+
+**Asking.** A Home sheet a moment after the first open (sign-up lands
+there): what location is for, that it is saved to the account, then the
+system prompt. "Not now" waits a week; a city works instead. Booking
+screens ask in place through the same chip.
+
+**Everywhere.** The chip ("Indiranagar, Bengaluru · Change") on Home's Book
+services, Fitness, Labs, Doctors and Services; Profile shows the place with
+its age; Profile, Location has the live switch, each family member's place
+("Papa lives in Lucknow", used when booking for him), and "Forget all".
+Lab and service address fields fill from the place, with a one-tap "Use
+Indiranagar, 560038".
+
+**Privacy.** The policy said "we do not collect precise location". It now
+says we do, when allowed, and the change is material: everyone agrees again
+once (new version 2026-10-25, hash in 0040). A point goes to the maps
+provider from our server, never with a name or user id.
+
+**Verified here:** typecheck, lint (no new errors), 516 tests (16 new: the
+parsers against Ola and OSM shapes, cache keys, the move and save rules,
+words), 0040 applied twice on local Postgres 16 with its scenarios (save,
+jitter skipped, stale address dropped, family place, nonsense refused, RLS,
+other family refused, no consent refused, daily cap, quota, cascade on
+account deletion) and the check (all yes). The function typechecks with a
+Deno shim. Web screenshots with a fake GPS fix: the Home primer, Home with
+the live chip, Profile, Profile Location, place search, Fitness, Labs and
+Doctors.
+**Not verified:** the deployed function against the real Ola and OSM APIs
+(this container cannot reach them), and location on a phone (needs the new
+dev build from the fitness change).
+
+**Live, next day.** Athar applied 0040 (check all yes), deployed `geo` from
+the dashboard with the one-file copy, and set the Ola key as a Supabase
+secret. On the phone the place now shows with its pincode. The one-file copy
+first broke the web app's production build: the root tsconfig typechecked
+`supabase/manual` and failed on `Deno`; it is now excluded like
+`supabase/functions` (PR #56). loc-live and int-ola-maps are done.
+
+## Share to Cheeku, and Check and save (int-share-target, loop-scan-ux) · 2026-10-26
+
+**Why.** Most Indian reports arrive as a WhatsApp PDF. Before this the only
+way in was to save it, open Cheeku, find Scan and pick it again, and the
+record was filed the moment the reader finished, wrong values and all.
+
+**Share target.** `expo-share-intent` (8.0.x, the line for SDK 57; 9.x needs
+SDK 58) registers Cheeku AI in the share sheet for one PDF or image (iOS
+share extension, Android intent filters for `application/pdf` and
+`image/*`). `ShareIntake` in the root layout takes the file, holds it in a
+small in-memory store (`src/lib/scan/shared.ts`, never on disk), and opens
+Scan once the person is signed in, so a share before sign-in is not lost.
+iOS opens the app with a `dataUrl=` link, which `app/+native-intent.tsx`
+turns into `/scan?shared=1`. A shared file replaces the three source cards
+with the file itself and a "Read it" button; whose it is is still asked.
+
+**Scan.** Two clear choices, Report and Prescription, with the other types
+behind "Something else" (and "Not sure, let Cheeku tell"), then the member
+pills, then the source.
+
+**Check and save.** `uploadDocument` is now `prepareUpload` (validate,
+store, read) then `fileUpload` (write the record). Between them the
+person sees what was read. Only fields under the 0.7 confidence line are
+asked about, each with an edit box and "Looks right"; the rest sit in a
+folded "N read clearly" list. Save writes the corrected extraction
+(`applyReview`: touched values get confidence 1, a changed number gets its
+flag recomputed from the report's range, date, lab and doctor follow their
+fields). Anything left unchecked files as needs_review, so the record says
+"Waiting for a check" instead of passing a guess off as read. Discard
+deletes the stored file; nothing reaches the documents table. Bulk upload
+in the member form still files directly through `uploadDocument`.
+
+**Verified here:** typecheck, lint, 523 tests (7 new: which items are asked
+about, filed vs needs_review, corrections, ranges and flags, share
+normalising and refusing a video). Web screenshots of the pick screen, the
+other types, and Check and save in its states (unsure, ticked, corrected,
+all clear for Papa) through a temporary preview route, since web cannot
+read a picked file (an old `expo-file-system` limit, noted in PLAN Open).
+**Not verified:** the share sheet itself and the whole flow on a phone.
+Both need a new dev build (`npx expo prebuild --clean`) or `eas build`.
+
+
+## DPDP readiness: requests answered, Grievance Officer named, breach plan (sec-dpdp) · 2026-10-27
+
+**Why.** Since 0031 a person could open a rights request from Settings,
+Privacy, and it went nowhere: nobody was told, there was no way to answer,
+and the person never heard back. The legal texts still said "[Grievance
+Officer name]" and the app showed support@baymax.health.
+
+**Named.** Athar Ali is the Grievance Officer, privacy@cheekuai.in and
+support@cheekuai.in are the contacts (`src/lib/legal/entity.ts`,
+`src/lib/app-meta.ts`). The legal name, address, hosting region and courts
+stay as placeholders until the company is incorporated, and the app keeps
+saying so.
+
+**Non-material legal versions.** Filling in a contact changes the text, so
+Terms, Privacy and Health Data Consent got new versions (2026-10-27) and
+hashes. They are published with `material = false`: nothing about what we
+collect or share changed, so nobody already signed in is asked to agree
+again, while new sign-ups agree to the new text. The database already
+supported this (`current_material_versions` only counts material rows and
+compares dates); the one thing in the way was a test that required every
+consented document to be material. It now checks that each kind has a
+material version in force, and that every version is published with the
+same `material` the app declares. The Privacy Policy keeps the location line
+as its first "what changed", because anyone who has not yet agreed to the
+2026-10-25 version still sees the gate, and the gate shows the first change.
+
+**Answering.** Migration 0041: `privacy_queue` (open requests, oldest due
+first, days left, overdue; team only, revoked from the app roles),
+`answer_privacy_request(id, status, reply, handled_by)` (the only way to move
+one on: checks the status, needs a reply before closing, stamps
+resolved_at), and a trigger that drops a note in the person's inbox when the
+status changes. The note uses the existing `support_update` kind (account
+category), so it follows their account notification setting and the push
+shows the generic account line. It never repeats what they wrote; a copy
+test checks the words and that `details` is never put into a body.
+
+**Alerting.** `privacy-alert` Edge Function, fired by a Database Webhook on
+INSERT, emails privacy@cheekuai.in through Resend: kind, received, due date,
+id, and the two SQL lines to handle it. Never the text or the account email.
+Without a Resend key it does nothing and says so, so the webhook can exist
+before the mail account does.
+
+**Written.** `docs/privacy/requests.md` (weekly routine, what each kind
+needs), `docs/privacy/breach-runbook.md` (first hour, CERT-In in 6 hours,
+people without delay, Board without delay and a full report within 72
+hours), `docs/privacy/dpdp-readiness.md` (every duty and where it stands, the
+questions for the lawyer, what is left).
+
+**Verified here:** typecheck, lint, tests (legal and copy tests extended),
+0041 applied twice on local Postgres 16 with scenarios: queue shows a new
+request with 90 days left, closing without a reply refused, a bad status
+refused, in_progress then resolved each notify once with the right words, a
+closed request cannot be answered again, nothing the person wrote reaches a
+notification, the app roles cannot read the queue or call the function, and
+current material versions are unchanged. The check file says yes on all six
+rows. The function typechecks and its email carries no request text.
+**Not verified:** the function against Resend (no key, no network here), and
+the webhook on the real project.
+
+## Vision board: the 5-year plan, live and in git · 2026-10-28
+
+**Why.** Athar, Suraj and Deepesh needed one place to brainstorm, prioritise
+and stay in sync on the next five years: product, AI, supply, growth, revenue,
+employers and insurers, funding, team and trust. The financial model says what
+the numbers do; nothing said who does what, when, and what it depends on.
+
+**What.** A live board at https://claude.ai/artifact/KUeA2YYdL4CmUKWhK3faAE,
+mirrored in `founder-ops/vision-board/`. Nine lanes across Q4 2026 (pre-launch),
+quarters to 2029 and half-years for 2030 and 2031, the grain the founders
+picked. 93 cards, 12 risks, 6 moat pillars and 10 tags from the first fill.
+
+**The decision that shapes it.** The board runs the financial model's own
+engine (`founder-ops/vision-board/engine.js`, v2). Every column header shows that
+period's users, revenue, EBITDA, cash and team, and a card can be placed by
+the model instead of a date: "Employers go live", "Series B + 3 months",
+"monthly users reach 50 lakh". Those cards move by themselves when a lever
+changes, so a slower Series A or a dearer CAC visibly pushes the work that
+depends on it. Levers are a private what-if until someone makes them the
+plan for everyone.
+
+**Data.** The artifact's shared database is the live record (only editors of
+the artifact can read or write it). `board.json` is the git copy, synced by
+Claude with `sync.py` (pull, push, diff); the README has both directions.
+Owners are the three founders by name, as agreed; Archit is not on it.
+
+**Verified here:** the page against a mock runtime with the seed data at
+desktop (light) and phone (dark) widths, every view, no script errors and no
+sideways scroll; the published seed read back at the editor level and hidden
+at the view-only level; `sync.py pull` of the live data matches the seed
+(`diff` empty) and `build` reproduces the published page byte for byte.
+**Not verified:** two people editing at once, presence and comments in the
+real viewer.
+
+## Vision board v2: built for the weekly sync on a big screen · 2026-10-28
+
+**Why.** The first board was too crowded to talk over: a fixed lane rail ate
+a fifth of the width, every column header carried six numbers and a bar, and
+every card showed everything at once. The founders wanted a calm surface on a
+laptop or a TV, with one card at a time to discuss.
+
+**What changed** (same URL, same data, same model engine):
+- No lane rail. Lanes are thin bands with a sticky label, a status bar and a
+  collapse toggle, so 4 to 5 quarters fit on a laptop instead of 3.
+- Column headers show two numbers and up to two events; the rest is a click
+  away in a popover.
+- Cards are compact by default and expand in place (chevron per card, or
+  Expand all). Low-signal marks are gone: no P2 badge, no "planned" status,
+  no kind label on plain initiatives.
+- A discussion sheet: the card grows out of the board into a large centred
+  sheet, with arrow keys to walk the plan quarter by quarter, E to edit in
+  place and Esc to shrink back into the card. Discuss starts from this
+  quarter. Editing cards and risks happens in the same sheet.
+- Filters, levers and the change feed moved into popovers off one
+  translucent toolbar; the plan strip keeps four headline numbers, active
+  filter tokens and the what-if state.
+- Motion: model-placed cards glide to their new quarter when a lever moves
+  (FLIP, interruptible), popovers scale from their buttons, cards stagger in
+  on view changes, press feedback on every control, all off under reduced
+  motion. System type with size-specific tracking; Apple greys.
+
+**Verified here:** every view, the sheet (view, next and previous, edit),
+risk editing, the lever glide, filters, collapse and expand, against a mock
+runtime with the seed data at 1440 and 1280 (light) and 390 (dark): no script
+errors and no sideways scroll. `sync.py build` reproduces the published page
+byte for byte. **Not verified:** presence and comments in the real viewer.
+
+## Vision board v3: tags, the card sheet, a live trajectory, three new moats · 2026-10-28
+
+**Why.** After v2 the founders asked for: a visible way to open one card on the board; type and layer tags so product work reads at a glance; a better card layout for discussion; a Trajectory page you can play with rather than read; and three more pillars of defensibility.
+
+**What changed** (same URL; the data change went in through the board's database, pinned to the versions read first, so a teammate's edit to "Incorporate the company" was kept):
+- An eye at the bottom of every card opens that card's why, done-when and confidence in place.
+- Tags now have groups. Type: Feature, Product addition, New product (solid pills). Layer: App, B2B, Model, Hardware (tinted pills). 73 cards are tagged, every product card has a type, and the filter and the editor show the groups.
+- The card sheet is rebuilt. A lane-tinted header holds the pills, the title, four facts (owner, when, priority, a confidence ring) and a status track. The body has why, how as numbered steps when written as a list, a finish-line block, the card on a five-year timeline with now and model events, a connections flow (needs first, this card, then unlocks), risks, moat and decision votes.
+- Trajectory is interactive. A month cursor drives six KPI tiles with sparklines and year-on-year change, a play button and scrubber with model events, crosshairs and tooltips on all three charts, legend toggles, a scenario switch on the page, the period column lit in the tables, and milestones under the users chart. Charts grow in on entry and tween between scenarios.
+- Moats: three new pillars with live model numbers, nine new cards and 14 cards re-linked:
+  - **Insurance risk infrastructure.** Metric: insurance revenue a year. New cards: corporate agent licence, claims help in chat, family floater priced from our risk score.
+  - **Connected ecosystem in one app.** Metric: share of revenue from in-app services. New cards: one home for every service, family wallet, Cheeku ID.
+  - **Pendant for elder parents.** Metric: pendants with elder parents. New cards: a 1,000-parent pilot, fall detection and SOS, the pendant through employers and insurers.
+
+**Verified here:** the page against a mock runtime with the live data plus these writes, at 1440 and 1280 (light) and 390 (dark). I checked the board, the eye toggle, four card sheets (initiative with steps, model-placed milestone, decision, pendant), trajectory draw-in, hover on users and revenue, play, legend toggle, the bear tween and moats. There were no script errors and no sideways scroll. Both write batches committed atomically. `board.json` is pulled from the live board afterwards, and `sync.py build` reproduces the published page byte for byte. **Not verified:** the new pages in the real viewer with two people at once.
+
+
+## Founder ops folder · 28 Oct 2026
+
+Founders' planning material now lives in `founder-ops/`, outside the app. The
+vision board moved there from `docs/vision-board/`. `founder-ops/library/` holds
+text snapshots of the seed and DD decks v2, the founders' note, longevity thesis
+v2, build list v2 and the launch readiness plan, with superseded docs under
+`archive/`. `founder-ops/model/report.js` prints bear, base and bull from the
+board's engine. ESLint and TypeScript skip the folder, and
+`founder-ops/check-isolation.sh` fails a branch that mixes ops files with app
+code. The launch and LabStack trackers stay in `docs/` because engineers update
+them with app work. See `founder-ops/README.md`.
+
+## Prescription scorecard on ten standards (loop-reading-v2, ai-rx-score) · 2026-10-31
+
+**Why.** A new prescription raises the same questions every time: is it right for this person, what is actually in it, does it clash with what they already take, and can it cost less. Cheeku has the person's records, so it can answer from them rather than in general. This is the "8 of 10 checks" scorecard the tracker has carried since the first audit.
+
+**The ten standards**, in the order they are shown:
+1. Every salt identified (brand to salt).
+2. No banned combinations (CDSCO notification, June 2023).
+3. Allergies.
+4. Their other medicines (from other prescriptions still running and their own list).
+5. Dose for their age and weight (adult daily limits; mg/kg for children; under 3 months, paracetamol only on a doctor's word).
+6. Not doubled up (same salt, or two of a class that should not stack).
+7. Their conditions (kidney function from eGFR when on file).
+8. Pregnancy and breastfeeding (from the pregnancy in memory).
+9. Their reports (a statin with a high LDL fits; thyroxine with a very low TSH asks about the dose).
+10. Clear instructions (dose, how often, how long; antibiotics need a course).
+
+**How it decides.** Each check is clear, to sort, ask first, or couldn't check. "Ask first" (red) is kept for an allergy match, a banned combination, a medicine not used in pregnancy and a known dangerous pair. Nothing ever says "stop taking": every finding that needs action becomes a question for the prescriber, ready to send. A medicine outside the formulary is "couldn't check", never fine.
+
+**Where it runs.** The rules are one file with no imports, `supabase/functions/rx-score/rx.ts`. The `rx-score` Edge Function scores as the signed-in person, with their own token and no service key, so RLS decides what it can read. The card is kept in `rx_scorecards` (migration 0042), with RLS that only allows a card for the owner's own prescription. A trigger clears the card when the prescription is edited. The app reads the kept card first, then calls the function, then scores on the phone with the same code if the function is not deployed. Metro, Vercel and EAS build from `mobile-react-native` only and cannot bundle code outside it. So the app keeps an exact copy of the rules (`src/lib/rx/engine.ts`), and a test fails if the two differ.
+
+**Design.** The screen is built from the app's own parts: `Reveal`, `Gradient`, the `Card`/`Section` of record pages, `Tap` press feedback, semantic colours for health meaning only, and the type and radius scales the lint enforces. The order follows the questions:
+1. The verdict, with a ring counting the clear checks.
+2. The medicines and their salts.
+3. The ten checks. Each opens to its findings and links to the record each one rests on.
+4. The questions for the doctor, ready to send.
+5. Same-salt prices.
+6. Ordering.
+
+Rows expand on a critically damped spring and skip motion under reduced motion. A scroll-edge fade sits under the floating bar.
+
+**Verified here:**
+- 12 engine tests: the demo family, an allergy, a banned combination, a statin in pregnancy, an overdose, a doubled salt, an unknown brand, a missing antibiotic course, the formulary, and the app copy in sync.
+- The full suite passes (536 tests), and so do the typecheck and lint for the new files.
+- Migration 0042 and its check, on a local Postgres with all migrations.
+- RLS: another account reads none of the cards and cannot write one.
+- The edit trigger clears the card.
+- The function's code run as the person through a local PostgREST stand-in.
+- The flow in the web preview: the prescription page card, the scorecard, expanding a check, opening a source record, and three members (8 of 10, 10 of 10, 10 of 10).
+
+**Not verified:** the Deno function deployed on Supabase, a phone, and clinical sign-off of the formulary.
+
+## The root vercel.json stopped the mobile deploys · 2026-10-31
+
+Commit e58c00c added a root `vercel.json` with `git.deploymentEnabled: false` to stop the Next.js `cheeku-ai` project building. `cheeku-ai-mobile` reads the root file as well, so from that commit on it made no Preview or Production deployments, including the merge of #65 (303ab27) that carried the prescription scorecard and the rename. The file is removed, and the next push to `main` builds Production again. The Next.js project is switched off in the Vercel dashboard instead (AGENTS.md, "How a merge reaches people"). The `marketing/` typecheck exclusion stays, so its builds would not fail even if it ran.
+
 ## Dead code out of the mobile app · 2026-10-30
 
 A reachability pass over `mobile-react-native`: every route in `app/` as an
@@ -3502,3 +3900,41 @@ built the repo root and has nothing left to build.
 (stops at the missing-credentials check, as it should); the RLS audit runs
 from its new path with the same results as before; the mobile app's
 typecheck and 476 tests are unchanged.
+
+## One folder for the app, SDK 58, and main merged in · 2026-10-31
+
+**Why.** Expo Go on the owner's phone runs only SDK 58, so the app would not
+open on a phone, and the app's docs, database and tests were spread across the
+repo root, reached through `../` paths.
+
+**What moved into `mobile-react-native/`.** `supabase/` (migrations, SQL-editor
+steps, Edge Functions including the new `geo`, `rx-score` and
+`privacy-alert`), `docs/` (with `docs/privacy`), `design/`, the database tests
+(`tests/db`, run with `npm run test:db`), the root Markdown docs, every Claude
+skill (the founder skills too), and, on the owner's call, `founder-ops/` and
+`marketing/`. Those two stay walled off: excluded from `tsc`, Metro's
+`blockList` and the root ESLint, and `check-isolation.sh` was repointed.
+
+**What stays at the root, on the owner's call.** The Next.js web app (`src/`,
+`next.config.ts`, pnpm files, `scripts/`), unchanged except that `migrate.ts`,
+`sql-editor-steps.ts` and `src/lib/db/rls.test.ts` now read
+`mobile-react-native/supabase/`. It is the reference and does not deploy. The
+earlier note on this branch that it had been removed was corrected, and
+`.github/pull_request_template.md` stays at the root because GitHub only reads
+it there.
+
+**SDK 58.** Expo 58, React Native 0.88, React 19.3. Code changes: the custom
+tab bar takes `emitter` and `navigateToTab` (Expo Router dropped the
+`navigation` prop), refs are typed `ScrollViewInstance` / `TextInputInstance`,
+the data export uses `File.writeSync` (`write` is async now), `yaml` is a
+direct dev dependency, and `expo-share-intent` moved to 9.0.0 (its SDK 58
+line). That module is optional at runtime, so Expo Go opens the app and only
+the share sheet waits for a development build. `app.json` lost three keys SDK
+57 no longer accepts and points the Android icon at the files that exist.
+Expo CLI needs Node 22.13+ or 24 (not 25).
+
+**Verified here:** app typecheck, 537 tests, `expo-doctor` 20/20, an iOS
+bundle export; the web app's typecheck and tests (unchanged from main), its
+lint (fewer errors than main, since the demo code is no longer linted). The
+RLS audit fails the same 22 checks in both copies, as it does on main.
+**Not verified:** on a phone or in Expo Go.

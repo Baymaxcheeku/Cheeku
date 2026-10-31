@@ -8,9 +8,9 @@ India-first: ₹ pricing, UPI checkout, Hindi/Hinglish in the safety lexicon,
 112/108 and Tele-MANAS as the emergency numbers.
 
 **It ships as a mobile app** (Expo, React Native). Everything lives in
-`mobile-react-native/`; start with `PLAN.md` and `AGENTS.md`. The Next.js web app that used
-to live at the repo root was removed on 2026-10-30 — it is in git history before
-that date. The web is served by the Expo web export of the same app.
+`mobile-react-native/`; start with `PLAN.md` and `AGENTS.md`. The Next.js web app at the
+repo root is kept as the reference but no longer deploys; the web is served by
+the Expo web export of this app.
 
 ## The five rules the code enforces
 
@@ -50,9 +50,9 @@ docs/  design/         content system, specs, trackers, design frames
 
 Migrations are applied in the Supabase SQL editor: `supabase/manual/*-step-*.sql`
 in order, then the matching `*-check.sql`. Edge Functions deploy from the
-dashboard or with `supabase functions deploy <name>`. The pnpm migration runner
-and seed scripts that used to live at the repo root were removed on 2026-10-31;
-they are in git history before that date.
+dashboard or with `supabase functions deploy <name>`. The root web app's pnpm
+scripts (`pnpm db:migrate`, `pnpm seed`) still work and read
+`mobile-react-native/supabase/`.
 
 | Command | What it does |
 |---|---|

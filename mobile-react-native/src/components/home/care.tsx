@@ -12,6 +12,7 @@ import { onShelf, routeFor, SERVICES } from "@/lib/services/catalog";
 import { kv } from "@/lib/storage";
 import { brand, hue, ink } from "@/theme/tokens";
 import { font } from "@/theme/type";
+import { LocationChip } from "@/components/location/location-chip";
 import { Tap } from "@/components/ui/tap";
 
 /*
@@ -22,10 +23,11 @@ import { Tap } from "@/components/ui/tap";
  * is open from day one instead of a list of "soon" cards. Layout, top down:
  *
  *   prompt    a dark card: book anything by telling Cheeku in a sentence
- *   core      Doctors, Lab tests, Medicines, Health insurance (fourth, by ask),
+ *   core      Doctors, Lab tests, Medicines, Fitness (fourth; it took health
+ *             insurance's place on 2026-10-25, insurance comes later),
  *             as big two-up tiles
  *   more      mental health, dental, eye care, physio, home care, ambulance,
- *             fitness: one swipeable row
+ *             insurance (soon): one swipeable row
  *
  * Doctors are one segment now: gynaecologists, dieticians, psychologists and
  * every other specialty sit inside it (/services/doctors), not as tiles.
@@ -71,6 +73,9 @@ export function CareSection() {
             </View>
           </View>
           <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 3 }}>Doctors, tests, medicines and care at home</Text>
+          <View style={{ marginTop: 8 }}>
+            <LocationChip />
+          </View>
         </View>
         <Tap accessibilityRole="button" onPress={() => open("/services")} hitSlop={8} style={{ flexDirection: "row", alignItems: "center", gap: 2, paddingBottom: 2 }}>
           <Text style={{ fontFamily: font.semibold, fontSize: 13, color: brand[600] }}>See all</Text>

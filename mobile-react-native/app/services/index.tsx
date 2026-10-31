@@ -12,6 +12,7 @@ import { onShelf, routeFor, searchServices, SHELVES } from "@/lib/services/catal
 import { useServiceRequestList, whenText } from "@/lib/services/requests";
 import { brand, ink, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
+import { LocationChip } from "@/components/location/location-chip";
 import { Tap } from "@/components/ui/tap";
 
 /*
@@ -33,6 +34,7 @@ export default function ServicesHub() {
       <Backdrop />
       <ScreenHeader title="Book services" subtitle={marketplace().preview ? "Partner network · preview" : "Partner network"} />
       <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: insets.bottom + 32, gap: 12 }} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+        <LocationChip />
         <View style={[glassShadow, { flexDirection: "row", alignItems: "center", gap: 10, height: 52, paddingHorizontal: 16, borderRadius: 999, backgroundColor: "#fff", borderWidth: 1, borderColor: glass.rim, marginTop: 6 }]}>
           <Search size={18} color={ink[500]} />
           <TextInput

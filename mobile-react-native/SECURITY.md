@@ -33,7 +33,7 @@ a skipped safety test reads exactly like a passing one.
 ## The service-role key
 
 The key bypasses RLS entirely and never ships in the mobile app. Since the
-Next.js app was removed (2026-10-30) it is used only server-side, in the
+Next.js app stopped deploying (2026-10-31) it is used only server-side, in the
 Supabase Edge Functions (`supabase/functions/delete-account` for the account
 delete, which must remove what the cascade cannot reach), and by local tooling
 (`scripts/seed.ts`, `tests/db/profile-isolation.test.ts`). The list below was
@@ -86,8 +86,8 @@ grep -rn "createAdminSupabase" src --include="*.ts" | grep -v "admin.ts"
 
 ## Headers
 
-**Removed with the Next.js app on 2026-10-30.** This section describes what
-`next.config.ts` set for the web build; the mobile app has no server of its
+**The Next.js app no longer deploys (2026-10-31).** This section describes what
+the root `next.config.ts` sets for the web build; the mobile app has no server of its
 own, and the Expo web export's headers are Vercel's to set. Kept as the
 standard to meet if a web surface returns:
 
