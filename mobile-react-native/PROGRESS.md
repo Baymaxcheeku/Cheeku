@@ -3938,3 +3938,28 @@ bundle export; the web app's typecheck and tests (unchanged from main), its
 lint (fewer errors than main, since the demo code is no longer linted). The
 RLS audit fails the same 22 checks in both copies, as it does on main.
 **Not verified:** on a phone or in Expo Go.
+
+## The repo is the app · 2026-10-31
+
+The owner asked that everything related to the app live inside it and the rest
+go. After PR #67 the root still held the Next.js web app (`src/`,
+`next.config.ts`, the pnpm workspace) and its tools (`scripts/migrate.ts`,
+`seed.ts`, `sql-editor-steps.ts`, `seed-demo-documents.ts`, a web copy of
+`build-lexicon.ts`), plus `eslint.config.mjs`. None of it was used by the app:
+the app imports nothing outside this folder, and those tools only read this
+folder's `supabase/`. So they are removed; all of it is in git history at
+`9d01a11`.
+
+**Moved in:** `skills-lock.json`, which pins the Claude skills that live in
+`.claude/skills/`.
+
+**Kept at the root:** `.github/pull_request_template.md` (GitHub reads it only
+there) and a two-line `.gitignore`.
+
+**What is lost, deliberately.** `pnpm db:migrate` and `pnpm seed`. Migrations
+are applied from `supabase/manual/*-step-*.sql` in the SQL editor, as they
+already were. The root ESLint's design-token warnings on app screens no longer
+run; the app's `npm run lint` has no ESLint config of its own yet. The web
+app's duplicate RLS audit went with it; `tests/db/rls.test.ts` is the one copy.
+
+**Verified here:** typecheck, 537 tests, `expo-doctor`, an iOS bundle export.

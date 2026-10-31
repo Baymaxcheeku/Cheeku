@@ -45,7 +45,7 @@ The `library/` files are text snapshots taken on 28 Oct 2026, for search and his
 
 ## How it stays away from the app
 
-- Next.js builds only `src/`. TypeScript and ESLint skip this folder (`tsconfig.json` exclude, `eslint.config.mjs` ignores), and Vitest only collects tests from `src/`.
+- It sits inside `mobile-react-native/` but is never built: the app's `tsconfig.json` excludes it, Metro's `blockList` skips it, and Vitest only collects tests from `src/` and `tests/`.
 - No secrets, patient data or user data go into the live tools or this folder. The live tools run on claude.ai and have no connection to Supabase or the app's database.
 - A PR either changes `founder-ops/` or changes the app, never both. `bash mobile-react-native/founder-ops/check-isolation.sh` checks the current branch against `origin/main` and also fails if app code mentions `founder-ops`. Run it before every ops commit.
 

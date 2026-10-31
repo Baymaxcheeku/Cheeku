@@ -1,12 +1,13 @@
 # Execution plan — React Native app
 
-The native build of the app that lives in the repo root as a Next.js web app.
-Since 2026-10-31 everything else (docs, design, supabase, tests, founder-ops,
-marketing) lives in this folder.
+The native build of the app that used to live in the repo root as a Next.js
+web app. Since 2026-10-31 this folder is the whole repo apart from `.github/`:
+docs, design, supabase, tests, founder-ops and marketing all live here. The
+Next.js app was removed the same day; it is in git history at `9d01a11`.
 
 **THE WEB APP IS NO LONGER A TARGET.** Decided 2026-08-09: Baymax ships
 exclusively as a mobile app on the App Store and Play Store. The Next.js build
-stays as the reference for screens, flows and product rules that were decided
+was the reference (git history, `9d01a11`) for screens, flows and product rules that were decided
 and reviewed there, and it is not maintained. Do not port mobile work back to
 it, and do not treat a difference between the two as a mobile bug — including
 the tier-2 caution UI, the subscription screen and the family tray, none of
@@ -90,7 +91,7 @@ generator, same seeds, same faces.
 Screens: `/` splash · `/welcome` (4-panel carousel, journey picker) ·
 `/sign-in` · `/who` · `/profile` · `/first-upload` · `/plan`
 
-1. Port the motion vocabulary. `../src/components/ui/motion.tsx` is the whole
+1. Port the motion vocabulary. `src/components/ui/motion.tsx` in the Next.js app (git `9d01a11`) is the whole
    set: `Drift`, `Settle`, `PulseRing`, `StaggerList`, `PopIn`, `PressRow`,
    `Meter`, `SpringSwitch`, `TapToWiggle`. Rewrite once in Reanimated and every
    screen follows. Honour `useReducedMotion` explicitly — Reanimated does not
@@ -99,7 +100,7 @@ Screens: `/` splash · `/welcome` (4-panel carousel, journey picker) ·
    working around a stacking-context trap that does not exist here; use
    `@gorhom/bottom-sheet` or a plain modal instead.
 3. Port the Sprout mascot to `react-native-svg`. Gradients port; filters do
-   not. `../src/components/illustrations/sprout-flat.tsx` is the filter-free
+   not. the web app's `src/components/illustrations/sprout-flat.tsx` is the filter-free
    fallback if the shading does not survive.
 4. Supabase auth against the existing project. Session in SecureStore, already
    wired in `src/lib/supabase/client.ts`.

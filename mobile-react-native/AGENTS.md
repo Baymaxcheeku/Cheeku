@@ -25,10 +25,10 @@ insight, quota expiry — and passes with **no Supabase environment at all**
 (verified with the env vars explicitly unset). A failing test here is a real
 failure, not a missing key.
 
-Everything but the reference Next.js app lives in this folder: the app,
+Everything lives in this folder (the repo root holds only `.github/`): the app,
 `supabase/` (migrations, SQL-editor steps, Edge Functions), `docs/`, `design/`,
 `tests/db/`, and the founders' `founder-ops/` and `marketing/` (never app code;
-excluded from tsc, Metro and lint). The database tests run separately with
+excluded from tsc and Metro). The database tests run separately with
 `npm run test:db`; the RLS audit there has 22 known failures (policies added after it was last updated), recorded in `PLAN.md`.
 The package uses **npm** and its own `package-lock.json`.
 
