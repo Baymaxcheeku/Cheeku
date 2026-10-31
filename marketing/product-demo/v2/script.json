@@ -1,0 +1,33 @@
+{
+  "voice": "af_heart",
+  "speed": 0.94,
+  "phonemeFixes": { "mˈɪɹə": "mˈiːɹɑː" },
+  "scenes": [
+    { "id": "hook", "chapter": null,
+      "lines": ["In India, a family's health lives in WhatsApp chats, paper files, and late-night searches."] },
+    { "id": "meet", "chapter": null,
+      "lines": ["Meet Cheeku AI. One app, and one memory, for your whole family's health."] },
+    { "id": "family", "chapter": 0,
+      "lines": ["This is Arjun and Meera. They're ready to start a family."] },
+    { "id": "plan", "chapter": 0,
+      "lines": ["Arjun asks for Meera. Cheeku answers from her own reports.", "Recheck her thyroid, start folic acid today, and fix Arjun's low vitamin D.", "Tests for both of them, booked right from the chat."] },
+    { "id": "positive", "chapter": 1,
+      "lines": ["Six weeks later, it's positive."] },
+    { "id": "pregnancy", "chapter": 1,
+      "lines": ["Now Cheeku walks with Meera, week by week.", "What to eat, what to skip, and a quick check on anything she picks up."] },
+    { "id": "doctor", "chapter": 1,
+      "lines": ["Every scan is read and filed, and her doctor sees the notes before the call."] },
+    { "id": "baby", "chapter": 2,
+      "lines": ["Then Tara arrives. One tap adds her to the family, with her own vaccine card and growth charts."] },
+    { "id": "homecare", "chapter": 2,
+      "lines": ["A nurse comes home for Meera and the baby, and a physio helps her recover."] },
+    { "id": "fever", "chapter": 2,
+      "lines": ["At midnight, Tara runs a fever. Cheeku knows she's just seven weeks old, and says: see a doctor tonight."] },
+    { "id": "care", "chapter": 3,
+      "lines": ["Doctors, labs, medicines, therapy, dental, eyes, physio, home care, and ambulance.", "Every kind of care, booked in one place, and every result comes home to the family's memory."] },
+    { "id": "engine", "chapter": 4,
+      "lines": ["All of it feeds Cheeku's longevity engine.", "Each morning, everyone gets a few small steps, and the next check-up is booked before it's due."] },
+    { "id": "close", "chapter": null,
+      "lines": ["Small steps, for longer, healthier lives. Built for a hundred crore Indians.", "Cheeku AI. Your family's health, remembered."] }
+  ]
+}

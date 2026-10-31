@@ -1,0 +1,211 @@
+{
+ "fps": 30,
+ "total": 3561,
+ "scenes": [
+  {
+   "id": "hook",
+   "from": 0,
+   "dur": 252,
+   "vo": [
+    {
+     "file": "hook_0.wav",
+     "from": 36,
+     "dur": 174,
+     "text": "In India, a family's health lives in WhatsApp chats, paper files, and late-night searches."
+    }
+   ]
+  },
+  {
+   "id": "meet",
+   "from": 252,
+   "dur": 210,
+   "vo": [
+    {
+     "file": "meet_0.wav",
+     "from": 279,
+     "dur": 140,
+     "text": "Meet Cheeku AI. One app, and one memory, for your whole family's health."
+    }
+   ]
+  },
+  {
+   "id": "family",
+   "from": 462,
+   "dur": 168,
+   "vo": [
+    {
+     "file": "family_0.wav",
+     "from": 477,
+     "dur": 104,
+     "text": "This is Arjun and Meera. They're ready to start a family."
+    }
+   ]
+  },
+  {
+   "id": "plan",
+   "from": 630,
+   "dur": 480,
+   "vo": [
+    {
+     "file": "plan_0.wav",
+     "from": 645,
+     "dur": 116,
+     "text": "Arjun asks for Meera. Cheeku answers from her own reports."
+    },
+    {
+     "file": "plan_1.wav",
+     "from": 782,
+     "dur": 163,
+     "text": "Recheck her thyroid, start folic acid today, and fix Arjun's low vitamin D."
+    },
+    {
+     "file": "plan_2.wav",
+     "from": 967,
+     "dur": 84,
+     "text": "Tests for both of them, booked right from the chat."
+    }
+   ]
+  },
+  {
+   "id": "positive",
+   "from": 1110,
+   "dur": 120,
+   "vo": [
+    {
+     "file": "positive_0.wav",
+     "from": 1128,
+     "dur": 58,
+     "text": "Six weeks later, it's positive."
+    }
+   ]
+  },
+  {
+   "id": "pregnancy",
+   "from": 1230,
+   "dur": 300,
+   "vo": [
+    {
+     "file": "pregnancy_0.wav",
+     "from": 1245,
+     "dur": 78,
+     "text": "Now Cheeku walks with Meera, week by week."
+    },
+    {
+     "file": "pregnancy_1.wav",
+     "from": 1349,
+     "dur": 116,
+     "text": "What to eat, what to skip, and a quick check on anything she picks up."
+    }
+   ]
+  },
+  {
+   "id": "doctor",
+   "from": 1530,
+   "dur": 198,
+   "vo": [
+    {
+     "file": "doctor_0.wav",
+     "from": 1545,
+     "dur": 133,
+     "text": "Every scan is read and filed, and her doctor sees the notes before the call."
+    }
+   ]
+  },
+  {
+   "id": "baby",
+   "from": 1728,
+   "dur": 258,
+   "vo": [
+    {
+     "file": "baby_0.wav",
+     "from": 1743,
+     "dur": 185,
+     "text": "Then Tara arrives. One tap adds her to the family, with her own vaccine card and growth charts."
+    }
+   ]
+  },
+  {
+   "id": "homecare",
+   "from": 1986,
+   "dur": 204,
+   "vo": [
+    {
+     "file": "homecare_0.wav",
+     "from": 2001,
+     "dur": 128,
+     "text": "A nurse comes home for Meera and the baby, and a physio helps her recover."
+    }
+   ]
+  },
+  {
+   "id": "fever",
+   "from": 2190,
+   "dur": 276,
+   "vo": [
+    {
+     "file": "fever_0.wav",
+     "from": 2205,
+     "dur": 193,
+     "text": "At midnight, Tara runs a fever. Cheeku knows she's just seven weeks old, and says: see a doctor tonight."
+    }
+   ]
+  },
+  {
+   "id": "care",
+   "from": 2466,
+   "dur": 435,
+   "vo": [
+    {
+     "file": "care_0.wav",
+     "from": 2481,
+     "dur": 168,
+     "text": "Doctors, labs, medicines, therapy, dental, eyes, physio, home care, and ambulance."
+    },
+    {
+     "file": "care_1.wav",
+     "from": 2675,
+     "dur": 163,
+     "text": "Every kind of care, booked in one place, and every result comes home to the family's memory."
+    }
+   ]
+  },
+  {
+   "id": "engine",
+   "from": 2901,
+   "dur": 345,
+   "vo": [
+    {
+     "file": "engine_0.wav",
+     "from": 2916,
+     "dur": 73,
+     "text": "All of it feeds Cheeku's longevity engine."
+    },
+    {
+     "file": "engine_1.wav",
+     "from": 3017,
+     "dur": 159,
+     "text": "Each morning, everyone gets a few small steps, and the next check-up is booked before it's due."
+    }
+   ]
+  },
+  {
+   "id": "close",
+   "from": 3246,
+   "dur": 315,
+   "vo": [
+    {
+     "file": "close_0.wav",
+     "from": 3270,
+     "dur": 142,
+     "text": "Small steps, for longer, healthier lives. Built for a hundred crore Indians."
+    },
+    {
+     "file": "close_1.wav",
+     "from": 3432,
+     "dur": 83,
+     "text": "Cheeku AI. Your family's health, remembered."
+    }
+   ]
+  }
+ ]
+}
