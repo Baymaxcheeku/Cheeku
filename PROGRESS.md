@@ -3767,3 +3767,44 @@ board's engine. ESLint and TypeScript skip the folder, and
 `founder-ops/check-isolation.sh` fails a branch that mixes ops files with app
 code. The launch and LabStack trackers stay in `docs/` because engineers update
 them with app work. See `founder-ops/README.md`.
+
+## Prescription scorecard on ten standards (loop-reading-v2, ai-rx-score) · 2026-10-31
+
+**Why.** A new prescription raises the same questions every time: is it right for this person, what is actually in it, does it clash with what they already take, and can it cost less. Cheeku has the person's records, so it can answer from them rather than in general. This is the "8 of 10 checks" scorecard the tracker has carried since the first audit.
+
+**The ten standards**, in the order they are shown:
+1. Every salt identified (brand to salt).
+2. No banned combinations (CDSCO notification, June 2023).
+3. Allergies.
+4. Their other medicines (from other prescriptions still running and their own list).
+5. Dose for their age and weight (adult daily limits; mg/kg for children; under 3 months, paracetamol only on a doctor's word).
+6. Not doubled up (same salt, or two of a class that should not stack).
+7. Their conditions (kidney function from eGFR when on file).
+8. Pregnancy and breastfeeding (from the pregnancy in memory).
+9. Their reports (a statin with a high LDL fits; thyroxine with a very low TSH asks about the dose).
+10. Clear instructions (dose, how often, how long; antibiotics need a course).
+
+**How it decides.** Each check is clear, to sort, ask first, or couldn't check. "Ask first" (red) is kept for an allergy match, a banned combination, a medicine not used in pregnancy and a known dangerous pair. Nothing ever says "stop taking": every finding that needs action becomes a question for the prescriber, ready to send. A medicine outside the formulary is "couldn't check", never fine.
+
+**Where it runs.** The rules are one file with no imports, `supabase/functions/rx-score/rx.ts`. The `rx-score` Edge Function scores as the signed-in person, with their own token and no service key, so RLS decides what it can read. The card is kept in `rx_scorecards` (migration 0042), with RLS that only allows a card for the owner's own prescription. A trigger clears the card when the prescription is edited. The app reads the kept card first, then calls the function, then scores on the phone with the same code if the function is not deployed. Metro, Vercel and EAS build from `mobile-react-native` only and cannot bundle code outside it. So the app keeps an exact copy of the rules (`src/lib/rx/engine.ts`), and a test fails if the two differ.
+
+**Design.** The screen is built from the app's own parts: `Reveal`, `Gradient`, the `Card`/`Section` of record pages, `Tap` press feedback, semantic colours for health meaning only, and the type and radius scales the lint enforces. The order follows the questions:
+1. The verdict, with a ring counting the clear checks.
+2. The medicines and their salts.
+3. The ten checks. Each opens to its findings and links to the record each one rests on.
+4. The questions for the doctor, ready to send.
+5. Same-salt prices.
+6. Ordering.
+
+Rows expand on a critically damped spring and skip motion under reduced motion. A scroll-edge fade sits under the floating bar.
+
+**Verified here:**
+- 12 engine tests: the demo family, an allergy, a banned combination, a statin in pregnancy, an overdose, a doubled salt, an unknown brand, a missing antibiotic course, the formulary, and the app copy in sync.
+- The full suite passes (536 tests), and so do the typecheck and lint for the new files.
+- Migration 0042 and its check, on a local Postgres with all migrations.
+- RLS: another account reads none of the cards and cannot write one.
+- The edit trigger clears the card.
+- The function's code run as the person through a local PostgREST stand-in.
+- The flow in the web preview: the prescription page card, the scorecard, expanding a check, opening a source record, and three members (8 of 10, 10 of 10, 10 of 10).
+
+**Not verified:** the Deno function deployed on Supabase, a phone, and clinical sign-off of the formulary.
