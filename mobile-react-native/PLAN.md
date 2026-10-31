@@ -260,8 +260,11 @@ The locale is not optional. Without it CocoaPods dies with
 "Something went wrong running `pod install`", which looks like a dependency
 problem and is not one. The `pods` script in package.json already sets it.
 
-Expo Go cannot run this build — it is SDK 57 and Expo Go ships the SDK it was
-released with. Use the simulator, or a development build on a device.
+The app is on SDK 58 (upgraded 2026-10-31) so it opens in the current Expo Go:
+`npx expo start`, then scan the QR code. Expo Go only ever runs the latest SDK,
+so the next SDK release breaks this again. Expo CLI needs Node 22.13+ or 24+;
+odd releases (25) are unsupported. The `ios/` folder was generated for SDK 57:
+run `npx expo prebuild --clean` before the next simulator or development build.
 
 Copy `.env.example` to `.env.local` first. Migrations are applied in the
 Supabase SQL editor from `supabase/manual/*-step-*.sql`, then the matching

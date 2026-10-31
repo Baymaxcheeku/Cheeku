@@ -19,7 +19,7 @@ import {
 import { AskSkeleton } from "@/components/ui/skeleton";
 import { MemoryIcon, ReadsIcon, type AppIcon } from "@/components/ui/icons";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View, type ScrollViewInstance, type TextInputInstance } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ProductAssessmentCard } from "@/components/ai/product-assessment-card";
@@ -130,8 +130,8 @@ export default function Ask() {
   const [pickerOpen, setPickerOpen] = useState(false);
   const [focused, setFocused] = useState(false);
   const [aboutId, setAboutId] = useState<string | null>(record ?? null);
-  const input = useRef<TextInput>(null);
-  const scroller = useRef<ScrollView>(null);
+  const input = useRef<TextInputInstance>(null);
+  const scroller = useRef<ScrollViewInstance>(null);
   const stickToEnd = useRef(true);
   const sentInitial = useRef(false);
   /** Set when the chat itself switched member, so the switch doesn't wipe the turn in flight. */

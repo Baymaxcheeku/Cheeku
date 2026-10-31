@@ -7,12 +7,6 @@
     "icon": "./assets/icon.png",
     "scheme": "baymax",
     "userInterfaceStyle": "light",
-    "newArchEnabled": true,
-    "splash": {
-      "image": "./assets/splash-icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#fafafe"
-    },
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.baymax.app",
@@ -25,10 +19,11 @@
     "android": {
       "package": "com.baymax.app",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png",
         "backgroundColor": "#4a2ade"
       },
-      "edgeToEdgeEnabled": true,
       "permissions": [
         "CAMERA",
         "USE_BIOMETRIC",
@@ -52,14 +47,23 @@
         }
       ],
       "expo-font",
-      "expo-splash-screen",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "resizeMode": "contain",
+          "backgroundColor": "#fafafe",
+          "imageWidth": 200
+        }
+      ],
       "expo-sharing",
       [
         "expo-notifications",
         {
           "color": "#4a2ade"
         }
-      ]
+      ],
+      "expo-status-bar"
     ],
     "experiments": {
       "typedRoutes": true

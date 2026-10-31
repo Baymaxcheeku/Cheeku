@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ArrowRight, ArrowUp, Building2, ChevronLeft, MonitorPlay, RotateCcw, Stethoscope } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
-import { KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, View } from "react-native";
+import { KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, View, type ScrollViewInstance } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -88,7 +88,7 @@ export default function Consult() {
   const presetMode: Mode | null = modeParam === "online" || modeParam === "clinic" ? modeParam : null;
   const presetSpecialty: SpecialtyId | null = specialtyParam && specialtyParam in SPECIALTIES ? (specialtyParam as SpecialtyId) : null;
   const presetWho = typeof whoParam === "string" && whoParam.trim() ? whoParam.trim() : null;
-  const scroll = useRef<ScrollView>(null);
+  const scroll = useRef<ScrollViewInstance>(null);
   const chosenSpecialty = useRef<SpecialtyId>("gp");
   // The result that stopped the flow, so the emergency screen can be reopened.
   const stoppedBy = useRef<SafetyResult | null>(null);

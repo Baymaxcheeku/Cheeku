@@ -101,7 +101,7 @@ export async function exportAccount(): Promise<
     const file = new File(Paths.cache, filename);
     if (file.exists) file.delete();
     file.create();
-    file.write(JSON.stringify(bundle, null, 2));
+    file.writeSync(JSON.stringify(bundle, null, 2));
     return { ok: true, uri: file.uri, filename };
   } catch {
     return { ok: false, message: "Could not write the export file. Please try again." };
