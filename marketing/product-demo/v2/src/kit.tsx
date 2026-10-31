@@ -41,7 +41,7 @@ export const Phone: React.FC<{ x: number; y: number; s: number; rot?: number; ti
     transform: `perspective(1800px) rotateY(${tilt}deg) rotate(${rot}deg) scale(${s})`, transformOrigin: '50% 50%' }}>
     <div style={{ position: 'absolute', inset: 0, borderRadius: 74, background: 'linear-gradient(145deg,#2c2c3a,#0d0d14 40%,#1c1c26)',
       boxShadow: '0 60px 120px rgba(40,30,120,.28), 0 18px 40px rgba(20,20,60,.22), inset 0 0 0 2px #3c3c4c' }} />
-    <div style={{ position: 'absolute', left: PHONE.bezel, top: PHONE.bezel, right: PHONE.bezel, bottom: PHONE.bezel, borderRadius: 63, overflow: 'hidden',
+    <div style={{ position: 'absolute', left: PHONE.bezel, top: PHONE.bezel, right: PHONE.bezel, bottom: PHONE.bezel, borderRadius: 63, overflow: 'hidden', clipPath: 'inset(0 round 63px)', isolation: 'isolate',
       background: dark ? '#0b0b1f' : C.canvas }}>
       <div style={{ width: 390, height: SCREEN_H, transform: `scale(${PHONE.scale})`, transformOrigin: '0 0', position: 'relative', fontFamily: FONT, color: C.ink }}>
         {children}
