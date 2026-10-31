@@ -555,5 +555,22 @@
   "owner": "athar",
   "next": [],
   "order": 34
+ },
+ {
+  "id": "rxscore",
+  "group": "records",
+  "title": "Prescription scorecard",
+  "what": "Every medicine on a prescription read to its salts and checked on ten standards against the person's records, with questions for the doctor and same-salt prices.",
+  "state": "standin",
+  "where": "app/prescription/[id].tsx, supabase/functions/rx-score",
+  "shipped": null,
+  "owner": "athar",
+  "next": [
+   "loop-reading-v2",
+   "ai-rx-score",
+   "ai-brand-salt",
+   "ai-clinical-signoff"
+  ],
+  "order": 9.5
  }
 ]

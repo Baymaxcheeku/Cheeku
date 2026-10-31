@@ -38,6 +38,7 @@ import { brand, hue, ink, semantic, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
 
 import { Bullets, Card, ChipRow, Eyebrow, FactGrid, MedicineList, ReminderButton, reminderAt, Section } from "./parts";
+import { ScorecardEntry } from "./scorecard-entry";
 import { Tap } from "@/components/ui/tap";
 
 /*
@@ -61,6 +62,9 @@ export function PrescriptionBody({ record, details, isPrimary }: { record: Recor
 
   return (
     <View>
+      {/* Every medicine checked on ten standards against this person's records. */}
+      <ScorecardEntry documentId={record.id} />
+
       {/* The doctor, as a card you could hand to a receptionist. */}
       <Card style={{ marginTop: 12 }}>
         <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
