@@ -1,11 +1,11 @@
 {
   "expo": {
     "name": "Cheeku AI",
-    "slug": "baymax",
+    "slug": "cheeku-ai",
     "version": "0.1.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "scheme": "baymax",
+    "scheme": "cheekuai",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
@@ -15,7 +15,7 @@
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.baymax.app",
+      "bundleIdentifier": "in.cheekuai.app",
       "infoPlist": {
         "NSCameraUsageDescription": "Cheeku AI uses the camera so you can photograph a report, prescription or scan and file it against a family member.",
         "NSPhotoLibraryUsageDescription": "Cheeku AI needs access to your photos so you can upload medical documents you have already saved.",
@@ -23,7 +23,7 @@
       }
     },
     "android": {
-      "package": "com.baymax.app",
+      "package": "in.cheekuai.app",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#4a2ade"
