@@ -1,0 +1,194 @@
+{
+ "fps": 30,
+ "total": 3408,
+ "scenes": [
+  {
+   "id": "hook",
+   "from": 0,
+   "dur": 240,
+   "vo": [
+    {
+     "file": "hook_0.wav",
+     "from": 36,
+     "dur": 172,
+     "text": "In India, a family's health lives in WhatsApp chats, paper files, and late-night searches."
+    }
+   ]
+  },
+  {
+   "id": "meet",
+   "from": 240,
+   "dur": 210,
+   "vo": [
+    {
+     "file": "meet_0.wav",
+     "from": 267,
+     "dur": 139,
+     "text": "Meet Cheeku AI. One app, and one memory, for your whole family's health."
+    }
+   ]
+  },
+  {
+   "id": "plan",
+   "from": 450,
+   "dur": 300,
+   "vo": [
+    {
+     "file": "plan_0.wav",
+     "from": 471,
+     "dur": 198,
+     "text": "Arjun and Priya are ready for a baby. He asks Cheeku for her, and the answer comes from her own reports."
+    }
+   ]
+  },
+  {
+   "id": "labs",
+   "from": 750,
+   "dur": 255,
+   "vo": [
+    {
+     "file": "labs_0.wav",
+     "from": 765,
+     "dur": 201,
+     "text": "Her thyroid test is booked for home collection, and the report files itself, every value tracked over time."
+    }
+   ]
+  },
+  {
+   "id": "preg",
+   "from": 1005,
+   "dur": 165,
+   "vo": [
+    {
+     "file": "preg_0.wav",
+     "from": 1020,
+     "dur": 114,
+     "text": "Then, it's positive. Now everything is read against week twelve."
+    }
+   ]
+  },
+  {
+   "id": "gyne",
+   "from": 1170,
+   "dur": 240,
+   "vo": [
+    {
+     "file": "gyne_0.wav",
+     "from": 1185,
+     "dur": 148,
+     "text": "Booking her gynaecologist takes a minute. The doctor gets her story before the call."
+    }
+   ]
+  },
+  {
+   "id": "medcheck",
+   "from": 1410,
+   "dur": 258,
+   "vo": [
+    {
+     "file": "medcheck_0.wav",
+     "from": 1425,
+     "dur": 216,
+     "text": "Every prescription is checked at salt level, on ten standards, against years of her history. Same salt, for less."
+    }
+   ]
+  },
+  {
+   "id": "baby",
+   "from": 1668,
+   "dur": 195,
+   "vo": [
+    {
+     "file": "baby_0.wav",
+     "from": 1683,
+     "dur": 108,
+     "text": "Then Tara arrives. One tap, and she has her own health file."
+    }
+   ]
+  },
+  {
+   "id": "fever",
+   "from": 1863,
+   "dur": 270,
+   "vo": [
+    {
+     "file": "fever_0.wav",
+     "from": 1878,
+     "dur": 198,
+     "text": "At midnight, she runs a fever. Cheeku knows she's seven weeks old, and gets a paediatrician on video, tonight."
+    }
+   ]
+  },
+  {
+   "id": "after",
+   "from": 2133,
+   "dur": 225,
+   "vo": [
+    {
+     "file": "after_0.wav",
+     "from": 2148,
+     "dur": 166,
+     "text": "After the call, the prescription is filed, doses are set, and the follow-up waits in her memory."
+    }
+   ]
+  },
+  {
+   "id": "care",
+   "from": 2358,
+   "dur": 255,
+   "vo": [
+    {
+     "file": "care_0.wav",
+     "from": 2373,
+     "dur": 200,
+     "text": "A GP for Arjun. Therapy, physio, nurses at home, medicines delivered. Insurance, coming soon."
+    }
+   ]
+  },
+  {
+   "id": "fit",
+   "from": 2613,
+   "dur": 150,
+   "vo": [
+    {
+     "file": "fit_0.wav",
+     "from": 2628,
+     "dur": 78,
+     "text": "Even a gym class, picked for his blood sugar."
+    }
+   ]
+  },
+  {
+   "id": "engine",
+   "from": 2763,
+   "dur": 315,
+   "vo": [
+    {
+     "file": "engine_0.wav",
+     "from": 2778,
+     "dur": 251,
+     "text": "Every report, booking and dose feeds Cheeku's longevity engine. Each morning, everyone gets small steps, made for their own numbers."
+    }
+   ]
+  },
+  {
+   "id": "close",
+   "from": 3078,
+   "dur": 330,
+   "vo": [
+    {
+     "file": "close_0.wav",
+     "from": 3144,
+     "dur": 56,
+     "text": "Built for a hundred crore Indians."
+    },
+    {
+     "file": "close_1.wav",
+     "from": 3235,
+     "dur": 81,
+     "text": "Cheeku AI. Your family's health, remembered."
+    }
+   ]
+  }
+ ]
+}

@@ -16,6 +16,8 @@ const eslintConfig = [
       "build/**",
       "next-env.d.ts",
       ".designvenv/**",
+      // Founders' planning material, never part of the app.
+      "founder-ops/**",
       // Deno code, deployed to Supabase, with its own imports and globals.
       "supabase/functions/**",
     ],

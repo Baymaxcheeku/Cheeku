@@ -301,6 +301,18 @@ haptics has to be seen on a simulator or a device before it counts as done.
 
 ## Open
 
+- **Prescription scorecard needs 0042 and the rx-score function** (2026-10-31).
+  Every prescription page now opens with a check of each medicine, read to
+  its salts, on ten standards against the person's records
+  (`app/prescription/[id].tsx`). Until migration 0042 runs the card is
+  scored every time and not kept; until `rx-score` is deployed the phone
+  scores it with the same rules (`src/lib/rx/engine.ts`, an exact copy of
+  `supabase/functions/rx-score/rx.ts`, kept in step by a test). The
+  formulary is a starter list of about 50 salts and 70 brands and is not
+  clinically signed off; brands outside it show as "couldn't check". Prices
+  are indicative. The licensed brand-to-salt resolver (ai-brand-salt)
+  replaces the list. Seen only in the web preview against a local stand-in
+  database; untested on a phone.
 - **Privacy requests are answered from the SQL editor** (2026-10-27).
   Migration 0041 adds `privacy_queue` and `answer_privacy_request`; the
   weekly routine is in `docs/privacy/requests.md`. The email to
@@ -345,9 +357,13 @@ haptics has to be seen on a simulator or a device before it counts as done.
   would let push-dispatch skip theirs; not built.
 
 
-- **Rename.** "Baymax" is Disney's character and blocks store submission. It is
-  currently the Expo `name`, `slug`, `scheme` and both bundle identifiers.
-  Change before creating any store account.
+- **Renamed, needs a new build** (2026-10-31). The bundle id and Android
+  package are `in.cheekuai.app`, the slug `cheeku-ai` and the URL scheme
+  `cheekuai` (was `com.baymax.app`, `baymax`). An installed dev build keeps
+  the old id: run `npx expo prebuild --clean` and make a new dev build or
+  `eas build`. Create store listings, OAuth client ids and EAS credentials
+  against `in.cheekuai.app` only; the share extension and its App Group
+  follow the new id. Untested on a phone.
 - **The product checker is a mock.** `askAboutProduct` answers from five
   scenarios in `src/lib/ai/mock/scenarios.ts`, not a real ingredient lookup.
   The About page describes the capability without claiming "scan anything", but
@@ -397,7 +413,7 @@ haptics has to be seen on a simulator or a device before it counts as done.
   retention) should say so when a lawyer next reads it, which means a new
   document version.
 - **Web hosting is on Vercel Hobby, which is for non-commercial use only.**
-  Before launch, move `cheeku-ai-mobile` (and `cheeku-ai`) to Vercel Pro or
+  Before launch, move `cheeku-ai-mobile` to Vercel Pro or
   to Cloudflare Pages (free plan allows commercial use; verify current terms).
   Supabase is on the free plan too, which pauses a project after a week
   without traffic: move production to Pro before real users depend on it.
