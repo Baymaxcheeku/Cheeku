@@ -30,3 +30,13 @@ Companies pay for health insurance that only works once an employee's family is 
 - Say one number, then stop. Let them ask.
 - Never say: AI-powered, platform, disrupting, ecosystem, revolutionise.
 - Rehearse each out loud under 20 seconds.
+
+## 8. The healthspan pitch (Athar's draft, tightened)
+
+**30 seconds:**
+Indians live about 71 years, but only about 60 of them in good health. The last ten are spent sick, and that decline doesn't start suddenly. It starts years earlier, in the months between doctor visits, when nobody is watching. India got better at consultations and lab tests; nobody owns the time in between. Cheeku does. It's a 24/7 health companion for the family: it remembers every report, answers in plain words, books the next test or doctor, and nudges better daily choices, so those ten years shrink.
+
+**10 seconds:**
+Indians spend their last ten years sick, and it's decided between doctor visits. Cheeku is the companion that owns that time: it remembers, answers, books care and keeps the family on track.
+
+Source: WHO, life expectancy 70.8 and healthy life expectancy 60.3 (2019).
