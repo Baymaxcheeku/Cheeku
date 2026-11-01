@@ -4015,3 +4015,17 @@ The owner asked for it: the centre + in the tab bar already adds a record from e
 
 **Verified here:** 0043 on the local Postgres with its check (five yes rows). RLS: another account can't read, can't name Arjun's members, and can't write as him. The member-removal trigger works. 560 tests, including 23 new ones. Typecheck, and lint with no errors. Web screenshots of the list, policy page, form (add and edit), Health file, Profile row and two chat answers.
 **Not verified:** on an iPhone, and 0043 in Supabase. It has to be applied before anything saves.
+
+## The insurance card, redesigned · 2026-11-01
+
+The owner didn't like the dark teal card: distinct, but it sat on the lilac glass like something from another app. They asked for the lime of the "Open now" pill or baby pink.
+
+**Lime, as a light pass.** Lime is already the app's "live, available" accent, so "you're covered" means what green already means here. Pink is the pregnancy and vaccine tint in this app, so it would have blurred meaning. The card is now a lime wash fading to white with ink text and a quiet shield watermark, laid out like the physical card:
+- the insurer and plan at the top, at full width
+- "Available to use" as the one big number, with how much of the cover is left as a slim bar
+- the status as a pill beside it: ink with lime text while active, orange within 30 days of renewal, slate once ended or before it starts
+- the faces of the people covered and a masked policy number ("•••• 0918") at the foot
+
+The card colour never changes, only the pill, and these are `hue` accents, not `semantic` health colours (Rule 3).
+
+**One component.** `CoverCard` in `src/components/insurance/parts.tsx` draws every policy: on the Insurance list and page, and in the Health file, which used to draw its own copy. The Health file's "Add insurance" row moved to the same lime and ink.
