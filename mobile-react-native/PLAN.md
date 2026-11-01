@@ -276,6 +276,12 @@ in a shell. See `SHIPPING.md`.
    (`({ pressed }) => ...`) into `{}`, so on a phone the row loses all its
    layout while the web looks fine. ESLint makes it an error.
 
+15. **Leaving sign-in, onboarding, a booking or the account uses
+   `startFresh(router, href)`** (`src/lib/nav/start-fresh.ts`), never a bare
+   `router.replace`. Replace only swaps the top screen; whatever was pushed
+   before stays under it, and the iPhone edge swipe walks back into it. The
+   tab shell, welcome and who have the swipe-back gesture off.
+
 ## Running it
 
 Web preview (fast, and NOT sufficient — see below):

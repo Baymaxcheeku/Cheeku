@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { clearAudience, readAudience } from "@/lib/auth/audience";
 import { formatPrice, PLANS } from "@/lib/billing/plans";
 import { brand, lilac, surface } from "@/theme/tokens";
+import { startFresh } from "@/lib/nav/start-fresh";
 
 /**
  * A7 — family access, offered once, skippable.
@@ -53,7 +54,7 @@ export default function Plan() {
   useEffect(() => {
     let cancelled = false;
     void readAudience().then((audience) => {
-      if (!cancelled && audience !== "family") router.replace("/home");
+      if (!cancelled && audience !== "family") startFresh(router, "/home");
     });
     return () => {
       cancelled = true;
@@ -66,7 +67,7 @@ export default function Plan() {
       // Cleared either way. Once this step has been answered the hint has
       // stopped describing anything, and a stale "family" would re-offer this.
       await clearAudience();
-      router.replace("/home");
+      startFresh(router, "/home");
     } finally {
       setPending(false);
     }
@@ -179,7 +180,7 @@ export default function Plan() {
             // Straight on to Home. Sending someone back to a plan chooser they
             // just bought from is the clearest way to make a purchase feel like
             // it did not register.
-            router.replace("/home");
+            startFresh(router, "/home");
           }}
         />
       </ScrollView>

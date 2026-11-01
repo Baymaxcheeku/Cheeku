@@ -11,6 +11,7 @@ import { DEFAULT_LOCK_DELAY, shouldLock, type LockDelay } from "@/lib/security/l
 import { brand, ink, surface } from "@/theme/tokens";
 import { Brand } from "@/components/ui/brand";
 import { Tap } from "@/components/ui/tap";
+import { startFresh } from "@/lib/nav/start-fresh";
 
 /*
  * Holds the app behind a biometric challenge when the lock is on.
@@ -160,7 +161,7 @@ export function AppLockGate({ children }: { children: React.ReactNode }) {
     await signOutAndWipe(queryClient);
     lockedRef.current = false;
     setLocked(false);
-    router.replace("/welcome");
+    startFresh(router, "/welcome");
   }
 
   return (

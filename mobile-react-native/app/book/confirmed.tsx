@@ -23,6 +23,7 @@ import { brand, ink, lilac, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
 import { feel } from "@/lib/feel";
 import { Tap } from "@/components/ui/tap";
+import { startFresh } from "@/lib/nav/start-fresh";
 
 /*
  * Book a doctor — done.
@@ -57,7 +58,7 @@ export default function Confirmed() {
 
   function home() {
     reset();
-    router.replace("/home");
+    startFresh(router, "/home");
   }
 
   if (!booking || !doctor) {
