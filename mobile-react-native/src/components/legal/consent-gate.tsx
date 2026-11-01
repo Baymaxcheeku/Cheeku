@@ -18,6 +18,7 @@ import { supabase } from "@/lib/supabase/client";
 import { brand, ink, shadow, surface } from "@/theme/tokens";
 import { font, type } from "@/theme/type";
 import { Tap } from "@/components/ui/tap";
+import { startFresh } from "@/lib/nav/start-fresh";
 
 /*
  * Asks a signed-in person to agree, when the database says they have to.
@@ -122,7 +123,7 @@ function ConsentSheet({ state }: { state: ConsentState }) {
     setBusy("signout");
     await signOutAndWipe(queryClient);
     setBusy(null);
-    router.replace("/welcome");
+    startFresh(router, "/welcome");
   }
 
   return (

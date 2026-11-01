@@ -90,7 +90,7 @@ export function UnlockCard({ stage, signals }: { stage: "starter" | "building"; 
             {copy.title}
           </Text>
         </View>
-        <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 19.5, color: ink[700], marginTop: 8 }}>{copy.body}</Text>
+        <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 19.5, color: ink[700], marginTop: 8, paddingRight: "34%" }}>{copy.body}</Text>
 
         <Glass strong className="mt-4 rounded-xl px-3 py-1.5">
           {rows.map((r, i) => (
@@ -158,7 +158,7 @@ function UnlockRowView({ row, index, last, onPress }: { row: UnlockRow; index: n
         </View>
       )}
       <View className="min-w-0 flex-1">
-        <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 15, color: row.done ? ink[500] : ink[900], textDecorationLine: row.done ? "line-through" : "none" }}>
+        <Text numberOfLines={2} style={{ fontFamily: font.semibold, fontSize: 15, lineHeight: 19, color: row.done ? ink[500] : ink[900], textDecorationLine: row.done ? "line-through" : "none" }}>
           {row.title}
         </Text>
         <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 12, color: ink[500], marginTop: 1 }}>

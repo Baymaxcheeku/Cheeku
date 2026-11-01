@@ -31,6 +31,7 @@ import { brand, ink, semantic, shadow, surface } from "@/theme/tokens";
 import { font, type } from "@/theme/type";
 import { Brand } from "@/components/ui/brand";
 import { Tap } from "@/components/ui/tap";
+import { startFresh } from "@/lib/nav/start-fresh";
 
 /** Mirrors `passwordSchema`'s minimum, for the live length meter. */
 const MIN_PASSWORD = 10;
@@ -177,7 +178,7 @@ export default function SignIn() {
       }
       const landing = await resolveLanding();
       if (landing === "/home") await queryClient.prefetchQuery({ queryKey: FAMILY_KEY, queryFn: loadFamily });
-      router.replace(landing);
+      startFresh(router, landing);
     } catch {
       // A throw is a transport failure. Saying "wrong password" to someone with
       // no signal sends them to reset a password that was never the problem.

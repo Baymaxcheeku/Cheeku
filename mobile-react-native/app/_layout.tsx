@@ -138,6 +138,15 @@ export default function RootLayout() {
             {/* Opens fast and from the side like every other push, but a
                 touch quicker: it is a glance, not a destination. */}
             <Stack.Screen name="notifications" options={{ animationDuration: 240 }} />
+            {/* Roots: nothing sits under these, so an edge swipe must not pop.
+                The tab shell is where a signed-in person lives; welcome is
+                where a signed-out one starts; who is the first screen after
+                sign-in, and swiping back from it would land on sign-in while
+                still signed in (iPhone, 2026-11-01). */}
+            <Stack.Screen name="(app)" options={{ gestureEnabled: false }} />
+            <Stack.Screen name="index" options={{ gestureEnabled: false, animation: "fade" }} />
+            <Stack.Screen name="welcome" options={{ gestureEnabled: false }} />
+            <Stack.Screen name="who" options={{ gestureEnabled: false }} />
           </Stack>
           {/*
            * Here rather than in the signed-in tab shell, so it also covers a

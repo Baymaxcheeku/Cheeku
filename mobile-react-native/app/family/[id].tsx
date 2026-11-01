@@ -39,6 +39,7 @@ import { font } from "@/theme/type";
 import { Brand } from "@/components/ui/brand";
 import { Tap } from "@/components/ui/tap";
 import { DetailSkeleton, ScreenSkeleton } from "@/components/ui/skeleton";
+import { startFresh } from "@/lib/nav/start-fresh";
 
 /*
  * One family member: switch to them, change their face or details, or remove
@@ -356,7 +357,7 @@ export default function Member() {
               accessibilityRole="button"
               onPress={() => {
                 void switchMember(member.id);
-                router.replace("/home");
+                startFresh(router, "/home");
               }}
               style={({ pressed }) => [glassShadow, { marginTop: 12, flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 14, height: 36, borderRadius: 999, backgroundColor: pressed ? "#fff" : glass.fillStrong, borderWidth: 1, borderColor: glass.rim }]}
             >

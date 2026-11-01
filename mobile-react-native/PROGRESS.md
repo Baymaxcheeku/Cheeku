@@ -3976,3 +3976,18 @@ After #68 the owner confirmed Home, Notifications and Profile on the phone and a
 
 **Verified here:** the typecheck, 537 tests, lint (no errors, the same 54 warnings) and the web screenshots above.
 **Not verified:** on an iPhone.
+
+## New accounts: a right swipe on Home "signed out" · 2026-11-01
+
+Reported on an iPhone: a first-time user who swiped right on Home landed on the welcome screen, as if signed out.
+
+**Why.** Nobody was signed out. Welcome pushes sign-in, sign-in hands over with `router.replace(landing)`, and each onboarding step pushes the next (who, profile, journey, first-upload, plan). The plan ends with `router.replace("/home")`. Replace only swaps the top screen, so a new account reached Home with the whole of onboarding and welcome still underneath. The iOS edge swipe popped back through it. A returning user had welcome under Home in the same way. The same pattern ran through other flows too: a finished booking replaced its last step with a second Home on top of the booking flow, and sign-out put welcome on top of the signed-in stack, so a swipe there went back into the app.
+
+**Fix.**
+- `startFresh(router, href)` clears the stack (`dismissAll`) and then replaces. It is used by sign-in, all three ways out of the plan step, the booking confirmation, the family "go home" exits, and the three sign-out paths (Profile, app lock, the consent gate).
+- Swipe-back is off on the tab shell, the splash, welcome and who. These are roots: nothing should sit under them.
+- Welcome now checks for a session. If one exists, it sends the person to their landing instead of showing what looks like a sign-out.
+- New-user layout: on the starter Home the unlock card's body text ran under the mascot (the title had clearance, the body had none), and the first step's title was cut to "Add your latest rep…" by the "Opens Today" pill. The body now keeps clear of the mascot, and step titles wrap to two lines.
+
+**Checked:** web screenshots of a brand-new account through the consent gate, who, profile, journey, first-upload and plan, the starter Home (all of it), Records, Ask, Profile, Add a record and Book services, plus welcome and sign-in signed out. Typecheck, 537 tests, lint (no errors, the same 54 warnings).
+**Not verified:** on an iPhone, and the swipe itself, which a browser cannot do. Check a fresh sign-up end to end: a right swipe on Home should do nothing, sign-out should leave nothing to swipe back to, and finishing a booking should leave Home with nothing behind it.
