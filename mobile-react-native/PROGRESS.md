@@ -4033,3 +4033,13 @@ The card colour never changes, only the pill, and these are `hue` accents, not `
 ## The insurance card: back to the original teal · 2026-11-01
 
 The owner rejected the lime card: the green didn't suit the app, and the washed-out, see-through look (the faint watermark, the faded ended state) made the card weak. They preferred the original teal, so the colours are back: the ocean-to-teal gradient (`hue.ocean.fg` to the new `hue.ocean.mid`, the same two stops as before) with white text. Nothing translucent is laid over the card, and an ended policy is no longer faded. Only the status pill changes, and it is solid: white with teal text while active, orange near renewal, slate once ended. The layout fixes stay because they only rearrange: insurer and plan at full width, status beside the amount, the people covered and a masked policy number at the foot. Lesson for next time: show the owner a colour change before shipping it.
+
+## Cheeku's "hat": eyelids drawn unclipped on iPhone · 2026-11-01
+
+Reported on an iPhone: a flat purple shape sat on Cheeku's head on Home (the desk pose) and elsewhere, and it moved, which looked like a bug.
+
+**Why.** Those are his eyelids. In `working`, `think`, `worried` and `joy` each eyelid is clipped by an eye-shaped stencil (a track matte), and the file names that stencil with `tp`, a Lottie 5.7 field, with the stencil far down the layer stack. The web player honours `tp`. lottie-ios on the phone does not, so it never found the right stencil and drew the eyelids whole: a disc resting above the eyes that swung down over the face on every blink. Rendering the old file with the matte removed reproduces the owner's screenshot exactly.
+
+**Fix.** Each stencil now sits directly above the eyelid it clips, and `tp` is gone: the classic matte form every renderer reads. A stencil is never drawn, so nothing else moves; rendered with lottie-web, the blink is now correct at frames 66 and 118. `scripts/recolor-mascot.mjs` does the same rewrite (`classicMattes`) so a re-export can't bring it back, and rerunning it reproduces the committed files byte for byte. `think`, `worried` and `joy` have no source copies, so they were fixed directly.
+
+**Not verified:** on the iPhone itself.

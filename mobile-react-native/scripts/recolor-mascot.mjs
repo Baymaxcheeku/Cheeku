@@ -168,8 +168,39 @@ function blushLayers(layers) {
   }
 }
 
+/*
+ * Track mattes in the classic form every renderer reads (iPhone, 2026-11-01).
+ *
+ * The downloaded files point an eyelid at its eye-shaped stencil with `tp`
+ * (Lottie 5.7's "matte parent"), with the stencil far down the stack. The
+ * web player honours `tp`; lottie-ios on the phone does not, falls back to
+ * "the layer directly above is the matte", and so drew the purple eyelids
+ * unclipped: a shape over Cheeku's head that moved every time he blinked.
+ * Here each stencil (td) is moved to sit directly above the layer it clips
+ * and `tp` is dropped. A stencil is never drawn, so nothing moves visually.
+ */
+function classicMattes(layers) {
+  if (!Array.isArray(layers) || !layers.some((l) => l.tt && l.tp !== undefined)) return layers;
+  const byInd = new Map(layers.map((l) => [l.ind, l]));
+  const out = [];
+  for (const l of layers.filter((x) => !x.td)) {
+    if (l.tt && l.tp !== undefined) {
+      const src = byInd.get(l.tp);
+      if (!src?.td) throw new Error(`matte ${l.tp} for "${l.nm}" is not a matte source`);
+      out.push(src);
+      delete l.tp;
+    }
+    out.push(l);
+  }
+  // A stencil nobody points at by `tp` keeps its old place above its layer.
+  for (const l of layers.filter((x) => x.td && !out.includes(x))) out.splice(layers.indexOf(l), 0, l);
+  return out;
+}
+
 for (const file of fs.readdirSync(SRC).filter((f) => f.endsWith(".json"))) {
   const data = JSON.parse(fs.readFileSync(path.join(SRC, file), "utf8"));
+  data.layers = classicMattes(data.layers);
+  for (const a of data.assets ?? []) if (a.layers) a.layers = classicMattes(a.layers);
   blushLayers(data.layers);
   walk(data);
   data.nm = `cheeku-${path.basename(file, ".json")}`;
