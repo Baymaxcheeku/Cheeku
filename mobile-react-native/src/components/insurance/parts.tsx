@@ -1,4 +1,4 @@
-import { ShieldCheck, ShieldPlus } from "lucide-react-native";
+import { ShieldPlus } from "lucide-react-native";
 import { Text, View } from "react-native";
 
 import { Avatar } from "@/components/ui/avatar";
@@ -8,29 +8,28 @@ import { POLICY_TYPE_LABEL, policyState, type Policy } from "@/lib/insurance/pol
 import type { ActiveProfile } from "@/lib/profiles/context";
 import type { CoverStatus } from "@/lib/records/details";
 import { rupeesShort, shortDate } from "@/lib/records/details";
-import { hue, ink, surface } from "@/theme/tokens";
+import { hue } from "@/theme/tokens";
 import { font } from "@/theme/type";
 
 /*
- * The insurance card (owner, 2026-11-01).
+ * The insurance card.
  *
- * WHY IT LOOKS LIKE THIS. The first version was a dark teal slab: distinct,
- * but it sat on the lilac glass like a sticker from another app. Cover reads
- * best as a light PASS, the way the physical card does: who it's with and
- * whether it's live at the top, the money as the one big number, who it
- * covers and the policy number at the foot.
+ * THE COLOURS ARE THE ORIGINAL TEAL, ON PURPOSE (owner, 2026-11-01). A light
+ * lime "pass" was tried and rejected: the green clashed with the app and the
+ * washed-out, see-through look made the card feel weak. The deep ocean-to-
+ * teal gradient with white text is what the owner liked, so it stays: no
+ * watermark, no faded card for an ended policy, nothing translucent laid
+ * over it. Only the status pill changes colour, and it is solid: white with
+ * teal text while active, orange within 30 days of renewal, slate once it
+ * has ended or before it starts (category accents, `hue`, not `semantic`).
  *
- * The green is the lime of the "Open now" pill on Book services: the app's
- * own "live, available" accent, so "you're covered" means what green already
- * means here. Pink was the other candidate; it is the pregnancy and vaccine
- * tint in this app, so it would have blurred the meaning. The status pill
- * changes, never the card: ink with lime text while active, orange when it
- * renews within 30 days, slate once it has ended or before it starts. These
- * are category accents (`hue`), not health meaning (`semantic`).
- *
- * One component for every place a policy shows (Insurance list and page,
- * the Health file), so they can never drift apart again.
+ * What was kept from the redesign is layout only: insurer and plan at full
+ * width, the status beside the amount, the people covered and a masked
+ * policy number at the foot. One component for every place a policy shows
+ * (Insurance list and page, the Health file), so they never drift apart.
  */
+
+const SOFT = "rgba(255,255,255,0.78)";
 
 export type CoverCardProps = {
   insurer: string;
@@ -59,7 +58,7 @@ export function statusWords(status: CoverStatus, daysLeft: number | null, start:
 function pillTone(status: CoverStatus): { bg: string; fg: string } {
   if (status === "renew_soon") return { bg: hue.orange.bg, fg: hue.orange.fg };
   if (status === "expired" || status === "not_started") return { bg: hue.slate.bg, fg: hue.slate.fg };
-  return { bg: ink[900], fg: hue.lime.bg };
+  return { bg: "#ffffff", fg: hue.ocean.fg };
 }
 
 const tail = (no: string) => {
@@ -81,25 +80,19 @@ export function CoverCard({ insurer, subtitle, remaining, sumInsured, claimed, s
       onPress={onPress}
       disabled={!onPress}
       scale={0.985}
-      style={[glassShadow, { borderRadius: 24, overflow: "hidden", borderWidth: 1, borderColor: surface.line, opacity: ended ? 0.75 : 1 }]}
+      style={[glassShadow, { borderRadius: 24, overflow: "hidden" }]}
     >
-      <Gradient from={ended ? hue.slate.bg : hue.lime.bg} to="#ffffff" angle="diagonal" />
-      {/* The watermark: a big quiet shield, so the card reads as cover at a glance. */}
-      <View pointerEvents="none" style={{ position: "absolute", right: -18, top: -14, opacity: 0.09 }}>
-        <ShieldCheck size={132} color={ink[900]} strokeWidth={1.5} />
-      </View>
+      <Gradient from={hue.ocean.fg} to={hue.ocean.mid} angle="diagonal" />
 
       <View style={{ padding: 16, gap: 14 }}>
         <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-          <View style={{ width: 36, height: 36, borderRadius: 12, backgroundColor: ink[900], alignItems: "center", justifyContent: "center" }}>
-            <ShieldPlus size={18} color={hue.lime.bg} strokeWidth={2} />
-          </View>
+          <ShieldPlus size={20} color="#fff" />
           <View style={{ flex: 1, minWidth: 0 }}>
-            <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>
+            <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 15, color: "#fff" }}>
               {insurer}
             </Text>
             {subtitle ? (
-              <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 12, color: ink[700], marginTop: 1 }}>
+              <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 12, color: SOFT, marginTop: 1 }}>
                 {subtitle}
               </Text>
             ) : null}
@@ -109,25 +102,25 @@ export function CoverCard({ insurer, subtitle, remaining, sumInsured, claimed, s
         <View>
           {/* The status sits with the money, so the names above get the full width. */}
           <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
-            <Text style={{ fontFamily: font.medium, fontSize: 12, color: ink[700] }}>{ended ? "Was covering" : "Available to use"}</Text>
+            <Text style={{ fontFamily: font.medium, fontSize: 12, color: SOFT }}>{ended ? "Was covering" : "Available to use"}</Text>
             <View style={{ borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4, backgroundColor: tone.bg }}>
               <Text style={{ fontFamily: font.semibold, fontSize: 11, color: tone.fg }}>{statusWords(status, daysLeft, start, end)}</Text>
             </View>
           </View>
           <View style={{ flexDirection: "row", alignItems: "baseline", gap: 6, marginTop: 2 }}>
-            <Text style={{ fontFamily: font.bold, fontSize: 28, letterSpacing: -0.8, color: ink[900] }}>{rupeesShort(remaining)}</Text>
-            <Text style={{ fontFamily: font.medium, fontSize: 13, color: ink[700] }}>of {rupeesShort(sumInsured)}</Text>
+            <Text style={{ fontFamily: font.bold, fontSize: 28, letterSpacing: -0.8, color: "#fff" }}>{rupeesShort(remaining)}</Text>
+            <Text style={{ fontFamily: font.medium, fontSize: 13, color: SOFT }}>of {rupeesShort(sumInsured)} sum insured</Text>
           </View>
-          <View style={{ height: 6, borderRadius: 999, backgroundColor: "rgba(15,16,48,0.08)", marginTop: 10, overflow: "hidden" }}>
-            <View style={{ width: `${Math.round(left * 100)}%`, height: 6, borderRadius: 999, backgroundColor: ink[900] }} />
+          <View style={{ height: 6, borderRadius: 999, backgroundColor: "rgba(255,255,255,0.22)", marginTop: 10, overflow: "hidden" }}>
+            <View style={{ width: `${Math.round(left * 100)}%`, height: 6, borderRadius: 999, backgroundColor: "#fff" }} />
           </View>
-          <Text style={{ fontFamily: font.regular, fontSize: 12, color: ink[500], marginTop: 6 }}>
+          <Text style={{ fontFamily: font.regular, fontSize: 12, color: SOFT, marginTop: 6 }}>
             {claimed > 0 ? `${rupeesShort(claimed)} used this policy year` : "Nothing claimed this policy year"}
           </Text>
         </View>
 
         {members.length || policyNo ? (
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 10, paddingTop: 12, borderTopWidth: 1, borderTopColor: "rgba(15,16,48,0.07)" }}>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 10, paddingTop: 12, borderTopWidth: 1, borderTopColor: "rgba(255,255,255,0.18)" }}>
             {members.length ? (
               <View style={{ flexDirection: "row" }}>
                 {members.slice(0, 4).map((m, i) => (
@@ -137,10 +130,10 @@ export function CoverCard({ insurer, subtitle, remaining, sumInsured, claimed, s
                 ))}
               </View>
             ) : null}
-            <Text numberOfLines={1} style={{ flex: 1, fontFamily: font.medium, fontSize: 13, color: ink[700] }}>
+            <Text numberOfLines={1} style={{ flex: 1, fontFamily: font.medium, fontSize: 13, color: "#fff" }}>
               {names}
             </Text>
-            {policyNo ? <Text style={{ fontFamily: font.semibold, fontSize: 12, letterSpacing: 0.6, color: ink[500] }}>{tail(policyNo)}</Text> : null}
+            {policyNo ? <Text style={{ fontFamily: font.semibold, fontSize: 12, letterSpacing: 0.6, color: SOFT }}>{tail(policyNo)}</Text> : null}
           </View>
         ) : null}
       </View>

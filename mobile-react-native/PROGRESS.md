@@ -4029,3 +4029,7 @@ The owner didn't like the dark teal card: distinct, but it sat on the lilac glas
 The card colour never changes, only the pill, and these are `hue` accents, not `semantic` health colours (Rule 3).
 
 **One component.** `CoverCard` in `src/components/insurance/parts.tsx` draws every policy: on the Insurance list and page, and in the Health file, which used to draw its own copy. The Health file's "Add insurance" row moved to the same lime and ink.
+
+## The insurance card: back to the original teal · 2026-11-01
+
+The owner rejected the lime card: the green didn't suit the app, and the washed-out, see-through look (the faint watermark, the faded ended state) made the card weak. They preferred the original teal, so the colours are back: the ocean-to-teal gradient (`hue.ocean.fg` to the new `hue.ocean.mid`, the same two stops as before) with white text. Nothing translucent is laid over the card, and an ended policy is no longer faded. Only the status pill changes, and it is solid: white with teal text while active, orange near renewal, slate once ended. The layout fixes stay because they only rearrange: insurer and plan at full width, status beside the amount, the people covered and a masked policy number at the foot. Lesson for next time: show the owner a colour change before shipping it.
