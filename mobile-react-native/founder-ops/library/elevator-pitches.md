@@ -40,3 +40,19 @@ Indians live about 71 years, but only about 60 of them in good health. The last 
 Indians spend their last ten years sick, and it's decided between doctor visits. Cheeku is the companion that owns that time: it remembers, answers, books care and keeps the family on track.
 
 Source: WHO, life expectancy 70.8 and healthy life expectancy 60.3 (2019).
+
+## 9. The healthspan pitch, two-minute version (Athar's structure)
+
+In India, life expectancy is about 71 years. But healthy life expectancy is only about 60. That means the average Indian spends the last ten years of life dealing with illness: diabetes, blood pressure, heart and kidney problems, a parent who slowly stops being independent.
+
+And those ten years don't arrive suddenly. They build up quietly for a decade before, in numbers nobody connects. A sugar reading that creeps up every year. A prescription from one doctor that clashes with another. A follow-up test that never got booked.
+
+Over the last three decades, India has become good at the moment of care. You can find a doctor, book a lab test and get medicines delivered in a day. What nobody owns is everything around that moment: before the consultation, when you don't know whether something is serious or which doctor to see; after it, when you walk out with a prescription you can't read and a test list you don't understand; and the long stretch in between, when the daily choices are made alone, with Google and WhatsApp forwards. Every report sits with a different lab, every prescription with a different doctor, and no one holds the whole story.
+
+That is the gap Cheeku fills. Cheeku is a 24/7 health companion for the whole family. It remembers every report, prescription and reading for each family member, so every answer is about your father, not an average man. It answers your health questions in plain language and cuts through the noise. When you need care, it books it right there: a home lab test, a doctor, a dietitian, across 12,000+ pincodes through our partners. And every day it helps you make small, personal choices, on food, medicines, sleep and the next test, that keep you healthier for longer.
+
+Clinician-signed rules decide; the AI only explains, and it never diagnoses. Every answer and every booking adds to the family's health memory, so Cheeku gets more useful the longer you use it.
+
+We have built the full product with zero funding, and we launch in January. Our goal is simple: give Indian families back those ten years.
+
+(About 330 words, two minutes at a calm pace.)
