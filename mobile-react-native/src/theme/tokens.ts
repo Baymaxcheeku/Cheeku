@@ -66,7 +66,8 @@ export const hue = {
   rose: { fg: "#c22a6b", bg: "#fdeaf0" },
   plum: { fg: "#b0428a", bg: "#fbe9f5" },
   teal: { fg: "#0e8478", bg: "#e4f5f2" },
-  ocean: { fg: "#155e75", bg: "#e0f2f6" },
+  // `mid` is the far stop of the insurance card gradient (ocean.fg to mid).
+  ocean: { fg: "#155e75", bg: "#e0f2f6", mid: "#1b8aa3" },
   indigo: { fg: "#3835a0" },
   slate: { fg: "#5b5580", bg: "#efeff5" },
   lime: { fg: "#2f3d00", bg: "#e4ff7a" },

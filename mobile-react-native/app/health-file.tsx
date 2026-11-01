@@ -352,8 +352,8 @@ function FileBody({ f, memberId, member, onAdd }: { f: HealthFile; memberId: str
             scale={0.98}
             style={[glassShadow, { flexDirection: "row", alignItems: "center", gap: 12, padding: 14, borderRadius: 24, backgroundColor: "#fff", borderWidth: 1, borderColor: surface.line }]}
           >
-            <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: hue.lime.bg, alignItems: "center", justifyContent: "center" }}>
-              <ShieldPlus size={19} color={ink[900]} />
+            <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: hue.ocean.bg, alignItems: "center", justifyContent: "center" }}>
+              <ShieldPlus size={19} color={hue.ocean.fg} />
             </View>
             <View style={{ flex: 1, minWidth: 0 }}>
               <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{p.isPrimary ? "Add your insurance" : `Add ${p.firstName}'s insurance`}</Text>
