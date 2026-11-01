@@ -1,7 +1,8 @@
 import { useRouter } from "expo-router";
 import { ChevronRight, MessageCircle, Search } from "lucide-react-native";
 import { useMemo, useState } from "react";
-import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { ScrollView, Text, TextInput, View } from "react-native";
+import { Pressable } from "@/components/ui/pressable";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { TierDot } from "@/components/chat/tier";

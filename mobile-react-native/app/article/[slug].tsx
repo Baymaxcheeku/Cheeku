@@ -2,7 +2,8 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Bookmark, BookmarkCheck, ChevronLeft, ExternalLink, MessageCircle, MessageCircleQuestion, Share2, ShieldCheck } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
-import { Linking, Pressable, ScrollView, Share, Text, View, type NativeScrollEvent, type NativeSyntheticEvent } from "react-native";
+import { Linking, ScrollView, Share, Text, View, type NativeScrollEvent, type NativeSyntheticEvent } from "react-native";
+import { Pressable } from "@/components/ui/pressable";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ArticleRow, CATEGORY_STYLE, Emblem, Eyebrow, type CategoryStyle } from "@/components/learn/parts";

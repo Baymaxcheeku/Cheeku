@@ -2,7 +2,8 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ArrowLeftRight, Check, ChevronRight, FileText, Lock, Plus, Trash2, UserCog } from "lucide-react-native";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, View } from "react-native";
+import { KeyboardAvoidingView, Platform, ScrollView, Text, View } from "react-native";
+import { Pressable } from "@/components/ui/pressable";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AvatarPicker } from "@/components/family/avatar-picker";

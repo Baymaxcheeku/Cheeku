@@ -1,7 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { BellRing, Check, ChevronRight, FileHeart, Lock, Phone, ShieldCheck, Stethoscope, type LucideIcon } from "lucide-react-native";
-import { Linking, Pressable, Text, View } from "react-native";
+import { Linking, Text, View } from "react-native";
+import { Pressable } from "@/components/ui/pressable";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Tap } from "@/components/ui/tap";

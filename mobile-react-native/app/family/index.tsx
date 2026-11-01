@@ -1,7 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { ChevronRight, Lock, Plus, ShieldCheck, Users } from "lucide-react-native";
-import { Pressable, RefreshControl, ScrollView, Text, View } from "react-native";
+import { RefreshControl, ScrollView, Text, View } from "react-native";
+import { Pressable } from "@/components/ui/pressable";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 

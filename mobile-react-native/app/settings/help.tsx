@@ -16,7 +16,8 @@ import {
   type LucideIcon,
 } from "lucide-react-native";
 import { useState } from "react";
-import { Linking, Pressable, Text, TextInput, View } from "react-native";
+import { Linking, Text, TextInput, View } from "react-native";
+import { Pressable } from "@/components/ui/pressable";
 
 import { Tap } from "@/components/ui/tap";
 import { MascotFigure } from "@/components/illustrations/sprout";

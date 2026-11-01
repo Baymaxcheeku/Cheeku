@@ -19,7 +19,8 @@ import {
   type LucideIcon,
 } from "lucide-react-native";
 import { useState } from "react";
-import { Pressable, RefreshControl, ScrollView, Share, Text, View } from "react-native";
+import { RefreshControl, ScrollView, Share, Text, View } from "react-native";
+import { Pressable } from "@/components/ui/pressable";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { FileSkeleton } from "@/components/ui/skeleton";

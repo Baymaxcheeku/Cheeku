@@ -3938,3 +3938,20 @@ bundle export; the web app's typecheck and tests (unchanged from main), its
 lint (fewer errors than main, since the demo code is no longer linted). The
 RLS audit fails the same 22 checks in both copies, as it does on main.
 **Not verified:** on a phone or in Expo Go.
+
+## iPhone: rows that stacked, a blank Due soon, a hidden bell · 2026-11-01
+
+Reported from Expo Go on an iPhone, on main after the SDK 58 move: on Home the action plan rows drew the icon, the title and the chevron one under another, and the streak card sat over the list. Due soon showed an icon in an empty box. Notifications fell apart (the selected "All" chip was blank, "Mark all read" stacked, the count tiles lost their shape). The Profile family row stacked, and the avatar picker misbehaved. The web build showed none of it.
+
+**Why.** NativeWind registers React Native's `Pressable` for `className`, so every Pressable renders through NativeWind's native runtime, className or not. That runtime copies an inline style with `{ ...style }` (`react-native-css-interop` 0.2.6, `applyRules`), and spreading a function gives `{}`. 58 Pressables in the app used `style={({ pressed }) => ({ flexDirection: "row", ... })}`, so each lost every rule: direction, padding, gap, background and size. The "All" chip went blank because it lost its ink background and kept its white text. The web uses a different NativeWind runtime, which is why it looked right.
+
+**Fix.**
+- `src/components/ui/pressable.tsx` is a drop-in Pressable. It keeps the pressed state itself and works out the callback before NativeWind sees it, so a plain object always arrives. Same props, same callback, so the 37 files that used React Native's Pressable only changed their import.
+- An ESLint rule (`no-restricted-imports`, an error) refuses `Pressable` from "react-native" in the app. `ui/tap.tsx` is exempt because it passes an array, never a callback.
+- The bell's "9+" badge sat inside the circle and covered the top half of the bell. It now sits on the rim.
+- Avatars draw the face first and lay a photo over it. The Profile card and its family row showed bare coloured circles on the phone, while Home showed the same people's faces. That cause is not pinned down from the cloud: the data is the same on both screens and the images bundle correctly for iOS (checked in an exported iOS bundle). A photo link that neither loads nor errors would leave exactly this, and now it leaves the face instead.
+
+The streak card overlap should go once the rows have their height back. That needs checking on the phone.
+
+**Verified here:** the typecheck, 537 tests, lint (no errors, the same 54 warnings as main), a probe file that the new rule rejects, and an iOS bundle export. Web screenshots of Home, Notifications, Profile and Edit profile against the local stand-in. Those only show layout and copy, and the web never had the bug.
+**Not verified:** on an iPhone. Check Home (plan rows, streak card, Due soon, bell), Notifications (header, count tiles, chips, rows), Profile (avatar, family row) and Edit profile (the face grid and choosing a face).

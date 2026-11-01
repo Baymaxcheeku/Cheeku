@@ -19,7 +19,8 @@ import {
 import { AskSkeleton } from "@/components/ui/skeleton";
 import { MemoryIcon, ReadsIcon, type AppIcon } from "@/components/ui/icons";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View, type ScrollViewInstance, type TextInputInstance } from "react-native";
+import { KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, View, type ScrollViewInstance, type TextInputInstance } from "react-native";
+import { Pressable } from "@/components/ui/pressable";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ProductAssessmentCard } from "@/components/ai/product-assessment-card";

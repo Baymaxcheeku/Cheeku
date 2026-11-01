@@ -88,6 +88,29 @@ const eslintConfig = [
       ],
     },
   },
+  {
+    // NativeWind's native runtime turns a Pressable `style` callback into `{}`
+    // (it copies the style with a spread), so on a phone those rows lost every
+    // layout rule while the web build looked fine (iPhone, 2026-11-01). The
+    // app's own Pressable resolves the callback first. See
+    // mobile-react-native/src/components/ui/pressable.tsx.
+    files: ["mobile-react-native/app/**/*.{ts,tsx}", "mobile-react-native/src/**/*.{ts,tsx}"],
+    ignores: ["mobile-react-native/src/components/ui/pressable.tsx", "mobile-react-native/src/components/ui/tap.tsx"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: [
+            {
+              name: "react-native",
+              importNames: ["Pressable"],
+              message: "Import Pressable from \"@/components/ui/pressable\". React Native's own loses a style callback under NativeWind on iOS and Android.",
+            },
+          ],
+        },
+      ],
+    },
+  },
 ];
 
 export default eslintConfig;

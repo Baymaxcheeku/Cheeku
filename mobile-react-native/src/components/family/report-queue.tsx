@@ -1,5 +1,6 @@
 import { AlertCircle, Camera, Check, FileText, FolderOpen, ImageIcon, X } from "lucide-react-native";
-import { ActivityIndicator, Pressable, Text, View } from "react-native";
+import { ActivityIndicator, Text, View } from "react-native";
+import { Pressable } from "@/components/ui/pressable";
 import Animated, { FadeInDown, LinearTransition } from "react-native-reanimated";
 
 import { glass } from "@/components/ui/glass";
