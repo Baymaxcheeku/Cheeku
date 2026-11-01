@@ -9,14 +9,18 @@ const { parseEmailLink } = await import("./email-link");
 const { statusFor } = await import("./state");
 
 describe("parseEmailLink: what the confirmation link carries", () => {
-  it("reads the session from the fragment (Expo Go and build URLs alike)", () => {
+  it("reads the one-time code (Expo Go and build URLs alike)", () => {
     for (const base of ["cheekuai://auth/callback", "exp://192.168.1.4:8081/--/auth/callback"]) {
-      expect(parseEmailLink(`${base}#access_token=a.b.c&refresh_token=r1&expires_in=3600&type=signup`)).toEqual({
-        kind: "session",
-        accessToken: "a.b.c",
-        refreshToken: "r1",
-      });
+      expect(parseEmailLink(`${base}?code=6f1c2d9e-0b7a`)).toEqual({ kind: "code", code: "6f1c2d9e-0b7a" });
     }
+  });
+
+  it("refuses a link that carries a ready-made session (login CSRF)", () => {
+    expect(parseEmailLink("cheekuai://auth/callback#access_token=a.b.c&refresh_token=r1&type=signup")).toEqual({
+      kind: "failed",
+    });
+    // Not even alongside a code: a doctored link is never half-trusted.
+    expect(parseEmailLink("cheekuai://auth/callback?code=c1#access_token=a&refresh_token=r")).toEqual({ kind: "failed" });
   });
 
   it("tells an expired link from a broken one", () => {
@@ -26,20 +30,18 @@ describe("parseEmailLink: what the confirmation link carries", () => {
     expect(parseEmailLink("cheekuai://auth/callback?error=server_error&error_description=x")).toEqual({ kind: "failed" });
   });
 
-  it("an error wins over tokens, so a doctored link is never half-trusted", () => {
-    expect(parseEmailLink("cheekuai://auth/callback?error=access_denied#access_token=a&refresh_token=r")).toEqual({
-      kind: "failed",
-    });
+  it("an error wins over a code", () => {
+    expect(parseEmailLink("cheekuai://auth/callback?error=access_denied&code=c1")).toEqual({ kind: "failed" });
   });
 
-  it("needs both tokens", () => {
-    expect(parseEmailLink("cheekuai://auth/callback#access_token=a")).toEqual({ kind: "empty" });
+  it("needs a code", () => {
+    expect(parseEmailLink("cheekuai://auth/callback?type=signup")).toEqual({ kind: "empty" });
     expect(parseEmailLink("cheekuai://auth/callback")).toEqual({ kind: "empty" });
     expect(parseEmailLink(null)).toEqual({ kind: "empty" });
   });
 
   it("a malformed escape is a failed link, not a crash", () => {
-    expect(parseEmailLink("cheekuai://auth/callback#access_token=%E0%A4%A&refresh_token=r")).toEqual({ kind: "failed" });
+    expect(parseEmailLink("cheekuai://auth/callback?code=%E0%A4%A")).toEqual({ kind: "failed" });
   });
 });
 

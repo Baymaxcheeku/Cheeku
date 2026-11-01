@@ -21,9 +21,10 @@ type Outcome = "working" | "expired" | "failed";
  * Where the confirmation email's link opens the app.
  *
  * Open to anyone (it is not inside a guard), because the person arriving
- * is by definition not signed in yet. The link carries a session from
- * Supabase's verify endpoint; `completeEmailLink` checks it with Supabase
- * before it is used, so an edited or forged link signs nobody in.
+ * is by definition not signed in yet. The link carries a one-time code from
+ * Supabase's verify endpoint; `completeEmailLink` exchanges it with the
+ * verifier only this phone holds (PKCE), so a link from anybody else's
+ * sign-up, or an edited or forged one, signs nobody in.
  *
  * On success the new session flips the guards and this screen sends the
  * person to the splash, which takes a new account to onboarding.

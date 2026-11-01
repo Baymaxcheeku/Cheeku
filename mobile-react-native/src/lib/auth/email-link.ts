@@ -6,9 +6,14 @@ import { supabase } from "@/lib/supabase/client";
  * THE CONFIRMATION LINK.
  *
  * Supabase's email sends the person to its own verify endpoint, which marks
- * the address confirmed and then redirects to `authRedirectUrl()` with the new
- * session in the URL fragment (`#access_token=…&refresh_token=…`). The app
- * opens on /auth/callback, which hands the fragment to `completeEmailLink`.
+ * the address confirmed and then redirects to `authRedirectUrl()` with a
+ * one-time code (`?code=…`). The app opens on /auth/callback, and
+ * `completeEmailLink` exchanges the code for a session using the verifier
+ * sign-up left in this phone's keychain (PKCE, lib/supabase/client.ts).
+ *
+ * A link that carries a ready-made session (`#access_token=…`) is refused.
+ * Only the implicit flow sends one, this app never asks for it, and accepting
+ * it would let anyone sign a victim in to an account of the sender's choosing.
  *
  * The address is confirmed on Supabase's side BEFORE the redirect. So a link
  * opened on a laptop, or a redirect the allow list rejects, still confirms the
@@ -27,7 +32,7 @@ export function authRedirectUrl(): string {
 }
 
 export type EmailLinkResult =
-  | { kind: "session"; accessToken: string; refreshToken: string }
+  | { kind: "code"; code: string }
   | { kind: "expired" }
   | { kind: "failed" }
   | { kind: "empty" };
@@ -35,9 +40,8 @@ export type EmailLinkResult =
 /**
  * Reads what the verify endpoint put on the URL. Pure, so it is tested.
  *
- * Parameters arrive in the fragment for the implicit flow (the client's
- * default) and in the query string when Supabase reports an error, so both are
- * read, fragment winning.
+ * The code arrives in the query string; Supabase reports errors in either the
+ * query or the fragment, so both are read.
  */
 export function parseEmailLink(url: string | null): EmailLinkResult {
   if (!url) return { kind: "empty" };
@@ -61,26 +65,26 @@ export function parseEmailLink(url: string | null): EmailLinkResult {
   const error = params.get("error_code") ?? params.get("error");
   if (error) return error === "otp_expired" ? { kind: "expired" } : { kind: "failed" };
 
-  const accessToken = params.get("access_token");
-  const refreshToken = params.get("refresh_token");
-  if (accessToken && refreshToken) return { kind: "session", accessToken, refreshToken };
-  return { kind: "empty" };
+  // A ready-made session is never accepted, whatever else the link carries.
+  if (params.has("access_token") || params.has("refresh_token")) return { kind: "failed" };
+
+  const code = params.get("code");
+  return code ? { kind: "code", code } : { kind: "empty" };
 }
 
 /**
  * Turns the link into a session on this phone.
  *
- * `setSession` checks the access token with Supabase rather than trusting
- * whatever arrived in a URL: a forged or edited link fails here and signs
- * nobody in.
+ * The exchange needs the verifier this phone stored when it asked for the
+ * email, so a code from anybody else's sign-up, or from an older email this
+ * phone has since replaced, fails here and signs nobody in. A link opened on
+ * another device fails the same way, but the address is confirmed already:
+ * logging in finishes it.
  */
 export async function completeEmailLink(url: string | null): Promise<"signedIn" | "expired" | "failed" | "empty"> {
   const parsed = parseEmailLink(url);
-  if (parsed.kind !== "session") return parsed.kind;
-  const { error } = await supabase.auth.setSession({
-    access_token: parsed.accessToken,
-    refresh_token: parsed.refreshToken,
-  });
+  if (parsed.kind !== "code") return parsed.kind;
+  const { error } = await supabase.auth.exchangeCodeForSession(parsed.code);
   return error ? "failed" : "signedIn";
 }
 

@@ -74,6 +74,16 @@ export const supabase = createClient(url, anonKey, {
      * does not exist here.
      */
     detectSessionInUrl: false,
+    /*
+     * PKCE, so an email link can only finish a sign-up THIS phone started.
+     * Sign-up and resend keep a secret verifier in the keychain; the link
+     * carries a one-time code that is useless without it. With the default
+     * implicit flow the link carried a whole session, and anyone could send
+     * a victim a link to the ATTACKER's account: opened on a signed-out
+     * phone it signed them in there, and whatever they uploaded next went
+     * to the attacker (login CSRF; security review, 2026-11-01).
+     */
+    flowType: "pkce",
   },
 });
 
