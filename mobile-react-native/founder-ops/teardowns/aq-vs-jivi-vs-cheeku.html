@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Why AQ Won</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:opsz,wght@14..32,400..700&display=swap">
+<style>
+/* Layout: the Cheeku vision-board surface as a long-form case study. Sticky section rail, verdict panel,
+   then one section per question, each led by its exhibit. AQ blue joins Jivi orange and Cheeku violet. */
+:root {
+  --bg: #F5F5F7; --surface: #FFFFFF; --surface-2: #F2F2F5; --surface-3: #E8E8ED;
+  --ink: #1D1D1F; --ink-2: #3A3A3F; --muted: #6E6E73; --faint: #A1A1A6;
+  --line: rgba(20, 20, 40, .08); --line-2: rgba(20, 20, 40, .14);
+  --accent: #5B4EF0; --accent-soft: #EEECFF; --on-accent: #FFFFFF;
+  --jivi: #D2551E; --jivi-soft: #FCEBE2; --aq: #1677FF; --aq-soft: #E6F0FF;
+  --lime: #E4FF7A; --lime-ink: #2F3D00;
+  --good: #248A3D; --good-soft: #E3F4E7; --warn: #B86E00; --warn-soft: #FBF0DC; --bad: #D70015; --bad-soft: #FDE4E6;
+  --sh-1: 0 0 0 0.5px rgba(20, 20, 40, .08), 0 1px 2px rgba(20, 20, 40, .05), 0 2px 8px rgba(20, 20, 40, .035);
+  --glass: rgba(245, 245, 247, .8);
+  --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+  --brand: 'Instrument Serif', Georgia, serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0B0B0E; --surface: #1C1C1F; --surface-2: #242428; --surface-3: #2F2F35;
+  --ink: #F5F5F7; --ink-2: #D6D6DC; --muted: #98989F; --faint: #63636B; --line: rgba(255, 255, 255, .08); --line-2: rgba(255, 255, 255, .15);
+  --accent: #8F87FF; --accent-soft: #24213F; --on-accent: #0B0B0E;
+  --jivi: #FF8A4C; --jivi-soft: #3A2116; --aq: #5AA2FF; --aq-soft: #14243D;
+  --lime: #D6F25C; --lime-ink: #1E2700;
+  --good: #32D06A; --good-soft: #15301E; --warn: #FFB340; --warn-soft: #36280F; --bad: #FF6B6B; --bad-soft: #3A1518;
+  --sh-1: 0 0 0 0.5px rgba(255, 255, 255, .08), 0 1px 2px rgba(0, 0, 0, .4);
+  --glass: rgba(11, 11, 14, .8);
+  color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #0B0B0E; --surface: #1C1C1F; --surface-2: #242428; --surface-3: #2F2F35;
+  --ink: #F5F5F7; --ink-2: #D6D6DC; --muted: #98989F; --faint: #63636B; --line: rgba(255, 255, 255, .08); --line-2: rgba(255, 255, 255, .15);
+  --accent: #8F87FF; --accent-soft: #24213F; --on-accent: #0B0B0E;
+  --jivi: #FF8A4C; --jivi-soft: #3A2116; --aq: #5AA2FF; --aq-soft: #14243D;
+  --lime: #D6F25C; --lime-ink: #1E2700;
+  --good: #32D06A; --good-soft: #15301E; --warn: #FFB340; --warn-soft: #36280F; --bad: #FF6B6B; --bad-soft: #3A1518;
+  --sh-1: 0 0 0 0.5px rgba(255, 255, 255, .08), 0 1px 2px rgba(0, 0, 0, .4);
+  --glass: rgba(11, 11, 14, .8);
+  color-scheme: dark; }
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 64px; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 400 15px/1.55 var(--font); -webkit-font-smoothing: antialiased; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
+h1, h2, h3, h4 { margin: 0; text-wrap: balance; }
+p { margin: 0; }
+.num { font-variant-numeric: tabular-nums; }
+.wrap { max-width: 1120px; margin: 0 auto; padding: 0 max(20px, env(safe-area-inset-left, 0px)); }
+
+/* Rail */
+.rail { position: sticky; top: 0; z-index: 20; background: var(--glass); -webkit-backdrop-filter: saturate(180%) blur(18px); backdrop-filter: saturate(180%) blur(18px); border-bottom: 0.5px solid var(--line-2); }
+.rail .wrap { display: flex; gap: 14px; align-items: center; min-height: 52px; overflow-x: auto; scrollbar-width: none; }
+.rail b { font: italic 400 22px/1 var(--brand); color: var(--accent); white-space: nowrap; }
+.rail nav { display: flex; gap: 2px; background: var(--surface-3); border-radius: 9px; padding: 2px; }
+.rail nav a { padding: 5px 10px; border-radius: 7px; font-size: 12.5px; font-weight: 550; color: var(--ink-2); white-space: nowrap; text-decoration: none; }
+.rail nav a:hover { background: var(--surface); }
+
+/* Hero */
+header.hero { padding: 44px 0 22px; display: grid; gap: 14px; }
+.eyebrow { font-size: 12px; font-weight: 650; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.hero h1 { font: 400 clamp(36px, 6vw, 60px)/1.02 var(--brand); letter-spacing: -0.01em; }
+.hero h1 em { color: var(--jivi); }
+.hero h1 span { color: var(--accent); font-style: italic; }
+.hero .lede { max-width: 68ch; font-size: 17px; color: var(--ink-2); }
+.legend { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 12.5px; color: var(--muted); }
+.tag { display: inline-flex; align-items: center; gap: 5px; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 650; letter-spacing: .02em; white-space: nowrap; vertical-align: 1px; }
+.tag::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.tag.tv { color: var(--good); background: var(--good-soft); }
+.tag.tr { color: var(--warn); background: var(--warn-soft); }
+.tag.ta { color: var(--accent); background: var(--accent-soft); }
+.tag.tm { color: var(--ink-2); background: var(--surface-3); }
+
+/* Sections */
+section { padding: 38px 0 8px; display: grid; gap: 18px; }
+.sh { display: grid; gap: 6px; }
+.sh .k { font: 600 12px/1 var(--font); letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+.sh h2 { font: 400 clamp(28px, 4vw, 40px)/1.08 var(--brand); }
+.sh p { max-width: 72ch; color: var(--ink-2); }
+h3 { font-size: 17px; font-weight: 650; letter-spacing: -0.01em; }
+.card { background: var(--surface); border-radius: 16px; box-shadow: var(--sh-1); padding: 20px; display: grid; gap: 12px; min-width: 0; align-content: start; }
+.grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+@media (max-width: 860px) { .grid2, .grid3 { grid-template-columns: minmax(0, 1fr); } }
+ul.tight { margin: 0; padding-left: 18px; display: grid; gap: 6px; }
+ul.tight li { padding-left: 2px; }
+.muted { color: var(--muted); }
+.small { font-size: 13px; }
+
+/* Verdict */
+.verdict { background: #16152A; color: #F5F5F7; border-radius: 20px; padding: 26px; display: grid; gap: 16px; }
+.verdict h2 { font: 400 clamp(26px, 3.6vw, 36px)/1.1 var(--brand); }
+.verdict ol { margin: 0; padding-left: 20px; display: grid; gap: 10px; max-width: 80ch; }
+.verdict li::marker { color: #E4FF7A; font-weight: 700; }
+.verdict b { color: #E4FF7A; font-weight: 650; }
+
+/* Tiles */
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+.tile { background: var(--surface); border-radius: 14px; box-shadow: var(--sh-1); padding: 14px 16px; display: grid; gap: 4px; }
+.tile .v { font: 600 26px/1.1 var(--font); letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.tile .l { font-size: 12.5px; color: var(--muted); }
+.tile.j .v { color: var(--jivi); }
+.tile.c .v { color: var(--accent); }
+
+/* Tables */
+.tw { overflow-x: auto; border-radius: 16px; box-shadow: var(--sh-1); background: var(--surface); }
+table { width: 100%; border-collapse: collapse; font-size: 13.5px; min-width: 760px; }
+th, td { text-align: left; vertical-align: top; padding: 11px 14px; border-bottom: 0.5px solid var(--line-2); }
+th { font-size: 11.5px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); font-weight: 650; background: var(--surface-2); }
+tr:last-child td { border-bottom: 0; }
+td.d { font-weight: 650; white-space: nowrap; }
+td.j { border-left: 3px solid var(--jivi); }
+td.c { border-left: 3px solid var(--accent); }
+.pill { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: 11.5px; font-weight: 650; white-space: nowrap; }
+.pill.g { color: var(--good); background: var(--good-soft); }
+.pill.w { color: var(--warn); background: var(--warn-soft); }
+.pill.b { color: var(--bad); background: var(--bad-soft); }
+
+/* Charts */
+.chart { width: 100%; overflow-x: auto; }
+.chart svg { display: block; width: 100%; height: auto; min-width: 560px; }
+.chart.sm svg { min-width: 0; max-width: 620px; }
+svg text { font-family: var(--font); }
+.cap { font-size: 12.5px; color: var(--muted); max-width: 80ch; }
+.keyrow { display: flex; flex-wrap: wrap; gap: 14px; font-size: 12.5px; color: var(--ink-2); }
+.keyrow span { display: inline-flex; align-items: center; gap: 6px; }
+.sw { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+
+/* Three columns of judgement */
+.judge h3 { display: flex; gap: 8px; align-items: center; }
+.judge .dot { width: 10px; height: 10px; border-radius: 50%; }
+
+/* Architectures */
+.arch { border-top: 4px solid var(--line-2); }
+.arch.rec { border-top-color: var(--accent); }
+.arch .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 12px; font-size: 13px; }
+.arch .stats div { display: grid; gap: 1px; }
+.arch .stats b { font-size: 15px; font-variant-numeric: tabular-nums; }
+.arch .stats span { color: var(--muted); font-size: 12px; }
+.badge { justify-self: start; font-size: 11.5px; font-weight: 700; padding: 3px 10px; border-radius: 999px; background: var(--accent); color: var(--on-accent); }
+
+/* Roadmap */
+.road { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 960px) { .road { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .road { grid-template-columns: minmax(0, 1fr); } }
+.q { background: var(--surface); border-radius: 16px; box-shadow: var(--sh-1); padding: 16px; display: grid; gap: 10px; align-content: start; }
+.q .when { font-size: 12px; font-weight: 650; color: var(--accent); letter-spacing: .04em; text-transform: uppercase; }
+.q h4 { font-size: 15px; }
+.q .lbl { font-size: 11px; font-weight: 700; color: var(--muted); letter-spacing: .06em; text-transform: uppercase; }
+.q ul { margin: 0; padding-left: 16px; display: grid; gap: 4px; font-size: 13px; }
+.avoid { display: flex; flex-wrap: wrap; gap: 8px; }
+.avoid span { font-size: 13px; padding: 5px 11px; border-radius: 999px; background: var(--bad-soft); color: var(--bad); font-weight: 550; text-decoration: line-through; text-decoration-thickness: 1px; }
+
+/* Failure list */
+.fails { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; counter-reset: f; }
+@media (max-width: 860px) { .fails { grid-template-columns: minmax(0, 1fr); } }
+.fail { background: var(--surface); border-radius: 14px; box-shadow: var(--sh-1); padding: 16px 16px 16px 54px; position: relative; display: grid; gap: 6px; counter-increment: f; }
+.fail::before { content: counter(f); position: absolute; left: 16px; top: 15px; width: 26px; height: 26px; border-radius: 50%; background: var(--jivi-soft); color: var(--jivi); font-weight: 700; font-size: 13px; display: grid; place-items: center; }
+.fail h4 { font-size: 15px; }
+.fail p { font-size: 13.5px; color: var(--ink-2); }
+.fail .w { font-size: 12.5px; color: var(--muted); }
+.fail .w b { color: var(--ink); font-weight: 600; }
+
+footer { padding: 40px 0 60px; display: grid; gap: 10px; font-size: 13px; color: var(--muted); }
+footer ol { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
+
+.hero h1 b { color: var(--aq); font-weight: 400; }
+.tile.q .v { color: var(--aq); }
+td.q { border-left: 3px solid var(--aq); }
+.heat td.lv { text-align: center; font-weight: 650; font-size: 12.5px; white-space: nowrap; }
+.lv.s { background: var(--good-soft); color: var(--good); }
+.lv.p { background: var(--warn-soft); color: var(--warn); }
+.lv.n { background: var(--bad-soft); color: var(--bad); }
+.xfer { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0; }
+.xfer > div { padding: 12px 14px; border-bottom: 0.5px solid var(--line-2); font-size: 13.5px; }
+.xfer > div:nth-child(odd) { border-right: 0.5px solid var(--line-2); }
+.xfer .h { font-size: 11.5px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); font-weight: 650; background: var(--surface-2); }
+@media (max-width: 640px) { .xfer { grid-template-columns: minmax(0, 1fr); } .xfer > div:nth-child(odd) { border-right: 0; } }
+.moves { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; counter-reset: m; }
+@media (max-width: 860px) { .moves { grid-template-columns: minmax(0, 1fr); } }
+.move { background: var(--surface); border-radius: 14px; box-shadow: var(--sh-1); padding: 16px 16px 16px 54px; position: relative; display: grid; gap: 6px; counter-increment: m; }
+.move::before { content: counter(m); position: absolute; left: 16px; top: 15px; width: 26px; height: 26px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); font-weight: 700; font-size: 13px; display: grid; place-items: center; }
+.move h4 { font-size: 15px; }
+.move p { font-size: 13.5px; color: var(--ink-2); }
+.move .from { font-size: 12px; color: var(--muted); }
+</style>
+</head>
+<body>
+<div class="rail"><div class="wrap">
+  <b>Cheeku</b>
+  <nav aria-label="Sections">
+    <a href="#verdict">Verdict</a><a href="#growth">Growth</a><a href="#breakdown">Why it worked</a><a href="#cracks">Cracks</a><a href="#three">AQ · Jivi · Cheeku</a><a href="#transfer">What transfers</a><a href="#odds">Cheeku's odds</a><a href="#better">The better way</a><a href="#sources">Sources</a>
+  </nav>
+</div></div>
+
+<main class="wrap">
+
+<header class="hero">
+  <div class="eyebrow">Case study · 1 Nov 2026 · founders only · companion to the Jivi teardown</div>
+  <h1><b>AQ</b> did not win on AI. It won on <span>distribution, trust and fulfilment.</span></h1>
+  <p class="lede">Ant Group's AI health app went from launch in June 2025 to 150 million users in September 2026. Jivi, with a better benchmark score, shut down in June 2026. This page breaks down why, what is still unproven about AQ, and which parts of it a ₹26 crore Indian startup can actually use.</p>
+  <div class="legend">Evidence levels:
+    <span class="tag tv">Verified</span> company release or named source
+    <span class="tag tr">Reported</span> press or analyst claim
+    <span class="tag ta">Analysis</span> our inference
+  </div>
+</header>
+
+<section id="verdict" style="padding-top:10px">
+  <div class="verdict">
+    <h2>The verdict in five lines</h2>
+    <ol>
+      <li>AQ's success is <b>scale, not yet a business</b>: 150M users and about 20M questions a day, with no disclosed revenue model. Ant's CEO calls it a <b>"must-win"</b> with saturated spending through 2026.</li>
+      <li>It worked because Ant brought <b>a decade of hospital rails, 300,000 verified doctors, insurance payment and a billion Alipay users</b> to a product that answers, then books, then pays. The model was the least special part.</li>
+      <li>Jivi had the model and none of the rest. <b>Cheeku sits in between</b>: real partner rails and a sharper user (the family health manager), but no super-app, no doctor network of its own and a tiny budget.</li>
+      <li>What transfers to India: <b>no-ads trust, named doctors who review AI answers, built-for-parents design, fulfilment in the same chat, and habit campaigns</b>. What does not: Alipay, the Spring Festival Gala, cash red packets and buying a doctor platform.</li>
+      <li>The better way for Cheeku: <b>WhatsApp for reach, the app for fulfilment, employers for revenue, named doctors for trust</b>, and one free hero campaign instead of paid installs.</li>
+    </ol>
+  </div>
+</section>
+
+<section aria-label="AQ at a glance">
+  <div class="tiles">
+    <div class="tile q"><div class="v num">150M</div><div class="l">Users, Sep 2026 <span class="tag tv">Verified</span></div></div>
+    <div class="tile q"><div class="v num">~20M</div><div class="l">Health questions a day, Sep 2026 <span class="tag tv">Verified</span></div></div>
+    <div class="tile q"><div class="v num">300K</div><div class="l">Verified doctors on AQ for Doctor (ex-Haodf) <span class="tag tv">Verified</span></div></div>
+    <div class="tile q"><div class="v num">5,000</div><div class="l">Hospitals connected for digital services <span class="tag tv">Verified</span></div></div>
+    <div class="tile q"><div class="v num">55%</div><div class="l">Users from tier-3 cities and below <span class="tag tr">Reported</span></div></div>
+    <div class="tile q"><div class="v num">500+</div><div class="l">Named physicians with AI doctor agents <span class="tag tv">Verified</span></div></div>
+  </div>
+</section>
+
+<section id="growth">
+  <div class="sh"><div class="k">The growth curve</div><h2>From launch to 150 million in 15 months</h2>
+    <p>Ant changed the metric along the way: monthly active users until January 2026, then "users". Read the jump from 30M to 100M with that in mind, and with the cash campaign that ran in between.</p></div>
+  <div class="grid2">
+    <div class="card">
+      <h3>Users, millions <span class="tag tv">Verified</span></h3>
+      <div class="chart sm" id="users"></div>
+      <p class="cap">Hollow points are monthly active users; filled points are "users" as Ant reported them. The Spring Festival Gala campaign (Feb 2026) paid new users ¥16.8 each.</p>
+    </div>
+    <div class="card">
+      <h3>Health questions a day, millions <span class="tag tv">Verified</span></h3>
+      <div class="chart sm" id="questions"></div>
+      <p class="cap">Questions roughly track users: about 0.13 to 0.33 questions per user a day. That ratio, not the user count, is the engagement signal worth copying.</p>
+    </div>
+  </div>
+  <div class="card">
+    <h3>Timeline</h3>
+    <div class="chart" id="timeline"></div>
+  </div>
+</section>
+
+<section id="breakdown">
+  <div class="sh"><div class="k">Breakdown</div><h2>Seven reasons AQ worked</h2>
+    <p>Ranked by how much each would be missed if it were taken away. The first three are things money alone cannot buy quickly.</p></div>
+  <div class="grid2">
+    <div class="card"><h3>1 · A decade of rails before the app <span class="tag tv">Verified</span></h3>
+      <p class="small">Alipay has booked hospital appointments since 2014. AQ launched already connected to 5,000 hospitals, with medicine purchase and payment through basic medical insurance e-certificates. An industry founder told 健闻咨询 the core value of a health app is <i>fulfilment</i>, not information. AQ could fulfil on day one.</p></div>
+    <div class="card"><h3>2 · It bought the doctors' trust <span class="tag tv">Verified</span></h3>
+      <p class="small">Ant acquired Haodf (Jan 2025), now AQ for Doctor with 300,000 verified physicians. 500+ named physicians run AI doctor agents trained on their own practice. An "AI answer plus doctor review" option covers 16 specialties. The AI is never alone.</p></div>
+    <div class="card"><h3>3 · It said what it is not <span class="tag tv">Verified</span></h3>
+      <p class="small">"AQ does not provide medical diagnoses or replace professional doctors." On 29 Dec 2025 it published a pledge: no ads, no paid ranking, no commercial influence in answers. It renamed itself from AQ to A-Fu ("good fortune"), from a tool to a health friend.</p></div>
+    <div class="card"><h3>4 · Distribution and money at national scale <span class="tag tr">Reported</span></h3>
+      <p class="small">A billion Alipay users, the CCTV Spring Festival Gala, ¥16.8 red packets for new users, CCTV partnership, and an ad spend of "a few hundred million yuan" in the rename month. CEO Han Xinyi: a must-win, with saturated investment in 2026.</p></div>
+    <div class="card"><h3>5 · Built for parents <span class="tag tr">Reported</span></h3>
+      <p class="small">55% of users in tier-3 cities and below, a third middle-aged or older. Elder mode with large type, voice questions, and recognition of 10+ dialects including Cantonese and Hokkien. The family is the unit even when one person types.</p></div>
+    <div class="card"><h3>6 · Habit campaigns, not features <span class="tag tv">Verified</span></h3>
+      <p class="small">"Free report reading for 100 million people" with CCTV; a national weight-loss drive with a ¥0.01 body-fat scale and Huawei, Xiaomi device links. 2.75M people joined and lost 2.5M kg by Sep 2026.</p></div>
+    <div class="card"><h3>7 · Government as a partner <span class="tag tv">Verified</span></h3>
+      <p class="small">Digital health assistants with the Zhejiang and Chongqing health commissions, a medical-insurance assistant (Yibaoer) with local insurance bureaus, and its Healthcare Large Model inside hospital AI appliances.</p></div>
+    <div class="card" style="background:var(--aq-soft)"><h3>What was not a reason</h3>
+      <p class="small">Model quality. Ant has a Healthcare Large Model, but no independent safety evaluation of AQ has been published (UCL review, Sep 2026). AQ's edge was everything around the model, which is exactly where Jivi had nothing.</p></div>
+  </div>
+</section>
+
+<section id="cracks">
+  <div class="sh"><div class="k">Honest cracks</div><h2>What is still unproven about AQ</h2></div>
+  <div class="grid3">
+    <div class="card"><h3>Retention after the cash</h3><p class="small">QuestMobile (as reported by 证券之星): Q2 2026 monthly downloads down 63.5% and monthly active users down 31.8% on Q1. Analysts claimed over 70M early users were one-time subsidy visitors. <span class="tag tr">Reported</span></p></div>
+    <div class="card"><h3>No business model yet</h3><p class="small">China Electronics News (Jan 2026): the goal is serving and accumulating users; the business model is not yet clear. A user wrote that they wish it had a paid tier. <span class="tag tr">Reported</span></p></div>
+    <div class="card"><h3>Concentration risk</h3><p class="small">One company controls triage, doctor referral, providers, pharmacy and insurance payment, which a UCL review flags as the sharpest conflict-of-interest risk among consumer health AIs. <span class="tag tv">Verified</span></p></div>
+  </div>
+  <p class="small muted">Read AQ as a strategic loss leader for a company that already earns from payments and insurance. It proves the demand and the product shape. It does not prove that a standalone company can pay for it.</p>
+</section>
+
+<section id="three">
+  <div class="sh"><div class="k">Three-way comparison</div><h2>AQ, Jivi and Cheeku on the factors that decided the outcome</h2></div>
+  <div class="tw">
+    <table class="heat">
+      <thead><tr><th>Factor</th><th>AQ (Ant Group)</th><th>Jivi (closed)</th><th>Cheeku (plan)</th><th>What it means for Cheeku</th></tr></thead>
+      <tbody>
+        <tr><td class="d">Distribution</td><td class="lv s">1B Alipay users</td><td class="lv n">Viral installs, global</td><td class="lv p">India, organic, employers</td><td class="small">Our hardest gap. Employers and WhatsApp are the only cheap channels.</td></tr>
+        <tr><td class="d">Fulfilment</td><td class="lv s">Book, buy, pay with insurance</td><td class="lv n">None</td><td class="lv p">Partner rails, 12,000+ pincodes</td><td class="small">Our strongest asset against Jivi. Make booking the default end of every answer.</td></tr>
+        <tr><td class="d">Doctor trust</td><td class="lv s">300K doctors, 500+ named agents</td><td class="lv p">100+ doctors partnered</td><td class="lv p">Clinician-signed rules</td><td class="small">Add named doctors who review answers on request.</td></tr>
+        <tr><td class="d">Positioning</td><td class="lv s">Health friend, never diagnoses</td><td class="lv n">AI doctor</td><td class="lv s">Family memory, never diagnoses</td><td class="small">Right already. Add a no-ads pledge.</td></tr>
+        <tr><td class="d">Target user</td><td class="lv s">Parents, tier 3+</td><td class="lv n">Anyone, anywhere</td><td class="lv s">The family health manager</td><td class="small">Sharper than AQ for paying: the adult child pays for parents.</td></tr>
+        <tr><td class="d">Habit loop</td><td class="lv p">Campaigns, devices, coaching</td><td class="lv n">Episodic symptom checks</td><td class="lv p">Nudges, weekly review, retest</td><td class="small">Tie the loop to a booked test every quarter.</td></tr>
+        <tr><td class="d">Model strategy</td><td class="lv s">Own model, inside an ecosystem</td><td class="lv n">Own model, nothing around it</td><td class="lv p">APIs now, own model gated</td><td class="small">Never lead with the model.</td></tr>
+        <tr><td class="d">Capital</td><td class="lv s">Group balance sheet</td><td class="lv n">$3M</td><td class="lv p">₹26 cr seed</td><td class="small">We cannot buy users. Spend on fulfilment and trust.</td></tr>
+        <tr><td class="d">Government</td><td class="lv s">Health commissions, insurance bureaus</td><td class="lv p">IndiaAI award</td><td class="lv p">ABDM planned 2027</td><td class="small">ABHA pull and one state pilot later, as a channel.</td></tr>
+        <tr><td class="d">Monetisation</td><td class="lv n">Not disclosed</td><td class="lv n">Tested too late</td><td class="lv p">Plans and bookings from launch</td><td class="small">We must earn early; AQ does not have to.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="card">
+    <h3>Strength on each success factor, 1 to 5 <span class="tag ta">Analysis</span></h3>
+    <div class="keyrow"><span><i class="sw" style="background:var(--aq)"></i>AQ</span><span><i class="sw" style="background:var(--jivi)"></i>Jivi</span><span><i class="sw" style="background:var(--faint)"></i>Cheeku today</span><span><i class="sw" style="background:var(--accent)"></i>Cheeku with the moves below</span></div>
+    <div class="chart" id="factors"></div>
+    <p class="cap">Our scores. Cheeku can close most of the gap on fulfilment, trust, user fit and habit. Distribution and capital stay well below AQ whatever we do, which is why the strategy has to make each user worth more and cost less.</p>
+  </div>
+</section>
+
+<section id="transfer">
+  <div class="sh"><div class="k">What transfers to India</div><h2>Copy the shape, swap the engine</h2></div>
+  <div class="tw">
+    <div class="xfer">
+      <div class="h">AQ did this</div><div class="h">Cheeku's Indian version</div>
+      <div>Alipay as the front door for a billion users</div><div><b>WhatsApp front door</b> for questions and reports; the app for booking and the family file. Chinese rivals without a super-app went the WeChat-bot route.</div>
+      <div>Bought Haodf: 300K doctors</div><div><b>A named panel of 20 to 50 Indian specialists</b> who review AI answers on request, paid per review or inside the care plan.</div>
+      <div>500+ physician AI agents</div><div>Later: doctor-signed answer packs for diabetes, thyroid, BP and pregnancy, credited by name.</div>
+      <div>Insurance e-certificate payments</div><div>ABHA record pull (2027) and an insurer wellness channel; never underwriting in year one.</div>
+      <div>No-ads pledge</div><div><b>Publish the same pledge at launch.</b> It separates us from every pharmacy and booking app.</div>
+      <div>Elder mode, 10+ dialects</div><div>Parent mode on day one: large type, Hindi voice, family sharing set up by the child.</div>
+      <div>"Free report reading for 100M people" with CCTV</div><div><b>Free report decode campaign</b> with a lab partner and a media partner; costs inference, not cash.</div>
+      <div>Weight-loss drive, ¥0.01 scale</div><div><b>90-day HbA1c challenge</b>: a discounted home test on day 0 and day 90. Every participant books twice.</div>
+      <div>Spring Festival Gala, ¥16.8 red packets</div><div>Not affordable and not wanted. Diwali employer gifting brings families in already paid for.</div>
+    </div>
+  </div>
+</section>
+
+<section id="odds">
+  <div class="sh"><div class="k">Cheeku's odds</div><h2>Where Cheeku is stronger than AQ, and where it never will be</h2></div>
+  <div class="grid2">
+    <div class="card"><h3>Stronger than AQ</h3>
+      <ul class="tight small">
+        <li><b>A paying user.</b> AQ serves parents for free. Cheeku sells to the adult child who already pays for the parents' tests.</li>
+        <li><b>Neutrality.</b> AQ's own triage routes to its own doctors, pharmacy and payments. Cheeku books the best partner for the pincode and price.</li>
+        <li><b>The family file.</b> AQ is built around one user with a family section. Cheeku's memory is per member and per family from the start.</li>
+        <li><b>India has no AQ.</b> No Indian super-app is building this as a standalone, funded product today.</li>
+      </ul></div>
+    <div class="card"><h3>Never as strong as AQ</h3>
+      <ul class="tight small">
+        <li><b>Distribution.</b> No billion-user parent app; every user has to be earned.</li>
+        <li><b>Capital.</b> AQ spent more on ads in one month than our whole seed. We cannot win a subsidy war, so we must not start one.</li>
+        <li><b>Payments and insurance.</b> No equivalent of paying hospital bills with insurance inside the app.</li>
+        <li><b>The threat.</b> If Jio, PhonePe, Paytm or Google build an Indian AQ, they start where Ant started. Our defence is employers, the family graph and speed.</li>
+      </ul></div>
+  </div>
+  <div class="card">
+    <h3>What has to be true for Cheeku to succeed</h3>
+    <div class="tw" style="box-shadow:none">
+      <table style="min-width:0">
+        <thead><tr><th>Condition</th><th>Measured by</th><th>By when</th><th>Confidence today</th></tr></thead>
+        <tbody>
+          <tr><td>Families come back without being paid to</td><td>Day-30 retention ≥ 25%</td><td>Closed beta, Q1 2027</td><td><span class="pill w">Medium</span></td></tr>
+          <tr><td>Answers end in bookings</td><td>≥ 3% of monthly users book care</td><td>Q2 2027</td><td><span class="pill w">Medium</span></td></tr>
+          <tr><td>Employers pay for families</td><td>10 employers live, seat payback under 6 months</td><td>Q2 2027</td><td><span class="pill w">Medium</span></td></tr>
+          <tr><td>Named doctors lend trust</td><td>20 specialists reviewing answers</td><td>Q2 2027</td><td><span class="pill g">High</span></td></tr>
+          <tr><td>Growth is mostly earned</td><td>≥ 60% of new users organic or employer-led</td><td>Q4 2027</td><td><span class="pill b">Low</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section id="better">
+  <div class="sh"><div class="k">The better way</div><h2>Eight moves for Cheeku, learned from AQ and Jivi together</h2></div>
+  <div class="moves">
+    <div class="move"><h4>Sell to the child, design for the parent</h4><p>Parent mode, Hindi voice and family sharing on day one; the adult child sets it up and pays.</p><p class="from">From AQ: 55% tier-3 users, elder mode, dialects</p></div>
+    <div class="move"><h4>Every answer ends in an action</h4><p>A test, a consult, a reminder, a retest. Information is free; fulfilment is the product.</p><p class="from">From AQ: fulfilment first. From Jivi: free answers alone die.</p></div>
+    <div class="move"><h4>Borrow trust from named doctors</h4><p>A panel of Indian specialists who review AI answers on request. Make the review the paid upgrade.</p><p class="from">From AQ: "AI answer plus doctor review" in 16 specialties</p></div>
+    <div class="move"><h4>Publish a no-ads pledge</h4><p>No ads, no paid ranking, no partner preference in answers. Put it on the home screen.</p><p class="from">From AQ: the 29 Dec 2025 statement</p></div>
+    <div class="move"><h4>One free hero campaign, not paid installs</h4><p>"Free report decode" with a lab and a media partner, then a 90-day HbA1c challenge that books two tests per family.</p><p class="from">From AQ: report reading for 100M, the weight-loss drive</p></div>
+    <div class="move"><h4>WhatsApp for reach, the app for fulfilment</h4><p>Questions and reports arrive on WhatsApp; bookings, the family file and payments live in the app.</p><p class="from">From China: rivals without a super-app used WeChat bots</p></div>
+    <div class="move"><h4>Employers are our Alipay</h4><p>An employer brings hundreds of families at once, already paid for. Start in month one.</p><p class="from">From our model: seat payback about 2.7 months</p></div>
+    <div class="move"><h4>Never buy users with cash</h4><p>Red packets bought AQ installs that left (reported). We would buy nothing but churn. Judge every channel on day-30 retention.</p><p class="from">From AQ's Q2 2026 drop, and Jivi's installs</p></div>
+  </div>
+  <div class="card">
+    <h3>Do not copy from AQ</h3>
+    <div class="avoid">
+      <span>Cash red packets</span><span>National TV launches</span><span>100+ services at launch</span><span>Buying a doctor platform</span><span>Training our own health model now</span><span>Device subsidies</span><span>Mental health coaching</span><span>Insurance payments in year one</span>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="wrap" id="sources">
+  <div class="eyebrow">Sources</div>
+  <ol>
+    <li><a href="https://www.antgroup.com/en/news-media/press-releases/1750919400000">Ant Group: launch of AQ</a> (26 Jun 2025)</li>
+    <li><a href="https://www.antgroup.com/en/news-media/press-releases/1765779300000">Ant Group: AQ upgrades, 15M MAU, A-Fu rename</a> (15 Dec 2025)</li>
+    <li><a href="https://pandaily.com/ant-group-extends-ant-a-fu-new-user-bonus-campaign">Pandaily: A-Fu new-user bonus extended; 30M MAU as of Jan 2026</a> (14 Feb 2026)</li>
+    <li><a href="https://www.businesswire.com/news/home/20260812917154/en/Ant-Group-launches-AQ-for-Doctor-bringing-an-AI-powered-workstation-to-millions-of-physicians">Business Wire: AQ for Doctor, 300K physicians, 16 specialties</a> (12 Aug 2026)</li>
+    <li><a href="https://www.mobihealthnews.com/news/asia/ant-group-upgrades-doctor-app-ai">MobiHealthNews: Ant Group upgrades doctor app with AI</a> (21 Aug 2026)</li>
+    <li><a href="https://www.antgroup.com/en/news-media/press-releases/1789024200000">Ant Group: AQ reaches 150M users</a> (10 Sep 2026)</li>
+    <li><a href="https://baike.baidu.com/item/%E8%9A%82%E8%9A%81%E9%98%BF%E7%A6%8F/67085925">Baidu Baike: 蚂蚁阿福 (timeline, 55% tier-3 users, no-ads statement)</a></li>
+    <li><a href="https://www.phirda.com/artilce_42713.html?module=trackingCodeGenerator">健闻咨询 via phirda: 医疗AI不打流量战 (ad spend, CEO "must win")</a> (3 Jun 2026)</li>
+    <li><a href="https://news.10jqka.com.cn/20260722/c678351285.shtml">证券之星 via 10jqka: 一分钱体脂秤 (Spring Festival Gala, QuestMobile Q2 decline)</a> (22 Jul 2026)</li>
+    <li><a href="https://www.toutiao.com/article/7591910115700146694/">中国电子报: 蚂蚁阿福的"健康体检"报告 (business model unclear)</a> (6 Jan 2026)</li>
+    <li><a href="https://www.eet-china.com/mp/a463765.html">EET China: a heavy user on the no-ads pledge</a> (30 Dec 2025)</li>
+    <li><a href="https://discovery.ucl.ac.uk/id/eprint/10230188/1/Keane_Revised%20Manuscript_Tracked.pdf">UCL: The New Health AI Infrastructure for Consumers</a> (Sep 2026)</li>
+    <li>Jivi facts: see the companion <a href="https://claude.ai/artifact/GQ1fdDj53ySFL4GiAa5gb8">Jivi teardown</a>. Cheeku figures: financial model v2.</li>
+  </ol>
+  <p>The infographic shared in chat says "30M+ MAU (Jan 2026)", "10M+ questions daily", "5,000+ hospitals" and "1 million+ physicians". The first three match Ant's figures. The 1 million refers to doctors reachable through hospital digital services at launch; Ant's own count of verified doctors on its platform is 300,000. "Most recommended among Chinese physicians surveyed" has no source we could find.</p>
+</footer>
+
+<script>
+(function () {
+  const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const NS = 'http://www.w3.org/2000/svg';
+  function el(tag, attrs, text) { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (text != null) e.textContent = text; return e; }
+  function svg(id, w, h, label) { const host = document.getElementById(id); host.innerHTML = ''; const s = el('svg', { viewBox: `0 0 ${w} ${h}`, role: 'img', 'aria-label': label }); host.appendChild(s); return s; }
+  const mi = s => { const [y, m] = s.split('-').map(Number); return y * 12 + m; };
+
+  function draw() {
+    const C = { ink: css('--ink'), ink2: css('--ink-2'), muted: css('--muted'), faint: css('--faint'), line: css('--line-2'), accent: css('--accent'), jivi: css('--jivi'), aq: css('--aq'), surface: css('--surface') };
+
+    // Users over time
+    (function () {
+      const pts = [['2025-06', 0, 'l'], ['2025-12', 15, 'mau'], ['2026-01', 30, 'mau'], ['2026-02', 100, 'u'], ['2026-08', 100, 'u'], ['2026-09', 150, 'u']];
+      const W = 560, H = 280, L = 44, R = 20, T = 20, B = 36, a = mi('2025-05'), b = mi('2026-10');
+      const s = svg('users', W, H, 'AQ users in millions from June 2025 to September 2026');
+      const X = d => L + (mi(d) - a) / (b - a) * (W - L - R), Y = v => T + (1 - v / 160) * (H - T - B);
+      [0, 50, 100, 150].forEach(v => { s.appendChild(el('line', { x1: L, x2: W - R, y1: Y(v), y2: Y(v), stroke: C.line, 'stroke-dasharray': v ? '2 3' : '' })); s.appendChild(el('text', { x: L - 8, y: Y(v) + 4, 'text-anchor': 'end', 'font-size': 11, fill: C.muted }, v)); });
+      [['2025-07', 'Jul 25'], ['2025-10', 'Oct'], ['2026-01', 'Jan 26'], ['2026-04', 'Apr'], ['2026-07', 'Jul'], ['2026-10', 'Oct']].forEach(([d, t]) => s.appendChild(el('text', { x: X(d), y: H - 12, 'text-anchor': 'middle', 'font-size': 11, fill: C.muted }, t)));
+      s.appendChild(el('rect', { x: X('2026-02') - 9, y: T, width: 18, height: H - T - B, fill: C.aq, opacity: 0.08 }));
+      s.appendChild(el('text', { x: X('2026-02') + 12, y: T + 12, 'font-size': 10.5, fill: C.aq, 'font-weight': 650 }, 'Spring Festival + ¥16.8'));
+      let d = ''; pts.forEach((p, i) => { d += (i ? 'L' : 'M') + X(p[0]) + ' ' + Y(p[1]); });
+      s.appendChild(el('path', { d, fill: 'none', stroke: C.aq, 'stroke-width': 2.5 }));
+      pts.forEach(p => {
+        s.appendChild(el('circle', { cx: X(p[0]), cy: Y(p[1]), r: 5, fill: p[2] === 'u' ? C.aq : C.surface, stroke: C.aq, 'stroke-width': 2 }));
+        if (p[1] && !(p[0] === '2026-08')) s.appendChild(el('text', { x: X(p[0]) - 8, y: Y(p[1]) - 9, 'text-anchor': 'end', 'font-size': 11.5, 'font-weight': 650, fill: C.ink }, p[1] + 'M'));
+      });
+      s.appendChild(el('text', { x: X('2025-06') + 6, y: Y(0) - 8, 'font-size': 11, fill: C.muted }, 'Launch'));
+    })();
+
+    // Questions per day
+    (function () {
+      const d = [['Dec 2025', 5], ['Jan 2026', 10], ['Sep 2026', 20]];
+      const W = 560, H = 280, L = 44, R = 20, T = 20, B = 36;
+      const s = svg('questions', W, H, 'AQ health questions per day in millions');
+      const Y = v => T + (1 - v / 22) * (H - T - B), bw = 90, gap = (W - L - R - bw * d.length) / (d.length + 1);
+      [0, 5, 10, 15, 20].forEach(v => { s.appendChild(el('line', { x1: L, x2: W - R, y1: Y(v), y2: Y(v), stroke: C.line, 'stroke-dasharray': v ? '2 3' : '' })); s.appendChild(el('text', { x: L - 8, y: Y(v) + 4, 'text-anchor': 'end', 'font-size': 11, fill: C.muted }, v)); });
+      d.forEach((r, i) => { const x = L + gap + i * (bw + gap); s.appendChild(el('rect', { x, y: Y(r[1]), width: bw, height: Y(0) - Y(r[1]), rx: 6, fill: C.aq })); s.appendChild(el('text', { x: x + bw / 2, y: Y(r[1]) - 7, 'text-anchor': 'middle', 'font-size': 12, 'font-weight': 650, fill: C.ink }, r[1] + 'M')); s.appendChild(el('text', { x: x + bw / 2, y: H - 12, 'text-anchor': 'middle', 'font-size': 11.5, fill: C.ink2 }, r[0])); });
+    })();
+
+    // Timeline
+    (function () {
+      const ev = [
+        ['2023-11', 'Zhejiang AI assistant', 'with health commission'], ['2025-01', 'Buys Haodf', 'online doctors'], ['2025-06', 'AQ launches', '5,000 hospitals'],
+        ['2025-12', 'Renamed A-Fu', '15M MAU, No. 3 App Store'], ['2026-02', 'Spring Festival Gala', '100M users'],
+        ['2026-06', 'Weight-loss drive', 'CCTV deal in May'], ['2026-09', '150M users', 'AQ for Doctor in Aug'],
+      ];
+      const W = 1040, H = 180, x0 = 40, x1 = W - 60, a = mi('2023-10'), b = mi('2026-10');
+      const X = d => x0 + (mi(d) - a) / (b - a) * (x1 - x0);
+      const s = svg('timeline', W, H, 'AQ timeline from November 2023 to September 2026');
+      s.appendChild(el('line', { x1: x0, x2: x1, y1: 90, y2: 90, stroke: C.line, 'stroke-width': 2 }));
+      ['2024', '2025', '2026'].forEach(y => { const x = X(y + '-01'); s.appendChild(el('line', { x1: x, x2: x, y1: 84, y2: 96, stroke: C.faint })); s.appendChild(el('text', { x, y: 112, 'text-anchor': 'middle', 'font-size': 11, fill: C.muted }, y)); });
+      ev.forEach((e, i) => {
+        const x = X(e[0]), up = i % 2 === 0, ty = up ? 26 : 150, last = i === ev.length - 1;
+        const anchor = i === 0 ? 'start' : last ? 'end' : 'middle';
+        s.appendChild(el('line', { x1: x, x2: x, y1: up ? 42 : 134, y2: up ? 84 : 96, stroke: C.line }));
+        s.appendChild(el('circle', { cx: x, cy: 90, r: last ? 7 : 5, fill: last ? C.aq : C.surface, stroke: C.aq, 'stroke-width': 2 }));
+        s.appendChild(el('text', { x, y: ty, 'text-anchor': anchor, 'font-size': 12, 'font-weight': 650, fill: C.ink }, e[1]));
+        s.appendChild(el('text', { x, y: ty + 14, 'text-anchor': anchor, 'font-size': 10.5, fill: C.muted }, e[2]));
+      });
+    })();
+
+    // Factor dot plot
+    (function () {
+      const d = [
+        ['Distribution', 5, 2, 2, 3], ['Fulfilment', 5, 1, 3, 4], ['Doctor trust', 5, 2, 2, 4], ['Positioning', 5, 2, 4, 5], ['Target user fit', 5, 2, 4, 5],
+        ['Habit loop', 4, 1, 3, 4], ['Capital', 5, 1, 2, 2], ['Model and tech', 4, 4, 3, 3], ['Data', 4, 1, 2, 3], ['Monetisation', 2, 1, 3, 4],
+      ];
+      const W = 900, rh = 30, top = 30, L = 150, R = 40, H = top + d.length * rh + 14;
+      const s = svg('factors', W, H, 'Strength from 1 to 5 for AQ, Jivi, Cheeku today and Cheeku with the moves, across ten factors');
+      const X = v => L + (v - 1) / 4 * (W - L - R);
+      [1, 2, 3, 4, 5].forEach(v => { s.appendChild(el('line', { x1: X(v), x2: X(v), y1: top - 10, y2: top + d.length * rh - 10, stroke: C.line, 'stroke-dasharray': '2 3' })); s.appendChild(el('text', { x: X(v), y: 16, 'text-anchor': 'middle', 'font-size': 11, fill: C.muted }, v === 1 ? '1 weak' : v === 5 ? '5 strong' : v)); });
+      const cols = [C.aq, C.jivi, C.faint, C.accent];
+      d.forEach((r, i) => {
+        const y = top + i * rh, vals = r.slice(1);
+        s.appendChild(el('text', { x: L - 12, y: y + 4, 'text-anchor': 'end', 'font-size': 12.5, fill: C.ink2 }, r[0]));
+        s.appendChild(el('line', { x1: X(Math.min(...vals)), x2: X(Math.max(...vals)), y1: y, y2: y, stroke: C.line, 'stroke-width': 3 }));
+        const seen = {};
+        vals.forEach((v, j) => { const k = v; const n = seen[k] = (seen[k] || 0) + 1; const cnt = vals.filter(x => x === v).length; const off = cnt > 1 ? (n - (cnt + 1) / 2) * 12 : 0;
+          s.appendChild(el('circle', { cx: X(v) + off, cy: y, r: 6, fill: j === 2 ? C.surface : cols[j], stroke: cols[j], 'stroke-width': j === 2 ? 3 : 0 })); });
+      });
+    })();
+  }
+  draw();
+  if (window.matchMedia) { const mq = matchMedia('(prefers-color-scheme: dark)'); if (mq.addEventListener) mq.addEventListener('change', draw); }
+  new MutationObserver(draw).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+})();
+
+</script>
+</body>
+</html>
