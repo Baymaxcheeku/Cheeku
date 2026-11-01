@@ -3995,3 +3995,23 @@ Reported on an iPhone: a first-time user who swiped right on Home landed on the 
 ## Records: the header + is gone · 2026-11-01
 
 The owner asked for it: the centre + in the tab bar already adds a record from every screen, and a filed record lands in the list sorted and tagged, so a second add button in the Records header only made it busier. Cheeku at his desk stays. The empty state keeps its "Add your first record" button, because a new user with nothing filed needs the way in on the page itself.
+
+## Insurance: the whole family's cover, and Cheeku explains it · 2026-11-01
+
+**What the audit found.** Insurance existed only as a record type (0028): a full model (insurer, number, floater or individual, sum insured, claimed, members, TPA, cashless, co-pay, room rent, waiting periods, claims), a record page and a Health file card. There was no way to get a real policy in. The document reader is still a stand-in, so an uploaded policy filed with no details and never showed. The Niva Bupa card on the owner's account was demo seed data. Chat never saw insurance. There is no public insurer API: Bima Sugam isn't open to third parties and ABHA doesn't carry policies.
+
+**What the owner chose.** Upload plus a quick form. No auto-fetch for now, but a shape a partner feed can fill later. One Insurance screen in Profile for the family, with a floater entered once and linked to everyone it covers. Chat explains cover from the policy's own terms.
+
+**Built.**
+- Migration 0043, `insurance_policies`. One row per policy, not per person.
+  - `covered_profile_ids` lists the members it covers; `document_id` optionally points at the uploaded PDF, which is filed as an Insurance record under the first person covered; `source` is manual, document or partner.
+  - RLS: only the owner reads or writes, a policy can only name the owner's own members and documents, and removing a member takes them off every policy.
+  - It's a table rather than a record because a record needs a file and belongs to one person, and a partner feed will hand us fields, not files.
+- `src/lib/insurance`. `policy.ts` handles reading, validation (rupees typed as "5 lakh", "5,00,000" or "1.5 cr") and rows; `explain.ts` has the plain-words summary and the chat answers; `queries.ts` loads and saves.
+- Profile > Insurance (`app/insurance`): the family's policies as teal cards with faces, a policy page, and an add/edit form. The essentials come first; TPA, room rent, co-pay, waiting periods, inclusions and exclusions sit behind "More about this policy".
+- Health file: the policies covering the person replace any record card for the same document, renewals within 60 days join "Coming up", there's a Manage link, and "Add insurance" shows when nothing covers them.
+- Chat: a cover question with nothing medical in it is answered by rules from the saved policy, with no model call. The answer is either in a field or it isn't, and a model would only add room to guess. Where the policy is silent it says so and names who can confirm. A saved exclusion named in the question ("cosmetic surgery") is caught. With a symptom alongside, the model answers and the digest carries the cover as plain lines. "Cover the wound" is first aid, not insurance; tested.
+- The data export includes the table.
+
+**Verified here:** 0043 on the local Postgres with its check (five yes rows). RLS: another account can't read, can't name Arjun's members, and can't write as him. The member-removal trigger works. 560 tests, including 23 new ones. Typecheck, and lint with no errors. Web screenshots of the list, policy page, form (add and edit), Health file, Profile row and two chat answers.
+**Not verified:** on an iPhone, and 0043 in Supabase. It has to be applied before anything saves.

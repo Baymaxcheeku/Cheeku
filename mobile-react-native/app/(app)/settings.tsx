@@ -11,6 +11,7 @@ import {
   Globe,
   HardDrive,
   HeartPulse,
+  ShieldPlus,
   LockKeyhole,
   Info,
   LogOut,
@@ -247,6 +248,7 @@ export default function Settings() {
       <Group label="Account">
         <Row icon={UserCog} title="Personal information" body="Name, date of birth and contact" href="/settings/personal" />
         <Row icon={HeartPulse} title="Health profile" body="Conditions, allergies and medicines" href="/settings/health" />
+        <Row icon={ShieldPlus} title="Insurance" body="Your family's cover and what it includes" href="/insurance" />
         <LocationRow />
         <Row icon={ShieldCheck} title="Security" body="App lock, password and sign-ins" href="/settings/security" />
         <Row icon={LockKeyhole} title="Privacy & consent" body="Your choices, documents and rights" href="/settings/privacy" />

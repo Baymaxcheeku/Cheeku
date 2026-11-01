@@ -53,13 +53,14 @@ export async function exportAccount(): Promise<
     "privacy_requests",
     "today_actions",
     "daily_logs",
+    "insurance_policies",
   ] as const;
 
   /*
-   * Added by migrations 0031, 0033 and 0034. Until it is applied these tables do not exist,
+   * Added by migrations 0031, 0033, 0034 and 0043. Until it is applied these tables do not exist,
    * and an export must not fail over a table that has never held anything.
    */
-  const addedLater = new Set<string>(["account_activity", "privacy_requests", "today_actions", "daily_logs"]);
+  const addedLater = new Set<string>(["account_activity", "privacy_requests", "today_actions", "daily_logs", "insurance_policies"]);
 
   const bundle: ExportBundle = {
     exportedAt: new Date().toISOString(),

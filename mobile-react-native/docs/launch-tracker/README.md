@@ -121,6 +121,9 @@ Milestone `V2` holds ideas saved for after launch. The page shows them in their 
 | `ai-serving` | Suraj | P0 | M2 | Inference serving in India |
 | `ai-routing` | Suraj | P1 | M3 | Model routing and token budgets |
 | `ai-rx-score` | Suraj | P0 | M3 | Prescription scorecard engine |
+| `profile-insurance` | Athar | P1 | M3 | Insurance: family policies and cover in chat |
+| `ai-insurance-read` | Suraj | P2 | M3 | Read insurance policies into fields |
+| `partner-insurance-feed` | Archit | P3 | M4 | Fetch existing insurance from a partner |
 | `ai-meal-vision` | Suraj | P1 | M3 | Read meal photos |
 | `ai-med-box` | Suraj | P1 | M3 | Medicine box photo to the medicine list |
 | `ai-moe-eval` | Suraj | P1 | M2 | Benchmark an open medical MoE against our model plan |
