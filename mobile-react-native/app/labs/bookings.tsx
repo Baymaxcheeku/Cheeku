@@ -1,6 +1,7 @@
 import { useRouter } from "expo-router";
 import { ChevronRight, FlaskConical } from "lucide-react-native";
-import { Pressable, RefreshControl, ScrollView, Text, View } from "react-native";
+import { RefreshControl, ScrollView, Text, View } from "react-native";
+import { Pressable } from "@/components/ui/pressable";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { PartnerBadge, rupees } from "@/components/labs/parts";

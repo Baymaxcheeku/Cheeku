@@ -1,5 +1,6 @@
 import { useEffect } from "react";
-import { AccessibilityInfo, Pressable, View, type ViewProps } from "react-native";
+import { AccessibilityInfo, View, type ViewProps } from "react-native";
+import { Pressable } from "@/components/ui/pressable";
 import Animated, {
   Easing,
   interpolate,

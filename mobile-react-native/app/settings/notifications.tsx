@@ -19,7 +19,8 @@ import {
   type LucideIcon,
 } from "lucide-react-native";
 import { useEffect, useState } from "react";
-import { Linking, Pressable, Text, View } from "react-native";
+import { Linking, Text, View } from "react-native";
+import { Pressable } from "@/components/ui/pressable";
 
 import { Panel, Section, SettingsScreen } from "@/components/settings/chrome";
 import { SpringSwitch } from "@/components/ui/motion";

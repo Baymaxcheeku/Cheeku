@@ -30,7 +30,8 @@ import {
   type LucideIcon,
 } from "lucide-react-native";
 import { useEffect } from "react";
-import { Modal, Pressable, Text, View, type ImageSourcePropType } from "react-native";
+import { Modal, Text, View, type ImageSourcePropType } from "react-native";
+import { Pressable } from "@/components/ui/pressable";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,

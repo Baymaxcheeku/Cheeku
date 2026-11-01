@@ -1,7 +1,8 @@
 import { useRouter } from "expo-router";
 import { CalendarPlus, ChevronRight, FlaskConical, Plus } from "lucide-react-native";
 import { useState } from "react";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { ScrollView, Text, View } from "react-native";
+import { Pressable } from "@/components/ui/pressable";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 

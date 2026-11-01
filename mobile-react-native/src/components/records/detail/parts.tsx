@@ -1,6 +1,7 @@
 import { BellRing, Check, Moon, Sun, Sunrise, type LucideIcon } from "lucide-react-native";
 import { useEffect, useState } from "react";
-import { Platform, Pressable, Text, View, type ViewStyle } from "react-native";
+import { Platform, Text, View, type ViewStyle } from "react-native";
+import { Pressable } from "@/components/ui/pressable";
 
 import { Glass } from "@/components/ui/glass";
 import { clearRecordReminder, hasRecordReminder, setRecordReminder, type RecordReminder } from "@/lib/notifications/push";

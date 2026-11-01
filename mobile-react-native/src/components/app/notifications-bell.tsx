@@ -75,11 +75,13 @@ export function NotificationsBell() {
         <Animated.View
           style={[
             {
+              // On the rim, not inside it: inside, "9+" covered the top half of
+              // the bell on iPhone (2026-11-01).
               position: "absolute",
-              top: 5,
-              right: 4,
-              minWidth: 19,
-              height: 19,
+              top: -4,
+              right: -4,
+              minWidth: 20,
+              height: 20,
               paddingHorizontal: 5,
               borderRadius: 999,
               alignItems: "center",

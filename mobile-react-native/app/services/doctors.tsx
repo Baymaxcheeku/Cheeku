@@ -1,7 +1,8 @@
 import { useRouter } from "expo-router";
 import { ArrowRight, CalendarClock, ChevronRight, Search, X } from "lucide-react-native";
 import { useState } from "react";
-import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { ScrollView, Text, TextInput, View } from "react-native";
+import { Pressable } from "@/components/ui/pressable";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { LocationChip } from "@/components/location/location-chip";

@@ -75,19 +75,27 @@ export function Avatar({
         ...(ring ? { borderWidth: RING_WIDTH, borderColor: ring } : null),
       }}
     >
+      {/*
+       * The drawn face is always there, and a photo, when there is one, sits on
+       * top of it. On iPhone (2026-11-01) the Profile card and its family row
+       * showed bare coloured circles: a photo link that never loaded and never
+       * errored either left nothing to fall back to. Now the worst case is the
+       * person's face from the set instead of an empty circle.
+       */}
+      {art ? (
+        <Image alt="" source={art} style={{ width: inner, height: inner }} accessibilityIgnoresInvertColors />
+      ) : markup ? (
+        <SvgXml xml={markup} width={inner} height={inner} />
+      ) : null}
       {photo && !broken ? (
         <Image
           alt=""
           source={{ uri: photo }}
-          style={{ width: inner, height: inner, borderRadius: inner / 2 }}
+          style={{ position: "absolute", top: 0, left: 0, width: inner, height: inner, borderRadius: inner / 2 }}
           onError={() => setBrokenUrl(photo ?? null)}
           accessibilityIgnoresInvertColors
         />
-      ) : art ? (
-        <Image alt="" source={art} style={{ width: inner, height: inner }} accessibilityIgnoresInvertColors />
-      ) : (
-        <SvgXml xml={markup} width={inner} height={inner} />
-      )}
+      ) : null}
     </View>
   );
 }

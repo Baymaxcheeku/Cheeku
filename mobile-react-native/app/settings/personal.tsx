@@ -2,7 +2,8 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { CalendarHeart, ChevronRight, Dna, HeartPulse, IdCard, Mail, ShieldCheck, UserCog } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Text, View } from "react-native";
+import { Pressable } from "@/components/ui/pressable";
 
 import { SaveButton, SettingsScreen } from "@/components/settings/chrome";
 import { Eyebrow, PersonHero, Reason, Title } from "@/components/settings/editorial";

@@ -271,6 +271,11 @@ in a shell. See `SHIPPING.md`.
    and tells the person in their inbox. The notification never repeats what
    they wrote, and neither does the alert email.
 
+14. **Pressable comes from `@/components/ui/pressable`, never from
+   "react-native".** NativeWind's native runtime turns a `style` callback
+   (`({ pressed }) => ...`) into `{}`, so on a phone the row loses all its
+   layout while the web looks fine. ESLint makes it an error.
+
 ## Running it
 
 Web preview (fast, and NOT sufficient — see below):

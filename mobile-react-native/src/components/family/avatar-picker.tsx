@@ -1,5 +1,6 @@
 import { Camera, Check, ImagePlus, Shuffle, X } from "lucide-react-native";
-import { Image, Pressable, Text, View, type ImageSourcePropType } from "react-native";
+import { Image, Text, View, type ImageSourcePropType } from "react-native";
+import { Pressable } from "@/components/ui/pressable";
 
 import { Avatar } from "@/components/ui/avatar";
 import { KID_FACE_IDS } from "@/lib/profiles/face-pool";

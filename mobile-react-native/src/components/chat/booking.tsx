@@ -14,7 +14,8 @@ import {
 import { useState } from "react";
 import { Tap } from "@/components/ui/tap";
 import type { AppIcon } from "@/components/ui/icons";
-import { Pressable, Text, View } from "react-native";
+import { Text, View } from "react-native";
+import { Pressable } from "@/components/ui/pressable";
 
 import { BookSheet } from "@/components/fitness/book-sheet";
 import { SessionRow } from "@/components/fitness/parts";
