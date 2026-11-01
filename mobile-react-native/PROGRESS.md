@@ -3991,3 +3991,7 @@ Reported on an iPhone: a first-time user who swiped right on Home landed on the 
 
 **Checked:** web screenshots of a brand-new account through the consent gate, who, profile, journey, first-upload and plan, the starter Home (all of it), Records, Ask, Profile, Add a record and Book services, plus welcome and sign-in signed out. Typecheck, 537 tests, lint (no errors, the same 54 warnings).
 **Not verified:** on an iPhone, and the swipe itself, which a browser cannot do. Check a fresh sign-up end to end: a right swipe on Home should do nothing, sign-out should leave nothing to swipe back to, and finishing a booking should leave Home with nothing behind it.
+
+## Records: the header + is gone · 2026-11-01
+
+The owner asked for it: the centre + in the tab bar already adds a record from every screen, and a filed record lands in the list sorted and tagged, so a second add button in the Records header only made it busier. Cheeku at his desk stays. The empty state keeps its "Add your first record" button, because a new user with nothing filed needs the way in on the page itself.
