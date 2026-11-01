@@ -111,8 +111,14 @@ export function useInboxLive(onNew?: (item: InboxItem) => void) {
 
     void sessionUser().then((user) => {
       if (cancelled || !user) return;
+      // A name of its own per mount. supabase-js hands back an existing
+      // channel with the same name, and if the last mount's channel is still
+      // open (a remount, Fast Refresh) adding listeners to it throws "cannot
+      // add postgres_changes callbacks after subscribe()". The filter below,
+      // not the name, decides which rows arrive.
+      const topic = `inbox:${user.id}:${Math.random().toString(36).slice(2, 10)}`;
       channel = supabase
-        .channel(`inbox:${user.id}`)
+        .channel(topic)
         .on(
           "postgres_changes",
           { event: "INSERT", schema: "public", table: "notifications", filter: `user_id=eq.${user.id}` },

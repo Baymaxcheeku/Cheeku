@@ -261,7 +261,7 @@ export default function Notifications() {
         {permission.data === "denied" ? <PushBlocked onOpenSettings={() => void Linking.openSettings()} /> : null}
 
         {soon ? (
-          <Animated.View entering={still ? undefined : FadeIn.duration(220)} className="mt-5">
+          <Animated.View entering={still ? undefined : FadeIn.duration(220)} style={{ marginTop: 20 }}>
             <Text style={{ fontFamily: font.semibold, fontSize: 13, color: ink[500], marginBottom: 8, marginLeft: 4 }}>Coming up</Text>
             <AppointmentCard appt={soon} hero />
           </Animated.View>

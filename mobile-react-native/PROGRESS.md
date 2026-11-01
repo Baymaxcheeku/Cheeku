@@ -3955,3 +3955,24 @@ The streak card overlap should go once the rows have their height back. That nee
 
 **Verified here:** the typecheck, 537 tests, lint (no errors, the same 54 warnings as main), a probe file that the new rule rejects, and an iOS bundle export. Web screenshots of Home, Notifications, Profile and Edit profile against the local stand-in. Those only show layout and copy, and the web never had the bug.
 **Not verified:** on an iPhone. Check Home (plan rows, streak card, Due soon, bell), Notifications (header, count tiles, chips, rows), Profile (avatar, family row) and Edit profile (the face grid and choosing a face).
+
+## iPhone sweep: the rest of the app, the 8:00 pm tile, the inbox socket · 2026-11-01
+
+After #68 the owner confirmed Home, Notifications and Profile on the phone and asked for every other screen to be checked for the same kind of fault.
+
+**Checked across the whole app** (an AST pass over every `.tsx` in `app/` and `src/`, not a sample):
+- A style callback on anything but our Pressable: none left.
+- `className` on a component NativeWind does not handle on native (it keeps the class on web and drops it on a phone): one, the "Coming up" `Animated.View` on Notifications, whose margin was lost. Now an inline style.
+- Tailwind classes React Native ignores (grid, space-x/y, divide, hover:, first:/last:, line-clamp, sticky, fixed and the like): none.
+- Browser-only inline styles (fixed or sticky position, vh and vw, calc, grid display, cursor, backdrop filter): none.
+- Line heights below the font size, which clip text on iOS: none.
+- Web screenshots of 24 screens: services, doctors, consult chat, labs (home, choose, test, partner, bookings, booking), fitness (list, bookings, booking), chats, a conversation, appointments, care, records, add a record, medicines, today, family, plans and Ask. None looked off.
+
+**Fixed:**
+- Fitness class tile: "8:00 p / m". The tile strips " am"/" pm" by matching a plain space, but iOS formats times with a narrow no-break space (U+202F), so nothing was stripped and the full time wrapped in the 60pt tile. It now matches `\s`, and the line shrinks to fit rather than wrap.
+- "cannot add postgres_changes callbacks after subscribe()": supabase-js returns an existing channel when the name matches, so when the inbox hook mounted again before the old channel was removed, it added listeners to a subscribed channel. Each mount now gets its own channel name. The filter, not the name, decides which rows arrive.
+
+**Still open: bundled images that do not draw on the phone.** After the restart, faces were still empty circles on Add a record and Cheeku's face was blank in the chat header, while Home showed faces. The bundle hands `<Image>` valid asset ids, and the dev server returns both files (checked: the iOS dev bundle the phone loads, and the asset URLs it builds). So the failure is in loading on the device. In development, `src/lib/dev/image-failure.ts` now puts a LogBox warning up with the address and the native error whenever a face or Cheeku's face fails, so the next run says why. One guess to rule out: a `--tunnel` session throttling image requests.
+
+**Verified here:** the typecheck, 537 tests, lint (no errors, the same 54 warnings) and the web screenshots above.
+**Not verified:** on an iPhone.
