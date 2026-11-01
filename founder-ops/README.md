@@ -21,6 +21,7 @@ Share each one from its Share menu with the other founders as **editors**. Viewe
 |---|---|---|---|
 | Vision board (3 to 5 year plan) | https://claude.ai/artifact/KUeA2YYdL4CmUKWhK3faAE | Page with shared database | `vision-board/` |
 | Raise tracker (seed funnel) | https://claude.ai/artifact/HzgvNiduRXdfhC62KjA3eg | Page with shared database | `investor-tracker/` |
+| Jivi teardown (strategy postmortem) | https://claude.ai/artifact/GQ1fdDj53ySFL4GiAa5gb8 | Page | `teardowns/jivi-vs-cheeku.html` |
 | Financial model v2 | https://claude.ai/artifact/JP51ovW13s8yVXLBV9tTej | Page | `vision-board/engine.js`, `model/report.js` |
 | Seed deck v2 | https://claude.ai/artifact/AzJYLFCF5JZbTJpBdNJTKb | Slides | `library/seed-deck-v2.md` |
 | Due diligence deck v2 | https://claude.ai/artifact/8Tkb1TszfUorrB4N9toqyi | Slides | `library/dd-deck-v2.md` |
