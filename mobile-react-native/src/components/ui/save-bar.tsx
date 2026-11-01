@@ -1,7 +1,8 @@
 import { usePathname } from "expo-router";
 import { CloudOff, X } from "lucide-react-native";
 import { useEffect } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Text, View } from "react-native";
+import { Pressable } from "@/components/ui/pressable";
 import Animated, { SlideInDown, SlideOutDown } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 

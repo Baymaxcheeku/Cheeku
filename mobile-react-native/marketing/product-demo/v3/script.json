@@ -1,0 +1,21 @@
+{
+  "voice": "af_heart",
+  "speed": 0.96,
+  "phonemeFixes": { "pɹˈɪjə": "pɹˈiːjɑː", "tˈɑːɹɹə": "tˈɑːɹə" },
+  "scenes": [
+    { "id": "hook", "lines": ["In India, a family's health lives in WhatsApp chats, paper files, and late-night searches."] },
+    { "id": "meet", "lines": ["Meet Cheeku AI. One app, and one memory, for your whole family's health."] },
+    { "id": "plan", "lines": ["Arjun and Priya are ready for a baby. He asks Cheeku for her, and the answer comes from her own reports."] },
+    { "id": "labs", "lines": ["Her thyroid test is booked for home collection, and the report files itself, every value tracked over time."] },
+    { "id": "preg", "lines": ["Then, it's positive. Now everything is read against week twelve."] },
+    { "id": "gyne", "lines": ["Booking her gynaecologist takes a minute. The doctor gets her story before the call."] },
+    { "id": "medcheck", "lines": ["Every prescription is checked at salt level, on ten standards, against years of her history. Same salt, for less."] },
+    { "id": "baby", "lines": ["Then Tara arrives. One tap, and she has her own health file."] },
+    { "id": "fever", "lines": ["At midnight, she runs a fever. Cheeku knows she's seven weeks old, and gets a paediatrician on video, tonight."] },
+    { "id": "after", "lines": ["After the call, the prescription is filed, doses are set, and the follow-up waits in her memory."] },
+    { "id": "care", "lines": ["A GP for Arjun. Therapy, physio, nurses at home, medicines delivered. Insurance, coming soon."] },
+    { "id": "fit", "lines": ["Even a gym class, picked for his blood sugar."] },
+    { "id": "engine", "lines": ["Every report, booking and dose feeds Cheeku's longevity engine. Each morning, everyone gets small steps, made for their own numbers."] },
+    { "id": "close", "lines": ["Built for a hundred crore Indians.", "Cheeku AI. Your family's health, remembered."] }
+  ]
+}

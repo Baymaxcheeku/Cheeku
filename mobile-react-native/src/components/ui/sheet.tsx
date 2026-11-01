@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { KeyboardAvoidingView, Modal, Platform, Pressable, StyleSheet, useWindowDimensions, View, type LayoutChangeEvent } from "react-native";
+import { KeyboardAvoidingView, Modal, Platform, StyleSheet, useWindowDimensions, View, type LayoutChangeEvent } from "react-native";
+import { Pressable } from "@/components/ui/pressable";
 import { GestureDetector, usePanGesture } from "react-native-gesture-handler";
 import Animated, { Easing, useAnimatedStyle, useSharedValue, withSpring, withTiming } from "react-native-reanimated";
 import { scheduleOnRN } from "react-native-worklets";

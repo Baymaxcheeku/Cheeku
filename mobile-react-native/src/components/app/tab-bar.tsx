@@ -2,7 +2,8 @@
  * SDK 57 NOTE. expo-router no longer depends on `@react-navigation/*` — it
  * vendors the navigators and re-exports their types from the Tabs layout, so
  * this type comes from `expo-router/tabs` rather than the package the web
- * ecosystem's examples all import from.
+ * ecosystem's examples all import from. SDK 58 replaced the `navigation` prop
+ * with `emitter` and `navigateToTab`.
  */
 import type { BottomTabBarProps } from "expo-router/tabs";
 import { useRouter } from "expo-router";
@@ -44,7 +45,7 @@ const ICONS: Record<string, { icon: LucideIcon; label: string; short: string }> 
  * the tabs on either side, and a mis-hit here files a document instead of
  * opening a list.
  */
-export function TabBar({ state, navigation }: BottomTabBarProps) {
+export function TabBar({ state, emitter, navigateToTab }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
   const router = useRouter();
 
@@ -72,7 +73,7 @@ export function TabBar({ state, navigation }: BottomTabBarProps) {
           const Icon = meta.icon;
 
           function onPress() {
-            const event = navigation.emit({
+            const event = emitter.emit({
               type: "tabPress",
               target: route.key,
               canPreventDefault: true,
@@ -82,7 +83,7 @@ export function TabBar({ state, navigation }: BottomTabBarProps) {
             // someone's thumb.
             if (!active && !event.defaultPrevented) {
               feel.tick();
-              navigation.navigate(route.name);
+              navigateToTab(route.key);
             }
           }
 

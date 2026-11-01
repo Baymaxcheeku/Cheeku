@@ -2,7 +2,8 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ArrowLeftRight, Check, ChevronRight, FileText, Lock, Plus, Trash2, UserCog } from "lucide-react-native";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, View } from "react-native";
+import { KeyboardAvoidingView, Platform, ScrollView, Text, View } from "react-native";
+import { Pressable } from "@/components/ui/pressable";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AvatarPicker } from "@/components/family/avatar-picker";
@@ -38,6 +39,7 @@ import { font } from "@/theme/type";
 import { Brand } from "@/components/ui/brand";
 import { Tap } from "@/components/ui/tap";
 import { DetailSkeleton, ScreenSkeleton } from "@/components/ui/skeleton";
+import { startFresh } from "@/lib/nav/start-fresh";
 
 /*
  * One family member: switch to them, change their face or details, or remove
@@ -355,7 +357,7 @@ export default function Member() {
               accessibilityRole="button"
               onPress={() => {
                 void switchMember(member.id);
-                router.replace("/home");
+                startFresh(router, "/home");
               }}
               style={({ pressed }) => [glassShadow, { marginTop: 12, flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 14, height: 36, borderRadius: 999, backgroundColor: pressed ? "#fff" : glass.fillStrong, borderWidth: 1, borderColor: glass.rim }]}
             >

@@ -14,6 +14,7 @@ import Animated, {
 } from "react-native-reanimated";
 
 import { useReducedMotion } from "@/components/ui/motion";
+import { onImageFailure } from "@/lib/dev/image-failure";
 
 import "./wasm";
 
@@ -369,7 +370,7 @@ function FaceMark({ size, moment, still }: { size: number; moment: Moment; still
 
   return (
     <Animated.View style={[{ width: size, height: size, transformOrigin: "center bottom" }, style]} accessibilityRole="image" accessibilityLabel="Cheeku">
-      <Image alt="" source={FACE} style={{ width: size, height: size }} resizeMode="contain" />
+      <Image alt="" source={FACE} style={{ width: size, height: size }} resizeMode="contain" onError={onImageFailure("Cheeku face", FACE)} />
     </Animated.View>
   );
 }

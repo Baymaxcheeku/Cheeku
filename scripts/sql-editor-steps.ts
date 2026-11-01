@@ -1,7 +1,7 @@
 /*
  * Splits a migration into small steps for the Supabase SQL Editor.
  *
- *   npx tsx scripts/sql-editor-steps.ts supabase/migrations/0030_memory_layer.sql
+ *   npx tsx scripts/sql-editor-steps.ts mobile-react-native/supabase/migrations/0030_memory_layer.sql
  *
  * The editor cuts long pastes off part-way (it stopped at character 5290 once)
  * and the error it gives, "syntax error at end of input", says nothing about
@@ -13,7 +13,7 @@
  *     obvious before Run
  *
  * The migration itself must be safe to run again, so a step that half-ran
- * can simply be run again. Output goes to supabase/manual/<prefix>-step-N-of-M.sql.
+ * can simply be run again. Output goes to mobile-react-native/supabase/manual/<prefix>-step-N-of-M.sql.
  */
 
 import { readFileSync, readdirSync, unlinkSync, writeFileSync } from "node:fs";
@@ -51,7 +51,7 @@ for (const s of sections) {
 }
 if (current) steps.push(current);
 
-const dir = resolve(__dirname, "../supabase/manual");
+const dir = resolve(__dirname, "../mobile-react-native/supabase/manual");
 for (const f of readdirSync(dir)) if (f.startsWith(`${prefix}-step-`)) unlinkSync(resolve(dir, f));
 steps.forEach((body, i) => {
   const head = `-- ${prefix} step ${i + 1} of ${steps.length}. Run the steps in order, each in a new query. Safe to run again.\n`;

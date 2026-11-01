@@ -11,6 +11,7 @@ import {
   type CoverStatus,
 } from "@/lib/records/details";
 import { DOC_TYPE_LABEL, type DocStatus, type DocType, type EntityFlag } from "@/lib/records/types";
+import { POLICY_TYPE_LABEL, type Policy } from "@/lib/insurance/policy";
 
 /*
  * ONE PERSON'S HEALTH FILE, shaped from one database read.
@@ -46,8 +47,8 @@ export type Tracked = {
 export type FileMedicine = { name: string; detail: string | null; source: "record" | "profile"; documentId: string | null; date: string | null };
 export type FileVaccine = { name: string; label: string; date: string | null; documentId: string | null };
 export type UpcomingKind = "follow_up" | "next_dose" | "renewal" | "appointment" | "lab_visit" | "refill";
-export type Upcoming = { id: string; kind: UpcomingKind; title: string; detail: string | null; date: string; days: number; documentId: string };
-export type Cover = { documentId: string; insurer: string; plan: string | null; sumInsured: number; remaining: number; end: string | null; status: CoverStatus; daysLeft: number | null };
+export type Upcoming = { id: string; kind: UpcomingKind; title: string; detail: string | null; date: string; days: number; documentId: string; /** Where a tap goes, when it is not the record (a policy). */ href?: string };
+export type Cover = { documentId: string; insurer: string; plan: string | null; sumInsured: number; remaining: number; end: string | null; status: CoverStatus; daysLeft: number | null; /** Where a tap goes: the policy for a saved policy, else the record. */ href: string; claimed: number; start: string | null; policyNo: string | null; subtitle: string | null; /** Family members a saved policy covers; empty for a record. */ coveredIds: string[] };
 export type CareContact = { name: string; kind: "doctor" | "place"; visits: number; last: string | null };
 export type RecentRecord = { id: string; docType: DocType; title: string; eventDate: string | null; status: DocStatus; summary: string | null };
 
@@ -230,7 +231,7 @@ export function coverFrom(documents: Row[], now: Date): Cover[] {
     if (d?.kind !== "insurance") continue;
     const c = coverStatus(d, now);
     if (c.status === "expired") continue;
-    out.push({ documentId: String(doc.id), insurer: d.insurer, plan: d.plan, sumInsured: d.sumInsured, remaining: coverUsed(d).remaining, end: d.end, status: c.status, daysLeft: c.daysLeft });
+    out.push({ documentId: String(doc.id), insurer: d.insurer, plan: d.plan, sumInsured: d.sumInsured, remaining: coverUsed(d).remaining, end: d.end, status: c.status, daysLeft: c.daysLeft, href: `/records/${String(doc.id)}`, claimed: d.claimed, start: d.start, policyNo: d.policyNo, subtitle: d.plan, coveredIds: [] });
   }
   return out;
 }
@@ -339,4 +340,26 @@ export function shareText(f: HealthFile): string {
     `\nFrom the health file in Cheeku. Values are as the labs printed them.`,
   ];
   return lines.filter(Boolean).join("\n");
+}
+
+/*
+ * The family's saved policies (migration 0043) that cover this person, on
+ * top of any insurance records filed for them. A policy that points at a
+ * filed record replaces that record's card rather than showing it twice, and
+ * one renewing within 60 days joins what's coming up.
+ */
+export function withPolicies(file: HealthFile, policies: readonly Policy[], now: Date = new Date()): HealthFile {
+  if (!policies.length) return file;
+  const linked = new Set(policies.map((p) => p.documentId).filter((x): x is string => Boolean(x)));
+  const fromPolicies: Cover[] = [];
+  const renewals: Upcoming[] = [];
+  for (const p of policies) {
+    const c = coverStatus(p, now);
+    if (c.status === "expired") continue;
+    fromPolicies.push({ documentId: p.documentId ?? p.id, insurer: p.insurer, plan: p.plan, sumInsured: p.sumInsured, remaining: coverUsed(p).remaining, end: p.end, status: c.status, daysLeft: c.daysLeft, href: `/insurance/${p.id}`, claimed: p.claimed, start: p.start, policyNo: p.policyNo, subtitle: [p.plan, POLICY_TYPE_LABEL[p.policyType]].filter(Boolean).join(" · "), coveredIds: p.coveredProfileIds });
+    const left = daysUntil(p.end, now);
+    if (p.end && left !== null && left <= 60) renewals.push({ id: `policy-${p.id}`, kind: "renewal", title: `${p.insurer} renews`, detail: p.plan, date: p.end, days: left, documentId: p.documentId ?? p.id, href: `/insurance/${p.id}` });
+  }
+  const upcoming = [...file.upcoming.filter((u) => !(u.kind === "renewal" && linked.has(u.documentId))), ...renewals].sort((a, b) => a.date.localeCompare(b.date));
+  return { ...file, cover: [...fromPolicies, ...file.cover.filter((c) => !linked.has(c.documentId))], upcoming };
 }

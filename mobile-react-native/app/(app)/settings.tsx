@@ -11,6 +11,7 @@ import {
   Globe,
   HardDrive,
   HeartPulse,
+  ShieldPlus,
   LockKeyhole,
   Info,
   LogOut,
@@ -25,12 +26,12 @@ import { useState } from "react";
 
 import {
   ActivityIndicator,
-  Pressable,
   ScrollView,
   Text,
   TextInput,
   View,
 } from "react-native";
+import { Pressable } from "@/components/ui/pressable";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import {
@@ -66,6 +67,7 @@ import { brand, hue, ink, lilac, semantic, shadow, surface } from "@/theme/token
 import { Brand, brandify } from "@/components/ui/brand";
 import { feel } from "@/lib/feel";
 import { DetailSkeleton, ListSkeleton, ScreenSkeleton } from "@/components/ui/skeleton";
+import { startFresh } from "@/lib/nav/start-fresh";
 
 /**
  * I1 — profile and settings.
@@ -105,7 +107,7 @@ export default function Settings() {
      * scheduled reminders, picked photos. See lib/privacy/local-data.ts.
      */
     await signOutAndWipe(queryClient);
-    router.replace("/welcome");
+    startFresh(router, "/welcome");
   }
 
   if (context.isPending) {
@@ -246,6 +248,7 @@ export default function Settings() {
       <Group label="Account">
         <Row icon={UserCog} title="Personal information" body="Name, date of birth and contact" href="/settings/personal" />
         <Row icon={HeartPulse} title="Health profile" body="Conditions, allergies and medicines" href="/settings/health" />
+        <Row icon={ShieldPlus} title="Insurance" body="Your family's cover and what it includes" href="/insurance" />
         <LocationRow />
         <Row icon={ShieldCheck} title="Security" body="App lock, password and sign-ins" href="/settings/security" />
         <Row icon={LockKeyhole} title="Privacy & consent" body="Your choices, documents and rights" href="/settings/privacy" />

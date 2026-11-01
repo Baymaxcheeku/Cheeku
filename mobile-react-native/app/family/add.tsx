@@ -2,7 +2,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { ArrowRight, Camera, Check, FileText, HeartPulse, Lock, TriangleAlert } from "lucide-react-native";
 import { useState } from "react";
-import { ActivityIndicator, Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, View } from "react-native";
+import { ActivityIndicator, Image, KeyboardAvoidingView, Platform, ScrollView, Text, View } from "react-native";
+import { Pressable } from "@/components/ui/pressable";
 import Animated, { FadeIn, FadeInRight, FadeOutLeft } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -24,6 +25,7 @@ import { addFamilyMember } from "@/lib/settings/actions";
 import { brand, ink, lilac, semantic } from "@/theme/tokens";
 import { font } from "@/theme/type";
 import { Tap } from "@/components/ui/tap";
+import { startFresh } from "@/lib/nav/start-fresh";
 
 /*
  * Add a family member: five short steps, then everything is saved at once.
@@ -289,7 +291,7 @@ export default function AddMember() {
               >
                 {outcome && outcome.filed > 0 ? `See ${first}'s reports` : `Switch to ${first}`}
               </PillButton>
-              <Tap accessibilityRole="button" onPress={() => router.replace("/home")} style={{ height: 44, alignItems: "center", justifyContent: "center" }}>
+              <Tap accessibilityRole="button" onPress={() => startFresh(router, "/home")} style={{ height: 44, alignItems: "center", justifyContent: "center" }}>
                 <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[500] }}>Done for now</Text>
               </Tap>
             </View>

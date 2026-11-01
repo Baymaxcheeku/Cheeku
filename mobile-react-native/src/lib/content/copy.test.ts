@@ -61,7 +61,7 @@ describe("card copy follows the content system", () => {
 describe("notification copy follows the content system", () => {
   // The literal titles and bodies in the latest notification migration. Names
   // and dates are added at run time, so this checks the fixed words only.
-  const sql = readFileSync(resolve(__dirname, "../../../../supabase/migrations/0036_notification_copy.sql"), "utf8");
+  const sql = readFileSync(resolve(__dirname, "../../../supabase/migrations/0036_notification_copy.sql"), "utf8");
   const pairs = [...sql.matchAll(/perform notify_user\(\s*[^,]+,[^,]+,[^,]+,\s*'[a-z_]+'[^,]*,\s*([\s\S]*?),\s*([\s\S]*?),\s*'\//g)];
 
   it("finds every notification in the migration", () => {
@@ -69,7 +69,7 @@ describe("notification copy follows the content system", () => {
   });
 
   it("keeps the fitness booking words short and calm (0039)", () => {
-    const fit = readFileSync(resolve(__dirname, "../../../../supabase/migrations/0039_fitness.sql"), "utf8");
+    const fit = readFileSync(resolve(__dirname, "../../../supabase/migrations/0039_fitness.sql"), "utf8");
     const words = [...fit.matchAll(/perform notify_user\(([\s\S]*?)\);/g)].flatMap((m) => [...(m[1] ?? "").matchAll(/'((?:[^']|'')*)'/g)].map((x) => (x[1] ?? "").replace(/''/g, "'")));
     expect(words.length).toBeGreaterThan(6);
     for (const w of words) clean("fitness notification", w);
@@ -82,7 +82,7 @@ describe("notification copy follows the content system", () => {
   });
 
   it("keeps the privacy request words short, calm and free of what was asked (0041)", () => {
-    const priv = readFileSync(resolve(__dirname, "../../../../supabase/migrations/0041_privacy_requests_handling.sql"), "utf8");
+    const priv = readFileSync(resolve(__dirname, "../../../supabase/migrations/0041_privacy_requests_handling.sql"), "utf8");
     const titles = [...priv.matchAll(/v_title := '((?:[^']|'')*)'/g)].map((m) => (m[1] ?? "").replace(/''/g, "'"));
     const bodies = [...priv.matchAll(/v_body := ([^;]*);/g)].map((m) => [...(m[1] ?? "").matchAll(/'((?:[^']|'')*)'/g)].map((x) => (x[1] ?? "").replace(/''/g, "'")).join("30 Jan"));
     expect(titles).toHaveLength(3);

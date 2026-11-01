@@ -12,6 +12,7 @@ import { chatModel, ModelBusy } from "./models";
 import { planTurn, type TurnPlan } from "./pipeline";
 import { BOOKING_REPLY, eventMemory, factUsage, readThreadRow, replyText, SITTING_GAP_MS, sittingFor, toTurnMemory, type BookedEvent, type ThreadMessage } from "./thread";
 import type { Fact, Tier } from "./types";
+import { policiesFor } from "@/lib/insurance/queries";
 
 /*
  * THE MEMORY LAYER'S READS AND WRITES.
@@ -37,6 +38,11 @@ export const threadKey = (profileId: string | undefined) => ["thread", profileId
 const missing = (message: string | undefined) => Boolean(message && /could not find the function|function .* does not exist|column .* does not exist|could not find the .* column/i.test(message));
 
 export async function fetchMemory(profileId: string): Promise<MemoryBundle | null> {
+  const [bundle, policies] = await Promise.all([readBundle(profileId), policiesFor(profileId)]);
+  return bundle ? { ...bundle, policies } : null;
+}
+
+async function readBundle(profileId: string): Promise<MemoryBundle | null> {
   const { data, error } = await supabase.rpc("memory_bundle", { p_profile: profileId });
   if (!error) return (data as MemoryBundle | null) ?? null;
   if (!missing(error.message)) throw new Error(`memory: ${error.message}`);

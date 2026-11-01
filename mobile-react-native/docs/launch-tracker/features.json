@@ -1,0 +1,576 @@
+[
+ {
+  "id": "auth",
+  "group": "accounts",
+  "title": "Sign-up and sign-in",
+  "what": "Email and password with the consent box on sign-up; returning people go straight to Home. Google and Apple are next.",
+  "state": "live",
+  "where": "app/sign-in.tsx, src/lib/auth",
+  "shipped": "2026-09-29",
+  "owner": "archit",
+  "next": [
+   "auth-social",
+   "auth-sessions",
+   "rl-auth",
+   "ops-auth-config"
+  ],
+  "order": 1
+ },
+ {
+  "id": "onboarding",
+  "group": "accounts",
+  "title": "Welcome and onboarding",
+  "what": "A four-panel welcome, who you are looking after, life-stage journeys (pregnancy, new parent, ageing parent) and a first upload.",
+  "state": "live",
+  "where": "app/welcome.tsx, app/who.tsx, app/journey.tsx, app/first-upload.tsx",
+  "shipped": "2026-10-05",
+  "owner": "athar",
+  "next": [
+   "loop-onboarding"
+  ],
+  "order": 2
+ },
+ {
+  "id": "family",
+  "group": "accounts",
+  "title": "Family, plans and switching",
+  "what": "Up to four members by plan, faces for every age or a real photo, health basics per member, and every screen follows the member in view.",
+  "state": "live",
+  "where": "app/family, src/lib/profiles, migrations 0025-0026",
+  "shipped": "2026-09-30",
+  "owner": "athar",
+  "next": [
+   "loop-caregiver"
+  ],
+  "order": 3
+ },
+ {
+  "id": "pregnancy",
+  "group": "accounts",
+  "title": "Pregnancy and birth",
+  "what": "Track a pregnancy by period or scan dating; at birth the baby becomes a member and carries what the pregnancy knew.",
+  "state": "live",
+  "where": "app/pregnancy.tsx, src/lib/memory/clock.ts",
+  "shipped": "2026-10-01",
+  "owner": "athar",
+  "next": [],
+  "order": 4
+ },
+ {
+  "id": "consent",
+  "group": "accounts",
+  "title": "Consent, privacy and data rights",
+  "what": "Versioned policies, a consent ledger, a re-consent gate, privacy requests, a storage notice and cache controls.",
+  "state": "live",
+  "where": "src/lib/privacy, app/settings/privacy.tsx, migrations 0031-0032",
+  "shipped": "2026-10-08",
+  "owner": "athar",
+  "next": [
+   "sec-dpdp"
+  ],
+  "order": 5
+ },
+ {
+  "id": "delete",
+  "group": "accounts",
+  "title": "Delete my account",
+  "what": "Removes records, files, photos and the sign-in itself; the consent and rights records are kept as the law asks.",
+  "state": "live",
+  "where": "supabase/functions/delete-account, migration 0037",
+  "shipped": "2026-10-24",
+  "owner": "athar",
+  "next": [
+   "qa-delete-account"
+  ],
+  "order": 6
+ },
+ {
+  "id": "applock",
+  "group": "accounts",
+  "title": "App lock",
+  "what": "Face ID or fingerprint before the app opens, with a grace period; a lock on a door, not a safe.",
+  "state": "live",
+  "where": "src/lib/security/app-lock.ts, app/settings/security.tsx",
+  "shipped": "2026-10-08",
+  "owner": "athar",
+  "next": [
+   "sec-offline-cache"
+  ],
+  "order": 7
+ },
+ {
+  "id": "upload",
+  "group": "records",
+  "title": "Scan and upload",
+  "what": "Report or Prescription, whose it is, then camera, photos, a PDF or a file shared from WhatsApp. Check and save asks only about values the reader was unsure of; nothing is filed before that. The reader behind it is still a stand-in.",
+  "state": "standin",
+  "where": "app/scan.tsx, src/components/scan, src/lib/scan, src/lib/records/upload.ts",
+  "shipped": "2026-09-30",
+  "owner": "athar",
+  "next": [
+   "loop-scan-ux",
+   "ai-ocr-report",
+   "ai-ocr-pipeline",
+   "int-share-target"
+  ],
+  "order": 8
+ },
+ {
+  "id": "records",
+  "group": "records",
+  "title": "Health records",
+  "what": "Eleven record types, each with its own detail page, filters by member, type and time, a timeline, and move, retype or delete.",
+  "state": "live",
+  "where": "app/records, src/components/records, migration 0028",
+  "shipped": "2026-09-30",
+  "owner": "athar",
+  "next": [
+   "loop-reading-v2"
+  ],
+  "order": 9
+ },
+ {
+  "id": "healthfile",
+  "group": "records",
+  "title": "Health file",
+  "what": "One page per member: basics, values over time, what is worth a look, who they have seen, recent records, and a share.",
+  "state": "live",
+  "where": "app/health-file.tsx, migration 0029",
+  "shipped": "2026-10-01",
+  "owner": "athar",
+  "next": [],
+  "order": 10
+ },
+ {
+  "id": "memory",
+  "group": "ai",
+  "title": "Family health memory",
+  "what": "Readings, trends, the medicine ledger, open loops, the life-stage clock and corrections, built on the phone for each member.",
+  "state": "live",
+  "where": "src/lib/memory, app/memory.tsx, migration 0030",
+  "shipped": "2026-10-01",
+  "owner": "suraj",
+  "next": [
+   "ai-memory-server",
+   "ai-memory-normalise",
+   "ai-memory-tools",
+   "ai-clinical-signoff"
+  ],
+  "order": 11
+ },
+ {
+  "id": "safety",
+  "group": "ai",
+  "title": "Safety router",
+  "what": "Eleven emergencies and five urgent patterns in English, Hindi and Hinglish go straight to a 112 or 108 card, before any model is asked.",
+  "state": "live",
+  "where": "src/lib/safety (lexicon.yaml)",
+  "shipped": "2026-07-27",
+  "owner": "suraj",
+  "next": [
+   "ai-guardrails",
+   "ai-evals"
+  ],
+  "order": 12
+ },
+ {
+  "id": "chat",
+  "group": "ai",
+  "title": "Ask Cheeku chat",
+  "what": "One continuous thread per member with urgency tiers, starters from their records, a switch when the question is about someone else, and booking cards in the thread. Answers come from a stand-in until the model is ready.",
+  "state": "standin",
+  "where": "app/ask.tsx, src/lib/ask, src/components/chat",
+  "shipped": "2026-10-04",
+  "owner": "suraj",
+  "next": [
+   "ai-model-ft",
+   "ai-serving",
+   "ai-api-contract",
+   "ai-chat-streaming",
+   "loop-chat-chips"
+  ],
+  "order": 13
+ },
+ {
+  "id": "relay",
+  "group": "ai",
+  "title": "Chat relay and metering",
+  "what": "The cheeku-chat function forwards to the model, keeps the urgency floor, meters every call, and gives free families 20 chats a day.",
+  "state": "live",
+  "where": "supabase/functions/cheeku-chat, migration 0035",
+  "shipped": "2026-10-19",
+  "owner": "archit",
+  "next": [
+   "rl-chat-edge",
+   "rl-free-20",
+   "cost-routing"
+  ],
+  "order": 14
+ },
+ {
+  "id": "homestages",
+  "group": "loop",
+  "title": "Home stages",
+  "what": "Starter, building and Today, unlocked by the first record, with a week streak, what is due soon and family alerts.",
+  "state": "live",
+  "where": "app/home.tsx, src/lib/home/stage.ts, migration 0033",
+  "shipped": "2026-10-13",
+  "owner": "athar",
+  "next": [],
+  "order": 15
+ },
+ {
+  "id": "plan",
+  "group": "loop",
+  "title": "Today's action plan",
+  "what": "A daily plan across five pillars built from each person's readings, conditions, medicines and life stage: steps with proof, meal photos read against their numbers, readings, sleep, breathing, and a card per part of the day for medicines.",
+  "state": "live",
+  "where": "app/today.tsx, src/lib/home/plan.ts, migration 0034",
+  "shipped": "2026-10-13",
+  "owner": "athar",
+  "next": [
+   "loop-meds",
+   "loop-cron"
+  ],
+  "order": 16
+ },
+ {
+  "id": "calmtoday",
+  "group": "loop",
+  "title": "Calmer Today",
+  "what": "Three tasks for right now, the rest folded under Later today, a progress ring, and Done folds the card away with a haptic.",
+  "state": "live",
+  "where": "app/today.tsx, nowTasks in src/lib/home/plan.ts",
+  "shipped": "2026-10-24",
+  "owner": "athar",
+  "next": [
+   "ui-b4-today"
+  ],
+  "order": 17
+ },
+ {
+  "id": "goals",
+  "group": "loop",
+  "title": "Goal cards",
+  "what": "Five goals with two questions each; the plan carries the goal's check-ins, a streak and an optional daily reminder.",
+  "state": "live",
+  "where": "src/lib/home/goals.ts, src/components/today/goals.tsx",
+  "shipped": "2026-10-24",
+  "owner": "athar",
+  "next": [
+   "loop-goal-cards"
+  ],
+  "order": 18
+ },
+ {
+  "id": "meds",
+  "group": "loop",
+  "title": "Your medicines",
+  "what": "Each dose ticked on its own, morning, afternoon and night, the week's doses, how long a strip lasts with a refill nudge, and schedule and dose-time settings.",
+  "state": "live",
+  "where": "app/medicines.tsx, src/lib/home/meds.ts",
+  "shipped": "2026-10-25",
+  "owner": "athar",
+  "next": [
+   "loop-meds"
+  ],
+  "order": 18.4
+ },
+ {
+  "id": "nudges",
+  "group": "loop",
+  "title": "Daily nudges on the phone",
+  "what": "Dose reminders, refills, the morning plan, lunch photo, evening walk, goal, streak, Sunday reset and an after-visit prescription ask, at most four a day and never after 10 pm.",
+  "state": "live",
+  "where": "src/lib/notifications/engage.ts, use-engagement.ts",
+  "shipped": "2026-10-25",
+  "owner": "athar",
+  "next": [
+   "loop-nudges",
+   "loop-notifs"
+  ],
+  "order": 18.6
+ },
+ {
+  "id": "care",
+  "group": "loop",
+  "title": "Family care",
+  "what": "A card per family member with today's doses, the week, latest BP and sugar and what needs you, plus alerts when a parent's doses go unticked, a strip runs low or a test is overdue.",
+  "state": "live",
+  "where": "app/care.tsx, src/lib/care, migration 0038",
+  "shipped": "2026-10-25",
+  "owner": "athar",
+  "next": [],
+  "order": 18.8
+ },
+ {
+  "id": "notifs",
+  "group": "loop",
+  "title": "Notifications",
+  "what": "An inbox with live updates, categories and read state, settings per kind, phone reminders for appointments, lab visits, records, doses, refills and the day's nudges, and server-side nudges and caregiver alerts every 15 minutes. The push sender is wired; phones buzz once the app build has push credentials.",
+  "state": "live",
+  "where": "app/notifications.tsx, src/lib/notifications, supabase/functions/push-dispatch",
+  "shipped": "2026-10-03",
+  "owner": "archit",
+  "next": [
+   "loop-cron"
+  ],
+  "order": 19
+ },
+ {
+  "id": "learn",
+  "group": "loop",
+  "title": "Worth knowing (Learn)",
+  "what": "Plain-language articles with categories, saved items and reading history, picked for the member in view.",
+  "state": "live",
+  "where": "app/learn.tsx, app/article, migrations 0016-0029",
+  "shipped": "2026-10-01",
+  "owner": "athar",
+  "next": [
+   "content-clinical"
+  ],
+  "order": 20
+ },
+ {
+  "id": "labs",
+  "group": "care",
+  "title": "Lab tests at home",
+  "what": "Catalogue, packages, cart, choose a lab, slots, a booking tracker and results back into records. Runs on sample labs until LabStack is connected.",
+  "state": "standin",
+  "where": "app/labs, src/lib/labs, migration 0027",
+  "shipped": "2026-09-30",
+  "owner": "archit",
+  "next": [
+   "int-lab-partner",
+   "sec-listings",
+   "sec-lab-demo"
+  ],
+  "order": 21
+ },
+ {
+  "id": "doctors",
+  "group": "care",
+  "title": "Doctor consults",
+  "what": "Doctor directory, profiles with ratings and reviews, slots, a chat-led consult with a pre-consult note, and appointments. Sample doctors and a placeholder video room for now.",
+  "state": "standin",
+  "where": "app/book, app/appointments, src/lib/booking",
+  "shipped": "2026-09-29",
+  "owner": "archit",
+  "next": [
+   "int-doctors",
+   "int-server-bookings",
+   "sec-sample-data"
+  ],
+  "order": 22
+ },
+ {
+  "id": "services",
+  "group": "care",
+  "title": "Book services",
+  "what": "One hub for dental, eye, physio, home care, transport and medicines, with requests and a waitlist; a preview provider answers for now.",
+  "state": "standin",
+  "where": "app/services, src/lib/services",
+  "shipped": "2026-10-04",
+  "owner": "archit",
+  "next": [
+   "int-services"
+  ],
+  "order": 23
+ },
+ {
+  "id": "fitness",
+  "group": "care",
+  "title": "Fitness classes",
+  "what": "Book one class at a gym or studio near you, matched to the person's profile (weight, sugar, BP, knees, age, pregnancy) on the phone. Location with our own explainer or a city pick, search and chips, studio pages with a week of classes, a booking sheet for any family member, a ticket with a check-in code, cancel, inbox rows, reminders and a chat card. It replaced health insurance on Home; insurance moves to Coming soon. Runs on sample studios until the partner's API is connected.",
+  "state": "standin",
+  "where": "app/fitness, src/lib/fitness, src/components/fitness, migration 0039",
+  "shipped": "2026-10-25",
+  "owner": "athar",
+  "next": [
+   "loop-fitness",
+   "int-fitness"
+  ],
+  "order": 23.5
+ },
+ {
+  "id": "location",
+  "group": "care",
+  "title": "Location and nearby",
+  "what": "Where the phone is, live while the app is open, and where each family member lives, saved to the account (latest place only). Addresses from our own geo function (Ola Maps, then OpenStreetMap) with a 30-day cache and a daily cap. A Home primer asks once; a chip on Home, Fitness, Labs, Doctors and Services shows and changes the place; Profile shows it with its age; lab and service addresses fill from it.",
+  "state": "live",
+  "where": "src/lib/location, src/components/location, app/settings/location.tsx, supabase/functions/geo, migration 0040",
+  "shipped": "2026-10-25",
+  "owner": "athar",
+  "next": [
+   "loc-live"
+  ],
+  "order": 23.6
+ },
+ {
+  "id": "billing",
+  "group": "care",
+  "title": "Plans and paywall",
+  "what": "Free, Solo and Family, a paywall built around one decision, and plan management. Upgrades are a demo until store billing.",
+  "state": "standin",
+  "where": "app/settings/subscription.tsx, src/components/billing",
+  "shipped": "2026-10-03",
+  "owner": "archit",
+  "next": [
+   "pay-subscriptions",
+   "sec-demo-billing"
+  ],
+  "order": 24
+ },
+ {
+  "id": "ui",
+  "group": "design",
+  "title": "UI audit batches 1 to 3",
+  "what": "Haptics, one bottom sheet with drag to dismiss, one press feel, skeletons, one type, radius and colour scale, one primary button, and a lint guard. Checked on a phone.",
+  "state": "live",
+  "where": "src/components/ui, src/theme/tokens.ts, eslint.config.mjs",
+  "shipped": "2026-10-24",
+  "owner": "athar",
+  "next": [],
+  "order": 25
+ },
+ {
+  "id": "mascot",
+  "group": "design",
+  "title": "Cheeku the mascot",
+  "what": "The chikoo character in brand colours with eleven moments, moves and peeks, plus the illustration set and faces for every age.",
+  "state": "live",
+  "where": "src/components/illustrations, assets",
+  "shipped": "2026-10-05",
+  "owner": "athar",
+  "next": [],
+  "order": 26
+ },
+ {
+  "id": "content",
+  "group": "design",
+  "title": "Content system",
+  "what": "Who Cheeku is, five writing rules, slot limits, notification formulas and health meaning words, held by copy tests.",
+  "state": "live",
+  "where": "docs/content-system.md, src/lib/content",
+  "shipped": "2026-10-19",
+  "owner": "athar",
+  "next": [],
+  "order": 27
+ },
+ {
+  "id": "web",
+  "group": "design",
+  "title": "Mobile web app",
+  "what": "The same app on the web at cheeku-ai-mobile.vercel.app, with a shell that feels installed on a phone.",
+  "state": "live",
+  "where": "public/index.html, Vercel cheeku-ai-mobile",
+  "shipped": "2026-10-24",
+  "owner": "athar",
+  "next": [
+   "ops-hosting-plans"
+  ],
+  "order": 28
+ },
+ {
+  "id": "rls",
+  "group": "platform",
+  "title": "Row-level security",
+  "what": "Every table locks rows to their family; documents sit in private storage, 10 MB, images and PDFs only.",
+  "state": "live",
+  "where": "supabase/migrations (0001-0037)",
+  "shipped": "2026-07-27",
+  "owner": "archit",
+  "next": [
+   "sec-definer-review",
+   "sec-pentest"
+  ],
+  "order": 29
+ },
+ {
+  "id": "db",
+  "group": "platform",
+  "title": "Database and migrations",
+  "what": "37 migrations, each with step files, a check query and local Postgres scenarios.",
+  "state": "live",
+  "where": "supabase/migrations, supabase/manual",
+  "shipped": "2026-10-24",
+  "owner": "archit",
+  "next": [
+   "ops-envs",
+   "ops-backups",
+   "perf-indexes"
+  ],
+  "order": 30
+ },
+ {
+  "id": "functions",
+  "group": "platform",
+  "title": "Edge Functions",
+  "what": "cheeku-chat, push-dispatch and delete-account on Supabase.",
+  "state": "live",
+  "where": "supabase/functions",
+  "shipped": "2026-10-24",
+  "owner": "archit",
+  "next": [
+   "be-edge-standards",
+   "ops-monitoring"
+  ],
+  "order": 31
+ },
+ {
+  "id": "tests",
+  "group": "platform",
+  "title": "Automated tests",
+  "what": "434 unit tests across safety, memory, the plan, goals, records, billing and copy; CI is next.",
+  "state": "live",
+  "where": "mobile-react-native/src/**/*.test.ts",
+  "shipped": "2026-10-24",
+  "owner": "archit",
+  "next": [
+   "ops-ci",
+   "qa-e2e"
+  ],
+  "order": 32
+ },
+ {
+  "id": "trackers",
+  "group": "gtm",
+  "title": "Trackers and team docs",
+  "what": "This launch tracker, the LabStack partnership tracker, PLAN and PROGRESS, the PR template and the UI audit.",
+  "state": "live",
+  "where": "docs/launch-tracker, docs/labstack-tracker, PROGRESS.md",
+  "shipped": "2026-10-24",
+  "owner": "athar",
+  "next": [],
+  "order": 33
+ },
+ {
+  "id": "decks",
+  "group": "gtm",
+  "title": "Pitch decks, thesis and videos",
+  "what": "Investor decks with the proven-markets slide, a two-page thesis for cold outreach, a launch video and a product demo video.",
+  "state": "live",
+  "where": "shared from Athar",
+  "shipped": "2026-10-23",
+  "owner": "athar",
+  "next": [],
+  "order": 34
+ },
+ {
+  "id": "rxscore",
+  "group": "records",
+  "title": "Prescription scorecard",
+  "what": "Every medicine on a prescription read to its salts and checked on ten standards against the person's records, with questions for the doctor and same-salt prices.",
+  "state": "standin",
+  "where": "app/prescription/[id].tsx, supabase/functions/rx-score",
+  "shipped": null,
+  "owner": "athar",
+  "next": [
+   "loop-reading-v2",
+   "ai-rx-score",
+   "ai-brand-salt",
+   "ai-clinical-signoff"
+  ],
+  "order": 9.5
+ }
+]

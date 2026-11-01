@@ -22,7 +22,7 @@ import { Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { MascotFigure } from "@/components/illustrations/sprout";
-import { Glass, GlassCircle } from "@/components/ui/glass";
+import { Glass } from "@/components/ui/glass";
 import { PillButton } from "@/components/ui/screen";
 import { formatEventDate } from "@/lib/records/grouping";
 import {
@@ -87,7 +87,6 @@ const SEVERITY_TINT: Record<Severity, { bg: string; fg: string }> = {
 /** The title block at the top of the records screen. */
 export function RecordsHeader({ title, subtitle }: { title: string; subtitle: string }) {
   const insets = useSafeAreaInsets();
-  const router = useRouter();
 
   return (
     <View className="px-5" style={{ paddingTop: insets.top + 12 }}>
@@ -100,14 +99,12 @@ export function RecordsHeader({ title, subtitle }: { title: string; subtitle: st
         </View>
         {/* The filing clerk: Cheeku at his desk, typing away. Tap him. */}
         <MascotFigure size={72} moment="working" hop />
-        <GlassCircle label="Add a health record" onPress={() => router.push("/scan")}>
-          <Plus size={21} color={ink[900]} />
-        </GlassCircle>
         {/*
-         * The frames put a search control and a notification bell here. Search
-         * over records is a Phase 2 tail item and the bell already exists on
-         * Home wired to real data — a second, unwired copy would be a control
-         * that looks identical to a working one and does nothing.
+         * No add button here (owner, 2026-11-01): the centre + in the tab bar
+         * already adds a record from every screen, and whatever is filed lands
+         * in this list sorted and tagged. Two buttons for one action made the
+         * header busier without making anything easier. Search and a bell are
+         * left out for the same reason: the bell lives on Home.
          */}
       </View>
     </View>

@@ -19,7 +19,8 @@ import {
   type LucideIcon,
 } from "lucide-react-native";
 import { useState } from "react";
-import { Pressable, RefreshControl, ScrollView, Share, Text, View } from "react-native";
+import { RefreshControl, ScrollView, Share, Text, View } from "react-native";
+import { Pressable } from "@/components/ui/pressable";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { FileSkeleton } from "@/components/ui/skeleton";
@@ -33,11 +34,12 @@ import { shareText, whenLabel, type HealthFile, type Tracked, type UpcomingKind 
 import { useHealthFile } from "@/lib/health/queries";
 import type { ActiveProfile } from "@/lib/profiles/context";
 import { useFamily, useSwitchMember } from "@/lib/profiles/family";
-import { rupeesShort, shortDate } from "@/lib/records/details";
+import { shortDate } from "@/lib/records/details";
 import { DOC_TYPE_LABEL, FLAG_LABEL } from "@/lib/records/types";
 import { brand, hue, ink, lilac, semantic, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
 import { Tap } from "@/components/ui/tap";
+import { CoverCard } from "@/components/insurance/parts";
 
 /**
  * ONE PERSON'S HEALTH FILE.
@@ -126,6 +128,7 @@ export default function HealthFileScreen() {
 
 function FileBody({ f, memberId, member, onAdd }: { f: HealthFile; memberId: string; member: ActiveProfile; onAdd: () => void }) {
   const router = useRouter();
+  const everyone = useFamily().data?.access.all ?? [];
   const p = f.person;
   const who = p.isPrimary ? "you" : p.firstName;
   const [allValues, setAllValues] = useState(false);
@@ -202,7 +205,7 @@ function FileBody({ f, memberId, member, onAdd }: { f: HealthFile; memberId: str
               const k = UPCOMING[u.kind];
               const overdue = u.days < 0;
               return (
-                <Tap scale={0.98} key={u.id} accessibilityRole="button" onPress={() => router.push(`/records/${u.documentId}`)} style={{ flexDirection: "row", alignItems: "center", gap: 12, padding: 14, borderTopWidth: i ? 1 : 0, borderTopColor: surface.line }}>
+                <Tap scale={0.98} key={u.id} accessibilityRole="button" onPress={() => router.push((u.href ?? `/records/${u.documentId}`) as never)} style={{ flexDirection: "row", alignItems: "center", gap: 12, padding: 14, borderTopWidth: i ? 1 : 0, borderTopColor: surface.line }}>
                   <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: k.bg, alignItems: "center", justifyContent: "center" }}>
                     <k.icon size={18} color={k.fg} />
                   </View>
@@ -312,29 +315,52 @@ function FileBody({ f, memberId, member, onAdd }: { f: HealthFile; memberId: str
 
       {f.cover.length ? (
         <>
-          <SectionHead title="Insurance cover" />
+          <SectionHead
+            title="Insurance cover"
+            right={
+              <Tap accessibilityRole="button" onPress={() => router.push("/insurance")} hitSlop={8}>
+                <Text style={{ fontFamily: font.semibold, fontSize: 13, color: brand[600] }}>Manage</Text>
+              </Tap>
+            }
+          />
           <View style={{ gap: 10 }}>
             {f.cover.map((c) => (
-              <Pressable key={c.documentId} accessibilityRole="button" onPress={() => router.push(`/records/${c.documentId}`)} style={({ pressed }) => [glassShadow, { borderRadius: 24, overflow: "hidden", padding: 16, transform: [{ scale: pressed ? 0.985 : 1 }] }]}>
-                <Gradient from={hue.ocean.fg} to="#1b8aa3" angle="diagonal" />
-                <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-                  <ShieldPlus size={18} color="#fff" />
-                  <Text numberOfLines={1} style={{ flex: 1, fontFamily: font.semibold, fontSize: 15, color: "#fff" }}>{c.insurer}</Text>
-                  <Text style={{ fontFamily: font.semibold, fontSize: 12, color: "rgba(255,255,255,0.85)" }}>{c.status === "renew_soon" ? `Renews in ${c.daysLeft} days` : c.end ? `Till ${shortDate(c.end)}` : "Active"}</Text>
-                </View>
-                <View style={{ flexDirection: "row", gap: 20, marginTop: 12 }}>
-                  <View>
-                    <Text style={{ fontFamily: font.bold, fontSize: 20, color: "#fff" }}>{rupeesShort(c.remaining)}</Text>
-                    <Text style={{ fontFamily: font.regular, fontSize: 12, color: "rgba(255,255,255,0.75)" }}>available</Text>
-                  </View>
-                  <View>
-                    <Text style={{ fontFamily: font.bold, fontSize: 20, color: "#fff" }}>{rupeesShort(c.sumInsured)}</Text>
-                    <Text style={{ fontFamily: font.regular, fontSize: 12, color: "rgba(255,255,255,0.75)" }}>sum insured</Text>
-                  </View>
-                </View>
-              </Pressable>
+              <CoverCard
+                key={c.href}
+                insurer={c.insurer}
+                subtitle={c.subtitle}
+                remaining={c.remaining}
+                sumInsured={c.sumInsured}
+                claimed={c.claimed}
+                status={c.status}
+                daysLeft={c.daysLeft}
+                start={c.start}
+                end={c.end}
+                policyNo={c.policyNo}
+                members={everyone.filter((m) => c.coveredIds.includes(m.id))}
+                onPress={() => router.push(c.href as never)}
+              />
             ))}
           </View>
+        </>
+      ) : member ? (
+        <>
+          <SectionHead title="Insurance cover" />
+          <Tap
+            accessibilityRole="button"
+            onPress={() => router.push({ pathname: "/insurance/edit", params: { for: member.id } })}
+            scale={0.98}
+            style={[glassShadow, { flexDirection: "row", alignItems: "center", gap: 12, padding: 14, borderRadius: 24, backgroundColor: "#fff", borderWidth: 1, borderColor: surface.line }]}
+          >
+            <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: hue.ocean.bg, alignItems: "center", justifyContent: "center" }}>
+              <ShieldPlus size={19} color={hue.ocean.fg} />
+            </View>
+            <View style={{ flex: 1, minWidth: 0 }}>
+              <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{p.isPrimary ? "Add your insurance" : `Add ${p.firstName}'s insurance`}</Text>
+              <Text style={{ fontFamily: font.regular, fontSize: 12, color: ink[500], marginTop: 1 }}>See the cover here, and ask Cheeku what it includes</Text>
+            </View>
+            <ChevronRight size={16} color={ink[300]} />
+          </Tap>
         </>
       ) : null}
 

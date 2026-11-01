@@ -22,7 +22,7 @@ else.
 ## 2 · `--legacy-peer-deps` is required
 
 `.npmrc` pins it. NativeWind's web support drags in `react-dom@19.2.8`, which
-peer-requires `react@^19.2.8`, while Expo SDK 57 pins `react@19.2.3`. Without
+peer-requires `react@^19.2.8`, while Expo SDK 57 pinned `react@19.2.3` (SDK 58 pins `19.3.0`; the flag stays). Without
 the flag npm refuses the whole install.
 
 ## 3 · DiceBear must stay on v9

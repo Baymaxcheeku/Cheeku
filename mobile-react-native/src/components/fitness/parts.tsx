@@ -137,7 +137,9 @@ export function SessionRow({ session, studio, km, reason, showDay, onPress }: { 
       scale={0.98}
     >
       <View style={{ width: 60, height: 60, borderRadius: 16, backgroundColor: art.bg, alignItems: "center", justifyContent: "center" }}>
-        <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900], letterSpacing: -0.3 }}>{timeLabel(session.startsAt).replace(/ (am|pm)/, "")}</Text>
+        {/* \s, not " ": iOS puts a narrow no-break space (U+202F) before am/pm,
+            so a plain space never matched and "8:00 pm" wrapped in the tile. */}
+        <Text numberOfLines={1} adjustsFontSizeToFit style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900], letterSpacing: -0.3 }}>{timeLabel(session.startsAt).replace(/\s?(am|pm)$/i, "")}</Text>
         <Text style={{ fontFamily: font.semibold, fontSize: 10, color: art.fg }}>{showDay ? dayLabel(session.startsAt) : timeLabel(session.startsAt).slice(-2)}</Text>
       </View>
       <View style={{ flex: 1, minWidth: 0, gap: 3 }}>

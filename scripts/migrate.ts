@@ -1,5 +1,5 @@
 /**
- * Applies supabase/migrations/*.sql in order, against DATABASE_URL.
+ * Applies mobile-react-native/supabase/migrations/*.sql in order, against DATABASE_URL.
  *
  * This exists because the Supabase SQL Editor reports only the first error and
  * gives no indication of how far a multi-file paste got — which left the schema
@@ -14,7 +14,7 @@ import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { Client } from "pg";
 
-const MIGRATIONS_DIR = join(import.meta.dirname, "..", "supabase", "migrations");
+const MIGRATIONS_DIR = join(import.meta.dirname, "..", "mobile-react-native", "supabase", "migrations");
 
 const APP_TABLES = [
   "subscriptions",

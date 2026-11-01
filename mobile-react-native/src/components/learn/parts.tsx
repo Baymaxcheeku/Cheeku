@@ -19,7 +19,8 @@ import {
   Syringe,
   type LucideIcon,
 } from "lucide-react-native";
-import { Pressable, Text, View } from "react-native";
+import { Text, View } from "react-native";
+import { Pressable } from "@/components/ui/pressable";
 
 import { Tap } from "@/components/ui/tap";
 import { Gradient, glassShadow } from "@/components/ui/glass";

@@ -16,10 +16,11 @@ const eslintConfig = [
       "build/**",
       "next-env.d.ts",
       ".designvenv/**",
-      // Founders' planning material, never part of the app.
-      "founder-ops/**",
+      // Founders' planning material and the demo videos, never part of the app.
+      "mobile-react-native/founder-ops/**",
+      "mobile-react-native/marketing/**",
       // Deno code, deployed to Supabase, with its own imports and globals.
-      "supabase/functions/**",
+      "mobile-react-native/supabase/functions/**",
     ],
   },
   ...compat.extends("next/core-web-vitals", "next/typescript"),
@@ -83,6 +84,29 @@ const eslintConfig = [
         {
           selector: "Literal[value=/(^|\\s)(text|rounded(-[tblr]{1,2})?)-\\[[0-9.]+px\\]/]",
           message: "Arbitrary size class. Use the named scale (text-xs..text-4xl, rounded-sm..rounded-2xl).",
+        },
+      ],
+    },
+  },
+  {
+    // NativeWind's native runtime turns a Pressable `style` callback into `{}`
+    // (it copies the style with a spread), so on a phone those rows lost every
+    // layout rule while the web build looked fine (iPhone, 2026-11-01). The
+    // app's own Pressable resolves the callback first. See
+    // mobile-react-native/src/components/ui/pressable.tsx.
+    files: ["mobile-react-native/app/**/*.{ts,tsx}", "mobile-react-native/src/**/*.{ts,tsx}"],
+    ignores: ["mobile-react-native/src/components/ui/pressable.tsx", "mobile-react-native/src/components/ui/tap.tsx"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: [
+            {
+              name: "react-native",
+              importNames: ["Pressable"],
+              message: "Import Pressable from \"@/components/ui/pressable\". React Native's own loses a style callback under NativeWind on iOS and Android.",
+            },
+          ],
         },
       ],
     },

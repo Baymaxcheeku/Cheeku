@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { labelFor, parseOlaReverse, parseOlaSearch, parseOsmReverse, parseOsmSearch, reverseKey, searchKey } from "../../../../supabase/functions/geo/parse";
+import { labelFor, parseOlaReverse, parseOlaSearch, parseOsmReverse, parseOsmSearch, reverseKey, searchKey } from "../../../supabase/functions/geo/parse";
 
 // Shapes as the providers answer them (trimmed). Ola follows Google's
 // geocoding shape; Nominatim is format=jsonv2 with addressdetails=1.

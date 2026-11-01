@@ -2,7 +2,8 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { CheckCheck, ChevronDown, Settings2, Trash2, Undo2 } from "lucide-react-native";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Linking, Pressable, RefreshControl, ScrollView, Text, View } from "react-native";
+import { Linking, RefreshControl, ScrollView, Text, View } from "react-native";
+import { Pressable } from "@/components/ui/pressable";
 import Swipeable from "react-native-gesture-handler/ReanimatedSwipeable";
 import Animated, { FadeIn, FadeInDown, FadeOutDown, LinearTransition } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -260,7 +261,7 @@ export default function Notifications() {
         {permission.data === "denied" ? <PushBlocked onOpenSettings={() => void Linking.openSettings()} /> : null}
 
         {soon ? (
-          <Animated.View entering={still ? undefined : FadeIn.duration(220)} className="mt-5">
+          <Animated.View entering={still ? undefined : FadeIn.duration(220)} style={{ marginTop: 20 }}>
             <Text style={{ fontFamily: font.semibold, fontSize: 13, color: ink[500], marginBottom: 8, marginLeft: 4 }}>Coming up</Text>
             <AppointmentCard appt={soon} hero />
           </Animated.View>

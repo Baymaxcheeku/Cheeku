@@ -1,0 +1,15 @@
+node_modules/
+out/
+models/
+.venv/
+public/vo3/
+public/clips/
+public/mix.wav
+music.wav
+vo_lines.json
+capture/stack/node_modules/
+capture/stack/storage/
+capture/stack/server.log
+capture/stack/server.pid
+capture/cap/out/
+capture/cap/node_modules/
