@@ -181,6 +181,15 @@ export const STORAGE_REGISTRY: readonly StoredItem[] = [
     lasts: "Until uninstall",
   },
   {
+    key: "cheeku.returning",
+    label: "Signed in here before",
+    why: "Opens on Log in instead of the introduction once this phone has been used.",
+    where: "keychain",
+    contains: "preference",
+    scope: "device",
+    lasts: "Until uninstall",
+  },
+  {
     key: "cheeku.offline.prefs",
     label: "Offline reading setting",
     why: "Whether to keep an offline copy, and for how long.",

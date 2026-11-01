@@ -1,5 +1,4 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "expo-router";
 import { Fingerprint, ShieldCheck } from "lucide-react-native";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AppState, type AppStateStatus, Platform, Text, View } from "react-native";
@@ -11,7 +10,6 @@ import { DEFAULT_LOCK_DELAY, shouldLock, type LockDelay } from "@/lib/security/l
 import { brand, ink, surface } from "@/theme/tokens";
 import { Brand } from "@/components/ui/brand";
 import { Tap } from "@/components/ui/tap";
-import { startFresh } from "@/lib/nav/start-fresh";
 
 /*
  * Holds the app behind a biometric challenge when the lock is on.
@@ -34,7 +32,6 @@ import { startFresh } from "@/lib/nav/start-fresh";
  *   covered on `inactive`, not on `background`, which arrives too late.
  */
 export function AppLockGate({ children }: { children: React.ReactNode }) {
-  const router = useRouter();
   const queryClient = useQueryClient();
 
   const [enabled, setEnabled] = useState(false);
@@ -161,7 +158,8 @@ export function AppLockGate({ children }: { children: React.ReactNode }) {
     await signOutAndWipe(queryClient);
     lockedRef.current = false;
     setLocked(false);
-    startFresh(router, "/welcome");
+    // No navigation: the ended session closes the signed-in screens and the
+    // splash sends the person to Log in (app/_layout.tsx, resolveLanding).
   }
 
   return (

@@ -4029,3 +4029,34 @@ The owner didn't like the dark teal card: distinct, but it sat on the lilac glas
 The card colour never changes, only the pill, and these are `hue` accents, not `semantic` health colours (Rule 3).
 
 **One component.** `CoverCard` in `src/components/insurance/parts.tsx` draws every policy: on the Insurance list and page, and in the Health file, which used to draw its own copy. The Health file's "Add insurance" row moved to the same lime and ink.
+
+## Sign-in you cannot walk around, and email confirmed before the account opens · 2026-11-01
+
+**What the owner asked.** Sign-up must confirm the email with a verification link before the account can be used. A signed-in person must not be able to go back to onboarding or sign-in. Signing out must land on Log in. And all of it must be secure.
+
+**What was wrong.**
+- No screen asked who should see it. Welcome checked for a session itself, sign-in did not, and the first onboarding screen's back button went to `/sign-in` while signed in. A signed-out person could still reach any app screen by link, and only row level security kept the data back.
+- Sign-up ignored email confirmation. With it on, `signUp` returns no session, the old code fell through to `resolveLanding`, and the person landed on the welcome carousel with no word about an email. Logging in before confirming said "That email and password do not match", which was wrong.
+- Sign-out went to the carousel, and so did every cold launch while signed out.
+- `resolveLanding` asked the server (`getUser`) whether anyone was signed in. Offline, that answered "no one" for a valid session.
+- The token refresh ran in the background as well, against Supabase's advice for React Native.
+
+**Built.**
+- `src/lib/auth/state.ts`: one status, `signedOut`, `unverified` or `signedIn`, followed through `onAuthStateChange`. A session counts as signed in only with `email_confirmed_at`, so even with confirmation switched off in Supabase an unconfirmed account sees nothing past check-your-inbox. The token refresh runs only while the app is in the foreground.
+- Every app screen moved into `app/(signed-in)/`, a route group, so URLs are unchanged. The root `Stack.Protected` guards it, and welcome, sign-in and verify-email have guards of their own. A screen the status forbids cannot be reached by a push, a swipe, Android back or a link. A status change drops the closed screens from history and lands on the splash, which routes with `resolveLanding`. Sign-in and the three sign-out paths no longer navigate themselves, because two navigations racing was the old bug's shape. The splash only holds its 1.4 s on a cold launch.
+- `resolveLanding` reads the session on the phone, the same one the guards read, and then asks the server. A token the server refuses (revoked from another phone, account gone) is signed out here. A failure to reach the server is not a refusal. A phone that has signed in before (`cheeku.returning`, device scope) opens on Log in when signed out, so sign-out lands on Log in and so does the next launch.
+- `app/verify-email.tsx`: check your inbox, with the address, "I've confirmed it", resend with a 60 s countdown, and "Use a different email". Logging in to an unconfirmed account (`email_not_confirmed`, which Supabase only answers to the right password) comes here too.
+- `app/auth/callback.tsx` and `src/lib/auth/email-link.ts`: the email's link opens the app (`Linking.createURL("auth/callback")`, so the same code works in Expo Go and builds). The session in the link's fragment goes through `setSession`, which Supabase checks, so an edited link signs nobody in. An expired link says so and offers a new one. A person already signed in who opens a link keeps their own session, because swapping accounts from a link would skip the sign-out wipe.
+- Sign-up answers the same for a new address and one that already has an account, as Supabase does, so it can't be used to find out who uses Cheeku. The resend answers "sent" or "wait" and nothing else.
+
+**Secrets.** Checked: `.env.local` holds only the two `EXPO_PUBLIC_` values (URL and anon key, safe in a bundle under RLS) and is gitignored. Nothing in `app/` or `src/` mentions the service role key.
+
+**Checked:** typecheck, 569 tests (11 new for the link parser and the status rule), and the iOS and web exports build.
+**Not verified:** on a phone or in Expo Go. Nothing here was run against Supabase, and "Confirm email" and the redirect URLs are dashboard settings I could not see. Check on an iPhone:
+1. Create an account. Check-your-inbox should show the address. Open the email on the phone: the app should open, confirm, and go to onboarding.
+2. On onboarding's first screen there should be no back button, and the edge swipe should do nothing.
+3. Sign out from Settings: you should land on Log in. Swipe back and Android back should lead nowhere into the app.
+4. Kill the app and reopen it: it should open on Log in, not the carousel.
+5. Log in to an unconfirmed account: you should land on check-your-inbox, and resend should count down.
+6. Open an old link: you should see "That link has run out".
+

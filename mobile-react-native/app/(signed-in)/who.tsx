@@ -87,7 +87,10 @@ export default function Who() {
 
   return (
     <View className="flex-1 bg-canvas">
-      <OnboardingHeader back="/sign-in" action={{ label: "Skip", href: "/profile" }} step={1} />
+      {/* No back button: this is the first screen of a signed-in account, and
+          behind it is sign-in, which a signed-in person must not reach. Signing
+          out is in Settings. */}
+      <OnboardingHeader action={{ label: "Skip", href: "/profile" }} step={1} />
 
       <ScrollView
         className="flex-1"

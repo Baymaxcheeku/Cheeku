@@ -25,6 +25,7 @@ import { ConsentGate } from "@/components/legal/consent-gate";
 import { ShareIntake } from "@/components/scan/share-intake";
 import { ToastHost } from "@/components/notifications/toast";
 import { SaveBar } from "@/components/ui/save-bar";
+import { startAuth, useAuth } from "@/lib/auth/state";
 import { persistOptions } from "@/lib/offline/cache";
 import { startOnlineManager } from "@/lib/offline/status";
 import { DeviceFrame } from "@/components/ui/device-frame";
@@ -85,6 +86,9 @@ export default function RootLayout() {
   // React Query's default online check is a browser listener that never fires
   // on a device, so without this the app believes it is online in a tunnel.
   useEffect(startOnlineManager, []);
+  // Who is signed in, followed for the life of the app. The guards below read it.
+  useEffect(startAuth, []);
+  const status = useAuth((s) => s.status);
   const [loaded, error] = useFonts({
     Inter_400Regular,
     Inter_500Medium,
@@ -96,12 +100,18 @@ export default function RootLayout() {
     InstrumentSerif_400Regular_Italic,
   });
 
+  /*
+   * The splash also waits for the stored session to be read, which is local
+   * and quick. Drawing the navigator before then would apply the signed-out
+   * guards to somebody who is signed in, for one frame.
+   */
+  const ready = (loaded || Boolean(error)) && status !== "loading";
   useEffect(() => {
     // Hide on error too: a missing font is a degraded screen, not a dead app.
-    if (loaded || error) void SplashScreen.hideAsync();
-  }, [loaded, error]);
+    if (ready) void SplashScreen.hideAsync();
+  }, [ready]);
 
-  if (!loaded && !error) return null;
+  if (!ready) return null;
 
   return (
     /*
@@ -124,9 +134,28 @@ export default function RootLayout() {
            */}
           <AppLock>
           {/*
+           * WHO MAY SEE WHAT. Each screen belongs to one sign-in status, and a
+           * screen whose guard is false cannot be reached: not by a push, an
+           * edge swipe, the Android back button or a link. When the status
+           * changes (a sign-in, a sign-out, a confirmed email), the screens
+           * that just closed are removed from history and the navigator goes
+           * to its first open screen, the splash, which asks resolveLanding
+           * where the person belongs now.
+           *
+           *   index, auth/callback, legal  anyone (the consent box opens legal
+           *                                before an account exists)
+           *   (signed-in)                  a signed-in account with a
+           *                                confirmed email: every app screen
+           *   welcome, sign-in             signed out only
+           *   verify-email                 anyone not fully signed in
+           *
+           * Navigation, not access control: row level security checks the
+           * token on every query whatever is on screen.
+           *
            * `headerShown: false` throughout: every screen draws its own header
            * (the settings screens share one, onboarding has a step rail). A
-           * native header on top of those would be a second title bar.
+           * native header on top of those would be a second title bar. Swipe
+           * back is off on the roots, where nothing sits underneath.
            */}
           <Stack
             screenOptions={{
@@ -135,18 +164,18 @@ export default function RootLayout() {
               animation: "slide_from_right",
             }}
           >
-            {/* Opens fast and from the side like every other push, but a
-                touch quicker: it is a glance, not a destination. */}
-            <Stack.Screen name="notifications" options={{ animationDuration: 240 }} />
-            {/* Roots: nothing sits under these, so an edge swipe must not pop.
-                The tab shell is where a signed-in person lives; welcome is
-                where a signed-out one starts; who is the first screen after
-                sign-in, and swiping back from it would land on sign-in while
-                still signed in (iPhone, 2026-11-01). */}
-            <Stack.Screen name="(app)" options={{ gestureEnabled: false }} />
+            {/* First, so it is where every guard change lands. */}
             <Stack.Screen name="index" options={{ gestureEnabled: false, animation: "fade" }} />
-            <Stack.Screen name="welcome" options={{ gestureEnabled: false }} />
-            <Stack.Screen name="who" options={{ gestureEnabled: false }} />
+            <Stack.Protected guard={status === "signedIn"}>
+              <Stack.Screen name="(signed-in)" options={{ gestureEnabled: false, animation: "fade" }} />
+            </Stack.Protected>
+            <Stack.Protected guard={status === "signedOut"}>
+              <Stack.Screen name="welcome" options={{ gestureEnabled: false }} />
+              <Stack.Screen name="sign-in" />
+            </Stack.Protected>
+            <Stack.Protected guard={status !== "signedIn"}>
+              <Stack.Screen name="verify-email" options={{ gestureEnabled: false }} />
+            </Stack.Protected>
           </Stack>
           {/*
            * Here rather than in the signed-in tab shell, so it also covers a

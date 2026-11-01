@@ -1,5 +1,5 @@
 import { useRouter } from "expo-router";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { PanResponder, Text, useWindowDimensions, View } from "react-native";
 import Animated, { FadeIn, FadeInLeft, FadeInRight } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -25,9 +25,6 @@ import { castFaces } from "@/lib/profiles/avatar";
 import { brand, hue, ink, semantic, shadow, surface } from "@/theme/tokens";
 import { font, type } from "@/theme/type";
 import { Tap } from "@/components/ui/tap";
-import { resolveLanding } from "@/lib/auth/landing";
-import { startFresh } from "@/lib/nav/start-fresh";
-import { supabase } from "@/lib/supabase/client";
 
 
 /*
@@ -79,22 +76,9 @@ export default function Welcome() {
   const faces = useMemo(() => castFaces(3), []);
 
   /*
-   * Welcome is for people who are signed out. Anyone who reaches it with a
-   * session (an old stack, a stale link) is sent where they belong instead of
-   * being shown what looks like a sign-out. The session read is local; the
-   * landing check only runs when there is one.
+   * Welcome is for people who are signed out, and the root navigator's
+   * guards make that true: a signed-in person cannot reach it (app/_layout.tsx).
    */
-  useEffect(() => {
-    let cancelled = false;
-    void supabase.auth.getSession().then(async ({ data }) => {
-      if (cancelled || !data.session) return;
-      const landing = await resolveLanding();
-      if (!cancelled && landing !== "/welcome") startFresh(router, landing);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [router]);
 
   function go(to: number) {
     if (to < 0 || to >= PANELS.length) return;

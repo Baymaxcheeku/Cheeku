@@ -281,6 +281,15 @@ in a shell. See `SHIPPING.md`.
    `router.replace`. Replace only swaps the top screen; whatever was pushed
    before stays under it, and the iPhone edge swipe walks back into it. The
    tab shell, welcome and who have the swipe-back gesture off.
+   **Who may see a screen is decided by where it lives** (2026-11-01). Every
+   screen that needs an account goes in `app/(signed-in)/`, which the root
+   navigator guards with `Stack.Protected` on `useAuth().status`
+   (`src/lib/auth/state.ts`): signed-in screens need a confirmed email,
+   welcome and sign-in need no session, verify-email needs anything but a
+   signed-in account. A sign-in, sign-out or confirmed email never navigates
+   by hand: the status changes, the closed screens leave the history, and the
+   splash asks `resolveLanding`. A new screen outside the group is public;
+   only legal, auth/callback and the signed-out screens belong there.
 
 16. **Insurance answers come from the saved policy, never from what policies
    "usually" cover.** `src/lib/insurance/explain.ts` says when the details
@@ -310,6 +319,21 @@ so the next SDK release breaks this again. Expo CLI needs Node 22.13+ or 24+;
 odd releases (25) are unsupported. The `ios/` folder was generated for SDK 57:
 run `npx expo prebuild --clean` before the next simulator or development build.
 
+**Supabase auth settings this app depends on** (dashboard, Authentication;
+not in version control yet, `ops-auth-config`):
+- Sign In / Providers, Email: **Confirm email ON.** Without it an account is
+  created with a session before its address is proven; the app still keeps
+  such an account on check-your-inbox (`statusFor`), but the server would
+  not.
+- URL Configuration, Redirect URLs: `cheekuai://**` (builds), `exp://**`
+  (Expo Go, development only; remove before launch) and the web origin
+  (`https://cheeku-ai-mobile.vercel.app/**`). A link whose redirect is not
+  listed still confirms the address, then lands on the Site URL instead of
+  the app.
+- The confirmation template can stay the default (`{{ .ConfirmationURL }}`).
+  Its email comes from Supabase's own sender, which is rate limited to a few
+  an hour: set up custom SMTP before real sign-ups.
+
 Copy `.env.example` to `.env.local` first. Migrations are applied in the
 Supabase SQL editor from `supabase/manual/*-step-*.sql`, then the matching
 `*-check.sql`.
@@ -323,6 +347,12 @@ Anything about layout, cold-start routing, gestures, camera, biometrics or
 haptics has to be seen on a simulator or a device before it counts as done.
 
 ## Open
+
+- **Sign-up needs "Confirm email" on, and the redirect URLs listed**
+  (2026-11-01). See Running it. Until then new accounts skip the email and
+  are held on check-your-inbox with no email arriving. "Forgot password?" on
+  sign-in still does nothing: a reset needs its own set-a-new-password screen
+  behind the same link handling (`auth-sessions`).
 
 - **Insurance needs 0043 applied** (2026-11-01). Paste
   `supabase/manual/0043-step-1-of-1.sql` into the SQL editor, then

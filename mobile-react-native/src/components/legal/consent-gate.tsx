@@ -1,5 +1,4 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "expo-router";
 import { ChevronLeft, Download, LogOut } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, AppState, Modal, ScrollView, Text, View } from "react-native";
@@ -18,7 +17,6 @@ import { supabase } from "@/lib/supabase/client";
 import { brand, ink, shadow, surface } from "@/theme/tokens";
 import { font, type } from "@/theme/type";
 import { Tap } from "@/components/ui/tap";
-import { startFresh } from "@/lib/nav/start-fresh";
 
 /*
  * Asks a signed-in person to agree, when the database says they have to.
@@ -74,7 +72,6 @@ export function ConsentGate() {
 
 function ConsentSheet({ state }: { state: ConsentState }) {
   const insets = useSafeAreaInsets();
-  const router = useRouter();
   const queryClient = useQueryClient();
 
   const [checked, setChecked] = useState(false);
@@ -123,7 +120,8 @@ function ConsentSheet({ state }: { state: ConsentState }) {
     setBusy("signout");
     await signOutAndWipe(queryClient);
     setBusy(null);
-    startFresh(router, "/welcome");
+    // No navigation: the ended session closes the signed-in screens and the
+    // splash sends the person to Log in (app/_layout.tsx, resolveLanding).
   }
 
   return (

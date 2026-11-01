@@ -67,7 +67,6 @@ import { brand, hue, ink, lilac, semantic, shadow, surface } from "@/theme/token
 import { Brand, brandify } from "@/components/ui/brand";
 import { feel } from "@/lib/feel";
 import { DetailSkeleton, ListSkeleton, ScreenSkeleton } from "@/components/ui/skeleton";
-import { startFresh } from "@/lib/nav/start-fresh";
 
 /**
  * I1 — profile and settings.
@@ -107,7 +106,8 @@ export default function Settings() {
      * scheduled reminders, picked photos. See lib/privacy/local-data.ts.
      */
     await signOutAndWipe(queryClient);
-    startFresh(router, "/welcome");
+    // No navigation: the ended session closes the signed-in screens and the
+    // splash sends the person to Log in (app/_layout.tsx, resolveLanding).
   }
 
   if (context.isPending) {

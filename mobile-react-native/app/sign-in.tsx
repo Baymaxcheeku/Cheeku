@@ -20,18 +20,17 @@ import { CtaLabel } from "@/components/onboarding/chrome";
 import { BubblePop, FillBar } from "@/components/onboarding/motion";
 import { useReducedMotion } from "@/components/ui/motion";
 import { ConsentBox } from "@/components/legal/consent-box";
+import { authRedirectUrl } from "@/lib/auth/email-link";
 import { createAccountSchema, signInSchema } from "@/lib/auth/schemas";
-import { resolveLanding } from "@/lib/auth/landing";
+import { useAuth } from "@/lib/auth/state";
 import { ensureSignupConsent, signupConsentPayload } from "@/lib/legal/consent";
 import { clearOfflineCache } from "@/lib/offline/cache";
 import { logActivity } from "@/lib/privacy/activity";
-import { FAMILY_KEY, loadFamily } from "@/lib/profiles/family";
 import { supabase } from "@/lib/supabase/client";
 import { brand, ink, semantic, shadow, surface } from "@/theme/tokens";
 import { font, type } from "@/theme/type";
 import { Brand } from "@/components/ui/brand";
 import { Tap } from "@/components/ui/tap";
-import { startFresh } from "@/lib/nav/start-fresh";
 
 /** Mirrors `passwordSchema`'s minimum, for the live length meter. */
 const MIN_PASSWORD = 10;
@@ -78,8 +77,10 @@ export default function SignIn() {
   const queryClient = useQueryClient();
   const insets = useSafeAreaInsets();
 
+  const setPendingEmail = useAuth((s) => s.setPendingEmail);
   const [tab, setTab] = useState<Tab>("signIn");
-  const [email, setEmail] = useState("");
+  // Back from check-your-inbox, the address is already typed.
+  const [email, setEmail] = useState(() => useAuth.getState().pendingEmail ?? "");
   const [password, setPassword] = useState("");
   const [consent, setConsent] = useState(false);
   const [show, setShow] = useState(false);
@@ -126,6 +127,15 @@ export default function SignIn() {
 
     setBusy(true);
     try {
+      /*
+       * A fresh session starts from a clean cache: whatever the last session
+       * left (another account's family, or a "no profile" cached while signed
+       * out) must never be what Home opens on. Cleared BEFORE the session
+       * exists, because the moment it does the guards take the person on.
+       */
+      queryClient.clear();
+      await clearOfflineCache();
+
       const credentials = { email: parsed.data.email, password: parsed.data.password };
       /*
        * The consent travels WITH the sign-up, in the new user's metadata, and
@@ -137,7 +147,26 @@ export default function SignIn() {
       const { data: authData, error: authError } =
         tab === "signIn"
           ? await supabase.auth.signInWithPassword(credentials)
-          : await supabase.auth.signUp({ ...credentials, options: { data: { consent: signupConsentPayload() } } });
+          : await supabase.auth.signUp({
+              ...credentials,
+              options: {
+                data: { consent: signupConsentPayload() },
+                // Where the confirmation email's link brings them back to.
+                emailRedirectTo: authRedirectUrl(),
+              },
+            });
+
+      /*
+       * An account that has not opened its confirmation link yet. Supabase
+       * only answers this when the password was right, so it says nothing
+       * about whether an address has an account that the right password
+       * would not already prove.
+       */
+      if (tab === "signIn" && authError?.code === "email_not_confirmed") {
+        setPendingEmail(parsed.data.email);
+        router.replace("/verify-email");
+        return;
+      }
 
       if (authError) {
         /*
@@ -149,36 +178,35 @@ export default function SignIn() {
         setError(
           tab === "signIn"
             ? "That email and password do not match an account."
-            : authError.message,
+            : authError.status === 429
+              ? "Too many tries. Wait a minute, then try again."
+              : authError.message,
         );
         return;
       }
 
       /*
-       * Where they belong, not where a new account belongs.
-       *
-       * This was a hard-coded "/who", so signing in to an account that already
-       * had a profile and years of records still walked through the whole of
-       * onboarding and asked for a profile that existed. Replacing "/" instead
-       * is not the fix either: that lands on the splash, which used to bounce
-       * to the welcome carousel they had just finished.
+       * Created, and waiting for its email to be confirmed: no session yet
+       * (Supabase, "Confirm email" on). The same screen whether the address
+       * is new or already has an account, because Supabase answers both the
+       * same way and so does this app: telling them apart here would make
+       * sign-up a way to find out who uses Cheeku.
        */
-      /*
-       * A fresh session starts from a clean cache: whatever the last session
-       * left (another account's family, or a "no profile" cached while signed
-       * out) must never be what Home opens on. Then the family is loaded
-       * BEFORE Home is shown, so it opens complete instead of on a loader.
-       */
-      queryClient.clear();
-      await clearOfflineCache();
-      if (authData.session) {
-        // Belt and braces for the trigger, then the account's own history.
-        if (tab === "create") await ensureSignupConsent();
-        void logActivity("sign_in");
+      if (!authData.session) {
+        setPendingEmail(parsed.data.email);
+        router.replace("/verify-email");
+        return;
       }
-      const landing = await resolveLanding();
-      if (landing === "/home") await queryClient.prefetchQuery({ queryKey: FAMILY_KEY, queryFn: loadFamily });
-      startFresh(router, landing);
+
+      // Belt and braces for the consent trigger, then the account's own history.
+      if (tab === "create") await ensureSignupConsent();
+      void logActivity("sign_in");
+      /*
+       * No navigation here. The new session flips the root navigator's
+       * guards: sign-in and welcome close, leave the history, and the splash
+       * sends the person where they belong (resolveLanding). Navigating from
+       * here as well would race it.
+       */
     } catch {
       // A throw is a transport failure. Saying "wrong password" to someone with
       // no signal sends them to reset a password that was never the problem.
