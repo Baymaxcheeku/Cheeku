@@ -41,7 +41,7 @@ export function Pressable({ style, onPressIn, onPressOut, ...rest }: ComponentPr
         if (live) setPressed(false);
         onPressOut?.(e);
       }}
-      style={live ? style({ pressed }) : style}
+      style={live ? style({ pressed, hovered: false }) : style}
     />
   );
 }

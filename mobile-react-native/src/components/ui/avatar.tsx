@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Image, View, type ImageSourcePropType } from "react-native";
 import { SvgXml } from "react-native-svg";
 
+import { onImageFailure } from "@/lib/dev/image-failure";
 import { faceSvg, generatedAvatar } from "@/lib/profiles/avatar";
 
 /*
@@ -83,7 +84,7 @@ export function Avatar({
        * person's face from the set instead of an empty circle.
        */}
       {art ? (
-        <Image alt="" source={art} style={{ width: inner, height: inner }} accessibilityIgnoresInvertColors />
+        <Image alt="" source={art} style={{ width: inner, height: inner }} onError={onImageFailure("Avatar face", art)} accessibilityIgnoresInvertColors />
       ) : markup ? (
         <SvgXml xml={markup} width={inner} height={inner} />
       ) : null}
