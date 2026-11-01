@@ -34,7 +34,7 @@ import { shareText, whenLabel, type HealthFile, type Tracked, type UpcomingKind 
 import { useHealthFile } from "@/lib/health/queries";
 import type { ActiveProfile } from "@/lib/profiles/context";
 import { useFamily, useSwitchMember } from "@/lib/profiles/family";
-import { rupeesShort, shortDate } from "@/lib/records/details";
+import { shortDate } from "@/lib/records/details";
 import { DOC_TYPE_LABEL, FLAG_LABEL } from "@/lib/records/types";
 import { brand, hue, ink, lilac, semantic, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
