@@ -6,6 +6,7 @@ import { loopWhen } from "./loops";
 import { ageWords, type SymptomMatch } from "./symptoms";
 import type { ThresholdRead } from "./thresholds";
 import type { Tier } from "./types";
+import { coverDigest } from "@/lib/insurance/explain";
 
 /*
  * THE MODEL CONTRACT.
@@ -71,6 +72,12 @@ export type MemoryDigest = {
   /** What to measure next, for a symptom with no recent reading on file. */
   askForReadings: string[];
   stats: { records: number; messages: number; since: string | null };
+  /**
+   * The person's insurance, as plain lines from what they saved (migration
+   * 0043). For explaining their own cover back to them; anything not here is
+   * unknown, and the model must say so rather than guess.
+   */
+  cover: { insurer: string; lines: string[] }[];
 };
 
 export type ModelRequest = {
@@ -176,5 +183,6 @@ export function digest(
     changes: focus.changes ?? [],
     askForReadings: focus.askForReadings ?? [],
     stats: { records: c.stats.records, messages: c.stats.messages, since: c.stats.since ? shortDate(c.stats.since) : null },
+    cover: coverDigest(c.cover, () => [c.subject.firstName]),
   };
 }

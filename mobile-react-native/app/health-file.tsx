@@ -203,7 +203,7 @@ function FileBody({ f, memberId, member, onAdd }: { f: HealthFile; memberId: str
               const k = UPCOMING[u.kind];
               const overdue = u.days < 0;
               return (
-                <Tap scale={0.98} key={u.id} accessibilityRole="button" onPress={() => router.push(`/records/${u.documentId}`)} style={{ flexDirection: "row", alignItems: "center", gap: 12, padding: 14, borderTopWidth: i ? 1 : 0, borderTopColor: surface.line }}>
+                <Tap scale={0.98} key={u.id} accessibilityRole="button" onPress={() => router.push((u.href ?? `/records/${u.documentId}`) as never)} style={{ flexDirection: "row", alignItems: "center", gap: 12, padding: 14, borderTopWidth: i ? 1 : 0, borderTopColor: surface.line }}>
                   <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: k.bg, alignItems: "center", justifyContent: "center" }}>
                     <k.icon size={18} color={k.fg} />
                   </View>
@@ -313,11 +313,18 @@ function FileBody({ f, memberId, member, onAdd }: { f: HealthFile; memberId: str
 
       {f.cover.length ? (
         <>
-          <SectionHead title="Insurance cover" />
+          <SectionHead
+            title="Insurance cover"
+            right={
+              <Tap accessibilityRole="button" onPress={() => router.push("/insurance")} hitSlop={8}>
+                <Text style={{ fontFamily: font.semibold, fontSize: 13, color: brand[600] }}>Manage</Text>
+              </Tap>
+            }
+          />
           <View style={{ gap: 10 }}>
             {f.cover.map((c) => (
-              <Pressable key={c.documentId} accessibilityRole="button" onPress={() => router.push(`/records/${c.documentId}`)} style={({ pressed }) => [glassShadow, { borderRadius: 24, overflow: "hidden", padding: 16, transform: [{ scale: pressed ? 0.985 : 1 }] }]}>
-                <Gradient from={hue.ocean.fg} to="#1b8aa3" angle="diagonal" />
+              <Pressable key={c.href} accessibilityRole="button" onPress={() => router.push(c.href as never)} style={({ pressed }) => [glassShadow, { borderRadius: 24, overflow: "hidden", padding: 16, transform: [{ scale: pressed ? 0.985 : 1 }] }]}>
+                <Gradient from={hue.ocean.fg} to={hue.teal.fg} angle="diagonal" />
                 <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
                   <ShieldPlus size={18} color="#fff" />
                   <Text numberOfLines={1} style={{ flex: 1, fontFamily: font.semibold, fontSize: 15, color: "#fff" }}>{c.insurer}</Text>
@@ -336,6 +343,25 @@ function FileBody({ f, memberId, member, onAdd }: { f: HealthFile; memberId: str
               </Pressable>
             ))}
           </View>
+        </>
+      ) : member ? (
+        <>
+          <SectionHead title="Insurance cover" />
+          <Tap
+            accessibilityRole="button"
+            onPress={() => router.push({ pathname: "/insurance/edit", params: { for: member.id } })}
+            scale={0.98}
+            style={[glassShadow, { flexDirection: "row", alignItems: "center", gap: 12, padding: 14, borderRadius: 24, backgroundColor: "#fff", borderWidth: 1, borderColor: surface.line }]}
+          >
+            <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: hue.ocean.bg, alignItems: "center", justifyContent: "center" }}>
+              <ShieldPlus size={19} color={hue.ocean.fg} />
+            </View>
+            <View style={{ flex: 1, minWidth: 0 }}>
+              <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{p.isPrimary ? "Add your insurance" : `Add ${p.firstName}'s insurance`}</Text>
+              <Text style={{ fontFamily: font.regular, fontSize: 12, color: ink[500], marginTop: 1 }}>See the cover here, and ask Cheeku what it includes</Text>
+            </View>
+            <ChevronRight size={16} color={ink[300]} />
+          </Tap>
         </>
       ) : null}
 

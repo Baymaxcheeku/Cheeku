@@ -18,6 +18,7 @@ import { describeChange, notableChanges, type Series } from "./series";
 import { matchSymptoms } from "./symptoms";
 import { analyteKey, readThreshold, type ThresholdRead } from "./thresholds";
 import { TIER_RANK, type Fact, type Tier, type TierReason } from "./types";
+import { coverReply, isCoverQuestion } from "@/lib/insurance/explain";
 
 /*
  * ONE TURN, END TO END. The spec's minimum viable loop:
@@ -248,7 +249,15 @@ export async function planTurn(args: {
    * the booking card rides under the answer.
    */
   const bookingOnly = booking !== null && parsed.length === 0 && symptoms.length === 0;
-  const reply = bookingOnly ? bookingReply(booking, ctx) : await args.model.respond({
+  /*
+   * An insurance question with nothing medical in it ("is room rent
+   * capped?") is answered from their own saved policy by rules, like a
+   * booking: the answer is in a field or it isn't, and a model would only add
+   * room to guess. With a symptom alongside, the model answers and sees the
+   * cover in the digest.
+   */
+  const coverOnly = !bookingOnly && booking === null && parsed.length === 0 && symptoms.length === 0 && isCoverQuestion(text);
+  const reply = bookingOnly ? bookingReply(booking, ctx) : coverOnly ? coverModelReply(text, ctx) : await args.model.respond({
     question: text,
     history: args.history.slice(-12),
     memory: digest(ctx, {
@@ -307,6 +316,11 @@ export async function planTurn(args: {
 
 
 /** What Cheeku says when asked to book something. Rules, in plain words. */
+export function coverModelReply(text: string, ctx: MemoryContext): ModelReply {
+  const r = coverReply(text, ctx.subject.firstName, ctx.cover);
+  return { paragraphs: r.paragraphs, citations: [], followUps: r.followUps, basis: ctx.cover.length ? "grounded" : "silent" };
+}
+
 export function bookingReply(b: BookingIntent, ctx: MemoryContext): ModelReply {
   const name = ctx.subject.firstName;
   if (b.service === "fitness") {

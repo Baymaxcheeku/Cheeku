@@ -7,6 +7,7 @@ import { deriveLoops, openLoops, relevantLoops } from "./loops";
 import type { ChatModel, ModelReply } from "./model";
 import { mockModel } from "./mock-model";
 import { planTurn } from "./pipeline";
+import { readPolicy, type Policy } from "@/lib/insurance/policy";
 import { resolveClock } from "./clock";
 
 /*
@@ -347,5 +348,44 @@ describe("booking from the chat", () => {
     const plan = await run("book a doctor, I have chest pain", imaad(), "2026-09-08", noModel);
     expect(plan.status).toBe("escalate");
     expect(plan.booking).toBeNull();
+  });
+});
+
+describe("insurance questions", () => {
+  const policy = readPolicy({
+    id: "pol",
+    insurer: "Star Health",
+    policy_no: "SH-1",
+    policy_type: "family_floater",
+    sum_insured: 500000,
+    claimed: 0,
+    end_date: "2027-06-30",
+    room_rent: "1% of the sum insured a day",
+    covered_profile_ids: ["b"],
+  }) as Policy;
+  const askedModel: ChatModel = {
+    id: "spy",
+    respond: async () => ({ paragraphs: ["model answer"], citations: [], followUps: [], basis: "general" }),
+  };
+
+  it("are answered from the saved policy, without the model", async () => {
+    const plan = await run("is room rent capped on our insurance?", imaad({ policies: [policy] }), "2026-11-01", noModel);
+    expect(plan.status).toBe("answered");
+    expect(plan.reply?.paragraphs[0]).toContain("1% of the sum insured a day");
+    expect(plan.reply?.basis).toBe("grounded");
+  });
+
+  it("only use policies that cover this person", async () => {
+    const other = { ...policy, coveredProfileIds: ["someone-else"] };
+    const plan = await run("what does my insurance cover?", imaad({ policies: [other] }), "2026-11-01", noModel);
+    expect(plan.reply?.paragraphs[0]).toContain("don't have an insurance policy for Imaad");
+  });
+
+  it("with a symptom, go to the model, which sees the cover", async () => {
+    let seen: unknown = null;
+    const spy: ChatModel = { id: "spy", respond: async (req) => ((seen = req.memory.cover), askedModel.respond(req)) };
+    const plan = await run("he has a mild nappy rash, is a doctor visit covered by insurance?", imaad({ policies: [policy] }), "2026-11-01", spy);
+    expect(plan.reply?.paragraphs[0]).toBe("model answer");
+    expect(JSON.stringify(seen)).toContain("Star Health");
   });
 });

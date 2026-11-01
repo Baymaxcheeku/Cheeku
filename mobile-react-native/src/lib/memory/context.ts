@@ -8,6 +8,7 @@ import { deriveLoops, mergeLoops, openLoops, type LoopView, type StoredLoop } fr
 import { seriesFrom, type Series } from "./series";
 import { bloodGroupNote, motherOf, readPregnancy, readSubject } from "./subjects";
 import type { Fact, Pregnancy, Subject } from "./types";
+import type { Policy } from "@/lib/insurance/policy";
 
 /*
  * ONE PERSON'S MEMORY, ASSEMBLED.
@@ -33,6 +34,8 @@ export type MemoryBundle = {
   facts: Row[];
   loops: Row[];
   stats: { records?: number; messages?: number; conversations?: number; first_message_at?: string | null } | null;
+  /** The family's insurance policies that cover this person (migration 0043). Read separately; absent before it. */
+  policies?: Policy[];
 };
 
 export type MemoryNote = { kind: "dating" | "blood_group"; text: string };
@@ -59,6 +62,8 @@ export type MemoryContext = {
   stats: { records: number; messages: number; conversations: number; since: string | null };
   /** The clock at any date, for reading a value against the day it was taken. */
   clockAt: (date: string) => ResolvedClock;
+  /** Insurance policies covering this person, for explaining their cover back to them. */
+  cover: Policy[];
 };
 
 const str = (v: unknown): string | null => (typeof v === "string" && v.trim() ? v.trim() : null);
@@ -146,6 +151,7 @@ export function buildContext(bundle: MemoryBundle, today: string, extraFacts: re
     doctor: latestDoctor(documents),
     stats: { records: stats.records ?? documents.length, messages: stats.messages ?? 0, conversations: stats.conversations ?? 0, since: stats.first_message_at ?? null },
     clockAt,
+    cover: (bundle.policies ?? []).filter((p) => p.coveredProfileIds.includes(subject.id)),
   };
 }
 

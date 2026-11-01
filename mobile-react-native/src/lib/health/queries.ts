@@ -3,7 +3,9 @@ import { useQuery, type QueryClient } from "@tanstack/react-query";
 import { selectableProfiles } from "@/lib/profiles/context";
 import { supabase } from "@/lib/supabase/client";
 
-import { buildHealthFile, type Bundle, type HealthFile } from "./file";
+import { policiesFor } from "@/lib/insurance/queries";
+
+import { buildHealthFile, withPolicies, type Bundle, type HealthFile } from "./file";
 
 /*
  * The health file, one member at a time.
@@ -24,6 +26,11 @@ export const healthFileKey = (profileId: string | undefined) => ["health-file", 
 const missingFunction = (message: string | undefined) => Boolean(message && /could not find the function|function .* does not exist/i.test(message));
 
 export async function fetchHealthFile(profileId: string): Promise<HealthFile | null> {
+  const [file, policies] = await Promise.all([readFile(profileId), policiesFor(profileId)]);
+  return file ? withPolicies(file, policies) : null;
+}
+
+async function readFile(profileId: string): Promise<HealthFile | null> {
   const { data, error } = await supabase.rpc("health_file_bundle", { p_profile: profileId });
   if (!error) return data ? buildHealthFile(data as Bundle) : null;
   if (!missingFunction(error.message)) throw new Error(`health file: ${error.message}`);

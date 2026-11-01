@@ -282,6 +282,13 @@ in a shell. See `SHIPPING.md`.
    before stays under it, and the iPhone edge swipe walks back into it. The
    tab shell, welcome and who have the swipe-back gesture off.
 
+16. **Insurance answers come from the saved policy, never from what policies
+   "usually" cover.** `src/lib/insurance/explain.ts` says when the details
+   are silent and names who can confirm (the policy wording, the TPA, the
+   insurer). It answers money and paperwork only, never medicine. A pure
+   cover question is answered by rules without the model; with a symptom
+   alongside, the model answers and sees the cover in the digest.
+
 ## Running it
 
 Web preview (fast, and NOT sufficient — see below):
@@ -316,6 +323,16 @@ Anything about layout, cold-start routing, gestures, camera, biometrics or
 haptics has to be seen on a simulator or a device before it counts as done.
 
 ## Open
+
+- **Insurance needs 0043 applied** (2026-11-01). Paste
+  `supabase/manual/0043-step-1-of-1.sql` into the SQL editor, then
+  `0043-check.sql` (five yes rows). Until then Profile > Insurance shows the
+  empty state and saving says the database needs updating; nothing else
+  breaks. Policies are typed in for now: the document reader
+  (`ai-insurance-read`) and a partner feed (`partner-insurance-feed`) come
+  later and write the same table.
+- **The RLS audit should add `insurance_policies`** alongside the tables
+  listed below.
 
 - **The RLS audit is stale** (2026-10-31). Everything that lived at the repo
   root now lives in this folder, and `tests/db` runs with `npm run test:db`.
