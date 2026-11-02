@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Seed Spend Model</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:opsz,wght@14..32,400..700&display=swap">
+<style>
+/* Layout: the Cheeku vision-board surface as a working spend model. A sticky control bar (scenario and
+   levers), then the ₹26 cr build-up, use of funds, monthly spend and cash, the team plan and line items. */
+:root {
+  --bg: #F5F5F7; --surface: #FFFFFF; --surface-2: #F2F2F5; --surface-3: #E8E8ED;
+  --ink: #1D1D1F; --ink-2: #3A3A3F; --muted: #6E6E73; --faint: #A1A1A6;
+  --line: rgba(20, 20, 40, .08); --line-2: rgba(20, 20, 40, .14);
+  --accent: #5B4EF0; --accent-soft: #EEECFF; --on-accent: #FFFFFF;
+  --jivi: #D2551E; --jivi-soft: #FCEBE2;
+  --lime: #E4FF7A; --lime-ink: #2F3D00;
+  --good: #248A3D; --good-soft: #E3F4E7; --warn: #B86E00; --warn-soft: #FBF0DC; --bad: #D70015; --bad-soft: #FDE4E6;
+  --sh-1: 0 0 0 0.5px rgba(20, 20, 40, .08), 0 1px 2px rgba(20, 20, 40, .05), 0 2px 8px rgba(20, 20, 40, .035);
+  --glass: rgba(245, 245, 247, .8);
+  --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+  --brand: 'Instrument Serif', Georgia, serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0B0B0E; --surface: #1C1C1F; --surface-2: #242428; --surface-3: #2F2F35;
+  --ink: #F5F5F7; --ink-2: #D6D6DC; --muted: #98989F; --faint: #63636B; --line: rgba(255, 255, 255, .08); --line-2: rgba(255, 255, 255, .15);
+  --accent: #8F87FF; --accent-soft: #24213F; --on-accent: #0B0B0E;
+  --jivi: #FF8A4C; --jivi-soft: #3A2116;
+  --lime: #D6F25C; --lime-ink: #1E2700;
+  --good: #32D06A; --good-soft: #15301E; --warn: #FFB340; --warn-soft: #36280F; --bad: #FF6B6B; --bad-soft: #3A1518;
+  --sh-1: 0 0 0 0.5px rgba(255, 255, 255, .08), 0 1px 2px rgba(0, 0, 0, .4);
+  --glass: rgba(11, 11, 14, .8);
+  color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #0B0B0E; --surface: #1C1C1F; --surface-2: #242428; --surface-3: #2F2F35;
+  --ink: #F5F5F7; --ink-2: #D6D6DC; --muted: #98989F; --faint: #63636B; --line: rgba(255, 255, 255, .08); --line-2: rgba(255, 255, 255, .15);
+  --accent: #8F87FF; --accent-soft: #24213F; --on-accent: #0B0B0E;
+  --jivi: #FF8A4C; --jivi-soft: #3A2116;
+  --lime: #D6F25C; --lime-ink: #1E2700;
+  --good: #32D06A; --good-soft: #15301E; --warn: #FFB340; --warn-soft: #36280F; --bad: #FF6B6B; --bad-soft: #3A1518;
+  --sh-1: 0 0 0 0.5px rgba(255, 255, 255, .08), 0 1px 2px rgba(0, 0, 0, .4);
+  --glass: rgba(11, 11, 14, .8);
+  color-scheme: dark; }
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 64px; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 400 15px/1.55 var(--font); -webkit-font-smoothing: antialiased; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
+h1, h2, h3, h4 { margin: 0; text-wrap: balance; }
+p { margin: 0; }
+.num { font-variant-numeric: tabular-nums; }
+.wrap { max-width: 1120px; margin: 0 auto; padding: 0 max(20px, env(safe-area-inset-left, 0px)); }
+
+:root { --c-people: #5B4EF0; --c-hiring: #9B92FF; --c-mkt: #E0821E; --c-model: #0A9396; --c-ops: #8E6A2E; --c-rev: #248A3D; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --c-people: #8F87FF; --c-hiring: #C3BDFF; --c-mkt: #FFA94D; --c-model: #3CCACC; --c-ops: #D2A262; --c-rev: #32D06A; } }
+:root[data-theme="dark"] { --c-people: #8F87FF; --c-hiring: #C3BDFF; --c-mkt: #FFA94D; --c-model: #3CCACC; --c-ops: #D2A262; --c-rev: #32D06A; }
+.bar { position: sticky; top: 0; z-index: 20; background: var(--glass); -webkit-backdrop-filter: saturate(180%) blur(18px); backdrop-filter: saturate(180%) blur(18px); border-bottom: 0.5px solid var(--line-2); }
+.bar-in { display: flex; gap: 10px 16px; align-items: center; min-height: 54px; flex-wrap: wrap; padding-block: 8px; }
+.brand { font: italic 400 24px/1 var(--brand); color: var(--accent); }
+.sub { font-size: 12px; font-weight: 600; color: var(--muted); }
+.seg { display: inline-flex; background: var(--surface-3); border-radius: 9px; padding: 2px; gap: 2px; }
+.seg button { border: 0; background: transparent; padding: 6px 14px; border-radius: 7px; font: 600 13px/1 var(--font); color: var(--ink-2); cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 0 0 0.5px var(--line-2), 0 1px 3px rgba(0,0,0,.1); }
+.jump { display: flex; gap: 12px; margin-left: auto; overflow-x: auto; scrollbar-width: none; max-width: 100%; }
+.jump a { font-size: 12.5px; font-weight: 550; color: var(--ink-2); white-space: nowrap; }
+header.hero { padding: 34px 0 10px; display: grid; gap: 12px; }
+.eyebrow { font-size: 12px; font-weight: 650; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.hero h1 { font: 400 clamp(32px, 5vw, 52px)/1.04 var(--brand); }
+.hero h1 span { color: var(--accent); font-style: italic; }
+.hero .lede { max-width: 70ch; font-size: 16.5px; color: var(--ink-2); }
+section { padding: 28px 0 4px; display: grid; gap: 16px; }
+.sh { display: grid; gap: 6px; }
+.sh .k { font: 600 12px/1 var(--font); letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+.sh h2 { font: 400 clamp(26px, 3.6vw, 36px)/1.1 var(--brand); }
+.sh p { max-width: 74ch; color: var(--ink-2); }
+h3 { font-size: 16px; font-weight: 650; }
+.card { background: var(--surface); border-radius: 16px; box-shadow: var(--sh-1); padding: 18px; display: grid; gap: 12px; min-width: 0; align-content: start; }
+.grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+@media (max-width: 900px) { .grid2, .grid3 { grid-template-columns: minmax(0, 1fr); } }
+.levers { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); display: grid; gap: 14px 22px; padding: 16px 18px; }
+.lever { display: grid; gap: 6px; }
+.lever label { font-size: 12.5px; font-weight: 600; color: var(--ink-2); display: flex; justify-content: space-between; gap: 8px; }
+.lever label b { color: var(--accent); font-variant-numeric: tabular-nums; }
+.lever input[type=range] { width: 100%; accent-color: var(--accent); }
+.lever.tog { align-content: center; }
+.lever.tog label { justify-content: flex-start; align-items: center; gap: 8px; }
+.btn { border: 0; height: 30px; padding: 0 12px; border-radius: 8px; background: var(--surface-3); color: var(--ink); font: 550 12.5px/1 var(--font); cursor: pointer; justify-self: start; }
+.btn:hover { background: var(--line-2); }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+.tiles.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.tile { background: var(--surface); border-radius: 14px; box-shadow: var(--sh-1); padding: 14px 16px; display: grid; gap: 3px; }
+.card .tile { box-shadow: none; background: var(--surface-2); }
+.tile .v { font: 650 24px/1.1 var(--font); letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.tile .l { font-size: 12.5px; color: var(--muted); }
+.tile.hero .v { color: var(--accent); font-size: 30px; }
+.tile.good .v { color: var(--good); } .tile.bad .v { color: var(--bad); }
+.tw { overflow-x: auto; border-radius: 12px; border: 0.5px solid var(--line-2); }
+.tw.flat { border: 0; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 0.5px solid var(--line-2); white-space: nowrap; }
+th { font-size: 11px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); font-weight: 650; background: var(--surface-2); position: sticky; top: 0; }
+table.num td:not(:first-child), table.num th:not(:first-child) { text-align: right; font-variant-numeric: tabular-nums; }
+tr.tot td { font-weight: 700; border-top: 1px solid var(--line-2); }
+tr.grp td { background: var(--surface-2); font-weight: 650; font-size: 12px; color: var(--ink-2); }
+td.why { white-space: normal; color: var(--muted); min-width: 220px; }
+td.neg { color: var(--bad); }
+.row-h { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+.chart { width: 100%; overflow-x: auto; }
+.chart svg { display: block; width: 100%; height: auto; min-width: 620px; }
+.chart.sm svg { min-width: 0; }
+.cap { font-size: 12.5px; color: var(--muted); max-width: 84ch; }
+.keyrow { display: flex; flex-wrap: wrap; gap: 14px; font-size: 12.5px; color: var(--ink-2); }
+.keyrow span { display: inline-flex; align-items: center; gap: 6px; }
+.sw { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+ul.tight { margin: 0; padding-left: 18px; display: grid; gap: 7px; }
+.small { font-size: 13px; } .muted { color: var(--muted); }
+.toast { position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 8px 14px; border-radius: 10px; font-size: 13px; z-index: 50; }
+main { padding-bottom: 60px; }
+
+.lab { font-size: 12.5px; font-weight: 600; color: var(--ink-2); }
+.explain p { max-width: 80ch; color: var(--ink-2); font-size: 15px; }
+.explain b { color: var(--ink); }
+</style>
+</head>
+<body>
+<div class="bar"><div class="wrap bar-in">
+  <b class="brand">Cheeku</b><span class="sub">Seed spend model</span>
+  <div class="seg" role="group" aria-label="Scenario"><button type="button" data-sc="bear">Bear</button><button type="button" data-sc="base">Base</button><button type="button" data-sc="bull">Bull</button></div>
+  <nav class="jump" aria-label="Sections"><a href="#buffer">The ₹11 cr</a><a href="#build">₹26 cr build-up</a><a href="#funds">Use of funds</a><a href="#monthly">Monthly</a><a href="#team">Team</a><a href="#notes">Notes</a></nav>
+</div></div>
+
+<main class="wrap">
+  <header class="hero">
+    <div class="eyebrow">Seed round · ₹26 crore · Jan 2027 to Jun 2028 · runs on financial model v2</div>
+    <h1>Where the <span>₹26 crore</span> goes, month by month, seat by seat</h1>
+    <p class="lede">Every number on this page is calculated live by the financial model's own engine, the same code behind the vision board and the decks. Nothing here is a separate estimate. Change a lever and the model reruns.</p>
+  </header>
+
+  <section class="levers card" aria-label="Levers">
+    <div class="lever"><span class="lab">Funding</span><div class="seg" role="group" aria-label="Funding"><button type="button" data-fund="seed">Seed only</button><button type="button" data-fund="plan">Seed + Series A (model plan)</button></div></div>
+    <div class="lever tog"><label for="lvDef"><input id="lvDef" type="checkbox"> Defend mode (cut spend when runway &lt; 6 months)</label></div>
+    <div class="lever"><label for="lvMkt">Marketing <b id="vMkt">100%</b></label><input id="lvMkt" type="range" min="50" max="150" step="5" value="100"></div>
+    <div class="lever"><label for="lvHire">Hiring plan <b id="vHire">100%</b></label><input id="lvHire" type="range" min="50" max="130" step="5" value="100"></div>
+    <div class="lever"><label for="lvGpu">Compute cost <b id="vGpu">100%</b></label><input id="lvGpu" type="range" min="50" max="200" step="10" value="100"></div>
+    <div class="lever"><button type="button" class="btn" id="reset">Reset to the model</button></div>
+  </section>
+
+  <section id="buffer">
+    <div class="sh"><div class="k">Your question</div><h2>What the "₹11 crore buffer" is</h2></div>
+    <div class="card explain" id="bufferText"></div>
+  </section>
+
+  <section id="build">
+    <div class="sh"><div class="k">The ask</div><h2 id="buildTitle">How ₹26 crore is used</h2><p id="buildLede"></p></div>
+    <div class="tiles" id="tiles"></div>
+    <div class="card">
+      <h3>From ₹26 crore to the cash left when the Series A is due (end of Jan 2028), ₹ crore</h3>
+      <div class="chart" id="waterfall"></div>
+      <p class="cap">Months 1 to 13 of the model. Gross profit is revenue less cost of revenue (chat and voice inference, cloud, store fees, partner costs). "Interest and timing" is interest on cash plus working capital (deferred employer revenue, receivables).</p>
+    </div>
+    <div class="card"><h3>All three scenarios at these settings</h3><div class="tw"><table id="scTable" class="num"></table></div></div>
+  </section>
+
+  <section id="funds">
+    <div class="sh"><div class="k">Use of funds</div><h2>Where the money goes in the first 18 months</h2></div>
+    <div class="grid2">
+      <div class="card"><h3>By deck bucket, share of spend</h3><div class="chart sm" id="fundsChart"></div><p class="cap" id="fundsCap"></p></div>
+      <div class="card"><h3>By model line, 18 months, ₹ crore</h3><div class="tw flat"><table id="lineTable" class="num"></table></div></div>
+    </div>
+  </section>
+
+  <section id="monthly">
+    <div class="sh"><div class="k">Month by month</div><h2>Spend, revenue and cash</h2></div>
+    <div class="card"><div class="keyrow" id="keyMonthly"></div><div class="chart" id="monthlyChart"></div><p class="cap" id="monthlyCap"></p></div>
+    <div class="card"><div class="row-h"><h3>Monthly table, ₹ lakh</h3><button type="button" class="btn" id="copyMonthly">Copy as CSV</button></div><div class="tw"><table id="monthTable" class="num"></table></div></div>
+  </section>
+
+  <section id="team">
+    <div class="sh"><div class="k">Team</div><h2>Every seat the model funds, and who fills it</h2><p id="teamLede"></p></div>
+    <div class="card"><h3>Headcount by team</h3><div class="keyrow" id="keyTeam"></div><div class="chart" id="teamChart"></div></div>
+    <div class="card"><h3>Roles in hiring order</h3><div class="tw"><table id="roleTable"></table></div>
+      <p class="cap">The model phases each hire in over the year, so seats are funded in fractions; the month shown is when a seat is at least half funded, and the cost is exactly what the model spends on it. Salaries are the model's average for each team (2027 rupees, +10% a year, +20% for benefits). A Chief of Staff usually costs more than the team average; the model funds that from the same team budget.</p></div>
+  </section>
+
+  <section id="notes">
+    <div class="sh"><div class="k">Notes</div><h2>How this stays in sync</h2></div>
+    <div class="card"><ul class="tight small">
+      <li><b>One engine.</b> The page embeds <code>vision-board/engine.js</code>. <code>spend-model/build.py</code> rebuilds it after any change to the model, so the vision board, the decks and this page always show the same numbers.</li>
+      <li><b>The model plan includes the Series A.</b> Financial model v2 raises ₹70 crore at month 13 (Feb 2028) and keeps hiring and spending into 2028 on that basis. "Seed only" shows what happens if it does not arrive.</li>
+      <li><b>Defend mode is the model's own rule:</b> when runway falls under six months it cuts marketing by 65%, compute by 50%, pendant work by 80%, and freezes hiring.</li>
+      <li><b>Model lines.</b> People, marketing, employer sales costs, compute and data (own GPUs, tuning, evals), pendant R&amp;D, office and G&amp;A, with revenue and cost of revenue from the same run.</li>
+      <li><b>Changes from the Jivi teardown are not applied here.</b> The model still funds pendant R&amp;D, a hardware hire and insurer deals inside these 18 months. Use the hiring and compute levers to see the leaner plan.</li>
+    </ul></div>
+  </section>
+</main>
+
+<script>
+/*ENGINE*/
+</script>
+<script>
+/*ROLES*/
+</script>
+<script>
+(function () {
+  const $ = id => document.getElementById(id);
+  const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const NS = 'http://www.w3.org/2000/svg';
+  const el = (t, a, tx) => { const e = document.createElementNS(NS, t); for (const k in a) e.setAttribute(k, a[k]); if (tx != null) e.textContent = tx; return e; };
+  const svg = (id, w, h, label) => { const host = $(id); host.innerHTML = ''; const s = el('svg', { viewBox: `0 0 ${w} ${h}`, role: 'img', 'aria-label': label }); host.appendChild(s); return s; };
+  const L_ = v => v / LAKH, C_ = v => v / CR;
+  const cr = v => '₹' + C_(v).toFixed(2) + ' cr', cr1 = v => '₹' + C_(v).toFixed(1) + ' cr', lk = v => L_(v).toFixed(1);
+  const fmtN = n => n >= 1e5 ? (n / 1e5).toFixed(1) + ' lakh' : Math.round(n).toLocaleString('en-IN');
+  const MON = t => ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][t % 12] + ' ' + String(27 + Math.floor(t / 12));
+  const TEAM = {}; FUNCS.forEach(f => { TEAM[f[0]] = f[1]; });
+  const TEAMC = { founders: '#14136B', eng: '#5B4EF0', ai: '#0A9396', product: '#C8417F', clinical: '#248A3D', care: '#7FB069', growth: '#E0821E', b2b: '#B5179E', corp: '#2F6FDE', hardware: '#6E6E73', ga: '#8E6A2E' };
+  const DEF = { sc: 'base', fund: 'seed', defend: false, mkt: 100, hire: 100, gpu: 100 };
+  let st = Object.assign({}, DEF);
+  try { const v = JSON.parse(localStorage.getItem('cheeku-spend2') || 'null'); if (v) st = Object.assign(st, v); } catch (e) {}
+  const save = () => { try { localStorage.setItem('cheeku-spend2', JSON.stringify(st)); } catch (e) {} };
+
+  function model(o) {
+    const s = scenario(o.sc);
+    s.mktMult = o.mkt / 100; s.hiringMult = o.hire / 100; s.gpuMult = o.gpu / 100; s.defend = o.defend;
+    if (o.fund === 'seed') s.rounds = [s.rounds[0]];
+    const rows = run(s);
+    let out = -1; for (let t = 0; t < rows.length; t++) if (rows[t].cash < 0) { out = t; break; }
+    return { s, rows, runway: out < 0 ? 60 : out };
+  }
+  const runwayOf = (o, defend) => model(Object.assign({}, o, { fund: 'seed', defend })).runway;
+  const rwTxt = m => m >= 60 ? '60+ months' : m + ' months';
+
+  function render() {
+    document.querySelectorAll('[data-sc]').forEach(b => b.setAttribute('aria-pressed', b.dataset.sc === st.sc));
+    document.querySelectorAll('[data-fund]').forEach(b => b.setAttribute('aria-pressed', b.dataset.fund === st.fund));
+    $('lvDef').checked = st.defend;
+    [['lvMkt', 'vMkt', 'mkt'], ['lvHire', 'vHire', 'hire'], ['lvGpu', 'vGpu', 'gpu']].forEach(([i, v, k]) => { $(i).value = st[k]; $(v).textContent = st[k] + '%'; });
+    const C = { ink: css('--ink'), ink2: css('--ink-2'), muted: css('--muted'), line: css('--line-2'), accent: css('--accent'), good: css('--good'), bad: css('--bad') };
+    const M = model(st), R = M.rows.slice(0, 18), S = M.s;
+    const seedRw = runwayOf(st, false), seedRwDef = runwayOf(st, true);
+    const plan = model(Object.assign({}, st, { fund: 'plan' }));
+    const atA = plan.rows[12];                     // end of Jan 2028, the month before the Series A lands
+    const burnA = -atA.ebitda;
+    const scName = { bear: 'Bear', base: 'Base', bull: 'Bull' }[st.sc];
+
+    // The ₹11 cr explanation
+    const usedToA = 26 * CR - atA.cash;
+    $('bufferText').innerHTML = `<p>In the financial model the seed lands in <b>Jan 2027</b> and the Series A (₹70 crore) in <b>Feb 2028</b>, month 13. Over those 13 months the plan spends its way through <b>${cr1(usedToA)}</b> of the ₹26 crore. At the end of Jan 2028, <b>${cr1(atA.cash)}</b> is still in the bank. That is the figure you saw as the "₹11 crore buffer" (base case at the model's settings: ₹10.85 crore).</p>
+      <p>It is not money set aside for something. It is runway the plan has not reached yet: <b>${(atA.cash / burnA).toFixed(1)} months</b> of spending at the Jan 2028 burn of <b>${cr1(burnA)} a month</b>. If the Series A arrives on time, it is the cushion that lets us negotiate without a gun to our head. If the Series A is late, the plan as written runs out after <b>${rwTxt(seedRw)}</b> in total; with defend mode (the model cuts marketing, compute and hiring) it lasts <b>${rwTxt(seedRwDef)}</b>.</p>
+      <p>So the ₹26 crore is <b>13 months of plan to reach Series A milestones, plus about four months of safety</b>. That is where the deck's "17 months of runway" comes from.</p>`;
+
+    // build lede + tiles
+    const peak = Math.max(...R.map(r => -r.ebitda));
+    const spend18 = R.reduce((a, r) => a + r.oPeople + r.oMkt + r.oCorpSales + r.oLlm + r.oPendant + r.oOffice + r.oGa + r.cogs, 0);
+    $('buildTitle').textContent = `${scName} case: ₹26 crore carries the plan to the Series A with ${cr1(atA.cash)} to spare`;
+    $('buildLede').textContent = `Months 1 to 13 use ${cr1(usedToA)}. Without a Series A the same plan lasts ${rwTxt(seedRw)} (${rwTxt(seedRwDef)} in defend mode).`;
+    $('tiles').innerHTML = [['hero', cr1(atA.cash), 'Cash left at end of Jan 2028'], ['', cr1(usedToA), 'Used in months 1 to 13'], ['', rwTxt(seedRw), 'Runway, seed only, as written'], ['', rwTxt(seedRwDef), 'Runway, seed only, defend mode'], ['', '₹' + (peak / CR).toFixed(2) + ' cr', 'Peak monthly burn, 18 months'], ['', (R[17].hcTotal).toFixed(0) + ' people', 'Team at month 18']]
+      .map(x => `<div class="tile ${x[0]}"><div class="v">${x[1]}</div><div class="l">${x[2]}</div></div>`).join('');
+
+    // waterfall over months 1..13 of the plan run
+    (function () {
+      const P = plan.rows.slice(0, 13), sum = k => P.reduce((a, r) => a + r[k], 0);
+      const gp = sum('gp'), other = P.reduce((a, r, i) => a + (r.cash - (i ? P[i - 1].cash : 0) - r.funding - r.ebitda), 0);
+      const items = [['Seed', 26 * CR, 'start'], ['People', -sum('oPeople')], ['Marketing', -sum('oMkt')], ['Employer sales', -sum('oCorpSales')], ['Compute and data', -sum('oLlm')], ['Pendant R&D', -sum('oPendant')], ['Office', -sum('oOffice')], ['G&A', -sum('oGa')], ['Gross profit', gp], ['Interest and timing', other], ['Cash, Jan 2028', P[12].cash, 'end']];
+      const W = 1040, H = 330, L = 46, B = 52, T = 24, max = 28 * CR;
+      const s = svg('waterfall', W, H, 'Waterfall from the seed to cash at the Series A');
+      const Y = v => T + (1 - v / max) * (H - T - B), bw = (W - L - 10) / items.length;
+      [0, 5, 10, 15, 20, 25].forEach(v => { s.appendChild(el('line', { x1: L, x2: W - 10, y1: Y(v * CR), y2: Y(v * CR), stroke: C.line, 'stroke-dasharray': v ? '2 3' : '' })); s.appendChild(el('text', { x: L - 8, y: Y(v * CR) + 4, 'text-anchor': 'end', 'font-size': 11, fill: C.muted }, v)); });
+      let run = 0;
+      items.forEach((it, i) => {
+        const x = L + i * bw + 6, w = bw - 12; let y0, y1, col;
+        if (it[2] === 'start') { y0 = 0; y1 = it[1]; run = it[1]; col = C.accent; }
+        else if (it[2] === 'end') { y0 = 0; y1 = it[1]; col = C.good; }
+        else { y0 = run; y1 = run + it[1]; run = y1; col = it[1] < 0 ? C.ink2 : C.good; }
+        const top = Math.max(y0, y1), bot = Math.min(y0, y1);
+        s.appendChild(el('rect', { x, y: Y(top), width: w, height: Math.max(1, Y(bot) - Y(top)), rx: 4, fill: col, opacity: it[2] ? 1 : 0.85 }));
+        s.appendChild(el('text', { x: x + w / 2, y: Y(top) - 6, 'text-anchor': 'middle', 'font-size': 11.5, 'font-weight': 650, fill: C.ink }, (it[2] ? '' : it[1] < 0 ? '−' : '+') + Math.abs(C_(it[1])).toFixed(1)));
+        const words = it[0].split(' '); words.forEach((wd, j) => s.appendChild(el('text', { x: x + w / 2, y: H - 34 + j * 13, 'text-anchor': 'middle', 'font-size': 11, fill: C.ink2 }, wd)));
+      });
+      s.appendChild(el('text', { x: L, y: 14, 'font-size': 11, fill: C.muted }, '₹ crore'));
+    })();
+
+    // scenario table
+    $('scTable').innerHTML = `<thead><tr><th>Scenario</th><th>Used, months 1 to 13</th><th>Cash, end Jan 2028</th><th>Runway, seed only</th><th>Runway, defend mode</th><th>Revenue, 18 months</th><th>Team, month 18</th><th>Monthly users, month 18</th></tr></thead><tbody>` +
+      ['bear', 'base', 'bull'].map(sc => { const o = Object.assign({}, st, { sc }); const p = model(Object.assign({}, o, { fund: 'plan' })), m = model(o); const a = p.rows[12];
+        return `<tr${sc === st.sc ? ' style="font-weight:650"' : ''}><td>${sc[0].toUpperCase() + sc.slice(1)}</td><td>${cr(26 * CR - a.cash)}</td><td>${cr(a.cash)}</td><td>${rwTxt(runwayOf(o, false))}</td><td>${rwTxt(runwayOf(o, true))}</td><td>${cr(m.rows.slice(0, 18).reduce((x, r) => x + r.rev, 0))}</td><td>${m.rows[17].hcTotal.toFixed(0)}</td><td>${fmtN(m.rows[17].mau)}</td></tr>`; }).join('') + '</tbody>';
+
+    // use of funds
+    (function () {
+      const sum = k => R.reduce((a, r) => a + (typeof k === 'function' ? k(r) : r[k]), 0);
+      const people = sum('oPeople'), growth = sum(r => r.oMkt + r.oCorpSales), mdl = sum(r => r.oLlm + r.cChat + r.cVoice + r.cCloud), ops = sum(r => r.oOffice + r.oGa + r.oPendant);
+      const tot = people + growth + mdl + ops;
+      const items = [['People', people, '--c-people', 35], ['Growth', growth, '--c-mkt', 33], ['Model and compute', mdl, '--c-model', 18], ['Ops, office, G&A, pendant', ops, '--c-ops', 14]];
+      const W = 560, H = 210, L = 175, Rr = 110, T = 10, rh = 46;
+      const s = svg('fundsChart', W, H, 'Use of funds by bucket');
+      const X = v => L + v / 60 * (W - L - Rr);
+      items.forEach((it, i) => { const y = T + i * rh + 8, pct = it[1] / tot * 100;
+        s.appendChild(el('text', { x: L - 10, y: y + 13, 'text-anchor': 'end', 'font-size': 12.5, fill: C.ink2 }, it[0]));
+        s.appendChild(el('rect', { x: L, y, width: X(pct) - L, height: 18, rx: 5, fill: css(it[2]) }));
+        s.appendChild(el('line', { x1: X(it[3]), x2: X(it[3]), y1: y - 4, y2: y + 22, stroke: C.muted, 'stroke-width': 2 }));
+        s.appendChild(el('text', { x: Math.max(X(pct), X(it[3])) + 8, y: y + 13, 'font-size': 12, 'font-weight': 650, fill: C.ink }, `${pct.toFixed(0)}% · ${cr1(it[1])}`)); });
+      $('fundsCap').textContent = `Grey ticks are the seed deck's split (35/33/18/14). Over the first 18 months the model spends ${cr1(tot)} across these buckets; "model and compute" includes chat, voice and cloud inference.`;
+      const lines = [['People', people], ['Marketing', sum('oMkt')], ['Employer sales costs', sum('oCorpSales')], ['Compute and data (GPUs, tuning, evals)', sum('oLlm')], ['Chat, voice and cloud inference', sum(r => r.cChat + r.cVoice + r.cCloud)], ['Pendant R&D', sum('oPendant')], ['Office', sum('oOffice')], ['G&A (legal, audit, tools, insurance)', sum('oGa')], ['Other cost of revenue (store fees, partners)', sum(r => r.cogs - r.cChat - r.cVoice - r.cCloud)]];
+      const spend = lines.reduce((a, l) => a + l[1], 0), rev = sum('rev');
+      $('lineTable').innerHTML = `<thead><tr><th>Line</th><th>₹ cr</th></tr></thead><tbody>` + lines.map(l => `<tr><td style="white-space:normal">${l[0]}</td><td>${C_(l[1]).toFixed(2)}</td></tr>`).join('') +
+        `<tr class="tot"><td>Total spend</td><td>${C_(spend).toFixed(2)}</td></tr><tr><td>Revenue</td><td>${C_(rev).toFixed(2)}</td></tr><tr class="tot"><td>Net burn before interest</td><td>${C_(spend - rev).toFixed(2)}</td></tr></tbody>`;
+    })();
+
+    // monthly chart
+    const B = [['oPeople', 'People', '--c-people'], ['oMkt', 'Marketing', '--c-mkt'], ['oCorpSales', 'Employer sales', '--c-hiring'], ['oLlm', 'Compute and data', '--c-model'], ['ops', 'Pendant, office, G&A', '--c-ops'], ['cogs', 'Cost of revenue', '--muted']];
+    const val = (r, k) => k === 'ops' ? r.oPendant + r.oOffice + r.oGa : r[k];
+    $('keyMonthly').innerHTML = B.map(b => `<span><i class="sw" style="background:var(${b[2]})"></i>${b[1]}</span>`).join('') + `<span><i class="sw" style="background:var(--c-rev)"></i>Revenue</span><span><i class="sw" style="background:var(--ink)"></i>Cash (right axis)</span>`;
+    (function () {
+      const W = 1040, H = 340, L = 50, Rr = 64, T = 20, Bt = 40;
+      const tops = R.map(r => B.reduce((a, b) => a + val(r, b[0]), 0)); const maxS = Math.max(...tops) * 1.1, maxC = Math.max(27 * CR, ...R.map(r => r.cash)) * 1.02;
+      const s = svg('monthlyChart', W, H, 'Monthly spend, revenue and cash');
+      const Y = v => T + (1 - v / maxS) * (H - T - Bt), Yc = v => T + (1 - Math.max(0, v) / maxC) * (H - T - Bt), bw = (W - L - Rr) / 18;
+      const stepS = maxS > 4 * CR ? 1 * CR : 0.5 * CR;
+      for (let v = 0; v <= maxS; v += stepS) { s.appendChild(el('line', { x1: L, x2: W - Rr, y1: Y(v), y2: Y(v), stroke: C.line, 'stroke-dasharray': v ? '2 3' : '' })); s.appendChild(el('text', { x: L - 8, y: Y(v) + 4, 'text-anchor': 'end', 'font-size': 11, fill: C.muted }, (v / CR).toFixed(1))); }
+      for (let v = 0; v <= maxC; v += 20 * CR) s.appendChild(el('text', { x: W - Rr + 8, y: Yc(v) + 4, 'font-size': 11, fill: C.muted }, (v / CR) + ' cr'));
+      s.appendChild(el('text', { x: L, y: 12, 'font-size': 11, fill: C.muted }, '₹ crore a month'));
+      R.forEach((r, i) => { let acc = 0; const x = L + i * bw + 4, w = bw - 8;
+        B.forEach(b => { const v = val(r, b[0]); s.appendChild(el('rect', { x, y: Y(acc + v), width: w, height: Math.max(0, Y(acc) - Y(acc + v)), fill: css(b[2]), opacity: b[0] === 'cogs' ? 0.55 : 1 })); acc += v; });
+        s.appendChild(el('line', { x1: x, x2: x + w, y1: Y(r.rev), y2: Y(r.rev), stroke: css('--c-rev'), 'stroke-width': 3 }));
+        if (r.funding > 0 && i > 0) s.appendChild(el('text', { x: x + w / 2, y: T + 10, 'text-anchor': 'middle', 'font-size': 10.5, 'font-weight': 650, fill: C.accent }, 'Series A'));
+        if (i % 2 === 0 || i === 17) s.appendChild(el('text', { x: x + w / 2, y: H - 18, 'text-anchor': 'middle', 'font-size': 10.5, fill: C.ink2 }, MON(i))); });
+      let d = ''; R.forEach((r, i) => { d += (i ? 'L' : 'M') + (L + i * bw + bw / 2) + ' ' + Yc(r.cash); });
+      s.appendChild(el('path', { d, fill: 'none', stroke: C.ink, 'stroke-width': 2.5 }));
+      const lx = L + 17 * bw + bw / 2, lc = R[17].cash;
+      s.appendChild(el('circle', { cx: lx, cy: Yc(lc), r: 5, fill: lc >= 0 ? C.good : C.bad }));
+      s.appendChild(el('text', { x: lx - 8, y: Yc(lc) - 10, 'text-anchor': 'end', 'font-size': 11.5, 'font-weight': 650, fill: C.ink }, (lc < 0 ? '−' : '') + cr(Math.abs(lc))));
+    })();
+    $('monthlyCap').textContent = st.fund === 'plan' ? 'Model plan: the ₹70 crore Series A lands in Feb 2028.' : `Seed only. ${R.some(r => r.cash < 0) ? 'Cash goes below zero inside 18 months: the plan as written needs the Series A.' : 'Cash stays above zero for 18 months at these settings.'}${R.some(r => r.defending) ? ' Defend mode switches on in ' + MON(R.findIndex(r => r.defending)) + '.' : ''}`;
+
+    // monthly table
+    const cols = [['m', 'Month'], ['hc', 'Team'], ['oPeople', 'People'], ['oMkt', 'Marketing'], ['oCorpSales', 'Employer sales'], ['oLlm', 'Compute'], ['oPendant', 'Pendant'], ['oOffice', 'Office'], ['oGa', 'G&A'], ['cogs', 'Cost of revenue'], ['rev', 'Revenue'], ['ebitda', 'EBITDA'], ['funding', 'Funding'], ['cash', 'Cash']];
+    const cell = (r, k, i) => k === 'm' ? MON(i) + (r.defending ? ' ·' : '') : k === 'hc' ? r.hcTotal.toFixed(1) : lk(r[k]);
+    const tot = k => R.reduce((a, r) => a + r[k], 0);
+    $('monthTable').innerHTML = `<thead><tr>${cols.map(c => `<th>${c[1]}</th>`).join('')}</tr></thead><tbody>` + R.map((r, i) => `<tr>${cols.map(c => `<td${(c[0] === 'cash' && r.cash < 0) || (c[0] === 'ebitda') ? ' class="neg"' : ''}>${cell(r, c[0], i)}</td>`).join('')}</tr>`).join('') +
+      `<tr class="tot"><td>18 months</td><td>${R[17].hcTotal.toFixed(1)}</td>${['oPeople', 'oMkt', 'oCorpSales', 'oLlm', 'oPendant', 'oOffice', 'oGa', 'cogs', 'rev', 'ebitda', 'funding'].map(k => `<td>${lk(tot(k))}</td>`).join('')}<td>${lk(R[17].cash)}</td></tr></tbody>`;
+    window.__csv = [cols.map(c => c[1]).join(',')].concat(R.map((r, i) => cols.map(c => cell(r, c[0], i)).join(','))).join('\n');
+
+    // team chart
+    const keys = FUNCS.map(f => f[0]);
+    $('keyTeam').innerHTML = keys.map(k => `<span><i class="sw" style="background:${TEAMC[k]}"></i>${TEAM[k]}</span>`).join('');
+    (function () {
+      const W = 1040, H = 290, L = 40, Rr = 20, T = 16, Bt = 36, max = Math.max(10, Math.ceil(Math.max(...R.map(r => r.hcTotal)) / 10) * 10);
+      const s = svg('teamChart', W, H, 'Headcount by team per month');
+      const Y = v => T + (1 - v / max) * (H - T - Bt), bw = (W - L - Rr) / 18;
+      for (let v = 0; v <= max; v += 10) { s.appendChild(el('line', { x1: L, x2: W - Rr, y1: Y(v), y2: Y(v), stroke: C.line, 'stroke-dasharray': v ? '2 3' : '' })); s.appendChild(el('text', { x: L - 8, y: Y(v) + 4, 'text-anchor': 'end', 'font-size': 11, fill: C.muted }, v)); }
+      R.forEach((r, i) => { let acc = 0; const x = L + i * bw + 5, w = bw - 10;
+        keys.forEach(k => { const v = r.hc[k] || 0; if (!v) return; s.appendChild(el('rect', { x, y: Y(acc + v), width: w, height: Y(acc) - Y(acc + v), fill: TEAMC[k] })); acc += v; });
+        s.appendChild(el('text', { x: x + w / 2, y: Y(acc) - 5, 'text-anchor': 'middle', 'font-size': 10.5, 'font-weight': 650, fill: C.ink }, acc.toFixed(0)));
+        if (i % 2 === 0 || i === 17) s.appendChild(el('text', { x: x + w / 2, y: H - 14, 'text-anchor': 'middle', 'font-size': 10.5, fill: C.ink2 }, MON(i))); });
+    })();
+
+    // roles
+    const fte = (f, t) => f[2] * LAKH * Math.pow(1 + S.salaryGrowth, Math.floor(t / 12)) * (1 + S.loading) / 12;
+    let html = `<thead><tr><th>Role</th><th>Funded from</th><th>Team salary, ₹ lakh a year</th><th>18-month cost, ₹ lakh</th><th>Why we need them</th></tr></thead><tbody>`, grand = 0, nRoles = 0;
+    FUNCS.forEach(f => {
+      const key = f[0], roster = ROSTER[key] || [];
+      const maxHc = Math.max(...R.map(r => r.hc[key] || 0)); const seats = Math.ceil(maxHc - 1e-9);
+      if (!seats) return;
+      let teamCost = 0; const lines = [];
+      for (let k = 1; k <= seats; k++) {
+        let cost = 0, from = -1;
+        R.forEach((r, t) => { const fr = Math.max(0, Math.min(1, (r.hc[key] || 0) - (k - 1))); cost += fr * fte(f, t); if (from < 0 && fr >= 0.5) from = t; });
+        const peakFr = Math.max(...R.map(r => Math.max(0, Math.min(1, (r.hc[key] || 0) - (k - 1)))));
+        const ro = roster[k - 1] || [TEAM[key] + ' hire ' + k, ''];
+        teamCost += cost;
+        lines.push(`<tr><td>${ro[0]}</td><td>${from >= 0 ? MON(from) : `<span class="muted">${Math.round(peakFr * 100)}% funded by ${MON(17)}</span>`}</td><td style="text-align:right">${f[2]}</td><td style="text-align:right">${lk(cost)}</td><td class="why">${ro[1]}</td></tr>`);
+      }
+      grand += teamCost; nRoles += seats;
+      html += `<tr class="grp"><td>${TEAM[key]} · ${(R[17].hc[key] || 0).toFixed(1)} at month 18</td><td></td><td></td><td style="text-align:right">${lk(teamCost)}</td><td></td></tr>` + lines.join('');
+    });
+    html += `<tr class="tot"><td>Total payroll, 18 months</td><td></td><td></td><td style="text-align:right">${lk(grand)}</td><td>Matches the model's people line: ${lk(R.reduce((a, r) => a + r.oPeople, 0))}</td></tr></tbody>`;
+    $('roleTable').innerHTML = html;
+    $('teamLede').textContent = `${R[0].hcTotal.toFixed(0)} people in Jan 2027, ${R[11].hcTotal.toFixed(0)} by Dec 2027, ${R[17].hcTotal.toFixed(0)} by Jun 2028. ${nRoles} roles are funded at least in part within 18 months.`;
+  }
+
+  document.addEventListener('click', e => {
+    const b = e.target.closest('[data-sc]'); if (b) { st.sc = b.dataset.sc; save(); render(); return; }
+    const f = e.target.closest('[data-fund]'); if (f) { st.fund = f.dataset.fund; save(); render(); return; }
+    if (e.target.id === 'reset') { st = Object.assign({}, DEF, { sc: st.sc }); save(); render(); return; }
+    if (e.target.id === 'copyMonthly') { const done = m => { const t = document.createElement('div'); t.className = 'toast'; t.textContent = m; document.body.appendChild(t); setTimeout(() => t.remove(), 1800); };
+      try { navigator.clipboard.writeText(window.__csv).then(() => done('Copied the monthly table'), () => done('Copy is blocked here. Select the table instead.')); } catch (x) { done('Copy is blocked here. Select the table instead.'); } }
+  });
+  [['lvMkt', 'mkt'], ['lvHire', 'hire'], ['lvGpu', 'gpu']].forEach(([i, k]) => $(i).addEventListener('input', e => { st[k] = Number(e.target.value); save(); render(); }));
+  $('lvDef').addEventListener('change', e => { st.defend = e.target.checked; save(); render(); });
+  render();
+  if (window.matchMedia) { const mq = matchMedia('(prefers-color-scheme: dark)'); if (mq.addEventListener) mq.addEventListener('change', render); }
+  new MutationObserver(render).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+})();
+
+</script>
+</body>
+</html>
