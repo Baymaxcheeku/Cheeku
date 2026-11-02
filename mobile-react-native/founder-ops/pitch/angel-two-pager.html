@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cheeku AI Seed</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:opsz,wght@14..32,400..750&display=swap">
+<style>
+/* Layout: two phone-width "pages" stacked like printed sheets. Page 1 is the story (problem, product, proof),
+   page 2 is the business (model, moat, team, round). Every section leads with one picture and two lines. */
+:root {
+  --bg: #EEEEF3; --page: #FFFFFF; --soft: #F5F5F8; --soft-2: #EBEAF5;
+  --ink: #17171C; --ink-2: #3A3A42; --muted: #6E6E78; --line: rgba(20, 20, 40, .1);
+  --accent: #5B4EF0; --accent-soft: #EEECFF; --lime: #E4FF7A; --lime-ink: #2F3D00; --navy: #14136B;
+  --aq: #1677FF; --coral: #E5603A; --good: #248A3D;
+  --display: 'Instrument Serif', Georgia, serif;
+  --body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #08080B; --page: #141418; --soft: #1C1C22; --soft-2: #22203A;
+  --ink: #F4F4F7; --ink-2: #D2D2DA; --muted: #9A9AA4; --line: rgba(255, 255, 255, .1);
+  --accent: #8F87FF; --accent-soft: #24213F; --lime: #D6F25C; --lime-ink: #1E2700; --navy: #2C2A85;
+  --aq: #5AA2FF; --coral: #FF8A5C; --good: #32D06A; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #08080B; --page: #141418; --soft: #1C1C22; --soft-2: #22203A;
+  --ink: #F4F4F7; --ink-2: #D2D2DA; --muted: #9A9AA4; --line: rgba(255, 255, 255, .1);
+  --accent: #8F87FF; --accent-soft: #24213F; --lime: #D6F25C; --lime-ink: #1E2700; --navy: #2C2A85;
+  --aq: #5AA2FF; --coral: #FF8A5C; --good: #32D06A; color-scheme: dark; }
+
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 400 15px/1.5 var(--body); -webkit-font-smoothing: antialiased; }
+a { color: var(--accent); }
+h1, h2, h3 { margin: 0; text-wrap: balance; font-weight: 400; }
+p { margin: 0; }
+.num { font-variant-numeric: tabular-nums; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 6px; }
+
+.sheet { max-width: 760px; margin: 18px auto; background: var(--page); border-radius: 24px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,.05), 0 12px 40px rgba(20,20,40,.08); }
+@media (max-width: 800px) { .sheet { margin: 10px; border-radius: 20px; } }
+.pagehead { display: flex; justify-content: space-between; align-items: center; padding: 18px 26px 0; font-size: 11.5px; font-weight: 650; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.logo { font: italic 400 26px/1 var(--display); color: var(--accent); letter-spacing: 0; text-transform: none; }
+.blk { padding: 26px; display: grid; gap: 14px; border-top: 1px solid var(--line); }
+.blk:first-of-type { border-top: 0; }
+.k { font-size: 11.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); }
+.blk h2 { font: 400 clamp(27px, 6vw, 36px)/1.08 var(--display); letter-spacing: -0.005em; }
+.blk h2 em { color: var(--accent); }
+.lede { color: var(--ink-2); max-width: 60ch; }
+.two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; }
+@media (max-width: 560px) { .two { grid-template-columns: minmax(0, 1fr); } .blk { padding: 22px 18px; } .pagehead { padding: 16px 18px 0; } }
+.box { background: var(--soft); border-radius: 16px; padding: 16px; display: grid; gap: 8px; align-content: start; }
+svg { display: block; width: 100%; height: auto; }
+svg text { font-family: var(--body); }
+.cap { font-size: 11.5px; color: var(--muted); }
+
+/* hero */
+.hero { padding: 30px 26px 26px; display: grid; gap: 16px; background: radial-gradient(120% 90% at 100% 0%, var(--soft-2) 0%, var(--page) 60%); }
+.hero h1 { font: 400 clamp(36px, 8.4vw, 56px)/1.0 var(--display); letter-spacing: -0.01em; }
+.hero h1 em { color: var(--accent); }
+.hero .lede { font-size: 16.5px; }
+.ask { display: inline-flex; gap: 8px; flex-wrap: wrap; }
+.tag { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 12px; border-radius: 999px; font-size: 12.5px; font-weight: 650; background: var(--soft); color: var(--ink-2); }
+.tag.lime { background: var(--lime); color: var(--lime-ink); }
+.video { display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 14px; align-items: center; text-decoration: none; color: inherit; background: var(--ink); color: var(--page); border-radius: 18px; padding: 12px 16px 12px 12px; transition: transform 160ms cubic-bezier(.23,1,.32,1); }
+.video:hover { transform: translateY(-1px); }
+.video:active { transform: scale(.985); }
+.thumb { aspect-ratio: 16 / 10; border-radius: 12px; background: linear-gradient(135deg, var(--accent), #2A1F9E); display: grid; place-items: center; position: relative; overflow: hidden; }
+.thumb::after { content: ""; position: absolute; inset: auto -20% -40% auto; width: 90%; height: 90%; border-radius: 50%; background: rgba(228, 255, 122, .35); }
+.play { width: 38px; height: 38px; border-radius: 50%; background: #fff; display: grid; place-items: center; position: relative; z-index: 1; }
+.play::before { content: ""; border-left: 12px solid #2A1F9E; border-top: 8px solid transparent; border-bottom: 8px solid transparent; margin-left: 3px; }
+.video b { display: block; font-size: 15px; }
+.video span { font-size: 12.5px; opacity: .75; }
+
+/* stats strip */
+.stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+@media (max-width: 560px) { .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.stat { background: var(--soft); border-radius: 14px; padding: 12px; }
+.stat b { display: block; font: 650 22px/1.1 var(--body); letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.stat span { font-size: 12px; color: var(--muted); }
+
+/* loop */
+.steps { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+@media (max-width: 560px) { .steps { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.step { border-radius: 16px; padding: 14px 12px; display: grid; gap: 6px; align-content: start; background: var(--soft); }
+.step .ic { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent); }
+.step .ic svg { width: 18px; height: 18px; }
+.step b { font-size: 14px; }
+.step span { font-size: 12.5px; color: var(--ink-2); line-height: 1.4; }
+
+/* compare */
+.cmp { width: 100%; border-collapse: collapse; font-size: 13px; }
+.cmp th, .cmp td { padding: 9px 8px; text-align: left; border-bottom: 1px solid var(--line); vertical-align: top; }
+.cmp th { font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+.cmp td:first-child { color: var(--muted); font-size: 12px; width: 26%; }
+.cmp .aq { color: var(--aq); font-weight: 650; }
+.cmp .ch { color: var(--accent); font-weight: 650; }
+
+/* team */
+.team { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+@media (max-width: 620px) { .team { grid-template-columns: minmax(0, 1fr); } }
+.p { border-radius: 18px; padding: 16px; display: grid; gap: 10px; align-content: start; background: var(--soft); }
+.p .who { display: flex; gap: 12px; align-items: center; }
+.av { width: 52px; height: 52px; border-radius: 16px; display: grid; place-items: center; color: #fff; font: 400 26px/1 var(--display); flex: none; }
+.p b { display: block; font-size: 16px; }
+.p .role { font-size: 12px; font-weight: 650; color: var(--accent); letter-spacing: .04em; text-transform: uppercase; }
+.p ul { margin: 0; padding-left: 16px; display: grid; gap: 5px; font-size: 13px; color: var(--ink-2); }
+.p .sup { font-size: 12.5px; font-weight: 650; color: var(--ink); background: var(--page); border-radius: 10px; padding: 8px 10px; }
+
+/* round */
+.round { background: var(--navy); color: #fff; border-radius: 20px; padding: 20px; display: grid; gap: 14px; }
+.round h3 { font: 400 clamp(30px, 7vw, 44px)/1 var(--display); }
+.round h3 em { color: var(--lime); }
+.split { display: flex; height: 44px; border-radius: 12px; overflow: hidden; gap: 3px; }
+.split div { display: flex; align-items: center; padding: 0 12px; font-size: 13px; font-weight: 700; white-space: nowrap; }
+.split .a { background: var(--lime); color: var(--lime-ink); flex: 5; }
+.split .v { background: rgba(255,255,255,.16); color: #fff; flex: 21; }
+.legend2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; font-size: 13px; }
+.legend2 div { background: rgba(255,255,255,.08); border-radius: 12px; padding: 10px 12px; }
+.legend2 b { display: block; font-size: 15px; }
+.uses { display: grid; gap: 8px; }
+.use { display: grid; grid-template-columns: 130px minmax(0, 1fr) 40px; gap: 10px; align-items: center; font-size: 13px; }
+.use i { display: block; height: 10px; border-radius: 5px; background: var(--lime); }
+.use span:last-child { text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; }
+@media (max-width: 420px) { .use { grid-template-columns: 100px minmax(0, 1fr) 36px; } .legend2 { grid-template-columns: minmax(0, 1fr); } }
+.miles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+@media (max-width: 560px) { .miles { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.miles div { background: rgba(255,255,255,.08); border-radius: 12px; padding: 10px; font-size: 12px; opacity: .95; }
+.miles b { display: block; font-size: 18px; color: var(--lime); font-variant-numeric: tabular-nums; }
+
+.cta { padding: 24px 26px 28px; display: grid; gap: 12px; text-align: center; justify-items: center; }
+.cta h2 { font: 400 clamp(26px, 6vw, 34px)/1.1 var(--display); }
+.btn { display: inline-flex; align-items: center; justify-content: center; height: 46px; padding: 0 22px; border-radius: 999px; background: var(--accent); color: #fff; font-weight: 650; text-decoration: none; }
+.fine { font-size: 11px; color: var(--muted); max-width: 64ch; padding: 0 26px 22px; margin: 0 auto; }
+.life { display: flex; height: 40px; border-radius: 20px; overflow: hidden; font-size: 13px; font-weight: 700; color: #fff; }
+.life .h { flex: 60; background: var(--accent); display: flex; align-items: center; padding-left: 14px; }
+.life .s { flex: 10; min-width: 72px; background: var(--coral); display: flex; align-items: center; justify-content: center; }
+.facts { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 13px; color: var(--ink-2); }
+.facts b { color: var(--ink); }
+.fly { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.fly span { padding: 8px 14px; border-radius: 999px; background: var(--soft-2); font-size: 13px; font-weight: 650; }
+.fly span.on { background: var(--accent); color: #fff; }
+.fly span.lime { background: var(--lime); color: var(--lime-ink); }
+.fly i { font-style: normal; color: var(--muted); }
+@media print { body { background: #fff; } .sheet { box-shadow: none; margin: 0 auto; break-after: page; } }
+@media (prefers-reduced-motion: reduce) { .video { transition: none; } }
+</style>
+</head>
+<body>
+
+<!-- PAGE 1 -->
+<article class="sheet" aria-label="Page 1: the story">
+  <div class="pagehead"><span class="logo">Cheeku</span><span>Seed round · 1 / 2</span></div>
+
+  <section class="hero">
+    <h1>Indians live 71 years. <em>The last 10 are spent sick.</em></h1>
+    <p class="lede">Cheeku is India's 24/7 health companion for families. It remembers every report and prescription, checks every medicine, and books the next step of care, so those ten years shrink.</p>
+    <div class="ask"><span class="tag lime">Raising ₹26 crore seed</span><span class="tag">Launching December 2026</span><span class="tag">Built with ₹0</span></div>
+    <a class="video" href="https://youtu.be/mI4FmQt_8Qk" target="_blank" rel="noopener">
+      <div class="thumb"><div class="play" aria-hidden="true"></div></div>
+      <div><b>Watch the 2-minute demo</b><span>The product, built end to end. Opens on YouTube.</span></div>
+    </a>
+  </section>
+
+  <section class="blk">
+    <div class="k">The problem</div>
+    <h2>Health is lost <em>between</em> doctor visits</h2>
+    <p class="lede">A consult lasts two minutes. Then families manage everything alone on WhatsApp: reports from three labs, prescriptions from three doctors, and nobody sees the trend.</p>
+    <div class="box">
+      <span class="cap">Average Indian life, 71 years (WHO)</span>
+      <div class="life" role="img" aria-label="60 healthy years, then 10 years sick"><div class="h">60 healthy years</div><div class="s">10 sick</div></div>
+      <div class="facts"><span><b>10.1 cr</b> diabetic</span><span><b>13.6 cr</b> prediabetic</span><span><b>31.5 cr</b> high BP</span><span><b>39.4%</b> of health spend from pocket</span></div>
+    </div>
+  </section>
+
+  <section class="blk">
+    <div class="k">The product</div>
+    <h2>One companion that <em>remembers, checks, books</em></h2>
+    <p class="lede">Every answer is about your father, not an average man. Clinician-signed rules decide; the AI explains; it never diagnoses.</p>
+    <div class="steps">
+      <div class="step"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h5"/></svg></div><b>Remembers</b><span>Every report, prescription and reading, per family member.</span></div>
+      <div class="step"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/><path d="M9 12l2 2 4-4"/></svg></div><b>Checks</b><span>Each prescription against 10 published standards.</span></div>
+      <div class="step"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 3v4M16 3v4M4 10h16"/></svg></div><b>Books</b><span>Home labs, doctors, physio across 12,000+ pincodes.</span></div>
+      <div class="step"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg></div><b>Keeps you on track</b><span>Daily nudges, weekly review, quarterly retest.</span></div>
+    </div>
+  </section>
+
+  <section class="blk">
+    <div class="k">Proof it works</div>
+    <h2>China built this. It reached <em>150 million people</em> in 15 months.</h2>
+    <p class="lede">Ant Group's AQ answers about 20 million health questions a day. India has no AQ yet, and India's version needs family memory and booking at its core. That is Cheeku.</p>
+    <div class="two">
+      <div class="box">
+        <svg viewBox="0 0 320 190" role="img" aria-label="AQ users in millions: launch June 2025, 15 million December 2025, 30 million January 2026, 100 million February 2026, 150 million September 2026">
+          <line x1="34" x2="310" y1="160" y2="160" stroke="var(--line)"/>
+          <line x1="34" x2="310" y1="110" y2="110" stroke="var(--line)" stroke-dasharray="3 4"/>
+          <line x1="34" x2="310" y1="60" y2="60" stroke="var(--line)" stroke-dasharray="3 4"/>
+          <text x="28" y="164" font-size="10.5" fill="var(--muted)" text-anchor="end">0</text>
+          <text x="28" y="114" font-size="10.5" fill="var(--muted)" text-anchor="end">50</text>
+          <text x="28" y="64" font-size="10.5" fill="var(--muted)" text-anchor="end">100</text>
+          <path d="M40 160 L163 145 L183 130 L204 60 L286 60 L306 10 L306 160 L40 160 Z" fill="var(--aq)" opacity=".12"/>
+          <path d="M40 160 L163 145 L183 130 L204 60 L286 60 L306 10" fill="none" stroke="var(--aq)" stroke-width="3" stroke-linejoin="round"/>
+          <circle cx="306" cy="10" r="5" fill="var(--aq)"/>
+          <text x="298" y="14" font-size="12" font-weight="700" fill="var(--ink)" text-anchor="end">150M</text>
+          <text x="196" y="54" font-size="11" font-weight="650" fill="var(--ink)" text-anchor="end">100M</text>
+          <text x="40" y="180" font-size="10.5" fill="var(--muted)">Jun 2025</text>
+          <text x="306" y="180" font-size="10.5" fill="var(--muted)" text-anchor="end">Sep 2026</text>
+        </svg>
+        <span class="cap">AQ users, millions. Source: Ant Group releases, Jun 2025 to Sep 2026.</span>
+      </div>
+      <div class="box">
+        <table class="cmp">
+          <thead><tr><th></th><th>AQ, China</th><th>Cheeku, India</th></tr></thead>
+          <tbody>
+            <tr><td>Built for</td><td class="aq">One user</td><td class="ch">The whole family</td></tr>
+            <tr><td>Answers and then</td><td class="aq">Books, pays</td><td class="ch">Books, checks medicines</td></tr>
+            <tr><td>Never</td><td class="aq">Diagnoses</td><td class="ch">Diagnoses</td></tr>
+            <tr><td>Market</td><td class="aq">1.4 bn people</td><td class="ch">1.4 bn people, no leader</td></tr>
+          </tbody>
+        </table>
+        <span class="cap">AQ proves the demand. India's 79.7 crore health IDs prove the rails.</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="blk">
+    <div class="k">Where we are</div>
+    <h2>Built before we raised a rupee</h2>
+    <div class="stats">
+      <div class="stat"><b>₹0</b><span>raised to build V1 end to end</span></div>
+      <div class="stat"><b>12,000+</b><span>pincodes of care live via partners</span></div>
+      <div class="stat"><b>5,000+</b><span>consultants, labs and medicines at home</span></div>
+      <div class="stat"><b>Dec 2026</b><span>store launch, iOS and Android</span></div>
+    </div>
+  </section>
+</article>
+
+<!-- PAGE 2 -->
+<article class="sheet" aria-label="Page 2: the business">
+  <div class="pagehead"><span class="logo">Cheeku</span><span>Seed round · 2 / 2</span></div>
+
+  <section class="blk">
+    <div class="k">How we make money</div>
+    <h2>Answers are free. <em>Care is the business.</em></h2>
+    <p class="lede">Families pay for the care they already buy: tests, consults, plans. Employers pay for their staff's families. Insurers come next.</p>
+    <div class="two">
+      <div class="box">
+        <svg viewBox="0 0 320 200" role="img" aria-label="Revenue, base case, crore rupees: 2027 1.9, 2028 17, 2029 88, 2030 328, 2031 862">
+          <line x1="20" x2="310" y1="170" y2="170" stroke="var(--line)"/>
+          <rect x="30" y="169" width="38" height="1" fill="var(--accent)"/>
+          <rect x="86" y="164" width="38" height="6" rx="3" fill="var(--accent)"/>
+          <rect x="142" y="145" width="38" height="25" rx="4" fill="var(--accent)"/>
+          <rect x="198" y="80" width="38" height="90" rx="4" fill="var(--accent)"/>
+          <rect x="254" y="22" width="38" height="148" rx="4" fill="var(--lime)" stroke="var(--accent)" stroke-width="1.5"/>
+          <text x="49" y="160" font-size="11" text-anchor="middle" fill="var(--ink)">1.9</text>
+          <text x="105" y="156" font-size="11" text-anchor="middle" fill="var(--ink)">17</text>
+          <text x="161" y="138" font-size="11" text-anchor="middle" fill="var(--ink)">88</text>
+          <text x="217" y="73" font-size="11" text-anchor="middle" fill="var(--ink)">328</text>
+          <text x="273" y="16" font-size="12" font-weight="700" text-anchor="middle" fill="var(--ink)">₹862 cr</text>
+          <text x="49" y="188" font-size="10.5" text-anchor="middle" fill="var(--muted)">2027</text>
+          <text x="105" y="188" font-size="10.5" text-anchor="middle" fill="var(--muted)">2028</text>
+          <text x="161" y="188" font-size="10.5" text-anchor="middle" fill="var(--muted)">2029</text>
+          <text x="217" y="188" font-size="10.5" text-anchor="middle" fill="var(--muted)">2030</text>
+          <text x="273" y="188" font-size="10.5" text-anchor="middle" fill="var(--muted)">2031</text>
+        </svg>
+        <span class="cap">Revenue, ₹ crore, our base-case model. 72% gross margin and EBITDA positive by mid-2030.</span>
+      </div>
+      <div class="box" style="gap:10px">
+        <div class="use" style="grid-template-columns:1fr auto;color:var(--ink)"><b>Care booked in chat</b><span class="muted">largest line</span></div>
+        <div class="use" style="grid-template-columns:1fr auto"><b>Family plans</b><span class="muted">Free · ₹99 · ₹249 a month</span></div>
+        <div class="use" style="grid-template-columns:1fr auto"><b>Employers</b><span class="muted">Family plan for staff</span></div>
+        <div class="use" style="grid-template-columns:1fr auto"><b>Insurers</b><span class="muted">wellness, then risk</span></div>
+        <span class="cap">Zero supply capex: labs, doctors and pharmacies come through partners.</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="blk">
+    <div class="k">Why we win</div>
+    <h2>Every day, the family file gets <em>harder to leave</em></h2>
+    <p class="lede">Each report, medicine and booking deepens a family's memory. That consented, longitudinal data trains India's own health model and becomes the risk layer insurers have never had.</p>
+    <div class="fly" role="img" aria-label="Flywheel: family memory, better answers, more bookings, more data, India's health AI">
+      <span class="on">Family memory</span><i>→</i><span>Better answers</span><i>→</i><span>More bookings</span><i>→</i><span>More data</span><i>→</i><span class="lime">India's own health AI</span>
+    </div>
+  </section>
+
+  <section class="blk">
+    <div class="k">The team</div>
+    <h2>The three people who could <em>build exactly this</em></h2>
+    <div class="team">
+      <div class="p">
+        <div class="who"><div class="av" style="background:linear-gradient(135deg,#5B4EF0,#2A1F9E)">A</div><div><b>Athar Ali</b><span class="role">CEO</span></div></div>
+        <ul><li>Second-time founder</li><li>Meta: computer vision for Instagram</li><li>Practo: launched Surgicare</li></ul>
+        <div class="sup">Built Cheeku V1 end to end</div>
+      </div>
+      <div class="p">
+        <div class="who"><div class="av" style="background:linear-gradient(135deg,#0A9396,#055A5C)">S</div><div><b>Suraj Mondal</b><span class="role">CTO</span></div></div>
+        <ul><li>IISc aerospace engineer</li><li>Deep learning blast wave system for DRDO</li><li>SigTuple: clinical-grade AI on blood samples</li></ul>
+        <div class="sup">Builds AI that cannot be wrong</div>
+      </div>
+      <div class="p">
+        <div class="who"><div class="av" style="background:linear-gradient(135deg,#E5603A,#9C3315)">D</div><div><b>Deepesh Mahajan</b><span class="role">CBO</span></div></div>
+        <ul><li>12 years in healthcare commerce</li><li>Pine Labs: built healthcare pay-later, owned ₹1,000 cr+ revenue</li><li>Practo: enterprise ₹10.8 cr to ₹24 cr</li></ul>
+        <div class="sup">Has sold healthcare to India at scale</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="blk">
+    <div class="round">
+      <div class="k" style="color:var(--lime)">The round</div>
+      <h3>One seed round of <em>₹26 crore</em></h3>
+      <p style="opacity:.9">Raised in two closes, one round in total, for about 17 months of runway to our Series A milestones.</p>
+      <div class="split" role="img" aria-label="₹5 crore angel close and ₹21 crore institutional close">
+        <div class="a">₹5 cr</div><div class="v">₹21 cr</div>
+      </div>
+      <div class="legend2">
+        <div><b>₹5 crore · angels, now</b>Launch in December with the team and marketing in place.</div>
+        <div><b>₹21 crore · institutions, Q1 2027</b>Scale what the launch proves.</div>
+      </div>
+      <div class="uses">
+        <div class="use"><span>People</span><i style="width:100%"></i><span>36%</span></div>
+        <div class="use"><span>Growth</span><i style="width:95%"></i><span>35%</span></div>
+        <div class="use"><span>Model and compute</span><i style="width:50%"></i><span>18%</span></div>
+        <div class="use"><span>Ops and safety</span><i style="width:31%"></i><span>11%</span></div>
+      </div>
+      <div class="miles">
+        <div><b>7 lakh</b>monthly users</div>
+        <div><b>12,000</b>paying subscribers</div>
+        <div><b>Weekly</b>care bookings in chat</div>
+        <div><b>1st</b>insurer pilot</div>
+      </div>
+      <p style="font-size:12px;opacity:.75">Milestones by the Series A, around 13 months after close. Use of funds over the first 18 months.</p>
+    </div>
+  </section>
+
+  <section class="cta">
+    <h2>Help us give Indian families back those ten years.</h2>
+    <a class="btn" href="https://youtu.be/mI4FmQt_8Qk" target="_blank" rel="noopener">Watch the demo</a>
+    <p>Athar Ali · athar@cheekuai.in · cheekuai.in</p>
+  </section>
+  <p class="fine">Sources: WHO (life expectancy 70.8, healthy 60.3); ICMR-INDIAB 2023; National Health Accounts 2021-22; ABDM dashboard; Ant Group press releases on AQ (Jun 2025 to Sep 2026). Projections are from Cheeku's base-case financial model and are not guarantees. Confidential.</p>
+</article>
+
+</body>
+</html>
