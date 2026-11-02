@@ -262,7 +262,7 @@ main { padding-bottom: 60px; }
       ['Pricing', `Free tier, Solo ₹${S.priceSolo} and Family ₹${S.priceFamily} a month; ${(S.paidConv[0] * 100).toFixed(1)}% of monthly users paying in year one.`],
       ['Care bookings', `${(S.bookRate[0] * 100).toFixed(1)}% of monthly users book care each month in year one, about ₹${S.aov[0]} a booking, Cheeku keeping ${Math.round(S.take[0] * 100)}% of the booking value.`],
       ['Employers', `Employer plans start once consumer users pass ${fmtN(S.corpTrigger)}; employees get the Family plan at ${Math.round(S.corpDiscount * 100)}% off.`],
-      ['Compute', `About ₹${S.cpcRented.toFixed(2)} a chat on rented frontier models, ₹${S.cpcOwn[0].toFixed(2)} on our own GPUs; ₹${S.llmSpend[0]} crore for compute and data in year one.`],
+      ['Model work', `Work on our own model (fine-tuning, evals, own GPUs) starts in month ${S.llmStart + 1} (${MON(S.llmStart)}), six months after the seed closes. Until then the app runs on rented frontier models at about ₹${S.cpcRented.toFixed(2)} a chat; on our own GPUs it falls to ₹${S.cpcOwn[0].toFixed(2)}. Compute and data budget: ₹${S.llmSpend[0]} crore a year in year one, spent from month ${S.llmStart + 1}.`],
       ['Taxes and currency', `Prices include 18% GST; ${Math.round(S.interest * 100)}% interest on cash held; ₹87 = US$1 where dollars are quoted.`],
     ];
     $('assumpTable').innerHTML = '<tbody>' + A.map(a => `<tr><td style="white-space:nowrap;vertical-align:top;font-weight:650">${a[0]}</td><td style="white-space:normal">${a[1]}</td></tr>`).join('') + '</tbody>';
