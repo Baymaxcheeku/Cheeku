@@ -87,6 +87,7 @@ h3 { font-size: 16px; font-weight: 650; }
 .lever label { font-size: 12.5px; font-weight: 600; color: var(--ink-2); display: flex; justify-content: space-between; gap: 8px; }
 .lever label b { color: var(--accent); font-variant-numeric: tabular-nums; }
 .lever input[type=range] { width: 100%; accent-color: var(--accent); }
+.lever select { height: 32px; border-radius: 8px; border: 0.5px solid var(--line-2); background: var(--surface-2); color: var(--ink); font: 500 13px/1 var(--font); padding: 0 8px; }
 .lever.tog { align-content: center; }
 .lever.tog label { justify-content: flex-start; align-items: center; gap: 8px; }
 .btn { border: 0; height: 30px; padding: 0 12px; border-radius: 8px; background: var(--surface-3); color: var(--ink); font: 550 12.5px/1 var(--font); cursor: pointer; justify-self: start; }
@@ -131,18 +132,19 @@ main { padding-bottom: 60px; }
 <div class="bar"><div class="wrap bar-in">
   <b class="brand">Cheeku</b><span class="sub">Seed spend model</span>
   <div class="seg" role="group" aria-label="Scenario"><button type="button" data-sc="bear">Bear</button><button type="button" data-sc="base">Base</button><button type="button" data-sc="bull">Bull</button></div>
-  <nav class="jump" aria-label="Sections"><a href="#buffer">The ₹11 cr</a><a href="#build">₹26 cr build-up</a><a href="#funds">Use of funds</a><a href="#monthly">Monthly</a><a href="#team">Team</a><a href="#notes">Notes</a></nav>
+  <nav class="jump" aria-label="Sections"><a href="#assumptions">Assumptions</a><a href="#build">₹26 cr build-up</a><a href="#funds">Use of funds</a><a href="#monthly">Monthly</a><a href="#team">Team</a><a href="#notes">Methodology</a></nav>
 </div></div>
 
 <main class="wrap">
   <header class="hero">
-    <div class="eyebrow">Seed round · ₹26 crore · Jan 2027 to Jun 2028 · runs on financial model v2</div>
+    <div class="eyebrow">Cheeku AI · Seed round · ₹26 crore · spend and hiring plan · <span id="periodLbl">Jan 2027 to Jun 2028</span></div>
     <h1>Where the <span>₹26 crore</span> goes, month by month, seat by seat</h1>
-    <p class="lede">Every number on this page is calculated live by the financial model's own engine, the same code behind the vision board and the decks. Nothing here is a separate estimate. Change a lever and the model reruns.</p>
+    <p class="lede">How the ₹26 crore seed is spent over the first 18 months: every hire, every rupee of marketing, compute and operations, and the revenue we expect alongside it, in bear, base and bull cases. Every figure comes from our financial model, so this plan, the model and the deck always agree.</p>
   </header>
 
   <section class="levers card" aria-label="Levers">
     <div class="lever"><span class="lab">Funding</span><div class="seg" role="group" aria-label="Funding"><button type="button" data-fund="seed">Seed only</button><button type="button" data-fund="plan">Seed + Series A (model plan)</button></div></div>
+    <div class="lever"><label for="lvClose">Seed closes in</label><select id="lvClose"><option value="0">Jan 2027</option><option value="1">Feb 2027</option><option value="2">Mar 2027</option><option value="3">Apr 2027</option><option value="4">May 2027</option><option value="5">Jun 2027</option></select></div>
     <div class="lever tog"><label for="lvDef"><input id="lvDef" type="checkbox"> Defend mode (cut spend when runway &lt; 6 months)</label></div>
     <div class="lever"><label for="lvMkt">Marketing <b id="vMkt">100%</b></label><input id="lvMkt" type="range" min="50" max="150" step="5" value="100"></div>
     <div class="lever"><label for="lvHire">Hiring plan <b id="vHire">100%</b></label><input id="lvHire" type="range" min="50" max="130" step="5" value="100"></div>
@@ -150,16 +152,16 @@ main { padding-bottom: 60px; }
     <div class="lever"><button type="button" class="btn" id="reset">Reset to the model</button></div>
   </section>
 
-  <section id="buffer">
-    <div class="sh"><div class="k">Your question</div><h2>What the "₹11 crore buffer" is</h2></div>
-    <div class="card explain" id="bufferText"></div>
+  <section id="assumptions">
+    <div class="sh"><div class="k">Read this first</div><h2>Key assumptions</h2><p>The plan runs month by month from the day the seed lands. Figures for the selected scenario update with the levers above.</p></div>
+    <div class="card"><div class="tw flat"><table id="assumpTable"></table></div></div>
   </section>
 
   <section id="build">
     <div class="sh"><div class="k">The ask</div><h2 id="buildTitle">How ₹26 crore is used</h2><p id="buildLede"></p></div>
     <div class="tiles" id="tiles"></div>
     <div class="card">
-      <h3>From ₹26 crore to the cash left when the Series A is due (end of Jan 2028), ₹ crore</h3>
+      <h3 id="wfTitle">From ₹26 crore to the cash left when the Series A is due, ₹ crore</h3>
       <div class="chart" id="waterfall"></div>
       <p class="cap">Months 1 to 13 of the model. Gross profit is revenue less cost of revenue (chat and voice inference, cloud, store fees, partner costs). "Interest and timing" is interest on cash plus working capital (deferred employer revenue, receivables).</p>
     </div>
@@ -188,13 +190,13 @@ main { padding-bottom: 60px; }
   </section>
 
   <section id="notes">
-    <div class="sh"><div class="k">Notes</div><h2>How this stays in sync</h2></div>
+    <div class="sh"><div class="k">Methodology</div><h2>How the numbers are built</h2></div>
     <div class="card"><ul class="tight small">
-      <li><b>One engine.</b> The page embeds <code>vision-board/engine.js</code>. <code>spend-model/build.py</code> rebuilds it after any change to the model, so the vision board, the decks and this page always show the same numbers.</li>
-      <li><b>The model plan includes the Series A.</b> Financial model v2 raises ₹70 crore at month 13 (Feb 2028) and keeps hiring and spending into 2028 on that basis. "Seed only" shows what happens if it does not arrive.</li>
-      <li><b>Defend mode is the model's own rule:</b> when runway falls under six months it cuts marketing by 65%, compute by 50%, pendant work by 80%, and freezes hiring.</li>
-      <li><b>Model lines.</b> People, marketing, employer sales costs, compute and data (own GPUs, tuning, evals), pendant R&amp;D, office and G&amp;A, with revenue and cost of revenue from the same run.</li>
-      <li><b>Changes from the Jivi teardown are not applied here.</b> The model still funds pendant R&amp;D, a hardware hire and insurer deals inside these 18 months. Use the hiring and compute levers to see the leaner plan.</li>
+      <li><b>One model.</b> This plan runs on the same month-by-month financial model behind our deck and projections; there is no separate spreadsheet to reconcile.</li>
+      <li><b>Seed only, or with the Series A.</b> Our plan raises a Series A around month 13. "Seed only" shows how long ₹26 crore lasts if that round is delayed; "Seed + Series A" shows the full plan.</li>
+      <li><b>Defend mode.</b> If runway falls below six months without new funding, we cut marketing by 65%, compute by 50% and hardware work by 80%, and freeze hiring. The toggle shows the effect.</li>
+      <li><b>Revenue</b> comes from subscriptions, care bookings through partners, employer plans and fitness bookings, net of app store fees, payment costs and partner costs.</li>
+      <li><b>Salaries</b> are team averages in 2027 rupees, rising 10% a year, plus 20% for benefits and statutory costs. Individual offers vary around the average within each team's budget.</li>
     </ul></div>
   </section>
 </main>
@@ -215,13 +217,14 @@ main { padding-bottom: 60px; }
   const L_ = v => v / LAKH, C_ = v => v / CR;
   const cr = v => '₹' + C_(v).toFixed(2) + ' cr', cr1 = v => '₹' + C_(v).toFixed(1) + ' cr', lk = v => L_(v).toFixed(1);
   const fmtN = n => n >= 1e5 ? (n / 1e5).toFixed(1) + ' lakh' : Math.round(n).toLocaleString('en-IN');
-  const MON = t => ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][t % 12] + ' ' + String(27 + Math.floor(t / 12));
+  let OFF = 0;
+  const MON = t => { const u = t + OFF; return ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][u % 12] + ' ' + String(2027 + Math.floor(u / 12)); };
   const TEAM = {}; FUNCS.forEach(f => { TEAM[f[0]] = f[1]; });
   const TEAMC = { founders: '#14136B', eng: '#5B4EF0', ai: '#0A9396', product: '#C8417F', clinical: '#248A3D', care: '#7FB069', growth: '#E0821E', b2b: '#B5179E', corp: '#2F6FDE', hardware: '#6E6E73', ga: '#8E6A2E' };
-  const DEF = { sc: 'base', fund: 'seed', defend: false, mkt: 100, hire: 100, gpu: 100 };
+  const DEF = { sc: 'base', fund: 'seed', defend: false, mkt: 100, hire: 100, gpu: 100, close: 0 };
   let st = Object.assign({}, DEF);
-  try { const v = JSON.parse(localStorage.getItem('cheeku-spend2') || 'null'); if (v) st = Object.assign(st, v); } catch (e) {}
-  const save = () => { try { localStorage.setItem('cheeku-spend2', JSON.stringify(st)); } catch (e) {} };
+  try { const v = JSON.parse(localStorage.getItem('cheeku-spend3') || 'null'); if (v) st = Object.assign(st, v); } catch (e) {}
+  const save = () => { try { localStorage.setItem('cheeku-spend3', JSON.stringify(st)); } catch (e) {} };
 
   function model(o) {
     const s = scenario(o.sc);
@@ -237,7 +240,7 @@ main { padding-bottom: 60px; }
   function render() {
     document.querySelectorAll('[data-sc]').forEach(b => b.setAttribute('aria-pressed', b.dataset.sc === st.sc));
     document.querySelectorAll('[data-fund]').forEach(b => b.setAttribute('aria-pressed', b.dataset.fund === st.fund));
-    $('lvDef').checked = st.defend;
+    $('lvDef').checked = st.defend; OFF = Number(st.close) || 0; $('lvClose').value = String(OFF); $('periodLbl').textContent = MON(0) + ' to ' + MON(17);
     [['lvMkt', 'vMkt', 'mkt'], ['lvHire', 'vHire', 'hire'], ['lvGpu', 'vGpu', 'gpu']].forEach(([i, v, k]) => { $(i).value = st[k]; $(v).textContent = st[k] + '%'; });
     const C = { ink: css('--ink'), ink2: css('--ink-2'), muted: css('--muted'), line: css('--line-2'), accent: css('--accent'), good: css('--good'), bad: css('--bad') };
     const M = model(st), R = M.rows.slice(0, 18), S = M.s;
@@ -249,23 +252,35 @@ main { padding-bottom: 60px; }
 
     // The ₹11 cr explanation
     const usedToA = 26 * CR - atA.cash;
-    $('bufferText').innerHTML = `<p>In the financial model the seed lands in <b>Jan 2027</b> and the Series A (₹70 crore) in <b>Feb 2028</b>, month 13. Over those 13 months the plan spends its way through <b>${cr1(usedToA)}</b> of the ₹26 crore. At the end of Jan 2028, <b>${cr1(atA.cash)}</b> is still in the bank. That is the figure you saw as the "₹11 crore buffer" (base case at the model's settings: ₹10.85 crore).</p>
-      <p>It is not money set aside for something. It is runway the plan has not reached yet: <b>${(atA.cash / burnA).toFixed(1)} months</b> of spending at the Jan 2028 burn of <b>${cr1(burnA)} a month</b>. If the Series A arrives on time, it is the cushion that lets us negotiate without a gun to our head. If the Series A is late, the plan as written runs out after <b>${rwTxt(seedRw)}</b> in total; with defend mode (the model cuts marketing, compute and hiring) it lasts <b>${rwTxt(seedRwDef)}</b>.</p>
-      <p>So the ₹26 crore is <b>13 months of plan to reach Series A milestones, plus about four months of safety</b>. That is where the deck's "17 months of runway" comes from.</p>`;
+    const A = [
+      ['Seed close', `Month 1 is ${MON(0)}, the month the ₹26 crore lands. If the close moves, every month in this plan moves with it: count runway from the actual close date. Costs before the close are funded by the founders.`],
+      ['Raise', `₹26 crore equity at ₹${S.rounds[0].pre} crore pre-money (${scName.toLowerCase()} case), no debt, no grants assumed.`],
+      ['Next round', `A Series A of ₹70 crore planned around month 13 (${MON(13)}). Runway figures marked "seed only" assume it does not arrive.`],
+      ['Launch', `App store launch in month 1. ${fmtN(S.mau0)} monthly active users in the launch month; ${Math.round(S.churn[0] * 100)}% of active users lost each month in year one.`],
+      ['Team', `${R[0].hcTotal.toFixed(0)} people at close, ${R[17].hcTotal.toFixed(0)} by ${MON(17)}. Team average salaries in 2027 rupees, +${Math.round(S.salaryGrowth * 100)}% a year, +${Math.round(S.loading * 100)}% for benefits.`],
+      ['Marketing', `₹${Math.round(S.mktBudget[0] * S.mktMult)} lakh a month in year one, ₹${Math.round(S.mktBudget[1] * S.mktMult)} lakh a month in year two; ₹${S.cac[0]} to ₹${S.cac[1]} to acquire an active user.`],
+      ['Pricing', `Free tier, Solo ₹${S.priceSolo} and Family ₹${S.priceFamily} a month; ${(S.paidConv[0] * 100).toFixed(1)}% of monthly users paying in year one.`],
+      ['Care bookings', `${(S.bookRate[0] * 100).toFixed(1)}% of monthly users book care each month in year one, about ₹${S.aov[0]} a booking, Cheeku keeping ${Math.round(S.take[0] * 100)}% of the booking value.`],
+      ['Employers', `Employer plans start once consumer users pass ${fmtN(S.corpTrigger)}; employees get the Family plan at ${Math.round(S.corpDiscount * 100)}% off.`],
+      ['Compute', `About ₹${S.cpcRented.toFixed(2)} a chat on rented frontier models, ₹${S.cpcOwn[0].toFixed(2)} on our own GPUs; ₹${S.llmSpend[0]} crore for compute and data in year one.`],
+      ['Taxes and currency', `Prices include 18% GST; ${Math.round(S.interest * 100)}% interest on cash held; ₹87 = US$1 where dollars are quoted.`],
+    ];
+    $('assumpTable').innerHTML = '<tbody>' + A.map(a => `<tr><td style="white-space:nowrap;vertical-align:top;font-weight:650">${a[0]}</td><td style="white-space:normal">${a[1]}</td></tr>`).join('') + '</tbody>';
 
     // build lede + tiles
     const peak = Math.max(...R.map(r => -r.ebitda));
     const spend18 = R.reduce((a, r) => a + r.oPeople + r.oMkt + r.oCorpSales + r.oLlm + r.oPendant + r.oOffice + r.oGa + r.cogs, 0);
+    $('wfTitle').textContent = `From ₹26 crore to the cash left when the Series A is due (end of ${MON(12)}), ₹ crore`;
     $('buildTitle').textContent = `${scName} case: ₹26 crore carries the plan to the Series A with ${cr1(atA.cash)} to spare`;
     $('buildLede').textContent = `Months 1 to 13 use ${cr1(usedToA)}. Without a Series A the same plan lasts ${rwTxt(seedRw)} (${rwTxt(seedRwDef)} in defend mode).`;
-    $('tiles').innerHTML = [['hero', cr1(atA.cash), 'Cash left at end of Jan 2028'], ['', cr1(usedToA), 'Used in months 1 to 13'], ['', rwTxt(seedRw), 'Runway, seed only, as written'], ['', rwTxt(seedRwDef), 'Runway, seed only, defend mode'], ['', '₹' + (peak / CR).toFixed(2) + ' cr', 'Peak monthly burn, 18 months'], ['', (R[17].hcTotal).toFixed(0) + ' people', 'Team at month 18']]
+    $('tiles').innerHTML = [['hero', cr1(atA.cash), 'Cash left at end of ' + MON(12)], ['', cr1(usedToA), 'Used in months 1 to 13'], ['', rwTxt(seedRw), 'Runway, seed only, as written'], ['', rwTxt(seedRwDef), 'Runway, seed only, defend mode'], ['', '₹' + (peak / CR).toFixed(2) + ' cr', 'Peak monthly burn, 18 months'], ['', (R[17].hcTotal).toFixed(0) + ' people', 'Team at month 18']]
       .map(x => `<div class="tile ${x[0]}"><div class="v">${x[1]}</div><div class="l">${x[2]}</div></div>`).join('');
 
     // waterfall over months 1..13 of the plan run
     (function () {
       const P = plan.rows.slice(0, 13), sum = k => P.reduce((a, r) => a + r[k], 0);
       const gp = sum('gp'), other = P.reduce((a, r, i) => a + (r.cash - (i ? P[i - 1].cash : 0) - r.funding - r.ebitda), 0);
-      const items = [['Seed', 26 * CR, 'start'], ['People', -sum('oPeople')], ['Marketing', -sum('oMkt')], ['Employer sales', -sum('oCorpSales')], ['Compute and data', -sum('oLlm')], ['Pendant R&D', -sum('oPendant')], ['Office', -sum('oOffice')], ['G&A', -sum('oGa')], ['Gross profit', gp], ['Interest and timing', other], ['Cash, Jan 2028', P[12].cash, 'end']];
+      const items = [['Seed', 26 * CR, 'start'], ['People', -sum('oPeople')], ['Marketing', -sum('oMkt')], ['Employer sales', -sum('oCorpSales')], ['Compute and data', -sum('oLlm')], ['Pendant R&D', -sum('oPendant')], ['Office', -sum('oOffice')], ['G&A', -sum('oGa')], ['Gross profit', gp], ['Interest and timing', other], ['Cash, ' + MON(12), P[12].cash, 'end']];
       const W = 1040, H = 330, L = 46, B = 52, T = 24, max = 28 * CR;
       const s = svg('waterfall', W, H, 'Waterfall from the seed to cash at the Series A');
       const Y = v => T + (1 - v / max) * (H - T - B), bw = (W - L - 10) / items.length;
@@ -285,7 +300,7 @@ main { padding-bottom: 60px; }
     })();
 
     // scenario table
-    $('scTable').innerHTML = `<thead><tr><th>Scenario</th><th>Used, months 1 to 13</th><th>Cash, end Jan 2028</th><th>Runway, seed only</th><th>Runway, defend mode</th><th>Revenue, 18 months</th><th>Team, month 18</th><th>Monthly users, month 18</th></tr></thead><tbody>` +
+    $('scTable').innerHTML = `<thead><tr><th>Scenario</th><th>Used, months 1 to 13</th><th>Cash, end of month 13</th><th>Runway, seed only</th><th>Runway, defend mode</th><th>Revenue, 18 months</th><th>Team, month 18</th><th>Monthly users, month 18</th></tr></thead><tbody>` +
       ['bear', 'base', 'bull'].map(sc => { const o = Object.assign({}, st, { sc }); const p = model(Object.assign({}, o, { fund: 'plan' })), m = model(o); const a = p.rows[12];
         return `<tr${sc === st.sc ? ' style="font-weight:650"' : ''}><td>${sc[0].toUpperCase() + sc.slice(1)}</td><td>${cr(26 * CR - a.cash)}</td><td>${cr(a.cash)}</td><td>${rwTxt(runwayOf(o, false))}</td><td>${rwTxt(runwayOf(o, true))}</td><td>${cr(m.rows.slice(0, 18).reduce((x, r) => x + r.rev, 0))}</td><td>${m.rows[17].hcTotal.toFixed(0)}</td><td>${fmtN(m.rows[17].mau)}</td></tr>`; }).join('') + '</tbody>';
 
@@ -334,7 +349,7 @@ main { padding-bottom: 60px; }
       s.appendChild(el('circle', { cx: lx, cy: Yc(lc), r: 5, fill: lc >= 0 ? C.good : C.bad }));
       s.appendChild(el('text', { x: lx - 8, y: Yc(lc) - 10, 'text-anchor': 'end', 'font-size': 11.5, 'font-weight': 650, fill: C.ink }, (lc < 0 ? '−' : '') + cr(Math.abs(lc))));
     })();
-    $('monthlyCap').textContent = st.fund === 'plan' ? 'Model plan: the ₹70 crore Series A lands in Feb 2028.' : `Seed only. ${R.some(r => r.cash < 0) ? 'Cash goes below zero inside 18 months: the plan as written needs the Series A.' : 'Cash stays above zero for 18 months at these settings.'}${R.some(r => r.defending) ? ' Defend mode switches on in ' + MON(R.findIndex(r => r.defending)) + '.' : ''}`;
+    $('monthlyCap').textContent = st.fund === 'plan' ? 'Model plan: the ₹70 crore Series A lands in ' + MON(13) + '.' : `Seed only. ${R.some(r => r.cash < 0) ? 'Cash goes below zero inside 18 months: the plan as written needs the Series A.' : 'Cash stays above zero for 18 months at these settings.'}${R.some(r => r.defending) ? ' Defend mode switches on in ' + MON(R.findIndex(r => r.defending)) + '.' : ''}`;
 
     // monthly table
     const cols = [['m', 'Month'], ['hc', 'Team'], ['oPeople', 'People'], ['oMkt', 'Marketing'], ['oCorpSales', 'Employer sales'], ['oLlm', 'Compute'], ['oPendant', 'Pendant'], ['oOffice', 'Office'], ['oGa', 'G&A'], ['cogs', 'Cost of revenue'], ['rev', 'Revenue'], ['ebitda', 'EBITDA'], ['funding', 'Funding'], ['cash', 'Cash']];
@@ -379,7 +394,7 @@ main { padding-bottom: 60px; }
     });
     html += `<tr class="tot"><td>Total payroll, 18 months</td><td></td><td></td><td style="text-align:right">${lk(grand)}</td><td>Matches the model's people line: ${lk(R.reduce((a, r) => a + r.oPeople, 0))}</td></tr></tbody>`;
     $('roleTable').innerHTML = html;
-    $('teamLede').textContent = `${R[0].hcTotal.toFixed(0)} people in Jan 2027, ${R[11].hcTotal.toFixed(0)} by Dec 2027, ${R[17].hcTotal.toFixed(0)} by Jun 2028. ${nRoles} roles are funded at least in part within 18 months.`;
+    $('teamLede').textContent = `${R[0].hcTotal.toFixed(0)} people in ${MON(0)}, ${R[11].hcTotal.toFixed(0)} by ${MON(11)}, ${R[17].hcTotal.toFixed(0)} by ${MON(17)}. ${nRoles} roles are funded at least in part within 18 months.`;
   }
 
   document.addEventListener('click', e => {
@@ -391,6 +406,7 @@ main { padding-bottom: 60px; }
   });
   [['lvMkt', 'mkt'], ['lvHire', 'hire'], ['lvGpu', 'gpu']].forEach(([i, k]) => $(i).addEventListener('input', e => { st[k] = Number(e.target.value); save(); render(); }));
   $('lvDef').addEventListener('change', e => { st.defend = e.target.checked; save(); render(); });
+  $('lvClose').addEventListener('change', e => { st.close = Number(e.target.value); save(); render(); });
   render();
   if (window.matchMedia) { const mq = matchMedia('(prefers-color-scheme: dark)'); if (mq.addEventListener) mq.addEventListener('change', render); }
   new MutationObserver(render).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
