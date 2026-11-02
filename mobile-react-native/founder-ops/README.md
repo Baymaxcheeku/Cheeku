@@ -28,7 +28,7 @@ Share each one from its Share menu with the other founders as **editors**. Viewe
 | PearX application answers | https://claude.ai/artifact/H9CAqono1mGZCxRCZofuwP | Doc | `library/pearx-application.md` |
 | Our story, dilution, moat and voice notes | Chat, 30 Oct to 1 Nov 2026 | Notes | `library/our-story.md` |
 | Scheduled agents (Routines) | claude.ai Routines | Routines | `routines/README.md` |
-| Seed spend model (₹26 cr, 18 months) | Not yet published | Page | `spend-model/index.html` |
+| Seed spend model (₹26 cr, 18 months) | https://claude.ai/artifact/1KcTgwdfJ7w7yG2ccyHdwB | Page | `spend-model/index.html` |
 | Financial model v2 | https://claude.ai/artifact/JP51ovW13s8yVXLBV9tTej | Page | `vision-board/engine.js`, `model/report.js` |
 | Seed deck v2 | https://claude.ai/artifact/AzJYLFCF5JZbTJpBdNJTKb | Slides | `library/seed-deck-v2.md` |
 | Due diligence deck v2 | https://claude.ai/artifact/8Tkb1TszfUorrB4N9toqyi | Slides | `library/dd-deck-v2.md` |
