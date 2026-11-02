@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Seed Spend Model</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:opsz,wght@14..32,400..700&display=swap">
+<style>
+/* Layout: the Cheeku vision-board surface as a working spend model. A sticky control bar (scenario and
+   levers), then the ₹26 cr build-up, use of funds, monthly spend and cash, the team plan and line items. */
+:root {
+  --bg: #F5F5F7; --surface: #FFFFFF; --surface-2: #F2F2F5; --surface-3: #E8E8ED;
+  --ink: #1D1D1F; --ink-2: #3A3A3F; --muted: #6E6E73; --faint: #A1A1A6;
+  --line: rgba(20, 20, 40, .08); --line-2: rgba(20, 20, 40, .14);
+  --accent: #5B4EF0; --accent-soft: #EEECFF; --on-accent: #FFFFFF;
+  --jivi: #D2551E; --jivi-soft: #FCEBE2;
+  --lime: #E4FF7A; --lime-ink: #2F3D00;
+  --good: #248A3D; --good-soft: #E3F4E7; --warn: #B86E00; --warn-soft: #FBF0DC; --bad: #D70015; --bad-soft: #FDE4E6;
+  --sh-1: 0 0 0 0.5px rgba(20, 20, 40, .08), 0 1px 2px rgba(20, 20, 40, .05), 0 2px 8px rgba(20, 20, 40, .035);
+  --glass: rgba(245, 245, 247, .8);
+  --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+  --brand: 'Instrument Serif', Georgia, serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0B0B0E; --surface: #1C1C1F; --surface-2: #242428; --surface-3: #2F2F35;
+  --ink: #F5F5F7; --ink-2: #D6D6DC; --muted: #98989F; --faint: #63636B; --line: rgba(255, 255, 255, .08); --line-2: rgba(255, 255, 255, .15);
+  --accent: #8F87FF; --accent-soft: #24213F; --on-accent: #0B0B0E;
+  --jivi: #FF8A4C; --jivi-soft: #3A2116;
+  --lime: #D6F25C; --lime-ink: #1E2700;
+  --good: #32D06A; --good-soft: #15301E; --warn: #FFB340; --warn-soft: #36280F; --bad: #FF6B6B; --bad-soft: #3A1518;
+  --sh-1: 0 0 0 0.5px rgba(255, 255, 255, .08), 0 1px 2px rgba(0, 0, 0, .4);
+  --glass: rgba(11, 11, 14, .8);
+  color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #0B0B0E; --surface: #1C1C1F; --surface-2: #242428; --surface-3: #2F2F35;
+  --ink: #F5F5F7; --ink-2: #D6D6DC; --muted: #98989F; --faint: #63636B; --line: rgba(255, 255, 255, .08); --line-2: rgba(255, 255, 255, .15);
+  --accent: #8F87FF; --accent-soft: #24213F; --on-accent: #0B0B0E;
+  --jivi: #FF8A4C; --jivi-soft: #3A2116;
+  --lime: #D6F25C; --lime-ink: #1E2700;
+  --good: #32D06A; --good-soft: #15301E; --warn: #FFB340; --warn-soft: #36280F; --bad: #FF6B6B; --bad-soft: #3A1518;
+  --sh-1: 0 0 0 0.5px rgba(255, 255, 255, .08), 0 1px 2px rgba(0, 0, 0, .4);
+  --glass: rgba(11, 11, 14, .8);
+  color-scheme: dark; }
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 64px; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 400 15px/1.55 var(--font); -webkit-font-smoothing: antialiased; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
+h1, h2, h3, h4 { margin: 0; text-wrap: balance; }
+p { margin: 0; }
+.num { font-variant-numeric: tabular-nums; }
+.wrap { max-width: 1120px; margin: 0 auto; padding: 0 max(20px, env(safe-area-inset-left, 0px)); }
+
+:root { --c-people: #5B4EF0; --c-hiring: #9B92FF; --c-mkt: #E0821E; --c-model: #0A9396; --c-ops: #8E6A2E; --c-rev: #248A3D; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --c-people: #8F87FF; --c-hiring: #C3BDFF; --c-mkt: #FFA94D; --c-model: #3CCACC; --c-ops: #D2A262; --c-rev: #32D06A; } }
+:root[data-theme="dark"] { --c-people: #8F87FF; --c-hiring: #C3BDFF; --c-mkt: #FFA94D; --c-model: #3CCACC; --c-ops: #D2A262; --c-rev: #32D06A; }
+.bar { position: sticky; top: 0; z-index: 20; background: var(--glass); -webkit-backdrop-filter: saturate(180%) blur(18px); backdrop-filter: saturate(180%) blur(18px); border-bottom: 0.5px solid var(--line-2); }
+.bar-in { display: flex; gap: 10px 16px; align-items: center; min-height: 54px; flex-wrap: wrap; padding-block: 8px; }
+.brand { font: italic 400 24px/1 var(--brand); color: var(--accent); }
+.sub { font-size: 12px; font-weight: 600; color: var(--muted); }
+.seg { display: inline-flex; background: var(--surface-3); border-radius: 9px; padding: 2px; gap: 2px; }
+.seg button { border: 0; background: transparent; padding: 6px 14px; border-radius: 7px; font: 600 13px/1 var(--font); color: var(--ink-2); cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 0 0 0.5px var(--line-2), 0 1px 3px rgba(0,0,0,.1); }
+.jump { display: flex; gap: 12px; margin-left: auto; overflow-x: auto; scrollbar-width: none; max-width: 100%; }
+.jump a { font-size: 12.5px; font-weight: 550; color: var(--ink-2); white-space: nowrap; }
+header.hero { padding: 34px 0 10px; display: grid; gap: 12px; }
+.eyebrow { font-size: 12px; font-weight: 650; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.hero h1 { font: 400 clamp(32px, 5vw, 52px)/1.04 var(--brand); }
+.hero h1 span { color: var(--accent); font-style: italic; }
+.hero .lede { max-width: 70ch; font-size: 16.5px; color: var(--ink-2); }
+section { padding: 28px 0 4px; display: grid; gap: 16px; }
+.sh { display: grid; gap: 6px; }
+.sh .k { font: 600 12px/1 var(--font); letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+.sh h2 { font: 400 clamp(26px, 3.6vw, 36px)/1.1 var(--brand); }
+.sh p { max-width: 74ch; color: var(--ink-2); }
+h3 { font-size: 16px; font-weight: 650; }
+.card { background: var(--surface); border-radius: 16px; box-shadow: var(--sh-1); padding: 18px; display: grid; gap: 12px; min-width: 0; align-content: start; }
+.grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+@media (max-width: 900px) { .grid2, .grid3 { grid-template-columns: minmax(0, 1fr); } }
+.levers { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); display: grid; gap: 14px 22px; padding: 16px 18px; }
+.lever { display: grid; gap: 6px; }
+.lever label { font-size: 12.5px; font-weight: 600; color: var(--ink-2); display: flex; justify-content: space-between; gap: 8px; }
+.lever label b { color: var(--accent); font-variant-numeric: tabular-nums; }
+.lever input[type=range] { width: 100%; accent-color: var(--accent); }
+.lever.tog { align-content: center; }
+.lever.tog label { justify-content: flex-start; align-items: center; gap: 8px; }
+.btn { border: 0; height: 30px; padding: 0 12px; border-radius: 8px; background: var(--surface-3); color: var(--ink); font: 550 12.5px/1 var(--font); cursor: pointer; justify-self: start; }
+.btn:hover { background: var(--line-2); }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+.tiles.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.tile { background: var(--surface); border-radius: 14px; box-shadow: var(--sh-1); padding: 14px 16px; display: grid; gap: 3px; }
+.card .tile { box-shadow: none; background: var(--surface-2); }
+.tile .v { font: 650 24px/1.1 var(--font); letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.tile .l { font-size: 12.5px; color: var(--muted); }
+.tile.hero .v { color: var(--accent); font-size: 30px; }
+.tile.good .v { color: var(--good); } .tile.bad .v { color: var(--bad); }
+.tw { overflow-x: auto; border-radius: 12px; border: 0.5px solid var(--line-2); }
+.tw.flat { border: 0; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 0.5px solid var(--line-2); white-space: nowrap; }
+th { font-size: 11px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); font-weight: 650; background: var(--surface-2); position: sticky; top: 0; }
+table.num td:not(:first-child), table.num th:not(:first-child) { text-align: right; font-variant-numeric: tabular-nums; }
+tr.tot td { font-weight: 700; border-top: 1px solid var(--line-2); }
+tr.grp td { background: var(--surface-2); font-weight: 650; font-size: 12px; color: var(--ink-2); }
+td.why { white-space: normal; color: var(--muted); min-width: 220px; }
+td.neg { color: var(--bad); }
+.row-h { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+.chart { width: 100%; overflow-x: auto; }
+.chart svg { display: block; width: 100%; height: auto; min-width: 620px; }
+.chart.sm svg { min-width: 0; }
+.cap { font-size: 12.5px; color: var(--muted); max-width: 84ch; }
+.keyrow { display: flex; flex-wrap: wrap; gap: 14px; font-size: 12.5px; color: var(--ink-2); }
+.keyrow span { display: inline-flex; align-items: center; gap: 6px; }
+.sw { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+ul.tight { margin: 0; padding-left: 18px; display: grid; gap: 7px; }
+.small { font-size: 13px; } .muted { color: var(--muted); }
+.toast { position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 8px 14px; border-radius: 10px; font-size: 13px; z-index: 50; }
+main { padding-bottom: 60px; }
+</style>
+</head>
+<body>
+<div class="bar"><div class="wrap bar-in">
+  <b class="brand">Cheeku</b><span class="sub">Seed spend model</span>
+  <div class="seg" role="group" aria-label="Scenario">
+    <button type="button" data-sc="bear">Bear</button><button type="button" data-sc="base">Base</button><button type="button" data-sc="bull">Bull</button>
+  </div>
+  <nav class="jump" aria-label="Sections"><a href="#build">₹26 cr build-up</a><a href="#funds">Use of funds</a><a href="#monthly">Monthly</a><a href="#team">Team</a><a href="#lines">Line items</a><a href="#notes">Assumptions</a></nav>
+</div></div>
+
+<main class="wrap">
+  <header class="hero">
+    <div class="eyebrow">Seed round · ₹26 crore · 18 months from close (Jan 2027 to Jun 2028) · founders only</div>
+    <h1>Where the <span>₹26 crore</span> comes from, and where every rupee goes</h1>
+    <p class="lede">A bottom-up plan: every hire with a start month and salary, every marketing rupee by channel, every compute and compliance line, netted against the revenue our financial model expects in each scenario. Change a lever and every number on the page moves.</p>
+  </header>
+
+  <section class="levers card" aria-label="Levers">
+    <div class="lever"><label for="lvMkt">Marketing spend <b id="vMkt">100%</b></label><input id="lvMkt" type="range" min="50" max="150" step="5" value="100"></div>
+    <div class="lever"><label for="lvSal">Salary levels <b id="vSal">100%</b></label><input id="lvSal" type="range" min="80" max="125" step="5" value="100"></div>
+    <div class="lever"><label for="lvPace">Hiring pace <b id="vPace">on plan</b></label><input id="lvPace" type="range" min="-3" max="3" step="1" value="0"></div>
+    <div class="lever"><label for="lvCont">Contingency buffer <b id="vCont">10%</b></label><input id="lvCont" type="range" min="0" max="20" step="1" value="10"></div>
+    <div class="lever tog"><label for="lvGpu"><input id="lvGpu" type="checkbox" checked> Own GPUs from month 7</label><button type="button" class="btn" id="reset">Reset levers</button></div>
+  </section>
+
+  <section id="build">
+    <div class="sh"><div class="k">The ask</div><h2 id="buildTitle">How ₹26 crore is built</h2><p id="buildLede"></p></div>
+    <div class="tiles" id="tiles"></div>
+    <div class="card">
+      <h3>From 18 months of spending to the raise, ₹ crore</h3>
+      <div class="chart" id="waterfall"></div>
+      <p class="cap">Revenue contribution is revenue minus cost of revenue (inference, partner costs, store fees) from financial model v2 for the selected scenario. Contingency is a share of net burn, for slips in hiring, launch dates or partner pricing.</p>
+    </div>
+    <div class="card">
+      <h3>All three scenarios at today's levers</h3>
+      <div class="tw"><table id="scTable"></table></div>
+      <p class="cap">The plan flexes with demand: in the bear case hiring after month 7 waits four months and marketing drops 35% (defend mode); in the bull case later hires come two months early and marketing rises 30%. That is why the 18-month need lands near ₹26 crore in all three.</p>
+    </div>
+  </section>
+
+  <section id="funds">
+    <div class="sh"><div class="k">Use of funds</div><h2>Where the money goes over 18 months</h2></div>
+    <div class="grid2">
+      <div class="card"><h3>By bucket, share of gross spend</h3><div class="chart sm" id="fundsChart"></div>
+        <p class="cap">Grey ticks show the split in seed deck v2 (35% people, 33% growth, 18% model, 14% ops). The bottom-up plan puts more into people and less into marketing and compute; update the deck to these numbers.</p></div>
+      <div class="card"><h3>What the money buys by month 18</h3><div class="tiles two" id="buys"></div>
+        <p class="cap">Users, subscribers and employer seats come from financial model v2 for the selected scenario. They are the evidence for the Series A conversation from around month 13 (Feb 2028).</p></div>
+    </div>
+  </section>
+
+  <section id="monthly">
+    <div class="sh"><div class="k">Month by month</div><h2>Spend, revenue and cash for 18 months</h2></div>
+    <div class="card">
+      <div class="keyrow" id="keyMonthly"></div>
+      <div class="chart" id="monthlyChart"></div>
+      <p class="cap">Bars are gross spend by bucket. The line is cash left from ₹26 crore after revenue contribution. No Series A money is included.</p>
+    </div>
+    <div class="card">
+      <div class="row-h"><h3>Monthly table, ₹ lakh</h3><button type="button" class="btn" id="copyMonthly">Copy as CSV</button></div>
+      <div class="tw"><table id="monthTable" class="num"></table></div>
+    </div>
+  </section>
+
+  <section id="team">
+    <div class="sh"><div class="k">Team</div><h2>Who we hire, when, and what it costs</h2><p id="teamLede"></p></div>
+    <div class="card"><h3>Headcount by team</h3><div class="keyrow" id="keyTeam"></div><div class="chart" id="teamChart"></div></div>
+    <div class="card"><h3>Hiring plan</h3><div class="tw"><table id="roleTable"></table></div>
+      <p class="cap">CTC is fixed annual pay in ₹ lakh. Monthly cost adds 10% for gratuity, group health cover and benefits, and an 8% raise from month 13. Each hire also carries half a month of CTC for recruiting and ₹1.2 lakh for a laptop and setup.</p></div>
+  </section>
+
+  <section id="lines">
+    <div class="sh"><div class="k">Line items</div><h2>Marketing, model and operations in detail</h2></div>
+    <div class="grid3">
+      <div class="card"><h3>Marketing by channel</h3><div class="tw flat"><table id="mktTable" class="num"></table></div></div>
+      <div class="card"><h3>Model and AI</h3><div class="tw flat"><table id="modelTable" class="num"></table></div></div>
+      <div class="card"><h3>Operations and clinical safety</h3><div class="tw flat"><table id="opsTable" class="num"></table></div></div>
+    </div>
+  </section>
+
+  <section id="notes">
+    <div class="sh"><div class="k">Assumptions</div><h2>What this model assumes, and what it leaves out</h2></div>
+    <div class="grid2">
+      <div class="card"><h3>Assumptions</h3><ul class="tight small">
+        <li><b>Timing.</b> Seed closes in Dec 2026; month 1 is Jan 2027, matching financial model v2.</li>
+        <li><b>Revenue.</b> Monthly revenue and cost of revenue per scenario come straight from financial model v2 (subscriptions, bookings, employer seats, fitness). Inference cost per chat sits inside cost of revenue.</li>
+        <li><b>Salaries.</b> Bengaluru and Gurugram startup ranges for 2026; founders at ₹24 lakh each. The salary lever scales every role.</li>
+        <li><b>Marketing.</b> ₹8 to 12 lakh a month before launch, ₹38 to 42 lakh after launch, ₹45 lakh from month 13, split by channel as shown.</li>
+        <li><b>Model.</b> Fine-tuning ₹3 to 5 lakh a month; a doctor-labelled 5,000-case eval set (₹21 lakh) plus refreshes; own GPUs ₹6 lakh a month from month 7 and ₹8 lakh from month 13; Hindi voice licensing from month 11.</li>
+        <li><b>Clinical safety and compliance.</b> Licensed drug database ₹25 lakh a year; a paid doctor review panel growing from ₹3 to ₹8 lakh a month; a regulatory opinion and DPDP set-up (₹15 lakh); two security audits.</li>
+      </ul></div>
+      <div class="card"><h3>Left out, and why it matters</h3><ul class="tight small">
+        <li><b>No Series A money.</b> The plan stands on ₹26 crore alone. Financial model v2 also assumes ₹70 crore at month 13 to accelerate; this page shows the seed has to carry us there with buffer.</li>
+        <li><b>The full model spends faster.</b> Financial model v2 hires about 50 people by month 18 and ramps marketing to ₹1.2 crore a month in 2028, which burns about ₹29 crore over 18 months. This plan holds 38 people and ₹45 lakh a month so ₹26 crore lasts.</li>
+        <li><b>No pendant, no state contracts, no own-model training run.</b> Those are Series A decisions (see the Jivi teardown).</li>
+        <li><b>Taxes and GST input credit</b> are not modelled; marketing and software include GST at cost.</li>
+        <li><b>Own GPUs</b> are on by default because the deck promises them by the Series A. Turning them off saves about ₹1 crore and is what the Jivi teardown recommends until chat cost passes 15% of revenue.</li>
+      </ul></div>
+    </div>
+    <p class="small muted">Files: <code>mobile-react-native/founder-ops/spend-model/</code> holds this page and <code>model.js</code>, which runs in Node for checks. Revenue series exported from <code>vision-board/engine.js</code> on 2 Nov 2026.</p>
+  </section>
+</main>
+
+<script>
+// Cheeku seed spend model: 18 months from close (Jan 2027 = month 1 to Jun 2028 = month 18).
+// Money in ₹ lakh. Revenue and cost of revenue per scenario come from financial model v2 (engine.js).
+const SP = (function () {
+  const N = 18;
+  const MONTHS = ['Jan 27', 'Feb 27', 'Mar 27', 'Apr 27', 'May 27', 'Jun 27', 'Jul 27', 'Aug 27', 'Sep 27', 'Oct 27', 'Nov 27', 'Dec 27', 'Jan 28', 'Feb 28', 'Mar 28', 'Apr 28', 'May 28', 'Jun 28'];
+  const TEAMS = { founders: 'Founders', eng: 'Engineering', ai: 'AI and data', product: 'Product and design', clinical: 'Clinical', care: 'Care', growth: 'Growth', corp: 'Employer sales', ga: 'Finance and people' };
+  // team, role, CTC ₹ lakh a year, start month in the base plan, why
+  const ROLES = [
+    ['founders', 'CEO (Athar)', 24, 1, 'Product, raise, hiring'],
+    ['founders', 'CTO (Suraj)', 24, 1, 'Architecture, model, safety router'],
+    ['founders', 'CBO (Deepesh)', 24, 1, 'Partners, employers, insurers'],
+    ['eng', 'Founding full-stack engineer', 36, 1, 'Chat, memory, booking flows'],
+    ['eng', 'Mobile engineer (React Native)', 32, 1, 'iOS and Android launch'],
+    ['eng', 'Backend and integrations engineer', 36, 3, 'Lab, doctor and payment partner APIs'],
+    ['eng', 'QA and test engineer', 16, 5, 'Release gate, regression suite'],
+    ['eng', 'Full-stack engineer', 30, 9, 'Employer portal, family sharing'],
+    ['eng', 'DevOps and security engineer', 34, 9, 'India hosting, DPDP controls, uptime'],
+    ['eng', 'Full-stack engineer', 30, 13, 'ABDM integration'],
+    ['ai', 'ML engineer (LLM, retrieval)', 45, 1, 'Memory tools, fine-tuning, routing'],
+    ['ai', 'Evals and safety engineer', 34, 3, '5,000-case India eval set, red flags'],
+    ['ai', 'Data engineer', 30, 7, 'Report and prescription parsing pipeline'],
+    ['ai', 'Head of ML', 75, 11, 'Own-GPU serving, adapted model'],
+    ['ai', 'Indic speech engineer', 42, 13, 'Hindi voice, then 4 more languages'],
+    ['product', 'Product designer', 28, 2, 'Launch UX, parent mode'],
+    ['product', 'Hindi content and UX writer', 12, 5, 'Plain-language answers, Hindi'],
+    ['product', 'Product manager', 32, 8, 'Bookings and care plan'],
+    ['clinical', 'Clinical lead (MD)', 42, 1, 'Signs every rule set, weekly chat review'],
+    ['clinical', 'Clinical pharmacist', 14, 3, 'Prescription check, drug database'],
+    ['clinical', 'Clinical QA associate', 9, 8, 'Audits answers, escalations'],
+    ['clinical', 'Specialist physician (part-time)', 30, 13, 'Diabetes and cardiac rule sets'],
+    ['care', 'Care coordinator', 5.5, 4, 'Booking follow-through, family support'],
+    ['care', 'Care coordinator', 5.5, 6, 'Booking follow-through, family support'],
+    ['care', 'Care coordinator', 5.5, 8, 'Hindi support line'],
+    ['care', 'Care coordinator', 5.5, 10, 'Employer member support'],
+    ['care', 'Care coordinator', 5.5, 13, 'Second metro'],
+    ['growth', 'Partnerships manager (labs, doctors)', 22, 2, 'Two partners per category, pricing'],
+    ['growth', 'Growth lead', 36, 3, 'Launch, channels, retention'],
+    ['growth', 'Content and community lead', 15, 4, 'Report-decode campaign, WhatsApp'],
+    ['growth', 'Performance marketer', 18, 6, 'Meta and Google, CAC guardrails'],
+    ['growth', 'Doctor and creator partnerships', 14, 10, 'Named doctor panel, creators'],
+    ['corp', 'Employer sales lead', 30, 2, 'First 10 employers'],
+    ['corp', 'Account executive', 16, 8, 'Mid-size employers, HR platforms'],
+    ['corp', 'Customer success', 10, 8, 'Employer onboarding, wellness talks'],
+    ['corp', 'Account executive', 16, 10, 'Diwali gifting, benefits platforms'],
+    ['ga', 'Finance and operations manager', 18, 3, 'Payroll, compliance, investor reporting'],
+    ['ga', 'People and recruiting partner', 14, 10, 'Hiring 30+ people'],
+  ];
+  const MKT_BASE = [8, 12, 40, 42, 38, 38, 38, 38, 38, 38, 38, 38, 45, 45, 45, 45, 45, 45];
+  const MKT_SPLIT = [['Performance (Meta, Google, app stores)', 0.40], ['Creators and doctor content', 0.20], ['Hero campaign (report decode, HbA1c challenge)', 0.15], ['Employer channel (events, wellness talks, gifting kits)', 0.10], ['Brand, PR and app store optimisation', 0.10], ['Referral credits', 0.05]];
+  let REV = null;
+  const DEFAULTS = { scenario: 'base', mkt: 100, salary: 100, pace: 0, gpu: true, contingency: 10, raise: 2600 };
+
+  function compute(o) {
+    o = Object.assign({}, DEFAULTS, o);
+    const sc = o.scenario, R = REV[sc];
+    const sal = o.salary / 100, mk = o.mkt / 100;
+    // scenario rules: bull pulls hires from month 4 on forward by 2 months and spends 30% more on marketing;
+    // bear freezes hires due from month 7 for 4 months and cuts marketing 35% from month 7 (defend mode).
+    const roles = ROLES.map(r => {
+      let start = r[3];
+      if (r[0] !== 'founders') {
+        if (sc === 'bull' && start >= 4) start -= 2;
+        if (sc === 'bear' && start >= 7) start += 4;
+        if (start > 1) start = Math.max(2, start + o.pace);
+      }
+      return { team: r[0], role: r[1], ctc: r[2] * sal, start, why: r[4], base: r[3] };
+    });
+    const rows = [];
+    let cash = o.raise, out = -1;
+    for (let m = 1; m <= N; m++) {
+      const L = { people: 0, hiring: 0, marketing: 0, model: 0, ops: 0 };
+      const byTeam = {}; let hc = 0;
+      const sub = {};
+      roles.forEach(r => {
+        if (m >= r.start && r.start <= N) {
+          const raiseF = (m >= 13 && r.start < 13) ? 1.08 : 1;
+          const c = r.ctc / 12 * 1.10 * raiseF;           // 10% on top of CTC: gratuity, group health cover, benefits
+          L.people += c; byTeam[r.team] = (byTeam[r.team] || 0) + c; hc++;
+        }
+        if (m === r.start && r.team !== 'founders') L.hiring += r.ctc / 24 + 1.2;  // recruiting (half a month of CTC, mostly referrals) + laptop and setup
+      });
+      // marketing
+      let mf = mk; if (sc === 'bull') mf *= 1.3; if (sc === 'bear' && m >= 7) mf *= 0.65;
+      L.marketing = MKT_BASE[m - 1] * mf;
+      // model and AI
+      sub.tuning = m <= 6 ? 3 : 5;
+      sub.evals = (m >= 2 && m <= 4 ? 7 : 0) + (m >= 7 ? 2 : 0);
+      sub.gpu = o.gpu ? (m >= 13 ? 8 : m >= 7 ? 6 : 0) : 0;
+      sub.cloud = m >= 13 ? 3 : m >= 4 ? 2 : 1.5;
+      sub.voice = m >= 11 ? 3 : 0;
+      sub.tooling = 1;
+      L.model = sub.tuning + sub.evals + sub.gpu + sub.cloud + sub.voice + sub.tooling;
+      // ops, clinical safety and admin
+      sub.drugdb = 25 / 12;
+      sub.panel = m >= 13 ? 8 : m >= 7 ? 5 : m >= 3 ? 3 : 0;
+      sub.legal = (m <= 2 ? 7.5 : 0) + 1.5;
+      sub.security = (m === 3 || m === 12) ? 6 : 0;
+      sub.insurance = 1;
+      sub.accounts = 1.2;
+      sub.office = hc * 0.12 * 0.6;
+      sub.tools = hc * 0.08;
+      sub.setup = m === 1 ? 3 : 0;
+      sub.partners = (m === 2 ? 5 : 0) + (m >= 3 ? 1 : 0);
+      sub.travel = 1.5;
+      L.ops = sub.drugdb + sub.panel + sub.legal + sub.security + sub.insurance + sub.accounts + sub.office + sub.tools + sub.setup + sub.partners + sub.travel;
+      const gross = L.people + L.hiring + L.marketing + L.model + L.ops;
+      const rev = R.rev[m - 1], cor = R.cor[m - 1], contrib = rev - cor;
+      const net = gross - contrib;
+      cash -= net;
+      if (cash < 0 && out < 0) out = m;
+      rows.push({ m, label: MONTHS[m - 1], ...L, gross, rev, cor, contrib, net, cash, hc, byTeam, sub: { ...sub }, mau: R.mau[m - 1], subs: R.subs[m - 1], seats: R.seats[m - 1] });
+    }
+    const sum = k => rows.reduce((a, r) => a + r[k], 0);
+    const tot = { people: sum('people'), hiring: sum('hiring'), marketing: sum('marketing'), model: sum('model'), ops: sum('ops'), gross: sum('gross'), rev: sum('rev'), cor: sum('cor'), contrib: sum('contrib'), net: sum('net') };
+    tot.contingency = tot.net * o.contingency / 100;
+    tot.need = tot.net + tot.contingency;
+    // runway: months the raise lasts at this plan, extending past 18 at the month-18 burn
+    let runway = out > 0 ? out - 1 + (rows[out - 2] ? rows[out - 2].cash / rows[out - 1].net : 0) : 18 + rows[17].cash / Math.max(1, rows[17].net);
+    return { o, roles, rows, tot, runway, endCash: rows[17].cash };
+  }
+  return { compute, ROLES, TEAMS, MKT_SPLIT, MONTHS, DEFAULTS, setRev: r => { REV = r; } };
+})();
+if (typeof module !== 'undefined') module.exports = SP;
+
+SP.setRev({"bear":{"rev":[1.28,2.04,2.77,3.49,4.19,4.87,5.54,6.19,7.36,9.12,10.58,11.75,24.07,28.2,32.43,36.47,40.48,44.46],"cor":[4.01,5.48,6.92,8.33,9.69,11.03,7.1,7.75,20.73,22.66,24.5,26.26,27.05,31.67,36.26,40.79,45.28,49.73],"mau":[38810,61649,83917,105629,126798,147437,167561,187181,206729,226156,244948,263118,322184,380689,438720,496117,552969,609280],"subs":[325,517,703,885,1063,1236,1404,1569,1729,1885,2038,2186,4075,4817,5552,6280,7001,7715],"seats":[0,0,0,0,0,0,0,0,322,917,1384,1722,1968,2212,2516,2754,2990,3223],"book":[7.42,11.79,16.05,20.2,24.25,28.2,32.05,35.8,39.54,43.25,46.85,50.32,97.86,115.63,133.26,150.7,167.96,185.07]},"base":{"rev":[2.94,4.55,6.19,7.86,10.49,13.14,15.82,18.66,21.63,25.61,29.18,32.32,65.5,76.01,87.03,98.12,117.6,131.71],"cor":[5.34,7.44,9.59,11.77,14.21,16.69,11.47,12.96,31.09,34.66,38.23,41.81,45.02,52.53,60.29,68.24,78.66,87.5],"mau":[63333,97933,133225,169223,206696,244897,283841,323624,364236,406238,448771,491853,592807,696762,803946,914178,1034362,1153195],"subs":[722,1116,1519,1929,2348,2775,3210,3654,4107,4570,5041,5522,10231,12038,13899,15816,17790,19824],"seats":[0,0,0,0,581,1157,1728,2358,3025,4149,5060,5756,6300,6841,7482,8014,13673,15689],"book":[16.15,24.97,33.97,43.15,52.71,62.45,72.38,82.52,92.88,103.59,114.44,125.42,240.09,282.19,325.6,370.24,418.92,467.04]},"bull":{"rev":[4.16,6.74,11,15.05,19.21,23.45,27.8,32.43,37.29,43.56,49.36,54.69,111.68,129.68,161.51,184.42,208.11,232.62],"cor":[6.01,8.8,12.04,15.35,18.76,22.28,15.72,17.95,42.26,47.57,52.96,58.46,64.64,75.59,90.57,103.09,116.13,129.71],"mau":[71667,115956,163109,211759,262144,314328,368377,424466,482632,543657,606482,671186,808637,952154,1112429,1271603,1437669,1610935],"subs":[1021,1652,2307,2985,3688,4416,5172,5955,6767,7608,8480,9384,17391,20508,23765,27166,30719,34429],"seats":[0,0,956,1770,2579,3383,4183,5059,5985,7507,8752,9718,10490,11256,20035,22871,25686,28481],"book":[21.93,35.48,49.91,64.8,80.22,96.18,112.72,129.89,147.69,166.36,185.58,205.38,393,462.75,540.64,618,698.71,782.91]}});
+</script>
+<script>
+(function () {
+  const $ = id => document.getElementById(id);
+  const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const NS = 'http://www.w3.org/2000/svg';
+  const el = (t, a, tx) => { const e = document.createElementNS(NS, t); for (const k in a) e.setAttribute(k, a[k]); if (tx != null) e.textContent = tx; return e; };
+  const svg = (id, w, h, label) => { const host = $(id); host.innerHTML = ''; const s = el('svg', { viewBox: `0 0 ${w} ${h}`, role: 'img', 'aria-label': label }); host.appendChild(s); return s; };
+  const cr = l => '₹' + (l / 100).toFixed(2) + ' cr';
+  const cr1 = l => '₹' + (l / 100).toFixed(1) + ' cr';
+  const lk = l => l.toFixed(1);
+  const fmtN = n => n >= 1e5 ? (n / 1e5).toFixed(1) + ' lakh' : n.toLocaleString('en-IN');
+  const BUCKETS = [['people', 'People', '--c-people'], ['hiring', 'Hiring and setup', '--c-hiring'], ['marketing', 'Marketing', '--c-mkt'], ['model', 'Model and AI', '--c-model'], ['ops', 'Ops and clinical safety', '--c-ops']];
+  const TEAMC = { founders: '#14136B', eng: '#5B4EF0', ai: '#0A9396', product: '#C8417F', clinical: '#248A3D', care: '#7FB069', growth: '#E0821E', corp: '#2F6FDE', ga: '#8E6A2E' };
+  let st = Object.assign({}, SP.DEFAULTS);
+  try { const saved = JSON.parse(localStorage.getItem('cheeku-spend') || 'null'); if (saved) st = Object.assign(st, saved); } catch (e) {}
+
+  function syncControls() {
+    document.querySelectorAll('[data-sc]').forEach(b => b.setAttribute('aria-pressed', b.dataset.sc === st.scenario));
+    $('lvMkt').value = st.mkt; $('vMkt').textContent = st.mkt + '%';
+    $('lvSal').value = st.salary; $('vSal').textContent = st.salary + '%';
+    $('lvPace').value = st.pace; $('vPace').textContent = st.pace === 0 ? 'on plan' : (st.pace < 0 ? Math.abs(st.pace) + ' mo earlier' : st.pace + ' mo later');
+    $('lvCont').value = st.contingency; $('vCont').textContent = st.contingency + '%';
+    $('lvGpu').checked = st.gpu;
+  }
+  function save() { try { localStorage.setItem('cheeku-spend', JSON.stringify(st)); } catch (e) {} }
+
+  function render() {
+    syncControls();
+    const R = SP.compute(st), t = R.tot, rows = R.rows;
+    const C = { ink: css('--ink'), ink2: css('--ink-2'), muted: css('--muted'), line: css('--line-2'), accent: css('--accent'), good: css('--good'), bad: css('--bad'), surface: css('--surface') };
+    const scName = { bear: 'Bear', base: 'Base', bull: 'Bull' }[st.scenario];
+    const gap = 2600 - t.need;
+    $('buildTitle').textContent = `${scName} case: the plan needs ${cr1(t.need)}`;
+    $('buildLede').textContent = `18 months of gross spend (${cr(t.gross)}), less ${cr(t.contrib)} of revenue contribution, gives ${cr(t.net)} of net burn. Add a ${st.contingency}% buffer (${cr(t.contingency)}) and the need is ${cr(t.need)}, ${Math.abs(gap) < 60 ? 'which rounds to the ₹26 crore ask' : gap > 0 ? 'leaving ' + cr(gap) + ' unallocated within the ₹26 crore ask' : cr(-gap) + ' more than the ₹26 crore ask'}.`;
+    const peak = Math.max(...rows.map(r => r.net));
+    $('tiles').innerHTML = [
+      ['hero', cr1(t.need), 'Needed for 18 months'],
+      ['', cr(t.gross), 'Gross spend, 18 months'],
+      [t.contrib >= 0 ? 'good' : 'bad', (t.contrib >= 0 ? '' : '−') + cr(Math.abs(t.contrib)), 'Revenue contribution'],
+      ['', R.runway >= 24 ? '24+ months' : R.runway.toFixed(1) + ' months', 'Runway on ₹26 cr'],
+      ['', '₹' + lk(peak) + ' lakh', 'Peak monthly net burn'],
+      [R.endCash >= 0 ? 'good' : 'bad', (R.endCash < 0 ? '−' : '') + cr(Math.abs(R.endCash)), 'Cash left at month 18'],
+    ].map(x => `<div class="tile ${x[0]}"><div class="v">${x[1]}</div><div class="l">${x[2]}</div></div>`).join('');
+
+    // waterfall
+    (function () {
+      const items = [['People', t.people, '--c-people'], ['Hiring', t.hiring, '--c-hiring'], ['Marketing', t.marketing, '--c-mkt'], ['Model', t.model, '--c-model'], ['Ops', t.ops, '--c-ops'], ['Revenue', -t.contrib, '--c-rev'], ['Net burn', null, null], ['Buffer', t.contingency, '--muted'], ['Need', null, null], ['Ask', 2600, '--accent']];
+      const W = 980, H = 330, L = 50, B = 46, T = 24, max = Math.max(3000, t.need * 1.08);
+      const s = svg('waterfall', W, H, 'Waterfall from spend to the raise');
+      const Y = v => T + (1 - v / max) * (H - T - B), bw = (W - L - 20) / items.length;
+      [0, 1000, 2000, 3000].forEach(v => { if (v > max) return; s.appendChild(el('line', { x1: L, x2: W - 10, y1: Y(v), y2: Y(v), stroke: C.line, 'stroke-dasharray': v ? '2 3' : '' })); s.appendChild(el('text', { x: L - 8, y: Y(v) + 4, 'text-anchor': 'end', 'font-size': 11, fill: C.muted }, v / 100)); });
+      let run = 0;
+      items.forEach((it, i) => {
+        const x = L + i * bw + 8, w = bw - 16;
+        let y0, y1, col, val;
+        if (it[0] === 'Net burn') { y0 = 0; y1 = run; col = C.ink2; val = run; }
+        else if (it[0] === 'Need') { y0 = 0; y1 = t.need; col = C.ink; val = t.need; }
+        else if (it[0] === 'Ask') { y0 = 0; y1 = 2600; col = C.accent; val = 2600; }
+        else if (it[0] === 'Buffer') { y0 = run; y1 = run + it[1]; run = y1; col = C.muted; val = it[1]; }
+        else { y0 = run; y1 = run + it[1]; run = y1; col = css(it[2]); val = it[1]; }
+        const top = Math.max(y0, y1), bot = Math.min(y0, y1);
+        s.appendChild(el('rect', { x, y: Y(top), width: w, height: Math.max(1, Y(bot) - Y(top)), rx: 4, fill: col, opacity: it[0] === 'Revenue' ? 0.85 : 1 }));
+        s.appendChild(el('text', { x: x + w / 2, y: Y(top) - 6, 'text-anchor': 'middle', 'font-size': 11.5, 'font-weight': 650, fill: C.ink }, (val < 0 ? '−' : it[0] === 'Revenue' ? '−' : '') + (Math.abs(val) / 100).toFixed(1)));
+        s.appendChild(el('text', { x: x + w / 2, y: H - 22, 'text-anchor': 'middle', 'font-size': 11.5, fill: C.ink2 }, it[0]));
+      });
+      s.appendChild(el('text', { x: L, y: 14, 'font-size': 11, fill: C.muted }, '₹ crore'));
+    })();
+
+    // scenario table
+    const all = ['bear', 'base', 'bull'].map(sc => ({ sc, r: SP.compute(Object.assign({}, st, { scenario: sc })) }));
+    $('scTable').innerHTML = `<thead><tr><th>Scenario</th><th>Gross spend</th><th>Revenue contribution</th><th>Net burn</th><th>Buffer</th><th>Need</th><th>Runway on ₹26 cr</th><th>Team at month 18</th><th>Monthly users at month 18</th></tr></thead><tbody>` +
+      all.map(a => `<tr${a.sc === st.scenario ? ' style="font-weight:650"' : ''}><td>${a.sc[0].toUpperCase() + a.sc.slice(1)}</td><td>${cr(a.r.tot.gross)}</td><td>${cr(a.r.tot.contrib)}</td><td>${cr(a.r.tot.net)}</td><td>${cr(a.r.tot.contingency)}</td><td><b>${cr(a.r.tot.need)}</b></td><td>${a.r.runway >= 24 ? '24+' : a.r.runway.toFixed(1)} months</td><td>${a.r.rows[17].hc}</td><td>${fmtN(a.r.rows[17].mau)}</td></tr>`).join('') + '</tbody>';
+    $('scTable').classList.add('num');
+
+    // use of funds bars
+    (function () {
+      const grossT = t.gross, deck = { people: 35, marketing: 33, model: 18, ops: 14 };
+      const items = [['People and hiring', t.people + t.hiring, '--c-people', deck.people], ['Marketing', t.marketing, '--c-mkt', deck.marketing], ['Model and AI', t.model, '--c-model', deck.model], ['Ops and clinical safety', t.ops, '--c-ops', deck.ops]];
+      const W = 560, H = 210, L = 170, R = 90, T = 10, rh = 46;
+      const s = svg("fundsChart", W, H, "Use of funds by bucket");
+      const X = v => L + v / 60 * (W - L - R);
+      items.forEach((it, i) => {
+        const y = T + i * rh + 8, pct = it[1] / grossT * 100;
+        s.appendChild(el('text', { x: L - 10, y: y + 13, 'text-anchor': 'end', 'font-size': 12.5, fill: C.ink2 }, it[0]));
+        s.appendChild(el('rect', { x: L, y, width: X(pct) - L, height: 18, rx: 5, fill: css(it[2]) }));
+        s.appendChild(el('line', { x1: X(it[3]), x2: X(it[3]), y1: y - 4, y2: y + 22, stroke: C.muted, 'stroke-width': 2 }));
+        s.appendChild(el('text', { x: Math.max(X(pct), X(it[3])) + 8, y: y + 13, 'font-size': 12, 'font-weight': 650, fill: C.ink }, `${pct.toFixed(0)}% · ${cr1(it[1])}`));
+      });
+    })();
+    const last = rows[17];
+    $('buys').innerHTML = [[fmtN(last.mau), 'Monthly active users'], [fmtN(last.subs), 'Paying subscribers'], [fmtN(last.seats), 'Employer seats'], [last.hc + ' people', 'Team size']].map(x => `<div class="tile"><div class="v">${x[0]}</div><div class="l">${x[1]}</div></div>`).join('');
+
+    // monthly stacked + cash
+    $('keyMonthly').innerHTML = BUCKETS.map(b => `<span><i class="sw" style="background:var(${b[2]})"></i>${b[1]}</span>`).join('') + `<span><i class="sw" style="background:var(--ink)"></i>Cash left (right axis)</span>`;
+    (function () {
+      const W = 1040, H = 340, L = 50, R = 60, T = 20, B = 40, maxS = Math.max(250, ...rows.map(r => r.gross)) * 1.1, maxC = 2700;
+      const s = svg('monthlyChart', W, H, 'Monthly gross spend by bucket and cash left');
+      const Y = v => T + (1 - v / maxS) * (H - T - B), Yc = v => T + (1 - Math.max(v, 0) / maxC) * (H - T - B);
+      const bw = (W - L - R) / 18;
+      [0, 50, 100, 150, 200, 250, 300].forEach(v => { if (v > maxS) return; s.appendChild(el('line', { x1: L, x2: W - R, y1: Y(v), y2: Y(v), stroke: C.line, 'stroke-dasharray': v ? '2 3' : '' })); s.appendChild(el('text', { x: L - 8, y: Y(v) + 4, 'text-anchor': 'end', 'font-size': 11, fill: C.muted }, v)); });
+      [0, 1000, 2000].forEach(v => s.appendChild(el('text', { x: W - R + 8, y: Yc(v) + 4, 'font-size': 11, fill: C.muted }, (v / 100) + ' cr')));
+      s.appendChild(el('text', { x: L, y: 12, 'font-size': 11, fill: C.muted }, '₹ lakh a month'));
+      rows.forEach((r, i) => {
+        let acc = 0; const x = L + i * bw + 4, w = bw - 8;
+        BUCKETS.forEach(b => { const v = r[b[0]]; s.appendChild(el('rect', { x, y: Y(acc + v), width: w, height: Math.max(0, Y(acc) - Y(acc + v)), fill: css(b[2]) })); acc += v; });
+        if (i % 2 === 0 || i === 17) s.appendChild(el('text', { x: x + w / 2, y: H - 18, 'text-anchor': 'middle', 'font-size': 10.5, fill: C.ink2 }, r.label));
+      });
+      let d = ''; rows.forEach((r, i) => { d += (i ? 'L' : 'M') + (L + i * bw + bw / 2) + ' ' + Yc(r.cash); });
+      s.appendChild(el('path', { d, fill: 'none', stroke: C.ink, 'stroke-width': 2.5 }));
+      const lx = L + 17 * bw + bw / 2;
+      s.appendChild(el('circle', { cx: lx, cy: Yc(last.cash), r: 5, fill: last.cash >= 0 ? C.good : C.bad }));
+      s.appendChild(el('text', { x: lx - 8, y: Yc(last.cash) - 10, 'text-anchor': 'end', 'font-size': 11.5, 'font-weight': 650, fill: C.ink }, (last.cash < 0 ? '−' : '') + cr(Math.abs(last.cash))));
+    })();
+
+    // month table
+    const cols = [['label', 'Month'], ['hc', 'Team'], ['people', 'People'], ['hiring', 'Hiring'], ['marketing', 'Marketing'], ['model', 'Model'], ['ops', 'Ops'], ['gross', 'Gross spend'], ['rev', 'Revenue'], ['cor', 'Cost of revenue'], ['net', 'Net burn'], ['cash', 'Cash left']];
+    const cell = (r, k) => k === 'label' ? r.label : k === 'hc' ? r.hc : lk(r[k]);
+    $('monthTable').innerHTML = `<thead><tr>${cols.map(c => `<th>${c[1]}</th>`).join('')}</tr></thead><tbody>` +
+      rows.map(r => `<tr>${cols.map(c => `<td${c[0] === 'cash' && r.cash < 0 ? ' class="neg"' : ''}>${cell(r, c[0])}</td>`).join('')}</tr>`).join('') +
+      `<tr class="tot"><td>18 months</td><td>${last.hc}</td>${['people', 'hiring', 'marketing', 'model', 'ops', 'gross', 'rev', 'cor', 'net'].map(k => `<td>${lk(t[k])}</td>`).join('')}<td>${lk(last.cash)}</td></tr></tbody>`;
+    window.__csv = [cols.map(c => c[1]).join(',')].concat(rows.map(r => cols.map(c => cell(r, c[0])).join(','))).join('\n');
+
+    // team chart
+    const teams = Object.keys(SP.TEAMS);
+    $('keyTeam').innerHTML = teams.map(k => `<span><i class="sw" style="background:${TEAMC[k]}"></i>${SP.TEAMS[k]}</span>`).join('');
+    (function () {
+      const W = 1040, H = 280, L = 40, RP = 20, T = 16, B = 36, max = 45;
+      const s = svg('teamChart', W, H, 'Headcount by team per month');
+      const Y = v => T + (1 - v / max) * (H - T - B), bw = (W - L - RP) / 18;
+      [0, 10, 20, 30, 40].forEach(v => { s.appendChild(el('line', { x1: L, x2: W - RP, y1: Y(v), y2: Y(v), stroke: C.line, 'stroke-dasharray': v ? '2 3' : '' })); s.appendChild(el('text', { x: L - 8, y: Y(v) + 4, 'text-anchor': 'end', 'font-size': 11, fill: C.muted }, v)); });
+      rows.forEach((r, i) => {
+        const counts = {}; R.roles.forEach(x => { if (i + 1 >= x.start && x.start <= 18) counts[x.team] = (counts[x.team] || 0) + 1; });
+        let acc = 0; const x = L + i * bw + 5, w = bw - 10;
+        teams.forEach(k => { const v = counts[k] || 0; if (!v) return; s.appendChild(el('rect', { x, y: Y(acc + v), width: w, height: Y(acc) - Y(acc + v), fill: TEAMC[k] })); acc += v; });
+        s.appendChild(el('text', { x: x + w / 2, y: Y(acc) - 5, 'text-anchor': 'middle', 'font-size': 10.5, 'font-weight': 650, fill: C.ink }, acc));
+        if (i % 2 === 0 || i === 17) s.appendChild(el('text', { x: x + w / 2, y: H - 14, 'text-anchor': 'middle', 'font-size': 10.5, fill: C.ink2 }, r.label));
+      });
+    })();
+    // role table
+    const roleCost = r => { let c = 0; for (let m = r.start; m <= 18; m++) c += r.ctc / 12 * 1.10 * ((m >= 13 && r.start < 13) ? 1.08 : 1); return c; };
+    let html = `<thead><tr><th>Role</th><th>Starts</th><th>CTC, ₹ lakh a year</th><th>18-month cost, ₹ lakh</th><th>Why we need them</th></tr></thead><tbody>`;
+    let teamTot = 0, grand = 0;
+    teams.forEach(k => {
+      const rs = R.roles.filter(r => r.team === k).sort((a, b) => a.start - b.start);
+      const sum = rs.reduce((a, r) => a + (r.start <= 18 ? roleCost(r) : 0), 0); grand += sum;
+      html += `<tr class="grp"><td>${SP.TEAMS[k]} · ${rs.filter(r => r.start <= 18).length}</td><td></td><td></td><td style="text-align:right">${lk(sum)}</td><td></td></tr>`;
+      rs.forEach(r => { const moved = r.start !== r.base; html += `<tr><td>${r.role}</td><td>${r.start <= 18 ? SP.MONTHS[r.start - 1] : 'after month 18'}${moved ? ` <span class="muted">(plan ${SP.MONTHS[r.base - 1]})</span>` : ''}</td><td style="text-align:right">${r.ctc.toFixed(1)}</td><td style="text-align:right">${r.start <= 18 ? lk(roleCost(r)) : '0.0'}</td><td class="why">${r.why}</td></tr>`; });
+    });
+    html += `<tr class="tot"><td>Total payroll</td><td></td><td></td><td style="text-align:right">${lk(grand)}</td><td></td></tr></tbody>`;
+    $('roleTable').innerHTML = html;
+    const hc12 = rows[11].hc;
+    $('teamLede').textContent = `${rows[0].hc} people at close, ${hc12} by December 2027 and ${last.hc} by June 2028. Payroll is ${cr(t.people)} over 18 months, ${(t.people / t.gross * 100).toFixed(0)}% of gross spend.`;
+
+    // line item tables
+    const sumSub = k => rows.reduce((a, r) => a + (r.sub[k] || 0), 0);
+    $('mktTable').innerHTML = `<thead><tr><th>Channel</th><th>₹ lakh</th></tr></thead><tbody>` + SP.MKT_SPLIT.map(c => `<tr><td style="white-space:normal">${c[0]}</td><td>${lk(t.marketing * c[1])}</td></tr>`).join('') + `<tr class="tot"><td>Total</td><td>${lk(t.marketing)}</td></tr></tbody>`;
+    const modelItems = [['Fine-tuning and experiments', 'tuning'], ['India eval set (doctor-labelled) and refreshes', 'evals'], ['Own GPU serving', 'gpu'], ['India-region cloud and vector store', 'cloud'], ['Hindi voice licensing', 'voice'], ['Observability and safety tooling', 'tooling']];
+    $('modelTable').innerHTML = `<thead><tr><th>Item</th><th>₹ lakh</th></tr></thead><tbody>` + modelItems.map(m => `<tr><td style="white-space:normal">${m[0]}</td><td>${lk(sumSub(m[1]))}</td></tr>`).join('') + `<tr class="tot"><td>Total</td><td>${lk(t.model)}</td></tr><tr><td class="muted" style="white-space:normal">Per-chat inference sits in cost of revenue</td><td class="muted">${lk(t.cor)}</td></tr></tbody>`;
+    const opsItems = [['Doctor review panel', 'panel'], ['Licensed drug database', 'drugdb'], ['Legal, regulatory opinion, DPDP', 'legal'], ['Office and co-working seats', 'office'], ['Software tools', 'tools'], ['Partner onboarding and integrations', 'partners'], ['Security audits', 'security'], ['Travel and events', 'travel'], ['Accounting, audit, secretarial', 'accounts'], ['Liability and cyber insurance', 'insurance'], ['Incorporation, DPIIT, trademarks', 'setup']];
+    $('opsTable').innerHTML = `<thead><tr><th>Item</th><th>₹ lakh</th></tr></thead><tbody>` + opsItems.map(m => `<tr><td style="white-space:normal">${m[0]}</td><td>${lk(sumSub(m[1]))}</td></tr>`).join('') + `<tr class="tot"><td>Total</td><td>${lk(t.ops)}</td></tr></tbody>`;
+  }
+
+  document.addEventListener('click', e => {
+    const b = e.target.closest('[data-sc]'); if (b) { st.scenario = b.dataset.sc; save(); render(); return; }
+    if (e.target.id === 'reset') { st = Object.assign({}, SP.DEFAULTS, { scenario: st.scenario }); save(); render(); return; }
+    if (e.target.id === 'copyMonthly') {
+      const done = m => { const t = document.createElement('div'); t.className = 'toast'; t.textContent = m; document.body.appendChild(t); setTimeout(() => t.remove(), 1800); };
+      try { navigator.clipboard.writeText(window.__csv).then(() => done('Copied the monthly table'), () => done('Copy is blocked here. Select the table instead.')); } catch (x) { done('Copy is blocked here. Select the table instead.'); }
+    }
+  });
+  const bind = (id, key, num) => $(id).addEventListener('input', e => { st[key] = num ? Number(e.target.value) : e.target.checked; save(); render(); });
+  bind('lvMkt', 'mkt', 1); bind('lvSal', 'salary', 1); bind('lvPace', 'pace', 1); bind('lvCont', 'contingency', 1); bind('lvGpu', 'gpu', 0);
+  render();
+  if (window.matchMedia) { const mq = matchMedia('(prefers-color-scheme: dark)'); if (mq.addEventListener) mq.addEventListener('change', render); }
+  new MutationObserver(render).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+})();
+
+</script>
+</body>
+</html>
