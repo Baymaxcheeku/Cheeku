@@ -1,28 +1,19 @@
-# ₹5 crore angel close: use of funds (3 Nov 2026)
+# ₹5 crore angel close: use of funds
 
-Built on financial model v2 (base case, seed only, defend mode off). Model months: Jan 2027 = month 1. December 2026 and the launch set-up costs are estimates outside the model.
+The live, line-by-line version is the "₹5 cr angels" section of the seed spend model (spend-model/index.html,
+https://claude.ai/artifact/1KcTgwdfJ7w7yG2ccyHdwB). It runs on financial model v2 with an optimised angel plan
+(pendant R&D and insurer/hardware hires wait for the VC money). December 2026 and one-off set-up costs are estimates.
 
-## Why ₹5 crore
-| Piece | ₹ crore | Source |
+Base case, institutional money landing in March 2027, optimised plan (₹ lakh):
+
+| Bucket | ₹ lakh | Share |
 |---|---|---|
-| Dec 2026 pre-launch month (core team, pre-launch marketing, set-up) | 0.60 | Estimate |
-| Jan to Apr 2027 at full plan (net of revenue) | 3.50 | Model: 0.80 + 0.85 + 0.90 + 0.95 |
-| Buffer: one more month if the VC close slips to May | 0.90 | About one month at the April burn |
-| **Total** | **5.00** | |
+| People (7 in December to about 12 by March) | 107 | 21% |
+| Launch marketing (₹20 lakh pre-launch, ₹40 lakh a month from January) | 140 | 28% |
+| December set-up, one-off (company, legal, regulatory opinion, DPDP, security audit, drug database, launch content, devices) | 61 | 12% |
+| Ops, legal and G&A | 34 | 7% |
+| Running the product, net of revenue | 10 | 2% |
+| Buffer when the ₹21 crore lands | 148 | 30% |
+| **Total** | **500** | **100%** |
 
-## By bucket (Dec 2026 to Apr 2027, plus buffer)
-| Bucket | ₹ crore | Share |
-|---|---|---|
-| People (9 at launch to about 13 by April) | 1.50 | 30% |
-| Launch marketing (₹20 lakh in Dec, ₹40 lakh a month from Jan) | 1.80 | 36% |
-| Ops, clinical safety and compliance (legal, regulatory opinion, DPDP, drug data, tools, insurance) | 0.50 | 10% |
-| Pendant R&D (model line; recommend deferring) | 0.17 | 3% |
-| Running the product (inference, cloud, partner and store costs, net of early revenue) | 0.13 | 3% |
-| Buffer | 0.90 | 18% |
-| **Total** | **5.00** | |
-
-## What it buys by April 2027 (model)
-About 1.7 lakh monthly users, about 1,900 paying subscribers, first employer pilots, and three months of retention and booking data for the VC round.
-
-## If the VC round is late
-Lean mode (marketing at ₹20 to 25 lakh a month, hiring frozen at about 10 people): about ₹60 lakh a month, so ₹5 crore lasts to about July 2027.
+Spent December to March: ₹3.5 crore. Full plan runs through April 2027; lean mode stretches to about May if the VC round slips.

@@ -132,7 +132,7 @@ main { padding-bottom: 60px; }
 <div class="bar"><div class="wrap bar-in">
   <b class="brand">Cheeku</b><span class="sub">Seed spend model</span>
   <div class="seg" role="group" aria-label="Scenario"><button type="button" data-sc="bear">Bear</button><button type="button" data-sc="base">Base</button><button type="button" data-sc="bull">Bull</button></div>
-  <nav class="jump" aria-label="Sections"><a href="#assumptions">Assumptions</a><a href="#build">₹26 cr build-up</a><a href="#funds">Use of funds</a><a href="#monthly">Monthly</a><a href="#team">Team</a><a href="#notes">Methodology</a></nav>
+  <nav class="jump" aria-label="Sections"><a href="#assumptions">Assumptions</a><a href="#angel">₹5 cr angels</a><a href="#build">₹26 cr build-up</a><a href="#funds">Use of funds</a><a href="#monthly">Monthly</a><a href="#team">Team</a><a href="#notes">Methodology</a></nav>
 </div></div>
 
 <main class="wrap">
@@ -155,6 +155,25 @@ main { padding-bottom: 60px; }
   <section id="assumptions">
     <div class="sh"><div class="k">Read this first</div><h2>Key assumptions</h2><p>The plan runs month by month from the day the seed lands. Figures for the selected scenario update with the levers above.</p></div>
     <div class="card"><div class="tw flat"><table id="assumpTable"></table></div></div>
+  </section>
+
+  <section id="angel">
+    <div class="sh"><div class="k">First close</div><h2>The ₹5 crore angel close, line by line</h2><p>The angels fund December's pre-launch month and the launch, until the institutional ₹21 crore lands. Every month after December comes from the same model as the rest of this page; December and the one-off set-up costs are our estimates.</p></div>
+    <div class="levers card">
+      <div class="lever"><label for="aClose">Institutional money lands in</label><select id="aClose"><option value="1">Feb 2027</option><option value="2">Mar 2027</option><option value="3">Apr 2027</option><option value="4">May 2027</option><option value="5">Jun 2027</option></select></div>
+      <div class="lever tog"><label for="aOpt"><input id="aOpt" type="checkbox"> Optimised angel plan (defer what can wait for the VC money)</label></div>
+    </div>
+    <div class="tiles" id="aTiles"></div>
+    <div class="grid2">
+      <div class="card"><h3>Where the ₹5 crore goes</h3><div class="tw flat"><table id="aBuckets" class="num"></table></div></div>
+      <div class="card"><h3>Optimisations</h3><div class="tw flat"><table id="aOptTable" class="num"></table></div><p class="cap">What the optimised plan holds back until the institutional round lands. Nothing customer-facing is cut.</p></div>
+    </div>
+    <div class="card"><div class="row-h"><h3>Month by month, ₹ lakh</h3></div><div class="tw"><table id="aMonths" class="num"></table></div></div>
+    <div class="grid3">
+      <div class="card"><h3>December set-up, one-off</h3><div class="tw flat"><table id="aOneOff" class="num"></table></div></div>
+      <div class="card"><h3>Marketing by channel</h3><div class="tw flat"><table id="aMkt" class="num"></table></div></div>
+      <div class="card"><h3>Who the angel money pays for</h3><div class="tw flat"><table id="aRoles" class="num"></table></div></div>
+    </div>
   </section>
 
   <section id="build">
@@ -221,10 +240,10 @@ main { padding-bottom: 60px; }
   const MON = t => { const u = t + OFF; return ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][u % 12] + ' ' + String(2027 + Math.floor(u / 12)); };
   const TEAM = {}; FUNCS.forEach(f => { TEAM[f[0]] = f[1]; });
   const TEAMC = { founders: '#14136B', eng: '#5B4EF0', ai: '#0A9396', product: '#C8417F', clinical: '#248A3D', care: '#7FB069', growth: '#E0821E', b2b: '#B5179E', corp: '#2F6FDE', hardware: '#6E6E73', ga: '#8E6A2E' };
-  const DEF = { sc: 'base', fund: 'seed', defend: false, mkt: 100, hire: 100, gpu: 100, close: 0 };
+  const DEF = { sc: 'base', fund: 'seed', defend: false, mkt: 100, hire: 100, gpu: 100, close: 0, aClose: 2, aOpt: true };
   let st = Object.assign({}, DEF);
-  try { const v = JSON.parse(localStorage.getItem('cheeku-spend3') || 'null'); if (v) st = Object.assign(st, v); } catch (e) {}
-  const save = () => { try { localStorage.setItem('cheeku-spend3', JSON.stringify(st)); } catch (e) {} };
+  try { const v = JSON.parse(localStorage.getItem('cheeku-spend4') || 'null'); if (v) st = Object.assign(st, v); } catch (e) {}
+  const save = () => { try { localStorage.setItem('cheeku-spend4', JSON.stringify(st)); } catch (e) {} };
 
   function model(o) {
     const s = scenario(o.sc);
@@ -394,7 +413,72 @@ main { padding-bottom: 60px; }
     });
     html += `<tr class="tot"><td>Total payroll, 18 months</td><td></td><td></td><td style="text-align:right">${lk(grand)}</td><td>Matches the model's people line: ${lk(R.reduce((a, r) => a + r.oPeople, 0))}</td></tr></tbody>`;
     $('roleTable').innerHTML = html;
+    renderAngel(st);
     $('teamLede').textContent = `${R[0].hcTotal.toFixed(0)} people in ${MON(0)}, ${R[11].hcTotal.toFixed(0)} by ${MON(11)}, ${R[17].hcTotal.toFixed(0)} by ${MON(17)}. ${nRoles} roles are funded at least in part within 18 months.`;
+  }
+
+  // ---- ₹5 crore angel close ----
+  const ANGEL = 5 * CR, VC = 21 * CR;
+  const AMON = t => t < 0 ? 'Dec 2026' : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][t % 12] + ' ' + (2027 + Math.floor(t / 12));
+  const ONEOFF = [
+    ['Company set-up: incorporation, DPIIT, Startup Haryana, trademarks', 3],
+    ['Angel round legal: convertible instrument, valuation report, filings', 6],
+    ['Regulatory opinion on the prescription check (CDSCO)', 5],
+    ['DPDP privacy set-up: consent flows, policies, advisory', 4],
+    ['Security audit and penetration test before launch', 6],
+    ['Licensed drug database, first year', 25],
+    ['Launch content: demo films, app store assets, creative', 8],
+    ['Test phones and devices for the team', 4],
+  ];
+  const MKT_SPLIT = [['Performance (Meta, Google, app stores)', 0.40], ['Doctor and creator content', 0.20], ['Hero campaign: free report decode', 0.15], ['Employer pilots and wellness talks', 0.10], ['Brand, PR and app store optimisation', 0.10], ['Referral credits', 0.05]];
+  function renderAngel(st) {
+    const o = Object.assign({}, st, { fund: 'seed', defend: false });
+    const M = model(o), S = M.s, R = M.rows, close = Number(st.aClose), opt = !!st.aOpt;
+    $('aClose').value = String(close); $('aOpt').checked = opt;
+    const fteF = (key, t) => { const f = FUNCS.find(x => x[0] === key); return f[2] * LAKH * Math.pow(1 + S.salaryGrowth, Math.floor(t / 12)) * (1 + S.loading) / 12; };
+    const held = (r, t) => opt ? ((r.hc.b2b || 0) * fteF('b2b', t) + (r.hc.hardware || 0) * fteF('hardware', t)) : 0;
+    // December: the founding team the model starts with, pre-launch marketing, G&A, cloud and tools
+    const decTeam = FUNCS.reduce((a, f) => a + f[3] * f[2] * LAKH * (1 + S.loading) / 12, 0);
+    const decHc = FUNCS.reduce((a, f) => a + f[3], 0);
+    const oneoff = ONEOFF.reduce((a, x) => a + x[1] * LAKH, 0);
+    const dec = { label: AMON(-1), hc: decHc, people: decTeam, mkt: 20 * LAKH, corp: 0, product: 1.5 * LAKH, opsga: S.gaFixed[0] * LAKH, oneoff, pendant: 0 };
+    const rowOf = (r, t) => ({ label: AMON(t), hc: r.hcTotal - (opt ? (r.hc.b2b || 0) + (r.hc.hardware || 0) : 0), people: r.oPeople - held(r, t), mkt: r.oMkt, corp: r.oCorpSales, product: r.cogs - r.rev + r.oLlm, opsga: r.oOffice + r.oGa, oneoff: 0, pendant: opt ? 0 : r.oPendant, rev: r.rev });
+    const months = [dec].concat(R.slice(0, close + 1).map(rowOf));
+    const tot = m => m.people + m.mkt + m.corp + m.product + m.opsga + m.oneoff + m.pendant;
+    let cum = 0; months.forEach(m => { m.total = tot(m); cum += m.total; m.cum = cum; m.left = ANGEL - cum; });
+    const spend = cum, buffer = ANGEL - spend;
+    // How far ₹5 crore goes: full plan, and lean (marketing at 35%, hiring frozen at the close month)
+    let c = spend, t = close + 1; while (t < 36 && c + tot(rowOf(R[t], t)) <= ANGEL) { c += tot(rowOf(R[t], t)); t++; }
+    const fullUntil = c < ANGEL && t < 36 ? AMON(t - 1) : AMON(t - 1);
+    const last = rowOf(R[close], close), leanBurn = last.people + last.mkt * S.defendMkt + last.corp + last.product + last.opsga;
+    const leanMonths = buffer > 0 ? buffer / leanBurn : 0;
+    const leanUntilT = close + Math.floor(leanMonths);
+    $('aTiles').innerHTML = [['hero', '₹5.0 cr', 'Angel close'], ['', cr1(spend), 'Spent from ' + AMON(-1) + ' to ' + AMON(close)], [buffer >= 0 ? 'good' : 'bad', (buffer < 0 ? '−' : '') + cr1(Math.abs(buffer)), 'Left when the ₹21 cr lands'], ['', fullUntil, '₹5 cr lasts through, full plan'], ['', buffer > 0 ? AMON(leanUntilT) : 'None', 'Lasts through in lean mode, if the VC round slips'], ['', fmtN(R[close].mau), 'Monthly users by ' + AMON(close)]]
+      .map(x => `<div class="tile ${x[0]}"><div class="v">${x[1]}</div><div class="l">${x[2]}</div></div>`).join('');
+    const sum = k => months.reduce((a, m) => a + m[k], 0);
+    const buckets = [['People', sum('people')], ['Launch marketing', sum('mkt')], ['Ops, legal and G&A', sum('opsga')], ['December set-up, one-off', sum('oneoff')], ['Running the product, net of revenue', sum('product')], ['Employer sales', sum('corp')], ['Pendant R&D', sum('pendant')], ['Buffer', Math.max(0, buffer)]];
+    $('aBuckets').innerHTML = `<thead><tr><th>Bucket</th><th>₹ lakh</th><th>Share</th></tr></thead><tbody>` + buckets.map(b => `<tr><td style="white-space:normal">${b[0]}</td><td>${lk(b[1])}</td><td>${(b[1] / ANGEL * 100).toFixed(0)}%</td></tr>`).join('') + `<tr class="tot"><td>Total</td><td>${lk(spend + Math.max(0, buffer))}</td><td>${((spend + Math.max(0, buffer)) / ANGEL * 100).toFixed(0)}%</td></tr></tbody>`;
+    const win = R.slice(0, close + 1);
+    const savePend = win.reduce((a, r) => a + r.oPendant, 0), saveHires = win.reduce((a, r, i) => a + (r.hc.b2b || 0) * fteF('b2b', i) + (r.hc.hardware || 0) * fteF('hardware', i), 0);
+    const ow = [['Pendant R&D waits for the VC money', savePend], ['Insurer-deal and hardware hires wait for the VC money', saveHires], ['Own-model work starts in month 7 (already in the model)', 0]];
+    $('aOptTable').innerHTML = `<thead><tr><th>Change</th><th>Saves, ₹ lakh</th></tr></thead><tbody>` + ow.map(x => `<tr><td style="white-space:normal">${x[0]}</td><td>${x[1] ? (opt ? lk(x[1]) : '<span class="muted">' + lk(x[1]) + ' if on</span>') : 'already applied'}</td></tr>`).join('') + `<tr class="tot"><td>Total held back</td><td>${opt ? lk(savePend + saveHires) : '0.0'}</td></tr></tbody>`;
+    const cols = [['label', 'Month'], ['hc', 'Team'], ['people', 'People'], ['mkt', 'Marketing'], ['corp', 'Employer sales'], ['product', 'Product, net'], ['opsga', 'Ops and G&A'], ['oneoff', 'One-off'], ['pendant', 'Pendant'], ['total', 'Total'], ['left', 'Left of ₹5 cr']];
+    $('aMonths').innerHTML = `<thead><tr>${cols.map(c => `<th>${c[1]}</th>`).join('')}</tr></thead><tbody>` + months.map(m => `<tr>${cols.map(c => `<td${c[0] === 'left' && m.left < 0 ? ' class="neg"' : ''}>${c[0] === 'label' ? m.label : c[0] === 'hc' ? m.hc.toFixed(1) : lk(m[c[0]])}</td>`).join('')}</tr>`).join('') +
+      `<tr class="tot"><td>Total</td><td></td>${['people', 'mkt', 'corp', 'product', 'opsga', 'oneoff', 'pendant', 'total'].map(k => `<td>${lk(sum(k))}</td>`).join('')}<td>${lk(buffer)}</td></tr></tbody>`;
+    $('aOneOff').innerHTML = `<thead><tr><th>Item</th><th>₹ lakh</th></tr></thead><tbody>` + ONEOFF.map(x => `<tr><td style="white-space:normal">${x[0]}</td><td>${x[1].toFixed(1)}</td></tr>`).join('') + `<tr class="tot"><td>Total</td><td>${lk(oneoff)}</td></tr></tbody>`;
+    const mk = sum('mkt');
+    $('aMkt').innerHTML = `<thead><tr><th>Channel</th><th>₹ lakh</th></tr></thead><tbody>` + MKT_SPLIT.map(x => `<tr><td style="white-space:normal">${x[0]}</td><td>${lk(mk * x[1])}</td></tr>`).join('') + `<tr class="tot"><td>Total, incl. ₹20 lakh pre-launch</td><td>${lk(mk)}</td></tr></tbody>`;
+    // roles: seats funded in the angel window
+    let rows = [], payroll = decTeam;
+    FUNCS.forEach(f => { const key = f[0]; if (opt && (key === 'b2b' || key === 'hardware')) return;
+      const maxHc = Math.max(f[3], ...win.map(r => r.hc[key] || 0)); const seats = Math.ceil(maxHc - 1e-9);
+      for (let k = 1; k <= seats; k++) { let cost = k <= f[3] ? f[3] >= k ? fteF(key, 0) * 0 + f[2] * LAKH * (1 + S.loading) / 12 : 0 : 0, from = k <= f[3] ? -1 : null;
+        win.forEach((r, i) => { const fr = Math.max(0, Math.min(1, (r.hc[key] || 0) - (k - 1))); cost += fr * fteF(key, i); if (from === null && fr >= 0.5) from = i; });
+        const ro = (ROSTER[key] || [])[k - 1] || [TEAM[key] + ' hire ' + k];
+        rows.push([ro[0], from === null ? 'part-funded' : AMON(from), cost]); }
+    });
+    const pay = rows.reduce((a, r) => a + r[2], 0);
+    $('aRoles').innerHTML = `<thead><tr><th>Role</th><th>From</th><th>₹ lakh</th></tr></thead><tbody>` + rows.map(r => `<tr><td style="white-space:normal">${r[0]}</td><td style="text-align:left">${r[1]}</td><td>${lk(r[2])}</td></tr>`).join('') + `<tr class="tot"><td>Total payroll</td><td></td><td>${lk(pay)}</td></tr></tbody>`;
   }
 
   document.addEventListener('click', e => {
@@ -407,6 +491,8 @@ main { padding-bottom: 60px; }
   [['lvMkt', 'mkt'], ['lvHire', 'hire'], ['lvGpu', 'gpu']].forEach(([i, k]) => $(i).addEventListener('input', e => { st[k] = Number(e.target.value); save(); render(); }));
   $('lvDef').addEventListener('change', e => { st.defend = e.target.checked; save(); render(); });
   $('lvClose').addEventListener('change', e => { st.close = Number(e.target.value); save(); render(); });
+  $('aClose').addEventListener('change', e => { st.aClose = Number(e.target.value); save(); render(); });
+  $('aOpt').addEventListener('change', e => { st.aOpt = e.target.checked; save(); render(); });
   render();
   if (window.matchMedia) { const mq = matchMedia('(prefers-color-scheme: dark)'); if (mq.addEventListener) mq.addEventListener('change', render); }
   new MutationObserver(render).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
