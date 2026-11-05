@@ -25,7 +25,7 @@ Use of the ₹5 cr angel money (spend model, VC money lands in March, December i
 
 > Thanks for making the time. Let me start with what I'm asking, then tell you why.
 >
-> I'm raising ₹5 crore from a small group of angels. We want it closed in December, just before we open the app to everyone in January. Most people write ₹10 to ₹50 lakh. It goes in as an iSAFE, which just means we don't argue about a valuation today. Your money turns into shares when our bigger round closes in the first quarter. Your price is capped at a ₹85 crore valuation, and if that bigger round comes in lower than we hope, you get 10% off it.
+> I'm raising ₹5 crore from a small group of angels. We want it closed in December, just before we open the app to everyone in January. Most people write ₹10 to ₹50 lakh. It goes in as an iSAFE, which just means we don't argue about a valuation today. Your money turns into shares when our bigger round closes in the first quarter. You get whichever price is lower for you: a ₹85 crore valuation, or 10% below what the institutions pay. If the institutions pay what we're aiming for, the ₹85 crore applies. The 10% is a floor, so if that round comes in weak, you still never convert at the full round price.
 >
 > How much of the company am I selling? None of mine. Every share is new. Across the whole ₹26 crore, angels and institutions together take about a fifth. Your ₹5 crore buys about 5%. The institutions' ₹21 crore buys about 16%. The three of us keep roughly 71%.
 >
@@ -62,6 +62,25 @@ Use of the ₹5 cr angel money (spend model, VC money lands in March, December i
 > And the returns. In the base case revenue is ₹1.9 crore in 2027 and ₹862 crore in 2031, at a 72% gross margin. Your ₹21 crore shrinks to about 10% after the Series A and B. At three times revenue that's roughly 12 times your money. If we only deliver half, and the market pays two times revenue, it's still about 4 times. I'd rather show you the version where we miss than only the one where we don't.
 >
 > What I'd like from you is a lead for roughly half the round. I can send the model and the data room tonight.
+
+## How the cap and the discount work together
+
+They do not stack. At the next round the angel converts at the lower of two prices, and only one applies.
+
+- **Cap price:** as if the company were worth ₹85 crore after the angels' money.
+- **Discount price:** 10% below what the institutions pay.
+
+The cap wins when the institutions price at about ₹95 crore before the money (₹116 crore after) or higher. Below that the discount wins. So the cap is the reward for an early yes, and the discount is a floor if the round comes in weak.
+
+| Institutions price at (after money / before money) | Which applies | Angel's ₹25 lakh is worth |
+|---|---|---|
+| ₹150 cr / ₹129 cr | Cap | ₹37.9 lakh (1.52x) |
+| ₹130 cr / ₹109 cr (our aim) | Cap | ₹32.1 lakh (1.28x) |
+| ₹116 cr / ₹95 cr | Cap, only just | ₹27.9 lakh (1.12x) |
+| ₹110 cr / ₹89 cr | Discount | ₹27.8 lakh (1.11x) |
+| ₹95 cr / ₹74 cr | Discount | ₹27.8 lakh (1.11x) |
+
+Worth is the paper value the day the iSAFE converts. Without the discount the last two rows would be 1.05x and 1.0x.
 
 ## How each reason for the valuation holds up
 
