@@ -25,7 +25,7 @@ Use of the ₹5 cr angel money (spend model, VC money lands in March, December i
 
 > Thanks for making the time. Let me start with what I'm asking, then tell you why.
 >
-> I'm raising ₹5 crore from a small group of angels. We want it closed in December, just before we open the app to everyone in January. Most people write ₹10 to ₹50 lakh. It goes in as an iSAFE, which just means we don't argue about a valuation today. Your money turns into shares when our bigger round closes in the first quarter. You get whichever price is lower for you: a ₹85 crore valuation, or 10% below what the institutions pay. If the institutions pay what we're aiming for, the ₹85 crore applies. The 10% is a floor, so if that round comes in weak, you still never convert at the full round price.
+> I'm raising ₹5 crore from a small group of angels. We want it closed in December, just before we open the app to everyone in January. Most people write ₹10 to ₹50 lakh. It goes in as an iSAFE with an ₹85 crore valuation cap and a 10% discount. In plain words, your money turns into shares when our bigger round closes in the first quarter, and you convert at whichever price is lower for you: an ₹85 crore valuation, or 10% below what the institutions pay. If the institutions pay what we're aiming for, the ₹85 crore applies. The 10% is the floor if that round comes in weak.
 >
 > How much of the company am I selling? None of mine. Every share is new. Across the whole ₹26 crore, angels and institutions together take about a fifth. Your ₹5 crore buys about 5%. The institutions' ₹21 crore buys about 16%. The three of us keep roughly 71%.
 >
@@ -44,6 +44,8 @@ Use of the ₹5 cr angel money (spend model, VC money lands in March, December i
 > We're raising ₹26 crore, about $2.7 million. ₹5 crore of that is angels, already in motion. The other ₹21 crore is what I'd like to talk to you about, and I'm looking for one lead who writes ₹10 crore or more.
 >
 > We're pricing the seed at about ₹130 crore after the money goes in. So ₹21 crore buys about 16%, and with the angels the whole seed is about 21%. It's all new shares. None of the founders are selling, and we keep about 71%. I'm comfortable in that range. I'd rather take a smaller cheque than a lower price.
+>
+> The angels' ₹5 crore comes in on an iSAFE with an ₹85 crore cap and a 10% discount. It converts inside your pre-money, so the ₹130 crore and the 16% already count them. Nothing sits on top of your price, and I'd want the term sheet to say so.
 >
 > The ₹26 crore gives us 17 months, to February 2028. About ₹9.4 crore goes on people, ₹9.1 crore on growth, ₹4.7 crore on our own model, and ₹2.9 crore on safety, compliance and drug data. By the Series A we're aiming for 7 lakh monthly users, 12,000 paying subscribers, care booked in the chat every week, and our tuned model beating the big frontier APIs on Indian tests.
 >
