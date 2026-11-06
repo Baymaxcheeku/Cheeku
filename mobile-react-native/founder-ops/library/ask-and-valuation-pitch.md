@@ -17,7 +17,7 @@ Today is 5 Nov 2026. Update anything that has moved before you walk in.
 | Runway | 17 months to Feb 2028 on the seed alone | |
 | Series A targets (Feb 2028) | 7 lakh monthly users, 12,000 paying subscribers, care booked in chat every week | |
 
-Use of the ₹26 cr (rounded): people ₹9.4 cr, growth ₹9.1 cr, own model ₹4.7 cr, safety, compliance and drug data ₹2.9 cr.
+Use of the ₹26 cr (rounded): people ₹9.4 cr, growth ₹9.0 cr, own model ₹4.7 cr, safety, compliance and drug data ₹2.9 cr.
 
 Use of the ₹5 cr angel money (spend model, VC money lands in March, December is an estimate): ₹3.5 cr spent from December to March and ₹1.5 cr kept as a cushion. Team ₹1.07 cr, getting the first users ₹1.4 cr, one-time set-up ₹61 lakh (licensed drug database ₹25 lakh, launch content ₹8 lakh, angel legal ₹6 lakh, security audit ₹6 lakh, regulatory opinion ₹5 lakh, DPDP ₹4 lakh, devices ₹4 lakh, company set-up ₹3 lakh), running costs about ₹45 lakh. About 1.3 lakh monthly users by March.
 
@@ -47,7 +47,7 @@ Use of the ₹5 cr angel money (spend model, VC money lands in March, December i
 >
 > The angels' ₹5 crore comes in on an iSAFE with an ₹85 crore cap and a 10% discount. It converts inside your pre-money, so the ₹130 crore and the 16% already count them. Nothing sits on top of your price, and I'd want the term sheet to say so.
 >
-> The ₹26 crore gives us 17 months, to February 2028. About ₹9.4 crore goes on people, ₹9.1 crore on growth, ₹4.7 crore on our own model, and ₹2.9 crore on safety, compliance and drug data. By the Series A we're aiming for 7 lakh monthly users, 12,000 paying subscribers, care booked in the chat every week, and our tuned model beating the big frontier APIs on Indian tests.
+> The ₹26 crore gives us 17 months, to February 2028. About ₹9.4 crore goes on people, ₹9 crore on growth, ₹4.7 crore on our own model, and ₹2.9 crore on safety, compliance and drug data. By the Series A we're aiming for 7 lakh monthly users, 12,000 paying subscribers, care booked in the chat every week, and our tuned model beating the big frontier APIs on Indian tests.
 >
 > I know ₹130 crore before launch needs defending, so here is how I think about it.
 >
