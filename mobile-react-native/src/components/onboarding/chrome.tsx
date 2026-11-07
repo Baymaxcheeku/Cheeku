@@ -50,7 +50,7 @@ export function OnboardingHeader({
    * came from keeps the control honest instead of surfacing an error.
    */
   function goBack() {
-    if (router.canGoBack()) router.back();
+    if (router.canGoBack()) router.back(); // eslint-disable-line no-restricted-properties -- no fallback without `back`
     else if (back) router.replace(back as never);
   }
 

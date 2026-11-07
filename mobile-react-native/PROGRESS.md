@@ -4043,3 +4043,18 @@ Reported on an iPhone: a flat purple shape sat on Cheeku's head on Home (the des
 **Fix.** Each stencil now sits directly above the eyelid it clips, and `tp` is gone: the classic matte form every renderer reads. A stencil is never drawn, so nothing else moves; rendered with lottie-web, the blink is now correct at frames 66 and 118. `scripts/recolor-mascot.mjs` does the same rewrite (`classicMattes`) so a re-export can't bring it back, and rerunning it reproduces the committed files byte for byte. `think`, `worried` and `joy` have no source copies, so they were fixed directly.
 
 **Not verified:** on the iPhone itself.
+
+## Back buttons: "GO_BACK was not handled by any navigator" · 2026-11-07
+
+Reported on an iPhone while moving around the app and going back: a red console error, "The action 'GO_BACK' was not handled by any navigator".
+
+**Why.** `router.back()` throws when the screen is the first entry in its stack. That is common here: sign-in and onboarding clear the stack (`startFresh`), a reminder or link can open a screen cold, and a `replace` swaps out whatever was behind. Eight back controls already checked `canGoBack()` first. Six did not:
+- the doctor's slot screen, both its back button and the "That doctor isn't available" link
+- an article's "That article isn't available" link
+- removing a policy on the insurance page
+- removing a family member
+- saving pregnancy dates
+
+**Fix.** One helper, `goBack(router, fallback)` in `src/lib/nav/go-back.ts`: back when there is something behind, otherwise straight to a sensible screen. The fallbacks are the doctor list, Home, Insurance, Family and the Health file. All 14 back controls now use it, the ones that were already safe included, so there is one way to do it. A lint rule (`no-restricted-properties` on `router.back` and `navigation.goBack`) fails the build on a bare call. The only exception is onboarding's back, which has no fallback on its first step and keeps its own check.
+
+**Not verified:** on the iPhone itself. Typecheck, lint (0 errors) and all 560 tests pass.

@@ -20,6 +20,7 @@ import { recordBooking, threadKey } from "@/lib/memory/store";
 import { useFamily } from "@/lib/profiles/family";
 import { brand, ink, lilac } from "@/theme/tokens";
 import { font } from "@/theme/type";
+import { goBack } from "@/lib/nav/go-back";
 
 /*
  * Book a doctor — pick a time.
@@ -57,7 +58,7 @@ export default function SlotScreen() {
     return (
       <View className="flex-1 items-center justify-center bg-canvas px-8">
         <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>That doctor isn&apos;t available</Text>
-        <Tap onPress={() => router.back()} className="mt-4">
+        <Tap onPress={() => goBack(router, "/book/doctors")} className="mt-4">
           <Text style={{ fontFamily: font.semibold, fontSize: 15, color: brand[600] }}>Go back</Text>
         </Tap>
       </View>
@@ -122,7 +123,7 @@ export default function SlotScreen() {
       <View className="overflow-hidden" style={{ borderBottomLeftRadius: 32, borderBottomRightRadius: 32 }}>
         <Gradient from={lilac.violet} to={lilac.mist} angle="vertical" glow="#ffffff" />
         <View className="flex-row items-center justify-between px-4" style={{ paddingTop: insets.top + 6 }}>
-          <GlassCircle label="Go back" onPress={() => router.back()}>
+          <GlassCircle label="Go back" onPress={() => goBack(router, "/book/doctors")}>
             <ChevronLeft size={21} color={ink[900]} />
           </GlassCircle>
           <Glass className="rounded-pill px-3 py-1.5">
