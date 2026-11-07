@@ -115,6 +115,7 @@ const BASE = {
   salaryGrowth: 0.10, loading: 0.20, hiringMult: 1,
   seatCost: 12000, seatShare: 0.6,
   llmSpend: [1.0, 2.0, 12, 10, 8],                 // ₹ cr a year, compute and data
+  llmStart: 6,                                     // month model work starts: six months after the seed closes (Nov 2026 founders' decision)
   pendantRnd: [0.5, 2.5, 4, 5, 4],                 // ₹ cr a year
   gaFixed: [8, 15, 30, 55, 80],                    // ₹ lakh a month: legal, audit, tools, insurance
   gaPct: 0.01,
@@ -303,7 +304,7 @@ function run(s) {
     }
     m.hcTotal = hcTotal; m.oPeople = people;
     m.oMkt = mktSpend;
-    m.oLlm = s.llmSpend[y] * CR / 12 * (0.4 + 0.6 * s.gpuMult) * (defending ? s.defendLlm : 1);
+    m.oLlm = t < s.llmStart ? 0 : s.llmSpend[y] * CR / 12 * (0.4 + 0.6 * s.gpuMult) * (defending ? s.defendLlm : 1);
     m.oPendant = s.pendantRnd[y] * CR / 12 * (defending ? s.defendPendant : 1);
     m.oOffice = seats * s.seatShare * s.seatCost * Math.pow(1.06, y);
     m.oGa = s.gaFixed[y] * LAKH + m.rev * s.gaPct;
