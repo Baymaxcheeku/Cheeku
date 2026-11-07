@@ -4059,4 +4059,4 @@ Reported on an iPhone while moving around the app and going back: a red console 
 
 **Not verified:** on the iPhone itself. Typecheck, lint (0 errors) and all 560 tests pass.
 
-**Follow-up, same day.** The owner still saw the warning. One gap was left: Expo Router queues navigation, so a second tap on back while the screen is still sliding out reads the old stack, passes `canGoBack()`, and sends a GO_BACK with nowhere to go. `goBack` now ignores a repeat within 600ms, the length of the slide. Three tests cover back, fallback and the double tap. Also checked that the owner's build is from this branch: `main` doesn't have any of this yet.
+**Follow-up, same day.** The owner still saw the warning. One gap was left: Expo Router queues navigation, so a second tap on back while the screen is still sliding out reads the old stack, passes `canGoBack()`, and sends a GO_BACK with nowhere to go. `goBack` now ignores a repeat within 600ms, the length of the slide. Three tests cover back, fallback and the double tap. Note that `main` doesn't have any of this yet, so a build from `main` still shows the warning.
