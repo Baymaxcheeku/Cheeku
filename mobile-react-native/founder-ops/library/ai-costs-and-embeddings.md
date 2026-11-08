@@ -50,19 +50,20 @@ chat default may lose pay-as-you-go.
 
 ## What it means for Cheeku's numbers and story
 
-1. **Chat is cheaper than the model assumes.** The engine uses ₹0.30 a chat
-   for the first six months on rented APIs (`cpcRented`) and ₹0.10 to ₹0.06
-   after (`cpcOwn`). Good small hosted models already cost ₹0.04 to ₹0.06.
-   The 2027 cost to serve is conservative, which is fine, but "own GPUs make
-   chat cheap" no longer stands on cost alone. Frame owning the model around
-   quality on Indian clinical evals, Indic voice, control, data staying in
-   India and licensing, and compare our ₹0.06 against frontier models
-   (₹0.85 to ₹0.90), not against the cheap tier.
-2. **Voice is the expensive part.** The engine uses ₹1.52 a voice minute in
-   2027 (`voiceCost`). At about ₹2 a turn and one to two turns a minute, real
-   cost is closer to ₹3 to ₹4 a minute, so 2 to 3 times the plan. Keep voice replies short,
-   run STT in translate-to-English mode, and keep heavy voice in paid tiers
-   or capped for free users.
+1. **Chat is cheaper than the model assumed.** The engine used ₹0.30 a chat for
+   the first six months and ₹0.10 to ₹0.06 after. Our answers carry about 4,260
+   tokens of family context (more than the 3,000 in Suraj's example), which
+   costs ₹0.05 to ₹0.08 on Haiku 5.5, GPT-OSS 120B or Sarvam 105B and about
+   ₹1.1 on Sonnet 5.5 or Gemini Pro. "Own GPUs make chat cheap" no longer
+   stands on cost alone: own the model for quality on Indian clinical evals,
+   Indic voice, control, data in India and licensing, and compare our ₹0.06
+   with frontier models (about 18× cheaper), not with the cheap tier.
+2. **Voice is the biggest serving cost.** A Sarvam voice turn is about ₹2 and
+   lasts roughly a minute (15 s spoken in, a ~500-character reply read out in
+   ~33 s), so about ₹2 a minute against ₹1.52 in the old engine, about 30%
+   higher. (An earlier draft of this note said ₹3 to ₹4 a minute; that
+   double-counted turns.) Keep replies short, run STT in translate-to-English
+   mode, and keep heavy voice in paid tiers or capped for free users.
 3. **OCR is a real per-user cost** (₹0.20 to ₹1 a page) with no separate line
    in the engine. A family uploading ten pages a month costs ₹2 to ₹5. Gemini
    Flash pricing doubles on 1 Jan 2027, right at launch.
@@ -77,3 +78,26 @@ chat default may lose pay-as-you-go.
 6. **Model choice is an eval question.** Price does not separate the cheap
    chat models, so run `evals/run.py` on Sarvam 105B, GPT-OSS 120B and Haiku
    5.5 before the Groq Llama models lose public pricing.
+
+## Applied to the model and decks (8 Nov 2026)
+
+Engine (`vision-board/engine.js`): `cpcRented` 0.07, `cpcOwn` [0.07, 0.07,
+0.065, 0.06, 0.06]; `voiceCost` [2.0, 1.32, 0.79, 0.59, 0.46] (same 77% fall
+as before, from the measured start); new `ocrPages` [0.5, 0.5, 0.6, 0.6, 0.6]
+per active user a month and `ocrCost` [0.9, 0.7, 0.5, 0.4, 0.3] ₹ a page, in
+cost of revenue as `cOcr`.
+
+Base case after the change: revenue unchanged (₹862 cr in 2031, ₹1,103 cr exit
+run rate); gross margin 2031 70% (was 72%); EBITDA 2031 ₹301 cr (was ₹317 cr);
+EBITDA positive still May 2030; lowest cash ₹11.3 cr, Jan 2028; cash Dec 2031
+₹398 cr (was ₹419 cr); serving a paying user ₹8.5 a month, a free user ₹6.5.
+Bear now dips to −₹17 cr (was −₹7 cr). These also include the founders'
+November decision that model spend starts six months after the seed
+(`llmStart` 6), which the decks had not yet picked up.
+
+Updated: the financial model page, the seed spend model, the vision board, the
+seed deck (how it works, moat, why now, business model) and the DD deck
+(summary, why now, how it works, our own model, moat, unit economics, costs,
+cost to serve, P&L, cash, scenarios, stress test, risks, ask). The text
+exports `library/seed-deck-v2.md` and `library/dd-deck-v2.md` are older
+snapshots and were not regenerated.

@@ -61,7 +61,7 @@ Use of the ₹5 cr angel money (spend model, VC money lands in March, December i
 >
 > Five, the next step is easy to see. If we hit those numbers, our model puts the Series A at about ₹250 crore before the money. That's nearly twice where you'd come in.
 >
-> And the returns. In the base case revenue is ₹1.9 crore in 2027 and ₹862 crore in 2031, at a 72% gross margin. Your ₹21 crore shrinks to about 10% after the Series A and B. At three times revenue that's roughly 12 times your money. If we only deliver half, and the market pays two times revenue, it's still about 4 times. I'd rather show you the version where we miss than only the one where we don't.
+> And the returns. In the base case revenue is ₹1.9 crore in 2027 and ₹862 crore in 2031, at a 70% gross margin. Your ₹21 crore shrinks to about 10% after the Series A and B. At three times revenue that's roughly 12 times your money. If we only deliver half, and the market pays two times revenue, it's still about 4 times. I'd rather show you the version where we miss than only the one where we don't.
 >
 > What I'd like from you is a lead for roughly half the round. I can send the model and the data room tonight.
 

@@ -67,7 +67,7 @@ For AI-first funds, deep tech partners and founders who think in models and eval
 
 **Elevator pitch:** Cheeku is building India's longitudinal health memory and the health model that reasons over it. Every report, prescription and reading in a family becomes coded, dated values per person, and each answer carries about 4,260 tokens of that history. Clinician-signed rules decide, a safety router catches red flags before any model runs, and the model only explains. We go from fine-tuned frontier models today to an adapted open model in 2028 and our own 15 to 22B India health model in 2029, each step shipping only if it wins 70% of a 5,000-case India eval set in five languages.
 
-**Traction angle:** a working V1 with a fine-tuned model and safety router, built with ₹0. Cost per answer falls from ₹0.30 to ₹0.06 on our own model, a quarter of frontier API cost.
+**Traction angle:** a working V1 with a fine-tuned model and safety router, built with ₹0. An answer costs about ₹0.07 on small hosted models today and ₹0.06 on our own model, against about ₹1.1 on frontier models.
 
 **Team angle:** Suraj built clinical-grade AI on real blood samples at SigTuple. Athar trained computer vision at Meta scale. That pairing is rare in Indian consumer health.
 

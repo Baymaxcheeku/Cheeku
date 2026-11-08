@@ -130,7 +130,7 @@ The form only has one founder block (the CEO), so the whole team has to come thr
 >
 > **On top:** an insurer risk layer worth about $115M a year at 1% share of health insurance, and model licensing to hospitals.
 >
-> **Our plan:** 20M average users in 2031 at $4.90 = $99M (₹862 crore) revenue, 72% gross margin, EBITDA positive from May 2030.
+> **Our plan:** 20M average users in 2031 at $4.90 = $99M (₹862 crore) revenue, 70% gross margin, EBITDA positive from May 2030.
 
 ## Pear, logistics and the founder video
 

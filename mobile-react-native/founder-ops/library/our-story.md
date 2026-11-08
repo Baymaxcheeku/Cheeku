@@ -7,7 +7,7 @@ Snapshot of the founders' summary agreed in chat, 30 Oct 2026. Numbers come from
 ## What we build: three layers, one loop
 1. **Longitudinal family health memory.** Every report, prescription, reading and chat becomes coded, dated values per family member, each fact tied to its source. Trends, medicines, open loops and a timeline per person; the family can correct any fact. About 4,260 tokens of family history go into every answer.
 2. **Clinical reasoning, safe by design.** Clinician-signed rules decide ranges, risk, urgency and 10 prescription checks against published standards. A safety router catches red flags before any model runs. Four urgency tiers; "go now" bypasses the model. The model never states a number it did not get from memory, and never diagnoses or prescribes.
-3. **CHEEKU-H, India's own health model.** Today: fine-tuned frontier models behind the router. Mid-2027: a tuned open model on our own GPUs. Jan 2028: an adapted open-weight model becomes default only if it wins 70% of a 5,000-case India eval set in 5 languages. 2029: our own 15 to 22B hybrid. Trained on consented family records, doctor-reviewed answers, Indian lab formats and brands, Indic voice and ABDM records. Cost per answer ₹0.30 to ₹0.06.
+3. **CHEEKU-H, India's own health model.** Today: fine-tuned frontier models behind the router. Mid-2027: a tuned open model on our own GPUs. Jan 2028: an adapted open-weight model becomes default only if it wins 70% of a 5,000-case India eval set in 5 languages. 2029: our own 15 to 22B hybrid. Trained on consented family records, doctor-reviewed answers, Indian lab formats and brands, Indic voice and ABDM records. Cost per answer about ₹0.07 on small hosted models today, ₹0.06 on our own model.
 
 **The loop:** daily nudges, weekly review, quarterly retest; care booked in chat across 12,000+ pincodes; every answer and booking writes back to memory.
 
@@ -17,7 +17,7 @@ Snapshot of the founders' summary agreed in chat, 30 Oct 2026. Numbers come from
 
 **Compute plan:** ₹33 cr compute and data over 5 years; 250k H100-hours, about ₹2.3 cr a run at IndiaAI subsidised rates; train from scratch only when it beats the adapted model.
 
-**Plan (base case):** ₹862 cr revenue in 2031 from about 2 crore average users at ₹429 a year; 72% gross margin; EBITDA positive from May 2030; 74% organic by 2031.
+**Plan (base case):** ₹862 cr revenue in 2031 from about 2 crore average users at ₹429 a year; 70% gross margin; EBITDA positive from May 2030; 74% organic by 2031.
 
 **Why now:** the longevity gap (life expectancy 70.8, healthy 60.3; 10.1 cr diabetic, 13.6 cr prediabetic, 31.5 cr hypertensive; 60+ population to 34.7 cr by 2050); data rails (79.7 cr ABHA IDs, DPDP Rules 2025); the AI moment (23 cr people a week ask ChatGPT health questions; Ant Group's AQ at national scale in China); the cost curve (IndiaAI H100s about ₹92 an hour, chats under 20 paise); the care gap (2-minute consults, 39.4% out of pocket).
 
