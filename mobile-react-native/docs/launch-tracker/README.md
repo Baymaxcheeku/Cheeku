@@ -8,7 +8,7 @@ It reads its tasks from the artifact's database, not from this folder. `tracker.
 When a change in this repo completes, starts or blocks a task below, update it in the tracker in the same session:
 
 1. `ArtifactData` `get` on collection `tasks`, doc id from the table below, to read its `version`.
-2. `ArtifactData` `update` with `if_version`: `{ status: "done" | "doing" | "blocked" | "todo", updatedAt, completedAt }` (completedAt only for done).
+2. `ArtifactData` `update` with `if_version`: `{ status: "done" | "doing" | "blocked" | "dependencies" | "future" | "v2" | "todo", updatedAt, completedAt }` (completedAt only for done). `dependencies` is waiting on another task or partner and still counts as launch work. `future` (Future scope) and `v2` park a task: it stays on the board and is left out of the readiness numbers.
 3. Add one `log` document: `{ at, taskId, title, from, to, by: "claude", note }`, where note names the commit.
 4. New work the audit missed: `set` a new `tasks` document with the same fields (owner `athar`, `archit` or `suraj`; optional `with`, a list of the others who work on it).
 5. When a feature ships or changes state, keep **What's built** current: `set` or `update` its document in the `features` collection. The fields are `{ id, group, title, what, state, where, shipped, owner, next, order }`.

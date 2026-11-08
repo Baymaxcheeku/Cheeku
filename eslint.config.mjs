@@ -89,6 +89,20 @@ const eslintConfig = [
     },
   },
   {
+    // A bare `router.back()` throws "GO_BACK was not handled by any navigator"
+    // when the screen is first in its stack (cold launch, a link, after
+    // startFresh or a replace). Seen on an iPhone, 2026-11-07. Use goBack()
+    // from mobile-react-native/src/lib/nav/go-back.ts, which falls back.
+    files: ["mobile-react-native/app/**/*.{ts,tsx}", "mobile-react-native/src/**/*.{ts,tsx}"],
+    rules: {
+      "no-restricted-properties": [
+        "error",
+        { object: "router", property: "back", message: "Use goBack(router, fallback) from @/lib/nav/go-back. A bare back() crashes when nothing is behind this screen." },
+        { object: "navigation", property: "goBack", message: "Use goBack(router, fallback) from @/lib/nav/go-back." },
+      ],
+    },
+  },
+  {
     // NativeWind's native runtime turns a Pressable `style` callback into `{}`
     // (it copies the style with a spread), so on a phone those rows lost every
     // layout rule while the web build looked fine (iPhone, 2026-11-01). The

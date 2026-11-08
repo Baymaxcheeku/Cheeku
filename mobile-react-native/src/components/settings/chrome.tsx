@@ -10,6 +10,7 @@ import { Backdrop } from "@/components/ui/screen";
 import { brand, ink } from "@/theme/tokens";
 import { font } from "@/theme/type";
 import { brandify } from "@/components/ui/brand";
+import { goBack } from "@/lib/nav/go-back";
 
 /**
  * The shared frame for every settings sub-screen.
@@ -51,7 +52,7 @@ export function SettingsScreen({
     <View className="flex-1 bg-canvas">
       <Backdrop height={380} />
       <View className="flex-row items-center px-4 pb-1" style={{ paddingTop: insets.top + 6 }}>
-        <GlassCircle label="Go back" onPress={() => (router.canGoBack() ? router.back() : router.replace("/settings"))}>
+        <GlassCircle label="Go back" onPress={() => goBack(router, "/settings")}>
           <ChevronLeft size={21} color={ink[900]} />
         </GlassCircle>
       </View>

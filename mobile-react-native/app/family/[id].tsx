@@ -40,6 +40,7 @@ import { Brand } from "@/components/ui/brand";
 import { Tap } from "@/components/ui/tap";
 import { DetailSkeleton, ScreenSkeleton } from "@/components/ui/skeleton";
 import { startFresh } from "@/lib/nav/start-fresh";
+import { goBack } from "@/lib/nav/go-back";
 
 /*
  * One family member: switch to them, change their face or details, or remove
@@ -316,7 +317,7 @@ export default function Member() {
     }
     setConfirm(false);
     refreshRoster(qc);
-    router.back();
+    goBack(router, "/family");
   }
 
   async function fileReports() {

@@ -18,6 +18,7 @@ import { brand, ink, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
 import { Tap } from "@/components/ui/tap";
 import { DetailSkeleton, ScreenSkeleton } from "@/components/ui/skeleton";
+import { goBack } from "@/lib/nav/go-back";
 
 /*
  * THE READER.
@@ -94,7 +95,7 @@ export default function ArticleReader() {
         <Text style={{ fontFamily: font.regular, fontSize: 15, lineHeight: 21, color: ink[500], textAlign: "center" }}>
           That article isn&apos;t available. It may have been unpublished while it is updated.
         </Text>
-        <Tap onPress={() => router.back()} style={{ marginTop: 18 }} hitSlop={8}>
+        <Tap onPress={() => goBack(router, "/home")} style={{ marginTop: 18 }} hitSlop={8}>
           <Text style={{ fontFamily: font.semibold, fontSize: 15, color: brand[600] }}>Go back</Text>
         </Tap>
       </View>
@@ -204,7 +205,7 @@ export default function ArticleReader() {
       {/* The bar: back, progress, save, share. Over the masthead, glass. */}
       <View pointerEvents="box-none" style={{ position: "absolute", top: 0, left: 0, right: 0, paddingTop: insets.top + 6, paddingBottom: 6, backgroundColor: scrolled ? surface.canvas : "transparent", borderBottomWidth: scrolled ? 1 : 0, borderBottomColor: surface.line }}>
         <View pointerEvents="box-none" style={{ flexDirection: "row", alignItems: "center", gap: 10, paddingHorizontal: 16 }}>
-          <GlassCircle label="Go back" onPress={() => (router.canGoBack() ? router.back() : router.replace("/home"))}>
+          <GlassCircle label="Go back" onPress={() => goBack(router, "/home")}>
             <ChevronLeft size={21} color={ink[900]} />
           </GlassCircle>
           <View style={{ flex: 1 }} />
