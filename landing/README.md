@@ -1,9 +1,8 @@
 # Landing page
 
-The public site for Cheeku AI while we are in stealth. One page, three
-readers: families (early access), employers and insurers (pilots), and
-investors (the deck). It is a separate project from the app and shares
-nothing with it.
+The public site for Cheeku while we are in stealth. One page, one reader: an
+Indian family. Its only job is to get them onto the waitlist. It is a separate
+project from the app and shares no code with it.
 
 ## Run it
 
@@ -14,58 +13,91 @@ npm run dev        # http://localhost:3100
 npm run build      # static files in out/, ready for any host
 ```
 
-Stack: Next.js (static export), Tailwind v4, Motion for animation, Lenis for
-smooth scroll, lottie-web for the mascot. No server code.
+Stack: Next.js (static export), Tailwind v4, Motion for the few animations,
+Geist for type. No server code.
 
 ## Rules
 
 - Everything for the site lives in this folder. Nothing here imports from
   `mobile-react-native/` or the root `src/`, and nothing there imports from
-  here. The mascot files and fonts in `public/` are copies.
+  here.
 - The root ESLint and TypeScript configs skip this folder.
 - It deploys on its own. An app release never waits on the site.
+
+## Direction
+
+Written before the page was built, and every section follows it (the top of
+`src/app/globals.css` has the same five lines).
+
+- Product: Cheeku keeps a family's reports, medicines and doctor visits in one
+  app, explains them in simple words and books the next step.
+- Character: calm, plain-spoken, protective.
+- World: the health drawer of an Indian home. The report file, the medicine
+  strips, the family WhatsApp group.
+- Moments: the product film in the hero, and real app screens in true iPhone
+  frames.
+- Signature: the person tag ("Papa", "Ma", "Baby"). Everything is about
+  someone in particular.
 
 ## What is on the page
 
 | Section | File | Job |
 |---|---|---|
-| Top strip, nav | `src/components/chrome.tsx` | a16z "State of Longevity" link; scroll progress; menu |
-| Hero | `hero.tsx` | The 71 vs 60 line, the signup form, cards that follow the pointer |
-| Proof strip, the 90 days, the lost decade | `problem.tsx` | What is built; the scroll-driven Day 0 to Day 90 story; the numbers |
-| For families | `families.tsx` | Four pains, each as "today" against "with Cheeku" |
-| How it works, daily jobs, safety | `product.tsx` | Remembers, decides, books; five jobs; rules decide |
-| Employers and insurers | `business.tsx` | The buyer's view, pilot signup |
-| Investors | `investors.tsx` | Why now, the loop, deck request |
-| Final call, footer | `closing.tsx` | Signup again, disclaimer, sources |
+| Top line, nav, hero | `src/components/top.tsx` | "Stop googling your family's health", the signup form, the product film |
+| The questions | `worries.tsx` | Six worries in the reader's own words |
+| Who it's for | `journeys.tsx` | The six families from the app's onboarding, each with a real screen. The fertility tab carries its own film |
+| How it works | `how.tsx` | Send it, understand it, get it done |
+| Medicine check | `how.tsx` | All of a person's medicines checked together, and cheaper options with the same salt |
+| Is it safe | `trust.tsx` | Not a doctor, danger means go now, nothing made up, your data |
+| Questions | `trust.tsx` | Six short answers |
+| Final call, footer | `closing.tsx` | Signup again, the disclaimer |
 
-Shared motion pieces (reveal, word-by-word headline, magnetic button, tilt
-card, count-up) are in `src/components/ui.tsx`.
+The six families are the same six the app asks about on the way in
+(`mobile-react-native/src/lib/onboarding/journeys.ts`): trying for a baby,
+expecting, new parent, caring for parents, getting healthier, just keeping
+track.
+
+## The app screens
+
+`public/screens/*.webp` are the real app, taken from the product demo
+recordings (393 points wide, sample data). `src/components/phone.tsx` draws
+the frame: it adds the status bar back so the screen is 393 by 852, an iPhone
+15's proportions, and nothing is stretched. To replace a screen, export a
+393 by 778 point capture at 2x and keep the file name.
+
+## The films
+
+Both are YouTube videos, loaded only when played (`src/components/video.tsx`):
+the product film in the hero (`mI4FmQt_8Qk`) and the fertility film
+(`YHAdRiJ32Fo`). The poster is YouTube's own thumbnail.
 
 ## Colour
 
-Light theme, in three weights. All tokens are in `src/app/globals.css`.
+All tokens are in `src/app/globals.css`.
 
-- 60%: lilac and near-white surfaces (the app's own lilac values).
-- 30%: indigo ink and brand violet: type, icons, the dark investor block.
-- 10%: marigold (`--color-loud`, `#ff6a2b`): calls to action and "live"
-  moments only. To try another loud colour, change that one token and its
-  two neighbours (`loud-deep`, `loud-wash`).
+- 60% white: the page, cards and most sections.
+- 30% brand purple (the app's own): the three "stage" panels, tabs, ticks and
+  headline accents. One hue, lit from the top left. No second colour in it.
+- 10% marigold (`--color-loud`): the signup button and nothing else.
+
+Glass is used where there is purple behind it to blur: the film's frame and
+the medicine check points.
 
 ## Copy rules
 
-- No em dashes. Never say AI-powered, platform, disrupting, ecosystem or
-  revolutionise.
-- Every number has a source in the footer. Product visuals are illustrations
-  with sample data, and the business dashboard is labelled "Illustrative".
-- Not on this page, on purpose: the raise amount, valuation, equity, revenue
-  projections, partner names and founder names.
-- a16z is quoted from its public report with a note that it is not an
-  investor or affiliate.
+- Written for a patient, not a doctor: sugar, BP, tablets, tests. No lab names
+  or drug names in the copy (the app screens show them, because that is the
+  product).
+- Short. Headlines end without a full stop. No em dashes. Never AI-powered,
+  platform, ecosystem or revolutionise.
+- Nothing invented: every feature named is in the app, and every number
+  (12,000+ pincodes, 300+ cities, 5,000+ doctors and specialists) is from the
+  seed deck.
+- Not on this page: investors, employers, pricing, partner names.
 
 ## Signups
 
-The three forms (family, company, investor) write one row each to a Supabase
-table. Until the two variables in `.env.example` are set, the form finishes
+The forms write one row each to a Supabase table. Until the two variables in `.env.example` are set, the form finishes
 but saves nothing and labels the confirmation "Preview, not saved".
 
 To switch it on, run this once in the Supabase SQL editor (a separate project
@@ -94,8 +126,9 @@ conflict, which the form treats as success.
 
 ## Before it goes public
 
-- Check the "23 crore people a week ask ChatGPT a health question" figure
-  against its original source and fix the footer credit.
+- Decide whether the a16z line at the very top stays. It is one component
+  (`TopLine` in `top.tsx`); the page reads fine without it.
+- Confirm "early 2027" and "small batches" are what we want to promise.
+- The form takes an email. A phone number may suit Indian families better.
 - Add a privacy note beside the form once the policy page exists.
-- Add a share image (`opengraph-image`) and the real domain in metadata.
-- A short launch film (Remotion) for the hero is planned, not built.
+- Add a share image and the real domain in metadata.
