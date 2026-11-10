@@ -1,0 +1,150 @@
+@import "tailwindcss";
+
+/*
+ * Colour, by weight:
+ *   60%  lilac and near-white surfaces (canvas, mist, lilac, violet)
+ *   30%  indigo ink and brand violet (type, the dark investor block, icons)
+ *   10%  marigold, the one loud colour: calls to action and live moments only
+ * The lilac and violet values are the app's own (mobile-react-native theme).
+ */
+@theme {
+  --color-canvas: #fafafe;
+  --color-mist: #f6f3ff;
+  --color-lilac: #ece8ff;
+  --color-violet: #e3dcff;
+  --color-violet-deep: #d8cffd;
+  --color-line: #e4e1f5;
+
+  --color-brand-300: #aeaeea;
+  --color-brand-400: #8a82f5;
+  --color-brand-500: #5b4ef0;
+  --color-brand-600: #4a2ade;
+  --color-brand-700: #3b2bc9;
+  --color-brand-900: #14136b;
+  --color-brand-950: #0a0a3c;
+
+  --color-ink: #0f1030;
+  --color-ink-700: #3a3b57;
+  --color-ink-500: #5f6082;
+  --color-ink-300: #9696ae;
+
+  --color-loud: #ff6a2b;
+  --color-loud-deep: #f04a12;
+  --color-loud-wash: #fff0e6;
+
+  --color-safe: #0f7538;
+  --color-safe-bg: #e7f7ee;
+  --color-caution: #8f5400;
+  --color-caution-bg: #fff4e0;
+  --color-danger: #c00a1c;
+  --color-danger-bg: #fef1f3;
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-serif-display), ui-serif, Georgia, serif;
+
+  --ease-out-strong: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out-strong: cubic-bezier(0.77, 0, 0.175, 1);
+
+  --shadow-card: 0 1px 0 rgba(255, 255, 255, 0.8) inset, 0 8px 28px -10px rgba(42, 31, 107, 0.18);
+  --shadow-float: 0 1px 0 rgba(255, 255, 255, 0.9) inset, 0 24px 60px -24px rgba(42, 31, 107, 0.35);
+  --shadow-loud: 0 10px 30px -10px rgba(240, 74, 18, 0.55);
+
+  --animate-marquee: marquee 38s linear infinite;
+  --animate-float: float 7s ease-in-out infinite;
+  --animate-pulse-ring: pulse-ring 2.4s var(--ease-out-strong) infinite;
+  --animate-spin-slow: spin 40s linear infinite;
+
+  @keyframes marquee {
+    to { transform: translateX(-50%); }
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  @keyframes pulse-ring {
+    0% { transform: scale(0.9); opacity: 0.7; }
+    100% { transform: scale(1.9); opacity: 0; }
+  }
+}
+
+html {
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  scroll-padding-top: 96px;
+}
+
+body {
+  font-family: var(--font-sans);
+  overflow-x: clip;
+}
+
+::selection {
+  background: var(--color-brand-600);
+  color: white;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-brand-600);
+  outline-offset: 3px;
+  border-radius: 8px;
+}
+
+/* Lenis */
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+.lenis.lenis-stopped { overflow: hidden; }
+
+@utility display {
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  line-height: 1.02;
+  text-wrap: balance;
+}
+
+@utility serif-accent {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+}
+
+@utility glass {
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow: var(--shadow-card);
+}
+
+@utility grid-fade {
+  background-image:
+    linear-gradient(to right, rgba(74, 42, 222, 0.06) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(74, 42, 222, 0.06) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, black 30%, transparent 100%);
+}
+
+@utility hatch {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    rgba(255, 255, 255, 0.35) 0 6px,
+    transparent 6px 12px
+  );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .glass {
+    background: white;
+    backdrop-filter: none;
+  }
+}
