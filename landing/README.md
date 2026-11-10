@@ -148,3 +148,20 @@ our content" when you invoke it.
 
 Only the skill was copied. The repo's Next.js starter app was left out, since
 this folder already is one.
+
+`.claude/skills/impeccable/` and `.claude/agents/impeccable-*.md` are
+Impeccable 4.8.2 (Paul Bakaus, Apache 2.0, copied 10 Nov 2026): design
+commands such as critique, audit, polish, typeset and layout, plus a detector
+for common AI-looking patterns. Notes:
+
+- It runs a compiled engine (0.1.22). The engine is not in this repo. On first
+  use the launcher downloads it from the project's GitHub releases into
+  `~/.impeccable/bin/` and refuses it unless the SHA-256 matches
+  `scripts/engine-checksums.txt`.
+- Its automatic hooks (a check after every file edit and at the end of every
+  turn) are not switched on. Run the detector by hand:
+  `.claude/skills/impeccable/scripts/impeccable detect src/`, or against the
+  running site for the full rule set.
+- Do not use its `live` mode without reading the README section on it first:
+  its Apply step can start a second agent with permission checks turned off.
+- `/impeccable init` writes a `PRODUCT.md` here. It has not been run yet.
