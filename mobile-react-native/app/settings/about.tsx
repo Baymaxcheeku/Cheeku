@@ -36,6 +36,7 @@ import { APP_VERSION } from "@/lib/app-meta";
 import { castFaces } from "@/lib/profiles/avatar";
 import { brand, ink, lilac, semantic, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
+import { goBack } from "@/lib/nav/go-back";
 
 /*
  * ABOUT CHEEKU. The product's case for itself, told as a short story:
@@ -72,7 +73,7 @@ export default function About() {
         <View style={{ overflow: "hidden", paddingTop: insets.top + 8, paddingBottom: 30 }}>
           <Gradient from={lilac.violet} to={surface.canvas} angle="vertical" glow="#ffffff" />
           <View style={{ paddingHorizontal: 16 }}>
-            <GlassCircle label="Go back" onPress={() => (router.canGoBack() ? router.back() : router.replace("/settings"))}>
+            <GlassCircle label="Go back" onPress={() => goBack(router, "/settings")}>
               <ChevronLeft size={21} color={ink[900]} />
             </GlassCircle>
           </View>

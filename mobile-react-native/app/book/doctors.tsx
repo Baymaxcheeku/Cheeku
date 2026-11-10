@@ -15,6 +15,7 @@ import { RatingLine } from "@/components/labs/parts";
 import { useRatings, type Rating } from "@/lib/labs/queries";
 import { brand, ink, lilac, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
+import { goBack } from "@/lib/nav/go-back";
 
 /*
  * Book a doctor — the list.
@@ -47,7 +48,7 @@ export default function Doctors() {
       </View>
 
       <View className="flex-row items-center gap-3 px-4 pb-2" style={{ paddingTop: insets.top + 6 }}>
-        <GlassCircle label="Go back" onPress={() => (router.canGoBack() ? router.back() : router.replace("/book/consult"))}>
+        <GlassCircle label="Go back" onPress={() => goBack(router, "/book/consult")}>
           <ChevronLeft size={21} color={ink[900]} />
         </GlassCircle>
         <Text numberOfLines={1} style={{ flex: 1, textAlign: "center", fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>

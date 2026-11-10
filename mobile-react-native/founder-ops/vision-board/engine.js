@@ -103,8 +103,17 @@ const BASE = {
   // Pendant
   pendantUnits: [0, 0, 1000, 2500, 6000], pendantStart: 33, pendantPrice: 4999, pendantCogs: 0.8,
   // Serving
-  cpcRented: 0.30, cpcOwn: [0.10, 0.10, 0.085, 0.07, 0.06], ownGpuMonth: 6,
-  voiceStart: 8, voiceMin: [3, 3, 3.5, 4, 4.5], voiceCost: [1.52, 1.0, 0.6, 0.45, 0.35],
+  // Unit costs from Suraj's price check, 7 Nov 2026 (library/ai-costs-and-embeddings.md).
+  // Our answers carry ~4,260 tokens of family context plus ~300 out: ₹0.05 to ₹0.08 a chat on
+  // Claude Haiku 5.5, GPT-OSS 120B or Sarvam 105B (about ₹1.1 on Sonnet 5.5 or Gemini Pro). Our own
+  // model takes traffic only when it wins our India evals at no higher cost, easing to ₹0.06.
+  cpcRented: 0.07, cpcOwn: [0.07, 0.07, 0.065, 0.06, 0.06], ownGpuMonth: 6,
+  // A Sarvam voice turn (15 s in, ~500-character reply translated and spoken) is about ₹2, roughly
+  // one turn a minute. Falls as Indic voice moves to our own model from 2028.
+  voiceStart: 8, voiceMin: [3, 3, 3.5, 4, 4.5], voiceCost: [2.0, 1.32, 0.79, 0.59, 0.46],
+  // Report reading: Parse and Extraction are two OCR calls a page. Gemini Flash-Lite plus Flash is
+  // ~₹0.80 a page after 1 Jan 2027; Sarvam for Indian-script reports ~₹1.50. Falls as our model reads reports.
+  ocrPages: [0.5, 0.5, 0.6, 0.6, 0.6], ocrCost: [0.9, 0.7, 0.5, 0.4, 0.3],   // pages per active user a month, ₹ a page
   cloud: [1.2, 1.0, 0.8, 0.7, 0.6], cloudFixed: 1.5 * LAKH,
   gpuMult: 1,
   headcount: {   // year-end plan; corp is by corporate year and starts at zero
@@ -115,6 +124,7 @@ const BASE = {
   salaryGrowth: 0.10, loading: 0.20, hiringMult: 1,
   seatCost: 12000, seatShare: 0.6,
   llmSpend: [1.0, 2.0, 12, 10, 8],                 // ₹ cr a year, compute and data
+  llmStart: 6,                                     // month model work starts: six months after the seed closes (Nov 2026 founders' decision)
   pendantRnd: [0.5, 2.5, 4, 5, 4],                 // ₹ cr a year
   gaFixed: [8, 15, 30, 55, 80],                    // ₹ lakh a month: legal, audit, tools, insurance
   gaPct: 0.01,
@@ -288,8 +298,9 @@ function run(s) {
     m.chats = m.chatsFree + m.chatsCap + m.chatsPaid;
     m.cChat = m.chats * cpc * s.gpuMult;
     m.cVoice = t >= s.voiceStart ? all * s.voiceMin[y] * s.voiceCost[y] * (1 + (s.gpuMult - 1) * 0.5) : 0;
+    m.cOcr = all * s.ocrPages[y] * s.ocrCost[y] * (1 + (s.gpuMult - 1) * 0.5);
     m.cCloud = all * s.cloud[y] + s.cloudFixed;
-    m.cogs = m.cChat + m.cVoice + m.cCloud + m.cStore + m.cMkt + m.cFit + m.cAds + m.cIns + m.cCorp + m.cB2b + m.cHw;
+    m.cogs = m.cChat + m.cVoice + m.cOcr + m.cCloud + m.cStore + m.cMkt + m.cFit + m.cAds + m.cIns + m.cCorp + m.cB2b + m.cHw;
     m.gp = m.rev - m.cogs;
     // People. The corporate team is hired by corporate year, from the month the vertical goes live.
     let hcTotal = 0, people = 0, seats = 0;
@@ -303,7 +314,7 @@ function run(s) {
     }
     m.hcTotal = hcTotal; m.oPeople = people;
     m.oMkt = mktSpend;
-    m.oLlm = s.llmSpend[y] * CR / 12 * (0.4 + 0.6 * s.gpuMult) * (defending ? s.defendLlm : 1);
+    m.oLlm = t < s.llmStart ? 0 : s.llmSpend[y] * CR / 12 * (0.4 + 0.6 * s.gpuMult) * (defending ? s.defendLlm : 1);
     m.oPendant = s.pendantRnd[y] * CR / 12 * (defending ? s.defendPendant : 1);
     m.oOffice = seats * s.seatShare * s.seatCost * Math.pow(1.06, y);
     m.oGa = s.gaFixed[y] * LAKH + m.rev * s.gaPct;
@@ -330,7 +341,7 @@ function run(s) {
 }
 
 const SUMKEYS = ['rSub', 'rMkt', 'rFit', 'rAds', 'rIns', 'rCorp', 'rCorpDirect', 'rCorpHr', 'rCorpGift', 'rInsurer', 'rState', 'rLlm', 'rHw', 'rev', 'gmv', 'gmvFit',
-  'cChat', 'cVoice', 'cCloud', 'cStore', 'cMkt', 'cFit', 'cAds', 'cIns', 'cCorp', 'cB2b', 'cHw', 'cogs', 'gp',
+  'cChat', 'cVoice', 'cOcr', 'cCloud', 'cStore', 'cMkt', 'cFit', 'cAds', 'cIns', 'cCorp', 'cB2b', 'cHw', 'cogs', 'gp',
   'oPeople', 'oMkt', 'oCorpSales', 'oLlm', 'oPendant', 'oOffice', 'oGa', 'opex', 'ebitda', 'interest', 'tax', 'net', 'cfo', 'funding',
   'chats', 'chatsFree', 'chatsCap', 'chatsPaid', 'passes', 'newPaid', 'newOrganic', 'corpNewClients', 'giftBilled', 'fitSessions'];
 
@@ -362,8 +373,8 @@ function metrics(s, rows) {
   const r = rows[23], y = 1;
   const arppu = r.subs > 0 ? (r.rSub - r.cStore) / r.subs : 0;
   const cpc = r.cChat / Math.max(1, r.chats);
-  const servePaid = s.paidChats[y] * cpc + (r.cVoice + r.cCloud) / r.mau;
-  const serveFree = (r.chatsFree + r.chatsCap) / Math.max(1, r.free) * cpc + (r.cVoice + r.cCloud) / r.mau;
+  const servePaid = s.paidChats[y] * cpc + (r.cVoice + r.cOcr + r.cCloud) / r.mau;
+  const serveFree = (r.chatsFree + r.chatsCap) / Math.max(1, r.free) * cpc + (r.cVoice + r.cOcr + r.cCloud) / r.mau;
   const ltv = (arppu - servePaid) / s.subChurn;
   const blendedCac = (s.cac[y] * s.cacMult) * (r.mauConsumer / Math.max(1, r.subs)) * (r.newPaid / Math.max(1, r.newPaid + r.newOrganic));
   const contribPerMau = r.gp / r.mau;

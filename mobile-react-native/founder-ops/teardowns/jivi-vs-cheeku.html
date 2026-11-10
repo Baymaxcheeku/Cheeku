@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jivi Teardown</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:opsz,wght@14..32,400..700&display=swap">
+<style>
+/* Layout: the Cheeku vision-board surface as a long-form postmortem. A sticky section rail, a verdict
+   panel, then one numbered section per deliverable (A to G), each led by its exhibit. */
+:root {
+  --bg: #F5F5F7; --surface: #FFFFFF; --surface-2: #F2F2F5; --surface-3: #E8E8ED;
+  --ink: #1D1D1F; --ink-2: #3A3A3F; --muted: #6E6E73; --faint: #A1A1A6;
+  --line: rgba(20, 20, 40, .08); --line-2: rgba(20, 20, 40, .14);
+  --accent: #5B4EF0; --accent-soft: #EEECFF; --on-accent: #FFFFFF;
+  --jivi: #D2551E; --jivi-soft: #FCEBE2;
+  --lime: #E4FF7A; --lime-ink: #2F3D00;
+  --good: #248A3D; --good-soft: #E3F4E7; --warn: #B86E00; --warn-soft: #FBF0DC; --bad: #D70015; --bad-soft: #FDE4E6;
+  --sh-1: 0 0 0 0.5px rgba(20, 20, 40, .08), 0 1px 2px rgba(20, 20, 40, .05), 0 2px 8px rgba(20, 20, 40, .035);
+  --glass: rgba(245, 245, 247, .8);
+  --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+  --brand: 'Instrument Serif', Georgia, serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0B0B0E; --surface: #1C1C1F; --surface-2: #242428; --surface-3: #2F2F35;
+  --ink: #F5F5F7; --ink-2: #D6D6DC; --muted: #98989F; --faint: #63636B; --line: rgba(255, 255, 255, .08); --line-2: rgba(255, 255, 255, .15);
+  --accent: #8F87FF; --accent-soft: #24213F; --on-accent: #0B0B0E;
+  --jivi: #FF8A4C; --jivi-soft: #3A2116;
+  --lime: #D6F25C; --lime-ink: #1E2700;
+  --good: #32D06A; --good-soft: #15301E; --warn: #FFB340; --warn-soft: #36280F; --bad: #FF6B6B; --bad-soft: #3A1518;
+  --sh-1: 0 0 0 0.5px rgba(255, 255, 255, .08), 0 1px 2px rgba(0, 0, 0, .4);
+  --glass: rgba(11, 11, 14, .8);
+  color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #0B0B0E; --surface: #1C1C1F; --surface-2: #242428; --surface-3: #2F2F35;
+  --ink: #F5F5F7; --ink-2: #D6D6DC; --muted: #98989F; --faint: #63636B; --line: rgba(255, 255, 255, .08); --line-2: rgba(255, 255, 255, .15);
+  --accent: #8F87FF; --accent-soft: #24213F; --on-accent: #0B0B0E;
+  --jivi: #FF8A4C; --jivi-soft: #3A2116;
+  --lime: #D6F25C; --lime-ink: #1E2700;
+  --good: #32D06A; --good-soft: #15301E; --warn: #FFB340; --warn-soft: #36280F; --bad: #FF6B6B; --bad-soft: #3A1518;
+  --sh-1: 0 0 0 0.5px rgba(255, 255, 255, .08), 0 1px 2px rgba(0, 0, 0, .4);
+  --glass: rgba(11, 11, 14, .8);
+  color-scheme: dark; }
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 64px; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 400 15px/1.55 var(--font); -webkit-font-smoothing: antialiased; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
+h1, h2, h3, h4 { margin: 0; text-wrap: balance; }
+p { margin: 0; }
+.num { font-variant-numeric: tabular-nums; }
+.wrap { max-width: 1120px; margin: 0 auto; padding: 0 max(20px, env(safe-area-inset-left, 0px)); }
+
+/* Rail */
+.rail { position: sticky; top: 0; z-index: 20; background: var(--glass); -webkit-backdrop-filter: saturate(180%) blur(18px); backdrop-filter: saturate(180%) blur(18px); border-bottom: 0.5px solid var(--line-2); }
+.rail .wrap { display: flex; gap: 14px; align-items: center; min-height: 52px; overflow-x: auto; scrollbar-width: none; }
+.rail b { font: italic 400 22px/1 var(--brand); color: var(--accent); white-space: nowrap; }
+.rail nav { display: flex; gap: 2px; background: var(--surface-3); border-radius: 9px; padding: 2px; }
+.rail nav a { padding: 5px 10px; border-radius: 7px; font-size: 12.5px; font-weight: 550; color: var(--ink-2); white-space: nowrap; text-decoration: none; }
+.rail nav a:hover { background: var(--surface); }
+
+/* Hero */
+header.hero { padding: 44px 0 22px; display: grid; gap: 14px; }
+.eyebrow { font-size: 12px; font-weight: 650; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.hero h1 { font: 400 clamp(36px, 6vw, 60px)/1.02 var(--brand); letter-spacing: -0.01em; }
+.hero h1 em { color: var(--jivi); }
+.hero h1 span { color: var(--accent); font-style: italic; }
+.hero .lede { max-width: 68ch; font-size: 17px; color: var(--ink-2); }
+.legend { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 12.5px; color: var(--muted); }
+.tag { display: inline-flex; align-items: center; gap: 5px; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 650; letter-spacing: .02em; white-space: nowrap; vertical-align: 1px; }
+.tag::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.tag.tv { color: var(--good); background: var(--good-soft); }
+.tag.tr { color: var(--warn); background: var(--warn-soft); }
+.tag.ta { color: var(--accent); background: var(--accent-soft); }
+.tag.tm { color: var(--ink-2); background: var(--surface-3); }
+
+/* Sections */
+section { padding: 38px 0 8px; display: grid; gap: 18px; }
+.sh { display: grid; gap: 6px; }
+.sh .k { font: 600 12px/1 var(--font); letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+.sh h2 { font: 400 clamp(28px, 4vw, 40px)/1.08 var(--brand); }
+.sh p { max-width: 72ch; color: var(--ink-2); }
+h3 { font-size: 17px; font-weight: 650; letter-spacing: -0.01em; }
+.card { background: var(--surface); border-radius: 16px; box-shadow: var(--sh-1); padding: 20px; display: grid; gap: 12px; min-width: 0; align-content: start; }
+.grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+@media (max-width: 860px) { .grid2, .grid3 { grid-template-columns: minmax(0, 1fr); } }
+ul.tight { margin: 0; padding-left: 18px; display: grid; gap: 6px; }
+ul.tight li { padding-left: 2px; }
+.muted { color: var(--muted); }
+.small { font-size: 13px; }
+
+/* Verdict */
+.verdict { background: #16152A; color: #F5F5F7; border-radius: 20px; padding: 26px; display: grid; gap: 16px; }
+.verdict h2 { font: 400 clamp(26px, 3.6vw, 36px)/1.1 var(--brand); }
+.verdict ol { margin: 0; padding-left: 20px; display: grid; gap: 10px; max-width: 80ch; }
+.verdict li::marker { color: #E4FF7A; font-weight: 700; }
+.verdict b { color: #E4FF7A; font-weight: 650; }
+
+/* Tiles */
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+.tile { background: var(--surface); border-radius: 14px; box-shadow: var(--sh-1); padding: 14px 16px; display: grid; gap: 4px; }
+.tile .v { font: 600 26px/1.1 var(--font); letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.tile .l { font-size: 12.5px; color: var(--muted); }
+.tile.j .v { color: var(--jivi); }
+.tile.c .v { color: var(--accent); }
+
+/* Tables */
+.tw { overflow-x: auto; border-radius: 16px; box-shadow: var(--sh-1); background: var(--surface); }
+table { width: 100%; border-collapse: collapse; font-size: 13.5px; min-width: 760px; }
+th, td { text-align: left; vertical-align: top; padding: 11px 14px; border-bottom: 0.5px solid var(--line-2); }
+th { font-size: 11.5px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); font-weight: 650; background: var(--surface-2); }
+tr:last-child td { border-bottom: 0; }
+td.d { font-weight: 650; white-space: nowrap; }
+td.j { border-left: 3px solid var(--jivi); }
+td.c { border-left: 3px solid var(--accent); }
+.pill { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: 11.5px; font-weight: 650; white-space: nowrap; }
+.pill.g { color: var(--good); background: var(--good-soft); }
+.pill.w { color: var(--warn); background: var(--warn-soft); }
+.pill.b { color: var(--bad); background: var(--bad-soft); }
+
+/* Charts */
+.chart { width: 100%; overflow-x: auto; }
+.chart svg { display: block; width: 100%; height: auto; min-width: 560px; }
+.chart.sm svg { min-width: 0; max-width: 620px; }
+svg text { font-family: var(--font); }
+.cap { font-size: 12.5px; color: var(--muted); max-width: 80ch; }
+.keyrow { display: flex; flex-wrap: wrap; gap: 14px; font-size: 12.5px; color: var(--ink-2); }
+.keyrow span { display: inline-flex; align-items: center; gap: 6px; }
+.sw { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+
+/* Three columns of judgement */
+.judge h3 { display: flex; gap: 8px; align-items: center; }
+.judge .dot { width: 10px; height: 10px; border-radius: 50%; }
+
+/* Architectures */
+.arch { border-top: 4px solid var(--line-2); }
+.arch.rec { border-top-color: var(--accent); }
+.arch .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 12px; font-size: 13px; }
+.arch .stats div { display: grid; gap: 1px; }
+.arch .stats b { font-size: 15px; font-variant-numeric: tabular-nums; }
+.arch .stats span { color: var(--muted); font-size: 12px; }
+.badge { justify-self: start; font-size: 11.5px; font-weight: 700; padding: 3px 10px; border-radius: 999px; background: var(--accent); color: var(--on-accent); }
+
+/* Roadmap */
+.road { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 960px) { .road { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .road { grid-template-columns: minmax(0, 1fr); } }
+.q { background: var(--surface); border-radius: 16px; box-shadow: var(--sh-1); padding: 16px; display: grid; gap: 10px; align-content: start; }
+.q .when { font-size: 12px; font-weight: 650; color: var(--accent); letter-spacing: .04em; text-transform: uppercase; }
+.q h4 { font-size: 15px; }
+.q .lbl { font-size: 11px; font-weight: 700; color: var(--muted); letter-spacing: .06em; text-transform: uppercase; }
+.q ul { margin: 0; padding-left: 16px; display: grid; gap: 4px; font-size: 13px; }
+.avoid { display: flex; flex-wrap: wrap; gap: 8px; }
+.avoid span { font-size: 13px; padding: 5px 11px; border-radius: 999px; background: var(--bad-soft); color: var(--bad); font-weight: 550; text-decoration: line-through; text-decoration-thickness: 1px; }
+
+/* Failure list */
+.fails { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; counter-reset: f; }
+@media (max-width: 860px) { .fails { grid-template-columns: minmax(0, 1fr); } }
+.fail { background: var(--surface); border-radius: 14px; box-shadow: var(--sh-1); padding: 16px 16px 16px 54px; position: relative; display: grid; gap: 6px; counter-increment: f; }
+.fail::before { content: counter(f); position: absolute; left: 16px; top: 15px; width: 26px; height: 26px; border-radius: 50%; background: var(--jivi-soft); color: var(--jivi); font-weight: 700; font-size: 13px; display: grid; place-items: center; }
+.fail h4 { font-size: 15px; }
+.fail p { font-size: 13.5px; color: var(--ink-2); }
+.fail .w { font-size: 12.5px; color: var(--muted); }
+.fail .w b { color: var(--ink); font-weight: 600; }
+
+footer { padding: 40px 0 60px; display: grid; gap: 10px; font-size: 13px; color: var(--muted); }
+footer ol { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
+</style>
+</head>
+<body>
+
+<div class="rail"><div class="wrap">
+  <b>Cheeku</b>
+  <nav aria-label="Sections">
+    <a href="#verdict">Verdict</a><a href="#teardown">A · Teardown</a><a href="#matrix">B · Matrix</a><a href="#supply">Supply</a><a href="#economics">Unit economics</a><a href="#architectures">C · D · Architectures</a><a href="#strategy">E · Strategy</a><a href="#roadmap">F · Roadmap</a><a href="#fail">G · How we fail</a><a href="#sources">Sources</a>
+  </nav>
+</div></div>
+
+<main class="wrap">
+
+<header class="hero">
+  <div class="eyebrow">Strategic postmortem · 1 Nov 2026 · founders only</div>
+  <h1><em>Jivi</em> died of a cost structure. <span>Cheeku</span> has a cheaper version of the same one.</h1>
+  <p class="lede">A teardown of Jivi Health (JiviAI), the Gurugram AI doctor that shut down in June 2026, and what it means for every product, technology and capital decision at Cheeku. Cheeku numbers come from our own financial model, run again for this page.</p>
+  <div class="legend">Every claim carries its evidence level:
+    <span class="tag tv">Verified</span> primary or named-source reporting
+    <span class="tag tr">Reported</span> secondary or anonymous sources
+    <span class="tag ta">Analysis</span> our inference
+    <span class="tag tm">Model</span> Cheeku financial model v2
+  </div>
+</header>
+
+<section id="verdict" style="padding-top:10px">
+  <div class="verdict">
+    <h2>The verdict in five lines</h2>
+    <ol>
+      <li>Jivi's costs grew with usage before revenue did: <b>proprietary medical models plus a free AI doctor</b> for 3.5M installs in 170+ countries, on about <b>$3M</b>. When the next round failed and the acquisition talks died, nothing was left.</li>
+      <li>Cheeku is <b>not immune</b>. Our current plan needs <b>₹246 cr across three rounds</b>, sells consumer subscriptions at <b>LTV/CAC of about 1.0</b> (0.36 in the bear case), and still budgets an own LLM, a pendant and state contracts. That is Jivi's trap at a different price.</li>
+      <li>The memory is the right product and the wrong thing to charge for. <b>Families pay for tests and care, not for being remembered.</b> Price the outcome; let the memory do the retention.</li>
+      <li>Recommended: <b>Hybrid-lean</b>. Orchestrate partner supply, never own it; sell a care plan with tests inside; lead with employers, the one buyer with budget (seat payback about <b>2.7 months</b> in our model); put the own model behind a revenue gate.</li>
+      <li>On our model, Hybrid-lean needs <b>₹96 cr instead of ₹246 cr</b>, turns EBITDA positive in <b>Feb 2030</b> instead of May 2030, and still reaches break-even in the bear case. The full plan does not.</li>
+    </ol>
+  </div>
+</section>
+
+<section aria-label="Jivi at a glance">
+  <div class="tiles">
+    <div class="tile j"><div class="v num">$2.99–3.1M</div><div class="l">Total raised, one seed round <span class="tag tv">Verified</span></div></div>
+    <div class="tile j"><div class="v num">3.5M</div><div class="l">Installs claimed, 170+ countries <span class="tag tv">Verified</span></div></div>
+    <div class="tile j"><div class="v num">29</div><div class="l">Employees, Jan 2025 (Tracxn) <span class="tag tr">Reported</span></div></div>
+    <div class="tile j"><div class="v num">32 mo</div><div class="l">Incorporation (Oct 2023) to shutdown (Jun 2026) <span class="tag tv">Verified</span></div></div>
+    <div class="tile j"><div class="v num">0</div><div class="l">Paid plans live 15 months after launch <span class="tag tv">Verified</span></div></div>
+    <div class="tile c"><div class="v num">₹0</div><div class="l">Cheeku raised; V1 built, launch Jan to Feb 2027</div></div>
+  </div>
+</section>
+
+<!-- A -->
+<section id="teardown">
+  <div class="sh"><div class="k">A · Executive teardown</div><h2>What happened to Jivi</h2>
+    <p>Jivi was founded by Ankur Jain (ex-BharatPe CPO, WalmartLabs) with G V Sanjay Reddy (GVK Group, GVK EMRI) as chairman, and Andrew Ng's AI Fund as co-founder and investor. It built MedX, a medical LLM that topped a Hugging Face medical leaderboard, and shipped an AI doctor app on Android, iOS and WhatsApp.</p></div>
+  <div class="card">
+    <h3>Timeline, Oct 2023 to Jun 2026</h3>
+    <div class="chart" id="timeline"></div>
+    <p class="cap">Dates from the sources listed at the end. Gap that matters: 15 months from public launch to "subscriptions coming soon", and no disclosed paid revenue line before the money ran out.</p>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <h3>Verified causes</h3>
+      <ul class="tight">
+        <li><b>Infrastructure cost of proprietary models.</b> "Building and running proprietary AI models became increasingly expensive. When you're up against companies like OpenAI and Google, it becomes very difficult to make the economics work." <span class="tag tr">Reported</span> (Entrackr, anonymous source)</li>
+        <li><b>The planned round did not close.</b> Investors who had shown interest did not participate. <span class="tag tr">Reported</span></li>
+        <li><b>Acquisition talks failed.</b> <span class="tag tr">Reported</span></li>
+        <li><b>The core was free by design.</b> Chairman Reddy, Oct 2024: keep the core free, add monetising features later. <span class="tag tv">Verified</span></li>
+        <li><b>Monetisation started late.</b> Jul 2025, Jain: subscriptions "soon"; a marketplace for medicines, supplements and devices "we have just started testing". <span class="tag tv">Verified</span></li>
+        <li><b>Breadth.</b> AI doctor, doctor co-pilot, ICD-11 coding, HealthOS, MedX agents, AudioX voice model, open-source releases, 100+ languages, 170+ countries, with 22 to 29 people. <span class="tag tv">Verified</span></li>
+      </ul>
+      <p class="small muted">No founder postmortem has been published. Revenue is only known as a Tracxn band (under ₹10 cr, FY25), which tells us nothing.</p>
+    </div>
+    <div class="card">
+      <h3>Our hypotheses, in order of weight</h3>
+      <ul class="tight">
+        <li><b>H1 · Global free users were cost with no market.</b> You cannot book a lab test in 170 countries. Every non-Indian user was inference spend with no path to revenue. <span class="tag ta">Analysis</span></li>
+        <li><b>H2 · Installs were not habit.</b> 3.5M installs, but no retention, conversion or cost-per-user was ever disclosed. Symptom checking is episodic. <span class="tag ta">Analysis</span></li>
+        <li><b>H3 · No paying buyer was chosen.</b> Consumers, doctors, hospitals and coders all appeared in the pitch; none got a sales motion. <span class="tag ta">Analysis</span></li>
+        <li><b>H4 · Benchmarks are not a product.</b> Beating GPT-4 on USMLE mattered in 2024. By 2026 ChatGPT Health was free and good enough for most questions. <span class="tag ta">Analysis</span></li>
+        <li><b>H5 · "AI doctor" capped trust.</b> It invites liability questions, doctor resistance and regulatory attention, and makes paying feel like paying for a fake doctor. <span class="tag ta">Analysis</span></li>
+        <li><b>H6 · $3M was app money spent like model money.</b> Andrew Ng himself told ET in Oct 2024 that most of India's AI value would be in applications on foundation models, not in training them. <span class="tag tv">Verified quote</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="grid3 judge">
+    <div class="card"><h3><span class="dot" style="background:var(--bad)"></span>Fundamentally flawed</h3>
+      <ul class="tight small">
+        <li>Training and serving proprietary models on a $3M seed</li>
+        <li>Global free distribution with India-only monetisation ideas</li>
+        <li>Positioning as an AI doctor that diagnoses</li>
+        <li>No single buyer with budget, pain and accountability</li>
+      </ul></div>
+    <div class="card"><h3><span class="dot" style="background:var(--warn)"></span>Premature</h3>
+      <ul class="tight small">
+        <li>Doctor co-pilot and ICD-11 coding: a real B2B product that needs a sales team</li>
+        <li>Medicine and device marketplace before habit</li>
+        <li>Own voice model (AudioX) before voice usage existed</li>
+        <li>Wearables and predictive monitoring</li>
+      </ul></div>
+    <div class="card"><h3><span class="dot" style="background:var(--good)"></span>Right but commercially hard</h3>
+      <ul class="tight small">
+        <li>Report explanation: a strong, repeatable wedge</li>
+        <li>WhatsApp as the front door</li>
+        <li>Indic languages and voice</li>
+        <li>Drug interaction checks and a doctor-validation layer</li>
+        <li>A longevity coach next to the AI doctor</li>
+      </ul></div>
+  </div>
+
+  <div class="card">
+    <h3>What Jivi needed to change to survive</h3>
+    <div class="grid2 small">
+      <ul class="tight">
+        <li><b>India only</b>, and stop serving countries it could never monetise.</li>
+        <li><b>API plus fine-tuning</b> instead of training; spend the compute money on distribution.</li>
+        <li><b>One payer from month one</b>: GVK EMRI, an insurer, or bookings revenue. The chairman ran India's largest ambulance network.</li>
+      </ul>
+      <ul class="tight">
+        <li><b>Charge for outcomes</b>: a report review by a doctor, a test booked, a consult.</li>
+        <li><b>Cut to ten people</b> or raise $8 to 10M once the cost curve was clear.</li>
+        <li><b>Publish retention</b>, not installs, to the next investors.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Reconstructed Jivi burn <span class="tag ta">Analysis · low confidence</span></h3>
+    <div class="chart sm" id="jiviBurn"></div>
+    <p class="cap">Assumptions: 25 people at ₹25 to 35 lakh loaded a year; free inference for about 10% of installs active monthly at ₹0.30 to ₹1 per long, multilingual answer; hosting and training of own models; office and tools. Result: about ₹1.2 to 2.0 cr a month. $3M (about ₹25 cr) lasts 13 to 21 months from Oct 2024, which runs out between Nov 2025 and Jul 2026. The shutdown came in Jun 2026, so the reported story is consistent with the arithmetic.</p>
+  </div>
+</section>
+
+<!-- B -->
+<section id="matrix">
+  <div class="sh"><div class="k">B · Comparison matrix</div><h2>Jivi against Cheeku, dimension by dimension</h2>
+    <p>"Cheeku today" means the plan in our decks and financial model v2. The verdict says whether that plan escapes Jivi's failure mode.</p></div>
+  <div class="card">
+    <h3>Exposure to Jivi's failure mode, 1 (safe) to 5 (same trap)</h3>
+    <div class="keyrow"><span><i class="sw" style="background:var(--jivi)"></i>Jivi</span><span><i class="sw" style="background:var(--faint)"></i>Cheeku plan today</span><span><i class="sw" style="background:var(--accent)"></i>Cheeku, recommended</span></div>
+    <div class="chart" id="exposure"></div>
+    <p class="cap">Scores are our judgement <span class="tag ta">Analysis</span>. The four dimensions where today's plan scores 4 or more are where we are repeating Jivi: technology spend, unit economics, focus and funding.</p>
+  </div>
+  <div class="tw">
+    <table>
+      <thead><tr><th>Dimension</th><th>Jivi</th><th>Cheeku plan today</th><th>Verdict</th></tr></thead>
+      <tbody>
+        <tr><td class="d">1 · Product</td><td class="j">AI doctor: symptom diagnosis, reports, nutrition, mental health, for anyone anywhere</td><td class="c">Longitudinal family health memory; checks prescriptions; books care; never diagnoses</td><td><span class="pill g">Stronger</span><br><span class="small muted">But memory alone earns nothing</span></td></tr>
+        <tr><td class="d">2 · Experience</td><td class="j">Episodic symptom checks; installs via app and WhatsApp; no retention disclosed</td><td class="c">Family health manager; daily nudges, weekly review, quarterly retest; 20 free chats a day</td><td><span class="pill w">Unproven</span><br><span class="small muted">12 to 18 chats a month per free user is our riskiest assumption</span></td></tr>
+        <tr><td class="d">3 · Technology</td><td class="j">Own MedX models, AudioX voice, agents, 15M-document knowledge base, open-source releases</td><td class="c">Frontier APIs plus fine-tuning now; own GPUs mid-2027; own 15 to 22B model in 2029; ₹33 cr compute</td><td><span class="pill b">Same trap</span><br><span class="small muted">If the 2029 model stays a plan line, not a gated option</span></td></tr>
+        <tr><td class="d">4 · Data</td><td class="j">Public medical corpus; no disclosed longitudinal patient data</td><td class="c">Consented per-member records with source; ABDM pull in 2027; family corrections</td><td><span class="pill g">Stronger</span><br><span class="small muted">In design only: zero records today</span></td></tr>
+        <tr><td class="d">5 · Business model</td><td class="j">Free core; subscriptions and marketplace only being tested in Jul 2025</td><td class="c">Subscriptions plus booking markup from launch; ten revenue engines planned</td><td><span class="pill w">Fix needed</span><br><span class="small muted">Right start, far too many engines</span></td></tr>
+        <tr><td class="d">6 · Supply</td><td class="j">100+ doctors and hospitals partnered (2024); no booking rails</td><td class="c">Partner rails across 12,000+ pincodes; owns nothing</td><td><span class="pill g">Stronger</span></td></tr>
+        <tr><td class="d">7 · Unit economics</td><td class="j">Undisclosed; inference grew with free global usage</td><td class="c">Consumer CAC per payer ₹2,173 vs LTV ₹2,108 (base); ₹5,951 vs ₹2,131 (bear) <span class="tag tm">Model</span></td><td><span class="pill b">Same trap</span><br><span class="small muted">Consumer subscriptions alone do not pay back</span></td></tr>
+        <tr><td class="d">8 · Distribution</td><td class="j">Viral installs, WhatsApp, awards, 170+ countries</td><td class="c">India only; 74% organic by 2031; employers only after 1 lakh users</td><td><span class="pill w">Fix needed</span><br><span class="small muted">Move employers to month one</span></td></tr>
+        <tr><td class="d">9 · Trust</td><td class="j">"AI doctor", "94% diagnostic accuracy"</td><td class="c">Rules decide, model explains; four urgency tiers; clinician sign-off before launch</td><td><span class="pill g">Stronger</span><br><span class="small muted">Only if the sign-off actually happens</span></td></tr>
+        <tr><td class="d">10 · Competition</td><td class="j">Competed with OpenAI and Google on model quality</td><td class="c">Competes on memory plus action with ChatGPT Health, and on incentives with Practo and Apollo</td><td><span class="pill g">Stronger</span><br><span class="small muted">ChatGPT Health is free and improving</span></td></tr>
+        <tr><td class="d">11 · Focus</td><td class="j">Consumer app, clinician tools, coding, voice, global, open source</td><td class="c">Companion, bookings, fitness, employers, ads, insurance, states, LLM licensing, pendant</td><td><span class="pill b">Same trap</span><br><span class="small muted">On paper we are broader than Jivi</span></td></tr>
+        <tr><td class="d">12 · Funding</td><td class="j">$3M seed; follow-on failed</td><td class="c">₹26 cr seed, then ₹70 cr at month 13, then ₹150 cr; lowest cash ₹10.8 cr in Jan 2028 <span class="tag tm">Model</span></td><td><span class="pill b">Same trap</span><br><span class="small muted">The plan dies if the Series A slips six months</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="card">
+    <h3>Where Cheeku stands in the market</h3>
+    <div class="chart" id="positioning"></div>
+    <p class="cap">Placement is our judgement <span class="tag ta">Analysis</span>. The top-right corner (long memory plus action) is empty in India. Ant Group's health app holds it in China; Babylon Health tried to get there by owning clinics and collapsed in 2023 (public reporting, not re-checked here). ChatGPT Health is moving right fast; it is the competitor that matters.</p>
+  </div>
+</section>
+
+<!-- Supply -->
+<section id="supply">
+  <div class="sh"><div class="k">Dimension 6 in depth</div><h2>Own supply, build a marketplace, or orchestrate?</h2>
+    <p>Answer: orchestrate. Integrate existing labs, doctors and pharmacies through partner APIs, keep pricing control and the customer relationship, and own none of the assets.</p></div>
+  <div class="grid2">
+    <div class="card">
+      <h3>Capital against control</h3>
+      <div class="chart sm" id="supplyMap"></div>
+      <p class="cap">Bubble size is operational complexity. Positions are directional <span class="tag ta">Analysis</span>.</p>
+    </div>
+    <div class="tw" style="align-self:start">
+      <table style="min-width:0">
+        <thead><tr><th>Option</th><th>Capital</th><th>Gross margin</th><th>Ops load</th><th>Call</th></tr></thead>
+        <tbody>
+          <tr><td class="d">Own clinics, labs, doctors</td><td>₹1.5 to 3 cr per clinic; lab capex extra</td><td>30 to 45% at maturity, negative early</td><td>Very high</td><td><span class="pill b">Avoid</span></td></tr>
+          <tr><td class="d">Build own marketplace</td><td>Supply sales team, onboarding, QA</td><td>Take rate 15 to 25%</td><td>High</td><td><span class="pill w">Not yet</span></td></tr>
+          <tr><td class="d">Integrate aggregators</td><td>Integration only</td><td>Markup 10 to 13% (our model)</td><td>Low to medium</td><td><span class="pill g">Do this</span></td></tr>
+          <tr><td class="d">No supply at all</td><td>None</td><td>Subscriptions only</td><td>Low</td><td><span class="pill b">Jivi's path</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <p class="small muted">Margin ranges are our estimates from Indian diagnostics and clinic economics <span class="tag ta">Analysis</span>, except the 10 to 13% take rate, which is in our model. Two rules: at least two partners per category, and the booking always happens inside Cheeku, under Cheeku's price.</p>
+</section>
+
+<!-- Unit economics -->
+<section id="economics">
+  <div class="sh"><div class="k">Dimension 7 in depth</div><h2>The number that decides everything: payback</h2>
+    <p>Months of contribution needed to earn back what it costs to win a paying account. Under 12 is healthy for consumer, under 6 is excellent.</p></div>
+  <div class="grid2">
+    <div class="card">
+      <h3>Payback by channel <span class="tag tm">Model</span></h3>
+      <div class="chart sm" id="payback"></div>
+      <p class="cap">Consumer: blended CAC per paying account against subscription contribution at end of 2028. Employer seat: ₹342 to win a seat, ₹164 a month in, ₹38 a month to serve. Lightweight: same consumer funnel at a tenth of the marketing spend, so more of the base is organic.</p>
+    </div>
+    <div class="card">
+      <h3>What a paying account is worth</h3>
+      <div class="tiles" style="grid-template-columns:repeat(2,minmax(0,1fr))">
+        <div class="tile"><div class="v num">₹135</div><div class="l">Revenue a month per subscriber, after store fees and GST</div></div>
+        <div class="tile"><div class="v num">₹8.6</div><div class="l">Cost to serve a paying account a month</div></div>
+        <div class="tile"><div class="v num">₹2,108</div><div class="l">Lifetime value at 6% monthly churn</div></div>
+        <div class="tile"><div class="v num" style="color:var(--bad)">₹2,173</div><div class="l">Blended CAC per payer, base 2028</div></div>
+      </div>
+      <p class="small">The consumer funnel converts 1.45% of monthly users to paid in 2028. At ₹140 to acquire an active user, each payer costs ₹2,173. The subscription barely earns that back over its whole life. <b>Everything else in the consumer plan has to come from bookings and organic growth.</b> <span class="tag tm">Model</span></p>
+    </div>
+  </div>
+</section>
+
+<!-- C + D -->
+<section id="architectures">
+  <div class="sh"><div class="k">C · D · Three architectures</div><h2>Three companies Cheeku could be</h2>
+    <p>All three run on the same demand assumptions in our model; they differ in what we build, hire and spend. Treat the outputs as relative, not as forecasts. Confidence is low to medium throughout.</p></div>
+  <div class="grid3">
+    <div class="card arch">
+      <h3>1 · Lightweight AI-first</h3>
+      <p class="small">Memory, report reader and prescription check on APIs. Bookings by referral to partners. Employers as the main channel. Team of about 15.</p>
+      <div class="stats">
+        <div><b>₹12 to 20 cr</b><span>Capital (₹10 cr runs short)</span></div>
+        <div><b>₹52 lakh</b><span>Monthly burn, 2027</span></div>
+        <div><b>43% → 80%</b><span>Gross margin, 2028 → 2031</span></div>
+        <div><b>Jun 2029</b><span>EBITDA positive (bear: Jun 2030)</span></div>
+        <div><b>₹123 cr</b><span>Revenue 2031</span></div>
+        <div><b>Low</b><span>Defensibility: easy for ChatGPT to copy</span></div>
+      </div>
+      <p class="small muted">Survives, but stays small. Without bookings at scale, the memory never compounds into data that insurers would pay for.</p>
+    </div>
+    <div class="card arch rec">
+      <span class="badge">Recommended</span>
+      <h3>2 · Hybrid-lean</h3>
+      <p class="small">AI companion plus care booked in chat through partners, sold as a care plan and through employers. No pendant, no states, no own model until revenue earns it. About 27 people by end 2027.</p>
+      <div class="stats">
+        <div><b>₹96 cr</b><span>Capital: ₹26 cr seed + ₹70 cr A</span></div>
+        <div><b>₹90 lakh</b><span>Monthly burn, 2027</span></div>
+        <div><b>38% → 75%</b><span>Gross margin, 2028 → 2031</span></div>
+        <div><b>Feb 2030</b><span>EBITDA positive (bear: Dec 2030)</span></div>
+        <div><b>₹410 cr</b><span>Revenue 2031</span></div>
+        <div><b>₹15.2 cr</b><span>Lowest cash, Jan 2028</span></div>
+      </div>
+      <p class="small muted">Keeps every option open: the own model and the insurer layer become Series A decisions backed by revenue and data.</p>
+    </div>
+    <div class="card arch">
+      <h3>3 · Full-stack ecosystem</h3>
+      <p class="small">Today's plan: ten engines, own GPUs and 15 to 22B model, pendant, insurers, states, model licensing. Owning clinics or labs would add capital on top.</p>
+      <div class="stats">
+        <div><b>₹246 cr+</b><span>Capital, three rounds</span></div>
+        <div><b>₹1.17 cr</b><span>Monthly burn, 2027 (₹2.7 cr in 2028)</span></div>
+        <div><b>34% → 72%</b><span>Gross margin, 2028 → 2031</span></div>
+        <div><b>May 2030</b><span>EBITDA positive (bear: not before Sep 2031)</span></div>
+        <div><b>₹862 cr</b><span>Revenue 2031</span></div>
+        <div><b>₹10.8 cr</b><span>Lowest cash; bear goes negative</span></div>
+      </div>
+      <p class="small muted">The biggest outcome and the most Jivi-like risk: survival depends on two more rounds landing on time.</p>
+    </div>
+  </div>
+  <div class="card">
+    <h3>EBITDA by year, ₹ crore <span class="tag tm">Model</span></h3>
+    <div class="keyrow"><span><i class="sw" style="background:var(--faint)"></i>Lightweight</span><span><i class="sw" style="background:var(--accent)"></i>Hybrid-lean</span><span><i class="sw" style="background:var(--jivi)"></i>Full-stack (today's plan)</span></div>
+    <div class="chart" id="ebitda"></div>
+    <p class="cap">Full-stack loses ₹97 cr before turning, Hybrid-lean ₹48 cr, Lightweight ₹12 cr. Hybrid-lean's 2031 EBITDA (₹180 cr) is 57% of Full-stack's on 39% of the capital.</p>
+  </div>
+  <div class="tw">
+    <table>
+      <thead><tr><th>Assumption</th><th>Value</th><th>Confidence</th></tr></thead>
+      <tbody>
+        <tr><td class="d">Launch month users</td><td>30,000 base, 15,000 bear</td><td><span class="pill w">Medium</span></td></tr>
+        <tr><td class="d">Monthly churn of active users</td><td>12% falling to 7%</td><td><span class="pill b">Low</span></td></tr>
+        <tr><td class="d">Paid conversion of monthly users</td><td>0.9% (2027) to 2.65% (2031)</td><td><span class="pill w">Medium</span></td></tr>
+        <tr><td class="d">Monthly users booking care</td><td>3% (2027) to 7.5% (2031), ₹850 to ₹1,050 a booking, 10 to 13% take</td><td><span class="pill b">Low</span></td></tr>
+        <tr><td class="d">Cost per chat</td><td>₹0.30 on rented models, ₹0.06 to ₹0.10 on own GPUs</td><td><span class="pill g">High</span></td></tr>
+        <tr><td class="d">Employer seats</td><td>₹164 a month in, ₹38 to serve, ₹342 to win</td><td><span class="pill w">Medium</span></td></tr>
+        <tr><td class="d">Lightweight and Hybrid-lean edits</td><td>Removed pendant, state contracts, model licensing and own-model compute; cut marketing and hiring; kept demand drivers</td><td><span class="pill a" style="color:var(--accent);background:var(--accent-soft)">Our edit</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- E -->
+<section id="strategy">
+  <div class="sh"><div class="k">E · Recommended strategy</div><h2>Hybrid-lean: charge for care, retain with memory, sell through employers</h2>
+    <p>Are we building the wrong thing? No, but we are planning to charge for the wrong thing and fund too many things at once. The memory is a retention engine and a data asset. It is not a product people pay ₹249 a month for on its own.</p></div>
+  <div class="grid2">
+    <div class="card">
+      <h3>Six decisions</h3>
+      <ol class="tight" style="padding-left:20px">
+        <li><b>Sell a care plan, not chat.</b> Test a Family Care Plan at ₹2,999 to ₹4,999 a year that includes home health checks, a doctor review of every report and unlimited Cheeku. Keep ₹99 and ₹249 as the entry tiers. This revisits the test bundles the thesis dropped in v2, so let the price test decide.</li>
+        <li><b>Employers from month one.</b> Do not wait for 1 lakh users. Seats pay back in under three months in our model, and HR teams have the budget, pain and accountability Jivi never found.</li>
+        <li><b>Diagnostics first among bookings.</b> Highest frequency, clearest price, and the retest loop is the longevity engine.</li>
+        <li><b>Gate the own model.</b> Own GPUs only when chat cost passes 15% of revenue. Own model only after the Series A, ₹20 cr+ revenue run rate and an eval win. The ₹33 cr becomes a decision, not a budget line.</li>
+        <li><b>India, two languages, one metro cluster at launch.</b> Hindi and English, Delhi NCR first, then Bengaluru and Mumbai.</li>
+        <li><b>Spend like Lightweight until retention proves out.</b> Hold burn near ₹55 lakh a month until day-30 retention passes 25%, then step up.</li>
+      </ol>
+    </div>
+    <div class="card">
+      <h3>Why this works where Jivi didn't</h3>
+      <div class="tw" style="box-shadow:none">
+        <table style="min-width:0">
+          <thead><tr><th>Jivi</th><th>Cheeku</th></tr></thead>
+          <tbody>
+            <tr><td>Free AI answers were the product</td><td>Care is the product; answers are free</td></tr>
+            <tr><td>Cost grew with every free user</td><td>Revenue grows with every booking and seat</td></tr>
+            <tr><td>Own models to win benchmarks</td><td>Rented models until revenue pays for our own</td></tr>
+            <tr><td>170 countries, no rails</td><td>India, 12,000+ pincodes of rails</td></tr>
+            <tr><td>No buyer chosen</td><td>Employers pay; families book</td></tr>
+            <tr><td>"AI doctor"</td><td>"Your family's health memory"; doctors decide</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <h3 style="margin-top:6px">The smallest version that makes money</h3>
+      <p class="small">Report reader, family memory and home lab booking with retest reminders, sold as the Family Care Plan in Delhi NCR, through 10 to 20 employers. Team of 12, about ₹50 lakh a month. At roughly ₹160 a month contribution per plan (₹2,999 a year less about ₹900 of tests, serving and payments), break-even is about <b>31,000 paying families</b>. <span class="tag ta">Analysis · low confidence</span></p>
+    </div>
+  </div>
+</section>
+
+<section aria-label="Copy, improve, avoid, rethink" style="padding-top:0">
+  <div class="grid2">
+    <div class="card"><h3>From Jivi: copy and improve</h3>
+      <ul class="tight small">
+        <li><b>Copy</b> the report explainer as the first-session hook, and WhatsApp as a front door.</li>
+        <li><b>Copy</b> the doctor-validation story, but make it real: a named clinical lead and weekly chat review.</li>
+        <li><b>Improve</b> drug checks into our 10-standard prescription scorecard, tied to the family's own medicines.</li>
+        <li><b>Improve</b> the longevity coach into the retest loop, which earns a booking every quarter.</li>
+      </ul></div>
+    <div class="card"><h3>From Jivi: avoid and rethink</h3>
+      <ul class="tight small">
+        <li><b>Avoid</b> training models, open-source releases and voice models to signal technical depth.</li>
+        <li><b>Avoid</b> install counts and country counts as the headline.</li>
+        <li><b>Rethink</b> our own plan's ten engines and three rounds: they repeat Jivi's breadth with more money.</li>
+        <li><b>Rethink</b> what we charge for: the memory stays free to grow; care earns.</li>
+      </ul></div>
+  </div>
+</section>
+
+<!-- F -->
+<section id="roadmap">
+  <div class="sh"><div class="k">F · 12-month roadmap</div><h2>Nov 2026 to Oct 2027</h2>
+    <p>Each quarter has one job. A quarter does not start its spend until the previous quarter's gate is met.</p></div>
+  <div class="road">
+    <div class="q"><div class="when">Q1 · Nov to Jan</div><h4>Make it legal and safe</h4>
+      <div class="lbl">Ship</div><ul><li>Incorporate, DPIIT, Startup Haryana</li><li>Clinician sign-off on every rule set</li><li>Regulatory opinion on the prescription check</li><li>Closed beta, 500 families</li><li>Lab partner booking live</li></ul>
+      <div class="lbl">Gate</div><ul><li>Day-30 retention ≥ 25% in beta</li><li>3 employer pilots signed</li><li>Seed closed</li></ul>
+      <div class="lbl">Hire</div><ul><li>Clinical lead (MD)</li><li>2 full-stack engineers, 1 ML engineer</li></ul></div>
+    <div class="q"><div class="when">Q2 · Feb to Apr</div><h4>Launch and price</h4>
+      <div class="lbl">Ship</div><ul><li>Store launch, Delhi NCR</li><li>Care plan test at three prices</li><li>Employer onboarding kit</li></ul>
+      <div class="lbl">Gate</div><ul><li>30,000 monthly users</li><li>Booking rate ≥ 3% of monthly users</li><li>10 employers live</li></ul>
+      <div class="lbl">Hire</div><ul><li>Corporate sales lead</li><li>Growth lead, 2 care coordinators</li></ul></div>
+    <div class="q"><div class="when">Q3 · May to Jul</div><h4>Prove the economics</h4>
+      <div class="lbl">Ship</div><ul><li>Retest loop and family nudges</li><li>Doctor consults in chat</li><li>ABDM sandbox</li></ul>
+      <div class="lbl">Gate</div><ul><li>1 lakh monthly users</li><li>Consumer payback ≤ 12 months</li><li>Bookings gross-margin positive</li></ul>
+      <div class="lbl">Hire</div><ul><li>Evals engineer, 2 engineers</li><li>2 corporate sales</li></ul></div>
+    <div class="q"><div class="when">Q4 · Aug to Oct</div><h4>Earn the Series A</h4>
+      <div class="lbl">Ship</div><ul><li>Bengaluru and Mumbai</li><li>Hindi voice beta</li><li>First insurer wellness pilot (channel, not risk)</li></ul>
+      <div class="lbl">Gate</div><ul><li>2.5 lakh monthly users</li><li>3,000 paying families + 5,000 employer seats</li><li>Burn ≤ ₹90 lakh a month</li></ul>
+      <div class="lbl">Hire</div><ul><li>Product designer, 2 care</li><li>Team of about 24</li></ul></div>
+  </div>
+  <div class="card">
+    <h3>Do not build in the next 12 months</h3>
+    <div class="avoid">
+      <span>Own LLM training</span><span>Own GPUs</span><span>Elder pendant</span><span>State memory layer</span><span>Model licensing</span><span>Ads</span><span>Insurer underwriting</span><span>Owned clinics, labs or pharmacy</span><span>Own doctors on payroll</span><span>Doctor co-pilot or EMR</span><span>More than two languages</span><span>Any country but India</span><span>Mental health therapy chat</span>
+    </div>
+  </div>
+</section>
+
+<!-- G -->
+<section id="fail">
+  <div class="sh"><div class="k">G · How Cheeku could fail just like Jivi</div><h2>Twelve ways this goes wrong, and the tripwire for each</h2></div>
+  <div class="fails">
+    <div class="fail"><h4>Free usage outruns revenue</h4><p>Chat volume grows faster than bookings and plans; serving cost becomes the burn.</p><p class="w"><b>Tripwire:</b> serving cost above ₹6 per free user a month. <b>Prevent:</b> route easy questions to small models, cache, cap long-context replies.</p></div>
+    <div class="fail"><h4>Model vanity</h4><p>We start training our own model because it raises well, before anyone pays.</p><p class="w"><b>Tripwire:</b> compute above 10% of burn before the Series A. <b>Prevent:</b> the revenue gate in decision 4.</p></div>
+    <div class="fail"><h4>Benchmark theatre</h4><p>Investor updates lead with eval scores instead of retention and bookings.</p><p class="w"><b>Tripwire:</b> any update without day-30 retention on page one. <b>Prevent:</b> a fixed metric order in every update.</p></div>
+    <div class="fail"><h4>Installs are not habit</h4><p>Health is episodic; families open Cheeku when sick and forget it otherwise.</p><p class="w"><b>Tripwire:</b> day-30 retention under 15%, or under 6 chats per monthly user. <b>Prevent:</b> retest loop, family nudges, WhatsApp delivery.</p></div>
+    <div class="fail"><h4>Nobody pays for memory</h4><p>The family loves the memory and still will not pay ₹249 for it.</p><p class="w"><b>Tripwire:</b> paid conversion under 1% after three months live. <b>Prevent:</b> price care plans and bookings, not access.</p></div>
+    <div class="fail"><h4>Ten engines, no engine</h4><p>We split 24 people across fitness, ads, insurance, states and hardware.</p><p class="w"><b>Tripwire:</b> more than three revenue lines with staff before ₹1 cr annual revenue. <b>Prevent:</b> the do-not-build list.</p></div>
+    <div class="fail"><h4>The Series A slips</h4><p>Like Jivi's failed round: the plan assumes ₹70 cr at month 13.</p><p class="w"><b>Tripwire:</b> under nine months of runway without a term sheet. <b>Prevent:</b> Hybrid-lean spend, and the model's defend mode cuts marketing and compute automatically.</p></div>
+    <div class="fail"><h4>Straddling consumer and enterprise</h4><p>Insurer, state and hospital deals pull founders off the consumer product too early.</p><p class="w"><b>Tripwire:</b> a founder spending over 20% of time on institutional deals before 2028. <b>Prevent:</b> employers only; insurers as a channel pilot.</p></div>
+    <div class="fail"><h4>A trust incident</h4><p>A missed "go now" or a wrong medicine flag goes viral.</p><p class="w"><b>Tripwire:</b> any missed urgent case in the weekly chat review. <b>Prevent:</b> zero-miss release gate, weekly doctor review, liability cover.</p></div>
+    <div class="fail"><h4>A regulator calls it a medical device</h4><p>CDSCO treats the prescription check or risk scores as software that guides treatment, or a DPDP breach happens.</p><p class="w"><b>Tripwire:</b> no written regulatory opinion by launch. <b>Prevent:</b> opinion in Q1; consent ledger; India hosting.</p></div>
+    <div class="fail"><h4>Partners squeeze the take</h4><p>A lab or doctor partner raises prices or pushes its own app to our users.</p><p class="w"><b>Tripwire:</b> any category with one partner, or take rate under 8%. <b>Prevent:</b> two partners per category; customer relationship stays in Cheeku.</p></div>
+    <div class="fail"><h4>ChatGPT Health comes to India with bookings</h4><p>A free frontier product connects ABHA records and partners with a pharmacy chain.</p><p class="w"><b>Tripwire:</b> an OpenAI or Google India health partnership announced. <b>Prevent:</b> win employers and the family graph first; their product serves individuals, ours serves families.</p></div>
+    <div class="fail"><h4>Acquisition as Plan B</h4><p>Jivi's last exit was a sale that never closed.</p><p class="w"><b>Tripwire:</b> treating "someone will buy us" as a runway plan. <b>Prevent:</b> a path to break-even that needs no buyer.</p></div>
+    <div class="fail"><h4>Founder bandwidth</h4><p>An accelerator in San Francisco, an India launch and a seed raise in the same quarter.</p><p class="w"><b>Tripwire:</b> the India launch date moves twice. <b>Prevent:</b> one founder owns launch, one owns the raise, one owns product.</p></div>
+  </div>
+</section>
+
+</main>
+
+<footer class="wrap" id="sources">
+  <div class="eyebrow">Sources</div>
+  <ol>
+    <li><a href="https://entrackr.com/exclusive/exclusive-jiviai-shuts-down-founder-ankur-jain-may-rejoin-bharatpe-12108207">Entrackr: JiviAI shuts down; founder Ankur Jain may rejoin BharatPe</a> (26 Jun 2026)</li>
+    <li><a href="https://entrackr.com/2024/10/andrew-ngs-ai-fund-enters-india-with-investment-in-jivi">Entrackr: Andrew Ng's AI Fund enters India with investment in Jivi</a> (8 Oct 2024)</li>
+    <li><a href="https://economictimes.indiatimes.com/tech/funding/andrew-ngs-fund-invests-in-ai-healthcare-platform-jivi/printarticle/114029891.cms">Economic Times: Andrew Ng's fund invests in AI healthcare platform Jivi</a> (8 Oct 2024)</li>
+    <li><a href="https://www.thehindu.com/sci-tech/technology/andrew-ngs-fund-makes-first-india-investment-with-ai-healthcare-firm-jivi/article68731240.ece">The Hindu / Reuters: AI Fund's first India investment</a> (8 Oct 2024)</li>
+    <li><a href="https://www.cnbctv18.com/technology/indian-healthtech-startups-using-ai-for-tailored-care-plans-patient-care-costs-19633975.htm">CNBC TV18: Healthtech startups bet on tailored care plans</a> (9 Jul 2025)</li>
+    <li><a href="https://www.jivi.ai/">jivi.ai home</a> and <a href="https://www.jivi.ai/about">about page</a> (live in Oct 2026)</li>
+    <li><a href="https://newsletter.failory.com/p/paging-dr-whatsapp">Failory: Paging Dr. WhatsApp</a> (2 Jul 2026)</li>
+    <li><a href="https://neodrop.ai/post/egtL-NhirHm">Neodrop: Three Shutdowns</a>, citing Tracxn (29 Jun 2026)</li>
+    <li><a href="https://www.ceovine.com/why-jiviai-failed">CEO Vine: Why JiviAI failed</a> (3 Oct 2026)</li>
+    <li>Ankur Jain's public LinkedIn profile (funding of $3.1M, 3.7M patients, 94% accuracy claims), via search results</li>
+    <li>Cheeku financial model v2 (<code>mobile-react-native/founder-ops/vision-board/engine.js</code>), base and bear cases plus the Lightweight and Hybrid-lean edits described in section D; seed deck v2, DD deck v2, longevity thesis v2</li>
+  </ol>
+  <p>Not covered by any source: Jivi's retention, paid conversion, gross margin or cost per user. Every figure about those is our reconstruction.</p>
+</footer>
+
+<script>
+(function () {
+  const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const NS = 'http://www.w3.org/2000/svg';
+  function el(tag, attrs, text) { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (text != null) e.textContent = text; return e; }
+  function svg(id, w, h) { const host = document.getElementById(id); host.innerHTML = ''; const s = el('svg', { viewBox: `0 0 ${w} ${h}`, role: 'img' }); host.appendChild(s); return s; }
+
+  function draw() {
+    const C = { ink: css('--ink'), ink2: css('--ink-2'), muted: css('--muted'), faint: css('--faint'), line: css('--line-2'), accent: css('--accent'), jivi: css('--jivi'), good: css('--good'), warn: css('--warn'), bad: css('--bad'), surface: css('--surface'), s2: css('--surface-2') };
+
+    // Timeline
+    (function () {
+      const ev = [
+        ['2023-10', 'Incorporated', 'Jivi Health Pvt Ltd'],
+        ['2024-04', 'Launch reported', 'GenAI for primary care'],
+        ['2024-10', 'AI Fund round', '100+ doctors partnered'],
+        ['2025-01', '29 staff', 'Tracxn'],
+        ['2025-07', 'Subs "soon"', 'marketplace in test'],
+        ['2026-02', 'India AI Summit', 'booth, Hall 2'],
+        ['2026-06', 'Shut down', 'round and sale failed'],
+      ];
+      const W = 1040, H = 170, x0 = 40, x1 = W - 40;
+      const t = s => { const [y, m] = s.split('-').map(Number); return y * 12 + m; };
+      const a = t('2023-09'), b = t('2026-08');
+      const X = s => x0 + (t(s) - a) / (b - a) * (x1 - x0);
+      const s = svg('timeline', W, H);
+      s.setAttribute('aria-label', 'Jivi timeline from incorporation in October 2023 to shutdown in June 2026');
+      s.appendChild(el('line', { x1: x0, x2: x1, y1: 84, y2: 84, stroke: C.line, 'stroke-width': 2 }));
+      s.appendChild(el('rect', { x: X('2024-04'), y: 80, width: X('2025-07') - X('2024-04'), height: 8, rx: 4, fill: C.jivi, opacity: 0.25 }));
+      s.appendChild(el('text', { x: (X('2024-04') + X('2025-07')) / 2, y: 104, 'text-anchor': 'middle', 'font-size': 11, fill: C.jivi, 'font-weight': 600 }, '15 months live with no paid plan'));
+      ['2024', '2025', '2026'].forEach(y => { const x = X(y + '-01'); s.appendChild(el('line', { x1: x, x2: x, y1: 78, y2: 90, stroke: C.faint })); s.appendChild(el('text', { x, y: 124, 'text-anchor': 'middle', 'font-size': 11, fill: C.muted }, y)); });
+      ev.forEach((e, i) => {
+        const x = X(e[0]), up = i % 2 === 0, last = i === ev.length - 1;
+        s.appendChild(el('circle', { cx: x, cy: 84, r: last ? 7 : 5, fill: last ? C.jivi : C.surface, stroke: C.jivi, 'stroke-width': 2 }));
+        const anchor = i === 0 ? 'start' : last ? 'end' : 'middle';
+        const ty = up ? 30 : 146;
+        s.appendChild(el('line', { x1: x, x2: x, y1: up ? 44 : 128, y2: up ? 77 : 91, stroke: C.line }));
+        s.appendChild(el('text', { x, y: ty, 'text-anchor': anchor, 'font-size': 12.5, 'font-weight': 650, fill: C.ink }, e[1]));
+        s.appendChild(el('text', { x, y: ty + 15, 'text-anchor': anchor, 'font-size': 11, fill: C.muted }, e[2]));
+      });
+    })();
+
+    // Jivi burn reconstruction: ranges
+    (function () {
+      const rows = [['People', 52, 73], ['Free inference', 10, 35], ['Model training and hosting', 30, 70], ['Office, tools, other', 8, 20]];
+      const W = 520, H = 210, L = 170, R = 30, top = 18, rh = 36, max = 80;
+      const s = svg('jiviBurn', W, H);
+      s.setAttribute('aria-label', 'Reconstructed Jivi monthly burn ranges in lakh rupees');
+      const X = v => L + v / max * (W - L - R);
+      [0, 20, 40, 60, 80].forEach(v => { s.appendChild(el('line', { x1: X(v), x2: X(v), y1: top - 6, y2: top + rows.length * rh, stroke: C.line, 'stroke-dasharray': v ? '2 3' : '' })); s.appendChild(el('text', { x: X(v), y: top + rows.length * rh + 16, 'text-anchor': 'middle', 'font-size': 11, fill: C.muted }, v)); });
+      rows.forEach((r, i) => {
+        const y = top + i * rh + 10;
+        s.appendChild(el('text', { x: L - 10, y: y + 11, 'text-anchor': 'end', 'font-size': 12.5, fill: C.ink2 }, r[0]));
+        s.appendChild(el('rect', { x: X(r[1]), y, width: X(r[2]) - X(r[1]), height: 14, rx: 7, fill: C.jivi, opacity: 0.85 }));
+        s.appendChild(el('text', { x: X(r[2]) + 6, y: y + 11, 'font-size': 11.5, fill: C.muted }, `${r[1]}–${r[2]}`));
+      });
+      s.appendChild(el('text', { x: L, y: H - 8, 'font-size': 11.5, fill: C.ink, 'font-weight': 650 }, '₹ lakh a month · total ≈ ₹100 to 200 lakh (₹1.0 to 2.0 cr)'));
+    })();
+
+    // Exposure dot plot
+    (function () {
+      const d = [
+        ['Product', 4, 2, 2], ['Experience', 4, 3, 2], ['Technology', 5, 4, 2], ['Data', 3, 2, 2], ['Business model', 5, 3, 2], ['Supply', 4, 1, 1],
+        ['Unit economics', 5, 4, 2], ['Distribution', 4, 3, 2], ['Trust', 4, 2, 2], ['Competition', 4, 3, 3], ['Focus', 5, 5, 2], ['Funding', 5, 4, 2],
+      ];
+      const W = 900, rh = 30, top = 30, L = 150, R = 40, H = top + d.length * rh + 20;
+      const s = svg('exposure', W, H);
+      s.setAttribute('aria-label', 'Exposure scores from 1 to 5 for Jivi, Cheeku today and Cheeku recommended across twelve dimensions');
+      const X = v => L + (v - 1) / 4 * (W - L - R);
+      [1, 2, 3, 4, 5].forEach(v => { s.appendChild(el('line', { x1: X(v), x2: X(v), y1: top - 10, y2: top + d.length * rh - 10, stroke: C.line, 'stroke-dasharray': '2 3' })); s.appendChild(el('text', { x: X(v), y: 16, 'text-anchor': 'middle', 'font-size': 11, fill: C.muted }, v === 1 ? '1 safe' : v === 5 ? '5 same trap' : v)); });
+      d.forEach((r, i) => {
+        const y = top + i * rh;
+        s.appendChild(el('text', { x: L - 12, y: y + 4, 'text-anchor': 'end', 'font-size': 12.5, fill: C.ink2 }, r[0]));
+        const xs = [X(r[1]), X(r[2]), X(r[3])];
+        s.appendChild(el('line', { x1: Math.min(...xs), x2: Math.max(...xs), y1: y, y2: y, stroke: C.line, 'stroke-width': 3 }));
+        const o = [0, 0, 0];
+        if (r[1] === r[2]) { o[0] = -6; o[1] = 6; }
+        if (r[2] === r[3]) { o[1] = -6; o[2] = 6; }
+        s.appendChild(el('circle', { cx: xs[0] + o[0], cy: y, r: 7, fill: C.jivi }));
+        s.appendChild(el('circle', { cx: xs[1] + o[1], cy: y, r: 7, fill: C.surface, stroke: C.faint, 'stroke-width': 3 }));
+        s.appendChild(el('circle', { cx: xs[2] + o[2], cy: y, r: 6, fill: C.accent }));
+      });
+    })();
+
+    // Positioning 2x2
+    (function () {
+      const pts = [
+        ['Cheeku', 0.88, 0.82, C.accent, 1], ['Ant Group health app (China)', 0.8, 0.72, C.faint, 0], ['ChatGPT Health', 0.55, 0.22, C.faint, 0],
+        ['Jivi (closed)', 0.25, 0.28, C.jivi, 1], ['Practo · Apollo 24/7', 0.2, 0.8, C.faint, 0], ['Tata 1mg · PharmEasy', 0.12, 0.66, C.faint, 0],
+        ['Eka Care', 0.62, 0.38, C.faint, 0], ['HealthifyMe', 0.5, 0.5, C.faint, 0], ['Babylon (collapsed 2023)', 0.38, 0.9, C.jivi, 0],
+      ];
+      const W = 900, H = 420, L = 70, R = 30, T = 20, B = 50;
+      const s = svg('positioning', W, H);
+      s.setAttribute('aria-label', 'Positioning map: how long a player remembers against whether it acts by booking care');
+      const X = v => L + v * (W - L - R), Y = v => T + (1 - v) * (H - T - B);
+      s.appendChild(el('rect', { x: X(0.5), y: Y(1), width: X(1) - X(0.5), height: Y(0.5) - Y(1), fill: C.accent, opacity: 0.06 }));
+      s.appendChild(el('line', { x1: X(0.5), x2: X(0.5), y1: Y(0), y2: Y(1), stroke: C.line }));
+      s.appendChild(el('line', { x1: X(0), x2: X(1), y1: Y(0.5), y2: Y(0.5), stroke: C.line }));
+      s.appendChild(el('rect', { x: X(0), y: Y(1), width: X(1) - X(0), height: Y(0) - Y(1), fill: 'none', stroke: C.line }));
+      s.appendChild(el('text', { x: X(0), y: H - 18, 'font-size': 12, fill: C.muted }, 'One episode'));
+      s.appendChild(el('text', { x: X(1), y: H - 18, 'text-anchor': 'end', 'font-size': 12, fill: C.muted }, 'Remembers the family over years'));
+      s.appendChild(el('text', { x: 14, y: Y(0.04), 'font-size': 12, fill: C.muted, transform: `rotate(-90 14 ${Y(0.04)})` }, 'Advice only'));
+      s.appendChild(el('text', { x: 14, y: Y(0.96), 'font-size': 12, fill: C.muted, 'text-anchor': 'end', transform: `rotate(-90 14 ${Y(0.96)})` }, 'Books care'));
+      pts.forEach(p => {
+        s.appendChild(el('circle', { cx: X(p[1]), cy: Y(p[2]), r: p[4] ? 9 : 6, fill: p[3] }));
+        const right = p[1] < 0.75;
+        s.appendChild(el('text', { x: X(p[1]) + (right ? 13 : -13), y: Y(p[2]) + 4, 'text-anchor': right ? 'start' : 'end', 'font-size': p[4] ? 13.5 : 12, 'font-weight': p[4] ? 700 : 500, fill: p[4] ? p[3] : C.ink2 }, p[0]));
+      });
+    })();
+
+    // Supply map
+    (function () {
+      const pts = [['Own clinics, labs', 0.9, 0.85, 34, C.bad], ['Own marketplace', 0.55, 0.6, 24, C.warn], ['Integrate partners', 0.2, 0.55, 15, C.good], ['No supply (Jivi)', 0.05, 0.08, 9, C.jivi]];
+      const W = 520, H = 330, L = 50, R = 20, T = 20, B = 44;
+      const s = svg('supplyMap', W, H);
+      s.setAttribute('aria-label', 'Supply options plotted by capital needed and control over the care experience');
+      const X = v => L + v * (W - L - R), Y = v => T + (1 - v) * (H - T - B);
+      s.appendChild(el('rect', { x: X(0), y: Y(1), width: X(1) - X(0), height: Y(0) - Y(1), fill: 'none', stroke: C.line }));
+      s.appendChild(el('line', { x1: X(0.5), x2: X(0.5), y1: Y(0), y2: Y(1), stroke: C.line, 'stroke-dasharray': '3 3' }));
+      s.appendChild(el('line', { x1: X(0), x2: X(1), y1: Y(0.5), y2: Y(0.5), stroke: C.line, 'stroke-dasharray': '3 3' }));
+      s.appendChild(el('text', { x: X(0), y: H - 16, 'font-size': 11.5, fill: C.muted }, 'Low capital'));
+      s.appendChild(el('text', { x: X(1), y: H - 16, 'text-anchor': 'end', 'font-size': 11.5, fill: C.muted }, 'High capital'));
+      s.appendChild(el('text', { x: 14, y: Y(0), 'font-size': 11.5, fill: C.muted, transform: `rotate(-90 14 ${Y(0)})` }, 'Little control'));
+      s.appendChild(el('text', { x: 14, y: Y(1), 'text-anchor': 'end', 'font-size': 11.5, fill: C.muted, transform: `rotate(-90 14 ${Y(1)})` }, 'Full control'));
+      s.appendChild(el('text', { x: X(0.25), y: Y(0.95), 'text-anchor': 'middle', 'font-size': 11, fill: C.good, 'font-weight': 650 }, 'Best ratio'));
+      pts.forEach(p => {
+        s.appendChild(el('circle', { cx: X(p[1]), cy: Y(p[2]), r: p[3], fill: p[4], opacity: 0.22 }));
+        s.appendChild(el('circle', { cx: X(p[1]), cy: Y(p[2]), r: 4, fill: p[4] }));
+        const right = p[1] < 0.6;
+        s.appendChild(el('text', { x: X(p[1]) + (right ? p[3] + 6 : -p[3] - 6), y: Y(p[2]) + 4, 'text-anchor': right ? 'start' : 'end', 'font-size': 12, 'font-weight': 650, fill: C.ink }, p[0]));
+      });
+    })();
+
+    // Payback bars
+    (function () {
+      const d = [['Employer seat', 2.7, C.good], ['Consumer, lightweight spend', 7.3, C.accent], ['Consumer, base', 17.2, C.warn], ['Consumer, bear', 46.5, C.bad]];
+      const W = 520, H = 220, L = 190, R = 50, T = 14, rh = 40, max = 50;
+      const s = svg('payback', W, H);
+      s.setAttribute('aria-label', 'Months to pay back acquisition cost by channel');
+      const X = v => L + v / max * (W - L - R);
+      [0, 12, 24, 36, 48].forEach(v => { s.appendChild(el('line', { x1: X(v), x2: X(v), y1: T, y2: T + d.length * rh, stroke: C.line, 'stroke-dasharray': v ? '2 3' : '' })); s.appendChild(el('text', { x: X(v), y: T + d.length * rh + 16, 'text-anchor': 'middle', 'font-size': 11, fill: C.muted }, v)); });
+      s.appendChild(el('line', { x1: X(12), x2: X(12), y1: T, y2: T + d.length * rh, stroke: C.good, 'stroke-width': 1.5 }));
+      s.appendChild(el('text', { x: X(12) + 4, y: T + 8, 'font-size': 10.5, fill: C.good, 'font-weight': 650 }, 'healthy ≤ 12'));
+      d.forEach((r, i) => {
+        const y = T + i * rh + 12;
+        s.appendChild(el('text', { x: L - 10, y: y + 12, 'text-anchor': 'end', 'font-size': 12.5, fill: C.ink2 }, r[0]));
+        s.appendChild(el('rect', { x: X(0), y, width: X(r[1]) - X(0), height: 18, rx: 5, fill: r[2] }));
+        s.appendChild(el('text', { x: X(r[1]) + 6, y: y + 13, 'font-size': 12, 'font-weight': 650, fill: C.ink }, r[1] + ' mo'));
+      });
+      s.appendChild(el('text', { x: L, y: H - 6, 'font-size': 11, fill: C.muted }, 'Months'));
+    })();
+
+    // EBITDA grouped bars
+    (function () {
+      const years = [2027, 2028, 2029, 2030, 2031];
+      const series = [['Lightweight', [-6.3, -5.8, 1.5, 24.3, 79.6], C.faint], ['Hybrid-lean', [-10.8, -19.5, -17.5, 31.3, 180.3], C.accent], ['Full-stack', [-14.1, -32.5, -50.2, 28.3, 317.1], C.jivi]];
+      const W = 900, H = 340, L = 60, R = 20, T = 20, B = 36, min = -100, max = 350;
+      const s = svg('ebitda', W, H);
+      s.setAttribute('aria-label', 'EBITDA by year for the three architectures, in crore rupees');
+      const Y = v => T + (max - v) / (max - min) * (H - T - B);
+      [-100, 0, 100, 200, 300].forEach(v => { s.appendChild(el('line', { x1: L, x2: W - R, y1: Y(v), y2: Y(v), stroke: v === 0 ? C.muted : C.line, 'stroke-dasharray': v === 0 ? '' : '2 3' })); s.appendChild(el('text', { x: L - 8, y: Y(v) + 4, 'text-anchor': 'end', 'font-size': 11, fill: C.muted }, v)); });
+      const gw = (W - L - R) / years.length, bw = gw / 4.2;
+      years.forEach((yr, i) => {
+        const gx = L + i * gw + gw / 2;
+        s.appendChild(el('text', { x: gx, y: H - 12, 'text-anchor': 'middle', 'font-size': 12, fill: C.ink2 }, yr));
+        series.forEach((se, j) => {
+          const v = se[1][i], x = gx + (j - 1.5) * bw + 2;
+          const y = v >= 0 ? Y(v) : Y(0), h = Math.abs(Y(v) - Y(0));
+          s.appendChild(el('rect', { x, y, width: bw - 4, height: Math.max(h, 1), rx: 3, fill: se[2] }));
+          if (i === 4 || (i === 2 && j === 2)) s.appendChild(el('text', { x: x + (bw - 4) / 2, y: v >= 0 ? y - 5 : y + h + 13, 'text-anchor': 'middle', 'font-size': 10.5, 'font-weight': 650, fill: C.ink }, Math.round(v)));
+        });
+      });
+    })();
+  }
+
+  draw();
+  if (window.matchMedia) { const mq = matchMedia('(prefers-color-scheme: dark)'); if (mq.addEventListener) mq.addEventListener('change', draw); }
+  new MutationObserver(draw).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+})();
+</script>
+</body>
+</html>

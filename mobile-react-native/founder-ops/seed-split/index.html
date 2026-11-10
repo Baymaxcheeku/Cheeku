@@ -1,0 +1,832 @@
+<title>Seed Split Calculator</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:opsz,wght@14..32,400..700&display=swap">
+<style>
+/* Layout: the vision-board surface turned into a working tool. A sticky bar carries the live verdict, a left rail holds
+   every input and switch, and the right column answers in order: verdict, who owns what, the sweep across VC numbers,
+   the fixes, the cap-by-valuation grid, a side-by-side compare, the cap table and the notes. */
+:root {
+  --bg: #F5F5F7; --surface: #FFFFFF; --surface-2: #F2F2F5; --surface-3: #E8E8ED;
+  --ink: #1D1D1F; --ink-2: #3A3A3F; --muted: #6E6E73; --faint: #A1A1A6;
+  --line: rgba(20, 20, 40, .08); --line-2: rgba(20, 20, 40, .14);
+  --accent: #5B4EF0; --accent-soft: #EEECFF; --on-accent: #FFFFFF;
+  --good: #248A3D; --good-soft: #E3F4E7; --warn: #B86E00; --warn-soft: #FBF0DC; --bad: #D70015; --bad-soft: #FDE4E6;
+  --c-founders: #5B4EF0; --c-pool: #B9B9C2; --c-top: #8E6A2E; --c-angel: #E0821E; --c-inst: #0A9396;
+  --sh-1: 0 0 0 0.5px rgba(20, 20, 40, .08), 0 1px 2px rgba(20, 20, 40, .05), 0 2px 8px rgba(20, 20, 40, .035);
+  --glass: rgba(245, 245, 247, .8);
+  --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+  --brand: 'Instrument Serif', Georgia, serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0B0B0E; --surface: #1C1C1F; --surface-2: #242428; --surface-3: #2F2F35;
+  --ink: #F5F5F7; --ink-2: #D6D6DC; --muted: #98989F; --faint: #63636B; --line: rgba(255, 255, 255, .08); --line-2: rgba(255, 255, 255, .15);
+  --accent: #8F87FF; --accent-soft: #24213F; --on-accent: #0B0B0E;
+  --good: #32D06A; --good-soft: #15301E; --warn: #FFB340; --warn-soft: #36280F; --bad: #FF6B6B; --bad-soft: #3A1518;
+  --c-founders: #8F87FF; --c-pool: #5A5A63; --c-top: #D2A262; --c-angel: #FFA94D; --c-inst: #3CCACC;
+  --sh-1: 0 0 0 0.5px rgba(255, 255, 255, .08), 0 1px 2px rgba(0, 0, 0, .4);
+  --glass: rgba(11, 11, 14, .8);
+  color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #0B0B0E; --surface: #1C1C1F; --surface-2: #242428; --surface-3: #2F2F35;
+  --ink: #F5F5F7; --ink-2: #D6D6DC; --muted: #98989F; --faint: #63636B; --line: rgba(255, 255, 255, .08); --line-2: rgba(255, 255, 255, .15);
+  --accent: #8F87FF; --accent-soft: #24213F; --on-accent: #0B0B0E;
+  --good: #32D06A; --good-soft: #15301E; --warn: #FFB340; --warn-soft: #36280F; --bad: #FF6B6B; --bad-soft: #3A1518;
+  --c-founders: #8F87FF; --c-pool: #5A5A63; --c-top: #D2A262; --c-angel: #FFA94D; --c-inst: #3CCACC;
+  --sh-1: 0 0 0 0.5px rgba(255, 255, 255, .08), 0 1px 2px rgba(0, 0, 0, .4);
+  --glass: rgba(11, 11, 14, .8);
+  color-scheme: dark; }
+
+[hidden] { display: none !important; }
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 70px; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 400 15px/1.55 var(--font); -webkit-font-smoothing: antialiased; }
+a { color: var(--accent); text-decoration: none; } a:hover { text-decoration: underline; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
+h1, h2, h3, h4 { margin: 0; text-wrap: balance; } p { margin: 0; }
+.num { font-variant-numeric: tabular-nums; }
+.wrap { max-width: 1240px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+
+.bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 30; background: var(--glass); -webkit-backdrop-filter: saturate(180%) blur(18px); backdrop-filter: saturate(180%) blur(18px); border-bottom: 0.5px solid var(--line-2); }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 31; background: var(--glass); }
+.bar-in { display: flex; gap: 8px 16px; align-items: center; min-height: 54px; flex-wrap: wrap; padding-block: 8px; }
+.brand { font: italic 400 24px/1 var(--brand); color: var(--accent); }
+.sub { font-size: 12px; font-weight: 600; color: var(--muted); }
+.pill { display: inline-flex; align-items: center; gap: 8px; padding: 5px 11px; border-radius: 999px; font: 650 12.5px/1.2 var(--font); font-variant-numeric: tabular-nums; }
+.pill i { width: 8px; height: 8px; border-radius: 50%; background: currentColor; display: inline-block; }
+.pill.good { background: var(--good-soft); color: var(--good); } .pill.ok { background: var(--accent-soft); color: var(--accent); } .pill.over { background: var(--bad-soft); color: var(--bad); }
+.bar .push { margin-left: auto; }
+
+header.hero { padding: 30px 0 6px; display: grid; gap: 10px; }
+.eyebrow { font-size: 12px; font-weight: 650; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.hero h1 { font: 400 clamp(32px, 5vw, 52px)/1.04 var(--brand); }
+.hero h1 span { color: var(--accent); font-style: italic; }
+.hero .lede { max-width: 72ch; font-size: 16px; color: var(--ink-2); }
+
+.layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: 18px; padding: 18px 0 60px; align-items: start; }
+@media (min-width: 1020px) { .layout { grid-template-columns: 350px minmax(0, 1fr); gap: 22px; } .rail { position: sticky; top: 66px; max-height: calc(100vh - 80px); overflow-y: auto; scrollbar-width: thin; } }
+.out { display: grid; gap: 16px; min-width: 0; }
+.card { background: var(--surface); border-radius: 16px; box-shadow: var(--sh-1); padding: 18px; display: grid; gap: 12px; min-width: 0; align-content: start; }
+.card h2 { font: 400 clamp(22px, 3vw, 28px)/1.12 var(--brand); }
+.card h3 { font-size: 15px; font-weight: 650; }
+.k { font: 600 11.5px/1 var(--font); letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+.cap { font-size: 12.5px; color: var(--muted); max-width: 86ch; }
+.small { font-size: 13px; } .muted { color: var(--muted); }
+.grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+@media (max-width: 900px) { .grid2, .grid3 { grid-template-columns: minmax(0, 1fr); } }
+
+/* inputs rail */
+.rail { display: grid; gap: 12px; align-content: start; }
+.grp { background: var(--surface); border-radius: 16px; box-shadow: var(--sh-1); padding: 14px 16px; display: grid; gap: 12px; }
+.grp > .gh { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.grp > .gh b { font-size: 13px; font-weight: 650; }
+.grp > .gh span { font-size: 11.5px; color: var(--muted); }
+.field { display: grid; gap: 6px; }
+.field > label, .lab { font-size: 12.5px; font-weight: 600; color: var(--ink-2); display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+.field > label em { font-style: normal; font-weight: 500; color: var(--muted); font-size: 11.5px; }
+.pair { display: grid; grid-template-columns: minmax(0, 1fr) 84px; gap: 10px; align-items: center; }
+.pair input[type=range] { width: 100%; accent-color: var(--accent); margin: 0; }
+.nbox { display: flex; align-items: center; height: 32px; border-radius: 8px; background: var(--surface-2); border: 0.5px solid var(--line-2); padding: 0 8px; gap: 4px; }
+.nbox input { width: 100%; min-width: 0; border: 0; background: transparent; color: var(--ink); font: 600 13.5px/1 var(--font); font-variant-numeric: tabular-nums; text-align: right; outline: none; padding: 0; -moz-appearance: textfield; }
+.nbox input::-webkit-outer-spin-button, .nbox input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.nbox:focus-within { box-shadow: 0 0 0 2px var(--accent); }
+.nbox span { color: var(--muted); font-size: 12px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { border: 0; background: var(--surface-3); color: var(--ink-2); padding: 7px 11px; border-radius: 8px; font: 600 12.5px/1 var(--font); cursor: pointer; }
+.chip:hover { background: var(--line-2); }
+.chip[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); }
+.seg { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; background: var(--surface-3); border-radius: 9px; padding: 2px; gap: 2px; }
+.seg button { border: 0; background: transparent; padding: 7px 6px; border-radius: 7px; font: 600 12px/1.2 var(--font); color: var(--ink-2); cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 0 0 0.5px var(--line-2), 0 1px 3px rgba(0,0,0,.1); }
+.tog { display: flex; gap: 9px; align-items: center; font-size: 12.5px; font-weight: 600; color: var(--ink-2); cursor: pointer; }
+.tog input { accent-color: var(--accent); width: 16px; height: 16px; margin: 0; }
+.btn { border: 0; height: 32px; padding: 0 13px; border-radius: 9px; background: var(--surface-3); color: var(--ink); font: 600 12.5px/1 var(--font); cursor: pointer; justify-self: start; }
+.btn:hover { background: var(--line-2); }
+.btn.pri { background: var(--accent); color: var(--on-accent); }
+.sublist { display: grid; gap: 10px; padding-top: 2px; border-top: 0.5px solid var(--line-2); }
+details.adv summary { cursor: pointer; font-size: 12.5px; font-weight: 650; color: var(--ink-2); padding: 2px 0; }
+details.adv[open] summary { margin-bottom: 10px; }
+
+/* verdict */
+.verdict { gap: 14px; }
+.vtop { display: flex; flex-wrap: wrap; gap: 14px 24px; align-items: flex-end; justify-content: space-between; }
+.big { font: 400 clamp(56px, 11vw, 92px)/.95 var(--brand); letter-spacing: -0.01em; font-variant-numeric: tabular-nums; }
+.big.good { color: var(--good); } .big.ok { color: var(--accent); } .big.over { color: var(--bad); }
+.vsay { font-size: 16px; color: var(--ink-2); max-width: 66ch; }
+.vsay b { color: var(--ink); }
+.fixes { display: grid; gap: 6px; margin: 0; padding-left: 18px; font-size: 14px; color: var(--ink-2); }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+.tile { background: var(--surface-2); border-radius: 12px; padding: 12px 14px; display: grid; gap: 3px; align-content: start; }
+.tile .v { font: 650 22px/1.1 var(--font); letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.tile .l { font-size: 12px; color: var(--muted); }
+.tile .s { font-size: 11.5px; color: var(--muted); }
+.tile.good .v { color: var(--good); } .tile.over .v { color: var(--bad); }
+.warnbox { background: var(--warn-soft); color: var(--ink); border-radius: 10px; padding: 10px 12px; font-size: 13px; }
+.warnbox.bad { background: var(--bad-soft); }
+
+/* charts and tables */
+.chart { width: 100%; overflow-x: auto; }
+.chart svg { display: block; width: 100%; height: auto; min-width: 560px; }
+.chart.flush svg { min-width: 0; }
+.keyrow { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 12.5px; color: var(--ink-2); }
+.keyrow span { display: inline-flex; align-items: center; gap: 6px; }
+.sw { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+.tw { overflow-x: auto; border-radius: 12px; border: 0.5px solid var(--line-2); }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 0.5px solid var(--line-2); white-space: nowrap; }
+tr:last-child td { border-bottom: 0; }
+th { font-size: 11px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); font-weight: 650; background: var(--surface-2); }
+table.num td:not(:first-child), table.num th:not(:first-child) { text-align: right; font-variant-numeric: tabular-nums; }
+tr.tot td { font-weight: 700; border-top: 1px solid var(--line-2); }
+td.over { color: var(--bad); font-weight: 650; } td.good { color: var(--good); font-weight: 650; } td.ok { color: var(--accent); font-weight: 650; }
+.heat td, .heat th { text-align: center; padding: 7px 8px; font-variant-numeric: tabular-nums; }
+.heat th:first-child, .heat td:first-child { text-align: left; position: sticky; left: 0; background: var(--surface); z-index: 1; font-weight: 650; }
+.heat td.c { cursor: pointer; font-weight: 600; }
+.heat td.c.h-good { background: var(--good-soft); color: var(--good); }
+.heat td.c.h-ok { background: var(--surface-2); color: var(--ink); }
+.heat td.c.h-over { background: var(--bad-soft); color: var(--bad); }
+.heat td.c.now { box-shadow: inset 0 0 0 2px var(--accent); }
+.heat tr.nowrow td:first-child, .heat th.nowcol { color: var(--accent); }
+.heat td.c:hover { filter: brightness(.96); }
+.lever { background: var(--surface-2); border-radius: 12px; padding: 12px 14px; display: grid; gap: 8px; align-content: start; }
+.lever h3 { font-size: 13.5px; }
+.lever .row { display: flex; justify-content: space-between; gap: 10px; font-size: 13px; color: var(--ink-2); align-items: baseline; }
+.lever .row b { font-variant-numeric: tabular-nums; color: var(--ink); text-align: right; }
+.lever .row b.over { color: var(--bad); }
+ul.tight { margin: 0; padding-left: 18px; display: grid; gap: 7px; }
+.toast { position: fixed; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); left: 50%; transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 8px 14px; border-radius: 10px; font-size: 13px; z-index: 50; }
+.row-h { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+.hint { font-size: 12px; color: var(--muted); }
+svg text { font-family: var(--font); fill: var(--muted); font-size: 11px; }
+svg text.ink { fill: var(--ink); }
+</style>
+
+<div class="bar"><div class="wrap bar-in">
+  <b class="brand">Cheeku</b><span class="sub">Seed split calculator</span>
+  <span class="pill push" id="barPill" role="status" aria-live="polite"></span>
+  <button type="button" class="btn" id="resetAll">Reset</button>
+</div></div>
+
+<main class="wrap">
+  <header class="hero">
+    <div class="eyebrow">Cheeku AI · seed round · ₹26 crore · angel iSAFE plus institutional round</div>
+    <h1>Type the VC's number. See what the <span>seed costs us</span></h1>
+    <p class="lede">Enter what an institution offers, in whichever way they quote it. The page shows what the angels and the institution take together, what the founders keep, and how to fix it when the number breaks the ceiling. It runs on the same model as the seed split document.</p>
+  </header>
+
+  <div class="layout">
+    <aside class="rail" aria-label="Inputs">
+
+      <section class="grp" aria-label="The VC's number">
+        <div class="gh"><b>1. The institution's number</b><span>₹ crore</span></div>
+        <div class="field">
+          <div class="lab">How they quote it</div>
+          <div class="seg" role="group" aria-label="Quote convention" data-seg="conv">
+            <button type="button" data-val="pre_in">Pre-money<br>iSAFE inside</button>
+            <button type="button" data-val="post">Post-money<br>whole seed</button>
+            <button type="button" data-val="pre_out">Pre-money<br>iSAFE on top</button>
+          </div>
+          <div class="hint" id="convHint"></div>
+        </div>
+        <div class="field">
+          <label for="quoteN" id="quoteLab">Their quote</label>
+          <div class="pair"><input type="range" id="quoteR" data-k="quote" aria-label="Quote slider"><div class="nbox"><span>₹</span><input type="number" id="quoteN" data-k="quote" inputmode="decimal" step="0.5"><span>cr</span></div></div>
+        </div>
+        <div class="field">
+          <div class="lab">Market scenario <em>post-money after the seed</em></div>
+          <div class="chips" role="group" aria-label="Market scenario" id="mkt"></div>
+        </div>
+      </section>
+
+      <section class="grp" aria-label="The round">
+        <div class="gh"><b>2. The round</b><span id="roundTot"></span></div>
+        <div class="field">
+          <label for="IN">Angel cheque <em>iSAFE, now</em></label>
+          <div class="pair"><input type="range" id="IR" data-k="I" min="0" max="12" step="0.5" aria-label="Angel cheque slider"><div class="nbox"><span>₹</span><input type="number" id="IN" data-k="I" inputmode="decimal" step="0.5"><span>cr</span></div></div>
+          <div class="chips" role="group" aria-label="Angel size" data-chip="I"><button class="chip" type="button" data-v="3">₹3 cr</button><button class="chip" type="button" data-v="4">₹4 cr</button><button class="chip" type="button" data-v="5">₹5 cr</button><button class="chip" type="button" data-v="6">₹6 cr</button></div>
+        </div>
+        <div class="field">
+          <label for="XN">Institutional cheque <em>Q1 2027</em></label>
+          <div class="pair"><input type="range" id="XR" data-k="X" min="0" max="40" step="0.5" aria-label="Institutional cheque slider"><div class="nbox"><span>₹</span><input type="number" id="XN" data-k="X" inputmode="decimal" step="0.5"><span>cr</span></div></div>
+        </div>
+        <label class="tog"><input type="checkbox" id="lock"> Hold the total at ₹26 cr</label>
+      </section>
+
+      <section class="grp" aria-label="Angel iSAFE terms">
+        <div class="gh"><b>3. Angel iSAFE terms</b><span>cap and discount</span></div>
+        <div class="field">
+          <div class="lab">Terms preset</div>
+          <div class="chips" role="group" aria-label="Terms preset" id="terms"></div>
+        </div>
+        <div class="field">
+          <label for="capN" id="capLab">Valuation cap</label>
+          <div class="pair"><input type="range" id="capR" data-k="cap" min="40" max="150" step="1" aria-label="Cap slider"><div class="nbox"><span>₹</span><input type="number" id="capN" data-k="cap" inputmode="decimal" step="1"><span>cr</span></div></div>
+        </div>
+        <div class="field">
+          <label for="discN">Discount to the round price</label>
+          <div class="pair"><input type="range" id="discR" data-k="disc" min="0" max="30" step="1" aria-label="Discount slider"><div class="nbox"><input type="number" id="discN" data-k="disc" inputmode="decimal" step="1"><span>%</span></div></div>
+          <div class="chips" role="group" aria-label="Discount" data-chip="disc"><button class="chip" type="button" data-v="0">None</button><button class="chip" type="button" data-v="10">10%</button><button class="chip" type="button" data-v="15">15%</button><button class="chip" type="button" data-v="20">20%</button></div>
+        </div>
+        <div class="field">
+          <div class="lab">Cap is drafted as</div>
+          <div class="seg" role="group" aria-label="Cap basis" data-seg="basis"><button type="button" data-val="post">Post-money</button><button type="button" data-val="pre">Pre-money</button></div>
+        </div>
+        <label class="tog"><input type="checkbox" id="tiered"> Tiered close, an earlier tranche at a lower cap</label>
+        <div class="sublist" id="tierBox" hidden>
+          <div class="field"><label for="t1amtN">First tranche <em>amount</em></label><div class="pair"><input type="range" id="t1amtR" data-k="t1amt" min="0" max="12" step="0.5" aria-label="First tranche amount slider"><div class="nbox"><span>₹</span><input type="number" id="t1amtN" data-k="t1amt" inputmode="decimal" step="0.5"><span>cr</span></div></div></div>
+          <div class="field"><label for="t1capN">First tranche <em>cap</em></label><div class="pair"><input type="range" id="t1capR" data-k="t1cap" min="40" max="150" step="1" aria-label="First tranche cap slider"><div class="nbox"><span>₹</span><input type="number" id="t1capN" data-k="t1cap" inputmode="decimal" step="1"><span>cr</span></div></div></div>
+          <div class="hint">The rest of the angel cheque uses the cap above.</div>
+        </div>
+      </section>
+
+      <section class="grp" aria-label="Pool and targets">
+        <div class="gh"><b>4. Pool and targets</b><span>what you can live with</span></div>
+        <div class="field">
+          <div class="lab">Option pool top-up the institution asks for <em>points of post-money</em></div>
+          <div class="chips" role="group" aria-label="Pool top-up" data-chip="topup"><button class="chip" type="button" data-v="0">None</button><button class="chip" type="button" data-v="3">3 pts</button><button class="chip" type="button" data-v="5">5 pts</button><button class="chip" type="button" data-v="8">8 pts</button></div>
+        </div>
+        <label class="tog"><input type="checkbox" id="countTopup"> Count the pool top-up inside the ceiling</label>
+        <div class="field">
+          <label for="ceilN">Ceiling, the most we will give up</label>
+          <div class="pair"><input type="range" id="ceilR" data-k="ceil" min="15" max="35" step="0.5" aria-label="Ceiling slider"><div class="nbox"><input type="number" id="ceilN" data-k="ceil" inputmode="decimal" step="0.5"><span>%</span></div></div>
+        </div>
+        <details class="adv">
+          <summary>Target band and founders' share</summary>
+          <div class="sublist" style="border:0;padding:0">
+            <div class="field"><label for="bandLoN">Target band, low</label><div class="pair"><input type="range" id="bandLoR" data-k="bandLo" min="10" max="30" step="0.5" aria-label="Band low slider"><div class="nbox"><input type="number" id="bandLoN" data-k="bandLo" inputmode="decimal" step="0.5"><span>%</span></div></div></div>
+            <div class="field"><label for="bandHiN">Target band, high</label><div class="pair"><input type="range" id="bandHiR" data-k="bandHi" min="10" max="30" step="0.5" aria-label="Band high slider"><div class="nbox"><input type="number" id="bandHiN" data-k="bandHi" inputmode="decimal" step="0.5"><span>%</span></div></div></div>
+            <div class="field"><label for="fPreN">Founders hold before the seed <em>the rest is the pool</em></label><div class="pair"><input type="range" id="fPreR" data-k="fPre" min="60" max="100" step="1" aria-label="Founders share slider"><div class="nbox"><input type="number" id="fPreN" data-k="fPre" inputmode="decimal" step="1"><span>%</span></div></div></div>
+          </div>
+        </details>
+      </section>
+    </aside>
+
+    <div class="out" id="outputs">
+
+      <section class="card verdict" aria-label="Verdict">
+        <div class="k">The result</div>
+        <div class="vtop">
+          <div><div class="big num" id="bigD"></div><div class="pill" id="vPill" style="margin-top:8px"></div></div>
+          <div class="row-h" style="gap:8px"><button type="button" class="btn pri" id="pinBtn">Pin to compare</button><button type="button" class="btn" id="copyBtn">Copy summary</button></div>
+        </div>
+        <p class="vsay" id="vSay"></p>
+        <div id="vFix"></div>
+        <div class="tiles" id="tiles"></div>
+        <div id="warns"></div>
+      </section>
+
+      <section class="card" aria-label="Who owns what">
+        <div class="k">Ownership</div>
+        <h2>Who owns what, before and after the seed</h2>
+        <div class="chart flush" id="ownChart"></div>
+        <div class="keyrow" id="ownKey"></div>
+      </section>
+
+      <section class="card" aria-label="Sweep">
+        <div class="k">Sweep</div>
+        <h2>What every VC number would cost, at these terms</h2>
+        <div class="chart" id="sweep"></div>
+        <p class="cap" id="sweepCap"></p>
+      </section>
+
+      <section class="card" aria-label="Fixes">
+        <div class="k">Levers</div>
+        <h2 id="levH">Three ways to bring it inside</h2>
+        <div class="grid3" id="levers"></div>
+        <p class="cap">Each answer holds the other inputs where they are now. Plug any of them back into the left rail and the result lands on the target.</p>
+      </section>
+
+      <section class="card" aria-label="Grid">
+        <div class="k">Cap by valuation</div>
+        <h2>Total dilution for every cap against every institutional post-money</h2>
+        <div class="tw"><table class="heat" id="heat"></table></div>
+        <p class="cap">Click a cell to set that cap and that post-money. Green is inside the target band, grey is inside the ceiling, red is over. The outlined cell is where you are now. The second row under each column heading is the VC pre-money with the iSAFE inside.</p>
+      </section>
+
+      <section class="card" aria-label="Compare">
+        <div class="row-h"><div><div class="k">Compare</div><h2>Side by side</h2></div><button type="button" class="btn" id="clearPins">Clear pinned</button></div>
+        <div class="tw"><table class="num" id="cmp"></table></div>
+        <p class="cap">The four market scenarios use your current terms. Pin up to four of your own scenarios, change the terms, and they stay here.</p>
+      </section>
+
+      <section class="card" aria-label="Cap table">
+        <div class="k">Cap table</div>
+        <h2>Share by share</h2>
+        <div class="tw"><table class="num" id="capTable"></table></div>
+        <p class="cap" id="capNote"></p>
+      </section>
+
+      <section class="card" aria-label="Notes">
+        <div class="k">Read before you send a number</div>
+        <h2>What this assumes</h2>
+        <ul class="tight small">
+          <li><b>The institution's number is converted for you.</b> Whichever way they quote it, the page finds the post-money after the whole seed and works from that. "iSAFE inside" means the angels' converted shares are part of their pre-money, which is the usual way. "iSAFE on top" means the pre-money covers only the existing holders and the angels sit on top of it, which is better for founders and worth asking for.</li>
+          <li><b>The cap is post-money by default.</b> That is how the 100X.VC iSAFE is described by one law firm. Have your lawyer confirm the clause in the template you use, then switch the basis here if it is pre-money.</li>
+          <li><b>Angels convert at the best of three prices:</b> the cap price, the discounted round price, or the round price itself. The calculator shows which one wins for each tranche.</li>
+          <li><b>The ceiling counts what founders give up.</b> That is the angels plus the institution, and the pool top-up if the box is ticked. Before the seed, founders hold 90% and the pool 10% unless you change it.</li>
+          <li><b>Share counts are illustrative,</b> on a base of 10,00,000 shares. Real counts depend on your actual cap table.</li>
+          <li><b>This is a planning tool.</b> It is not legal or tax advice, and no Q1 2027 valuation is promised. Anyone who is an NRI or overseas needs the instrument checked with counsel.</li>
+        </ul>
+      </section>
+    </div>
+  </div>
+</main>
+<div class="toast" id="toast" hidden></div>
+
+<script>/* Seed split model. Pure functions, no DOM. Money is in rupees crore.
+   Angels hold an iSAFE (cap and discount) that converts inside the institutional round.
+   The institutional round is described by its post-money V, the value of the company right after the whole seed,
+   angels included. Everything else (pre-money in any of three conventions, price per share) is derived from V. */
+(function (root) {
+  var S0 = 1000000; // illustrative share count before the seed
+
+  function defaults() {
+    return {
+      scen: 'base',            // 'weak' | 'bear' | 'base' | 'bull' | 'custom'
+      conv: 'pre_in',          // how the institution quotes: pre_in | post | pre_out
+      quote: 109,              // the institution's number, rupees crore, in the convention above
+      I: 5, X: 21, lock: true, // angel cheque, institutional cheque, keep the total at 26
+      cap: 85, basis: 'post',  // iSAFE valuation cap and whether it is post-money or pre-money
+      disc: 10,                // discount, percent
+      tiered: false, t1amt: 2, t1cap: 80,
+      fPre: 90,                // founders' share before the seed, percent (rest is the option pool)
+      topup: 0, countTopup: true, // pool top-up the institution asks for, points of post-money
+      ceil: 23, bandLo: 18, bandHi: 20
+    };
+  }
+
+  function tranches(s) {
+    if (!s.tiered) return [{ amt: s.I, cap: s.cap }];
+    var a1 = Math.min(Math.max(s.t1amt, 0), s.I), out = [];
+    if (a1 > 1e-9) out.push({ amt: a1, cap: s.t1cap });
+    if (s.I - a1 > 1e-9) out.push({ amt: s.I - a1, cap: s.cap });
+    return out;
+  }
+
+  // scale multiplies every cap, used by the solver and the cap axis of the grid
+  function evalV(s, V, scale) {
+    scale = scale || 1;
+    var X = s.X, x = X / V, T = s.topup / 100, d = s.disc / 100, tr = tranches(s);
+    var room = 1 - x - T;
+    if (!(V > 0) || room <= 1e-9) return { invalid: true, D: Infinity };
+    var aSum = 0, parts = [];
+    for (var it = 0; it < 80; it++) {
+      var next = 0; parts = [];
+      for (var i = 0; i < tr.length; i++) {
+        var t = tr[i], c = t.cap * scale;
+        var base = s.basis === 'pre' ? (room - aSum) : room;       // pre-money cap converts on the shares before the SAFEs
+        var viaCap = (t.amt / c) * Math.max(base, 0);
+        var viaDisc = d > 0 ? t.amt / ((1 - d) * V) : 0;
+        var atPar = t.amt / V;
+        var a = Math.max(viaCap, viaDisc, atPar);
+        var path = a === viaCap && viaCap >= viaDisc && viaCap > atPar + 1e-12 ? 'cap' : (viaDisc > atPar + 1e-12 && a === viaDisc ? 'discount' : 'round');
+        parts.push({ amt: t.amt, cap: c, a: a, path: path });
+        next += a;
+      }
+      if (Math.abs(next - aSum) < 1e-13) { aSum = next; break; }
+      aSum = next;
+    }
+    var existing = 1 - x - T - aSum;
+    if (existing <= 1e-9) return { invalid: true, D: Infinity };
+    var f = s.fPre / 100;
+    var D = x + aSum + (s.countTopup ? T : 0);
+    var par = (s.I + X) / V + (s.countTopup ? T : 0);
+    var N = S0 / existing;               // total shares after the seed
+    var pps = V * 1e7 / N;               // institutional price per share, rupees
+    parts.forEach(function (p) { p.price = p.a > 0 ? p.amt * 1e7 / (p.a * N) : 0; });
+    return {
+      V: V, X: X, I: s.I, preIn: V - X, preOut: V * (existing + T),
+      x: x, a: aSum, T: T, existing: existing,
+      founders: f * existing, poolOld: (1 - f) * existing,
+      D: D, Dfull: x + aSum + T, par: par, tax: D - par,
+      stepup: s.I > 0 ? aSum * V / s.I : 1,
+      N: N, pps: pps, parts: parts, invalid: false
+    };
+  }
+
+  function solveV(s, quote, scale) {
+    if (s.conv === 'post') return quote;
+    if (s.conv === 'pre_in') return quote + s.X;
+    // pre_out: the quote excludes the angels' converted shares, so find V where V x (1 - x - a) equals it
+    var lo = quote + s.X, hi = lo + 10, g = function (V) { var r = evalV(s, V, scale); return r.invalid ? -Infinity : r.preOut; };
+    var n = 0; while (g(hi) < quote && n++ < 60) hi = lo + (hi - lo) * 2;
+    for (var i = 0; i < 90; i++) { var mid = (lo + hi) / 2; if (g(mid) < quote) lo = mid; else hi = mid; }
+    return (lo + hi) / 2;
+  }
+
+  function evalQuote(s, scale) {
+    if (!(s.quote > 0)) return { invalid: true, D: Infinity };
+    var V = solveV(s, s.quote, scale);
+    var r = evalV(s, V, scale); r.quote = s.quote; return r;
+  }
+
+  function quoteFromV(s, V) {
+    if (s.conv === 'post') return V;
+    if (s.conv === 'pre_in') return V - s.X;
+    var r = evalV(s, V); return r.invalid ? V - s.X : r.preOut;
+  }
+
+  // ---- solvers: every one bisects a monotone function, so each answer can be checked by plugging it back in
+  function minV(s, target, scale) {
+    var lo = s.X * 1.0001 + 1e-6, hi = 20000;
+    var D = function (V) { return evalV(s, V, scale).D; };
+    if (!(D(hi) <= target)) return null;
+    for (var i = 0; i < 100; i++) { var m = (lo + hi) / 2; if (D(m) <= target) hi = m; else lo = m; }
+    return hi;
+  }
+  function maxX(s, target) {
+    var D = function (X) { var t = Object.assign({}, s, { X: X }); return evalQuote(t).D; };
+    if (!(D(0) <= target)) return { none: true };
+    if (D(150) <= target) return { any: true };
+    var lo = 0, hi = 150;
+    for (var i = 0; i < 100; i++) { var m = (lo + hi) / 2; if (D(m) <= target) lo = m; else hi = m; }
+    return { x: lo };
+  }
+  function minCapScale(s, target) {
+    var D = function (k) { return evalQuote(s, k).D; };
+    if (D(0.1) <= target) return { any: true };
+    if (!(D(40) <= target)) return { none: true };
+    var lo = 0.1, hi = 40;
+    for (var i = 0; i < 100; i++) { var m = (lo + hi) / 2; if (D(m) <= target) hi = m; else lo = m; }
+    return { k: hi, cap: s.cap * hi };
+  }
+
+  function status(s, D) {
+    var c = s.ceil / 100, lo = s.bandLo / 100, hi = s.bandHi / 100;
+    if (D > c + 1e-9) return { key: 'over', label: 'Over the ' + s.ceil + '% ceiling' };
+    if (D <= hi + 1e-9) return { key: 'good', label: D < lo - 1e-9 ? 'Better than the target band' : 'Inside the ' + s.bandLo + ' to ' + s.bandHi + '% band' };
+    return { key: 'ok', label: 'Inside the ceiling, above the band' };
+  }
+
+  var api = { S0: S0, defaults: defaults, tranches: tranches, evalV: evalV, evalQuote: evalQuote, solveV: solveV,
+              quoteFromV: quoteFromV, minV: minV, maxX: maxX, minCapScale: minCapScale, status: status };
+  if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.SplitModel = api;
+})(typeof window !== 'undefined' ? window : globalThis);
+</script>
+<script>
+(function () {
+  'use strict';
+  var M = window.SplitModel;
+  var KEY = 'cheeku-seedsplit1';
+  var $ = function (s, r) { return (r || document).querySelector(s); };
+  var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+
+  var MARKET = [{ k: 'weak', n: 'Weak', V: 106 }, { k: 'bear', n: 'Bear', V: 116 }, { k: 'base', n: 'Base', V: 130 }, { k: 'bull', n: 'Bull', V: 153 }];
+  var TERMS = [
+    { n: 'Angel-friendly', cap: 75, disc: 10 },
+    { n: 'Balanced', cap: 85, disc: 10, rec: true },
+    { n: 'Protective', cap: 100, disc: 10 },
+    { n: 'Cap only', cap: 85, disc: 0 }
+  ];
+  var CONV = {
+    pre_in: { short: 'pre-money, iSAFE inside', lab: 'Their pre-money', hint: 'The usual way. The angels\' converted shares sit inside this number.', min: 60, max: 170 },
+    post: { short: 'post-money', lab: 'Their post-money, after the whole seed', hint: 'The value of the company right after the ₹26 cr closes, angels included.', min: 90, max: 190 },
+    pre_out: { short: 'pre-money, iSAFE on top', lab: 'Their pre-money, before the angels\' shares', hint: 'The founder-friendly ask. The angels\' shares are added on top of this number.', min: 55, max: 160 }
+  };
+  var LIMITS = { quote: [1, 1000], I: [0, 50], X: [0, 150], cap: [5, 1000], disc: [0, 60], t1amt: [0, 50], t1cap: [5, 1000], fPre: [10, 100], topup: [0, 30], ceil: [5, 60], bandLo: [1, 60], bandHi: [1, 60] };
+  var TOTAL = 26;
+
+  var S = M.defaults(), pins = [];
+  try { var raw = localStorage.getItem(KEY); if (raw) { var o = JSON.parse(raw); if (o && o.S) S = Object.assign(S, o.S); if (o && Array.isArray(o.pins)) pins = o.pins.slice(0, 4); } } catch (e) {}
+  function save() { try { localStorage.setItem(KEY, JSON.stringify({ S: S, pins: pins })); } catch (e) {} }
+
+  // ---------- formatting
+  function num(x, n) { return Number(x).toLocaleString('en-IN', { minimumFractionDigits: n, maximumFractionDigits: n }); }
+  function cr(x, n) { if (!isFinite(x)) return 'none'; var r = Math.round(x * 10) / 10; return '₹' + num(r, n === undefined ? (Number.isInteger(r) ? 0 : 1) : n) + ' cr'; }
+  function pc(x, n) { return (x * 100).toFixed(n === undefined ? 1 : n) + '%'; }
+  function r1(x) { return Math.round(x * 10) / 10; }
+  function toast(t) { var el = $('#toast'); el.textContent = t; el.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(function () { el.hidden = true; }, 1800); }
+
+  // ---------- state changes
+  function clampAll() { Object.keys(LIMITS).forEach(function (k) { var v = Number(S[k]); if (!isFinite(v)) v = M.defaults()[k]; S[k] = Math.min(LIMITS[k][1], Math.max(LIMITS[k][0], v)); }); if (S.bandLo > S.bandHi) S.bandLo = S.bandHi; }
+  function reanchor() { var m = MARKET.filter(function (x) { return x.k === S.scen; })[0]; if (m) S.quote = r1(M.quoteFromV(S, m.V)); }
+  function setKey(k, v) {
+    S[k] = v;
+    if (k === 'quote') S.scen = 'custom';
+    if (S.lock && k === 'I') S.X = r1(TOTAL - v);
+    if (S.lock && k === 'X') S.I = r1(TOTAL - v);
+    if (k === 'bandHi' && S.bandLo > v) S.bandLo = v;
+    if (k === 'bandLo' && S.bandHi < v) S.bandHi = v;
+    if (k !== 'quote') reanchor();
+    render();
+  }
+  function setConv(c) {
+    var V = M.evalQuote(S); var keep = V.invalid ? null : V.V;
+    S.conv = c;
+    if (keep) S.quote = r1(M.quoteFromV(S, keep)); else S.quote = M.defaults().quote;
+    render();
+  }
+
+  // ---------- wiring
+  function bind() {
+    $$('input[data-k]').forEach(function (el) {
+      el.addEventListener('input', function () {
+        var v = parseFloat(el.value); if (!isFinite(v)) return;
+        setKey(el.getAttribute('data-k'), v, el);
+      });
+    });
+    $$('[data-seg] button').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var key = b.parentNode.getAttribute('data-seg'), val = b.getAttribute('data-val');
+        if (key === 'conv') setConv(val); else { S[key] = val; render(); }
+      });
+    });
+    $$('[data-chip] .chip').forEach(function (b) {
+      b.addEventListener('click', function () { setKey(b.parentNode.getAttribute('data-chip'), parseFloat(b.getAttribute('data-v'))); });
+    });
+    $('#lock').addEventListener('change', function (e) { S.lock = e.target.checked; if (S.lock) S.X = r1(TOTAL - S.I); reanchor(); render(); });
+    $('#tiered').addEventListener('change', function (e) { S.tiered = e.target.checked; render(); });
+    $('#countTopup').addEventListener('change', function (e) { S.countTopup = e.target.checked; render(); });
+    $('#resetAll').addEventListener('click', function () { S = M.defaults(); reanchor(); pins = []; render(); toast('Back to the base case'); });
+    $('#pinBtn').addEventListener('click', pin);
+    $('#copyBtn').addEventListener('click', copySummary);
+    $('#clearPins').addEventListener('click', function () { pins = []; render(); });
+  }
+
+  function syncInputs() {
+    var c = CONV[S.conv];
+    var qr = $('#quoteR'); qr.min = c.min; qr.max = c.max; qr.step = 0.5;
+    $$('input[data-k]').forEach(function (el) { var k = el.getAttribute('data-k'); if (document.activeElement !== el) el.value = (el.type === 'number') ? (Math.round(S[k] * 100) / 100) : S[k]; });
+    $$('[data-seg]').forEach(function (g) { var k = g.getAttribute('data-seg'); $$('button', g).forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-val') === S[k])); }); });
+    $$('[data-chip]').forEach(function (g) { var k = g.getAttribute('data-chip'); $$('.chip', g).forEach(function (b) { b.setAttribute('aria-pressed', String(Math.abs(parseFloat(b.getAttribute('data-v')) - S[k]) < 1e-9)); }); });
+    $('#lock').checked = S.lock; $('#tiered').checked = S.tiered; $('#countTopup').checked = S.countTopup;
+    $('#tierBox').hidden = !S.tiered;
+    $('#quoteLab').textContent = c.lab; $('#convHint').textContent = c.hint;
+    $('#capLab').textContent = S.tiered ? 'Cap for the rest of the cheque' : 'Valuation cap';
+    $('#roundTot').textContent = 'total ' + cr(S.I + S.X);
+    var mk = $('#mkt'); mk.innerHTML = '';
+    MARKET.forEach(function (m) {
+      var b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; b.textContent = m.n + ' ' + cr(m.V, 0);
+      b.setAttribute('aria-pressed', String(S.scen === m.k));
+      b.addEventListener('click', function () { S.scen = m.k; reanchor(); render(); });
+      mk.appendChild(b);
+    });
+    var tm = $('#terms'); tm.innerHTML = '';
+    TERMS.forEach(function (t) {
+      var b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; b.textContent = t.n + ' ' + t.cap + (t.disc ? ' + ' + t.disc + '%' : '');
+      b.setAttribute('aria-pressed', String(!S.tiered && S.cap === t.cap && S.disc === t.disc));
+      b.addEventListener('click', function () { S.cap = t.cap; S.disc = t.disc; S.tiered = false; S.basis = 'post'; reanchor(); render(); });
+      tm.appendChild(b);
+    });
+  }
+
+  // ---------- outputs
+  function statusClass(st) { return st.key; }
+  function quoteText(s, R) { return cr(s.quote) + ' ' + CONV[s.conv].short; }
+
+  function renderVerdict(R) {
+    var st = M.status(S, R.D), cls = st.key;
+    var big = $('#bigD'); big.textContent = pc(R.D); big.className = 'big num ' + cls;
+    var vp = $('#vPill'); vp.className = 'pill ' + cls; vp.innerHTML = '<i></i>' + st.label;
+    var bp = $('#barPill'); bp.className = 'pill push ' + cls; bp.innerHTML = '<i></i>' + pc(R.D) + ' · founders keep ' + pc(R.founders);
+    var ceil = S.ceil / 100, pts = Math.abs(R.D - ceil) * 100;
+    var say = 'At ' + quoteText(S, R) + ', the seed takes <b>' + pc(R.D) + '</b> of the company' + (S.countTopup || !S.topup ? '' : ' before the pool top-up') + '. Angels hold <b>' + pc(R.a) + '</b>, the institution <b>' + pc(R.x) + '</b>' + (S.topup ? ', and the pool top-up is ' + pc(R.T) : '') + '. Founders keep <b>' + pc(R.founders) + '</b>.';
+    $('#vSay').innerHTML = say;
+    var fx = $('#vFix'); var html = '';
+    var q = function (V) { return V === null ? null : M.quoteFromV(S, V); };
+    if (st.key === 'over') {
+      var items = [];
+      var mc = M.minCapScale(S, ceil); var mx = M.maxX(S, ceil); var mv = M.minV(S, ceil); var qv = q(mv);
+      html = '<p class="small"><b>' + pts.toFixed(1) + ' points over the ' + S.ceil + '% ceiling.</b> Any one of these gets you back inside:</p><ul class="fixes">';
+      if (qv !== null) items.push('Get the institution to quote at least <b>' + cr(qv) + '</b> (' + CONV[S.conv].short + ').');
+      if (mx.x !== undefined) items.push('Shrink the institutional cheque to <b>' + cr(mx.x) + '</b>, a seed of ' + cr(S.I + mx.x) + ' in all.');
+      if (mc.cap) items.push('Raise the cap to <b>' + cr(mc.cap, 0) + '</b>' + (S.tiered ? ' (both tranches scale together)' : '') + ', which trims the angels\' step-up.');
+      if (!items.length) items.push('No cap or cheque change gets there. The institution\'s number itself has to move.');
+      html += items.map(function (t) { return '<li>' + t + '</li>'; }).join('') + '</ul>';
+    } else {
+      var mv2 = M.minV(S, ceil), qq = mv2 === null ? null : q(mv2);
+      html = '<p class="small"><b>' + pts.toFixed(1) + ' points of headroom</b> under the ' + S.ceil + '% ceiling.' + (qq !== null ? ' The institution\'s quote could fall to <b>' + cr(qq) + '</b> (' + CONV[S.conv].short + ') before it breaks.' : '') + '</p>';
+    }
+    fx.innerHTML = html;
+  }
+
+  function tile(l, v, s, c) { return '<div class="tile ' + (c || '') + '"><div class="v">' + v + '</div><div class="l">' + l + '</div>' + (s ? '<div class="s">' + s + '</div>' : '') + '</div>'; }
+  function renderTiles(R) {
+    var pathNames = { cap: 'the cap price', discount: 'the discount price', round: 'the round price' };
+    var paths = R.parts.map(function (p) { return pathNames[p.path]; });
+    var uniq = paths.filter(function (p, i) { return paths.indexOf(p) === i; }).join(' and ');
+    var off = 1 - 1 / R.stepup;
+    var t = '';
+    t += tile('Post-money after the seed', cr(R.V), 'pre-money ' + cr(R.preIn) + ' with the iSAFE inside');
+    t += tile('Pre-money, iSAFE on top', cr(R.preOut), 'before the angels\' shares');
+    t += tile('Angels hold', pc(R.a), 'converting at ' + uniq);
+    t += tile('Institution holds', pc(R.x), cr(S.X) + ' cheque');
+    if (S.topup) t += tile('Pool top-up', pc(R.T), (S.countTopup ? 'counted' : 'not counted') + ' in the ceiling');
+    t += tile('Angel discount costs us', R.tax * 100 < 0.05 ? '0 pts' : (R.tax * 100).toFixed(1) + ' pts', 'against angels paying the round price');
+    t += tile('Angel step-up', R.stepup.toFixed(2) + 'x', off > 0.001 ? 'convert ' + Math.round(off * 100) + '% below the round price' : 'no discount to the round');
+    t += tile('Founders keep', pc(R.founders), 'from ' + S.fPre + '% before the seed', R.founders >= 0.7 ? 'good' : '');
+    $('#tiles').innerHTML = t;
+    var w = [];
+    if (S.X === 0) w.push('<div class="warnbox">The institutional cheque is zero, so this is the angel round on its own.</div>');
+    if (!S.tiered && R.parts[0] && R.parts[0].path === 'round') w.push('<div class="warnbox">The cap is above the round price, so it does nothing. Angels convert at the round price' + (S.disc ? ' less the discount' : '') + '.</div>');
+    if (S.basis === 'pre') w.push('<div class="warnbox">Cap treated as pre-money, so each cap converts on the shares before the angels come in. Confirm the clause with your lawyer.</div>');
+    $('#warns').innerHTML = w.join('');
+  }
+
+  function seg(x, w, color, label) { return { w: w, c: color, l: label }; }
+  function renderOwn(R) {
+    var f = S.fPre / 100;
+    var rows = [
+      { name: 'Before the seed', parts: [[f, 'var(--c-founders)', 'Founders'], [1 - f, 'var(--c-pool)', 'Option pool']] },
+      { name: 'After the seed', parts: [[R.founders, 'var(--c-founders)', 'Founders'], [R.poolOld, 'var(--c-pool)', 'Option pool'], [R.T, 'var(--c-top)', 'Pool top-up'], [R.a, 'var(--c-angel)', 'Angels'], [R.x, 'var(--c-inst)', 'Institution']] }
+    ];
+    var W = 720, L = 112, bw = W - L - 8, H = 118, svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Ownership before and after the seed">';
+    rows.forEach(function (row, i) {
+      var y = 14 + i * 52, x0 = L;
+      svg += '<text x="' + (L - 10) + '" y="' + (y + 25) + '" text-anchor="end" class="ink" style="font-size:12px;font-weight:600">' + row.name + '</text>';
+      row.parts.forEach(function (p) {
+        if (p[0] <= 0.0005) return;
+        var w = p[0] * bw;
+        svg += '<rect x="' + x0.toFixed(1) + '" y="' + y + '" width="' + Math.max(w - 1.5, 0.5).toFixed(1) + '" height="36" rx="5" fill="' + p[1] + '"/>';
+        if (w > 44) svg += '<text x="' + (x0 + w / 2 - 0.75).toFixed(1) + '" y="' + (y + 23) + '" text-anchor="middle" style="fill:#fff;font-weight:650;font-size:12px">' + (p[0] * 100).toFixed(1) + '%</text>';
+        x0 += w;
+      });
+    });
+    svg += '</svg>';
+    $('#ownChart').innerHTML = svg;
+    var key = [['var(--c-founders)', 'Founders', R.founders], ['var(--c-pool)', 'Option pool', R.poolOld], ['var(--c-top)', 'Pool top-up', R.T], ['var(--c-angel)', 'Angels', R.a], ['var(--c-inst)', 'Institution', R.x]];
+    $('#ownKey').innerHTML = key.filter(function (k) { return k[2] > 0.0005; }).map(function (k) { return '<span><i class="sw" style="background:' + k[0] + '"></i>' + k[1] + ' ' + pc(k[2]) + '</span>'; }).join('');
+  }
+
+  var sweepGeo = null;
+  function renderSweep(R) {
+    var conv = CONV[S.conv];
+    var qmin = Math.floor(Math.min(conv.min, S.quote - 12) / 10) * 10, qmax = Math.ceil(Math.max(conv.max, S.quote + 12) / 10) * 10;
+    var pts = [], par = [], ymin = 99, ymax = 0;
+    for (var q = qmin; q <= qmax; q += 1) {
+      var t = Object.assign({}, S, { quote: q }); var r = M.evalQuote(t);
+      if (r.invalid) continue;
+      pts.push([q, r.D * 100]); par.push([q, r.par * 100]);
+      ymin = Math.min(ymin, r.D * 100); ymax = Math.max(ymax, r.D * 100);
+    }
+    ymin = Math.min(ymin, S.bandLo) - 1; ymax = Math.max(Math.min(ymax, 40), S.ceil + 3);
+    ymin = Math.max(8, Math.floor(ymin / 2) * 2); ymax = Math.ceil(ymax / 2) * 2;
+    var W = 720, H = 310, m = { l: 44, r: 14, t: 16, b: 44 };
+    var X = function (q) { return m.l + (q - qmin) / (qmax - qmin) * (W - m.l - m.r); };
+    var Y = function (d) { return H - m.b - (d - ymin) / (ymax - ymin) * (H - m.t - m.b); };
+    sweepGeo = { qmin: qmin, qmax: qmax, m: m, W: W, H: H, X: X, Y: Y };
+    var s = '<svg viewBox="0 0 ' + W + ' ' + H + '" id="sweepSvg" role="img" aria-label="Total dilution against the institution\'s quote">';
+    for (var g = ymin; g <= ymax; g += 2) s += '<line x1="' + m.l + '" x2="' + (W - m.r) + '" y1="' + Y(g).toFixed(1) + '" y2="' + Y(g).toFixed(1) + '" stroke="var(--line-2)" stroke-width="0.5"/><text x="' + (m.l - 7) + '" y="' + (Y(g) + 4).toFixed(1) + '" text-anchor="end">' + g + '%</text>';
+    for (var qx = qmin; qx <= qmax; qx += 10) s += '<text x="' + X(qx).toFixed(1) + '" y="' + (H - m.b + 17) + '" text-anchor="middle">' + qx + '</text>';
+    s += '<text x="' + ((m.l + W - m.r) / 2) + '" y="' + (H - 6) + '" text-anchor="middle">Institution\'s quote, ' + conv.short + ' (₹ crore)</text>';
+    s += '<rect x="' + m.l + '" y="' + Y(S.bandHi).toFixed(1) + '" width="' + (W - m.l - m.r) + '" height="' + Math.max(Y(S.bandLo) - Y(S.bandHi), 0).toFixed(1) + '" fill="var(--good-soft)"/><text x="' + (W - m.r - 4) + '" y="' + (Y(S.bandHi) + 13).toFixed(1) + '" text-anchor="end" style="fill:var(--good);font-weight:600">Target band</text>';
+    s += '<line x1="' + m.l + '" x2="' + (W - m.r) + '" y1="' + Y(S.ceil).toFixed(1) + '" y2="' + Y(S.ceil).toFixed(1) + '" stroke="var(--bad)" stroke-width="1.5" stroke-dasharray="5 4"/><text x="' + (W - m.r - 4) + '" y="' + (Y(S.ceil) - 6).toFixed(1) + '" text-anchor="end" style="fill:var(--bad);font-weight:600">Ceiling ' + S.ceil + '%</text>';
+    var path = function (a) { return a.map(function (p, i) { return (i ? 'L' : 'M') + X(p[0]).toFixed(1) + ' ' + Y(Math.min(Math.max(p[1], ymin), ymax)).toFixed(1); }).join(''); };
+    s += '<path d="' + path(par) + '" fill="none" stroke="var(--faint)" stroke-width="1.5" stroke-dasharray="4 4"/>';
+    s += '<path d="' + path(pts) + '" fill="none" stroke="var(--accent)" stroke-width="2.6" stroke-linejoin="round"/>';
+    var cx = X(Math.min(Math.max(S.quote, qmin), qmax)), cy = Y(Math.min(Math.max(R.D * 100, ymin), ymax));
+    s += '<line x1="' + cx.toFixed(1) + '" x2="' + cx.toFixed(1) + '" y1="' + m.t + '" y2="' + (H - m.b) + '" stroke="var(--accent)" stroke-width="0.8" stroke-dasharray="2 3"/>';
+    s += '<circle cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) + '" r="6" fill="var(--accent)" stroke="var(--surface)" stroke-width="2.5"/>';
+    var lx = Math.min(Math.max(cx, m.l + 52), W - m.r - 52);
+    s += '<text x="' + lx.toFixed(1) + '" y="' + Math.max(cy - 12, m.t + 10).toFixed(1) + '" text-anchor="middle" class="ink" style="font-weight:650;font-size:12px">' + pc(R.D) + '</text>';
+    s += '<g id="hov" style="display:none"><line id="hovL" y1="' + m.t + '" y2="' + (H - m.b) + '" stroke="var(--ink)" stroke-width="0.6"/><rect id="hovB" rx="6" width="132" height="24" fill="var(--ink)"/><text id="hovT" text-anchor="middle" style="fill:var(--bg);font-weight:600;font-size:12px"></text></g>';
+    s += '<rect id="hit" x="' + m.l + '" y="' + m.t + '" width="' + (W - m.l - m.r) + '" height="' + (H - m.t - m.b) + '" fill="transparent" style="cursor:crosshair"/></svg>';
+    $('#sweep').innerHTML = s;
+    var hit = $('#hit'), svg = $('#sweepSvg');
+    function qAt(ev) { var rc = svg.getBoundingClientRect(); var px = (ev.clientX - rc.left) / rc.width * W; return Math.round(Math.min(Math.max(qmin + (px - m.l) / (W - m.l - m.r) * (qmax - qmin), qmin), qmax) * 2) / 2; }
+    hit.addEventListener('pointermove', function (ev) {
+      var qv = qAt(ev), r = M.evalQuote(Object.assign({}, S, { quote: qv })); if (r.invalid) return;
+      $('#hov').style.display = ''; var x = X(qv);
+      $('#hovL').setAttribute('x1', x); $('#hovL').setAttribute('x2', x);
+      var bx = Math.min(Math.max(x - 66, m.l), W - m.r - 132);
+      $('#hovB').setAttribute('x', bx); $('#hovB').setAttribute('y', m.t + 2);
+      $('#hovT').setAttribute('x', bx + 66); $('#hovT').setAttribute('y', m.t + 18); $('#hovT').textContent = cr(qv) + '  →  ' + pc(r.D);
+    });
+    hit.addEventListener('pointerleave', function () { $('#hov').style.display = 'none'; });
+    hit.addEventListener('click', function (ev) { setKey('quote', qAt(ev)); });
+    $('#sweepCap').innerHTML = 'The solid line is the total the founders give up at your terms. The dashed line is what it would be if the angels paid the round price, so the gap between them is the cost of the cap and discount. Hover to read a number, click to set the quote.';
+  }
+
+  function levers(R) {
+    var ceil = S.ceil / 100, hi = S.bandHi / 100;
+    var targets = [[ceil, 'Hold the ' + S.ceil + '% ceiling'], [hi, 'Reach ' + S.bandHi + '%']];
+    var q = function (V) { return V === null ? 'not reachable' : cr(M.quoteFromV(S, V)); };
+    var c1 = '<div class="lever"><h3>The institution\'s number</h3><div class="hint">Lowest quote, ' + CONV[S.conv].short + '</div>';
+    targets.forEach(function (t) { c1 += '<div class="row"><span>' + t[1] + '</span><b>' + q(M.minV(S, t[0])) + '</b></div>'; });
+    c1 += '</div>';
+    var c2 = '<div class="lever"><h3>The institutional cheque</h3><div class="hint">Largest cheque at this quote</div>';
+    targets.forEach(function (t) {
+      var m = M.maxX(S, t[0]); var txt = m.none ? 'not reachable' : (m.any ? 'any size' : cr(m.x) + ' <span class="muted">(seed ' + cr(S.I + m.x) + ')</span>');
+      c2 += '<div class="row"><span>' + t[1] + '</span><b>' + txt + '</b></div>';
+    });
+    c2 += '</div>';
+    var c3 = '<div class="lever"><h3>The angel cap</h3><div class="hint">Lowest cap at this quote' + (S.tiered ? ', both tranches scaled' : '') + '</div>';
+    targets.forEach(function (t) {
+      var m = M.minCapScale(S, t[0]); var txt = m.none ? 'not reachable' : (m.any ? 'any cap' : cr(m.cap, 0));
+      c3 += '<div class="row"><span>' + t[1] + '</span><b>' + txt + '</b></div>';
+    });
+    c3 += '<div class="hint">Not reachable means the round price plus the discount already breaks the target.</div></div>';
+    $('#levH').textContent = M.status(S, R.D).key === 'over' ? 'Three ways to bring it inside' : 'How much room you have, three ways';
+    $('#levers').innerHTML = c1 + c2 + c3;
+  }
+
+  function renderGrid(R) {
+    var caps = [60, 65, 70, 75, 80, 85, 90, 100, 110, 120];
+    if (caps.indexOf(S.cap) < 0) { caps.push(S.cap); caps.sort(function (a, b) { return a - b; }); }
+    var Vs = [106, 110, 116, 120, 125, 130, 140, 150, 160, 170];
+    var curV = r1(R.V); if (Vs.indexOf(curV) < 0) { Vs.push(curV); Vs.sort(function (a, b) { return a - b; }); }
+    var h = '<tr><th>Cap ↓ · Post-money →</th>' + Vs.map(function (v) { return '<th class="' + (v === curV ? 'nowcol' : '') + '">' + v + '<br><span style="font-weight:500;text-transform:none;letter-spacing:0">pre ' + r1(v - S.X) + '</span></th>'; }).join('') + '</tr>';
+    caps.forEach(function (c) {
+      h += '<tr class="' + (c === S.cap ? 'nowrow' : '') + '"><td>₹' + c + ' cr</td>';
+      Vs.forEach(function (v) {
+        var r = M.evalV(S, v, c / S.cap); var st = M.status(S, r.D);
+        var d = r.invalid ? '–' : (r.D * 100).toFixed(1);
+        h += '<td class="c h-' + st.key + (c === S.cap && v === curV ? ' now' : '') + '" tabindex="0" role="button" data-cap="' + c + '" data-v="' + v + '" aria-label="Cap ' + c + ', post-money ' + v + ', total ' + d + ' percent">' + d + '</td>';
+      });
+      h += '</tr>';
+    });
+    $('#heat').innerHTML = h;
+    $$('#heat td.c').forEach(function (td) {
+      var go = function () { S.cap = parseFloat(td.getAttribute('data-cap')); S.tiered = false; S.scen = 'custom'; var V = parseFloat(td.getAttribute('data-v')); S.quote = r1(M.quoteFromV(S, V)); render(); };
+      td.addEventListener('click', go); td.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
+    });
+  }
+
+  function pinLabel(s) { return (s.tiered ? 'Tiered ' + s.t1cap + '/' + s.cap : 'Cap ' + s.cap) + (s.disc ? ' + ' + s.disc + '%' : '') + ' · ' + cr(s.quote) + (s.conv === 'post' ? ' post' : s.conv === 'pre_out' ? ' pre on top' : ' pre'); }
+  function pin() {
+    if (pins.length >= 4) { toast('Four pinned already, clear one first'); return; }
+    pins.push({ s: Object.assign({}, S), label: pinLabel(S) }); render(); toast('Pinned');
+  }
+  function renderCompare(R) {
+    var cols = [{ h: 'This scenario', R: R, live: true }];
+    MARKET.forEach(function (m) { cols.push({ h: m.n + ' ' + cr(m.V, 0), R: M.evalV(S, m.V), s: S }); });
+    pins.forEach(function (p, i) { cols.push({ h: p.label, R: M.evalQuote(p.s), s: p.s, pin: i }); });
+    var rows = [
+      ['Post-money', function (c) { return cr(c.R.V); }],
+      ['Pre-money, iSAFE inside', function (c) { return cr(c.R.preIn); }],
+      ['Angels hold', function (c) { return pc(c.R.a); }],
+      ['Institution holds', function (c) { return pc(c.R.x); }],
+      ['Pool top-up', function (c) { return c.R.T ? pc(c.R.T) : '–'; }],
+      ['Total the founders give up', function (c) { return '<b>' + pc(c.R.D) + '</b>'; }],
+      ['Founders keep', function (c) { return pc(c.R.founders); }],
+      ['Angel step-up', function (c) { return c.R.stepup.toFixed(2) + 'x'; }]
+    ];
+    var h = '<tr><th></th>' + cols.map(function (c) { return '<th>' + c.h + (c.pin !== undefined ? ' <button type="button" class="btn" style="height:22px;padding:0 7px;font-size:11px;margin-left:4px" data-unpin="' + c.pin + '" aria-label="Remove pinned scenario">×</button>' : '') + '</th>'; }).join('') + '</tr>';
+    rows.forEach(function (r) { h += '<tr><td>' + r[0] + '</td>' + cols.map(function (c) { return '<td>' + (c.R.invalid ? '–' : r[1](c)) + '</td>'; }).join('') + '</tr>'; });
+    h += '<tr class="tot"><td>Verdict</td>' + cols.map(function (c) { if (c.R.invalid) return '<td>–</td>'; var st = M.status(c.s || S, c.R.D); return '<td class="' + st.key + '">' + (st.key === 'over' ? 'Over' : st.key === 'good' ? 'In band' : 'Inside') + '</td>'; }).join('') + '</tr>';
+    $('#cmp').innerHTML = h;
+    $$('[data-unpin]').forEach(function (b) { b.addEventListener('click', function () { pins.splice(parseInt(b.getAttribute('data-unpin'), 10), 1); render(); }); });
+    $('#clearPins').style.display = pins.length ? '' : 'none';
+  }
+
+  function renderCapTable(R) {
+    var f = S.fPre / 100, N = R.N, S0 = M.S0;
+    var rows = [
+      ['Founders', S0 * f, R.founders * N, R.founders],
+      ['Option pool, existing', S0 * (1 - f), R.poolOld * N, R.poolOld]
+    ];
+    if (R.T > 0) rows.push(['Option pool, new top-up', 0, R.T * N, R.T]);
+    rows.push(['Angels, iSAFE converts', 0, R.a * N, R.a]);
+    rows.push(['Institution', 0, R.x * N, R.x]);
+    var sh = function (v) { return Math.round(v).toLocaleString('en-IN'); };
+    var h = '<tr><th>Holder</th><th>Before the seed</th><th>After the seed</th><th>Share</th><th>Worth at the round price</th></tr>';
+    rows.forEach(function (r) { h += '<tr><td>' + r[0] + '</td><td>' + (r[1] ? sh(r[1]) : '–') + '</td><td>' + sh(r[2]) + '</td><td>' + pc(r[3], 2) + '</td><td>' + cr(r[3] * R.V) + '</td></tr>'; });
+    h += '<tr class="tot"><td>Total</td><td>' + sh(S0) + '</td><td>' + sh(N) + '</td><td>100.00%</td><td>' + cr(R.V) + '</td></tr>';
+    $('#capTable').innerHTML = h;
+    var pp = R.parts.map(function (p) { return 'tranche of ' + cr(p.amt) + ' at ' + cr(p.cap, 0) + ' converts at ₹' + Math.round(p.price).toLocaleString('en-IN') + ' a share'; }).join('; ');
+    $('#capNote').innerHTML = 'Institutional price ₹' + Math.round(R.pps).toLocaleString('en-IN') + ' a share. Angels: ' + pp + '. Share counts are illustrative on a base of 10,00,000 shares.';
+  }
+
+  function summary(R) {
+    var st = M.status(S, R.D);
+    var L = [];
+    L.push('Cheeku seed split, ' + st.label);
+    L.push('Institution quote: ' + quoteText(S, R) + ' (post-money ' + cr(R.V) + ', pre-money ' + cr(R.preIn) + ' with the iSAFE inside)');
+    L.push('Round: angels ' + cr(S.I) + ' on iSAFE, institution ' + cr(S.X) + ', total ' + cr(S.I + S.X));
+    L.push('iSAFE: ' + (S.tiered ? cr(S.t1amt) + ' at a ' + cr(S.t1cap, 0) + ' cap, rest at ' + cr(S.cap, 0) : cr(S.cap, 0) + ' cap') + (S.basis === 'pre' ? ' (pre-money)' : ' (post-money)') + ', ' + S.disc + '% discount');
+    L.push('Angels ' + pc(R.a) + ', institution ' + pc(R.x) + (S.topup ? ', pool top-up ' + pc(R.T) : '') + ', total ' + pc(R.D) + ' against a ' + S.ceil + '% ceiling');
+    L.push('Founders keep ' + pc(R.founders) + ' from ' + S.fPre + '%. Angel step-up ' + R.stepup.toFixed(2) + 'x.');
+    return L.join('\n');
+  }
+  var lastR = null;
+  function copySummary() {
+    var t = summary(lastR);
+    var fallback = function () { var ta = document.createElement('textarea'); ta.value = t; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); toast('Copied'); } catch (e) { toast('Select and copy failed'); } ta.remove(); };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(function () { toast('Copied'); }, fallback); else fallback();
+  }
+
+  function renderInvalid() {
+    $('#bigD').textContent = '–'; $('#bigD').className = 'big num over';
+    $('#vPill').className = 'pill over'; $('#vPill').innerHTML = '<i></i>These numbers do not work';
+    $('#barPill').className = 'pill push over'; $('#barPill').innerHTML = '<i></i>Check the inputs';
+    $('#vSay').textContent = 'The quote is too low for the cheques, cap and pool top-up together, so nothing is left for the existing holders. Raise the quote, shrink a cheque or lower the pool top-up.';
+    ['vFix', 'tiles', 'warns', 'ownChart', 'ownKey', 'sweep', 'levers', 'heat', 'cmp', 'capTable', 'capNote'].forEach(function (id) { $('#' + id).innerHTML = ''; });
+  }
+
+  function render() {
+    clampAll();
+    var R = M.evalQuote(S);
+    syncInputs();
+    if (R.invalid) { renderInvalid(); save(); return; }
+    lastR = R;
+    renderVerdict(R); renderTiles(R); renderOwn(R); renderSweep(R); levers(R); renderGrid(R); renderCompare(R); renderCapTable(R);
+    save();
+  }
+
+  bind();
+  if (S.scen !== 'custom') reanchor();
+  render();
+})();
+</script>

@@ -9,6 +9,7 @@ import { brandify } from "@/components/ui/brand";
 import { GlassCircle, Gradient, glassShadow } from "@/components/ui/glass";
 import { brand, ink, lilac, semantic, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
+import { goBack } from "@/lib/nav/go-back";
 
 /*
  * The shared frame for every redesigned screen.
@@ -57,7 +58,7 @@ export function ScreenHeader({
   return (
     <View className="flex-row items-center gap-3 px-4 pb-2" style={{ paddingTop: insets.top + 6 }}>
       {back ? (
-        <GlassCircle label="Go back" onPress={onBack ?? (() => (router.canGoBack() ? router.back() : router.replace(fallback as never)))}>
+        <GlassCircle label="Go back" onPress={onBack ?? (() => goBack(router, fallback as never))}>
           <ChevronLeft size={21} color={ink[900]} />
         </GlassCircle>
       ) : (

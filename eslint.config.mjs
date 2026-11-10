@@ -21,6 +21,8 @@ const eslintConfig = [
       "mobile-react-native/marketing/**",
       // Deno code, deployed to Supabase, with its own imports and globals.
       "mobile-react-native/supabase/functions/**",
+      // The marketing site: its own project with its own tooling.
+      "landing/**",
     ],
   },
   ...compat.extends("next/core-web-vitals", "next/typescript"),
@@ -85,6 +87,20 @@ const eslintConfig = [
           selector: "Literal[value=/(^|\\s)(text|rounded(-[tblr]{1,2})?)-\\[[0-9.]+px\\]/]",
           message: "Arbitrary size class. Use the named scale (text-xs..text-4xl, rounded-sm..rounded-2xl).",
         },
+      ],
+    },
+  },
+  {
+    // A bare `router.back()` throws "GO_BACK was not handled by any navigator"
+    // when the screen is first in its stack (cold launch, a link, after
+    // startFresh or a replace). Seen on an iPhone, 2026-11-07. Use goBack()
+    // from mobile-react-native/src/lib/nav/go-back.ts, which falls back.
+    files: ["mobile-react-native/app/**/*.{ts,tsx}", "mobile-react-native/src/**/*.{ts,tsx}"],
+    rules: {
+      "no-restricted-properties": [
+        "error",
+        { object: "router", property: "back", message: "Use goBack(router, fallback) from @/lib/nav/go-back. A bare back() crashes when nothing is behind this screen." },
+        { object: "navigation", property: "goBack", message: "Use goBack(router, fallback) from @/lib/nav/go-back." },
       ],
     },
   },

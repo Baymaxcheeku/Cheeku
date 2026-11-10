@@ -22,6 +22,7 @@ import { shouldCaution } from "@/lib/safety/caution";
 import { brand, hue, ink, lilac, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
 import { Brand } from "@/components/ui/brand";
+import { goBack } from "@/lib/nav/go-back";
 
 /*
  * Book a doctor — the conversation.
@@ -325,7 +326,7 @@ export default function Consult() {
           <Gradient from={lilac.base} to={surface.canvas} angle="vertical" />
         </View>
 
-        <Header onBack={() => (router.canGoBack() ? router.back() : router.replace("/home"))} topInset={insets.top} />
+        <Header onBack={() => goBack(router, "/home")} topInset={insets.top} />
 
         <ScrollView
           ref={scroll}

@@ -1,0 +1,27 @@
+{
+  "name": "cheeku-landing",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 3100",
+    "build": "next build",
+    "start": "npx serve out -l 3100",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "geist": "^1.9.2",
+    "lucide-react": "^1.70.0",
+    "motion": "^14.11.1",
+    "next": "^16.4.6",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.5",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "tailwindcss": "^4.3.5",
+    "typescript": "^5.9.0"
+  }
+}

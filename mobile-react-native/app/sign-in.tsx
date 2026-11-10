@@ -32,6 +32,7 @@ import { font, type } from "@/theme/type";
 import { Brand } from "@/components/ui/brand";
 import { Tap } from "@/components/ui/tap";
 import { startFresh } from "@/lib/nav/start-fresh";
+import { goBack } from "@/lib/nav/go-back";
 
 /** Mirrors `passwordSchema`'s minimum, for the live length meter. */
 const MIN_PASSWORD = 10;
@@ -101,15 +102,6 @@ export default function SignIn() {
     setError(null);
   }
 
-  /*
-   * `back()` fails when this screen is the first entry in the history stack,
-   * which it is on a cold launch or a direct link. Falling back to /welcome
-   * keeps the control honest instead of surfacing a GO_BACK error.
-   */
-  function goBack() {
-    if (router.canGoBack()) router.back();
-    else router.replace("/welcome");
-  }
 
   async function submit() {
     setError(null);
@@ -200,7 +192,7 @@ export default function SignIn() {
           <Tap scale={0.95}
             accessibilityRole="button"
             accessibilityLabel="Go back"
-            onPress={goBack}
+            onPress={() => goBack(router, "/welcome")}
             hitSlop={8}
             className="h-10 w-10 items-center justify-center rounded-pill bg-surface"
             style={shadow.e1}

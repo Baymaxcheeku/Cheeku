@@ -18,6 +18,7 @@ import { useFamily } from "@/lib/profiles/family";
 import { rupees } from "@/lib/records/details";
 import { brand, ink, semantic, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
+import { goBack } from "@/lib/nav/go-back";
 
 /*
  * One policy: the card, who it covers, what it covers in plain words (from
@@ -155,7 +156,7 @@ export default function PolicyPage() {
           setConfirm(false);
           if (ok) {
             refresh();
-            router.back();
+            goBack(router, "/insurance");
           }
         }}
       />

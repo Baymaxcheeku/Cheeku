@@ -16,6 +16,7 @@ import { shortDate } from "@/lib/records/details";
 import { brand, ink, semantic } from "@/theme/tokens";
 import { font } from "@/theme/type";
 import { FormSkeleton, ScreenSkeleton } from "@/components/ui/skeleton";
+import { goBack } from "@/lib/nav/go-back";
 
 /*
  * A PREGNANCY, AND THE BIRTH.
@@ -97,7 +98,7 @@ export default function PregnancyScreen() {
     const pregnancyId = existing?.pregnancy.id ?? null;
     const datings = Array.isArray(existing?.raw.datings) ? (existing.raw.datings as unknown[]) : [];
     void runOptimistic({
-      apply: () => router.back(),
+      apply: () => goBack(router, "/memory"),
       revert: () => undefined,
       write: () => savePregnancy(profileId, input, pregnancyId, datings),
       message: "Couldn't save the pregnancy dates. Check your connection.",
