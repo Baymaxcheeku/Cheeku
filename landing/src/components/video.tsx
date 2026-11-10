@@ -1,6 +1,6 @@
 "use client";
 
-import { Play } from "lucide-react";
+import { Pause, Play, Volume2, VolumeX } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 // Off only in the hosted preview copy, whose sandbox cannot embed other sites.
@@ -65,6 +65,91 @@ export function Film({ id, title, caption }: { id: string; title: string; captio
           <span className="absolute inset-x-0 bottom-0 p-4 text-left text-[15px] font-medium text-white sm:p-6 sm:text-[17px]">{caption}</span>
         </a>
       )}
+    </div>
+  );
+}
+
+/*
+ * The product film, served from this site: no other company's player, name
+ * or logo on it. It starts muted when it scrolls into view (browsers only
+ * allow sound after a tap) and pauses when it scrolls away. Two controls,
+ * ours: play or pause, and sound.
+ */
+export function LocalFilm({ src, poster, title }: { src: string; poster: string; title: string }) {
+  const video = useRef<HTMLVideoElement>(null);
+  const [playing, setPlaying] = useState(false);
+  const [muted, setMuted] = useState(true);
+  const [progress, setProgress] = useState(0);
+  const userPaused = useRef(false);
+
+  useEffect(() => {
+    const v = video.current;
+    if (!v) return;
+    const io = new IntersectionObserver(
+      ([e]) => {
+        if (e?.isIntersecting) {
+          if (!userPaused.current) void v.play().catch(() => {});
+        } else v.pause();
+      },
+      { threshold: 0.5 },
+    );
+    io.observe(v);
+    return () => io.disconnect();
+  }, []);
+
+  const toggle = () => {
+    const v = video.current;
+    if (!v) return;
+    if (v.paused) {
+      userPaused.current = false;
+      void v.play().catch(() => {});
+    } else {
+      userPaused.current = true;
+      v.pause();
+    }
+  };
+  const sound = () => {
+    const v = video.current;
+    if (!v) return;
+    v.muted = !v.muted;
+    setMuted(v.muted);
+    if (!v.muted && v.paused) void v.play().catch(() => {});
+  };
+
+  return (
+    <div className="group relative aspect-video w-full overflow-hidden rounded-[24px] bg-[#e9e7f0]">
+      <video
+        ref={video}
+        className="absolute inset-0 h-full w-full cursor-pointer object-cover"
+        src={src}
+        poster={poster}
+        muted
+        loop
+        playsInline
+        preload="metadata"
+        aria-label={title}
+        onClick={toggle}
+        onPlay={() => setPlaying(true)}
+        onPause={() => setPlaying(false)}
+        onTimeUpdate={(e) => setProgress(e.currentTarget.duration ? e.currentTarget.currentTime / e.currentTarget.duration : 0)}
+      />
+      {!playing && (
+        <button type="button" onClick={toggle} aria-label="Play the film" className="absolute left-1/2 top-1/2 grid h-[76px] w-[76px] -translate-x-1/2 -translate-y-1/2 cursor-pointer place-items-center rounded-full bg-white text-purple-700 shadow-[var(--shadow-lg)] transition-transform duration-200 ease-[var(--ease)] hover:scale-105 active:scale-[0.97] sm:h-[92px] sm:w-[92px]">
+          <Play size={30} fill="currentColor" strokeWidth={0} className="translate-x-0.5" />
+        </button>
+      )}
+      <div className="absolute inset-x-3 bottom-3 flex items-center gap-2 sm:inset-x-4 sm:bottom-4">
+        <button type="button" onClick={toggle} aria-label={playing ? "Pause the film" : "Play the film"} className="glass-white grid h-10 w-10 shrink-0 cursor-pointer place-items-center rounded-full text-ink">
+          {playing ? <Pause size={15} fill="currentColor" strokeWidth={0} /> : <Play size={15} fill="currentColor" strokeWidth={0} className="translate-x-px" />}
+        </button>
+        <button type="button" onClick={sound} aria-label={muted ? "Turn sound on" : "Turn sound off"} aria-pressed={!muted} className="glass-white flex h-10 shrink-0 cursor-pointer items-center gap-2 rounded-full px-4 text-[14px] font-medium text-ink">
+          {muted ? <VolumeX size={16} strokeWidth={1.75} /> : <Volume2 size={16} strokeWidth={1.75} />}
+          {muted ? "Tap for sound" : "Sound on"}
+        </button>
+        <div className="ml-1 h-1 flex-1 overflow-hidden rounded-full bg-white/60" aria-hidden>
+          <div className="h-full origin-left rounded-full bg-purple-600" style={{ transform: `scaleX(${progress})` }} />
+        </div>
+      </div>
     </div>
   );
 }

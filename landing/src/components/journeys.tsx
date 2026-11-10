@@ -104,10 +104,10 @@ function Chat({ ask, answer }: { ask: string; answer: string }) {
   }, [stage]);
   return (
     <div ref={ref} className="max-w-[440px] space-y-2.5">
-      <p className="glass ml-auto w-fit max-w-[85%] rounded-[20px] rounded-br-md px-4 py-2.5 text-[15px]">
+      <p className="ml-auto w-fit max-w-[85%] rounded-[20px] rounded-br-md bg-purple-600 px-4 py-2.5 text-[15px] text-white">
         <Typed text={ask} go={seen} speed={28} onDone={() => setStage((s) => (s === "ask" ? "think" : s))} />
       </p>
-      <p className={`w-fit max-w-[92%] rounded-[20px] rounded-bl-md bg-white px-4 py-3 text-[15px] leading-snug text-ink transition-opacity duration-300 ${stage === "ask" ? "opacity-0" : "opacity-100"}`}>
+      <p className={`w-fit max-w-[92%] rounded-[20px] rounded-bl-md bg-soft px-4 py-3 text-[15px] leading-snug text-ink ring-1 ring-hair transition-opacity duration-300 ${stage === "ask" ? "opacity-0" : "opacity-100"}`}>
         {stage === "answer" ? <Typed text={answer} go speed={16} /> : <Dots />}
       </p>
     </div>
@@ -138,26 +138,22 @@ export function Journeys() {
                 onClick={() => setI(n)}
                 className={`relative h-[104px] w-[150px] shrink-0 cursor-pointer overflow-hidden rounded-2xl text-left transition-[box-shadow,opacity] duration-200 ${on ? "opacity-100 shadow-[0_0_0_2px_var(--color-purple-600),var(--shadow-md)]" : "opacity-75 hover:opacity-100"}`}
               >
-                <Img src={x.photo} alt="" position="object-[80%_center]" />
-                <span aria-hidden className="absolute inset-0 bg-gradient-to-t from-purple-950/90 via-purple-950/30 to-transparent" />
-                <span className="absolute inset-x-3 bottom-2.5 text-[14px] font-medium leading-tight text-white">{x.tab}</span>
+                <Img src={x.photo} alt="" position="object-center" />
+                <span className="absolute inset-x-1.5 bottom-1.5 rounded-xl bg-white/90 px-2.5 py-1.5 text-[13px] font-medium leading-tight text-ink backdrop-blur">{x.tab}</span>
               </button>
             );
           })}
         </div>
 
-        <div id="journey-panel" role="tabpanel" aria-labelledby={`tab-${j.id}`} className="relative mt-5 overflow-hidden rounded-[32px] bg-purple-950 text-white">
+        <div id="journey-panel" role="tabpanel" aria-labelledby={`tab-${j.id}`} className="relative mt-5 overflow-hidden rounded-[32px] border border-hair bg-white shadow-[var(--shadow-md)]">
           <AnimatePresence mode="wait" initial={false}>
-            <motion.div key={j.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.35, ease: EASE }} className="relative grid lg:min-h-[600px] lg:grid-cols-[1fr_auto]">
-              <Img src={j.photo} alt={j.alt} position="object-right" />
-              <div aria-hidden className="absolute inset-0 bg-gradient-to-r from-purple-950/90 via-purple-950/55 to-purple-950/20" />
-
-              <div className="relative flex flex-col justify-between gap-10 p-7 sm:p-12">
+            <motion.div key={j.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3, ease: EASE }} className="grid lg:min-h-[600px] lg:grid-cols-[1fr_1fr]">
+              <div className="flex flex-col justify-between gap-10 p-7 sm:p-12">
                 <div>
-                  <h3 className="display max-w-[520px] text-[36px] sm:text-[48px]">{j.title}</h3>
-                  <p className="mt-4 max-w-[460px] text-[17px] leading-relaxed text-white/85">{j.body}</p>
+                  <h3 className="display max-w-[480px] text-[36px] sm:text-[46px]">{j.title}</h3>
+                  <p className="mt-4 max-w-[460px] text-[17px] leading-relaxed text-ink-2">{j.body}</p>
                   {"film" in j && (
-                    <a href={j.film} target="_blank" rel="noopener noreferrer" className="mt-5 inline-flex h-11 items-center rounded-full bg-white px-5 text-[15px] font-medium text-ink transition-colors duration-200 hover:bg-purple-50">
+                    <a href={j.film} target="_blank" rel="noopener noreferrer" className="mt-5 inline-flex h-11 items-center rounded-full bg-purple-600 px-5 text-[15px] font-medium text-white transition-colors duration-200 hover:bg-purple-700">
                       Watch their story
                     </a>
                   )}
@@ -165,8 +161,9 @@ export function Journeys() {
                 <Chat ask={j.ask} answer={j.answer} />
               </div>
 
-              <div className="relative flex items-end justify-center px-8 pt-2 lg:pr-14 lg:pt-12">
-                <Phone src={j.screen} alt={j.screenAlt} width={264} className="-mb-28" />
+              <div className="relative flex min-h-[420px] items-end justify-center overflow-hidden px-8 pt-10">
+                <Img src={j.photo} alt={j.alt} position="object-center" />
+                <Phone src={j.screen} alt={j.screenAlt} width={250} className="-mb-24" />
               </div>
             </motion.div>
           </AnimatePresence>

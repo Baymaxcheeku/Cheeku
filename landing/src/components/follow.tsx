@@ -32,7 +32,6 @@ const SOON = [
   ["Your watch and Strava", "Sleep, steps and activity, read alongside your reports"],
   ["Scan a meal or a label", "A plate of food or an ingredient list, explained for you"],
   ["Compare health cover", "Family insurance plans, side by side, in plain words"],
-  ["Talk, don’t type", "Ask Cheeku out loud, in your own language"],
 ];
 
 /** A stack of cards: each one slides up and rests on the last. */
@@ -53,21 +52,21 @@ export function FollowThrough() {
               <h3 className="display max-w-[440px] text-[34px] sm:text-[44px]">{c.title}</h3>
               <p className="mt-4 max-w-[420px] text-[17px] leading-relaxed text-ink-2">{c.body}</p>
             </div>
-            <div className="relative flex h-[340px] items-start justify-center overflow-hidden bg-gradient-to-b from-purple-100 to-purple-50 pt-10 md:h-[400px]">
+            <div className="relative flex h-[340px] items-start justify-center overflow-hidden bg-purple-50 pt-10 md:h-[400px]">
               <Phone src={c.screen} alt={c.alt} width={250} />
             </div>
           </article>
         ))}
-        <article className="sticky mb-6 overflow-hidden rounded-[32px] bg-purple-950 p-8 text-white shadow-[var(--shadow-md)] sm:p-12" style={{ top: `${96 + CARDS.length * 16}px` }}>
+        <article className="sticky mb-6 overflow-hidden rounded-[32px] border border-purple-200 bg-purple-50 p-8 shadow-[var(--shadow-md)] sm:p-12" style={{ top: `${96 + CARDS.length * 16}px` }}>
           <div className="flex flex-wrap items-center gap-3">
             <h3 className="display text-[34px] sm:text-[44px]">And next</h3>
             <Soon />
           </div>
-          <ul className="mt-8 grid gap-x-10 gap-y-6 sm:grid-cols-2">
+          <ul className="mt-8 grid gap-x-10 gap-y-6 sm:grid-cols-3">
             {SOON.map(([t, d]) => (
-              <li key={t} className="border-t border-white/15 pt-5">
+              <li key={t} className="border-t border-purple-200 pt-5">
                 <p className="text-[19px] font-medium">{t}</p>
-                <p className="mt-1 text-[16px] leading-relaxed text-purple-200">{d}</p>
+                <p className="mt-1 text-[16px] leading-relaxed text-ink-2">{d}</p>
               </li>
             ))}
           </ul>

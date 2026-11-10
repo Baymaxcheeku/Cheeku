@@ -30,7 +30,7 @@ const ROWS: { who: string; line: string; av: string }[][] = [
 export function People() {
   const { paused, toggle } = usePause();
   return (
-    <section className={`overflow-hidden py-24 sm:py-28 ${paused ? "paused" : ""}`}>
+    <section id="family" className={`overflow-hidden py-24 sm:py-28 ${paused ? "paused" : ""}`}>
       <div className="px-6">
         <Heading sub="Not one profile with everything mixed in. Each person at home gets a file of their own, and Cheeku remembers what matters for them.">
           Built around <em>everyone at home</em>

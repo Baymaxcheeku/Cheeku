@@ -87,7 +87,7 @@ Checked against the app's code on 10 Nov 2026. The website may promise the first
 ## Brand Commitments
 
 - Name: Cheeku (company: Cheeku AI). A round purple mascot exists; the founder does not want it in the hero.
-- Colour, set by the founder: a white theme at about 60%, brand purple at about 30%, a loud colour at about 10% for calls to action. The purple is the app's own (`#4a2ade`).
+- Colour, set by the founder: a light theme throughout, preferably white. No deep or dark sections (10 Nov 2026). Brand purple for accents, a loud colour for calls to action. The purple is the app's own (`#4a2ade`).
 - Feel the founder asked for: Apple-style glass, in the direction of August, Heidi Health and Confido Health.
 - Voice: short, plain, hard-hitting, written for Indian patients. No medical or lab terms in the copy. Everyday words: sugar, BP, tablets, tests. A little Hinglish where it is how people talk.
 - Never: em dashes; the words AI-powered, platform, ecosystem, disrupting, revolutionise.

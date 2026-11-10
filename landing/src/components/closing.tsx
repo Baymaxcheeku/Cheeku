@@ -68,17 +68,20 @@ export function Trust() {
 export function Closing() {
   return (
     <>
-      <section id="join" className="relative overflow-hidden bg-purple-950 text-white">
-        <Img src="/photos/parents.webp" alt="" position="object-right" className="opacity-60" />
-        <div aria-hidden className="absolute inset-0 bg-gradient-to-r from-purple-950 via-purple-950/80 to-purple-950/30" />
-        <div className="relative mx-auto max-w-[1180px] px-6 py-28 sm:py-36">
-          <h2 className="display max-w-[720px] text-[44px] sm:text-[68px]">
-            Next time someone at home is unwell, <em>don&apos;t be alone with it</em>
-          </h2>
-          <p className="mt-5 max-w-[460px] text-[18px] leading-relaxed text-white/85">We are letting families in a few at a time. Join now and you go first.</p>
-          <div className="mt-8">
-            <WaitlistForm source="closing" onPurple />
-            <p className="pl-1 text-[14px] text-white/70">Free to join. No spam.</p>
+      <section id="join" className="mx-auto max-w-[1400px] px-3 pb-10 sm:px-5">
+        <div className="relative grid overflow-hidden rounded-[28px] bg-purple-50 sm:rounded-[36px] lg:grid-cols-2">
+          <div className="p-8 sm:p-14 lg:py-24">
+            <h2 className="display max-w-[560px] text-[42px] text-ink sm:text-[60px]">
+              Next time someone at home is unwell, <em className="text-purple-700">don&apos;t be alone with it</em>
+            </h2>
+            <p className="mt-5 max-w-[440px] text-[18px] leading-relaxed text-ink-2">We are letting families in a few at a time. Join now and you go first.</p>
+            <div className="mt-8">
+              <WaitlistForm source="closing" />
+              <p className="pl-1 text-[14px] text-ink-3">Free to join. No spam.</p>
+            </div>
+          </div>
+          <div className="relative min-h-[300px]">
+            <Img src="/photos/parents.webp" alt="An elderly couple laughing over morning chai at home" position="object-center" />
           </div>
         </div>
       </section>

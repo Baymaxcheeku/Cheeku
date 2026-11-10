@@ -26,15 +26,16 @@ Geist for type. No server code.
 
 ## Where the design comes from
 
-The structure was studied from octohealth.com with the clone-website skill
-(notes in `docs/research/octohealth/brief.md`). The words, colour, type,
+The structure was studied from octohealth.com, and the hero and menu from
+trylifelong.com, with the clone-website skill (notes in `docs/research/`). The words, colour, type,
 photographs and app screens are Cheeku's. Product facts are in `PRODUCT.md`.
 
 ## What is on the page
 
 | Section | File |
 |---|---|
-| Floating nav, full-screen photo hero, moving line | `src/components/top.tsx` |
+| Menu bar with two drop-downs, photo-card hero, moving line | `src/components/top.tsx` |
+| Ask by chat or voice, languages | `ask.tsx` |
 | How it works (three photo cards), the product film | `how.tsx` |
 | The family, sliding past | `people.tsx` |
 | Six family situations, each with a photo and a real app screen | `journeys.tsx` |
@@ -57,14 +58,22 @@ dark, because the words sit there.
 
 ## Films
 
-The product film (`mI4FmQt_8Qk`) plays in its own section, reached from the
-hero's second button. The fertility film (`YHAdRiJ32Fo`) opens from the
-"Trying for a baby" tab.
+The product film is a file on this site (`public/video/cheeku-film.mp4`,
+7 MB, 720p, with a poster image), played by our own player in
+`src/components/video.tsx`: no other company's name or logo on it. It starts
+muted when it scrolls into view. To replace it, export a new MP4 and run:
+`ffmpeg -i new.mp4 -vf scale=1280:720 -c:v libx264 -crf 25 -preset slow -c:a aac -b:a 96k -movflags +faststart public/video/cheeku-film.mp4`.
+If the page gets real traffic, move the file to a video host that adjusts
+quality to the viewer's connection (Bunny Stream, Cloudflare Stream or Mux).
+
+The fertility film (`YHAdRiJ32Fo`) still opens on YouTube from the "Trying
+for a baby" tab, until its file is supplied.
 
 ## Colour and type
 
-Tokens are in `src/app/globals.css`. About 60% white, 30% brand purple,
-10% marigold (the signup button only). Headlines are Instrument Serif with
+Tokens are in `src/app/globals.css`. A light page throughout: white, with
+brand purple for accents, buttons and pale lilac panels, and marigold for
+the signup button only. No dark sections. Headlines are Instrument Serif with
 italic for the words that matter; everything else is Inter. Both are the
 faces the app uses.
 

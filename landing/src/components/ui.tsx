@@ -38,7 +38,7 @@ export function PillLink({ href, children, tone }: { href: string; children: Rea
     loud: "bg-loud text-ink hover:bg-loud-hover",
     white: "bg-white text-ink hover:bg-purple-50",
     glass: "glass text-white hover:bg-white/25",
-    ink: "bg-ink text-white hover:bg-purple-700",
+    ink: "bg-purple-600 text-white hover:bg-purple-700",
     outline: "border border-ink/25 text-ink hover:border-ink/60",
   } as const;
   return (

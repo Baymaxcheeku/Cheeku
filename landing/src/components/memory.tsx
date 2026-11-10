@@ -24,17 +24,17 @@ export function Memory() {
   const step = 360 / KEPT.length;
 
   return (
-    <section ref={ref} className="relative bg-purple-100" style={{ height: still ? "auto" : "220vh" }}>
+    <section ref={ref} className="relative bg-white" style={{ height: still ? "auto" : "220vh" }}>
       <div className={`${still ? "relative py-24" : "sticky top-0 h-screen"} flex items-center overflow-hidden`}>
         {/* A soft purple light where the wheel's centre sits, off the left edge. */}
-        <div aria-hidden className="absolute left-0 top-1/2 h-[140vh] w-[70vw] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(closest-side,var(--color-purple-600),rgb(138_130_245/0.55)_45%,transparent_72%)]" />
+        <div aria-hidden className="absolute left-0 top-1/2 h-[140vh] w-[70vw] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(closest-side,var(--color-purple-200),var(--color-purple-50)_55%,transparent_75%)]" />
 
         {!still && (
           <motion.div aria-hidden className="absolute left-0 top-1/2 hidden h-0 w-0 md:block" style={{ rotate: turn }}>
             {KEPT.map((k, n) => (
               <span
                 key={k}
-                className="absolute left-0 top-0 origin-left whitespace-nowrap font-[family-name:var(--font-display)] text-[26px] leading-none text-purple-950/80"
+                className="absolute left-0 top-0 origin-left whitespace-nowrap font-[family-name:var(--font-display)] text-[26px] leading-none text-purple-700"
                 style={{ transform: `translateY(-50%) rotate(${n * step}deg) translateX(min(34vw, 470px))` }}
               >
                 {k}
