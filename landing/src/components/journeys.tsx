@@ -72,7 +72,7 @@ const JOURNEYS = [
     ask: "What changed since my last checkup?",
     answer: "Your cholesterol is up a little, your vitamin D is still low. Here is one thing to do today.",
     screen: "/screens/fit.webp",
-    screenAlt: "Today's plan in Cheeku, built from the person's own numbers",
+    screenAlt: "Cheeku's home screen: today's one step and the action plan, built from the person's own numbers",
   },
   {
     id: "other",

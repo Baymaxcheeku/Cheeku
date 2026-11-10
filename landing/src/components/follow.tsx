@@ -24,7 +24,7 @@ const CARDS = [
     title: "One small step, every day",
     body: "A plan built from that person’s own numbers. Today’s tablets, one change to a meal, a walk. Nothing you can’t do.",
     screen: "/screens/fit.webp",
-    alt: "Today's plan in Cheeku",
+    alt: "Cheeku's home screen with today's one step and the action plan",
   },
 ];
 
