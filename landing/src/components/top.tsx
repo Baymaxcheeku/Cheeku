@@ -4,6 +4,7 @@ import { Menu, X } from "lucide-react";
 import { AnimatePresence, motion, useMotionValueEvent, useReducedMotion, useScroll } from "motion/react";
 import { useState } from "react";
 
+import { Img } from "./img";
 import { EASE, Marquee, PauseButton, PillLink, usePause } from "./ui";
 
 const LINKS = [
@@ -80,8 +81,7 @@ export function Hero() {
   const { paused, toggle } = usePause();
   return (
     <section id="top" className="relative flex h-svh min-h-[660px] flex-col justify-end overflow-hidden bg-purple-950 text-white">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src="/photos/hero.webp" alt="A woman showing her father something on her phone, at home in the evening" fetchPriority="high" className="absolute inset-0 h-full w-full object-cover object-[72%_center]" />
+      <Img src="/photos/hero.webp" alt="A woman showing her father something on her phone, at home in the evening" priority position="object-[72%_center]" />
       {/* The left and the foot of the photograph are darkened so the words always read. */}
       <div aria-hidden className="absolute inset-0 bg-gradient-to-r from-purple-950/85 via-purple-950/35 to-transparent" />
       <div aria-hidden className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-purple-950/90 to-transparent" />

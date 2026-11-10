@@ -4,6 +4,7 @@ import { Plus } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
 
+import { Img } from "./img";
 import { EASE, Heading, Reveal } from "./ui";
 import { WaitlistForm } from "./waitlist-form";
 
@@ -68,8 +69,7 @@ export function Closing() {
   return (
     <>
       <section id="join" className="relative overflow-hidden bg-purple-950 text-white">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/photos/parents.webp" alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover object-right opacity-60" />
+        <Img src="/photos/parents.webp" alt="" position="object-right" className="opacity-60" />
         <div aria-hidden className="absolute inset-0 bg-gradient-to-r from-purple-950 via-purple-950/80 to-purple-950/30" />
         <div className="relative mx-auto max-w-[1180px] px-6 py-28 sm:py-36">
           <h2 className="display max-w-[720px] text-[44px] sm:text-[68px]">

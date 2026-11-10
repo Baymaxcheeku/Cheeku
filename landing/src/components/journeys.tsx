@@ -1,9 +1,11 @@
 "use client";
 
-import { AnimatePresence, motion } from "motion/react";
-import { useState } from "react";
+import { AnimatePresence, motion, useInView } from "motion/react";
+import { useEffect, useRef, useState } from "react";
 
+import { Img } from "./img";
 import { Phone } from "./phone";
+import { Dots, Typed } from "./typed";
 import { EASE, Heading } from "./ui";
 
 /*
@@ -86,6 +88,32 @@ const JOURNEYS = [
   },
 ] as const;
 
+/*
+ * The exchange plays out like a real chat: the question types itself, Cheeku
+ * thinks for a beat, then the answer types out. It starts when the panel is
+ * on screen, and again each time a different situation is picked.
+ */
+function Chat({ ask, answer }: { ask: string; answer: string }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const seen = useInView(ref, { once: true, margin: "-15% 0px" });
+  const [stage, setStage] = useState<"ask" | "think" | "answer">("ask");
+  useEffect(() => {
+    if (stage !== "think") return;
+    const id = setTimeout(() => setStage("answer"), 900);
+    return () => clearTimeout(id);
+  }, [stage]);
+  return (
+    <div ref={ref} className="max-w-[440px] space-y-2.5">
+      <p className="glass ml-auto w-fit max-w-[85%] rounded-[20px] rounded-br-md px-4 py-2.5 text-[15px]">
+        <Typed text={ask} go={seen} speed={28} onDone={() => setStage((s) => (s === "ask" ? "think" : s))} />
+      </p>
+      <p className={`w-fit max-w-[92%] rounded-[20px] rounded-bl-md bg-white px-4 py-3 text-[15px] leading-snug text-ink transition-opacity duration-300 ${stage === "ask" ? "opacity-0" : "opacity-100"}`}>
+        {stage === "answer" ? <Typed text={answer} go speed={16} /> : <Dots />}
+      </p>
+    </div>
+  );
+}
+
 export function Journeys() {
   const [i, setI] = useState(0);
   const j = JOURNEYS[i]!;
@@ -110,8 +138,7 @@ export function Journeys() {
                 onClick={() => setI(n)}
                 className={`relative h-[104px] w-[150px] shrink-0 cursor-pointer overflow-hidden rounded-2xl text-left transition-[box-shadow,opacity] duration-200 ${on ? "opacity-100 shadow-[0_0_0_2px_var(--color-purple-600),var(--shadow-md)]" : "opacity-75 hover:opacity-100"}`}
               >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={x.photo} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover object-[80%_center]" />
+                <Img src={x.photo} alt="" position="object-[80%_center]" />
                 <span aria-hidden className="absolute inset-0 bg-gradient-to-t from-purple-950/90 via-purple-950/30 to-transparent" />
                 <span className="absolute inset-x-3 bottom-2.5 text-[14px] font-medium leading-tight text-white">{x.tab}</span>
               </button>
@@ -122,8 +149,7 @@ export function Journeys() {
         <div id="journey-panel" role="tabpanel" aria-labelledby={`tab-${j.id}`} className="relative mt-5 overflow-hidden rounded-[32px] bg-purple-950 text-white">
           <AnimatePresence mode="wait" initial={false}>
             <motion.div key={j.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.35, ease: EASE }} className="relative grid lg:min-h-[600px] lg:grid-cols-[1fr_auto]">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={j.photo} alt={j.alt} loading="lazy" className="absolute inset-0 h-full w-full object-cover object-right" />
+              <Img src={j.photo} alt={j.alt} position="object-right" />
               <div aria-hidden className="absolute inset-0 bg-gradient-to-r from-purple-950/90 via-purple-950/55 to-purple-950/20" />
 
               <div className="relative flex flex-col justify-between gap-10 p-7 sm:p-12">
@@ -136,14 +162,7 @@ export function Journeys() {
                     </a>
                   )}
                 </div>
-                <div className="max-w-[440px] space-y-2.5">
-                  <motion.p initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.45, ease: EASE }} className="glass ml-auto w-fit max-w-[85%] rounded-[20px] rounded-br-md px-4 py-2.5 text-[15px]">
-                    {j.ask}
-                  </motion.p>
-                  <motion.p initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5, duration: 0.45, ease: EASE }} className="w-fit max-w-[92%] rounded-[20px] rounded-bl-md bg-white px-4 py-3 text-[15px] leading-snug text-ink">
-                    {j.answer}
-                  </motion.p>
-                </div>
+                <Chat ask={j.ask} answer={j.answer} />
               </div>
 
               <div className="relative flex items-end justify-center px-8 pt-2 lg:pr-14 lg:pt-12">

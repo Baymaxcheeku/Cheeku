@@ -1,5 +1,6 @@
 import { Check, FileText, Pill } from "lucide-react";
 
+import { Img } from "./img";
 import { Heading, Reveal } from "./ui";
 import { Film } from "./video";
 
@@ -80,8 +81,7 @@ export function How() {
           <Reveal key={s.title} delay={i * 0.08}>
             <li className="list-none">
               <div className="relative aspect-[4/5] overflow-hidden rounded-[28px] bg-purple-950">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={s.photo} alt={s.alt} loading="lazy" className={`absolute inset-0 h-full w-full object-cover ${s.pos}`} />
+                <Img src={s.photo} alt={s.alt} position={s.pos} />
                 <div aria-hidden className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-purple-950/85 to-transparent" />
                 <div className="absolute inset-x-4 bottom-4">{s.overlay}</div>
               </div>
