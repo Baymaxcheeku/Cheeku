@@ -15,7 +15,7 @@ export function Film({ id, title, caption, compact = false }: { id: string; titl
   const [playing, setPlaying] = useState(false);
   const watch = `https://www.youtube.com/watch?v=${id}`;
   return (
-    <div className="relative aspect-video w-full overflow-hidden rounded-[20px] bg-purple-950">
+    <div className="relative aspect-video w-full overflow-hidden rounded-[24px] bg-purple-950">
       {playing ? (
         <iframe
           className="absolute inset-0 h-full w-full"

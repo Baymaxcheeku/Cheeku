@@ -41,7 +41,7 @@ export function WaitlistForm({ source, onPurple = false, center = false }: { sou
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.35, ease: EASE }}
-            className={`flex h-14 items-center gap-3 rounded-2xl px-4 ${onPurple ? "glass-dark text-white" : "bg-purple-50 text-ink"}`}
+            className={`flex h-14 items-center gap-3 rounded-full px-5 ${onPurple ? "glass text-white" : "bg-purple-50 text-ink"}`}
           >
             <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-loud text-ink">
               <Check size={16} strokeWidth={2.5} />
@@ -54,7 +54,7 @@ export function WaitlistForm({ source, onPurple = false, center = false }: { sou
         ) : (
           <motion.form key="form" onSubmit={submit} noValidate exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>
             <div
-              className={`flex h-14 items-center gap-2 rounded-2xl p-1.5 pl-4 transition-shadow duration-200 focus-within:ring-2 ${
+              className={`flex h-14 items-center gap-2 rounded-full p-1.5 pl-6 transition-shadow duration-200 focus-within:ring-2 ${
                 onPurple ? "bg-white focus-within:ring-loud" : "bg-white shadow-[var(--shadow-md)] ring-1 ring-hair focus-within:ring-purple-600"
               }`}
             >
@@ -77,7 +77,7 @@ export function WaitlistForm({ source, onPurple = false, center = false }: { sou
               <button
                 type="submit"
                 disabled={state === "busy"}
-                className="inline-flex h-11 shrink-0 cursor-pointer items-center gap-2 rounded-xl bg-loud px-4 text-[15px] font-semibold text-ink transition-[background-color,transform] duration-150 ease-[var(--ease)] hover:bg-loud-hover active:scale-[0.97] disabled:cursor-wait sm:px-5"
+                className="inline-flex h-11 shrink-0 cursor-pointer items-center gap-2 rounded-full bg-loud px-4 text-[15px] font-medium text-ink transition-[background-color,transform] duration-150 ease-[var(--ease)] hover:bg-loud-hover active:scale-[0.97] disabled:cursor-wait sm:px-5"
               >
                 Join the waitlist
                 {state === "busy" ? <Loader2 size={16} className="animate-spin" /> : <ArrowRight size={16} strokeWidth={2} />}

@@ -1,82 +1,111 @@
-import { Check } from "lucide-react";
+import { Check, FileText, Pill } from "lucide-react";
 
-import { Phone } from "./phone";
-import { Kicker, Reveal, Wrap } from "./ui";
+import { Heading, Reveal } from "./ui";
+import { Film } from "./video";
+
+/* Small panes of glass over each photograph, showing what Cheeku does at that step. */
+function Rows({ rows }: { rows: { icon: typeof Pill; top: string; main: string }[] }) {
+  return (
+    <ul className="space-y-2">
+      {rows.map((r) => (
+        <li key={r.main} className="glass flex items-center gap-3 rounded-2xl px-3.5 py-2.5 text-white">
+          <r.icon size={16} strokeWidth={1.5} className="shrink-0 opacity-90" />
+          <span>
+            <span className="block text-[11px] leading-tight text-white/70">{r.top}</span>
+            <span className="block text-[14px] font-medium leading-tight">{r.main}</span>
+          </span>
+        </li>
+      ))}
+    </ul>
+  );
+}
 
 const STEPS = [
-  { n: "1", title: "Send it", body: "A photo, a PDF, or share it straight from WhatsApp. Reports, prescriptions, scans, bills.", screen: "/screens/home.webp", alt: "Cheeku's home screen with today's one step and the family's plan" },
-  { n: "2", title: "Understand it", body: "Cheeku reads it and tells you what it means for that person, in plain words. No medical language.", screen: "/screens/track.webp", alt: "A lab report explained, with the values that need a doctor marked" },
-  { n: "3", title: "Get it done", body: "Need a test or a doctor? Book it in the app. Sample collected from home. The result files itself.", screen: "/screens/lab.webp", alt: "A home sample collection booked, with the slot and address confirmed" },
+  {
+    title: "Send it",
+    body: "A photo, a PDF, or share it straight from WhatsApp. Reports, prescriptions, scans and bills.",
+    photo: "/photos/send.webp",
+    alt: "Hands photographing a printed lab report on a dining table",
+    pos: "object-center",
+    overlay: (
+      <Rows
+        rows={[
+          { icon: FileText, top: "Just now", main: "Blood report, filed under Papa" },
+          { icon: Pill, top: "Yesterday", main: "Prescription, filed under Ma" },
+        ]}
+      />
+    ),
+  },
+  {
+    title: "Understand it",
+    body: "Cheeku tells you what it means for that person, in plain words, and what changed since last time.",
+    photo: "/photos/understand.webp",
+    alt: "A grandmother reading at home by a window",
+    pos: "object-top",
+    overlay: (
+      <div className="glass rounded-2xl p-4 text-white">
+        <p className="text-[12px] text-white/70">About Ma&apos;s report</p>
+        <p className="mt-1 text-[15px] leading-snug">Her sugar is a little higher than last year. Not urgent. Worth asking her doctor at the next visit.</p>
+      </div>
+    ),
+  },
+  {
+    title: "Get it done",
+    body: "Need a test or a doctor? Book it in the app. The sample is collected from home and the result files itself.",
+    photo: "/photos/act.webp",
+    alt: "A lab technician with a sample kit greeting a man at his front door",
+    pos: "object-top",
+    overlay: (
+      <div className="glass flex items-center gap-3 rounded-2xl p-4 text-white">
+        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-loud text-ink">
+          <Check size={18} strokeWidth={2.5} />
+        </span>
+        <span>
+          <span className="block text-[15px] font-medium leading-tight">Home test booked</span>
+          <span className="block text-[13px] leading-tight text-white/75">Saturday, 8 to 9 am</span>
+        </span>
+      </div>
+    ),
+  },
 ];
 
 export function How() {
   return (
-    <Wrap id="how" className="py-20 sm:py-28">
-      <Reveal className="max-w-[720px]">
-        <Kicker>How it works</Kicker>
-        <h2 className="h-section mt-3 text-[32px] sm:text-[48px]">Three steps. No learning curve</h2>
-      </Reveal>
-      <ol className="mt-12 grid gap-10 md:grid-cols-3 md:gap-6">
+    <section id="how" className="mx-auto max-w-[1180px] px-6 py-24 sm:py-28">
+      <Heading sub="No learning curve. If you can forward a WhatsApp message, you can use Cheeku.">
+        How it <em>works</em>
+      </Heading>
+      <ol className="mt-14 grid gap-10 md:grid-cols-3 md:gap-5">
         {STEPS.map((s, i) => (
-          <Reveal key={s.n} delay={i * 0.06}>
+          <Reveal key={s.title} delay={i * 0.08}>
             <li className="list-none">
-              <div className="relative flex h-[380px] items-start justify-center overflow-hidden rounded-[24px] bg-purple-50 pt-8">
-                <Phone src={s.screen} alt={s.alt} width={230} />
+              <div className="relative aspect-[4/5] overflow-hidden rounded-[28px] bg-purple-950">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={s.photo} alt={s.alt} loading="lazy" className={`absolute inset-0 h-full w-full object-cover ${s.pos}`} />
+                <div aria-hidden className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-purple-950/85 to-transparent" />
+                <div className="absolute inset-x-4 bottom-4">{s.overlay}</div>
               </div>
-              <div className="mt-6 flex items-baseline gap-3">
-                <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-purple-600 text-[14px] font-semibold text-white">{s.n}</span>
-                <h3 className="text-[22px] font-semibold tracking-[-0.02em]">{s.title}</h3>
-              </div>
-              <p className="mt-2 text-[17px] leading-relaxed text-ink-2">{s.body}</p>
+              <h3 className="display mt-6 text-center text-[30px]">{s.title}</h3>
+              <p className="mx-auto mt-2 max-w-[320px] text-center text-[16px] leading-relaxed text-ink-2">{s.body}</p>
             </li>
           </Reveal>
         ))}
       </ol>
-    </Wrap>
+    </section>
   );
 }
 
-const CHECKS = [
-  { title: "Checked against each other", body: "Every tablet, from every doctor, looked at together." },
-  { title: "Checked for this person", body: "Their age, their other illnesses, pregnancy, allergies." },
-  { title: "Same medicine, lower price", body: "See options with the same salt that cost less. You and your doctor decide." },
-];
-
-/** The one feature families ask about most, on the purple stage. */
-export function Medicines() {
+/** The product film, where the hero's second button lands. */
+export function FilmSection() {
   return (
-    <section id="medicines" className="mx-auto max-w-[1280px] px-3 sm:px-6">
-      <div className="stage relative overflow-hidden rounded-[28px] sm:rounded-[40px]">
-        <div className="mx-auto grid max-w-[1200px] items-center gap-10 px-5 pt-14 sm:px-10 sm:pt-20 lg:grid-cols-[1fr_auto] lg:gap-16">
-          <div className="pb-4 lg:pb-20">
-            <Reveal>
-              <Kicker onPurple>Medicine check</Kicker>
-              <h2 className="h-section mt-3 max-w-[560px] text-[32px] text-white sm:text-[48px]">Six tablets from three doctors. Has anyone checked them together?</h2>
-              <p className="mt-5 max-w-[520px] text-[18px] leading-relaxed text-purple-100">
-                Each doctor sees only their own prescription. Cheeku sees all of them, and tells you what to ask before the next dose.
-              </p>
-            </Reveal>
-            <ul className="mt-8 grid max-w-[560px] gap-3">
-              {CHECKS.map((c, i) => (
-                <Reveal key={c.title} delay={i * 0.06}>
-                  <li className="glass-dark flex list-none items-start gap-4 rounded-[18px] p-4 sm:p-5">
-                    <span className="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-white text-purple-700">
-                      <Check size={14} strokeWidth={3} />
-                    </span>
-                    <div>
-                      <p className="text-[17px] font-medium text-white">{c.title}</p>
-                      <p className="mt-0.5 text-[15px] leading-relaxed text-purple-100">{c.body}</p>
-                    </div>
-                  </li>
-                </Reveal>
-              ))}
-            </ul>
-            <p className="mt-6 max-w-[520px] text-[14px] leading-relaxed text-purple-200">Cheeku never tells you to stop a medicine and never rates your doctor. If something looks dangerous, it sends you to a doctor the same day.</p>
-          </div>
-          <div className="flex justify-center self-end">
-            <Phone src="/screens/meds-a.webp" alt="A medicine checked for one person: it fits her, with two things to get right and cheaper options with the same salt" width={300} className="-mb-28" />
-          </div>
-        </div>
+    <section id="film" className="bg-soft">
+      <div className="mx-auto max-w-[1180px] px-6 py-24 sm:py-28">
+        <Heading sub="One family, one evening, and everything Cheeku does for them.">
+          See it in <em>two minutes</em>
+        </Heading>
+        <Reveal className="mx-auto mt-12 max-w-[980px] rounded-[32px] bg-white p-2 shadow-[var(--shadow-lg)] sm:p-3">
+          <Film id="mI4FmQt_8Qk" title="Cheeku in two minutes" caption="Cheeku, in two minutes" />
+        </Reveal>
       </div>
     </section>
   );

@@ -24,75 +24,56 @@ Geist for type. No server code.
 - The root ESLint and TypeScript configs skip this folder.
 - It deploys on its own. An app release never waits on the site.
 
-## Direction
+## Where the design comes from
 
-Written before the page was built, and every section follows it (the top of
-`src/app/globals.css` has the same five lines).
-
-- Product: Cheeku keeps a family's reports, medicines and doctor visits in one
-  app, explains them in simple words and books the next step.
-- Character: calm, plain-spoken, protective.
-- World: the health drawer of an Indian home. The report file, the medicine
-  strips, the family WhatsApp group.
-- Moments: the product film in the hero, and real app screens in true iPhone
-  frames.
-- Signature: the person tag ("Papa", "Ma", "Baby"). Everything is about
-  someone in particular.
+The structure was studied from octohealth.com with the clone-website skill
+(notes in `docs/research/octohealth/brief.md`). The words, colour, type,
+photographs and app screens are Cheeku's. Product facts are in `PRODUCT.md`.
 
 ## What is on the page
 
-| Section | File | Job |
-|---|---|---|
-| Top line, nav, hero | `src/components/top.tsx` | "Stop googling your family's health", the signup form, the product film |
-| The questions | `worries.tsx` | Six worries in the reader's own words |
-| Who it's for | `journeys.tsx` | The six families from the app's onboarding, each with a real screen. The fertility tab carries its own film |
-| How it works | `how.tsx` | Send it, understand it, get it done |
-| Medicine check | `how.tsx` | All of a person's medicines checked together, and cheaper options with the same salt |
-| Is it safe | `trust.tsx` | Not a doctor, danger means go now, nothing made up, your data |
-| Questions | `trust.tsx` | Six short answers |
-| Final call, footer | `closing.tsx` | Signup again, the disclaimer |
+| Section | File |
+|---|---|
+| Floating nav, full-screen photo hero, moving line | `src/components/top.tsx` |
+| How it works (three photo cards), the product film | `how.tsx` |
+| The family, sliding past | `people.tsx` |
+| Six family situations, each with a photo and a real app screen | `journeys.tsx` |
+| Stacked cards: what Cheeku does, and what is coming | `follow.tsx` |
+| The pinned wheel of everything Cheeku remembers | `memory.tsx` |
+| Cheeku against Google and WhatsApp | `compare.tsx` |
+| Safety, questions, signup, footer | `closing.tsx` |
 
-The six families are the same six the app asks about on the way in
-(`mobile-react-native/src/lib/onboarding/journeys.ts`): trying for a baby,
-expecting, new parent, caring for parents, getting healthier, just keeping
-track.
+## Photographs
 
-## The app screens
+`public/photos/*.webp` were generated for this page (10 Nov 2026) and show
+no real people. The footer says so. Replace them with real photographs when
+there are some: keep the subject on the right and the left side calm and
+dark, because the words sit there.
 
-`public/screens/*.webp` are the real app, taken from the product demo
-recordings (393 points wide, sample data). `src/components/phone.tsx` draws
-the frame: it adds the status bar back so the screen is 393 by 852, an iPhone
-15's proportions, and nothing is stretched. To replace a screen, export a
-393 by 778 point capture at 2x and keep the file name.
+## App screens
 
-## The films
+`public/screens/*.webp` are the real app with sample data.
+`src/components/phone.tsx` frames them at an iPhone 15's true proportions.
 
-Both are YouTube videos, loaded only when played (`src/components/video.tsx`):
-the product film in the hero (`mI4FmQt_8Qk`) and the fertility film
-(`YHAdRiJ32Fo`). The poster is YouTube's own thumbnail.
+## Films
 
-## Colour
+The product film (`mI4FmQt_8Qk`) plays in its own section, reached from the
+hero's second button. The fertility film (`YHAdRiJ32Fo`) opens from the
+"Trying for a baby" tab.
 
-All tokens are in `src/app/globals.css`.
+## Colour and type
 
-- 60% white: the page, cards and most sections.
-- 30% brand purple (the app's own): the three "stage" panels, tabs, ticks and
-  headline accents. One hue, lit from the top left. No second colour in it.
-- 10% marigold (`--color-loud`): the signup button and nothing else.
-
-Glass is used where there is purple behind it to blur: the film's frame and
-the medicine check points.
+Tokens are in `src/app/globals.css`. About 60% white, 30% brand purple,
+10% marigold (the signup button only). Headlines are Instrument Serif with
+italic for the words that matter; everything else is Inter. Both are the
+faces the app uses.
 
 ## Copy rules
 
-- Written for a patient, not a doctor: sugar, BP, tablets, tests. No lab names
-  or drug names in the copy (the app screens show them, because that is the
-  product).
-- Short. Headlines end without a full stop. No em dashes. Never AI-powered,
-  platform, ecosystem or revolutionise.
-- Nothing invented: every feature named is in the app, and every number
-  (12,000+ pincodes, 300+ cities, 5,000+ doctors and specialists) is from the
-  seed deck.
+- For a patient: sugar, BP, tablets, tests. No lab or drug names in the copy.
+- Short. No em dashes. Never AI-powered, platform, ecosystem, revolutionise.
+- Only what the app does today is stated as fact. Wearables and Strava, meal
+  and label scanning, insurance comparison and voice are marked "Coming soon".
 - Not on this page: investors, employers, pricing, partner names.
 
 ## Signups
@@ -126,12 +107,10 @@ conflict, which the form treats as success.
 
 ## Before it goes public
 
-- Decide whether the a16z line at the very top stays. It is one component
-  (`TopLine` in `top.tsx`); the page reads fine without it.
-- Confirm "early 2027" and "small batches" are what we want to promise.
+- Confirm "early 2027" and "small batches".
+- Replace generated photographs with real ones if possible.
 - The form takes an email. A phone number may suit Indian families better.
-- Add a privacy note beside the form once the policy page exists.
-- Add a share image and the real domain in metadata.
+- Add a privacy note beside the form, a share image and the real domain.
 
 ## Skills kept with this project
 

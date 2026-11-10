@@ -1,78 +1,65 @@
 "use client";
 
-import { ArrowUpRight, Menu, X } from "lucide-react";
-import { AnimatePresence, motion, useMotionTemplate, useMotionValue, useMotionValueEvent, useReducedMotion, useScroll } from "motion/react";
-import { useRef, useState } from "react";
+import { Menu, X } from "lucide-react";
+import { AnimatePresence, motion, useMotionValueEvent, useReducedMotion, useScroll } from "motion/react";
+import { useState } from "react";
 
-import { EASE } from "./ui";
-import { Film } from "./video";
-import { WaitlistForm } from "./waitlist-form";
-
-const A16Z_URL = "https://a16z.com/the-state-of-longevity/";
-
-/** One quiet line above the page. Delete this component to remove it. */
-export function TopLine() {
-  return (
-    <a href={A16Z_URL} target="_blank" rel="noopener noreferrer" className="group flex min-h-9 items-center justify-center gap-1.5 bg-purple-950 px-4 py-2 text-center text-[13px] text-purple-200">
-      <span>
-        a16z says the next big health companies will be a &ldquo;healthcare home&rdquo;. <span className="font-medium text-white underline decoration-white/30 underline-offset-4 group-hover:decoration-white">We&apos;re building India&apos;s</span>
-      </span>
-      <ArrowUpRight size={14} strokeWidth={1.5} className="shrink-0 text-white" />
-    </a>
-  );
-}
+import { EASE, Marquee, PauseButton, PillLink, usePause } from "./ui";
 
 const LINKS = [
-  { href: "#for-you", label: "Who it's for" },
   { href: "#how", label: "How it works" },
-  { href: "#medicines", label: "Medicine check" },
-  { href: "#trust", label: "Is it safe" },
+  { href: "#for-you", label: "Who it's for" },
+  { href: "#follow-through", label: "What it does" },
   { href: "#faq", label: "Questions" },
 ];
 
+/** A floating pill: clear over the photograph, white once the page scrolls. */
 export function Nav() {
   const { scrollY } = useScroll();
-  const [stuck, setStuck] = useState(false);
+  const [solid, setSolid] = useState(false);
   const [open, setOpen] = useState(false);
-  useMotionValueEvent(scrollY, "change", (v) => setStuck(v > 24));
+  useMotionValueEvent(scrollY, "change", (v) => setSolid(v > 80));
+  const light = solid || open;
 
   return (
-    <header className="sticky top-0 z-40">
-      <div className={`transition-[background-color,border-color,backdrop-filter] duration-200 ${stuck || open ? "border-b border-hair bg-white/80 backdrop-blur-xl backdrop-saturate-150" : "border-b border-transparent"}`}>
-        <nav aria-label="Main" className="mx-auto flex h-16 max-w-[1200px] items-center justify-between px-5 sm:px-8">
-          <a href="#top" className="flex items-center gap-2" aria-label="Cheeku, back to top">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/mascot/face.png" alt="" width={28} height={28} className="h-7 w-7 rounded-full bg-purple-100" />
-            <span className="text-[18px] font-semibold tracking-tight">Cheeku</span>
+    <header className="fixed inset-x-0 top-0 z-40 px-3 pt-3 sm:px-6 sm:pt-4">
+      <div className={`mx-auto max-w-[1180px] rounded-[28px] transition-[background-color,box-shadow,backdrop-filter] duration-300 ${light ? "glass-white" : ""}`}>
+        <nav aria-label="Main" className="flex h-14 items-center justify-between pl-6 pr-2">
+          <a href="#top" className={`font-[family-name:var(--font-display)] text-[26px] leading-none transition-colors duration-300 ${light ? "text-ink" : "text-white"}`} aria-label="Cheeku, back to top">
+            Cheeku
           </a>
-          <ul className="hidden items-center gap-7 md:flex">
+          <ul className="hidden items-center gap-8 md:flex">
             {LINKS.map((l) => (
               <li key={l.href}>
-                <a href={l.href} className="text-[15px] text-ink-2 transition-colors duration-150 hover:text-ink">
+                <a href={l.href} className={`text-[14px] transition-colors duration-200 ${light ? "text-ink-2 hover:text-ink" : "text-white/85 hover:text-white"}`}>
                   {l.label}
                 </a>
               </li>
             ))}
           </ul>
           <div className="flex items-center gap-1">
-            <a href="#join" className="inline-flex h-9 items-center rounded-[10px] bg-ink px-3.5 text-[14px] font-medium text-white transition-[background-color,transform] duration-150 ease-[var(--ease)] hover:bg-purple-700 active:scale-[0.97]">
+            <a
+              href="#join"
+              className={`inline-flex h-10 items-center rounded-full px-5 text-[14px] font-medium transition-[background-color,color,transform] duration-200 ease-[var(--ease)] active:scale-[0.98] ${light ? "bg-ink text-white hover:bg-purple-700" : "bg-white text-ink hover:bg-purple-50"}`}
+            >
               Join the waitlist
             </a>
-            <button type="button" aria-label={open ? "Close menu" : "Open menu"} aria-expanded={open} onClick={() => setOpen((v) => !v)} className="grid h-10 w-10 cursor-pointer place-items-center rounded-[10px] text-ink md:hidden">
+            <button type="button" aria-label={open ? "Close menu" : "Open menu"} aria-expanded={open} onClick={() => setOpen((v) => !v)} className={`grid h-10 w-10 cursor-pointer place-items-center rounded-full md:hidden ${light ? "text-ink" : "text-white"}`}>
               {open ? <X size={20} strokeWidth={1.5} /> : <Menu size={20} strokeWidth={1.5} />}
             </button>
           </div>
         </nav>
         <AnimatePresence>
           {open && (
-            <motion.ul initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.18, ease: EASE }} className="border-t border-hair px-3 py-2 md:hidden">
+            <motion.ul initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} transition={{ duration: 0.25, ease: EASE }} className="overflow-hidden px-3 md:hidden">
               {LINKS.map((l) => (
                 <li key={l.href}>
-                  <a href={l.href} onClick={() => setOpen(false)} className="block rounded-[10px] px-3 py-3 text-[16px] text-ink active:bg-purple-50">
+                  <a href={l.href} onClick={() => setOpen(false)} className="block rounded-2xl px-3 py-3 text-[17px] text-ink active:bg-purple-50">
                     {l.label}
                   </a>
                 </li>
               ))}
+              <li className="h-2" />
             </motion.ul>
           )}
         </AnimatePresence>
@@ -81,64 +68,59 @@ export function Nav() {
   );
 }
 
-const FACTS = ["Lab tests at home in 12,000+ pincodes", "5,000+ doctors and specialists", "One file for everyone at home"];
+const LINE = [
+  ["12,000+ pincodes", "Tests collected at home"],
+  ["5,000+ doctors", "On video or at the clinic"],
+  ["One file each", "For everyone in the family"],
+  ["Every report", "Explained in simple words"],
+];
 
 export function Hero() {
-  const stage = useRef<HTMLDivElement>(null);
   const still = useReducedMotion();
-  const x = useMotionValue(30);
-  const y = useMotionValue(0);
-  // The light on the purple stage follows the pointer, like light on glass.
-  const light = useMotionTemplate`radial-gradient(520px circle at ${x}% ${y}%, rgb(255 255 255 / 0.16), transparent 60%)`;
-
+  const { paused, toggle } = usePause();
   return (
-    <div id="top">
-      <section className="mx-auto max-w-[1200px] px-5 pb-12 pt-14 text-center sm:px-8 sm:pb-14 sm:pt-20">
-        <motion.div initial={{ opacity: 0, y: still ? 0 : 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: EASE }}>
-          <p className="text-[15px] font-medium text-purple-600">For Indian families · Opening in small batches</p>
-          <h1 className="h-display mx-auto mt-5 max-w-[900px] text-[42px] sm:text-[64px] lg:text-[76px]">
-            Stop googling your <span className="text-purple-600">family&apos;s health</span>
-          </h1>
-          <p className="mx-auto mt-6 max-w-[620px] text-[18px] leading-[1.55] text-ink-2 sm:text-[20px]">
-            Send Cheeku any report or prescription. It explains it in simple words, remembers it for each person at home, and books the next test or doctor.
-          </p>
-          <div id="join" className="mt-8 scroll-mt-28">
-            <WaitlistForm source="hero" center />
-            <p className="text-[14px] text-ink-3">Free to join. No spam.</p>
-          </div>
-        </motion.div>
-      </section>
+    <section id="top" className="relative flex h-svh min-h-[660px] flex-col justify-end overflow-hidden bg-purple-950 text-white">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/photos/hero.webp" alt="A woman showing her father something on her phone, at home in the evening" fetchPriority="high" className="absolute inset-0 h-full w-full object-cover object-[72%_center]" />
+      {/* The left and the foot of the photograph are darkened so the words always read. */}
+      <div aria-hidden className="absolute inset-0 bg-gradient-to-r from-purple-950/85 via-purple-950/35 to-transparent" />
+      <div aria-hidden className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-purple-950/90 to-transparent" />
 
-      <section className="mx-auto max-w-[1280px] px-3 sm:px-6">
-        <motion.div
-          ref={stage}
-          initial={{ opacity: 0, y: still ? 0 : 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.12, ease: EASE }}
-          onPointerMove={(e) => {
-            if (still || e.pointerType !== "mouse" || !stage.current) return;
-            const r = stage.current.getBoundingClientRect();
-            x.set(((e.clientX - r.left) / r.width) * 100);
-            y.set(((e.clientY - r.top) / r.height) * 100);
-          }}
-          className="stage relative overflow-hidden rounded-[28px] px-4 pb-8 pt-4 sm:rounded-[40px] sm:px-10 sm:pb-12 sm:pt-10"
-        >
-          <motion.div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: light }} />
-          <div className="glass-dark relative mx-auto max-w-[980px] rounded-[26px] p-1.5 sm:rounded-[30px] sm:p-2.5">
-            <Film id="mI4FmQt_8Qk" title="Cheeku in two minutes" caption="See Cheeku in two minutes" />
-          </div>
-          <ul className="relative mx-auto mt-6 flex max-w-[980px] flex-col items-center justify-center gap-x-8 gap-y-2 text-[15px] text-purple-100 sm:mt-8 sm:flex-row">
-            {FACTS.map((f) => (
-              <li key={f} className="flex items-center gap-2">
-                <span className="h-1.5 w-1.5 rounded-full bg-loud" />
-                {f}
-              </li>
+      <motion.div
+        initial={{ opacity: 0, y: still ? 0 : 18 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.9, delay: 0.1, ease: EASE }}
+        className="relative mx-auto w-full max-w-[1180px] px-6 pb-10 sm:pb-14"
+      >
+        <h1 className="display max-w-[760px] text-[52px] sm:text-[76px] lg:text-[92px]">
+          Between doctor visits, <em>your family has Cheeku</em>
+        </h1>
+        <p className="mt-5 max-w-[500px] text-[17px] leading-relaxed text-white/90 sm:text-[19px]">
+          It reads every report and prescription, explains them in simple words, and gets the next test or doctor booked. For everyone at home.
+        </p>
+        <div className="mt-8 flex flex-wrap gap-3">
+          <PillLink href="#join" tone="loud">
+            Join the waitlist
+          </PillLink>
+          <PillLink href="#film" tone="glass">
+            Watch the film
+          </PillLink>
+        </div>
+      </motion.div>
+
+      <div className={`relative border-t border-white/15 ${paused ? "paused" : ""}`}>
+        <div className="mx-auto flex max-w-[1180px] items-center gap-4 px-6 py-4">
+          <PauseButton paused={paused} onToggle={toggle} label="the moving line" onDark />
+          <Marquee label="What Cheeku covers" className="[mask-image:linear-gradient(to_right,transparent,black_6%,black_94%,transparent)]">
+            {LINE.map(([a, b]) => (
+              <p key={a} className="flex shrink-0 items-baseline gap-2.5 pr-14 text-[15px]">
+                <span className="font-medium text-white">{a}</span>
+                <span className="text-white/70">{b}</span>
+              </p>
             ))}
-          </ul>
-        </motion.div>
-      </section>
-    </div>
+          </Marquee>
+        </div>
+      </div>
+    </section>
   );
 }
-
-
