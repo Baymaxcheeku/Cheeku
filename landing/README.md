@@ -132,3 +132,19 @@ conflict, which the form treats as success.
 - The form takes an email. A phone number may suit Indian families better.
 - Add a privacy note beside the form once the policy page exists.
 - Add a share image and the real domain in metadata.
+
+## Skills kept with this project
+
+`.claude/skills/clone-website/` is a third-party skill (JCodesMore,
+ai-website-cloner-template, MIT, copied 10 Nov 2026). It is three instruction
+files and nothing else: no scripts, no dependencies. It tells an agent how to
+study a live page (layout, type, spacing, motion, breakpoints) and rebuild it.
+
+How we use it: to measure how a reference site is built, then apply that to
+our own page. What we do not do with it: ship another company's text, images,
+logos, fonts or videos. Those belong to them. Its default instruction is to
+copy the source's real content and assets, so say "structure and motion only,
+our content" when you invoke it.
+
+Only the skill was copied. The repo's Next.js starter app was left out, since
+this folder already is one.
