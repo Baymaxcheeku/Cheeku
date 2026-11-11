@@ -63,6 +63,27 @@ export function flagFor(value: string, refRange: string | null, previous: Extrac
   return n < range[0] ? "low" : n > range[1] ? "high" : "normal";
 }
 
+/*
+ * A medicine is its own field, "med:<index>", because a misread handwritten
+ * name is the reading that matters most (the reader puts one per medicine,
+ * ai_integration_api services/baymax_reader.py). The field shows "Glycomet
+ * 500 mg"; a correction replaces the medicine's name with what the person
+ * typed and drops the separate strength, which the typed text now carries.
+ * The rest of the medicine (schedule, timing, days) is left as read.
+ */
+function withCorrectedMedicines(details: Extraction["details"], s: ReviewState): Extraction["details"] {
+  const meds = (details as { medicines?: unknown }).medicines;
+  if (!Array.isArray(meds)) return details;
+  let changed = false;
+  const next = meds.map((m, i) => {
+    const typed = s.edits[`f:med:${i}`]?.value?.trim();
+    if (!typed || !m || typeof m !== "object") return m;
+    changed = true;
+    return { ...(m as Record<string, unknown>), name: typed.slice(0, 80), strength: null };
+  });
+  return changed ? { ...details, medicines: next } : details;
+}
+
 /** The extraction as the person confirmed it. */
 export function applyReview(x: Extraction, s: ReviewState): Extraction {
   const touched = (id: string) => s.confirmed.has(id) || Boolean((s.edits[id]?.value ?? "").trim());
@@ -86,6 +107,7 @@ export function applyReview(x: Extraction, s: ReviewState): Extraction {
   const all = [...fields, ...values];
   return {
     ...x,
+    details: withCorrectedMedicines(x.details, s),
     fields,
     values,
     eventDate: pick("eventDate", x.eventDate),

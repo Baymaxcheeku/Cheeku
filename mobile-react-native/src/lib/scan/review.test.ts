@@ -64,6 +64,47 @@ describe("what the confirm step shows", () => {
   });
 });
 
+describe("a medicine read from a prescription", () => {
+  const rx: Extraction = {
+    title: "Prescription",
+    docType: "prescription",
+    eventDate: "2026-10-02",
+    facility: null,
+    doctor: "Dr. Rao",
+    details: {
+      doctor: { name: "Dr. Rao" },
+      medicines: [
+        { name: "Glycomet", strength: "500 mg", schedule: [1, 0, 1], timing: "after_food", durationDays: 30 },
+        { name: "Dolo", strength: "650", schedule: [0, 0, 0], asNeeded: true },
+      ],
+    },
+    fields: [
+      { key: "med:0", label: "Medicine 1", value: "Glycomet 500 mg", confidence: 0.92 },
+      { key: "med:1", label: "Medicine 2", value: "Dolo 650", confidence: 0.55 },
+    ],
+    values: [],
+    rawText: "",
+    confidence: 0.74,
+  };
+
+  it("asks about a doubtful medicine name and nothing read clearly", () => {
+    expect(unresolved(rx, EMPTY_REVIEW).map((i) => i.id)).toEqual(["f:med:1"]);
+  });
+
+  it("writes a corrected name into the medicine, keeping its schedule", () => {
+    const out = applyReview(rx, { edits: { "f:med:1": { value: "Dolo 650 mg" } }, confirmed: new Set() });
+    const meds = (out.details as { medicines: Record<string, unknown>[] }).medicines;
+    expect(meds[1]).toMatchObject({ name: "Dolo 650 mg", strength: null, asNeeded: true });
+    expect(meds[0]).toMatchObject({ name: "Glycomet", strength: "500 mg", schedule: [1, 0, 1] });
+    expect(routeFor(out)).toBe("filed");
+  });
+
+  it("leaves the medicines alone when a name is only confirmed", () => {
+    const out = applyReview(rx, { edits: {}, confirmed: new Set(["f:med:1"]) });
+    expect(out.details).toBe(rx.details);
+  });
+});
+
 describe("a shared file", () => {
   it("takes the first file and fixes WhatsApp's types", () => {
     expect(normaliseMime("image/jpg", "IMG.jpg")).toBe("image/jpeg");

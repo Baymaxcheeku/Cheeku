@@ -7,7 +7,24 @@ vi.mock("@tanstack/query-async-storage-persister", () => ({
 // The offline setting lives in the keychain, which needs a phone.
 vi.mock("@/lib/storage", () => ({ kv: { get: async () => null, set: async () => undefined, remove: async () => undefined } }));
 
-const { shouldPersistQuery } = await import("./cache");
+const { shouldPersistQuery, shouldDehydrate } = await import("./cache");
+
+describe("what is actually written", () => {
+  const q = (key: unknown[], status: "pending" | "error" | "success") =>
+    shouldDehydrate({ queryKey: key, state: { status } } as never);
+
+  it("writes an allowlisted query only once it has an answer", () => {
+    expect(q(["home-context"], "success")).toBe(true);
+    // Saved while loading, a failure afterwards ("signed out") was logged on
+    // every write and could be restored as an error on the next launch.
+    expect(q(["home-context"], "pending")).toBe(false);
+    expect(q(["home-context"], "error")).toBe(false);
+  });
+
+  it("still never writes what the allowlist leaves out", () => {
+    expect(q(["ask-context"], "success")).toBe(false);
+  });
+});
 
 /*
  * The allowlist decides what health data is written to disk. A mistake here is

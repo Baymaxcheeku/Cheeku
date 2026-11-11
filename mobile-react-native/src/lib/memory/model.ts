@@ -81,6 +81,13 @@ export type MemoryDigest = {
 };
 
 export type ModelRequest = {
+  /**
+   * The member this turn is about: always the active profile, never another.
+   * The AI API reads that member's own documents for it (retrieval, the
+   * health report), and only after the database's ai_may_process() agrees
+   * the signed-in account may (0044). Optional so a stand-in can ignore it.
+   */
+  profileId?: string;
   question: string;
   history: { role: "user" | "assistant"; content: string }[];
   memory: MemoryDigest;

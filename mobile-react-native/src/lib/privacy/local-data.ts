@@ -106,10 +106,27 @@ export async function clearCaches(queryClient: QueryClient): Promise<void> {
  * signed in because a cache would not clear is the worse failure.
  */
 export async function signOutAndWipe(queryClient: QueryClient): Promise<void> {
-  await logActivity("sign_out").catch(() => undefined);
-  await forgetThisDevice().catch(() => undefined);
-  await supabase.auth.signOut().catch(() => undefined);
-  await wipeAccountData(queryClient);
+  leaving = true;
+  try {
+    await logActivity("sign_out").catch(() => undefined);
+    await forgetThisDevice().catch(() => undefined);
+    await supabase.auth.signOut().catch(() => undefined);
+    await wipeAccountData(queryClient);
+  } finally {
+    leaving = false;
+  }
+}
+
+/*
+ * True while signOutAndWipe runs. The root session watcher
+ * (components/app/auth-lifecycle.tsx) wipes and routes on any sign-out it did
+ * not expect, such as a session revoked from another device; this tells it
+ * that this one is expected and its caller is already handling the route.
+ */
+let leaving = false;
+
+export function isSigningOut(): boolean {
+  return leaving;
 }
 
 /** The on-device half of sign-out and account deletion. */

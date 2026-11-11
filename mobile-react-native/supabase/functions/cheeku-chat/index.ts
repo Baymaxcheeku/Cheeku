@@ -20,6 +20,15 @@
 // Until CHEEKU_MODEL_URL is set this answers 503 and the app uses its built-in
 // stand-in, so turning the model on is a secrets change, not a release.
 //
+// THE AI API (int-ai-api). CHEEKU_MODEL_URL points at the Cheeku AI API's
+// /api/v1/baymax/chat (ai_integration_api, running against this project since
+// migration 0044). It needs to know WHO is asking to read that member's
+// documents, so the caller's own token travels on as `x-cheeku-user`, and the
+// API verifies it with Supabase Auth and asks ai_may_process() (theirs, on the
+// plan, consented) before reading anything. The body's `profileId` names the
+// member; the token, not the body, decides whether that is allowed.
+// `authorization: Bearer CHEEKU_MODEL_KEY` proves the call came from here.
+//
 // EVERY CALL IS CLAIMED FIRST. claim_model_call() (migration 0035) runs as the
 // caller, through their own JWT, and refuses a spent free allowance, bursts
 // (6 a minute, 60 an hour) and the daily ceiling. A refusal is a 429 with the
@@ -28,7 +37,7 @@
 //
 // Deploy:  supabase functions deploy cheeku-chat
 //          (JWT verification stays ON: only a signed-in member can call it)
-// Secrets: supabase secrets set CHEEKU_MODEL_URL=https://...  CHEEKU_MODEL_KEY=...
+// Secrets: supabase secrets set CHEEKU_MODEL_URL=https://<ai-api>/api/v1/baymax/chat  CHEEKU_MODEL_KEY=...
 // App:     EXPO_PUBLIC_CHAT_MODEL=edge
 
 const TIERS = ["reassure", "monitor", "contact_today", "go_now"];
@@ -90,7 +99,12 @@ Deno.serve(async (req) => {
   try {
     const res = await fetch(url, {
       method: "POST",
-      headers: { "content-type": "application/json", ...(key ? { authorization: `Bearer ${key}` } : {}) },
+      headers: {
+        "content-type": "application/json",
+        ...(key ? { authorization: `Bearer ${key}` } : {}),
+        // Who is asking, passed through unchanged; the model service verifies it itself.
+        "x-cheeku-user": authorization,
+      },
       body: JSON.stringify(body),
       signal: controller.signal,
     });

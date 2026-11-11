@@ -6,6 +6,7 @@ import { supabase } from "@/lib/supabase/client";
 import { policiesFor } from "@/lib/insurance/queries";
 
 import { buildHealthFile, withPolicies, type Bundle, type HealthFile } from "./file";
+import { readReport, type HealthReport } from "./report";
 
 /*
  * The health file, one member at a time.
@@ -70,4 +71,32 @@ export function useHealthFile(profileId: string | undefined) {
 /** Warms a member's file, so switching to them lands on a full page. */
 export function prefetchHealthFile(qc: QueryClient, profileId: string) {
   void qc.prefetchQuery({ queryKey: healthFileKey(profileId), queryFn: () => fetchHealthFile(profileId), staleTime: 30_000 });
+}
+
+// --------------------------------------------------------- health report --
+// The AI API's report for one member (0044, lib/health/report.ts).
+
+export const healthReportKey = (profileId: string | undefined) => ["health-report", profileId ?? "none"] as const;
+
+/**
+ * Null when there is no report yet, and also when 0044 is not applied (the
+ * table is missing): the card simply does not appear, nothing else breaks.
+ */
+export async function fetchHealthReport(profileId: string): Promise<HealthReport | null> {
+  const { data, error } = await supabase
+    .from("ai_health_reports")
+    .select("summary, report, generated_at")
+    .eq("profile_id", profileId)
+    .maybeSingle();
+  if (error) return null;
+  return readReport(data);
+}
+
+export function useHealthReport(profileId: string | undefined) {
+  return useQuery({
+    queryKey: healthReportKey(profileId),
+    queryFn: () => fetchHealthReport(profileId as string),
+    enabled: Boolean(profileId),
+    staleTime: 60_000,
+  });
 }

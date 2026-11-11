@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import {
   MessageCircle,
@@ -40,6 +41,8 @@ import { brand, hue, ink, lilac, semantic, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
 import { Tap } from "@/components/ui/tap";
 import { CoverCard } from "@/components/insurance/parts";
+import { ReportCard } from "@/components/health/report-card";
+import { healthReportKey, useHealthReport } from "@/lib/health/queries";
 
 /**
  * ONE PERSON'S HEALTH FILE.
@@ -65,6 +68,11 @@ export default function HealthFileScreen() {
   const members = family.data?.access.selectable ?? [];
   const file = useHealthFile(member?.id);
   const f = file.data ?? null;
+  const qc = useQueryClient();
+  const refresh = () => {
+    void file.refetch();
+    void qc.invalidateQueries({ queryKey: healthReportKey(member?.id) });
+  };
 
   const share = () => {
     if (f) void Share.share({ title: `${f.person.name}: health summary`, message: shareText(f) }).catch(() => undefined);
@@ -86,7 +94,7 @@ export default function HealthFileScreen() {
       <ScrollView
         contentContainerStyle={{ paddingBottom: insets.bottom + 32 }}
         showsVerticalScrollIndicator={false}
-        refreshControl={<RefreshControl refreshing={file.isRefetching} onRefresh={() => void file.refetch()} tintColor={brand[600]} />}
+        refreshControl={<RefreshControl refreshing={file.isRefetching} onRefresh={refresh} tintColor={brand[600]} />}
       >
         {/* Whose file. Switching here switches the app. */}
         {members.length > 1 ? (
@@ -135,6 +143,8 @@ function FileBody({ f, memberId, member, onAdd }: { f: HealthFile; memberId: str
   const steady = f.tracked.filter((t) => !f.flagged.includes(t));
   const shownSteady = allValues ? steady : steady.slice(0, 6);
   const identity = [p.relationship && !p.isPrimary ? p.relationship : null, p.age !== null ? `${p.age} years` : null, p.sex].filter(Boolean).join(" · ");
+  // Keyed by member like the file itself, so a switch never shows the last person's report.
+  const report = useHealthReport(memberId).data ?? null;
 
   return (
     <View>
@@ -184,6 +194,8 @@ function FileBody({ f, memberId, member, onAdd }: { f: HealthFile; memberId: str
           </Glass>
         </Tap>
       ) : null}
+
+      {report && f.totals.records > 0 ? <ReportCard report={report} firstName={p.firstName} isPrimary={p.isPrimary} /> : null}
 
       {f.totals.records === 0 ? (
         <Glass strong className="mt-4 items-center rounded-xl px-6 py-7">

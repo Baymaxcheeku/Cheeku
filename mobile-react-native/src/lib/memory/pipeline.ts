@@ -258,6 +258,7 @@ export async function planTurn(args: {
    */
   const coverOnly = !bookingOnly && booking === null && parsed.length === 0 && symptoms.length === 0 && isCoverQuestion(text);
   const reply = bookingOnly ? bookingReply(booking, ctx) : coverOnly ? coverModelReply(text, ctx) : await args.model.respond({
+    profileId: ctx.subject.id,
     question: text,
     history: args.history.slice(-12),
     memory: digest(ctx, {

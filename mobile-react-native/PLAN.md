@@ -265,6 +265,12 @@ in a shell. See `SHIPPING.md`.
    file. Anything left unchecked is filed as needs_review ("Waiting for a
    check"), never as filed. A shared file waits in memory, never on disk,
    until whose it is has been answered.
+   The reader is the AI API in edge mode (`doc-read`, int-ai-api); it only
+   reads, and a page it cannot read is refused, never filled from the
+   stand-in's samples. Each medicine is its own "med:<n>" field, so a doubtful
+   handwritten name is asked about, and a correction is written into the
+   medicine itself (`applyReview`). Filing is what teaches memory (0044's
+   trigger queues the index job).
 
 13. **A privacy request is answered through `answer_privacy_request`, never
    by editing the row.** It checks the status, needs a reply before closing
@@ -323,6 +329,54 @@ Anything about layout, cold-start routing, gestures, camera, biometrics or
 haptics has to be seen on a simulator or a device before it counts as done.
 
 ## Open
+
+- **Sign-in by emailed code is built; Supabase still has to be switched on**
+  (2026-11-11, `docs/security/login-map.md`). Sign-up confirms the email with
+  a 6-digit code on `/verify`, Log in has "Forgot password?" and "Email me a
+  login code", Settings' Change password uses the same code, and a session
+  revoked elsewhere now signs this phone out. The app works with "Confirm
+  email" on or off, so it can ship first. Then, in the Supabase dashboard:
+  1. Authentication > Email Templates: paste `supabase/templates/
+     confirmation.html` (Confirm signup), `magic_link.html` (Magic Link) and
+     `recovery.html` (Reset Password). Each shows the code, never a link.
+  2. Authentication > Providers > Email: Email OTP Length 6, Email OTP
+     Expiration 600, Minimum password length 10, then turn **Confirm email
+     on** and set `mailer_autoconfirm` back to off.
+  3. Until custom SMTP (Resend) is set, Supabase's built-in mailer is
+     heavily rate limited and may only deliver to the project team's own
+     addresses: fine for testing, not for launch.
+  Seen in the web preview against a stubbed Supabase only; never on a phone,
+  never against the live project, and iOS code autofill is unverified.
+- **The AI API is connected, behind three switches** (2026-11-07,
+  `int-ai-api`). `ai_integration_api` now runs against THIS Supabase
+  project: migration 0044 mapped its tables onto ours (profiles, documents,
+  conversations, notifications stay ours; it adds `ai_*` tables only) and its
+  own migrations and family plan were removed. Scan reads with it, chat
+  answers with it, and every filed record teaches it memory and rebuilds the
+  member's Health report (Health file, "Health report"). In order:
+  1. Paste `supabase/manual/0044-step-1-of-1.sql`, then `0044-check.sql`
+     (ten yes rows). If pgvector refuses, turn on "vector" under Database >
+     Extensions first. Until then nothing changes: the card does not show.
+  2. Run the AI API with this project's keys (its `.env.example`:
+     SUPABASE_URL, anon and service_role keys, CHEEKU_MODEL_KEY, Groq and
+     Gemini). It checks 0044 on start and drains the backfilled queue.
+  3. `supabase secrets set CHEEKU_MODEL_KEY=... CHEEKU_MODEL_URL=<api>/api/v1/baymax/chat CHEEKU_READER_URL=<api>/api/v1/baymax/read`,
+     then deploy `doc-read` (new) and redeploy `cheeku-chat` (now passes the
+     caller's token on), both with JWT verification on.
+  4. Ship the app with `EXPO_PUBLIC_DOC_READER=edge` and
+     `EXPO_PUBLIC_CHAT_MODEL=edge`.
+  In edge mode a scan that cannot be read says so and keeps nothing; it
+  never falls back to the stand-in reader's sample values. Seen only in
+  tests and on a local Postgres; never on a phone or against the live API.
+- **The AI API's leaked keys must be rotated** (2026-11-07). Its committed
+  `.env.example` held a real service_role key for its old project and a Groq
+  key, in git history since its initial commit. Scrubbed in the file; the keys
+  themselves must be rotated in the old project and in the Groq console.
+- **Clinical sign-off for the Health report and AI chat.** The report's and
+  chat's prompts (`ai_integration_api/app/services/health_report.py`,
+  `baymax_chat.py`) and the treatment guard (`output_guard.strip_treatment_advice`)
+  need a clinician's read, as do the AI API's `clinical_rules.json` and
+  `clinical_config.json`, which are marked unreviewed.
 
 - **Insurance needs 0043 applied** (2026-11-01). Paste
   `supabase/manual/0043-step-1-of-1.sql` into the SQL editor, then

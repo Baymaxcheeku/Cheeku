@@ -109,6 +109,20 @@ export function shouldPersistQuery(query: Query): boolean {
   return typeof root === "string" && PERSISTED.has(root);
 }
 
+/*
+ * What is actually written: allowlisted AND finished. Passing our own
+ * `shouldDehydrateQuery` REPLACES TanStack's default, which is "status is
+ * success", so without the second check a query still loading was saved with
+ * its promise. When that load then failed (Home refetching in the moment a
+ * session ended throws "signed out"), TanStack logged "A query that was
+ * dehydrated as pending ended up rejecting" once per write, and an errored
+ * query could be restored on the next launch. Only a successful answer is
+ * worth keeping offline.
+ */
+export function shouldDehydrate(query: Query): boolean {
+  return query.state?.status === "success" && shouldPersistQuery(query);
+}
+
 export const persistOptions = {
   persister,
   maxAge: MAX_AGE_MS,
@@ -120,7 +134,7 @@ export const persistOptions = {
   // v2 (2026-10-06): drops caches that saved a signed-out "no profile" as the
   // family, which made sign-in flash "Set up a profile first".
   buster: "v2",
-  dehydrateOptions: { shouldDehydrateQuery: shouldPersistQuery },
+  dehydrateOptions: { shouldDehydrateQuery: shouldDehydrate },
 } as const;
 
 /**

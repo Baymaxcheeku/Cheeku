@@ -21,6 +21,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider, type Metrics } from "react-native-safe-area-context";
 
 import { AppLock } from "@/components/app/app-lock-gate";
+import { AuthLifecycle } from "@/components/app/auth-lifecycle";
 import { ConsentGate } from "@/components/legal/consent-gate";
 import { ShareIntake } from "@/components/scan/share-intake";
 import { ToastHost } from "@/components/notifications/toast";
@@ -147,12 +148,17 @@ export default function RootLayout() {
             <Stack.Screen name="index" options={{ gestureEnabled: false, animation: "fade" }} />
             <Stack.Screen name="welcome" options={{ gestureEnabled: false }} />
             <Stack.Screen name="who" options={{ gestureEnabled: false }} />
+            {/* Reached by replacing the code screen: there is nothing under it
+                to swipe back to, and its back button means "skip for now". */}
+            <Stack.Screen name="reset-password" options={{ gestureEnabled: false }} />
           </Stack>
           {/*
            * Here rather than in the signed-in tab shell, so it also covers a
            * screen opened directly (a link, or a reload on web, straight into
            * /settings/privacy). It renders nothing while signed out.
            */}
+          {/* Token refresh follows the app; a session ended elsewhere ends here. */}
+          <AuthLifecycle />
           <ConsentGate />
           <ShareIntake />
           <ToastHost />

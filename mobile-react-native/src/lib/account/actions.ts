@@ -54,13 +54,23 @@ export async function exportAccount(): Promise<
     "today_actions",
     "daily_logs",
     "insurance_policies",
+    // What the AI API learned from their records (0044). Its chunks are not
+    // here: they are the documents' own text, already in documents.raw_text.
+    "ai_lab_results",
+    "ai_prescription_lines",
+    "ai_memory_facts",
+    "ai_memory_fact_history",
+    "ai_health_reports",
   ] as const;
 
   /*
-   * Added by migrations 0031, 0033, 0034 and 0043. Until it is applied these tables do not exist,
+   * Added by migrations 0031, 0033, 0034, 0043 and 0044. Until it is applied these tables do not exist,
    * and an export must not fail over a table that has never held anything.
    */
-  const addedLater = new Set<string>(["account_activity", "privacy_requests", "today_actions", "daily_logs", "insurance_policies"]);
+  const addedLater = new Set<string>([
+    "account_activity", "privacy_requests", "today_actions", "daily_logs", "insurance_policies",
+    "ai_lab_results", "ai_prescription_lines", "ai_memory_facts", "ai_memory_fact_history", "ai_health_reports",
+  ]);
 
   const bundle: ExportBundle = {
     exportedAt: new Date().toISOString(),

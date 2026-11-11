@@ -131,7 +131,7 @@ These are real and unfixed. They are listed rather than quietly omitted.
 |---|---|
 | **No rate limiting** on auth or AI endpoints | The chat quota bounds free-tier cost, but paid tiers and the auth endpoints are unbounded. Needs a durable store. |
 | **`'unsafe-inline'` in `script-src`** | Required by Next's inline bootstrap until a nonce-based CSP lands. |
-| **Email confirmation is off** | Turned off for development. Anyone can currently register an address they do not own. Must be re-enabled with real SMTP before launch. |
+| **Email confirmation is off** | Turned off for development. Anyone can currently register an address they do not own. The app is ready for it (codes on `/verify`, 2026-11-11); turning it on is the dashboard steps in `PLAN.md` Open, then real SMTP before launch. |
 | **Supabase minimum password length is 6** | The app's Zod schema enforces 10, which is what people meet — but the database would accept 6 if anything bypassed the form. |
 | **No audit log for reads** | Writes are traceable; nobody can currently answer "who opened this record and when". |
 | **Service key and DB password were pasted into a chat transcript** during setup | Both should be rotated before real data exists. |

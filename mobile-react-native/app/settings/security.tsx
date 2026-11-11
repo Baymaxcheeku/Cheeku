@@ -24,6 +24,8 @@ import { SpringSwitch } from "@/components/ui/motion";
 import { ACTIVITY_KEY, ACTIVITY_LABEL, logActivity, useActivity, type ActivityRow } from "@/lib/privacy/activity";
 import { isLockEnabled, lockCapability, lockDelay, lockName, setLockDelay, setLockEnabled } from "@/lib/security/app-lock";
 import { LOCK_DELAYS, type LockDelay } from "@/lib/security/lock-timing";
+import { setPendingCode } from "@/lib/auth/code";
+import { sendCode } from "@/lib/auth/flow";
 import { supabase } from "@/lib/supabase/client";
 import { brand, ink, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
@@ -98,7 +100,15 @@ export default function Security() {
     }
   }
 
+  /*
+   * A code, not a link. The link this used to send opened a browser and could
+   * never finish the change on the phone. The code goes to the account's own
+   * email and is entered on /verify, which leads to /reset-password: proof of
+   * the inbox, not just possession of an unlocked phone, before the password
+   * can change.
+   */
   async function sendPasswordReset() {
+    if (busy) return;
     setBusy("reset");
     setNote(null);
     try {
@@ -110,20 +120,19 @@ export default function Security() {
         setNote("Sign in again before changing your password.");
         return;
       }
-      await supabase.auth.resetPasswordForEmail(email);
+      const sent = await sendCode("recovery", email);
+      if (!sent.ok) {
+        setNote(sent.message);
+        return;
+      }
       void logActivity("password_reset_requested");
-      /*
-       * Always the same message, and never one that reveals whether the send
-       * succeeded for this address. The sign-in form is careful not to confirm
-       * which emails have accounts; a reset that reported failure differently
-       * would hand back the same oracle from a different screen.
-       */
-      setNote("If that address has an account, a reset link is on its way.");
+      void queryClient.invalidateQueries({ queryKey: ACTIVITY_KEY });
+      setPendingCode({ email, purpose: "recovery", sentAt: Date.now() });
+      router.push("/verify");
     } catch {
-      setNote("If that address has an account, a reset link is on its way.");
+      setNote("That did not go through. Check your connection and try again.");
     } finally {
       setBusy(null);
-      void queryClient.invalidateQueries({ queryKey: ACTIVITY_KEY });
     }
   }
 
@@ -239,7 +248,7 @@ export default function Security() {
             first
             icon={KeyRound}
             title="Change password"
-            body="Sends a reset link to your email"
+            body="We email you a code, then you choose a new one"
             busy={busy === "reset"}
             onPress={() => void sendPasswordReset()}
           />

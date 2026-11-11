@@ -35,6 +35,14 @@ export const createAccountSchema = z.object({
   consent: z.literal(true, { message: "Tick the box to agree to the terms before creating your account" }),
 });
 
+/** Choosing a password after a reset code. Same rule as creating an account. */
+export const newPasswordSchema = z
+  .object({
+    password: passwordSchema,
+    confirm: z.string().min(1, "Type the new password again"),
+  })
+  .refine((v) => v.password === v.confirm, { message: "The two passwords don't match", path: ["confirm"] });
+
 export const audienceSchema = z.object({
   audience: z.enum(["me", "family"]),
 });

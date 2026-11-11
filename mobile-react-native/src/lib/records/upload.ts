@@ -2,7 +2,8 @@ import { randomUUID } from "expo-crypto";
 import { File } from "expo-file-system";
 
 import { CONSENT_PAUSED, reportIfConsentRefused } from "@/lib/legal/consent";
-import { extractFromFile, routeFor, type Extraction } from "@/lib/ai/mock/extract";
+import { routeFor, type Extraction } from "@/lib/ai/mock/extract";
+import { READ_FAILED, readUpload } from "@/lib/ai/reader";
 import { selectableProfiles } from "@/lib/profiles/context";
 import { supabase } from "@/lib/supabase/client";
 
@@ -57,7 +58,7 @@ export type UploadResult =
 export type PickedFile = {
   uri: string;
   mimeType: string;
-  /** The picker's filename. Used only for the mock extractor's routing. */
+  /** The picker's filename. Used only for the stand-in reader's routing, never stored or sent. */
   name: string;
 };
 
@@ -142,8 +143,14 @@ export async function prepareUpload(
     return { ok: false, message: "The upload did not complete. Please try again." };
   }
 
-  const extraction = extractFromFile(picked.name, size, docType);
-  return { ok: true, prepared: { path, profileId, userId: user.id, mimeType: picked.mimeType, extraction } };
+  // The reader (lib/ai/reader): the AI API through doc-read, or the stand-in in demo mode.
+  const read = await readUpload({ path, profileId, mimeType: picked.mimeType, docType, name: picked.name, size });
+  if (!read.ok) {
+    // Nothing was read, so nothing is shown and the stored page goes: a file nobody can reach still holds a record.
+    await supabase.storage.from("documents").remove([path]).then(() => undefined, () => undefined);
+    return { ok: false, message: READ_FAILED[read.reason] };
+  }
+  return { ok: true, prepared: { path, profileId, userId: user.id, mimeType: picked.mimeType, extraction: read.extraction } };
 }
 
 /** Removes an uploaded file that was never filed. Best effort. */
