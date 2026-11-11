@@ -61,10 +61,10 @@ export default function LabPartner() {
   return (
     <View className="flex-1 bg-canvas">
       <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + 110 }} showsVerticalScrollIndicator={false}>
-        <View style={{ height: insets.top + 220, marginHorizontal: 10, marginTop: 6, paddingTop: insets.top, borderRadius: 32, overflow: "hidden", alignItems: "center", justifyContent: "center" }}>
+        <View style={{ height: insets.top + 150, marginHorizontal: 10, marginTop: 6, paddingTop: insets.top, borderRadius: 32, overflow: "hidden", alignItems: "center", justifyContent: "center" }}>
           <Gradient from={p.color} to="#ffffff" glow="#ffffff" />
-          <View style={[glassShadow, { borderRadius: 112 * 0.3 }]}>
-            <PartnerBadge partner={p} size={112} />
+          <View style={{ borderRadius: 72 * 0.3 }}>
+            <PartnerBadge partner={p} size={72} />
           </View>
           <View style={{ position: "absolute", top: 0, left: 0, right: 0 }}>
             <ScreenHeader fallback="/labs" />

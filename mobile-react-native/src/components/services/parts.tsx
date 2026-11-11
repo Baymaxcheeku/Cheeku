@@ -30,7 +30,7 @@ import { NerveIcon, WellbeingIcon, type AppIcon } from "@/components/ui/icons";
 import { Gradient, glass, glassShadow } from "@/components/ui/glass";
 import type { SpecialtyId } from "@/lib/booking/catalog";
 import type { Service } from "@/lib/services/catalog";
-import { brand, ink } from "@/theme/tokens";
+import { brand, ink, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
 
 /*
@@ -142,24 +142,17 @@ export function ServiceTile({ service: s, onPress, tall = true }: { service: Ser
       accessibilityRole="button"
       accessibilityLabel={`${s.title}. ${s.line}${s.status === "live" ? "" : s.status === "soon" ? ". Coming soon" : ". Locked"}`}
       onPress={onPress}
-      style={[glassShadow, { flex: 1, height: tall ? 196 : 168, borderRadius: 32, overflow: "hidden", backgroundColor: "#fff", borderWidth: 1, borderColor: glass.rim }]}
+      style={{ flex: 1, minHeight: tall ? 148 : 136, borderRadius: 24, backgroundColor: "#fff" }}
     >
-      <Gradient from={s.tint.to} to="#ffffff" angle="vertical" />
       <View style={{ padding: 16, flex: 1 }}>
-        {s.status !== "live" ? (
-          <View style={{ alignSelf: "flex-start", marginBottom: 6 }}>
-            <StatusPill status={s.status} />
+        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
+          <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: surface.tint, alignItems: "center", justifyContent: "center" }}>
+            <Icon size={20} color={ink[900]} strokeWidth={1.8} />
           </View>
-        ) : null}
+          {s.status !== "live" ? <StatusPill status={s.status} /> : <ChevronRight size={18} color={ink[300]} />}
+        </View>
         <Text numberOfLines={2} style={{ fontFamily: font.semibold, fontSize: 17, lineHeight: 21, letterSpacing: -0.3, color: ink[900] }}>{s.title}</Text>
         <Text numberOfLines={2} style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 17, color: ink[500], marginTop: 4, maxWidth: "92%" }}>{s.line}</Text>
-        <View style={{ flex: 1 }} />
-        <View style={{ width: 36, height: 36, borderRadius: 999, backgroundColor: brand[600], alignItems: "center", justifyContent: "center" }}>
-          <ChevronRight size={18} color="#fff" />
-        </View>
-      </View>
-      <View pointerEvents="none" style={{ position: "absolute", right: -4, bottom: -4 }}>
-        <ServiceArt icon={Icon} fg={s.tint.fg} size={tall ? 104 : 88} />
       </View>
     </Tap>
   );
@@ -198,8 +191,8 @@ export function AskToBook({ onPress, line }: { onPress: () => void; line?: strin
       onPress={onPress}
       style={[glassShadow, { borderRadius: 32, overflow: "hidden", minHeight: 124 }]} scale={0.98}
     >
-      <Gradient from={ink[900]} to={brand[700]} glow={brand[500]} />
-      <View style={{ flexDirection: "row", alignItems: "center", padding: 18, paddingRight: 8 }}>
+      <Gradient from={ink[900]} to={ink[900]} />
+      <View style={{ flexDirection: "row", alignItems: "center", padding: 18 }}>
         <View style={{ flex: 1 }}>
           <Text style={{ fontFamily: font.semibold, fontSize: 20, lineHeight: 25, letterSpacing: -0.4, color: "#fff" }}>
             Just tell <Brand onDark size={21} /> what you need
@@ -212,7 +205,6 @@ export function AskToBook({ onPress, line }: { onPress: () => void; line?: strin
             <ArrowRight size={15} color="#fff" />
           </View>
         </View>
-        <MascotFigure size={92} moment="present" move="sway" />
       </View>
     </Tap>
   );

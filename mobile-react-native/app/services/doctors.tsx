@@ -7,7 +7,6 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { LocationChip } from "@/components/location/location-chip";
 import { Tap } from "@/components/ui/tap";
-import { MascotFigure } from "@/components/illustrations/sprout";
 import { Grid2, SPECIALTY_ICON } from "@/components/services/parts";
 import { Brand } from "@/components/ui/brand";
 import { Gradient, glass, glassShadow } from "@/components/ui/glass";
@@ -72,10 +71,6 @@ export default function DoctorsHub() {
                 <Text style={{ fontFamily: font.semibold, fontSize: 13, color: "#fff" }}>Start pre-consultation</Text>
                 <ArrowRight size={15} color="#fff" />
               </View>
-            </View>
-            <View style={{ width: 104, height: 112, alignItems: "center", justifyContent: "flex-end" }}>
-              <View style={{ position: "absolute", bottom: 6, width: 92, height: 92, borderRadius: 999, backgroundColor: lilac.base }} />
-              <MascotFigure size={100} moment="think" hop />
             </View>
           </View>
         </Tap>

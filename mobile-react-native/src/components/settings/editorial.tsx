@@ -17,7 +17,7 @@ import { Tap } from "@/components/ui/tap";
  * place.
  */
 
-export function Eyebrow({ children, color = brand[600] }: { children: string; color?: string }) {
+export function Eyebrow({ children, color = ink[500] }: { children: string; color?: string }) {
   return <Text style={{ fontFamily: font.medium, fontSize: 12, color }}>{children}</Text>;
 }
 

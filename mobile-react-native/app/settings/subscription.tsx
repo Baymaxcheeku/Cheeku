@@ -193,7 +193,7 @@ export default function Subscription() {
     <SettingsScreen title="Your plan" eyebrow="What you get and who it covers" icon={Crown} bare>
       {/* -------------------------------------------------------- the hero -- */}
       <Reveal style={[glassShadow, { marginHorizontal: 20, marginTop: 4, borderRadius: 32, overflow: "hidden", padding: 20 }]}>
-        {paid ? <Gradient from={brand[800]} to={brand[500]} glow={brand[400]} /> : <Gradient from={lilac.violet} to="#ffffff" glow="#ffffff" />}
+        {paid ? <Gradient from={ink[900]} to={ink[900]} /> : <Gradient from={lilac.violet} to="#ffffff" glow="#ffffff" />}
         <Eyebrow color={paid ? BRAND_ON_DARK : brand[600]}>You&apos;re on</Eyebrow>
         <View style={{ flexDirection: "row", alignItems: "center", gap: 10, marginTop: 6 }}>
           <View style={{ width: 40, height: 40, borderRadius: 16, alignItems: "center", justifyContent: "center", backgroundColor: paid ? "rgba(255,255,255,0.16)" : "#fff" }}>
@@ -248,7 +248,7 @@ export default function Subscription() {
         <Pressable
           accessibilityRole="button"
           onPress={next.go}
-          style={({ pressed }) => ({ marginTop: 16, height: 52, borderRadius: 999, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, backgroundColor: paid ? "#fff" : brand[600], opacity: pressed ? 0.88 : 1, transform: [{ scale: pressed ? 0.985 : 1 }] })}
+          style={({ pressed }) => ({ marginTop: 16, height: 52, borderRadius: 999, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, backgroundColor: paid ? "#fff" : ink[900], opacity: pressed ? 0.88 : 1, transform: [{ scale: pressed ? 0.985 : 1 }] })}
         >
           <next.icon size={17} color={paid ? brand[700] : "#fff"} />
           <Text style={{ fontFamily: font.semibold, fontSize: 15, color: paid ? brand[700] : "#fff" }}>{next.label}</Text>
@@ -442,13 +442,13 @@ function PlanCard({ plan, current, from, onPress }: { plan: Plan; current: boole
         padding: 18,
         borderRadius: 32,
         overflow: "hidden",
-        backgroundColor: featured ? brand[700] : "#fff",
+        backgroundColor: featured ? ink[900] : "#fff",
         borderWidth: current ? 2 : 0,
         borderColor: featured ? BRAND_ON_DARK : brand[500],
       }]}
       scale={0.98}
     >
-      {featured ? <Gradient from={brand[800]} to={brand[500]} glow={brand[400]} /> : null}
+      {featured ? <Gradient from={ink[900]} to={ink[900]} /> : null}
       <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
         <View style={{ width: 40, height: 40, borderRadius: 16, alignItems: "center", justifyContent: "center", backgroundColor: featured ? "rgba(255,255,255,0.16)" : brand[50] }}>
           <Icon size={19} color={featured ? "#fff" : brand[600]} />

@@ -249,7 +249,6 @@ export default function Help() {
             <Text style={{ fontFamily: font.semibold, fontSize: 28, lineHeight: 32, letterSpacing: -0.8, color: ink[900], marginTop: 6 }}>How can we help?</Text>
             <Text style={{ fontFamily: font.regular, fontSize: 15, lineHeight: 20, color: ink[700], marginTop: 6 }}>Quick answers first. A real person if you need one.</Text>
           </View>
-          <MascotFigure size={96} moment="shrug" move="float" hop />
         </View>
         <View style={{ marginTop: 16, flexDirection: "row", alignItems: "center", gap: 10, height: 50, paddingHorizontal: 16, borderRadius: 999, backgroundColor: "#fff", borderWidth: 1, borderColor: surface.line }}>
           <Search size={18} color={ink[500]} />
