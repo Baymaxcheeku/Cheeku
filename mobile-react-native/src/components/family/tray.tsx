@@ -165,7 +165,7 @@ export function FamilyTray({
           <View className="mt-1 flex-row items-center gap-2 px-1">
             <ShieldCheck size={14} color={ink[500]} />
             <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 13, lineHeight: 17, color: ink[500] }}>
-              Everyone&apos;s file stays separate. Cheeku only ever talks about the person you&apos;re viewing.
+              Everyone&apos;s file stays separate. Cheeku talks about the person you&apos;re viewing; from your own chat it can give a one-line family round-up.
             </Text>
           </View>
 

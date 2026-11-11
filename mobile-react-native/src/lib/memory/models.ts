@@ -69,6 +69,7 @@ function readReply(v: unknown): (ModelReply & { modelId?: string }) | null {
     tier: TIERS.includes(o.tier as Tier) ? (o.tier as Tier) : null,
     basis: o.basis === "grounded" || o.basis === "silent" ? o.basis : "general",
     careOffer: o.careOffer === true,
+    actions: Array.isArray(o.actions) ? (o.actions as ModelReply["actions"]) : undefined,
     modelId: typeof o.modelId === "string" ? o.modelId : undefined,
   };
 }

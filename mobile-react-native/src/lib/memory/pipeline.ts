@@ -9,7 +9,7 @@ import { bookingIntent, withoutTestNames, type BookingIntent } from "./intent";
 import { decideTier, hardStopFor, type TierDecision } from "./ladder";
 import type { LedgerFlag } from "./ledger";
 import { relevantLoops, type LoopView } from "./loops";
-import { digest, type ChatModel, type ModelReply } from "./model";
+import { digest, type ChatModel, type ModelReply, type WorldDigest } from "./model";
 import { serviceById } from "@/lib/services/catalog";
 
 import { BOOKING_REPLY } from "./thread";
@@ -125,6 +125,8 @@ export async function planTurn(args: {
   newId: () => string;
   /** Lines from optional layers (lib/extensions), already short and factual. Read alongside the notes. */
   extraNotes?: readonly string[];
+  /** Everything around the person (lib/chat/world.ts), or a builder for it given this turn's context. */
+  world?: (ctx: MemoryContext) => Promise<WorldDigest | undefined>;
 }): Promise<TurnPlan> {
   const text = args.text.trim();
   const gate = detect(text);
@@ -235,7 +237,10 @@ export async function planTurn(args: {
 
   const aboutJaundice = keys.includes("bilirubin_total") || symptoms.some((s) => s.model.id === "jaundice");
   const aboutDates = /\b(week|weeks|due|edd|lmp|scan|dating|trimester|leave|travel|fly)\b/i.test(text) || reads.some((r) => r.threshold.modifiers.some((m) => m.startsWith("trimester") || m === "pregnant"));
-  const notes = [...ctx.notes.filter((n) => (n.kind === "blood_group" && aboutJaundice) || (n.kind === "dating" && aboutDates)).map((n) => n.text), ...(args.extraNotes ?? [])];
+  // Notes are shown beside the answer. Lines from optional layers (the watch)
+  // are context for the model only: they reach it in the digest, never the screen.
+  const notes = ctx.notes.filter((n) => (n.kind === "blood_group" && aboutJaundice) || (n.kind === "dating" && aboutDates)).map((n) => n.text);
+  const modelNotes = [...notes, ...(args.extraNotes ?? [])];
 
   const logged = parsed
     .filter((p) => p.key !== "bp_diastolic")
@@ -262,17 +267,17 @@ export async function planTurn(args: {
   const reply = bookingOnly ? bookingReply(booking, ctx) : coverOnly ? coverModelReply(text, ctx) : await args.model.respond({
     question: text,
     history: args.history.slice(-12),
-    memory: digest(ctx, {
+    memory: { ...digest(ctx, {
       readings: keys,
       reads,
       symptoms,
       loops,
-      notes,
+      notes: modelNotes,
       alerts: [...flags, ...alerts].map((f) => ({ title: f.title, text: f.text, tier: f.tier })),
       logged,
       changes: [...changes.map((c) => c.text), ...labFlags.map((r) => r.text)],
       askForReadings: missingReadings,
-    }),
+    }), world: args.world ? await args.world(ctx).catch(() => undefined) : undefined },
     floor: { tier: floor.tier, reasons: floor.reasons.map((r) => r.text) },
   });
   const decision = decideTier({ gate, hardStop: null, symptoms, reads, changes, flags, clock: ctx.clock, modelTier: reply.tier ?? null, extra: labFlags });

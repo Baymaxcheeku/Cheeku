@@ -23,6 +23,9 @@ export function memoryStarters(c: MemoryContext): Starter[] {
   const name = c.subject.firstName;
   const out: Starter[] = [];
 
+  // The big picture first: the longevity areas answer it from whatever is on file.
+  out.push({ key: "longevity", text: `How is ${name} doing overall?`, detail: "Heart, sugar, sleep, movement", icon: "trend" });
+
   const loop = c.loops[0];
   if (loop) out.push({ key: "loops", text: `What's still pending for ${name}?`, detail: `${loop.title} · ${loopWhen(loop)}`, icon: "loop" });
 

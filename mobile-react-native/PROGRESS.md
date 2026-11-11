@@ -4278,3 +4278,47 @@ Screen readers get it as one adjustable control.
 Verified: `tsc`, all tests (2 new), web build screenshots of Profile faces
 and the strip at three scroll positions. Not verified on a phone: snapping
 and the haptic tick only happen on a device.
+
+## Chat reads everything: longevity areas, the world around a person, the sparrow's voice · 2026-11-11
+
+The owner asked for Cheeku's chat to read and act on everything, feeding a
+longevity engine, with a written prompt ready for Archit, who connects the
+real model this week. Their answers: prompt and contract now, stand-in
+conversations until then; voice a playful sparrow; the chat can log, set
+goals, start bookings, run a weekly check-in and a family round-up; the
+longevity engine is areas and trends, no score.
+
+**Longevity engine** (`src/lib/longevity`). Six areas (heart and BP, sugar,
+sleep, movement, weight, check-ups), each on track / watch / act with a plain
+reason, from report values, readings said in chat, open follow-ups, and the
+watch through a new fifth extension slot, `longevitySignals`. Worst signal
+wins, numbers older than 18 months are dropped, children get check-ups and
+watch areas only, Indian BMI cut-offs. No score, by decision.
+
+**World** (`src/lib/chat/world.ts`). Each turn now also carries the areas,
+today's goal and logs, bookings coming up and just done (doctor, home test,
+class), the watch's lines, and, only from the account holder's own chat when
+asked "how is everyone", one line per family member. Best effort, 1.5 s cap.
+The family sheet's privacy line now says so.
+
+**Actions** (`src/lib/chat/actions.ts`, `safe-actions.ts`). A reply can carry
+up to three buttons: make a goal (writes `daily_prefs.goal`, so tomorrow's
+plan follows) or open an allowed screen. Anything else is dropped. Steps and
+sleep said in a message ("walked 6k", "slept 5 hours", "soya 7 ghante") are
+saved to `daily_logs` before the answer and acknowledged in it.
+
+**The sparrow** (`src/lib/memory/sparrow.ts`). Scripted stand-in turns in
+Cheeku's voice for: how am I doing, the week (with Tired / Okay / Flying),
+goals, the watch, bookings, the family round-up, and logged activity. They
+never run on a symptom or when the floor is monitor or higher.
+
+**For Archit.** `supabase/functions/cheeku-chat/prompt.ts` has the system
+prompt, the reply JSON schema and `renderRequest()`; the Edge Function now
+passes `actions` through; the guide with the golden conversations and a
+ten-point check is `docs/master/CHEEKU_CHAT_PROMPT.md`.
+
+Also: lines from optional layers were being shown under every answer as
+info callouts. They now reach the model only.
+
+Verified: `tsc`, 603 tests (12 new), web build: five flows driven end to
+end on the story family with sample watch data. Not verified on a phone.

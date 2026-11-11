@@ -37,10 +37,11 @@ import { askAboutProduct, chatQuota } from "@/lib/ai/chat";
 import { FREE_CHAT_SOFT_LINE } from "@/lib/billing/plans";
 import { promptEntriesFor } from "@/lib/ask/prompts";
 import { profileSignalsFor } from "@/lib/knowledge/queries";
-import { todayIso } from "@/lib/memory/clock";
 import { buildContext, memoryLine } from "@/lib/memory/context";
 import { memoryStarters, type Starter } from "@/lib/memory/starters";
 import { memberIntent } from "@/lib/memory/intent";
+import { applyGoal } from "@/lib/chat/actions";
+import { todayIso } from "@/lib/memory/clock";
 import { fetchMemory, fetchThread, memoryKey, refreshMemory, sendTurn, threadKey, useMemory, useThread } from "@/lib/memory/store";
 import { inOrder, sittingFor, withDayBreaks, type ThreadMessage, type TurnMemory } from "@/lib/memory/thread";
 import { useLabCart } from "@/lib/labs/queries";
@@ -231,7 +232,7 @@ export default function Ask() {
     setDraft("");
     setPendingText(text);
     try {
-      const res = await sendTurn({ text, profileId, thread, bundle, about: profileId === memberId ? about : null });
+      const res = await sendTurn({ text, profileId, thread, bundle, about: profileId === memberId ? about : null, isPrimary: Boolean(everyone.find((p) => p.id === profileId)?.isPrimary), qc });
       if (!res.ok) {
         if (res.quota) {
           setPaywallFor(text);
@@ -502,6 +503,7 @@ export default function Ask() {
                     onBook={(mode) => router.push({ pathname: "/book/consult", params: { mode, who: name } })}
                     onStartBooking={startBooking}
                     onOpenRoute={(route) => router.push(route as never)}
+                    onSetGoal={memberId ? (goal) => applyGoal(qc, memberId, goal, todayIso()) : undefined}
                   />
                 );
               })}

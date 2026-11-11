@@ -3,6 +3,7 @@ import {
   ArrowUpRight,
   BookOpen,
   BookOpenText,
+  Check,
   CircleAlert,
   CornerDownRight,
   FileText,
@@ -84,6 +85,7 @@ export function AssistantTurn({
   onBook,
   onStartBooking,
   onOpenRoute,
+  onSetGoal,
 }: {
   message: ThreadMessage;
   /** The member's first name, for labels. */
@@ -97,6 +99,8 @@ export function AssistantTurn({
   onStartBooking?: (booking: NonNullable<TurnMemory["booking"]>) => void;
   /** Opens a booked lab test or appointment. */
   onOpenRoute?: (route: string) => void;
+  /** Makes a goal the person's own (a "Make it my goal" button). Resolves true when saved. */
+  onSetGoal?: (goal: string) => Promise<boolean>;
 }) {
   const m = message.memory;
   if (m?.hardStop) return <HardStopCard memory={m} />;
@@ -144,6 +148,7 @@ export function AssistantTurn({
           {m?.booking ? <BookingCard booking={m.booking} onStart={onStartBooking} /> : null}
           {m?.event ? <BookedCard event={m.event} onOpen={onOpenRoute} /> : null}
           {onBook && m?.careOffer && !m.booking ? <CareOffer onBook={onBook} /> : null}
+          {m?.actions?.length ? <Actions actions={m.actions} onOpenRoute={onOpenRoute} onSetGoal={onSetGoal} /> : null}
           {m?.reading.length ? <ReadingStrip memory={m} onOpenRecord={onOpenRecord} /> : null}
           {m?.script ? <ScriptCard script={m.script} /> : null}
           {m?.watchFor.length ? <WatchFor items={m.watchFor} tierIsLow={m.tier === "reassure"} /> : null}
@@ -174,6 +179,38 @@ export function AssistantTurn({
 }
 
 // ------------------------------------------------------------------ parts --
+
+/*
+ * Things the chat offers to do: make a goal, open a screen. Nothing happens
+ * until a tap; a goal button says "Goal set" once it is saved.
+ */
+function Actions({ actions, onOpenRoute, onSetGoal }: { actions: NonNullable<TurnMemory["actions"]>; onOpenRoute?: (route: string) => void; onSetGoal?: (goal: string) => Promise<boolean> }) {
+  const [done, setDone] = useState<string | null>(null);
+  return (
+    <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
+      {actions.map((a, i) => {
+        const set = a.type === "set_goal" && done === a.goal;
+        const primary = i === 0;
+        return (
+          <Tap
+            key={a.label}
+            accessibilityRole="button"
+            accessibilityState={{ disabled: set }}
+            disabled={set || (a.type === "set_goal" ? !onSetGoal : !onOpenRoute)}
+            onPress={async () => {
+              if (a.type === "open") onOpenRoute?.(a.route);
+              else if (onSetGoal && (await onSetGoal(a.goal))) setDone(a.goal);
+            }}
+            style={{ height: 40, paddingHorizontal: 16, borderRadius: 999, flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: primary && !set ? ink[900] : "#fff", borderWidth: primary && !set ? 0 : 1, borderColor: surface.line }}
+          >
+            {set ? <Check size={14} color={ink[900]} strokeWidth={2.4} /> : null}
+            <Text style={{ fontFamily: font.semibold, fontSize: 13, color: primary && !set ? "#fff" : ink[900] }}>{set ? "Goal set" : a.label}</Text>
+          </Tap>
+        );
+      })}
+    </View>
+  );
+}
 
 /*
  * A paragraph, or a list. The model writes lists as a heading line followed
