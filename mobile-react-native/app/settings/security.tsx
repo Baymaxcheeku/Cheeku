@@ -166,7 +166,7 @@ export default function Security() {
                   </Text>
                 </View>
                 {busy === "lock" ? (
-                  <ActivityIndicator size="small" color={brand[600]} />
+                  <ActivityIndicator size="small" color={ink[900]} />
                 ) : (
                   <SpringSwitch checked={enabled} onChange={() => void toggleLock()} label={`Require ${lockName(capability.kind)} to open Cheeku AI`} />
                 )}
@@ -177,7 +177,7 @@ export default function Security() {
                   <View className="flex-row items-center gap-2">
                     <Timer size={15} color={ink[500]} />
                     <Text style={{ fontFamily: font.medium, fontSize: 13, color: ink[700] }}>Lock after leaving the app</Text>
-                    {busy === "delay" ? <ActivityIndicator size="small" color={brand[600]} /> : null}
+                    {busy === "delay" ? <ActivityIndicator size="small" color={ink[900]} /> : null}
                   </View>
                   <View className="mt-2.5 flex-row gap-2">
                     {LOCK_DELAYS.map((d) => {
@@ -354,7 +354,7 @@ function EmptyLine({ text }: { text: string }) {
 function IconTile({ icon: Icon }: { icon: LucideIcon }) {
   return (
     <View className="h-9 w-9 items-center justify-center rounded-tile" style={{ backgroundColor: brand[50] }}>
-      <Icon size={17} color={brand[600]} />
+      <Icon size={17} color={ink[900]} />
     </View>
   );
 }
@@ -387,7 +387,7 @@ function ActionRow({
         <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{title}</Text>
         <Text style={{ fontFamily: font.regular, fontSize: 12, lineHeight: 16, color: ink[500], marginTop: 2 }}>{body}</Text>
       </View>
-      {busy ? <ActivityIndicator size="small" color={brand[600]} /> : <ChevronRight size={16} color={ink[300]} />}
+      {busy ? <ActivityIndicator size="small" color={ink[900]} /> : <ChevronRight size={16} color={ink[300]} />}
     </Tap>
   );
 }

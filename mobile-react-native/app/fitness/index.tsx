@@ -146,7 +146,7 @@ export default function Fitness() {
 
             {fit.doctorNote ? (
               <View style={{ flexDirection: "row", gap: 10, borderRadius: 16, padding: 14, backgroundColor: lilac.mist }}>
-                <Stethoscope size={16} color={brand[600]} style={{ marginTop: 1 }} />
+                <Stethoscope size={16} color={ink[900]} style={{ marginTop: 1 }} />
                 <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[700] }}>
                   {fit.needs[0] === "prenatal" ? "Only prenatal classes are shown. " : "Gentler classes are shown first. "}
                   Check with {first === "you" ? "your" : `${first}'s`} doctor before starting, and tell the trainer.
@@ -159,7 +159,7 @@ export default function Fitness() {
                 accessibilityRole="button"
                 accessibilityLabel={`Next class: ${next.title}, ${dayLabel(next.startsAt)} ${timeLabel(next.startsAt)}`}
                 onPress={() => router.push({ pathname: "/fitness/booking/[id]", params: { id: next.id } })}
-                style={[glassShadow, { borderRadius: 24, backgroundColor: brand[600], padding: 14, flexDirection: "row", alignItems: "center", gap: 12 }]}
+                style={[glassShadow, { borderRadius: 24, backgroundColor: ink[900], padding: 14, flexDirection: "row", alignItems: "center", gap: 12 }]}
                 scale={0.98}
               >
                 <ActivityArt id={next.activity} size={44} radius={14} />

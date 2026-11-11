@@ -41,7 +41,7 @@ export function ReadsStrip({ articles }: { articles: readonly ArticleCard[] }) {
         </View>
         <Tap accessibilityRole="link" onPress={() => router.push("/learn")} hitSlop={8} style={{ flexDirection: "row", alignItems: "center", gap: 2, paddingBottom: 2 }}>
           <Text style={{ fontFamily: font.semibold, fontSize: 15, color: brand[600] }}>See all</Text>
-          <ChevronRight size={16} color={brand[600]} />
+          <ChevronRight size={16} color={ink[900]} />
         </Tap>
       </View>
       {/* Columns of two, so both rows move as one shelf. Built by hand, no wrapping. */}
@@ -113,7 +113,7 @@ export function FileCard({ file, member, loading }: { file: HealthFile | null | 
           <View>
             <Avatar svg={member.avatar} photo={member.photo} image={member.avatarImage} background={member.avatarBackground} size={46} />
             <View style={{ position: "absolute", right: -4, bottom: -4, width: 22, height: 22, borderRadius: 999, backgroundColor: "#fff", alignItems: "center", justifyContent: "center" }}>
-              <FolderHeart size={13} color={brand[600]} />
+              <FolderHeart size={13} color={ink[900]} />
             </View>
           </View>
           <View style={{ flex: 1 }}>

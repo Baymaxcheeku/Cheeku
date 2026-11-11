@@ -185,17 +185,17 @@ export default function PersonalInfo() {
             onPress={() => router.push({ pathname: "/family/[id]", params: { id: detail.id } })}
             style={({ pressed }) => ({ flexDirection: "row", alignItems: "center", gap: 12, padding: 14, borderRadius: 24, backgroundColor: pressed ? brand[100] : brand[50] })}
           >
-            <HeartPulse size={17} color={brand[600]} />
+            <HeartPulse size={17} color={ink[900]} />
             <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 13, lineHeight: 19, color: ink[700] }}>
               {first}&apos;s photo, health basics and past reports live on their page.
             </Text>
-            <ChevronRight size={17} color={brand[600]} />
+            <ChevronRight size={17} color={ink[900]} />
           </Pressable>
         </Reveal>
       ) : context.data?.email ? (
         <Reveal style={{ marginHorizontal: 20, marginTop: 12 }}>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 12, padding: 14, borderRadius: 24, backgroundColor: "rgba(255,255,255,0.75)", borderWidth: 1, borderColor: surface.line }}>
-            <Mail size={17} color={brand[600]} />
+            <Mail size={17} color={ink[900]} />
             <View style={{ flex: 1, minWidth: 0 }}>
               <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{context.data.email}</Text>
               <Text style={{ fontFamily: font.regular, fontSize: 12, color: ink[500], marginTop: 1 }}>Sign-in email. Only you see this.</Text>

@@ -191,7 +191,7 @@ function ChipSet({
             onPress={() => setAdding(true)}
             style={{ height: 38, paddingHorizontal: 12, borderRadius: 999, flexDirection: "row", alignItems: "center", gap: 4, borderWidth: 1.5, borderStyle: "dashed", borderColor: brand[300] }}
           >
-            <Plus size={14} color={brand[600]} />
+            <Plus size={14} color={ink[900]} />
             <Text style={{ fontFamily: font.semibold, fontSize: 13, color: brand[700] }}>{addLabel}</Text>
           </Tap>
         ) : null}
@@ -199,7 +199,7 @@ function ChipSet({
       {adding ? (
         <View style={{ flexDirection: "row", gap: 8, marginTop: 10 }}>
           <Input value={draft} onChangeText={setDraft} placeholder={placeholder} autoFocus onSubmitEditing={commit} returnKeyType="done" style={{ flex: 1 }} />
-          <Tap scale={0.95} accessibilityRole="button" accessibilityLabel="Add" onPress={commit} style={{ width: 46, height: 46, borderRadius: 16, backgroundColor: brand[600], alignItems: "center", justifyContent: "center" }}>
+          <Tap scale={0.95} accessibilityRole="button" accessibilityLabel="Add" onPress={commit} style={{ width: 46, height: 46, borderRadius: 16, backgroundColor: ink[900], alignItems: "center", justifyContent: "center" }}>
             <Check size={18} color="#fff" />
           </Tap>
         </View>
@@ -239,7 +239,7 @@ function AddButton({ label, onPress }: { label: string; onPress: () => void }) {
       onPress={onPress}
       style={({ pressed }) => ({ height: 46, borderRadius: 16, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, borderWidth: 1.5, borderStyle: "dashed", borderColor: brand[300], backgroundColor: pressed ? lilac.base : "transparent" })}
     >
-      <Plus size={16} color={brand[600]} />
+      <Plus size={16} color={ink[900]} />
       <Text style={{ fontFamily: font.semibold, fontSize: 15, color: brand[700] }}>{label}</Text>
     </Pressable>
   );

@@ -42,7 +42,7 @@ export function ProductPicker({
 
         <View className="mt-3 flex-row items-start gap-3">
           <View className="h-10 w-10 items-center justify-center rounded-pill bg-brand-50">
-            <Camera size={18} color={brand[600]} />
+            <Camera size={18} color={ink[900]} />
           </View>
           <View className="flex-1">
             <Text className="text-lg font-bold text-ink-900">Ask about a product</Text>

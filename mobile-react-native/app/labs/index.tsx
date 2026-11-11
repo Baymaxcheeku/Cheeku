@@ -291,7 +291,7 @@ function PrescriptionSheet({ open, profileId, name, onClose }: { open: boolean; 
                   <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{r.title}</Text>
                   <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[500] }}>{[formatEventDate(r.eventDate), r.doctor].filter(Boolean).join(" · ")}</Text>
                 </View>
-                {on ? <Check size={18} color={brand[600]} /> : null}
+                {on ? <Check size={18} color={ink[900]} /> : null}
               </Tap>
             );
           })}

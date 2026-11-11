@@ -104,7 +104,7 @@ export default function Doctors() {
 
         {intake ? (
           <Glass className="mt-4 flex-row items-center gap-2.5 rounded-lg px-3.5 py-3">
-            <ClipboardCheck size={18} color={brand[600]} strokeWidth={1.8} />
+            <ClipboardCheck size={18} color={ink[900]} strokeWidth={1.8} />
             <Text style={{ flex: 1, fontFamily: font.medium, fontSize: 13, color: ink[700] }}>
               Your pre-consultation note goes to whichever doctor you book.
             </Text>
@@ -191,7 +191,7 @@ function DoctorCard({
       </Tap>
 
       <View className="mt-3 flex-row items-center gap-2 rounded-lg px-3 py-2.5" style={{ backgroundColor: "rgba(241,240,254,0.8)" }}>
-        <Clock3 size={14} color={brand[600]} />
+        <Clock3 size={14} color={ink[900]} />
         <Text style={{ flex: 1, fontFamily: font.medium, fontSize: 13, color: ink[700] }}>
           {next ? `Next: ${next}` : "No slots in the next 3 days"}
         </Text>
@@ -208,7 +208,7 @@ function DoctorCard({
           borderRadius: 999,
           alignItems: "center",
           justifyContent: "center",
-          backgroundColor: brand[600],
+          backgroundColor: ink[900],
         }}
         scale={0.98}
       >

@@ -3,7 +3,7 @@ import { Pressable } from "@/components/ui/pressable";
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 
 import { EASE_OUT, useReducedMotion } from "@/components/ui/motion";
-import { brand, ink, surface } from "@/theme/tokens";
+import { ink, surface } from "@/theme/tokens";
 
 /*
  * The primary action. Ported from the web `Button`.
@@ -54,18 +54,18 @@ export function Button({
           flexDirection: "row",
           gap: 8,
           opacity: off ? 0.6 : 1,
-          backgroundColor: primary ? brand[600] : "#ffffff",
+          backgroundColor: primary ? ink[900] : "#ffffff",
           borderWidth: primary ? 0 : 1,
           borderColor: surface.line,
         }}
       >
-        {loading ? <ActivityIndicator color={primary ? "#fff" : brand[600]} /> : null}
+        {loading ? <ActivityIndicator color={primary ? "#fff" : ink[900]} /> : null}
         <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
           {typeof children === "string" ? (
             <Text
               style={{
                 fontSize: 17,
-                fontWeight: "700",
+                fontWeight: "600",
                 color: primary ? "#ffffff" : ink[700],
               }}
             >

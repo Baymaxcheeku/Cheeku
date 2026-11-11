@@ -55,7 +55,7 @@ export default function Insurance() {
         {policies.length === 0 ? (
           <View style={[glassShadow, { backgroundColor: "#fff", borderRadius: 24, padding: 20, alignItems: "center", gap: 10, borderWidth: 1, borderColor: surface.line, marginTop: 6 }]}>
             <View style={{ width: 56, height: 56, borderRadius: 999, backgroundColor: brand[50], alignItems: "center", justifyContent: "center" }}>
-              <ShieldPlus size={26} color={brand[600]} />
+              <ShieldPlus size={26} color={ink[900]} />
             </View>
             <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900], textAlign: "center" }}>Add your health insurance</Text>
             <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 19, color: ink[500], textAlign: "center" }}>

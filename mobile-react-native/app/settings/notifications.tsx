@@ -207,7 +207,7 @@ export default function NotificationSettings() {
                   className="h-11 w-11 items-center justify-center rounded-lg"
                   style={{ backgroundColor: status === "granted" ? brand[50] : hue.slate.bg }}
                 >
-                  {status === "granted" ? <BellRing size={20} color={brand[600]} /> : <BellOff size={20} color={ink[500]} />}
+                  {status === "granted" ? <BellRing size={20} color={ink[900]} /> : <BellOff size={20} color={ink[500]} />}
                 </View>
                 <View className="flex-1">
                   <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>
@@ -243,7 +243,7 @@ export default function NotificationSettings() {
           </Section>
 
           <View className="mx-5 mt-4 flex-row items-start gap-2.5 rounded-lg px-4 py-3" style={{ backgroundColor: brand[50] }}>
-            <Inbox size={16} color={brand[600]} style={{ marginTop: 1 }} />
+            <Inbox size={16} color={ink[900]} style={{ marginTop: 1 }} />
             <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[700] }}>
               Everything always lands in your inbox. These switches only choose what can also buzz your phone.
             </Text>

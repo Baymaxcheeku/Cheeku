@@ -179,7 +179,7 @@ function Action({ icon: Icon, label, sub, onPress }: { icon: LucideIcon; label: 
   return (
     <Tap accessibilityRole="button" onPress={onPress} disabled={!onPress} scale={0.99} style={{ flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 16, paddingVertical: 12, borderTopWidth: 1, borderTopColor: surface.line }}>
       <View style={{ width: 36, height: 36, borderRadius: 12, backgroundColor: brand[50], alignItems: "center", justifyContent: "center" }}>
-        <Icon size={17} color={brand[600]} />
+        <Icon size={17} color={ink[900]} />
       </View>
       <View style={{ flex: 1, minWidth: 0 }}>
         <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{label}</Text>

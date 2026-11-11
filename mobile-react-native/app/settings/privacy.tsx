@@ -200,7 +200,7 @@ export default function PrivacySettings() {
                   <Text style={{ fontFamily: font.regular, fontSize: 12, lineHeight: 17, color: ink[500], marginTop: 2 }}>{PURPOSE_COPY[p].line}</Text>
                 </View>
                 {pending === p ? (
-                  <ActivityIndicator size="small" color={brand[600]} />
+                  <ActivityIndicator size="small" color={ink[900]} />
                 ) : (
                   <View style={{ opacity: state?.available ? 1 : 0.45 }}>
                     <SpringSwitch checked={on} onChange={() => onSwitch(p)} label={PURPOSE_COPY[p].title} />
@@ -375,7 +375,7 @@ function StatusLine({ icon: Icon, title, body }: { icon: LucideIcon; title: stri
   return (
     <View className="flex-row gap-3">
       <View className="h-10 w-10 items-center justify-center rounded-md" style={{ backgroundColor: brand[50] }}>
-        <Icon size={19} color={brand[600]} />
+        <Icon size={19} color={ink[900]} />
       </View>
       <View className="min-w-0 flex-1">
         <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{title}</Text>
@@ -409,13 +409,13 @@ function LinkRow({
       style={first ? undefined : { borderTopWidth: 1, borderTopColor: surface.line }}
     >
       <View className="h-9 w-9 items-center justify-center rounded-tile" style={{ backgroundColor: brand[50] }}>
-        <Icon size={16} color={brand[600]} />
+        <Icon size={16} color={ink[900]} />
       </View>
       <View className="min-w-0 flex-1">
         <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{title}</Text>
         <Text style={{ fontFamily: font.regular, fontSize: 12, lineHeight: 16, color: ink[500], marginTop: 1 }}>{body}</Text>
       </View>
-      {busy ? <ActivityIndicator size="small" color={brand[600]} /> : <ChevronRight size={16} color={ink[300]} />}
+      {busy ? <ActivityIndicator size="small" color={ink[900]} /> : <ChevronRight size={16} color={ink[300]} />}
     </Tap>
   );
 }
@@ -483,7 +483,7 @@ function RequestSheet({ kind, onClose, onSent }: { kind: RequestKind | null; onC
             disabled={busy}
             onPress={() => void send()}
             className="mt-4 h-[52px] items-center justify-center rounded-pill"
-            style={{ backgroundColor: brand[600], opacity: busy ? 0.6 : 1 }}
+            style={{ backgroundColor: ink[900], opacity: busy ? 0.6 : 1 }}
           >
             {busy ? <ActivityIndicator color="#fff" /> : <Text style={{ fontFamily: font.semibold, fontSize: 15, color: "#fff" }}>Send request</Text>}
           </Tap>

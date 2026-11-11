@@ -138,7 +138,7 @@ export default function PregnancyScreen() {
         <ScreenHeader fallback="/memory" />
         <View style={{ flex: 1, padding: 24, justifyContent: "center", gap: 14 }}>
           <View style={{ width: 64, height: 64, borderRadius: 24, backgroundColor: brand[50], alignItems: "center", justifyContent: "center" }}>
-            <Baby size={30} color={brand[600]} />
+            <Baby size={30} color={ink[900]} />
           </View>
           <PageTitle title={`Welcome, ${born.name}`} line={`${born.name} is in the family now, and starts life with what the pregnancy knew: weeks at birth, delivery, weight, and ${name}'s blood group. Day-by-day newborn limits apply from today.`} />
           <PillButton

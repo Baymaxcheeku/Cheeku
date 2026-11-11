@@ -135,7 +135,7 @@ export default function MemoryScreen() {
         ) : canCarry ? (
           <Tap scale={0.98} accessibilityRole="button" onPress={() => router.push("/pregnancy")} style={[glassShadow, { flexDirection: "row", alignItems: "center", gap: 12, borderRadius: 24, backgroundColor: "#fff", padding: 14 }]}>
             <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: brand[50], alignItems: "center", justifyContent: "center" }}>
-              <Baby size={18} color={brand[600]} />
+              <Baby size={18} color={ink[900]} />
             </View>
             <View style={{ flex: 1 }}>
               <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>Expecting?</Text>
@@ -296,7 +296,7 @@ function Card({ children }: { children: React.ReactNode }) {
 function Note({ text }: { text: string }) {
   return (
     <View style={{ flexDirection: "row", gap: 10, borderRadius: 24, backgroundColor: brand[50], padding: 14 }}>
-      <Info size={15} color={brand[600]} style={{ marginTop: 2 }} />
+      <Info size={15} color={ink[900]} style={{ marginTop: 2 }} />
       <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 13, lineHeight: 19, color: ink[700] }}>{text}</Text>
     </View>
   );
@@ -314,7 +314,7 @@ function Row({ icon: Icon, title, detail }: { icon: LucideIcon; title: string; d
   return (
     <View style={{ flexDirection: "row", gap: 10 }}>
       <View style={{ width: 34, height: 34, borderRadius: 12, backgroundColor: brand[50], alignItems: "center", justifyContent: "center" }}>
-        <Icon size={16} color={brand[600]} />
+        <Icon size={16} color={ink[900]} />
       </View>
       <View style={{ flex: 1, gap: 2, justifyContent: "center" }}>
         <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{title}</Text>
@@ -346,7 +346,7 @@ function LedgerRow({ entry, first }: { entry: LedgerEntry; first: boolean }) {
       <Divider show={!first} />
       <View style={{ flexDirection: "row", gap: 10, opacity: ended ? 0.55 : 1 }}>
         <View style={{ width: 34, height: 34, borderRadius: 12, backgroundColor: brand[50], alignItems: "center", justifyContent: "center" }}>
-          <PillBottle size={16} color={brand[600]} />
+          <PillBottle size={16} color={ink[900]} />
         </View>
         <View style={{ flex: 1, gap: 2 }}>
           <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{entry.name}</Text>
@@ -371,7 +371,7 @@ function LoopRow({ loop, first, onAsk, onSet }: { loop: LoopView; first: boolean
       <Divider show={!first} />
       <View style={{ flexDirection: "row", gap: 10 }}>
         <View style={{ width: 34, height: 34, borderRadius: 12, backgroundColor: brand[50], alignItems: "center", justifyContent: "center" }}>
-          <Icon size={16} color={brand[600]} />
+          <Icon size={16} color={ink[900]} />
         </View>
         <View style={{ flex: 1, gap: 2 }}>
           <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{loop.title}</Text>

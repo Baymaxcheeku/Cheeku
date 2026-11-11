@@ -93,7 +93,7 @@ export default function PrescriptionScorecard() {
             <Questions card={card} />
             <Prices card={card} />
             <Reveal style={{ marginTop: 18, flexDirection: "row", gap: 10, padding: 12, borderRadius: 16, backgroundColor: "rgba(255,255,255,0.75)", borderWidth: 1, borderColor: surface.line }}>
-              <ShieldCheck size={16} color={brand[600]} style={{ marginTop: 1 }} />
+              <ShieldCheck size={16} color={ink[900]} style={{ marginTop: 1 }} />
               <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 12, lineHeight: 18, color: ink[700] }}>
                 A check, not a diagnosis. Read against {card.basis.records} records, {card.basis.labs} lab values and {card.basis.medicines} other {card.basis.medicines === 1 ? "medicine" : "medicines"} on file. Talk to the doctor before starting, stopping or switching anything.
               </Text>
@@ -105,9 +105,9 @@ export default function PrescriptionScorecard() {
           </View>
           <View pointerEvents="box-none" style={{ position: "absolute", left: 0, right: 0, bottom: 0, flexDirection: "row", gap: 10, paddingHorizontal: 20, paddingTop: 12, paddingBottom: insets.bottom + 14 }}>
             <Tap accessibilityRole="button" accessibilityLabel={`Ask Cheeku about ${card.person}'s prescription`} onPress={() => router.push("/ask")} style={[glassShadow, { width: 56, height: 56, borderRadius: 999, backgroundColor: "#fff", alignItems: "center", justifyContent: "center" }]} scale={0.96}>
-              <MessageCircle size={22} color={brand[600]} />
+              <MessageCircle size={22} color={ink[900]} />
             </Tap>
-            <Tap accessibilityRole="button" onPress={() => router.push({ pathname: "/services/request", params: { service: "medicines", offering: "rx" } })} style={{ flex: 1, height: 56, borderRadius: 999, backgroundColor: brand[600], flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8 }} scale={0.98}>
+            <Tap accessibilityRole="button" onPress={() => router.push({ pathname: "/services/request", params: { service: "medicines", offering: "rx" } })} style={{ flex: 1, height: 56, borderRadius: 999, backgroundColor: ink[900], flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8 }} scale={0.98}>
               <Truck size={18} color="#fff" />
               <Text style={{ fontFamily: font.semibold, fontSize: 15, color: "#fff" }}>Order with home delivery</Text>
             </Tap>
@@ -279,7 +279,7 @@ function CheckRow({ check, first, open, onToggle, onOpenRecord }: { check: Score
                 {f.source ? (
                   f.source.documentId ? (
                     <Tap accessibilityRole="link" accessibilityLabel={`Open ${f.source.label}`} onPress={() => onOpenRecord(String(f.source?.documentId))} hitSlop={8} style={{ flexDirection: "row", alignItems: "center", gap: 5, marginTop: 6, alignSelf: "flex-start" }}>
-                      <FileText size={12} color={brand[600]} />
+                      <FileText size={12} color={ink[900]} />
                       <Text style={{ fontFamily: font.medium, fontSize: 12, color: brand[600] }}>{f.source.label}</Text>
                     </Tap>
                   ) : (
@@ -337,7 +337,7 @@ function Prices({ card }: { card: Scorecard }) {
             {m.alternatives.map((a, i) => (
               <View key={a.name} style={{ flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 12, paddingHorizontal: 14, borderTopWidth: i ? 1 : 0, borderTopColor: glass.rim }}>
                 <View style={{ width: 36, height: 36, borderRadius: 12, backgroundColor: a.prescribed ? brand[50] : hue.teal.bg, alignItems: "center", justifyContent: "center" }}>
-                  {a.prescribed ? <Pill size={16} color={brand[600]} /> : <CircleCheck size={16} color={hue.teal.fg} />}
+                  {a.prescribed ? <Pill size={16} color={ink[900]} /> : <CircleCheck size={16} color={hue.teal.fg} />}
                 </View>
                 <View style={{ flex: 1, minWidth: 0 }}>
                   <Text numberOfLines={2} style={{ fontFamily: font.semibold, fontSize: 13, color: ink[900] }}>{a.name}</Text>
@@ -397,7 +397,7 @@ function Problem({ message, onRetry }: { message: string; onRetry?: () => void }
     <View style={{ paddingHorizontal: 32, marginTop: 60, alignItems: "center", gap: 14 }}>
       <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900], textAlign: "center" }}>{message}</Text>
       {onRetry ? (
-        <Tap accessibilityRole="button" onPress={onRetry} style={{ height: 46, paddingHorizontal: 22, borderRadius: 999, backgroundColor: brand[600], alignItems: "center", justifyContent: "center" }} scale={0.98}>
+        <Tap accessibilityRole="button" onPress={onRetry} style={{ height: 46, paddingHorizontal: 22, borderRadius: 999, backgroundColor: ink[900], alignItems: "center", justifyContent: "center" }} scale={0.98}>
           <Text style={{ fontFamily: font.semibold, fontSize: 15, color: "#fff" }}>Try again</Text>
         </Tap>
       ) : null}

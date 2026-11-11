@@ -362,9 +362,9 @@ export default function Scan() {
                   {done ? (
                     <Check size={18} color="#ffffff" strokeWidth={3} />
                   ) : current ? (
-                    <ActivityIndicator size="small" color={brand[600]} />
+                    <ActivityIndicator size="small" color={ink[900]} />
                   ) : (
-                    <Icon size={18} color={brand[600]} />
+                    <Icon size={18} color={ink[900]} />
                   )}
                 </View>
                 <View className="min-w-0 flex-1">
@@ -478,7 +478,7 @@ export default function Scan() {
         <Text style={{ fontFamily: font.semibold, fontSize: 13, color: brand[600] }}>
           {docType && !MAIN.some((m) => m.type === docType) ? `Something else: ${DOC_TYPE_LABEL[docType]}` : "Something else"}
         </Text>
-        <ChevronDown size={15} color={brand[600]} style={{ transform: [{ rotate: moreTypes ? "180deg" : "0deg" }] }} />
+        <ChevronDown size={15} color={ink[900]} style={{ transform: [{ rotate: moreTypes ? "180deg" : "0deg" }] }} />
       </Tap>
       {moreTypes ? (
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingBottom: 4 }}>
@@ -614,7 +614,7 @@ function SharedCard({ file, onDrop }: { file: SharedFile; onDrop: () => void }) 
   return (
     <View style={[glassShadow, { marginTop: 18, borderRadius: 24, padding: 14, backgroundColor: "#fff", borderWidth: 1, borderColor: glass.rim, gap: 8 }]}>
       <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-        <Share2 size={13} color={brand[600]} />
+        <Share2 size={13} color={ink[900]} />
         <Text style={{ fontFamily: font.semibold, fontSize: 11, letterSpacing: 0.9, textTransform: "uppercase", color: brand[600] }}>Shared with Cheeku</Text>
       </View>
       <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>

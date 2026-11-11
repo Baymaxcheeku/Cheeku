@@ -117,7 +117,7 @@ export function CartBar({ count, from, label, onPress, bottom }: { count: number
         style={[glassShadow, {
           height: 64,
           borderRadius: 999,
-          backgroundColor: brand[600],
+          backgroundColor: ink[900],
           flexDirection: "row",
           alignItems: "center",
           paddingLeft: 22,

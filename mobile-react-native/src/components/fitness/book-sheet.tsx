@@ -165,7 +165,7 @@ export function BookSheet({
         ) : null}
         {fit.doctorNote ? (
           <View style={{ flexDirection: "row", gap: 10, borderRadius: 16, padding: 12, backgroundColor: lilac.mist }}>
-            <Stethoscope size={16} color={brand[600]} style={{ marginTop: 1 }} />
+            <Stethoscope size={16} color={ink[900]} style={{ marginTop: 1 }} />
             <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[700] }}>
               New to exercise? Check with {member?.isPrimary ? "your" : `${first}'s`} doctor first, and tell the trainer before class.
             </Text>

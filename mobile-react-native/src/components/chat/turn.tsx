@@ -60,7 +60,7 @@ export function UserBubble({ message }: { message: ThreadMessage }) {
           <Text style={{ fontFamily: font.medium, fontSize: 12, color: ink[700] }}>{message.attachment.title}</Text>
         </View>
       ) : null}
-      <View style={{ backgroundColor: brand[600], borderRadius: 24, borderBottomRightRadius: 6, paddingHorizontal: 16, paddingVertical: 12 }}>
+      <View style={{ backgroundColor: ink[900], borderRadius: 24, borderBottomRightRadius: 6, paddingHorizontal: 16, paddingVertical: 12 }}>
         <Text style={{ fontFamily: font.regular, fontSize: 15, lineHeight: 21, color: "#fff" }}>{message.content}</Text>
       </View>
     </View>
@@ -131,7 +131,7 @@ export function AssistantTurn({
               <View style={{ borderTopWidth: 1, borderTopColor: surface.line, paddingTop: 10, gap: 8 }}>
                 {message.citations.map((c) => (
                   <Tap key={c.documentId} accessibilityRole="button" accessibilityLabel={`Open ${c.label}`} onPress={() => onOpenRecord(c.documentId)} style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-                    <FileText size={13} color={brand[600]} />
+                    <FileText size={13} color={ink[900]} />
                     <Text numberOfLines={1} style={{ flex: 1, fontFamily: font.medium, fontSize: 13, color: brand[700] }}>
                       {c.label}
                     </Text>
@@ -161,7 +161,7 @@ export function AssistantTurn({
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingRight: 8 }}>
               {m.followUps.map((f) => (
                 <Tap key={f} accessibilityRole="button" onPress={() => onSend(f)} style={[glassShadow, { flexDirection: "row", alignItems: "center", gap: 5, height: 36, paddingHorizontal: 13, borderRadius: 999, backgroundColor: glass.fillStrong, borderWidth: 1, borderColor: glass.rim }]}>
-                  <CornerDownRight size={12} color={brand[600]} />
+                  <CornerDownRight size={12} color={ink[900]} />
                   <Text style={{ fontFamily: font.medium, fontSize: 13, color: ink[900] }}>{f}</Text>
                 </Tap>
               ))}
@@ -206,7 +206,7 @@ function CareOffer({ onBook }: { onBook: (mode: "clinic" | "online") => void }) 
       <Tap
         accessibilityRole="button"
         onPress={() => onBook("clinic")}
-        style={{ flex: 1, height: 46, borderRadius: 999, backgroundColor: brand[600], flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6 }} scale={0.98}
+        style={{ flex: 1, height: 46, borderRadius: 999, backgroundColor: ink[900], flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6 }} scale={0.98}
       >
         <MapPin size={15} color="#fff" />
         <Text style={{ fontFamily: font.semibold, fontSize: 13, color: "#fff" }}>Doctors nearby</Text>
@@ -216,7 +216,7 @@ function CareOffer({ onBook }: { onBook: (mode: "clinic" | "online") => void }) 
         onPress={() => onBook("online")}
         style={[glassShadow, { flex: 1, height: 46, borderRadius: 999, backgroundColor: "#fff", borderWidth: 1, borderColor: surface.line, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6 }]} scale={0.98}
       >
-        <Video size={15} color={brand[600]} />
+        <Video size={15} color={ink[900]} />
         <Text style={{ fontFamily: font.semibold, fontSize: 13, color: ink[900] }}>Online consultation</Text>
       </Tap>
     </View>
@@ -248,7 +248,7 @@ function Revisions({ memory }: { memory: TurnMemory }) {
   return (
     <View style={{ marginLeft: 36, borderRadius: 16, backgroundColor: brand[50], padding: 12, gap: 6 }}>
       <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-        <History size={14} color={brand[600]} />
+        <History size={14} color={ink[900]} />
         <Text style={{ fontFamily: font.semibold, fontSize: 13, color: brand[700] }}>I&apos;ve corrected an earlier answer</Text>
       </View>
       {memory.revisions.map((r) => (
@@ -307,7 +307,7 @@ export function ScriptCard({ script, urgent }: { script: NonNullable<TurnMemory[
     <View style={[glassShadow, { borderRadius: 24, backgroundColor: "#fff", borderWidth: 1, borderColor: surface.line, overflow: "hidden" }]}>
       <Tap scale={0.98} accessibilityRole="button" accessibilityState={{ expanded: open }} onPress={() => setOpen((o) => !o)} style={{ flexDirection: "row", alignItems: "center", gap: 10, padding: 14, backgroundColor: brand[50] }}>
         <View style={{ width: 34, height: 34, borderRadius: 12, backgroundColor: "#fff", alignItems: "center", justifyContent: "center" }}>
-          <Stethoscope size={17} color={brand[600]} />
+          <Stethoscope size={17} color={ink[900]} />
         </View>
         <View style={{ flex: 1 }}>
           <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{urgent ? "What to tell them when you get there" : script.to ? `What to tell ${script.to}` : "What to tell the doctor"}</Text>
@@ -331,7 +331,7 @@ export function ScriptCard({ script, urgent }: { script: NonNullable<TurnMemory[
           ))}
           <View style={{ flexDirection: "row", gap: 8, marginTop: 4 }}>
             {script.phone ? (
-              <Tap accessibilityRole="button" accessibilityLabel={`Call ${script.to ?? "the doctor"}`} onPress={() => script.phone && tel(script.phone)} style={{ flex: 1, height: 42, borderRadius: 999, backgroundColor: brand[600], flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6 }}>
+              <Tap accessibilityRole="button" accessibilityLabel={`Call ${script.to ?? "the doctor"}`} onPress={() => script.phone && tel(script.phone)} style={{ flex: 1, height: 42, borderRadius: 999, backgroundColor: ink[900], flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6 }}>
                 <Phone size={15} color="#fff" />
                 <Text style={{ fontFamily: font.semibold, fontSize: 13, color: "#fff" }}>Call</Text>
               </Tap>
@@ -384,7 +384,7 @@ function LoopNudge({ title, when, because, onPress }: { title: string; when: str
   return (
     <Tap scale={0.98} accessibilityRole="button" onPress={onPress} style={[glassShadow, { flexDirection: "row", gap: 10, borderRadius: 24, backgroundColor: "#fff", borderWidth: 1, borderColor: surface.line, padding: 14 }]}>
       <View style={{ width: 34, height: 34, borderRadius: 12, backgroundColor: brand[50], alignItems: "center", justifyContent: "center" }}>
-        <BookOpenText size={16} color={brand[600]} />
+        <BookOpenText size={16} color={ink[900]} />
       </View>
       <View style={{ flex: 1, gap: 2 }}>
         <Text style={{ fontFamily: font.semibold, fontSize: 11, letterSpacing: 0.5, textTransform: "uppercase", color: brand[600] }}>Still open · {when}</Text>

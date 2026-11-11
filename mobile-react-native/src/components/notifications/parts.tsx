@@ -358,7 +358,7 @@ export function PushBlocked({ onOpenSettings }: { onOpenSettings: () => void }) 
         backgroundColor: pressed ? lilac.base : brand[50],
       })}
     >
-      <BellRing size={17} color={brand[600]} />
+      <BellRing size={17} color={ink[900]} />
       <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[700] }}>
         Phone alerts are off for <Brand />. Everything still lands here.{" "}
         <Text style={{ fontFamily: font.semibold, color: brand[700] }}>Turn on in Settings</Text>

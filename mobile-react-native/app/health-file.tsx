@@ -176,7 +176,7 @@ function FileBody({ f, memberId, member, onAdd }: { f: HealthFile; memberId: str
       {f.totals.needsReview ? (
         <Tap accessibilityRole="button" onPress={() => router.push("/records")} style={{ marginTop: 12 }}>
           <Glass strong className="flex-row items-center gap-3 rounded-xl p-3.5">
-            <BadgeCheck size={18} color={brand[600]} />
+            <BadgeCheck size={18} color={ink[900]} />
             <Text style={{ flex: 1, fontFamily: font.medium, fontSize: 13, color: ink[900] }}>
               {f.totals.needsReview} record{f.totals.needsReview === 1 ? " is" : "s are"} waiting for {p.isPrimary ? "your" : "a"} quick check
             </Text>
@@ -242,7 +242,7 @@ function FileBody({ f, memberId, member, onAdd }: { f: HealthFile; memberId: str
             onPress={() => router.push({ pathname: "/ask", params: { q: `How have ${p.isPrimary ? "my" : `${p.firstName}'s`} flagged values moved, and does anything need a doctor?` } })}
             style={{ flexDirection: "row", alignItems: "center", gap: 6, marginTop: 10, alignSelf: "flex-start", paddingHorizontal: 12, paddingVertical: 8, borderRadius: 999, backgroundColor: brand[50] }}
           >
-            <MessageCircle size={14} color={brand[600]} />
+            <MessageCircle size={14} color={ink[900]} />
             <Text style={{ fontFamily: font.semibold, fontSize: 13, color: brand[700] }}>Ask Cheeku about these</Text>
           </Tap>
         </>

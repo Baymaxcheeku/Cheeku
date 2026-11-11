@@ -74,8 +74,8 @@ export function AvatarPicker({
           </View>
         ) : (
           <View style={{ flexDirection: "row", gap: 10 }}>
-            <PhotoButton icon={<Camera size={17} color={brand[600]} />} label="Take a photo" onPress={() => onPickPhoto("camera")} />
-            <PhotoButton icon={<ImagePlus size={17} color={brand[600]} />} label="Choose photo" onPress={() => onPickPhoto("library")} />
+            <PhotoButton icon={<Camera size={17} color={ink[900]} />} label="Take a photo" onPress={() => onPickPhoto("camera")} />
+            <PhotoButton icon={<ImagePlus size={17} color={ink[900]} />} label="Choose photo" onPress={() => onPickPhoto("library")} />
           </View>
         )
       ) : null}
@@ -110,7 +110,7 @@ export function AvatarPicker({
               onPress={() => { onShuffle(); onClearPhoto?.(); }}
               icon={
                 <View style={{ width: 30, height: 30, borderRadius: 999, backgroundColor: brand[50], alignItems: "center", justifyContent: "center" }}>
-                  <Shuffle size={14} color={brand[600]} />
+                  <Shuffle size={14} color={ink[900]} />
                 </View>
               }
             />

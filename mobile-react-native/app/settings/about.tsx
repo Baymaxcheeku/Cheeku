@@ -313,7 +313,7 @@ function Floating({ label, note, icon: Icon, style, delay }: { label: string; no
     <Drift delay={delay} style={[{ position: "absolute", zIndex: 3 }, style]}>
       <View style={[glassShadow, { flexDirection: "row", alignItems: "center", gap: 7, paddingVertical: 7, paddingLeft: 7, paddingRight: 11, borderRadius: 999, backgroundColor: "#fff" }]}>
         <View style={{ width: 24, height: 24, borderRadius: 999, backgroundColor: brand[50], alignItems: "center", justifyContent: "center" }}>
-          <Icon size={13} color={brand[600]} />
+          <Icon size={13} color={ink[900]} />
         </View>
         <View>
           <Text style={{ fontFamily: font.semibold, fontSize: 12, color: ink[900] }}>{label}</Text>
@@ -329,7 +329,7 @@ function Step({ n, last, icon: Icon, title, text }: { n: number; last: boolean; 
     <View style={{ flexDirection: "row", gap: 14, marginTop: n === 1 ? 18 : 0 }}>
       <View style={{ alignItems: "center", width: 44 }}>
         <View style={[glassShadow, { width: 44, height: 44, borderRadius: 16, backgroundColor: "#fff", alignItems: "center", justifyContent: "center" }]}>
-          <Icon size={20} color={brand[600]} />
+          <Icon size={20} color={ink[900]} />
         </View>
         {last ? null : <View style={{ width: 2, flex: 1, minHeight: 24, marginVertical: 6, borderRadius: 1, backgroundColor: brand[100] }} />}
       </View>
@@ -368,7 +368,7 @@ function Feature({ icon: Icon, title, text }: { icon: LucideIcon; title: string;
   return (
     <View style={[glassShadow, { flex: 1, borderRadius: 24, backgroundColor: "#fff", padding: 14, gap: 8 }]}>
       <View style={{ width: 38, height: 38, borderRadius: 12, backgroundColor: brand[50], alignItems: "center", justifyContent: "center" }}>
-        <Icon size={18} color={brand[600]} />
+        <Icon size={18} color={ink[900]} />
       </View>
       <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{title}</Text>
       <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[700] }}>{text}</Text>
@@ -379,7 +379,7 @@ function Feature({ icon: Icon, title, text }: { icon: LucideIcon; title: string;
 function Tick({ text }: { text: string }) {
   return (
     <View style={{ flexDirection: "row", gap: 8, alignItems: "flex-start" }}>
-      <HeartHandshake size={15} color={brand[600]} style={{ marginTop: 2 }} />
+      <HeartHandshake size={15} color={ink[900]} style={{ marginTop: 2 }} />
       <Text style={{ flex: 1, fontFamily: font.medium, fontSize: 13, lineHeight: 19, color: ink[900] }}>{text}</Text>
     </View>
   );
@@ -389,7 +389,7 @@ function Trust({ icon: Icon, title, text }: { icon: LucideIcon; title: string; t
   return (
     <View style={[glassShadow, { flex: 1, alignItems: "center", borderRadius: 24, backgroundColor: "#fff", paddingVertical: 16, paddingHorizontal: 8, gap: 6 }]}>
       <View style={{ width: 40, height: 40, borderRadius: 999, backgroundColor: brand[50], alignItems: "center", justifyContent: "center" }}>
-        <Icon size={18} color={brand[600]} />
+        <Icon size={18} color={ink[900]} />
       </View>
       <Text style={{ fontFamily: font.semibold, fontSize: 13, color: ink[900] }}>{title}</Text>
       <Text style={{ fontFamily: font.regular, fontSize: 12, color: ink[500], textAlign: "center" }}>{text}</Text>

@@ -130,7 +130,7 @@ export default function HealthProfile() {
           <View style={{ flexDirection: "row", gap: 8, marginTop: 16 }}>
             {stats.map((st) => (
               <View key={st.one} style={{ flex: 1, padding: 12, borderRadius: 16, backgroundColor: "rgba(255,255,255,0.85)" }}>
-                <st.icon size={16} color={brand[600]} />
+                <st.icon size={16} color={ink[900]} />
                 <Text style={{ fontFamily: font.semibold, fontSize: 20, letterSpacing: -0.4, color: ink[900], marginTop: 6 }}>{st.n}</Text>
                 <Text style={{ fontFamily: font.regular, fontSize: 12, color: ink[500] }}>{st.n === 1 ? st.one : st.many}</Text>
               </View>
@@ -141,7 +141,7 @@ export default function HealthProfile() {
 
       <Reveal style={{ marginHorizontal: 20, marginTop: 12 }}>
         <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 10, padding: 14, borderRadius: 24, backgroundColor: brand[50] }}>
-          <Info size={16} color={brand[600]} style={{ marginTop: 2 }} />
+          <Info size={16} color={ink[900]} style={{ marginTop: 2 }} />
           <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 13, lineHeight: 19, color: ink[700] }}>
             {brandify(`In ${active.isPrimary ? "your" : `${first}'s`} own words. Cheeku reads every report and every symptom against this, and never guesses at a diagnosis.`)}
           </Text>

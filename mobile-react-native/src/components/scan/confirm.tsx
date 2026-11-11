@@ -129,7 +129,7 @@ export function ScanConfirm({
               style={{ flexDirection: "row", alignItems: "center", gap: 10, padding: 14 }}
             >
               <View style={{ width: 28, height: 28, borderRadius: 999, backgroundColor: brand[50], alignItems: "center", justifyContent: "center" }}>
-                <Check size={15} color={brand[600]} strokeWidth={3} />
+                <Check size={15} color={ink[900]} strokeWidth={3} />
               </View>
               <Text style={{ flex: 1, fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>
                 {clear.length} read clearly
@@ -199,7 +199,7 @@ function CheckRow({
       ]}
     >
       <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-        {done ? <Check size={15} color={brand[600]} strokeWidth={3} /> : <CircleHelp size={15} color={hue.orange.fg} />}
+        {done ? <Check size={15} color={ink[900]} strokeWidth={3} /> : <CircleHelp size={15} color={hue.orange.fg} />}
         <Text style={{ flex: 1, fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{item.label}</Text>
         <Text style={{ fontFamily: font.medium, fontSize: 11, color: done ? brand[600] : hue.orange.fg }}>{done ? "Checked" : "Not sure"}</Text>
       </View>

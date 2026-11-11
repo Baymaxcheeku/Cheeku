@@ -104,7 +104,7 @@ export function ConsentBox({
           {open ? "Hide what this covers" : "What this covers"}
         </Text>
         <View style={{ transform: [{ rotate: open ? "180deg" : "0deg" }] }}>
-          <ChevronDown size={14} color={brand[600]} />
+          <ChevronDown size={14} color={ink[900]} />
         </View>
       </Tap>
 
@@ -130,7 +130,7 @@ export function ConsentBox({
             return (
               <View key={p} className="flex-row items-start gap-3">
                 <View className="h-7 w-7 items-center justify-center rounded-sm" style={{ backgroundColor: brand[50] }}>
-                  <Icon size={14} color={brand[600]} />
+                  <Icon size={14} color={ink[900]} />
                 </View>
                 <View className="min-w-0 flex-1">
                   <Text style={{ fontFamily: font.semibold, fontSize: 13, color: ink[900] }}>{PURPOSE_COPY[p].title}</Text>

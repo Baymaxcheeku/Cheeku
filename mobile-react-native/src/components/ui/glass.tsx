@@ -3,7 +3,7 @@ import { StyleSheet, View, type ViewProps } from "react-native";
 import Svg, { Defs, LinearGradient, RadialGradient, Rect, Stop } from "react-native-svg";
 
 import { Tap } from "@/components/ui/tap";
-import { brand } from "@/theme/tokens";
+import { ink } from "@/theme/tokens";
 
 /*
  * Glass and gradient, without new native modules.
@@ -19,19 +19,21 @@ import { brand } from "@/theme/tokens";
  * the mascot. Same reason: `expo-linear-gradient` is native.
  */
 
+// Flat since the neutral redesign: "glass" is a plain white surface on the
+// grey canvas, with a hairline only where white meets white.
 export const glass = {
-  fill: "rgba(255,255,255,0.62)",
-  fillStrong: "rgba(255,255,255,0.86)",
-  rim: "rgba(255,255,255,0.95)",
+  fill: "#ffffff",
+  fillStrong: "#ffffff",
+  rim: "rgba(17,17,20,0.05)",
 } as const;
 
 /** The soft lift under glass: wide and faint rather than tight and dark. */
 export const glassShadow = {
-  shadowColor: brand[900],
-  shadowOpacity: 0.08,
-  shadowRadius: 18,
-  shadowOffset: { width: 0, height: 6 },
-  elevation: 3,
+  shadowColor: "#000000",
+  shadowOpacity: 0.03,
+  shadowRadius: 6,
+  shadowOffset: { width: 0, height: 1 },
+  elevation: 0,
 } as const;
 
 export function Glass({
@@ -88,7 +90,7 @@ export function GlassCircle({
           borderRadius: size / 2,
           alignItems: "center",
           justifyContent: "center",
-          backgroundColor: dark ? brand[600] : glass.fillStrong,
+          backgroundColor: dark ? ink[900] : glass.fillStrong,
           borderWidth: dark ? 0 : 1,
           borderColor: glass.rim,
         },

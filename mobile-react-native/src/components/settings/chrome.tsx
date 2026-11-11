@@ -70,7 +70,7 @@ export function SettingsScreen({
           style={bare ? { height: 0, opacity: 0, overflow: "hidden" } : undefined}
         >
           <Glass strong className="h-14 w-14 items-center justify-center rounded-lg">
-            <Icon size={23} color={brand[600]} strokeWidth={1.8} />
+            <Icon size={23} color={ink[900]} strokeWidth={1.8} />
           </Glass>
           <View className="min-w-0 flex-1">
             <Text style={{ fontFamily: font.semibold, fontSize: 24, lineHeight: 31, letterSpacing: -0.7, color: ink[900] }}>

@@ -111,7 +111,7 @@ export default function Medicines() {
                   accessibilityRole="button"
                   onPress={() => router.push({ pathname: "/services/request", params: { service: "medicines", offering: "refill" } })}
                   className="h-9 items-center justify-center rounded-pill px-3.5"
-                  style={{ backgroundColor: brand[600] }}
+                  style={{ backgroundColor: ink[900] }}
                 >
                   <Text style={{ fontFamily: font.semibold, fontSize: 13, color: "#fff" }}>Refill</Text>
                 </Tap>
@@ -223,7 +223,7 @@ function MedCard({ med, onStock, onSchedule }: { med: MedView; onStock: () => vo
     <View className="rounded-xl bg-white p-4" style={[glassShadow, { borderWidth: 1, borderColor: surface.line }]}>
       <View className="flex-row items-start gap-3">
         <View className="h-10 w-10 items-center justify-center rounded-lg" style={{ backgroundColor: brand[50] }}>
-          <Pill size={18} color={brand[600]} />
+          <Pill size={18} color={ink[900]} />
         </View>
         <View className="min-w-0 flex-1">
           <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{med.name}</Text>

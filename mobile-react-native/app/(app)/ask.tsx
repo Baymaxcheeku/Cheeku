@@ -416,7 +416,7 @@ export default function Ask() {
                       style={[glassShadow, { backgroundColor: glass.fillStrong, borderWidth: 1, borderColor: glass.rim }]}
                     >
                       <View className="h-10 w-10 items-center justify-center rounded-md bg-brand-50">
-                        <Icon size={17} color={brand[600]} />
+                        <Icon size={17} color={ink[900]} />
                       </View>
                       <View style={{ flex: 1 }}>
                         <Text style={{ fontFamily: font.medium, fontSize: 15, lineHeight: 19, color: ink[900] }}>{s.text}</Text>
@@ -437,7 +437,7 @@ export default function Ask() {
                   style={{ borderWidth: 1, borderStyle: "dashed", borderColor: brand[200] }}
                 >
                   <View className="h-10 w-10 items-center justify-center rounded-md bg-white">
-                    <Stethoscope size={17} color={brand[600]} />
+                    <Stethoscope size={17} color={ink[900]} />
                   </View>
                   <Text style={{ flex: 1, fontFamily: font.medium, fontSize: 15, color: ink[900] }}>Something&apos;s not right with {name}</Text>
                 </Tap>
@@ -551,13 +551,13 @@ export default function Ask() {
           ) : null}
           {about ? (
             <View style={{ flexDirection: "row", alignItems: "center", gap: 8, alignSelf: "flex-start", paddingLeft: 12, paddingRight: 6, paddingVertical: 6, borderRadius: 999, backgroundColor: brand[50] }}>
-              <FileText size={13} color={brand[600]} />
+              <FileText size={13} color={ink[900]} />
               <Text numberOfLines={1} style={{ maxWidth: 240, fontFamily: font.medium, fontSize: 13, color: brand[700] }}>
                 About {about.title}
                 {about.date ? ` · ${shortDate(about.date)}` : ""}
               </Text>
               <Tap accessibilityRole="button" accessibilityLabel="Stop asking about this record" onPress={() => setAboutId(null)} hitSlop={8}>
-                <X size={14} color={brand[600]} />
+                <X size={14} color={ink[900]} />
               </Tap>
             </View>
           ) : null}
@@ -593,7 +593,7 @@ export default function Ask() {
               style={{ maxHeight: 120, fontSize: 15, color: ink[900], fontFamily: "Inter_400Regular" }}
             />
             <Tap scale={0.95} accessibilityRole="button" accessibilityLabel="Ask about a product" onPress={() => setPickerOpen(true)} className="h-10 w-10 items-center justify-center rounded-pill">
-              <Camera size={19} color={brand[600]} />
+              <Camera size={19} color={ink[900]} />
             </Tap>
             <Tap scale={0.95}
               accessibilityRole="button"
@@ -602,7 +602,7 @@ export default function Ask() {
               disabled={Boolean(pendingText) || !draft.trim()}
               onPress={() => void send(draft)}
               className="h-11 w-11 items-center justify-center rounded-pill"
-              style={{ backgroundColor: brand[600], opacity: pendingText || !draft.trim() ? 0.35 : 1 }}
+              style={{ backgroundColor: ink[900], opacity: pendingText || !draft.trim() ? 0.35 : 1 }}
             >
               <ArrowUp size={19} color="#ffffff" />
             </Tap>
@@ -650,7 +650,7 @@ function MemoryChip({ label, strong, onPress }: { label: string; strong?: boolea
 function How({ icon: Icon, text }: { icon: AppIcon; text: string }) {
   return (
     <View style={{ flexDirection: "row", gap: 10, alignItems: "flex-start" }}>
-      <Icon size={15} color={brand[600]} style={{ marginTop: 1 }} />
+      <Icon size={15} color={ink[900]} style={{ marginTop: 1 }} />
       <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[700] }}>{text}</Text>
     </View>
   );

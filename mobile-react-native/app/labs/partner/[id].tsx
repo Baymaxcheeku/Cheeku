@@ -84,9 +84,9 @@ export default function LabPartner() {
           ) : null}
 
           <View style={{ flexDirection: "row", gap: 8, marginTop: 16 }}>
-            <Stat icon={<Clock3 size={16} color={brand[600]} />} label="Report" value={`in ${p.reportHours}h`} />
-            <Stat icon={<Truck size={16} color={brand[600]} />} label="Home visit" value={p.collectionFee ? `${rupees(p.collectionFee)}${p.freeCollectionAbove ? `, free over ${rupees(p.freeCollectionAbove)}` : ""}` : "Free"} />
-            <Stat icon={<ShieldCheck size={16} color={brand[600]} />} label="Accredited" value={p.accreditation.join(", ") || "-"} />
+            <Stat icon={<Clock3 size={16} color={ink[900]} />} label="Report" value={`in ${p.reportHours}h`} />
+            <Stat icon={<Truck size={16} color={ink[900]} />} label="Home visit" value={p.collectionFee ? `${rupees(p.collectionFee)}${p.freeCollectionAbove ? `, free over ${rupees(p.freeCollectionAbove)}` : ""}` : "Free"} />
+            <Stat icon={<ShieldCheck size={16} color={ink[900]} />} label="Accredited" value={p.accreditation.join(", ") || "-"} />
           </View>
 
           <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900], marginTop: 26, marginBottom: 8 }}>About</Text>
@@ -134,7 +134,7 @@ export default function LabPartner() {
             cart.setPartner(p.id);
             router.push(cart.tests.length ? "/labs/book" : "/labs");
           }}
-          style={[glassShadow, { height: 58, borderRadius: 999, backgroundColor: brand[600], alignItems: "center", justifyContent: "center" }]} scale={0.98}
+          style={[glassShadow, { height: 58, borderRadius: 999, backgroundColor: ink[900], alignItems: "center", justifyContent: "center" }]} scale={0.98}
         >
           <Text style={{ fontFamily: font.semibold, fontSize: 17, color: "#fff" }}>
             {cart.tests.length ? `Book home collection · ${cart.tests.length} ${cart.tests.length === 1 ? "test" : "tests"}` : "Pick tests to book"}

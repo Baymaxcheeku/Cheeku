@@ -79,14 +79,14 @@ export default function Confirmed() {
 
   const next: [React.ReactNode, string][] = online
     ? [
-        [<MonitorPlay key="a" size={16} color={brand[600]} />, "A video link appears here 15 minutes before your slot."],
-        [<ClipboardCheck key="b" size={16} color={brand[600]} />, `${doctor.name.split(" ").slice(0, 2).join(" ")} has your pre-consultation note.`],
-        [<MessageCircleHeart key="c" size={16} color={brand[600]} />, "After the call, send me the prescription and I'll file it."],
+        [<MonitorPlay key="a" size={16} color={ink[900]} />, "A video link appears here 15 minutes before your slot."],
+        [<ClipboardCheck key="b" size={16} color={ink[900]} />, `${doctor.name.split(" ").slice(0, 2).join(" ")} has your pre-consultation note.`],
+        [<MessageCircleHeart key="c" size={16} color={ink[900]} />, "After the call, send me the prescription and I'll file it."],
       ]
     : [
-        [<Ticket key="a" size={16} color={brand[600]} />, "Show this at the front desk to get your token."],
-        [<ClipboardCheck key="b" size={16} color={brand[600]} />, `${doctor.name.split(" ").slice(0, 2).join(" ")} has your pre-consultation note.`],
-        [<MessageCircleHeart key="c" size={16} color={brand[600]} />, "After the visit, snap the prescription and I'll file it."],
+        [<Ticket key="a" size={16} color={ink[900]} />, "Show this at the front desk to get your token."],
+        [<ClipboardCheck key="b" size={16} color={ink[900]} />, `${doctor.name.split(" ").slice(0, 2).join(" ")} has your pre-consultation note.`],
+        [<MessageCircleHeart key="c" size={16} color={ink[900]} />, "After the visit, snap the prescription and I'll file it."],
       ];
 
   return (
@@ -98,7 +98,7 @@ export default function Confirmed() {
       <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingTop: insets.top + 28, paddingBottom: 20 }} showsVerticalScrollIndicator={false}>
         <View className="items-center">
           <Animated.View style={tick}>
-            <View className="h-20 w-20 items-center justify-center rounded-pill" style={[glassShadow, { backgroundColor: brand[600] }]}>
+            <View className="h-20 w-20 items-center justify-center rounded-pill" style={[glassShadow, { backgroundColor: ink[900] }]}>
               <Check size={38} color="#fff" strokeWidth={3} />
             </View>
           </Animated.View>

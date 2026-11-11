@@ -306,7 +306,7 @@ export default function Subscription() {
             style={({ pressed }) => [glassShadow, { flexDirection: "row", alignItems: "center", gap: 12, padding: 16, borderRadius: 24, backgroundColor: pressed ? brand[100] : brand[50] }]}
           >
             <View style={{ width: 42, height: 42, borderRadius: 16, backgroundColor: "#fff", alignItems: "center", justifyContent: "center" }}>
-              <Zap size={19} color={brand[600]} />
+              <Zap size={19} color={ink[900]} />
             </View>
             <View style={{ flex: 1 }}>
               <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>Just need tonight?</Text>
@@ -314,7 +314,7 @@ export default function Subscription() {
                 Daily Pass, {formatPrice(PLANS.micro.priceInPaise)}. Unlimited for {DAILY_PASS_HOURS} hours, never renews.
               </Text>
             </View>
-            <ChevronRight size={18} color={brand[600]} />
+            <ChevronRight size={18} color={ink[900]} />
           </Pressable>
         </Reveal>
       ) : null}
@@ -371,7 +371,7 @@ function Meter({ left }: { left: number }) {
   return (
     <View>
       <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-        <MessageCircle size={17} color={brand[600]} />
+        <MessageCircle size={17} color={ink[900]} />
         <Text style={{ flex: 1, fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>
           {left} of {FREE_CHAT_LIMIT} chats left today
         </Text>
@@ -414,7 +414,7 @@ function Perk({ text, dark = false }: { text: string; dark?: boolean }) {
 function Assurance({ icon: Icon, text }: { icon: LucideIcon; text: string }) {
   return (
     <View style={{ flex: 1, flexDirection: "row", alignItems: "center", gap: 8, padding: 12, borderRadius: 16, backgroundColor: "rgba(255,255,255,0.7)", borderWidth: 1, borderColor: surface.line }}>
-      <Icon size={16} color={brand[600]} />
+      <Icon size={16} color={ink[900]} />
       <Text style={{ flex: 1, fontFamily: font.medium, fontSize: 13, lineHeight: 17, color: ink[700] }}>{text}</Text>
     </View>
   );
@@ -526,7 +526,7 @@ function Compare({ current }: { current: Tier }) {
               <View key={c.tier} style={{ flex: 1, alignItems: "center" }}>
                 {v === true ? (
                   <View style={{ width: 22, height: 22, borderRadius: 999, backgroundColor: brand[50], alignItems: "center", justifyContent: "center" }}>
-                    <Check size={13} color={brand[600]} strokeWidth={3} />
+                    <Check size={13} color={ink[900]} strokeWidth={3} />
                   </View>
                 ) : v === false ? (
                   <Minus size={15} color={ink[300]} />

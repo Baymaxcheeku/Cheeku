@@ -126,7 +126,7 @@ export function MemberCareCard({ member, phone }: { member: ActiveProfile; phone
             </View>
           ) : (
             <Tap accessibilityRole="button" onPress={() => open("/medicines")} className="mt-4 flex-row items-center gap-2 rounded-lg px-3 py-3" style={{ backgroundColor: surface.tint }}>
-              <Pill size={16} color={brand[600]} />
+              <Pill size={16} color={ink[900]} />
               <Text style={{ flex: 1, fontFamily: font.medium, fontSize: 13, color: ink[700] }}>{meds?.unscheduled.length ? `Set when ${name} takes their medicines` : `No medicines on a schedule for ${name}`}</Text>
               <ChevronRight size={16} color={ink[300]} />
             </Tap>
@@ -179,7 +179,7 @@ export function MemberCareCard({ member, phone }: { member: ActiveProfile; phone
                   void Linking.openURL(`tel:${phone.replace(/[^0-9+]/g, "")}`);
                 }}
                 className="h-10 flex-row items-center gap-1.5 rounded-pill px-4"
-                style={{ backgroundColor: brand[600] }}
+                style={{ backgroundColor: ink[900] }}
               >
                 <Phone size={15} color="#fff" />
                 <Text style={{ fontFamily: font.semibold, fontSize: 13, color: "#fff" }}>{`Call ${name}`}</Text>

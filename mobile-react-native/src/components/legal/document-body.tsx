@@ -75,7 +75,7 @@ export function DocumentBody({ doc }: { doc: LegalDocument }) {
             }
             return (
               <View key={i} className="mt-3 flex-row gap-2.5 rounded-lg p-3.5" style={{ backgroundColor: surface.base, borderWidth: 1, borderColor: brand[100] }}>
-                <Info size={16} color={brand[600]} style={{ marginTop: 2 }} />
+                <Info size={16} color={ink[900]} style={{ marginTop: 2 }} />
                 <Text style={{ flex: 1, fontFamily: font.semibold, fontSize: 15, lineHeight: 21, color: ink[900] }}>{b.note}</Text>
               </View>
             );

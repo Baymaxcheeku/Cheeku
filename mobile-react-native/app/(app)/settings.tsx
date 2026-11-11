@@ -202,7 +202,7 @@ export default function Settings() {
           ]}
           scale={0.98}
         >
-          <View className="h-10 w-10 items-center justify-center rounded-pill" style={{ backgroundColor: brand[600] }}>
+          <View className="h-10 w-10 items-center justify-center rounded-pill" style={{ backgroundColor: ink[900] }}>
             <Crown size={17} color="#fff" />
           </View>
           <View className="min-w-0 flex-1">
@@ -214,7 +214,7 @@ export default function Settings() {
             </Text>
           </View>
           <Text style={{ fontFamily: font.semibold, fontSize: 13, color: brand[600] }}>{canUpgrade ? "Upgrade" : "Manage"}</Text>
-          <ChevronRight size={15} color={brand[600]} />
+          <ChevronRight size={15} color={ink[900]} />
         </Tap>
       </View>
       </View>
@@ -464,9 +464,9 @@ function AccountData({ onDeleted }: { onDeleted: () => void }) {
           >
             <View className="h-9 w-9 items-center justify-center rounded-tile bg-brand-50">
               {busy === "export" ? (
-                <ActivityIndicator size="small" color={brand[600]} />
+                <ActivityIndicator size="small" color={ink[900]} />
               ) : (
-                <Download size={17} color={brand[600]} />
+                <Download size={17} color={ink[900]} />
               )}
             </View>
             <View className="min-w-0 flex-1">
@@ -620,7 +620,7 @@ function Row({
       style={{ borderBottomWidth: 1, borderBottomColor: "rgba(15,16,48,0.05)" }}
     >
       <View className="h-10 w-10 items-center justify-center rounded-md" style={{ backgroundColor: brand[50] }}>
-        <Icon size={18} color={brand[600]} strokeWidth={1.9} />
+        <Icon size={18} color={ink[900]} strokeWidth={1.9} />
       </View>
       <View className="min-w-0 flex-1">
         <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{brandify(title)}</Text>
