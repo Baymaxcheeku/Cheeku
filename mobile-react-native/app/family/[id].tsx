@@ -463,7 +463,7 @@ export default function Member() {
                   style={{ flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 10, borderTopWidth: i ? 1 : 0, borderTopColor: "rgba(15,16,48,0.06)" }}
                 >
                   <View style={{ width: 36, height: 36, borderRadius: 12, backgroundColor: brand[50], alignItems: "center", justifyContent: "center" }}>
-                    <FileText size={16} color={brand[600]} />
+                    <FileText size={16} color={ink[900]} />
                   </View>
                   <View style={{ flex: 1, minWidth: 0 }}>
                     <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{r.title}</Text>

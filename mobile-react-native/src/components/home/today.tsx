@@ -15,7 +15,6 @@ import {
   Moon,
   Pill,
   Salad,
-  Sparkles,
   Stethoscope,
   Syringe,
   Undo2,
@@ -70,27 +69,22 @@ export function UnlockCard({ stage, signals }: { stage: "starter" | "building"; 
   const copy = UNLOCK_COPY[stage];
 
   return (
-    <View className="overflow-hidden rounded-2xl" style={glassShadow}>
-      <Gradient from={lilac.base} to={lilac.deep} glow="#ffffff" />
-
-      <View pointerEvents="box-none" style={{ position: "absolute", right: 4, top: 26 }}>
-        <MascotFigure size={118} moment="present" hop />
-      </View>
+    <View className="overflow-hidden rounded-2xl" style={{ backgroundColor: "#fff" }}>
 
       <View className="p-4">
         <Glass className="flex-row items-center gap-1.5 self-start rounded-pill py-1.5 pl-2 pr-3">
           <View className="h-5 w-5 items-center justify-center rounded-pill" style={{ backgroundColor: brand[600] }}>
             <Lock size={11} color="#fff" strokeWidth={2.6} />
           </View>
-          <Text style={{ fontFamily: font.bold, fontSize: 11, letterSpacing: 1, color: brand[700], textTransform: "uppercase" }}>{copy.eyebrow}</Text>
+          <Text style={{ fontFamily: font.medium, fontSize: 12, color: ink[500] }}>{copy.eyebrow}</Text>
         </Glass>
 
-        <View style={{ paddingRight: "36%", marginTop: 14 }}>
+        <View style={{ marginTop: 14 }}>
           <Text accessibilityRole="header" style={{ fontFamily: font.semibold, fontSize: 24, lineHeight: 28, letterSpacing: -0.6, color: ink[900] }}>
             {copy.title}
           </Text>
         </View>
-        <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 19.5, color: ink[700], marginTop: 8, paddingRight: "34%" }}>{copy.body}</Text>
+        <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 19.5, color: ink[700], marginTop: 8 }}>{copy.body}</Text>
 
         <Glass strong className="mt-4 rounded-xl px-3 py-1.5">
           {rows.map((r, i) => (
@@ -114,7 +108,7 @@ export function UnlockCard({ stage, signals }: { stage: "starter" | "building"; 
           onPress={() => router.push("/scan")}
           style={{ marginTop: 18, flexDirection: "row", alignItems: "center", alignSelf: "flex-start" }}
         >
-          <View className="z-10 h-[52px] w-[52px] items-center justify-center rounded-pill" style={{ backgroundColor: brand[600] }}>
+          <View className="z-10 h-[52px] w-[52px] items-center justify-center rounded-pill" style={{ backgroundColor: ink[900] }}>
             <FileUp size={21} color="#ffffff" strokeWidth={1.9} />
           </View>
           <Glass strong className="-ml-4 h-[46px] justify-center pl-7 pr-5" style={{ borderTopRightRadius: 999, borderBottomRightRadius: 999 }}>
@@ -191,7 +185,7 @@ export function LockedPreview() {
           <View key={t.title} className="flex-1 rounded-xl bg-white p-3" style={[glassShadow, { borderWidth: 1, borderColor: surface.line, minHeight: 128 }]}>
             <View className="flex-row items-center justify-between">
               <View className="h-9 w-9 items-center justify-center rounded-md" style={{ backgroundColor: brand[50] }}>
-                <t.icon size={18} color={brand[600]} strokeWidth={1.9} />
+                <t.icon size={18} color={ink[900]} strokeWidth={1.9} />
               </View>
               <Lock size={13} color={ink[300]} strokeWidth={2.2} />
             </View>
@@ -209,10 +203,10 @@ export function LockedPreview() {
 export function TodayHeadline({ name, isSelf }: { name: string; isSelf: boolean }) {
   const [lead, accent] = isSelf ? [`Hi ${name},`, "here's today."] : [`${name}'s day,`, "one step at a time."];
   return (
-    <Text accessibilityRole="header" style={{ fontFamily: font.medium, fontSize: 34, lineHeight: 40, letterSpacing: -1.1, color: ink[900] }}>
+    <Text accessibilityRole="header" style={{ fontFamily: font.semibold, fontSize: 30, lineHeight: 36, letterSpacing: -0.9, color: ink[900] }}>
       {lead}
       {"\n"}
-      <Text style={{ fontFamily: font.italic, color: brand[600] }}>{accent}</Text>
+      <Text style={{ color: ink[300] }}>{accent}</Text>
     </Text>
   );
 }
@@ -351,11 +345,8 @@ export function StepCard({
   if (doneStep || !step) {
     const allDone = !doneStep;
     return (
-      <View className="overflow-hidden rounded-2xl" style={[glassShadow, { minHeight: 250 }]}>
+      <View className="overflow-hidden rounded-2xl" style={{ backgroundColor: "#fff" }}>
         <Gradient from={lilac.base} to={lilac.deep} glow="#ffffff" />
-        <View pointerEvents="box-none" style={{ position: "absolute", right: -10, bottom: -12 }}>
-          <MascotFigure size={168} moment={allDone ? "joy" : "celebrate"} hop />
-        </View>
         <View className="flex-1 p-4">
           <View className="flex-row gap-2">
             <Glass className="flex-row items-center gap-1.5 rounded-pill px-3 py-1.5">
@@ -366,7 +357,7 @@ export function StepCard({
             </Glass>
             {streak.count > 0 ? <Chip icon={Flame}>{`Day ${streak.count}`}</Chip> : null}
           </View>
-          <View style={{ paddingRight: "40%", marginTop: 20 }}>
+          <View style={{ marginTop: 16 }}>
             <Text style={{ fontFamily: font.semibold, fontSize: 24, lineHeight: 29, letterSpacing: -0.6, color: ink[900] }}>
               {milestone ?? (allDone ? "All done for today." : streak.count > 1 ? `${streak.count} days in a row.` : "First one done.")}
             </Text>
@@ -377,7 +368,7 @@ export function StepCard({
           <View className="mt-auto flex-row items-center gap-2 pt-5">
             {onMore ? (
               <Tap accessibilityRole="button" onPress={onMore}>
-                <View className="h-[44px] flex-row items-center gap-1.5 rounded-pill px-4" style={{ backgroundColor: brand[600] }}>
+                <View className="h-[44px] flex-row items-center gap-1.5 rounded-pill px-4" style={{ backgroundColor: ink[900] }}>
                   <Text style={{ fontFamily: font.semibold, fontSize: 15, color: "#fff" }}>One more?</Text>
                   <ArrowRight size={15} color="#fff" />
                 </View>
@@ -402,11 +393,8 @@ export function StepCard({
   // A task that needs more than a tap (steps, a meal, a reading) opens its sheet in the plan.
   const action = step.cta ?? (step.kind === "dose" ? { label: ACTION_LABEL.dose, route: "/medicines" } : step.kind !== "habit" ? { label: ACTION_LABEL[step.kind], route: `/today?task=${encodeURIComponent(step.key)}` } : null);
   return (
-    <View className="overflow-hidden rounded-2xl" style={[glassShadow, { minHeight: 300 }]}>
+    <View className="overflow-hidden rounded-2xl" style={{ backgroundColor: "#fff" }}>
       <Gradient from={lilac.base} to={lilac.deep} glow="#ffffff" />
-      <View pointerEvents="box-none" style={{ position: "absolute", right: -4, bottom: -12 }}>
-        <MascotFigure size={due ? 128 : 160} moment={due ? "think" : "present"} hop />
-      </View>
       <View className="flex-1 p-4">
         <View className="flex-row gap-2">
           {due ? (
@@ -421,13 +409,10 @@ export function StepCard({
         </View>
 
         {/* Title, then at most two short lines: their reason and the payoff. */}
-        <View style={{ paddingRight: "36%", marginTop: 20 }}>
+        <View style={{ marginTop: 16 }}>
           <Text style={{ fontFamily: font.semibold, fontSize: 24, lineHeight: 30, letterSpacing: -0.6, color: ink[900] }}>{step.title}</Text>
           {step.reason ? (
-            <View className="flex-row items-center gap-1.5" style={{ marginTop: 10 }}>
-              <Sparkles size={13} color={brand[600]} />
-              <Text numberOfLines={1} style={{ flex: 1, fontFamily: font.semibold, fontSize: 13, color: brand[700] }}>{step.reason}</Text>
-            </View>
+            <Text numberOfLines={1} style={{ fontFamily: font.medium, fontSize: 13, color: brand[600], marginTop: 8 }}>{step.reason}</Text>
           ) : null}
           <Text numberOfLines={2} style={{ fontFamily: font.regular, fontSize: 15, lineHeight: 20, color: ink[700], marginTop: step.reason ? 4 : 10 }}>{step.why}</Text>
         </View>
@@ -435,13 +420,13 @@ export function StepCard({
         <View className="mt-auto flex-row items-center gap-2 pt-5">
           {action ? (
             <Tap accessibilityRole="button" onPress={() => router.push(action.route as never)}>
-              <View className="h-[46px] flex-row items-center gap-1.5 rounded-pill px-4" style={{ backgroundColor: brand[600] }}>
+              <View className="h-[46px] flex-row items-center gap-1.5 rounded-pill px-4" style={{ backgroundColor: ink[900] }}>
                 <Text style={{ fontFamily: font.semibold, fontSize: 15, color: "#fff" }}>{action.label}</Text>
               </View>
             </Tap>
           ) : (
             <Tap accessibilityRole="button" accessibilityLabel={`Done: ${step.title}`} onPress={() => onDone(step)}>
-              <View className="h-[46px] flex-row items-center gap-2 rounded-pill pl-1.5 pr-5" style={{ backgroundColor: brand[600] }}>
+              <View className="h-[46px] flex-row items-center gap-2 rounded-pill pl-1.5 pr-5" style={{ backgroundColor: ink[900] }}>
                 <View className="h-[34px] w-[34px] items-center justify-center rounded-pill" style={{ backgroundColor: "rgba(255,255,255,0.22)" }}>
                   <Check size={17} color="#fff" strokeWidth={3} />
                 </View>
@@ -488,7 +473,7 @@ export function FamilyAlertCard({ row, member, onPress }: { row: DueRow; member:
     <Tap accessibilityRole="button" accessibilityLabel={sentence} onPress={onPress} scale={0.98}>
       <View className="flex-row items-center gap-3 rounded-xl bg-white p-3.5" style={[glassShadow, { borderWidth: 1, borderColor: surface.line }]}>
         <View>
-          {member ? <Avatar svg={member.avatar} photo={member.photo} image={member.avatarImage} background={member.avatarBackground} size={46} /> : <Users size={22} color={brand[600]} />}
+          {member ? <Avatar svg={member.avatar} photo={member.photo} image={member.avatarImage} background={member.avatarBackground} size={46} /> : <Users size={22} color={ink[900]} />}
           <View className="absolute -bottom-0.5 -right-0.5 h-5 w-5 items-center justify-center rounded-pill border-2 border-white" style={{ backgroundColor: row.overdue ? semantic.attention : semantic.caution }}>
             <BellRing size={10} color="#fff" strokeWidth={2.6} />
           </View>
@@ -516,7 +501,7 @@ export function DueThisWeek({ rows, onPress }: { rows: DueRow[]; onPress: (r: Du
       {rows.length === 0 ? (
         <View className="mt-3 flex-row items-center gap-3 rounded-xl bg-white p-4" style={[glassShadow, { borderWidth: 1, borderColor: surface.line }]}>
           <View className="h-10 w-10 items-center justify-center rounded-lg" style={{ backgroundColor: brand[50] }}>
-            <Check size={18} color={brand[600]} strokeWidth={2.6} />
+            <Check size={18} color={ink[900]} strokeWidth={2.6} />
           </View>
           <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 13, lineHeight: 19, color: ink[700] }}>
             Nothing due for the family in the next two weeks. Cheeku will put it here when something is.
@@ -535,7 +520,7 @@ export function DueThisWeek({ rows, onPress }: { rows: DueRow[]; onPress: (r: Du
                 style={({ pressed }) => ({ flexDirection: "row", alignItems: "center", gap: 12, padding: 14, borderTopWidth: i === 0 ? 0 : 1, borderTopColor: surface.line, backgroundColor: pressed ? surface.tint : "#fff" })}
               >
                 <View className="h-10 w-10 items-center justify-center rounded-lg" style={{ backgroundColor: brand[50] }}>
-                  <Icon size={18} color={brand[600]} strokeWidth={1.9} />
+                  <Icon size={18} color={ink[900]} strokeWidth={1.9} />
                 </View>
                 <View className="min-w-0 flex-1">
                   <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>
@@ -575,7 +560,7 @@ export function PlanPreview({ plan, skip, onOpen }: { plan: Plan; skip: string |
         </View>
         <Tap accessibilityRole="button" accessibilityLabel="See the full plan" onPress={() => onOpen("/today")} hitSlop={8} className="flex-row items-center gap-1">
           <Text style={{ fontFamily: font.semibold, fontSize: 13, color: brand[600] }}>See all</Text>
-          <ChevronRight size={15} color={brand[600]} />
+          <ChevronRight size={15} color={ink[900]} />
         </Tap>
       </View>
       <View className="mt-3">
@@ -593,13 +578,13 @@ export function PlanPreview({ plan, skip, onOpen }: { plan: Plan; skip: string |
               style={({ pressed }) => ({ flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 11, borderTopWidth: i === 0 ? 0 : 1, borderTopColor: surface.line, opacity: pressed ? 0.7 : 1 })}
             >
               <View className="h-9 w-9 items-center justify-center rounded-md" style={{ backgroundColor: brand[50] }}>
-                <Icon size={17} color={brand[600]} strokeWidth={1.9} />
+                <Icon size={17} color={ink[900]} strokeWidth={1.9} />
               </View>
               <View className="min-w-0 flex-1">
                 <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>
                   {t.title}
                 </Text>
-                <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 12, color: t.personal ? brand[700] : ink[500], marginTop: 1 }}>
+                <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 12, color: ink[500], marginTop: 1 }}>
                   {[t.goal ? "Your goal" : t.personal ? (t.reason ?? "For you") : null, PILLARS.find((p) => p.key === t.pillar)?.label, t.window !== "anytime" ? WINDOW_LABEL[t.window] : null].filter(Boolean).join(" · ")}
                 </Text>
               </View>
@@ -618,7 +603,7 @@ export function AskRow() {
   return (
     <Tap accessibilityRole="button" accessibilityLabel="Ask Cheeku" onPress={() => router.push("/ask")} scale={0.98}>
       <Glass strong className="flex-row items-center gap-3 rounded-xl p-3.5">
-        <View className="h-10 w-10 items-center justify-center rounded-pill" style={{ backgroundColor: brand[600] }}>
+        <View className="h-10 w-10 items-center justify-center rounded-pill" style={{ backgroundColor: ink[900] }}>
           <MessageCircle size={18} color="#fff" strokeWidth={1.9} />
         </View>
         <View className="min-w-0 flex-1">
@@ -662,7 +647,7 @@ export function UnlockMoment({ open, via, onClose }: { open: boolean; via: Unloc
               {items.map((it, i) => (
                 <View key={it.title} className="flex-row items-center gap-3 py-3" style={{ borderTopWidth: i === 0 ? 0 : 1, borderTopColor: surface.line }}>
                   <View className="h-9 w-9 items-center justify-center rounded-md" style={{ backgroundColor: brand[50] }}>
-                    <it.icon size={17} color={brand[600]} strokeWidth={2} />
+                    <it.icon size={17} color={ink[900]} strokeWidth={2} />
                   </View>
                   <View className="min-w-0 flex-1">
                     <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{it.title}</Text>
@@ -675,7 +660,7 @@ export function UnlockMoment({ open, via, onClose }: { open: boolean; via: Unloc
             <Tap
               accessibilityRole="button"
               onPress={onClose}
-              style={{ marginTop: 18, alignSelf: "stretch", height: 52, borderRadius: 999, backgroundColor: brand[600], alignItems: "center", justifyContent: "center" }} scale={0.98}
+              style={{ marginTop: 18, alignSelf: "stretch", height: 52, borderRadius: 999, backgroundColor: ink[900], alignItems: "center", justifyContent: "center" }} scale={0.98}
             >
               <Text style={{ fontFamily: font.semibold, fontSize: 17, color: "#fff" }}>See today</Text>
             </Tap>

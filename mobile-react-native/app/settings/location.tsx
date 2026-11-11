@@ -54,10 +54,10 @@ export default function LocationSettings() {
         <Panel>
           <View style={{ flexDirection: "row", gap: 14, alignItems: "center" }}>
             <View style={{ width: 56, height: 56, borderRadius: 16, backgroundColor: lilac.base, alignItems: "center", justifyContent: "center" }}>
-              {near.source === "gps" ? <LiveDot size={14} /> : <MapPin size={24} color={brand[600]} />}
+              {near.source === "gps" ? <LiveDot size={14} /> : <MapPin size={24} color={ink[900]} />}
             </View>
             <View style={{ flex: 1, minWidth: 0 }}>
-              <Text style={{ fontFamily: font.semibold, fontSize: 11, letterSpacing: 0.9, textTransform: "uppercase", color: brand[600] }}>
+              <Text style={{ fontFamily: font.medium, fontSize: 12, color: ink[500] }}>
                 {near.source === "gps" ? "You are here" : place ? "Your place" : "Not set yet"}
               </Text>
               <Text numberOfLines={2} style={{ fontFamily: font.semibold, fontSize: 20, letterSpacing: -0.3, color: ink[900] }}>{place ? placeLine(place) : "Share your location"}</Text>

@@ -90,7 +90,7 @@ export default function Fitness() {
         <StaggerItem index={0}>
           <View className="mt-2 overflow-hidden rounded-2xl p-5" style={glassShadow}>
             <Gradient from={lilac.base} to={lilac.deep} glow="#ffffff" />
-            <Text style={{ fontFamily: font.semibold, fontSize: 11, letterSpacing: 0.9, textTransform: "uppercase", color: brand[600] }}>Gyms and studios, one class at a time</Text>
+            <Text style={{ fontFamily: font.medium, fontSize: 12, color: ink[500] }}>Gyms and studios, one class at a time</Text>
             <Text style={{ fontFamily: font.semibold, fontSize: 28, lineHeight: 33, letterSpacing: -0.8, color: ink[900], marginTop: 6 }}>Classes for {first}</Text>
             <Text style={{ fontFamily: font.regular, fontSize: 15, lineHeight: 21, color: ink[700], marginTop: 4 }}>
               {lead ? `Picked from ${first === "you" ? "your" : `${first}'s`} health profile, with ${NEED_PHRASE[lead]} first. One class at a time, no membership.` : "Yoga, gym, swimming, dance and more. One class at a time, no membership."}
@@ -146,7 +146,7 @@ export default function Fitness() {
 
             {fit.doctorNote ? (
               <View style={{ flexDirection: "row", gap: 10, borderRadius: 16, padding: 14, backgroundColor: lilac.mist }}>
-                <Stethoscope size={16} color={brand[600]} style={{ marginTop: 1 }} />
+                <Stethoscope size={16} color={ink[900]} style={{ marginTop: 1 }} />
                 <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[700] }}>
                   {fit.needs[0] === "prenatal" ? "Only prenatal classes are shown. " : "Gentler classes are shown first. "}
                   Check with {first === "you" ? "your" : `${first}'s`} doctor before starting, and tell the trainer.
@@ -159,12 +159,12 @@ export default function Fitness() {
                 accessibilityRole="button"
                 accessibilityLabel={`Next class: ${next.title}, ${dayLabel(next.startsAt)} ${timeLabel(next.startsAt)}`}
                 onPress={() => router.push({ pathname: "/fitness/booking/[id]", params: { id: next.id } })}
-                style={[glassShadow, { borderRadius: 24, backgroundColor: brand[600], padding: 14, flexDirection: "row", alignItems: "center", gap: 12 }]}
+                style={[glassShadow, { borderRadius: 24, backgroundColor: ink[900], padding: 14, flexDirection: "row", alignItems: "center", gap: 12 }]}
                 scale={0.98}
               >
                 <ActivityArt id={next.activity} size={44} radius={14} />
                 <View style={{ flex: 1, minWidth: 0 }}>
-                  <Text style={{ fontFamily: font.semibold, fontSize: 11, letterSpacing: 0.9, textTransform: "uppercase", color: brand[200] }}>Next class</Text>
+                  <Text style={{ fontFamily: font.medium, fontSize: 12, color: brand[200] }}>Next class</Text>
                   <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 15, color: "#fff" }}>{next.title}</Text>
                   <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 12, color: brand[100] }}>{dayLabel(next.startsAt)}, {timeLabel(next.startsAt)} · {next.studioName}</Text>
                 </View>

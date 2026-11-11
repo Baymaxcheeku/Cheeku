@@ -116,7 +116,7 @@ export function dayLabel(iso: string, now = new Date()): string {
 export function ReasonPill({ text }: { text: string }) {
   return (
     <View style={{ alignSelf: "flex-start", maxWidth: "100%", flexDirection: "row", alignItems: "center", gap: 4, paddingHorizontal: 8, height: 22, borderRadius: 999, backgroundColor: lilac.base }}>
-      <Sparkles size={11} color={brand[600]} />
+      <Sparkles size={11} color={ink[900]} />
       <Text numberOfLines={1} style={{ flexShrink: 1, fontFamily: font.semibold, fontSize: 11, color: brand[700] }}>{text}</Text>
     </View>
   );
@@ -211,7 +211,7 @@ export function LocateCard({ locating, denied, onLocate, onPickCity }: { locatin
       <View style={{ width: 84, height: 84, alignItems: "center", justifyContent: "center" }}>
         {locating ? <PulseRing size={72} /> : null}
         <View style={{ width: 72, height: 72, borderRadius: 999, backgroundColor: lilac.base, alignItems: "center", justifyContent: "center" }}>
-          <LocateFixed size={30} color={brand[600]} />
+          <LocateFixed size={30} color={ink[900]} />
         </View>
       </View>
       <View style={{ gap: 6, alignItems: "center" }}>
@@ -230,7 +230,7 @@ export function LocateCard({ locating, denied, onLocate, onPickCity }: { locatin
             feel.tap();
             onLocate();
           }}
-          style={{ alignSelf: "stretch", height: 52, borderRadius: 999, backgroundColor: brand[600], flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8 }}
+          style={{ alignSelf: "stretch", height: 52, borderRadius: 999, backgroundColor: ink[900], flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8 }}
           scale={0.98}
         >
           {locating ? <ActivityIndicator color="#fff" /> : <LocateFixed size={17} color="#fff" />}

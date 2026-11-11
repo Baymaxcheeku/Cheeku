@@ -162,7 +162,7 @@ export default function ServicePage() {
 function Assurance({ icon: Icon, text }: { icon: LucideIcon; text: string }) {
   return (
     <View style={{ flexDirection: "row", alignItems: "center", gap: 10, padding: 12, borderRadius: 16, backgroundColor: "rgba(255,255,255,0.75)", borderWidth: 1, borderColor: surface.line }}>
-      <Icon size={16} color={brand[600]} />
+      <Icon size={16} color={ink[900]} />
       <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[700] }}>{text}</Text>
     </View>
   );

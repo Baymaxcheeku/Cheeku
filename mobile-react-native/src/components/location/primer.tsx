@@ -62,7 +62,7 @@ export function LocationPrimer() {
           <View style={{ width: 96, height: 96, alignItems: "center", justifyContent: "center" }}>
             <PulseRing size={80} />
             <View style={{ width: 80, height: 80, borderRadius: 999, backgroundColor: lilac.base, alignItems: "center", justifyContent: "center" }}>
-              <MapPin size={34} color={brand[600]} />
+              <MapPin size={34} color={ink[900]} />
             </View>
           </View>
           <Text style={{ fontFamily: font.semibold, fontSize: 24, letterSpacing: -0.6, color: ink[900], textAlign: "center" }}>Care near you</Text>
@@ -70,7 +70,7 @@ export function LocationPrimer() {
             Share your location to see the closest doctors, labs, pharmacies and classes, and to fill in addresses for home visits.
           </Text>
           <View style={{ flexDirection: "row", gap: 8, alignItems: "flex-start", backgroundColor: "#fff", borderRadius: 16, padding: 12, alignSelf: "stretch" }}>
-            <ShieldCheck size={15} color={brand[600]} style={{ marginTop: 2 }} />
+            <ShieldCheck size={15} color={ink[900]} style={{ marginTop: 2 }} />
             <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[700] }}>
               Only while the app is open. Saved to your account so bookings know where you are; turn it off or wipe it any time in Profile.
             </Text>

@@ -33,10 +33,10 @@ export function ScorecardEntry({ documentId }: { documentId: string }) {
       <Gradient from={t?.bg ?? brand[50]} to="#ffffff" />
       <View style={{ flexDirection: "row", alignItems: "center", gap: 12, padding: 14 }}>
         <View style={{ width: 46, height: 46, borderRadius: 999, backgroundColor: "#fff", alignItems: "center", justifyContent: "center" }}>
-          {q.isPending ? <ActivityIndicator color={brand[600]} /> : t ? <t.icon size={22} color={t.fg} /> : <CircleHelp size={22} color={brand[600]} />}
+          {q.isPending ? <ActivityIndicator color={ink[900]} /> : t ? <t.icon size={22} color={t.fg} /> : <CircleHelp size={22} color={ink[900]} />}
         </View>
         <View style={{ flex: 1, minWidth: 0 }}>
-          <Text style={{ fontFamily: font.bold, fontSize: 11, letterSpacing: 1.1, textTransform: "uppercase", color: t?.fg ?? brand[700] }}>Prescription check</Text>
+          <Text style={{ fontFamily: font.medium, fontSize: 12, color: t?.fg ?? brand[700] }}>Prescription check</Text>
           <Text numberOfLines={2} style={{ fontFamily: font.semibold, fontSize: 15, lineHeight: 20, color: ink[900], marginTop: 2 }}>
             {card ? card.verdict.title : q.isPending ? "Reading every salt against the records…" : "Check it against the records"}
           </Text>

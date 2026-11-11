@@ -4060,3 +4060,49 @@ Reported on an iPhone while moving around the app and going back: a red console 
 **Not verified:** on the iPhone itself. Typecheck, lint (0 errors) and all 560 tests pass.
 
 **Follow-up, same day.** The owner still saw the warning. One gap was left: Expo Router queues navigation, so a second tap on back while the screen is still sliding out reads the old stack, passes `canGoBack()`, and sends a GO_BACK with nowhere to go. `goBack` now ignores a repeat within 600ms, the length of the slide. Three tests cover back, fallback and the double tap. Note that `main` doesn't have any of this yet, so a build from `main` still shows the warning.
+
+## Neutral redesign, batch 0 and 1 · 2026-11-11
+
+**Why.** The owner's review: too many things competing on every screen, and
+a look that reads as generated. The reference they liked is a grey-white
+canvas, flat white cards, black actions and one accent used only for state.
+An audit of all 59 screens found the same causes everywhere: lavender on
+every surface, violet doing every job (buttons, links, icons, labels, hero
+cards), glass and shadow on every card, a colour per category, the mascot
+inside cards on 34 files, uppercase tracked labels, and violet italic
+headline lines.
+
+**Decisions (owner, 2026-11-11).** Neutral canvas with ink actions and violet
+as the single accent. The mascot stays in Ask, empty states and onboarding
+only, and stays the blob for now (the sparrow is the logo, not yet the app
+character). Restyle and declutter are allowed; flow, data and backend are not
+touched.
+
+**Batch 0, foundation.** Done in `src/theme/tokens.ts`, `tailwind.config.js`
+and the shared components, so most screens changed without being opened:
+
+- ink, canvas, surfaces and lines are neutral; `lilac.*` and every `hue.*`
+  resolve to neutrals; `brand` 50 to 300 are neutral and 400 up stay violet.
+- `Gradient` draws a flat fill (white, or its own first stop when dark, or
+  nothing when it fades into the canvas). `Backdrop` draws nothing.
+- `glass.fill` is the canvas grey (a chip on a white card), `fillStrong` is
+  white (a panel on the canvas); shadows are near zero except `e2`.
+- `Button`, `PillButton`, `GlassCircle dark`, save bars and message bubbles
+  are ink. A scripted pass moved 47 solid violet backgrounds to ink and 204
+  unconditional icon colours to ink; ticks, badges, toggles, selection and
+  links keep violet.
+- `<Brand />` inside a sentence is plain text; `type.eyebrow` and 29 inline
+  uppercase labels are sentence-case captions.
+
+**Batch 1, core tabs.** Home, Today's plan, Ask, Records, Profile: mascot out
+of cards and headers, text at full width, grey second headline line, grey
+plan sub-lines, no sparkle icons.
+
+**Still to do.** Batches 2 to 6 (records and health, family, booking,
+settings, onboarding): per-screen leftovers such as hard-coded pink, teal and
+peach fills, mascots in cards and stacked boxes.
+
+**Verified.** `tsc` and 563 vitest tests pass. Screens were looked at in the
+web build against the local mock backend only. ESLint would not start in the
+cloud session (module resolution error), so lint was not run. Not verified on
+a device.

@@ -343,7 +343,7 @@ export default function Help() {
         <View style={[glassShadow, { borderRadius: 32, backgroundColor: "#fff", padding: 18 }]}>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
             <View style={{ width: 38, height: 38, borderRadius: 12, backgroundColor: brand[50], alignItems: "center", justifyContent: "center" }}>
-              <MessageSquareWarning size={18} color={brand[600]} />
+              <MessageSquareWarning size={18} color={ink[900]} />
             </View>
             <View style={{ flex: 1 }}>
               <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>Report a problem</Text>
@@ -431,7 +431,7 @@ function ContactTile({ icon: Icon, title, note, onPress }: { icon: LucideIcon; t
       onPress={onPress}
       style={({ pressed }) => [glassShadow, { flex: 1, padding: 14, borderRadius: 24, backgroundColor: pressed ? brand[50] : "#fff", gap: 8 }]}
     >
-      <Icon size={19} color={brand[600]} />
+      <Icon size={19} color={ink[900]} />
       <View>
         <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{brandify(title)}</Text>
         <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 12, color: ink[500], marginTop: 2 }}>{note}</Text>

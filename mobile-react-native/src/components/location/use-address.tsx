@@ -5,7 +5,7 @@ import { Tap } from "@/components/ui/tap";
 import { feel } from "@/lib/feel";
 import { useNearbyPlace } from "@/lib/location/live";
 import { addressFrom } from "@/lib/location/rules";
-import { brand } from "@/theme/tokens";
+import { brand, ink } from "@/theme/tokens";
 import { font } from "@/theme/type";
 
 /**
@@ -18,7 +18,7 @@ export function UseMyAddress({ profileId, onUse }: { profileId?: string | null; 
   if (!p || p.provider === "none") {
     return (
       <Tap accessibilityRole="button" onPress={() => void near.locate()} style={{ flexDirection: "row", alignItems: "center", gap: 6, height: 40, alignSelf: "flex-start" }}>
-        <LocateFixed size={15} color={brand[600]} />
+        <LocateFixed size={15} color={ink[900]} />
         <Text style={{ fontFamily: font.semibold, fontSize: 13, color: brand[600] }}>{near.locating ? "Finding you" : "Use my location"}</Text>
       </Tap>
     );
@@ -32,7 +32,7 @@ export function UseMyAddress({ profileId, onUse }: { profileId?: string | null; 
       }}
       style={{ flexDirection: "row", alignItems: "center", gap: 6, height: 40, alignSelf: "flex-start", maxWidth: "100%" }}
     >
-      <LocateFixed size={15} color={brand[600]} />
+      <LocateFixed size={15} color={ink[900]} />
       <Text numberOfLines={1} style={{ flexShrink: 1, fontFamily: font.semibold, fontSize: 13, color: brand[600] }}>
         Use {p.pincode ? `${p.label}, ${p.pincode}` : p.label}
       </Text>

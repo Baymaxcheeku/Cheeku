@@ -251,7 +251,7 @@ export function InsuranceBody({ record, details }: { record: RecordDetail; detai
         <Gradient from={hue.ocean.fg} to="#1b8aa3" angle="diagonal" />
         <View style={{ flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between", gap: 10 }}>
           <View style={{ flex: 1 }}>
-            <Text style={{ fontFamily: font.semibold, fontSize: 12, letterSpacing: 0.6, color: "rgba(255,255,255,0.75)", textTransform: "uppercase" }}>{POLICY_TYPE[details.policyType]}</Text>
+            <Text style={{ fontFamily: font.medium, fontSize: 12, color: "rgba(255,255,255,0.75)" }}>{POLICY_TYPE[details.policyType]}</Text>
             <Text style={{ fontFamily: font.semibold, fontSize: 17, lineHeight: 23, color: "#fff", marginTop: 4 }}>{details.insurer}</Text>
             {details.plan ? <Text style={{ fontFamily: font.regular, fontSize: 13, color: "rgba(255,255,255,0.8)", marginTop: 1 }}>{details.plan}</Text> : null}
           </View>

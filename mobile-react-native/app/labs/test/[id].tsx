@@ -105,9 +105,9 @@ export default function LabTestDetail() {
 
           {/* Facts. */}
           <View style={{ flexDirection: "row", gap: 8, marginTop: 16 }}>
-            <Fact icon={<Droplet size={16} color={brand[600]} />} label="Sample" value={test.sample} />
-            <Fact icon={<Hourglass size={16} color={brand[600]} />} label="Fasting" value={test.fastingHours ? `${test.fastingHours} hours` : "Not needed"} />
-            <Fact icon={<Clock3 size={16} color={brand[600]} />} label="Report" value={labs.length ? `in ${Math.min(...labs.map((l) => l.p.reportHours))}h` : "-"} />
+            <Fact icon={<Droplet size={16} color={ink[900]} />} label="Sample" value={test.sample} />
+            <Fact icon={<Hourglass size={16} color={ink[900]} />} label="Fasting" value={test.fastingHours ? `${test.fastingHours} hours` : "Not needed"} />
+            <Fact icon={<Clock3 size={16} color={ink[900]} />} label="Report" value={labs.length ? `in ${Math.min(...labs.map((l) => l.p.reportHours))}h` : "-"} />
           </View>
 
           {inside.length ? (
@@ -117,7 +117,7 @@ export default function LabTestDetail() {
                 {inside.map((t) =>
                   t ? (
                     <Tap key={t.id} onPress={() => router.push({ pathname: "/labs/test/[id]", params: { id: t.id } })} style={{ flexDirection: "row", alignItems: "center", gap: 10, paddingVertical: 4 }}>
-                      <Check size={15} color={brand[600]} strokeWidth={2.6} />
+                      <Check size={15} color={ink[900]} strokeWidth={2.6} />
                       <Text style={{ flex: 1, fontFamily: font.medium, fontSize: 15, color: ink[900] }}>{t.name}</Text>
                       <ChevronRight size={15} color={ink[300]} />
                     </Tap>
@@ -174,7 +174,7 @@ export default function LabTestDetail() {
         <Tap
           accessibilityRole="button"
           onPress={() => (added ? router.push("/labs/choose") : cart.toggle(test.id))}
-          style={[glassShadow, { flex: 1, height: 58, borderRadius: 999, backgroundColor: brand[600], flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8 }]} scale={0.98}
+          style={[glassShadow, { flex: 1, height: 58, borderRadius: 999, backgroundColor: ink[900], flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8 }]} scale={0.98}
         >
           {added ? <Check size={18} color="#fff" strokeWidth={2.6} /> : <Plus size={18} color="#fff" strokeWidth={2.6} />}
           <Text style={{ fontFamily: font.semibold, fontSize: 17, color: "#fff" }}>{added ? `In cart · Choose lab` : "Add to cart"}</Text>

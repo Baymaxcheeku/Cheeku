@@ -35,7 +35,7 @@ export function AppointmentCard({ appt, hero }: { appt: Appointment; hero?: bool
       <Portrait face={face} size={hero ? 58 : 52} radius={hero ? 18 : 16} />
       <View className="min-w-0 flex-1">
         <View className="flex-row items-center gap-1.5">
-          {online ? <MonitorPlay size={13} color={brand[600]} /> : <Building2 size={13} color={hue.orange.fg} />}
+          {online ? <MonitorPlay size={13} color={ink[900]} /> : <Building2 size={13} color={hue.orange.fg} />}
           <Text style={{ fontFamily: font.semibold, fontSize: 12, color: online ? brand[700] : "#a3530a" }}>
             {online ? "Video call" : "Clinic visit"}
             {cancelled ? " · Cancelled" : ""}
@@ -85,7 +85,7 @@ export function AppointmentCard({ appt, hero }: { appt: Appointment; hero?: bool
               alignItems: "center",
               justifyContent: "center",
               gap: 8,
-              backgroundColor: brand[600],
+              backgroundColor: ink[900],
               transform: [{ scale: pressed ? 0.98 : 1 }],
             })}
           >

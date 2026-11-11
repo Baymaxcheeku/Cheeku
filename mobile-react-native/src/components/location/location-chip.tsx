@@ -32,7 +32,7 @@ export function LocationChip({ profileId, prefix = "Near", onDark = false }: { p
         style={{ alignSelf: "flex-start", maxWidth: "100%", height: 36, paddingHorizontal: 12, borderRadius: 999, backgroundColor: onDark ? "rgba(255,255,255,0.18)" : "#fff", flexDirection: "row", alignItems: "center", gap: 6 }}
         scale={0.96}
       >
-        {near.locating ? <ActivityIndicator size="small" color={brand[600]} /> : live ? <LiveDot /> : <MapPin size={14} color={brand[600]} />}
+        {near.locating ? <ActivityIndicator size="small" color={ink[900]} /> : live ? <LiveDot /> : <MapPin size={14} color={ink[900]} />}
         <Text numberOfLines={1} style={{ flexShrink: 1, fontFamily: font.semibold, fontSize: 13, color: onDark ? "#fff" : ink[900] }}>
           {near.place ? `${who && near.isTheirs ? `${who}: ` : ""}${near.place.label}` : near.locating ? "Finding you" : "Set location"}
         </Text>

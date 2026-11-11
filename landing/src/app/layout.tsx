@@ -1,16 +1,36 @@
-import { GeistSans } from "geist/font/sans";
 import type { Metadata, Viewport } from "next";
+import localFont from "next/font/local";
 
 import "./globals.css";
 
-const title = "Cheeku: your family's health, sorted";
+const inter = localFont({
+  variable: "--font-inter",
+  display: "swap",
+  src: [
+    { path: "../../public/fonts/Inter_400Regular.ttf", weight: "400" },
+    { path: "../../public/fonts/Inter_500Medium.ttf", weight: "500" },
+    { path: "../../public/fonts/Inter_600SemiBold.ttf", weight: "600" },
+  ],
+});
+
+// The same serif the Cheeku app uses for its own headlines.
+const serif = localFont({
+  variable: "--font-serif",
+  display: "swap",
+  src: [
+    { path: "../../public/fonts/InstrumentSerif_400Regular.ttf", weight: "400", style: "normal" },
+    { path: "../../public/fonts/InstrumentSerif_400Regular_Italic.ttf", weight: "400", style: "italic" },
+  ],
+});
+
+const title = "Cheeku: looking after your family between doctor visits";
 const description =
-  "Send Cheeku any report or prescription. It explains it in simple words, remembers it for each person at home and books the next test or doctor. Join the waitlist.";
+  "Cheeku reads every report and prescription, explains them in simple words, and gets the next test or doctor booked, for everyone at home. Join the waitlist.";
 
 export const metadata: Metadata = {
   title,
   description,
-  icons: { icon: "/favicon.png" },
+  icons: { icon: [{ url: "/icon.svg", type: "image/svg+xml" }, { url: "/favicon.png", sizes: "48x48" }], apple: "/apple-icon.png" },
   openGraph: { title, description, type: "website", locale: "en_IN" },
   twitter: { card: "summary_large_image", title, description },
 };
@@ -19,7 +39,7 @@ export const viewport: Viewport = { themeColor: "#ffffff", width: "device-width"
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en-IN" className={GeistSans.variable}>
+    <html lang="en-IN" className={`${inter.variable} ${serif.variable}`}>
       <body>{children}</body>
     </html>
   );

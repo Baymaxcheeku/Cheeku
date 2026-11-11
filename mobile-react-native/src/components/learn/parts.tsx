@@ -89,7 +89,7 @@ export function Emblem({ icon, category, size = 56 }: { icon: ArticleIcon; categ
 
 export function Eyebrow({ category, color }: { category: ArticleCategory; color?: string }) {
   return (
-    <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 11, letterSpacing: 0.8, textTransform: "uppercase", color: color ?? CATEGORY_STYLE[category].accent }}>
+    <Text numberOfLines={1} style={{ fontFamily: font.medium, fontSize: 12, color: color ?? CATEGORY_STYLE[category].accent }}>
       {CATEGORY_LABEL[category]}
     </Text>
   );

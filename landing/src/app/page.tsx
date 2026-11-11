@@ -1,23 +1,28 @@
-import { Closing } from "@/components/closing";
-import { How, Medicines } from "@/components/how";
+import { Ask } from "@/components/ask";
+import { Closing, Trust } from "@/components/closing";
+import { Compare } from "@/components/compare";
+import { FollowThrough } from "@/components/follow";
+import { FilmSection, How } from "@/components/how";
 import { Journeys } from "@/components/journeys";
-import { Hero, Nav, TopLine } from "@/components/top";
-import { Questions, Trust } from "@/components/trust";
-import { Worries } from "@/components/worries";
+import { Memory } from "@/components/memory";
+import { People } from "@/components/people";
+import { Hero, Nav } from "@/components/top";
 
 export default function Page() {
   return (
     <>
-      <TopLine />
       <Nav />
       <main>
         <Hero />
-        <Worries />
-        <Journeys />
         <How />
-        <Medicines />
+        <FilmSection />
+        <People />
+        <Journeys />
+        <Ask />
+        <FollowThrough />
+        <Memory />
+        <Compare />
         <Trust />
-        <Questions />
         <Closing />
       </main>
     </>

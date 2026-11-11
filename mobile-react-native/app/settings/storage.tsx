@@ -84,7 +84,7 @@ export default function StorageSettings() {
             disabled={busy}
             onPress={() => void clear()}
             className="mt-4 h-12 flex-row items-center justify-center gap-2 rounded-pill"
-            style={{ backgroundColor: brand[600], opacity: busy ? 0.6 : 1 }}
+            style={{ backgroundColor: ink[900], opacity: busy ? 0.6 : 1 }}
           >
             {busy ? <ActivityIndicator color="#fff" /> : <Eraser size={16} color="#fff" />}
             <Text style={{ fontFamily: font.semibold, fontSize: 15, color: "#fff" }}>Clear cache</Text>
@@ -105,7 +105,7 @@ export default function StorageSettings() {
         <Panel>
           <View className="flex-row items-center gap-3">
             <View className="h-9 w-9 items-center justify-center rounded-tile" style={{ backgroundColor: brand[50] }}>
-              <WifiOff size={17} color={brand[600]} />
+              <WifiOff size={17} color={ink[900]} />
             </View>
             <View className="min-w-0 flex-1">
               <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>Keep records readable offline</Text>

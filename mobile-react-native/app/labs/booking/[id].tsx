@@ -101,7 +101,7 @@ export default function LabBooking() {
       >
         {fresh && !cancelled ? (
           <View style={{ alignItems: "center", marginTop: 4, marginBottom: 18 }}>
-            <Enter kind="pop" style={[glassShadow, { width: 76, height: 76, borderRadius: 999, backgroundColor: brand[600], alignItems: "center", justifyContent: "center" }]}>
+            <Enter kind="pop" style={[glassShadow, { width: 76, height: 76, borderRadius: 999, backgroundColor: ink[900], alignItems: "center", justifyContent: "center" }]}>
               <Check size={36} color="#fff" strokeWidth={3} />
             </Enter>
             <Text style={{ fontFamily: font.semibold, fontSize: 24, letterSpacing: -0.7, color: ink[900], marginTop: 14 }}>Collection booked!</Text>
@@ -184,7 +184,7 @@ export default function LabBooking() {
         <Glass strong className="gap-2 rounded-xl p-4">
           {testNames.map((n) => (
             <View key={n} className="flex-row items-center gap-2">
-              <Check size={14} color={brand[600]} strokeWidth={2.6} />
+              <Check size={14} color={ink[900]} strokeWidth={2.6} />
               <Text style={{ fontFamily: font.medium, fontSize: 15, color: ink[900] }}>{n}</Text>
             </View>
           ))}

@@ -24,75 +24,65 @@ Geist for type. No server code.
 - The root ESLint and TypeScript configs skip this folder.
 - It deploys on its own. An app release never waits on the site.
 
-## Direction
+## Where the design comes from
 
-Written before the page was built, and every section follows it (the top of
-`src/app/globals.css` has the same five lines).
-
-- Product: Cheeku keeps a family's reports, medicines and doctor visits in one
-  app, explains them in simple words and books the next step.
-- Character: calm, plain-spoken, protective.
-- World: the health drawer of an Indian home. The report file, the medicine
-  strips, the family WhatsApp group.
-- Moments: the product film in the hero, and real app screens in true iPhone
-  frames.
-- Signature: the person tag ("Papa", "Ma", "Baby"). Everything is about
-  someone in particular.
+The structure was studied from octohealth.com, and the hero and menu from
+trylifelong.com, with the clone-website skill (notes in `docs/research/`). The words, colour, type,
+photographs and app screens are Cheeku's. Product facts are in `PRODUCT.md`.
 
 ## What is on the page
 
-| Section | File | Job |
-|---|---|---|
-| Top line, nav, hero | `src/components/top.tsx` | "Stop googling your family's health", the signup form, the product film |
-| The questions | `worries.tsx` | Six worries in the reader's own words |
-| Who it's for | `journeys.tsx` | The six families from the app's onboarding, each with a real screen. The fertility tab carries its own film |
-| How it works | `how.tsx` | Send it, understand it, get it done |
-| Medicine check | `how.tsx` | All of a person's medicines checked together, and cheaper options with the same salt |
-| Is it safe | `trust.tsx` | Not a doctor, danger means go now, nothing made up, your data |
-| Questions | `trust.tsx` | Six short answers |
-| Final call, footer | `closing.tsx` | Signup again, the disclaimer |
+| Section | File |
+|---|---|
+| Menu bar with two drop-downs, photo-card hero, moving line | `src/components/top.tsx` |
+| Ask by chat or voice, languages | `ask.tsx` |
+| How it works (three photo cards), the product film | `how.tsx` |
+| The family, sliding past | `people.tsx` |
+| Six family situations, each with a photo and a real app screen | `journeys.tsx` |
+| Stacked cards: what Cheeku does, and what is coming | `follow.tsx` |
+| The pinned wheel of everything Cheeku remembers | `memory.tsx` |
+| Cheeku against Google and WhatsApp | `compare.tsx` |
+| Safety, questions, signup, footer | `closing.tsx` |
 
-The six families are the same six the app asks about on the way in
-(`mobile-react-native/src/lib/onboarding/journeys.ts`): trying for a baby,
-expecting, new parent, caring for parents, getting healthier, just keeping
-track.
+## Photographs
 
-## The app screens
+`public/photos/*.webp` were generated for this page (10 Nov 2026) and show
+no real people. The footer says so. Replace them with real photographs when
+there are some: keep the subject on the right and the left side calm and
+dark, because the words sit there.
 
-`public/screens/*.webp` are the real app, taken from the product demo
-recordings (393 points wide, sample data). `src/components/phone.tsx` draws
-the frame: it adds the status bar back so the screen is 393 by 852, an iPhone
-15's proportions, and nothing is stretched. To replace a screen, export a
-393 by 778 point capture at 2x and keep the file name.
+## App screens
 
-## The films
+`public/screens/*.webp` are the real app with sample data.
+`src/components/phone.tsx` frames them at an iPhone 15's true proportions.
 
-Both are YouTube videos, loaded only when played (`src/components/video.tsx`):
-the product film in the hero (`mI4FmQt_8Qk`) and the fertility film
-(`YHAdRiJ32Fo`). The poster is YouTube's own thumbnail.
+## Films
 
-## Colour
+The product film is a file on this site (`public/video/cheeku-film.mp4`,
+7 MB, 720p, with a poster image), played by our own player in
+`src/components/video.tsx`: no other company's name or logo on it. It starts
+muted when it scrolls into view. To replace it, export a new MP4 and run:
+`ffmpeg -i new.mp4 -vf scale=1280:720 -c:v libx264 -crf 25 -preset slow -c:a aac -b:a 96k -movflags +faststart public/video/cheeku-film.mp4`.
+If the page gets real traffic, move the file to a video host that adjusts
+quality to the viewer's connection (Bunny Stream, Cloudflare Stream or Mux).
 
-All tokens are in `src/app/globals.css`.
+The fertility film (`YHAdRiJ32Fo`) still opens on YouTube from the "Trying
+for a baby" tab, until its file is supplied.
 
-- 60% white: the page, cards and most sections.
-- 30% brand purple (the app's own): the three "stage" panels, tabs, ticks and
-  headline accents. One hue, lit from the top left. No second colour in it.
-- 10% marigold (`--color-loud`): the signup button and nothing else.
+## Colour and type
 
-Glass is used where there is purple behind it to blur: the film's frame and
-the medicine check points.
+Tokens are in `src/app/globals.css`. A light page throughout: white, with
+brand purple for accents, buttons and pale lilac panels, and marigold for
+the signup button only. No dark sections. Headlines are Instrument Serif with
+italic for the words that matter; everything else is Inter. Both are the
+faces the app uses.
 
 ## Copy rules
 
-- Written for a patient, not a doctor: sugar, BP, tablets, tests. No lab names
-  or drug names in the copy (the app screens show them, because that is the
-  product).
-- Short. Headlines end without a full stop. No em dashes. Never AI-powered,
-  platform, ecosystem or revolutionise.
-- Nothing invented: every feature named is in the app, and every number
-  (12,000+ pincodes, 300+ cities, 5,000+ doctors and specialists) is from the
-  seed deck.
+- For a patient: sugar, BP, tablets, tests. No lab or drug names in the copy.
+- Short. No em dashes. Never AI-powered, platform, ecosystem, revolutionise.
+- Only what the app does today is stated as fact. Wearables and Strava, meal
+  and label scanning, insurance comparison and voice are marked "Coming soon".
 - Not on this page: investors, employers, pricing, partner names.
 
 ## Signups
@@ -126,9 +116,69 @@ conflict, which the form treats as success.
 
 ## Before it goes public
 
-- Decide whether the a16z line at the very top stays. It is one component
-  (`TopLine` in `top.tsx`); the page reads fine without it.
-- Confirm "early 2027" and "small batches" are what we want to promise.
+- Confirm "early 2027" and "small batches".
+- Replace generated photographs with real ones if possible.
 - The form takes an email. A phone number may suit Indian families better.
-- Add a privacy note beside the form once the policy page exists.
-- Add a share image and the real domain in metadata.
+- Add a privacy note beside the form, a share image and the real domain.
+
+## Skills kept with this project
+
+`.claude/skills/clone-website/` is a third-party skill (JCodesMore,
+ai-website-cloner-template, MIT, copied 10 Nov 2026). It is three instruction
+files and nothing else: no scripts, no dependencies. It tells an agent how to
+study a live page (layout, type, spacing, motion, breakpoints) and rebuild it.
+
+How we use it: to measure how a reference site is built, then apply that to
+our own page. What we do not do with it: ship another company's text, images,
+logos, fonts or videos. Those belong to them. Its default instruction is to
+copy the source's real content and assets, so say "structure and motion only,
+our content" when you invoke it.
+
+Only the skill was copied. The repo's Next.js starter app was left out, since
+this folder already is one.
+
+`.claude/skills/impeccable/` and `.claude/agents/impeccable-*.md` are
+Impeccable 4.8.2 (Paul Bakaus, Apache 2.0, copied 10 Nov 2026): design
+commands such as critique, audit, polish, typeset and layout, plus a detector
+for common AI-looking patterns. Notes:
+
+- It runs a compiled engine (0.1.22). The engine is not in this repo. On first
+  use the launcher downloads it from the project's GitHub releases into
+  `~/.impeccable/bin/` and refuses it unless the SHA-256 matches
+  `scripts/engine-checksums.txt`.
+- Its automatic hooks (a check after every file edit and at the end of every
+  turn) are not switched on. Run the detector by hand:
+  `.claude/skills/impeccable/scripts/impeccable detect src/`, or against the
+  running site for the full rule set.
+- Do not use its `live` mode without reading the README section on it first:
+  its Apply step can start a second agent with permission checks turned off.
+- `/impeccable init` writes a `PRODUCT.md` here. It has not been run yet.
+
+## Logo
+
+The logo is a little purple sparrow, the gauraiya that lives in every Indian home and turns up at the window each morning. Calm (closed, smiling eyes), friendly (round, nothing sharp), and always around. No letters in it.
+
+There are two versions:
+
+- **3D sparrow** for anywhere with room: the app, the website, posters, social posts. These are generated renders (Figma AI), cut out onto transparent backgrounds.
+- **Flat sparrow** (SVG, drawn by hand to match) for anything under 48 px and for one-colour use: favicons, print, stamps, embroidery.
+
+All files live in `public/brand/`. `kit-sheet.png` shows every version, the colours and the rules.
+
+| File | Use it for |
+| --- | --- |
+| `cheeku-sparrow-1024.png`, `cheeku-sparrow.webp` | The main 3D sparrow |
+| `mood-hello`, `mood-thinking`, `mood-celebrate`, `mood-calm` (`.webp` and `-1024.png`) | Greetings, "let me check", little wins, all-clear screens |
+| `cheeku-mark-flat.svg` | Flat sparrow, full colour |
+| `cheeku-mark-purple.svg`, `-ink.svg`, `-white.svg` | One colour, eyes and beak cut out |
+| `lockup-horizontal(-white).svg`, `lockup-stacked(-white).svg` | Flat sparrow with the name (name drawn from Instrument Serif as outlines) |
+| `app-icon-1024.png`, `-512`, `-180` | App stores and home screen (square, the store rounds the corners) |
+| `favicon.svg`, `favicon-16/32/48/192/512.png` | Browser tab and bookmarks |
+
+The site uses the flat sparrow in the nav and footer, `public/icon.svg` and `public/favicon.png` for the tab, and `public/apple-icon.png` for iPhone home screens.
+
+Colours: sparrow #7A6AF2, Cheeku purple #4A2ADE, belly lilac #DDD6FE, beak #FF8A3D, blush #F6A5CF, ink #17123A.
+
+Keep clear space of half the sparrow's height around it. Don't stretch it, recolour it, add a shadow to the flat version, or put it on a busy photo without a white or lilac tile behind it.
+
+The renders were made with an AI image tool, so before trademark filing get a professional search, and have a designer redraw the 3D sparrow as a proper 3D model if you need new poses that match exactly.

@@ -359,7 +359,7 @@ export default function Consult() {
           {!typing && step === "mode" ? (
             <BubblePop from="right" style={{ gap: 10, marginTop: 4 }}>
               <ModeCard
-                icon={<MonitorPlay size={24} color={brand[600]} strokeWidth={1.7} />}
+                icon={<MonitorPlay size={24} color={ink[900]} strokeWidth={1.7} />}
                 title="Online consultation"
                 body="Video call from home. 15 minutes, today if you like."
                 onPress={() => answer("Online consultation")}
@@ -383,7 +383,7 @@ export default function Consult() {
                 <View className="flex-row items-center gap-3 overflow-hidden rounded-xl p-3 pr-4">
                   <Gradient from={lilac.base} to={lilac.mist} />
                   <View className="h-14 w-14 items-center justify-center rounded-lg bg-white">
-                    <Stethoscope size={24} color={brand[600]} strokeWidth={1.7} />
+                    <Stethoscope size={24} color={ink[900]} strokeWidth={1.7} />
                   </View>
                   <View className="flex-1">
                     <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>See available doctors</Text>
@@ -391,7 +391,7 @@ export default function Consult() {
                       Your note goes with the booking
                     </Text>
                   </View>
-                  <View className="h-10 w-10 items-center justify-center rounded-pill" style={{ backgroundColor: brand[600] }}>
+                  <View className="h-10 w-10 items-center justify-center rounded-pill" style={{ backgroundColor: ink[900] }}>
                     <ArrowRight size={18} color="#fff" />
                   </View>
                 </View>
@@ -519,7 +519,7 @@ function CheekuLine({ text }: { text: string }) {
 function MyLine({ text }: { text: string }) {
   return (
     <View className="items-end pl-14">
-      <View className="rounded-xl px-4 py-3" style={{ backgroundColor: brand[600], borderBottomRightRadius: 6 }}>
+      <View className="rounded-xl px-4 py-3" style={{ backgroundColor: ink[900], borderBottomRightRadius: 6 }}>
         <Text style={{ fontFamily: font.medium, fontSize: 15, lineHeight: 21, color: "#fff" }}>{text}</Text>
       </View>
     </View>

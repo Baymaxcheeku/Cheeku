@@ -298,7 +298,7 @@ function Secondary({
       className="h-12 flex-1 flex-row items-center justify-center gap-2 rounded-pill"
       style={{ backgroundColor: surface.base, borderWidth: 1, borderColor: surface.line, opacity: disabled && !busy ? 0.6 : 1 }}
     >
-      {busy ? <ActivityIndicator size="small" color={brand[600]} /> : <Icon size={16} color={ink[700]} />}
+      {busy ? <ActivityIndicator size="small" color={ink[900]} /> : <Icon size={16} color={ink[700]} />}
       <Text style={{ fontFamily: font.semibold, fontSize: 13, color: ink[700] }}>{label}</Text>
     </Tap>
   );

@@ -6,8 +6,8 @@ import { SvgXml } from "react-native-svg";
 
 import { Tap } from "@/components/ui/tap";
 import { brandify } from "@/components/ui/brand";
-import { GlassCircle, Gradient, glassShadow } from "@/components/ui/glass";
-import { brand, ink, lilac, semantic, surface } from "@/theme/tokens";
+import { GlassCircle } from "@/components/ui/glass";
+import { ink, semantic, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
 import { goBack } from "@/lib/nav/go-back";
 
@@ -23,13 +23,13 @@ import { goBack } from "@/lib/nav/go-back";
  * and the button renders invisible (see PROGRESS.md, doctor booking).
  */
 
-/** The soft violet wash behind the top of a screen. */
-export function Backdrop({ height = 420 }: { height?: number }) {
-  return (
-    <View pointerEvents="none" style={{ position: "absolute", top: 0, left: 0, right: 0, height }}>
-      <Gradient from={lilac.base} to={surface.canvas} angle="vertical" />
-    </View>
-  );
+/**
+ * Once a violet wash behind the top of a screen. The canvas is one flat
+ * neutral now, so this draws nothing; it stays so the screens that mount it
+ * need no change.
+ */
+export function Backdrop(_: { height?: number }) {
+  return null;
 }
 
 /**
@@ -121,7 +121,7 @@ export function PillButton({
   icon?: React.ReactNode;
   style?: ViewProps["style"];
 }) {
-  const bg = { brand: brand[600], light: "#ffffff", danger: semantic.dangerBg }[tone];
+  const bg = { brand: ink[900], light: "#ffffff", danger: semantic.dangerBg }[tone];
   const fg = { brand: "#ffffff", light: ink[900], danger: semantic.dangerText }[tone];
   return (
     <Tap
@@ -130,7 +130,6 @@ export function PillButton({
       disabled={disabled || loading}
       onPress={onPress}
       style={[
-        tone === "light" ? glassShadow : null,
         {
           height: 54,
           borderRadius: 999,
@@ -142,7 +141,7 @@ export function PillButton({
           backgroundColor: bg,
           opacity: disabled ? 0.45 : 1,
           borderWidth: tone === "light" ? 1 : 0,
-          borderColor: "rgba(15,16,48,0.08)" },
+          borderColor: surface.line },
         style,
       ]} scale={0.98}
     >

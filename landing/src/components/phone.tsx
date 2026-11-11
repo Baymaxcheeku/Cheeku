@@ -1,3 +1,5 @@
+import { Img } from "./img";
+
 /*
  * A real app screen in a true iPhone frame.
  *
@@ -34,8 +36,9 @@ export function Phone({ src, alt, width = 300, className = "", priority = false 
               </svg>
             </span>
           </div>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={src} alt={alt} width={786} height={1556} loading={priority ? "eager" : "lazy"} decoding="async" className="block aspect-[393/778] w-full" />
+          <div className="relative aspect-[393/778] w-full">
+            <Img src={src} alt={alt} priority={priority} fit="fill" />
+          </div>
         </div>
       </div>
     </div>

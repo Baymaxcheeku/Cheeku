@@ -119,7 +119,7 @@ export function FamilyTray({
         <View className="flex-row items-start gap-3 px-5 pt-4">
           <View className="min-w-0 flex-1">
             <View className="flex-row items-center gap-1.5">
-              <Users size={13} color={brand[600]} />
+              <Users size={13} color={ink[900]} />
               <Text style={{ fontFamily: font.semibold, fontSize: 13, color: brand[700] }}>
                 Family plan · {used} of {seats} seats
               </Text>
@@ -283,7 +283,7 @@ function AddCard({ left, onPress }: { left: number; onPress: () => void }) {
       })}
     >
       <View style={{ width: 62, height: 62, borderRadius: 999, backgroundColor: "#fff", alignItems: "center", justifyContent: "center" }}>
-        <Plus size={24} color={brand[600]} strokeWidth={2.2} />
+        <Plus size={24} color={ink[900]} strokeWidth={2.2} />
       </View>
       <View style={{ flex: 1 }} />
       <Text style={{ fontFamily: font.semibold, fontSize: 17, color: brand[700] }}>Add someone</Text>
@@ -328,9 +328,9 @@ export function FamilyUpsellSheet({
   const step = PLANS.family.priceInPaise - PLANS.solo.priceInPaise;
 
   const perks: [React.ReactNode, string, string][] = [
-    [<Users key="u" size={18} color={brand[600]} />, "Up to 4 people, one plan", "Parents, partner, kids. Everyone gets their own file."],
-    [<ShieldCheck key="s" size={18} color={brand[600]} />, "Files never mix", "Switch in a tap. Cheeku only talks about who you're viewing."],
-    [<MessagesSquare key="k" size={18} color={brand[600]} />, "Unlimited chats for all", "Ask about anyone's report, any time of day."],
+    [<Users key="u" size={18} color={ink[900]} />, "Up to 4 people, one plan", "Parents, partner, kids. Everyone gets their own file."],
+    [<ShieldCheck key="s" size={18} color={ink[900]} />, "Files never mix", "Switch in a tap. Cheeku only talks about who you're viewing."],
+    [<MessagesSquare key="k" size={18} color={ink[900]} />, "Unlimited chats for all", "Ask about anyone's report, any time of day."],
   ];
 
   return (
@@ -401,7 +401,7 @@ function Ghost({ face, tilt }: { face: Face; tilt: number }) {
       <Avatar svg="" image={face.image} background={face.background} size={54} />
       <View style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, alignItems: "center", justifyContent: "center" }}>
         <View style={{ width: 24, height: 24, borderRadius: 999, backgroundColor: "rgba(255,255,255,0.92)", alignItems: "center", justifyContent: "center" }}>
-          <Plus size={14} color={brand[600]} strokeWidth={2.6} />
+          <Plus size={14} color={ink[900]} strokeWidth={2.6} />
         </View>
       </View>
     </View>

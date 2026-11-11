@@ -121,7 +121,7 @@ export default function AppointmentDetail() {
 
           <Glass strong className="mt-4 flex-row items-center gap-3 rounded-xl p-3.5">
             <View className="h-11 w-11 items-center justify-center rounded-lg" style={{ backgroundColor: online ? brand[50] : hue.orange.wash }}>
-              {online ? <MonitorPlay size={20} color={brand[600]} /> : <Building2 size={20} color={hue.orange.fg} />}
+              {online ? <MonitorPlay size={20} color={ink[900]} /> : <Building2 size={20} color={hue.orange.fg} />}
             </View>
             <View className="flex-1">
               <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>{whenLabel(appt)}</Text>
@@ -141,7 +141,7 @@ export default function AppointmentDetail() {
           <View className="mt-4">
             <Glass strong className="rounded-xl p-4">
               <View className="flex-row items-center gap-2">
-                <Video size={17} color={brand[600]} />
+                <Video size={17} color={ink[900]} />
                 <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>Video call</Text>
               </View>
               <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 19, color: ink[700], marginTop: 6 }}>
@@ -190,7 +190,7 @@ export default function AppointmentDetail() {
 
         {/* What goes with it. */}
         <Glass className="mt-4 gap-3 rounded-xl p-4">
-          <Row icon={<ClipboardCheck size={17} color={brand[600]} />} title="Pre-consultation note shared" line={`For ${appt.forName === "Me" ? "you" : appt.forName} · ${appt.concern}`} />
+          <Row icon={<ClipboardCheck size={17} color={ink[900]} />} title="Pre-consultation note shared" line={`For ${appt.forName === "Me" ? "you" : appt.forName} · ${appt.concern}`} />
           <View className="flex-row items-center justify-between rounded-lg px-3.5 py-3" style={{ backgroundColor: lilac.mist }}>
             <Text style={{ fontFamily: font.medium, fontSize: 13, color: ink[700] }}>{online ? "Consultation fee" : "Pay at the clinic"}</Text>
             <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>₹{fee}</Text>
@@ -200,7 +200,7 @@ export default function AppointmentDetail() {
         <PillButton
           tone="light"
           onPress={() => router.push(`/ask?q=${encodeURIComponent(`Help me prepare questions for my appointment with ${doctor.name}`)}`)}
-          icon={<MessageCircleHeart size={18} color={brand[600]} />}
+          icon={<MessageCircleHeart size={18} color={ink[900]} />}
           style={{ marginTop: 16 }}
         >
           Prepare questions with Cheeku

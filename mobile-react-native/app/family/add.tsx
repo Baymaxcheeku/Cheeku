@@ -200,7 +200,7 @@ export default function AddMember() {
         <View className="px-5 pt-6">
           <Glass strong className="items-center rounded-2xl px-6 py-8">
             <View style={{ width: 56, height: 56, borderRadius: 16, backgroundColor: brand[50], alignItems: "center", justifyContent: "center" }}>
-              <Lock size={24} color={brand[600]} />
+              <Lock size={24} color={ink[900]} />
             </View>
             <Text style={{ fontFamily: font.semibold, fontSize: 20, color: ink[900], marginTop: 12, textAlign: "center" }}>Family members come with Family</Text>
             <Text style={{ fontFamily: font.regular, fontSize: 15, lineHeight: 20, color: ink[500], marginTop: 6, textAlign: "center" }}>
@@ -249,8 +249,8 @@ export default function AddMember() {
 
           {done && outcome ? (
             <Glass strong className="mt-6 gap-3 rounded-xl p-4">
-              <Line ok icon={<Check size={15} color={brand[600]} />} text={`${first}'s profile is set up`} />
-              {outcome.photo === "saved" ? <Line ok icon={<Camera size={15} color={brand[600]} />} text="Photo added" /> : null}
+              <Line ok icon={<Check size={15} color={ink[900]} />} text={`${first}'s profile is set up`} />
+              {outcome.photo === "saved" ? <Line ok icon={<Camera size={15} color={ink[900]} />} text="Photo added" /> : null}
               {outcome.photo === "failed" ? (
                 <View style={{ gap: 10 }}>
                   <Line ok={false} icon={<Camera size={15} color={semantic.dangerText} />} text={`${photoError ?? "The photo didn't upload."} ${first} has a drawn face for now.`} />
@@ -260,7 +260,7 @@ export default function AddMember() {
                     onPress={() => void retryPhoto()}
                     style={{ alignSelf: "flex-start", marginLeft: 40, flexDirection: "row", alignItems: "center", gap: 8, height: 36, paddingHorizontal: 14, borderRadius: 999, backgroundColor: brand[50], opacity: retrying ? 0.6 : 1 }}
                   >
-                    {retrying ? <ActivityIndicator size="small" color={brand[600]} /> : <Camera size={14} color={brand[700]} />}
+                    {retrying ? <ActivityIndicator size="small" color={ink[900]} /> : <Camera size={14} color={brand[700]} />}
                     <Text style={{ fontFamily: font.semibold, fontSize: 13, color: brand[700] }}>{retrying ? "Uploading..." : "Try the photo again"}</Text>
                   </Tap>
                 </View>
@@ -268,7 +268,7 @@ export default function AddMember() {
               {outcome.health !== "skipped" ? (
                 <Line ok={outcome.health === "saved"} icon={<HeartPulse size={15} color={outcome.health === "saved" ? brand[600] : semantic.dangerText} />} text={outcome.health === "saved" ? "Health basics saved" : "Health basics didn't save. Add them from their page."} />
               ) : null}
-              {outcome.filed > 0 ? <Line ok icon={<FileText size={15} color={brand[600]} />} text={`${outcome.filed === 1 ? "1 report" : `${outcome.filed} reports`} filed. I'm reading them now.`} /> : null}
+              {outcome.filed > 0 ? <Line ok icon={<FileText size={15} color={ink[900]} />} text={`${outcome.filed === 1 ? "1 report" : `${outcome.filed} reports`} filed. I'm reading them now.`} /> : null}
               {outcome.failed > 0 ? <Line ok={false} icon={<TriangleAlert size={15} color={semantic.dangerText} />} text={`${outcome.failed === 1 ? "1 report" : `${outcome.failed} reports`} didn't upload. Try them again from ${first}'s file.`} /> : null}
             </Glass>
           ) : null}
@@ -278,7 +278,7 @@ export default function AddMember() {
               <ReportQueue items={queue} onChange={setQueue} locked />
             </View>
           ) : null}
-          {!done ? <ActivityIndicator color={brand[600]} style={{ marginTop: 20 }} /> : null}
+          {!done ? <ActivityIndicator color={ink[900]} style={{ marginTop: 20 }} /> : null}
 
           {done ? (
             <View style={{ marginTop: 24, gap: 10 }}>

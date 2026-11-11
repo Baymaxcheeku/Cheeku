@@ -136,7 +136,7 @@ export function PrescriptionBody({ record, details, isPrimary }: { record: Recor
             <Bullets items={details.tests} color={hue.teal.fg} />
             <PillButton
               tone="light"
-              icon={<FlaskConical size={17} color={brand[600]} />}
+              icon={<FlaskConical size={17} color={ink[900]} />}
               onPress={() => {
                 setPrescription(record.id);
                 router.push("/labs");
@@ -169,7 +169,7 @@ function FollowUp({ record, date, with: withWhom, isPrimary }: { record: RecordD
       <Card style={{ gap: 12 }}>
         <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
           <View style={{ width: 44, height: 44, borderRadius: 16, backgroundColor: brand[50], alignItems: "center", justifyContent: "center" }}>
-            <CalendarCheck size={20} color={brand[600]} />
+            <CalendarCheck size={20} color={ink[900]} />
           </View>
           <View style={{ flex: 1 }}>
             <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{shortDate(date)}</Text>

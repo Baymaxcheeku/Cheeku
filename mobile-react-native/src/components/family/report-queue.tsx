@@ -41,9 +41,9 @@ export function ReportQueue({
     <View style={{ gap: 12 }}>
       {!locked && room > 0 ? (
         <View style={{ flexDirection: "row", gap: 8 }}>
-          <Source icon={<Camera size={20} color={brand[600]} />} label="Snap" onPress={() => void add(snapPhoto)} />
-          <Source icon={<ImageIcon size={20} color={brand[600]} />} label="Photos" onPress={() => void add(pickPhotos)} />
-          <Source icon={<FolderOpen size={20} color={brand[600]} />} label="Files" onPress={() => void add(pickFiles)} />
+          <Source icon={<Camera size={20} color={ink[900]} />} label="Snap" onPress={() => void add(snapPhoto)} />
+          <Source icon={<ImageIcon size={20} color={ink[900]} />} label="Photos" onPress={() => void add(pickPhotos)} />
+          <Source icon={<FolderOpen size={20} color={ink[900]} />} label="Files" onPress={() => void add(pickFiles)} />
         </View>
       ) : null}
 
@@ -51,7 +51,7 @@ export function ReportQueue({
         <Animated.View key={it.key} entering={still ? undefined : FadeInDown.duration(220)} layout={still ? undefined : LinearTransition.duration(160)}>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 12, padding: 12, borderRadius: 16, backgroundColor: glass.fillStrong, borderWidth: 1, borderColor: it.status === "failed" ? "#f5c2c7" : surface.line }}>
             <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: brand[50], alignItems: "center", justifyContent: "center" }}>
-              {it.file.mimeType === "application/pdf" ? <FileText size={18} color={brand[600]} /> : <ImageIcon size={18} color={brand[600]} />}
+              {it.file.mimeType === "application/pdf" ? <FileText size={18} color={ink[900]} /> : <ImageIcon size={18} color={ink[900]} />}
             </View>
             <View style={{ flex: 1, minWidth: 0 }}>
               <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>
@@ -68,7 +68,7 @@ export function ReportQueue({
               </Text>
             </View>
             {it.status === "uploading" ? (
-              <ActivityIndicator color={brand[600]} />
+              <ActivityIndicator color={ink[900]} />
             ) : it.status === "done" ? (
               <View style={{ width: 26, height: 26, borderRadius: 999, backgroundColor: brand[600], alignItems: "center", justifyContent: "center" }}>
                 <Check size={14} color="#fff" strokeWidth={3} />

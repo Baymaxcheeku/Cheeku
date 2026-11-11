@@ -82,7 +82,7 @@ export function OnboardingHeader({
             accessibilityLabel={`Step ${step} of ${total}, ${SETUP_STEPS[step - 1]}`}
             accessibilityValue={{ min: 0, max: total, now: step }}
           >
-            <FillBar value={step / total} color={brand[600]} track={brand[100]} height={8} />
+            <FillBar value={step / total} color={ink[900]} track={brand[100]} height={8} />
           </View>
         ) : (
           <View className="flex-1" />

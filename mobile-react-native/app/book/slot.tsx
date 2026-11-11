@@ -179,9 +179,9 @@ export default function SlotScreen() {
 
         {m === "clinic" ? (
           <Glass className="mt-3 gap-2 rounded-xl p-3.5">
-            <Row icon={<MapPin size={15} color={brand[600]} />} text={`${doctor.clinic.name}, ${doctor.clinic.area} · ${doctor.clinic.km} km`} />
-            <Row icon={<Clock3 size={15} color={brand[600]} />} text={`OPD ${doctor.clinic.opd}`} />
-            <Row icon={<Ticket size={15} color={brand[600]} />} text="Arrive in your window, take a token at the desk, and you're seen in turn." />
+            <Row icon={<MapPin size={15} color={ink[900]} />} text={`${doctor.clinic.name}, ${doctor.clinic.area} · ${doctor.clinic.km} km`} />
+            <Row icon={<Clock3 size={15} color={ink[900]} />} text={`OPD ${doctor.clinic.opd}`} />
+            <Row icon={<Ticket size={15} color={ink[900]} />} text="Arrive in your window, take a token at the desk, and you're seen in turn." />
           </Glass>
         ) : null}
 
