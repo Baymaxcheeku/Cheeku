@@ -4128,3 +4128,26 @@ this pass cleared what it could not reach:
 
 Verified the same way as batch 1: `tsc`, 563 tests, web build screenshots.
 Not verified on a device.
+
+## Neutral redesign, batch 4 and 5 · 2026-11-11
+
+Booking and services (services, doctors, booking flow, appointments, labs,
+fitness, insurance) and settings, legal, learn and articles. Again the
+foundation had done most of it; this pass cleared the rest:
+
+- Service tiles are compact white cards: icon in a grey square, title, line,
+  grey chevron. The corner art, floating dots and violet arrow circle are
+  gone, so four services fit where two did.
+- The mascot leaves "Just tell Cheeku what you need", "Not sure who to see?"
+  and the Help header. Those cards use the full width for words.
+- Lab test and lab partner pages lose the tall empty hero; a small icon or
+  badge sits above the title.
+- Fitness reason chips are grey text, no sparkle; one per card is enough.
+- The plan card and the featured plan are ink, not violet.
+- Learn and articles: one neutral style for every category in place of teal,
+  blue, rose and orange sets.
+- Settings mini-labels (`Eyebrow`) default to grey; "On this phone", "In
+  short" and "What changed" are sentence case.
+
+Verified the same way: `tsc`, 563 tests, web build screenshots. Not verified
+on a device.

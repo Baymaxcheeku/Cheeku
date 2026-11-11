@@ -10,7 +10,7 @@ import { Glass, Gradient, glass, glassShadow } from "@/components/ui/glass";
 import { ScreenHeader } from "@/components/ui/screen";
 import { quote } from "@/lib/labs/logic";
 import { useCatalog, useLabCart, useRatings } from "@/lib/labs/queries";
-import { brand, hue, ink } from "@/theme/tokens";
+import { brand, hue, ink, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
 import { DetailSkeleton, ScreenSkeleton } from "@/components/ui/skeleton";
 
@@ -65,10 +65,10 @@ export default function LabTestDetail() {
     <View className="flex-1 bg-canvas">
       <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + 110 }} showsVerticalScrollIndicator={false}>
         {/* Hero. */}
-        <View style={{ height: insets.top + 260, marginHorizontal: 10, marginTop: 6, paddingTop: insets.top, borderRadius: 32, overflow: "hidden", alignItems: "center", justifyContent: "center" }}>
+        <View style={{ height: insets.top + 150, marginHorizontal: 10, marginTop: 6, paddingTop: insets.top, borderRadius: 32, overflow: "hidden", alignItems: "center", justifyContent: "center" }}>
           <Gradient from={art.from} to={art.to} glow="#ffffff" />
-          <View style={{ width: 150, height: 150, borderRadius: 999, backgroundColor: "rgba(255,255,255,0.75)", alignItems: "center", justifyContent: "center" }}>
-            <art.Icon size={70} color={art.fg} strokeWidth={1.5} />
+          <View style={{ width: 72, height: 72, borderRadius: 24, backgroundColor: surface.tint, alignItems: "center", justifyContent: "center" }}>
+            <art.Icon size={34} color={ink[900]} strokeWidth={1.6} />
           </View>
           <View style={{ position: "absolute", top: 0, left: 0, right: 0 }}>
             <ScreenHeader fallback="/labs" />

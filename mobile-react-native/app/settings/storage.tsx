@@ -65,7 +65,7 @@ export default function StorageSettings() {
       {/* --------------------------------------------------- on this phone -- */}
       <Section>
         <Panel>
-          <Text style={{ fontFamily: font.bold, fontSize: 11, letterSpacing: 1.2, color: ink[500] }}>ON THIS PHONE</Text>
+          <Text style={{ fontFamily: font.medium, fontSize: 12, color: ink[500] }}>On this phone</Text>
           {usage.isPending ? (
             <LinesSkeleton style={{ marginTop: 10 }} />
           ) : (

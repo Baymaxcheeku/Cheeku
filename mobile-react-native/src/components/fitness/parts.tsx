@@ -115,9 +115,8 @@ export function dayLabel(iso: string, now = new Date()): string {
 /** A small pill saying why this suits them. */
 export function ReasonPill({ text }: { text: string }) {
   return (
-    <View style={{ alignSelf: "flex-start", maxWidth: "100%", flexDirection: "row", alignItems: "center", gap: 4, paddingHorizontal: 8, height: 22, borderRadius: 999, backgroundColor: lilac.base }}>
-      <Sparkles size={11} color={ink[900]} />
-      <Text numberOfLines={1} style={{ flexShrink: 1, fontFamily: font.semibold, fontSize: 11, color: brand[700] }}>{text}</Text>
+    <View style={{ alignSelf: "flex-start", maxWidth: "100%", flexDirection: "row", alignItems: "center", gap: 4, paddingHorizontal: 8, height: 22, borderRadius: 999, backgroundColor: surface.tint }}>
+      <Text numberOfLines={1} style={{ flexShrink: 1, fontFamily: font.medium, fontSize: 11, color: ink[700] }}>{text}</Text>
     </View>
   );
 }

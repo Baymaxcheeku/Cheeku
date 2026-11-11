@@ -25,7 +25,7 @@ import { Pressable } from "@/components/ui/pressable";
 import { Tap } from "@/components/ui/tap";
 import { Gradient, glassShadow } from "@/components/ui/glass";
 import { CATEGORY_LABEL, readLabel, type ArticleCard, type ArticleCategory, type ArticleIcon } from "@/lib/knowledge/catalog";
-import { brand, hue, ink, lilac } from "@/theme/tokens";
+import { brand, hue, ink, lilac, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
 
 /*
@@ -45,12 +45,16 @@ import { font } from "@/theme/type";
 
 export type CategoryStyle = { field: string; soft: string; accent: string; deep: string; body: string };
 
+// Neutral since the November 2026 redesign: a category is told apart by its
+// name and icon, not by a colour of its own.
+const QUIET: CategoryStyle = { field: surface.tint, soft: "#ececef", accent: ink[900], deep: ink[900], body: ink[500] };
+
 export const CATEGORY_STYLE: Record<ArticleCategory, CategoryStyle> = {
-  reports: { field: lilac.base, soft: lilac.violet, accent: brand[600], deep: "#221a55", body: hue.slate.fg },
-  family: { field: hue.teal.bg, soft: "#c4ebe3", accent: hue.teal.fg, deep: "#113f39", body: "#4a6f69" },
-  prevention: { field: hue.blue.wash, soft: hue.blue.bg, accent: hue.blue.fg, deep: "#0f2e52", body: "#4f6886" },
-  pregnancy: { field: hue.rose.bg, soft: "#f8d2df", accent: hue.rose.fg, deep: "#4d1730", body: "#7d5566" },
-  living: { field: hue.orange.wash, soft: hue.orange.bg, accent: "#b5532a", deep: "#4a230f", body: "#7a5c4b" },
+  reports: QUIET,
+  family: QUIET,
+  prevention: QUIET,
+  pregnancy: QUIET,
+  living: QUIET,
 };
 
 export const ICONS: Record<ArticleIcon, LucideIcon> = {
