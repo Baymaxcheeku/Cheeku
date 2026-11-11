@@ -1,4 +1,5 @@
 import { Ask } from "@/components/ask";
+import { CareRing } from "@/components/care-ring";
 import { Closing, Trust } from "@/components/closing";
 import { Compare } from "@/components/compare";
 import { FollowThrough } from "@/components/follow";
@@ -18,6 +19,7 @@ export default function Page() {
         <FilmSection />
         <People />
         <Journeys />
+        <CareRing />
         <Ask />
         <FollowThrough />
         <Memory />

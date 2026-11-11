@@ -35,7 +35,7 @@ const JOURNEYS = [
     ask: "We’re trying for a baby. What should we do first?",
     answer: "I’ve read both your reports. Here are three things to raise with your doctor, in plain words.",
     screen: "/screens/ttc-a.webp",
-    screenAlt: "Cheeku answering a couple who are trying for a baby, from both their reports",
+    screenAlt: "A thyroid report read for someone trying for a baby, with each value against its range",
     film: "https://www.youtube.com/watch?v=YHAdRiJ32Fo",
   },
   {
@@ -60,7 +60,7 @@ const JOURNEYS = [
     ask: "Tara feels hot. The thermometer says 100.6",
     answer: "She is 7 weeks old, so don’t give any medicine before a doctor sees her. I can get a children’s doctor on a video call now.",
     screen: "/screens/parent-a.webp",
-    screenAlt: "Cheeku helping a parent whose 7 week old baby has a fever",
+    screenAlt: "Cheeku helping a parent whose 7 week old baby has a fever, with doctors nearby and what to tell them",
   },
   {
     id: "optimiser",
@@ -84,7 +84,7 @@ const JOURNEYS = [
     ask: "Find Ma’s thyroid report from last year",
     answer: "Here it is, from September. Two values were outside the range. Want me to share it with her doctor?",
     screen: "/screens/track.webp",
-    screenAlt: "A lab report read and filed by Cheeku",
+    screenAlt: "An annual check-up read and filed by Cheeku, with the values that need a doctor",
   },
 ] as const;
 

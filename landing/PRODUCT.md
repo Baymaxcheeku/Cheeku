@@ -63,11 +63,12 @@ Checked against the app's code on 10 Nov 2026. The website may promise the first
 - Booking inside the app: lab tests with home collection, doctors (video or clinic), medicines, fitness and other services, through partners. Some booking flows are still marked "preview" in the app.
 - Family care view: each person's doses today and anything that needs a call.
 - A daily plan: one small step for food, sleep, movement and medicines. A meal photo can be logged against it, and a step count with a screenshot as proof.
+- Watch and phone (11 Nov 2026): Apple Health and Health Connect read steps, sleep, heart rate, workouts and other readings into one summary a day; Strava arrives through either. Fitbit and Pixel Watch through a Google account is built but switched off until Google approves it.
+- Before the visit: a short pre-consultation note the doctor reads first.
 - Insurance: the family's policies saved in one place, and the cover explained in plain words from the policy the person entered.
 
 **Wanted on the page by the founder, but not built yet**
 
-- Wearables and Strava: no connection exists in the code. Steps are typed in with a screenshot "until wearables connect". Apple Health and Health Connect sync is on the build list (F11). Strava is not on it.
 - Meal scan that explains the food for that person: a photo can be logged; reading what is on the plate is on the build list (F12).
 - Scanning a food or cosmetic ingredient label: not in the code and not on the build list.
 - Comparing insurance plans: shown in the app as "soon".
@@ -82,7 +83,7 @@ Checked against the app's code on 10 Nov 2026. The website may promise the first
 - Stealth: no pricing, no partner names, no investor or employer content, no founder names on this site.
 - Care coverage figures that may be stated: 12,000+ pincodes, 300+ cities, 5,000+ doctors and specialists.
 - Launch: store release planned for January to February 2027, in small batches from the waitlist. The exact public wording is not confirmed.
-- Signups are not connected yet (see `README.md`).
+- Signups go to a Supabase `waitlist` table once its two settings are in place (see `README.md`).
 
 ## Brand Commitments
 

@@ -22,8 +22,10 @@ export function validEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.trim());
 }
 
-export async function joinWaitlist(email: string, audience: Audience, source: string): Promise<SignupResult> {
+export async function joinWaitlist(email: string, audience: Audience, source: string, trap = ""): Promise<SignupResult> {
   const clean = email.trim().toLowerCase();
+  // A bot filled the hidden field: look successful, save nothing.
+  if (trap) return { ok: true, saved: true };
   if (!validEmail(clean)) return { ok: false, message: "That email doesn't look right. Check it and try again." };
   if (!URL || !KEY) {
     await new Promise((r) => setTimeout(r, 700));
@@ -33,7 +35,7 @@ export async function joinWaitlist(email: string, audience: Audience, source: st
     const res = await fetch(`${URL}/rest/v1/waitlist`, {
       method: "POST",
       headers: { apikey: KEY, Authorization: `Bearer ${KEY}`, "Content-Type": "application/json", Prefer: "return=minimal" },
-      body: JSON.stringify({ email: clean, audience, source }),
+      body: JSON.stringify({ email: clean, audience, source: source.slice(0, 40) }),
     });
     // 409: already on the list. That is a success as far as the person cares.
     if (res.ok || res.status === 409) return { ok: true, saved: true };

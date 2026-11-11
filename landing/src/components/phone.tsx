@@ -13,7 +13,7 @@ export function Phone({ src, alt, width = 300, className = "", priority = false 
   return (
     <div className={`relative shrink-0 ${className}`} style={{ fontSize: width / 100, width: "100em" }}>
       <div className="rounded-[15.6em] bg-[#1b1a2b] p-[2.6em] shadow-[0_0_0_0.35em_#2e2c44,0_30px_60px_-24px_rgb(16_15_46/0.5)]">
-        <div className="relative overflow-hidden rounded-[13em] bg-[#ece8ff]">
+        <div className="relative overflow-hidden rounded-[13em] bg-[#f2f2f4]">
           {/* Status bar: 74 / 393 of the width. */}
           <div className="relative flex h-[17.85em] items-center justify-between px-[8em] pt-[2.4em] text-[#100f2e]">
             <span className="text-[4.1em] font-semibold tracking-tight">9:41</span>

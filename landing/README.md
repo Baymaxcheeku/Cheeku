@@ -39,7 +39,8 @@ photographs and app screens are Cheeku's. Product facts are in `PRODUCT.md`.
 | How it works (three photo cards), the product film | `how.tsx` |
 | The family, sliding past | `people.tsx` |
 | Six family situations, each with a photo and a real app screen | `journeys.tsx` |
-| Stacked cards: what Cheeku does, and what is coming | `follow.tsx` |
+| The care ring: everything families bring, round six kinds of care | `care-ring.tsx` |
+| Stacked cards: twelve things Cheeku follows through on, and what is coming | `follow.tsx` |
 | The pinned wheel of everything Cheeku remembers | `memory.tsx` |
 | Cheeku against Google and WhatsApp | `compare.tsx` |
 | Safety, questions, signup, footer | `closing.tsx` |
@@ -81,38 +82,30 @@ faces the app uses.
 
 - For a patient: sugar, BP, tablets, tests. No lab or drug names in the copy.
 - Short. No em dashes. Never AI-powered, platform, ecosystem, revolutionise.
-- Only what the app does today is stated as fact. Wearables and Strava, meal
-  and label scanning, insurance comparison and voice are marked "Coming soon".
+- Only what the app does today is stated as fact. Meal and label scanning,
+  insurance comparison, Fitbit through Google and voice are marked "Coming soon".
 - Not on this page: investors, employers, pricing, partner names.
 
 ## Signups
 
-The forms write one row each to a Supabase table. Until the two variables in `.env.example` are set, the form finishes
-but saves nothing and labels the confirmation "Preview, not saved".
+Every "Join the waitlist" button on the page scrolls to the one form, puts
+the cursor in the email field, and remembers which button it was. Each signup
+is one row in a Supabase table, with `source` saying where it came from
+(`closing:nav`, `closing:top` for the hero, and so on). A hidden field
+catches simple bots. Until the two variables in `.env.example` are set, the
+form finishes but saves nothing and says "preview, not saved".
 
-To switch it on, run this once in the Supabase SQL editor (a separate project
-from the app's is cleanest), then put the project URL and anon key in
-`landing/.env.local` and in the host's environment settings.
+To switch it on:
 
-```sql
-create table if not exists waitlist (
-  id uuid primary key default gen_random_uuid(),
-  email text not null check (char_length(email) between 5 and 254),
-  audience text not null check (audience in ('family', 'business', 'investor')),
-  source text check (source is null or char_length(source) <= 40),
-  created_at timestamptz not null default now(),
-  unique (email, audience)
-);
+1. Run `supabase/waitlist.sql` once in the Supabase SQL editor. The app's
+   project is fine; the website's key can only add rows to this one table.
+2. Put the project URL and the anon (public) key in `landing/.env.local`
+   and in the host's environment settings as `NEXT_PUBLIC_SUPABASE_URL` and
+   `NEXT_PUBLIC_SUPABASE_ANON_KEY`, then rebuild. They are baked in at build
+   time, so a change needs a new build.
 
-alter table waitlist enable row level security;
-
--- The public key may add a row and nothing else: no read, edit or delete.
-create policy "anyone can join" on waitlist for insert to anon with check (true);
-grant insert on waitlist to anon;
-```
-
-Read the list from the Supabase dashboard. A repeat signup returns a
-conflict, which the form treats as success.
+Read the list in Supabase, Table Editor, `waitlist`. A repeat signup returns
+a conflict, which the form treats as success.
 
 ## Before it goes public
 
