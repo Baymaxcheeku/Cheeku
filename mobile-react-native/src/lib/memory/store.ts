@@ -1,3 +1,5 @@
+import { activityFromText, logActivity } from "@/lib/chat/actions";
+import { gatherWorld } from "@/lib/chat/world";
 import { extensionChatNotes } from "@/lib/extensions";
 import { useInfiniteQuery, useQuery, type QueryClient } from "@tanstack/react-query";
 import { randomUUID } from "expo-crypto";
@@ -114,6 +116,9 @@ export async function sendTurn(args: {
   bundle: MemoryBundle;
   /** A record the question was asked from ("Ask about this report"). */
   about?: { id: string; title: string; date: string | null } | null;
+  /** The account holder's own profile: only there can Cheeku give a family round-up. */
+  isPrimary?: boolean;
+  qc?: QueryClient;
 }): Promise<SendResult> {
   const text = args.text.trim();
   if (!text) return { ok: false, message: "Type something first." };
@@ -135,6 +140,11 @@ export async function sendTurn(args: {
    * never refused) but on the on-device stand-in, so a refused question costs
    * no model call. The server meter refuses it as well; this just avoids asking.
    */
+  // Steps or sleep said in the message go straight into the day's logs, so
+  // the plan and the longevity areas see them, and the answer can say so.
+  const activity = activityFromText(text);
+  const justLogged = activity.steps !== null || activity.sleepMinutes !== null ? await logActivity(args.qc ?? null, { userId, profileId: args.profileId, day: todayIso(), activity }) : [];
+
   const quota = await chatQuota();
   const spent = quota.remaining !== null && quota.remaining <= 0;
   let plan: TurnPlan;
@@ -148,6 +158,7 @@ export async function sendTurn(args: {
       model: spent ? mockModel : chatModel(),
       newId: randomUUID,
       extraNotes: await extensionChatNotes(args.profileId),
+      world: (ctx) => gatherWorld({ profileId: args.profileId, ctx, question: text, isPrimary: Boolean(args.isPrimary), day: todayIso(), justLogged }),
     });
   } catch (e) {
     if (e instanceof ModelBusy) return { ok: false, message: BUSY };

@@ -1,12 +1,14 @@
 import type { ComponentType } from "react";
 
+import type { Signal } from "@/lib/longevity/areas";
+
 /*
  * EXTENSIONS: how an optional layer plugs into the app without the app
  * knowing what it is.
  *
- * The main app offers four slots and nothing else: a card on Home, a row on
- * Profile, extra lines for Cheeku to read before answering, and a clean-up
- * call on sign-out. A layer (the
+ * The main app offers five slots and nothing else: a card on Home, a row on
+ * Profile, extra lines for Cheeku to read before answering, signals for the
+ * longevity areas, and a clean-up call on sign-out. A layer (the
  * first is wearables, `src/modules/wearables`) registers itself once, from
  * one import line in `app/_layout.tsx`. Remove that line and the layer's
  * folder and every slot is simply empty: no screen, query or rule in the main
@@ -35,6 +37,11 @@ export type Extension = {
   profileRow?: ProfileRow;
   /** Plain sentences about this person for Cheeku to read. Short, factual, dated. */
   chatNotes?: (profileId: string) => Promise<string[]>;
+  /**
+   * Signals for the longevity areas (lib/longevity): a sleep, movement or
+   * heart mark from this layer's data. Sample data is marked `sample`.
+   */
+  longevitySignals?: (profileId: string) => Promise<Signal[]>;
   /** Erase whatever the layer kept on the phone. Runs on sign-out and account deletion. */
   onSignOut?: () => Promise<void>;
 };
@@ -72,4 +79,17 @@ export async function extensionChatNotes(profileId: string): Promise<string[]> {
     );
   const all = (await Promise.all(jobs)).flat();
   return all.filter((n) => typeof n === "string" && n.trim().length > 0).map((n) => n.trim().slice(0, 240)).slice(0, MAX_NOTES);
+}
+
+/** Every layer's longevity signals for one person. Same rules as the notes: never throws, never waits long. */
+export async function extensionSignals(profileId: string): Promise<Signal[]> {
+  const jobs = registered
+    .filter((e) => e.longevitySignals)
+    .map((e) =>
+      Promise.race([
+        (e.longevitySignals as (id: string) => Promise<Signal[]>)(profileId).catch(() => [] as Signal[]),
+        new Promise<Signal[]>((resolve) => setTimeout(() => resolve([]), NOTES_TIMEOUT_MS)),
+      ]),
+    );
+  return (await Promise.all(jobs)).flat().filter((s) => s && typeof s.line === "string").slice(0, 12);
 }

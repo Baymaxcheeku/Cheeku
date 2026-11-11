@@ -1,3 +1,5 @@
+import type { Signal } from "@/lib/longevity/areas";
+
 import { addDays, lastDays, shortDate } from "./days";
 import type { DaySummary, MetricKey } from "./types";
 
@@ -311,4 +313,32 @@ export function explain(key: MetricKey): string {
     glucose: "Readings from a connected meter or sensor, averaged for the day.",
   };
   return lines[key];
+}
+
+/**
+ * What the watch says about the longevity areas (lib/longevity): movement and
+ * sleep from this week's averages, heart from resting heart rate. Needs three
+ * days in the week to say anything; a single day is not a pattern.
+ */
+export function deviceSignals(days: readonly DaySummary[], today: string, sample = false): Signal[] {
+  const out: Signal[] = [];
+  const steps = trend(days, "steps", today);
+  if (steps.now !== null && steps.daysWithData >= 3) {
+    const v = steps.now;
+    const mark = v >= 7000 ? "on_track" : v >= 4000 ? "watch" : "act";
+    out.push({ area: "movement", mark, line: `About ${METRICS.steps.format(v)} steps a day this week${mark === "on_track" ? ", a good habit" : mark === "watch" ? ". 7,000 is a kind target" : ", which is low. Short walks after meals add up"}.`, source: "device", date: today, sample });
+  }
+  const sleep = trend(days, "sleep", today);
+  if (sleep.now !== null && sleep.daysWithData >= 3) {
+    const v = sleep.now;
+    const mark = v >= 420 ? "on_track" : v >= 360 ? "watch" : "act";
+    out.push({ area: "sleep", mark, line: `Sleeping about ${hoursMinutes(v)} a night this week${mark === "on_track" ? "" : mark === "watch" ? ", a little under seven hours" : ", which is short"}.`, source: "device", date: today, sample });
+  }
+  const rhr = trend(days, "restingHr", today);
+  if (rhr.now !== null && rhr.daysWithData >= 3) {
+    const up = rhr.delta !== null && rhr.delta >= 5;
+    const mark = up || rhr.now >= 90 ? "watch" : "on_track";
+    out.push({ area: "heart", mark, line: up ? `Resting heart rate is up ${Math.round(rhr.delta!)} bpm on last week. Often poor sleep, a cold or stress.` : `Resting heart rate around ${Math.round(rhr.now)} bpm${mark === "watch" ? ", on the high side" : ", steady"}.`, source: "device", date: today, sample });
+  }
+  return out;
 }

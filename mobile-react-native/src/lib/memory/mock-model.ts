@@ -4,6 +4,7 @@ import type { DocType, RecordEntity } from "@/lib/records/types";
 import { shortDate } from "@/lib/records/details";
 
 import { weeksBefore } from "./clock";
+import { sparrowTurn } from "./sparrow";
 import type { ChatModel, MemoryDigest, ModelReply, ModelRequest } from "./model";
 
 /*
@@ -245,6 +246,9 @@ export const mockModel: ChatModel = {
   id: "cheeku-mock-1",
   async respond(req) {
     if (req.memory.symptoms.length) return symptomReply(req);
+    // Longevity, the week, goals, the watch, bookings, the family: the sparrow's own turns.
+    const sparrow = sparrowTurn(req);
+    if (sparrow) return sparrow;
     if (DESCRIBES.test(req.question) && !LOOPS.test(req.question) && !MED.test(req.question)) return genericSymptomReply(req);
     if (req.memory.logged.length) return loggedReply(req);
     if (CLOCK.test(req.question)) return clockReply(req);
