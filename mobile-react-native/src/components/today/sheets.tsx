@@ -165,7 +165,7 @@ export function MealReadCard({ read }: { read: MealRead }) {
   const t = TONE[read.tone];
   return (
     <View className="rounded-lg p-3.5" style={{ backgroundColor: t.bg }}>
-      <Text style={{ fontFamily: font.bold, fontSize: 11, letterSpacing: 1, color: t.fg }}>{t.label.toUpperCase()}</Text>
+      <Text style={{ fontFamily: font.medium, fontSize: 12, color: t.fg }}>{t.label}</Text>
       <Text style={{ fontFamily: font.semibold, fontSize: 15, lineHeight: 19, color: ink[900], marginTop: 3 }}>{read.line}</Text>
       {read.tips.map((tip) => (
         <Text key={tip} style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[700], marginTop: 6 }}>

@@ -189,7 +189,7 @@ export function MemberCareCard({ member, phone }: { member: ActiveProfile; phone
               accessibilityRole="button"
               onPress={() => open("/today")}
               className="h-10 flex-row items-center gap-1.5 rounded-pill px-4"
-              style={{ backgroundColor: phone ? "#fff" : brand[600], borderWidth: phone ? 1 : 0, borderColor: surface.line }}
+              style={{ backgroundColor: phone ? "#fff" : ink[900], borderWidth: phone ? 1 : 0, borderColor: surface.line }}
             >
               <Text style={{ fontFamily: font.semibold, fontSize: 13, color: phone ? ink[900] : "#fff" }}>{`Open ${name}'s day`}</Text>
             </Tap>

@@ -61,7 +61,7 @@ export default function LabBookings() {
   return (
     <View className="flex-1 bg-canvas">
       <Backdrop />
-      <ScreenHeader title="Lab bookings" fallback="/labs" />
+      <ScreenHeader fallback="/labs" />
       <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: insets.bottom + 30 }} refreshControl={<RefreshControl refreshing={bookings.isRefetching} onRefresh={() => void bookings.refetch()} tintColor={brand[600]} />}>
         <PageTitle title="Your lab tests" line="The whole family's, each report filed with the right person." style={{ marginTop: 6 }} />
         {open.length ? <Text style={{ fontFamily: font.semibold, fontSize: 13, color: ink[500], marginTop: 20, marginBottom: 8 }}>In progress</Text> : null}

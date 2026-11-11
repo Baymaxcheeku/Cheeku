@@ -416,14 +416,9 @@ export default function Scan() {
       contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 8, paddingBottom: insets.bottom + 24 }}
       showsVerticalScrollIndicator={false}
     >
-      <View style={{ flexDirection: "row", alignItems: "flex-end" }}>
-        <Text accessibilityRole="header" style={{ flex: 1, fontFamily: font.medium, fontSize: 28, lineHeight: 36, letterSpacing: -1, color: ink[900] }}>
-          What are we{"\n"}
-          <Text style={{ fontFamily: font.italic, color: brand[600] }}>filing today?</Text>
-        </Text>
-        {/* Open arms: "hand it over". Worried at his desk if the last try failed. */}
-        <MascotFigure size={92} moment={phase === "error" ? "worried" : "present"} move={phase === "error" ? undefined : "sway"} hop />
-      </View>
+      <Text accessibilityRole="header" style={{ fontFamily: font.semibold, fontSize: 28, lineHeight: 33, letterSpacing: -0.8, color: ink[900] }}>
+        What are we filing today?
+      </Text>
       <Text style={{ fontFamily: font.regular, fontSize: 15, lineHeight: 20, color: ink[500], marginTop: 8 }}>
         I&apos;ll read it and pull out the key details. You check everything before it&apos;s saved.
       </Text>

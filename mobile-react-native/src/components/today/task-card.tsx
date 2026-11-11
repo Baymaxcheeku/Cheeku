@@ -65,7 +65,7 @@ function SmallButton({ label, onPress, dark, icon: Icon }: { label: string; onPr
         flexDirection: "row",
         alignItems: "center",
         gap: 6,
-        backgroundColor: dark ? brand[600] : "#fff",
+        backgroundColor: dark ? ink[900] : "#fff",
         borderWidth: dark ? 0 : 1,
         borderColor: surface.line,
       }}

@@ -4106,3 +4106,25 @@ peach fills, mascots in cards and stacked boxes.
 web build against the local mock backend only. ESLint would not start in the
 cloud session (module resolution error), so lint was not run. Not verified on
 a device.
+
+## Neutral redesign, batch 2 and 3 · 2026-11-11
+
+Records and health (record detail, prescription check, health file, medicines,
+memory, add a record, conversations) and family (family, add member, member,
+family care, notifications). The foundation had already carried most of it;
+this pass cleared what it could not reach:
+
+- Buttons whose violet sat behind a condition (`dark ? brand[600] : ...`) are
+  ink: the medicines and memory pills, task card actions, family care's
+  "Open day", the confirm sheet, the settings save bar, the slot CTA.
+- Notifications: rows are plain white, no amber wash or left rule; unread is
+  one violet dot; the row action is a quiet chip, not a filled pill.
+- Add a record: no mascot beside the headline, and the headline is one line.
+- Every violet italic headline line in the app is a grey second line.
+- Screens that showed a header title above a page title keep the page title
+  only (family, insurance, lab bookings, choose a lab, appointments).
+- Medicines stat labels and the reading sheet label are sentence case.
+- The photo buttons on a member page are grey fills, not violet dashes.
+
+Verified the same way as batch 1: `tsc`, 563 tests, web build screenshots.
+Not verified on a device.

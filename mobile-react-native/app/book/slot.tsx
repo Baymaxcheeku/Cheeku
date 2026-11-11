@@ -304,7 +304,7 @@ export default function SlotScreen() {
             borderRadius: 999,
             alignItems: "center",
             justifyContent: "center",
-            backgroundColor: slot ? brand[600] : "rgba(74,42,222,0.35)",
+            backgroundColor: slot ? ink[900] : "rgba(17,17,20,0.3)",
           }}
           scale={0.98}
         >
