@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Image, View, type ImageSourcePropType } from "react-native";
+import { Image as FaceImage, type ImageProps as FaceProps } from "expo-image";
 import Animated, {
   Easing,
   interpolate,
@@ -281,7 +282,7 @@ function Face({
             style={[{ position: "absolute", left: 0, top: 0, width: size + 6, height: size + 6, borderRadius: size, borderWidth: 2, borderColor: brand[400] }, halo]}
           />
           <Animated.View style={[shadow.e2, { borderRadius: size, borderWidth: 3, borderColor: "#fff", backgroundColor: "#fff" }, photo]}>
-            <Image alt="" source={person.image} style={{ width: size, height: size, borderRadius: size / 2 }} />
+            <FaceImage source={person.image as FaceProps["source"]} style={{ width: size, height: size, borderRadius: size / 2 }} contentFit="cover" cachePolicy="memory-disk" transition={0} accessible={false} />
           </Animated.View>
         </View>
         <View style={{ marginTop: -10 }}>

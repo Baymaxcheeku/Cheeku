@@ -1,6 +1,7 @@
 import LottieView, { type AnimationObject } from "lottie-react-native";
 import { useEffect, useState } from "react";
-import { Image, Platform, View, type ImageSourcePropType, type ViewStyle } from "react-native";
+import { Image, type ImageProps } from "expo-image";
+import { Platform, View, type ImageSourcePropType, type ViewStyle } from "react-native";
 import Animated, {
   Easing,
   interpolate,
@@ -194,10 +195,12 @@ export function Cheeku({
   const body =
     still || !animate ? (
       <Image
-        alt=""
-        source={CLIPS[plan.still].still}
+        source={CLIPS[plan.still].still as ImageProps["source"]}
         style={{ width: Math.min(boxW, size * f.stillAspect), height: size, alignSelf: "center" }}
-        resizeMode="contain"
+        contentFit="contain"
+        cachePolicy="memory-disk"
+        transition={0}
+        accessible={false}
       />
     ) : (
       <View style={{ position: "absolute", left: -x1 * canvasW, top: -y1 * canvasH, width: canvasW, height: canvasH }} pointerEvents="none">
@@ -301,11 +304,12 @@ export function CheekuMark({ size = 40, moment = "wave", animate, move }: { size
   if (reduced || animate === false) {
     return (
       <Image
-        alt="Cheeku"
-        source={CLIPS[PLAY[moment].still].still}
+        source={CLIPS[PLAY[moment].still].still as ImageProps["source"]}
         style={{ width: size, height: size }}
-        resizeMode="contain"
-        accessibilityRole="image"
+        contentFit="contain"
+        cachePolicy="memory-disk"
+        transition={0}
+        accessible
         accessibilityLabel="Cheeku"
       />
     );
@@ -370,7 +374,7 @@ function FaceMark({ size, moment, still }: { size: number; moment: Moment; still
 
   return (
     <Animated.View style={[{ width: size, height: size, transformOrigin: "center bottom" }, style]} accessibilityRole="image" accessibilityLabel="Cheeku">
-      <Image alt="" source={FACE} style={{ width: size, height: size }} resizeMode="contain" onError={onImageFailure("Cheeku face", FACE)} />
+      <Image source={FACE as ImageProps["source"]} style={{ width: size, height: size }} contentFit="contain" cachePolicy="memory-disk" transition={0} accessible={false} onError={(e) => onImageFailure("Cheeku face", FACE)?.(e.error)} />
     </Animated.View>
   );
 }

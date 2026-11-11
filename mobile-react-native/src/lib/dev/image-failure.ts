@@ -1,4 +1,4 @@
-import { Image, type ImageErrorEvent, type ImageSourcePropType } from "react-native";
+import { Image, type ImageSourcePropType } from "react-native";
 
 /*
  * Says why a bundled image did not draw, in development only.
@@ -12,13 +12,15 @@ import { Image, type ImageErrorEvent, type ImageSourcePropType } from "react-nat
  */
 export function onImageFailure(where: string, source: ImageSourcePropType | null | undefined) {
   if (!__DEV__) return undefined;
-  return (e: ImageErrorEvent) => {
+  // Takes React Native's error event or expo-image's error text.
+  return (e: { nativeEvent?: { error?: string } } | string | undefined) => {
     let uri = "unknown";
     try {
       uri = typeof source === "number" ? (Image.resolveAssetSource(source)?.uri ?? `asset ${source}`) : JSON.stringify(source);
     } catch {
       // Only a diagnostic.
     }
-    console.warn(`[image] ${where} did not load: ${e.nativeEvent?.error ?? "no error given"} (${uri})`);
+    const why = typeof e === "string" ? e : (e?.nativeEvent?.error ?? "no error given");
+    console.warn(`[image] ${where} did not load: ${why} (${uri})`);
   };
 }

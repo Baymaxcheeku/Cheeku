@@ -4250,3 +4250,31 @@ account.
 Verified: `tsc`, 589 tests (25 new), `expo config` with the three new plugins,
 web build screenshots with sample data. Not verified on a device: HealthKit
 and Health Connect need an EAS build.
+
+## Faces that go blank, and the swipeable "Your body today" · 2026-11-11
+
+**Faces.** On the owner's iPhone in Expo Go, faces drew on Home and came up
+as the person glyph on Profile and in the family sheet (and, before the
+glyph, as empty circles on Add a record and the chat header). No error was
+ever raised, which is why the earlier logging caught nothing. What the
+screens have in common: Home mounts first, and every later screen asks React
+Native's `<Image>` for the same bundled picture at a different size. On iOS
+each new size is a fresh request to the dev server, and some of those never
+finish and never fail. Avatars, Cheeku's face and stills, and the onboarding
+faces now draw through `expo-image`, which keeps one decoded copy of each
+picture in memory and on disk and reuses it at any size. A face that has not
+drawn after 1.2 s is asked for again, twice at most, with the glyph in the
+meantime. `expo-image` ships in Expo Go, so no new build is needed.
+
+**Your body today.** The three fixed tiles became a strip you swipe sideways
+without leaving Home: every metric with a reading this week (`lensTiles`),
+the slide in the middle in focus with viewfinder corners, its neighbours
+turned away round a barrel, a ruler of ticks sliding underneath with a long
+tick per metric, one haptic tick when it settles, a small nudge once per
+visit to show it moves. Tap the slide in focus to open that metric; tap a
+neighbour to bring it to the middle. Reduce Motion gets a plain paging row.
+Screen readers get it as one adjustable control.
+
+Verified: `tsc`, all tests (2 new), web build screenshots of Profile faces
+and the strip at three scroll positions. Not verified on a phone: snapping
+and the haptic tick only happen on a device.

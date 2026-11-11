@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { UserRound } from "lucide-react-native";
-import { Image, View, type ImageSourcePropType } from "react-native";
+import { Image, type ImageProps } from "expo-image";
+import { View, type ImageSourcePropType } from "react-native";
 import { SvgXml } from "react-native-svg";
 
 import { onImageFailure } from "@/lib/dev/image-failure";
@@ -58,23 +59,34 @@ export function Avatar({
   const [brokenUrl, setBrokenUrl] = useState<string | null>(null);
   const broken = Boolean(photo) && brokenUrl === photo;
   /*
-   * The bundled face can fail to draw on a phone (Expo Go, 2026-11-01 and
-   * again 2026-11-11: every face came up as a bare coloured circle). A blank
-   * disc reads as broken, so when the image reports an error a plain person
-   * glyph stands in. The cause is still logged in development.
+   * WHY FACES WENT BLANK, AND WHY THIS IS expo-image (2026-11-11).
    *
-   * An image on iOS can also do neither: never load and never error. So the
-   * glyph also appears if the face has not drawn within a moment, and goes
-   * the instant it does. The wait keeps it from flashing on a normal load.
+   * On an iPhone in Expo Go the faces drew on Home and came up empty on
+   * Profile, the family sheet, Add a record and the chat header, again and
+   * again. No error was ever reported. The pattern: Home mounts first and its
+   * faces load; every later screen asks React Native's <Image> for the SAME
+   * picture at a NEW size, and RN's iOS loader treats each size as a fresh
+   * request to the dev server. Some of those requests never finish and
+   * never fail, so the circle stayed empty with nothing to retry.
+   *
+   * expo-image keeps one decoded copy per picture in memory and on disk and
+   * reuses it at any size, so a face that loaded once draws everywhere at
+   * once. In case a first load still stalls, a face that has not drawn after
+   * a moment is asked for again (twice at most), and a person glyph stands
+   * in while it waits, never a blank disc.
    */
   const [faceFailed, setFaceFailed] = useState(false);
   const [faceLoaded, setFaceLoaded] = useState(false);
+  const [attempt, setAttempt] = useState(0);
   const [waitedLong, setWaitedLong] = useState(false);
   useEffect(() => {
-    if (faceLoaded) return;
-    const t = setTimeout(() => setWaitedLong(true), 900);
+    if (faceLoaded || faceFailed) return;
+    const t = setTimeout(() => {
+      setWaitedLong(true);
+      setAttempt((n) => (n < 2 ? n + 1 : n));
+    }, 1200);
     return () => clearTimeout(t);
-  }, [faceLoaded]);
+  }, [faceLoaded, faceFailed, attempt]);
   const standIn = faceFailed || (waitedLong && !faceLoaded);
   const generated = svg ? null : generatedAvatar(profileId ?? "", index);
   const markup = svg ?? generated?.svg ?? "";
@@ -110,26 +122,32 @@ export function Avatar({
       ) : null}
       {art && !faceFailed ? (
         <Image
-          alt=""
-          source={art}
+          key={attempt}
+          source={art as ImageProps["source"]}
           style={{ width: inner, height: inner }}
+          contentFit="cover"
+          cachePolicy="memory-disk"
+          transition={0}
+          onDisplay={() => setFaceLoaded(true)}
           onLoad={() => setFaceLoaded(true)}
           onError={(e) => {
             setFaceFailed(true);
-            onImageFailure("Avatar face", art)?.(e);
+            onImageFailure("Avatar face", art)?.(e.error);
           }}
-          accessibilityIgnoresInvertColors
+          accessible={false}
         />
       ) : markup ? (
         <SvgXml xml={markup} width={inner} height={inner} />
       ) : null}
       {photo && !broken ? (
         <Image
-          alt=""
           source={{ uri: photo }}
           style={{ position: "absolute", top: 0, left: 0, width: inner, height: inner, borderRadius: inner / 2 }}
+          contentFit="cover"
+          cachePolicy="memory-disk"
+          transition={120}
           onError={() => setBrokenUrl(photo ?? null)}
-          accessibilityIgnoresInvertColors
+          accessible={false}
         />
       ) : null}
     </View>
