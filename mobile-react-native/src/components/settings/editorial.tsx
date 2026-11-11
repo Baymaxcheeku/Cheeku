@@ -18,7 +18,7 @@ import { Tap } from "@/components/ui/tap";
  */
 
 export function Eyebrow({ children, color = brand[600] }: { children: string; color?: string }) {
-  return <Text style={{ fontFamily: font.semibold, fontSize: 12, letterSpacing: 1.1, textTransform: "uppercase", color }}>{children}</Text>;
+  return <Text style={{ fontFamily: font.medium, fontSize: 12, color }}>{children}</Text>;
 }
 
 export function Title({ children }: { children: React.ReactNode }) {

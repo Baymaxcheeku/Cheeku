@@ -1,9 +1,15 @@
-import { useId } from "react";
 import { StyleSheet, View, type ViewProps } from "react-native";
-import Svg, { Defs, LinearGradient, RadialGradient, Rect, Stop } from "react-native-svg";
 
 import { Tap } from "@/components/ui/tap";
-import { ink } from "@/theme/tokens";
+import { ink, surface } from "@/theme/tokens";
+
+/** Perceived lightness of a #rrggbb colour, dark enough to carry white text. */
+function isDark(hex: string): boolean {
+  const m = /^#([0-9a-f]{6})$/i.exec(hex);
+  if (!m) return false;
+  const n = parseInt(m[1] ?? "ffffff", 16);
+  return 0.299 * (n >> 16) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255) < 110;
+}
 
 /*
  * Glass and gradient, without new native modules.
@@ -22,9 +28,11 @@ import { ink } from "@/theme/tokens";
 // Flat since the neutral redesign: "glass" is a plain white surface on the
 // grey canvas, with a hairline only where white meets white.
 export const glass = {
-  fill: "#ffffff",
+  // A chip or inset sitting on a white card: the canvas grey.
+  fill: "#f2f2f4",
+  // A panel sitting on the canvas: white.
   fillStrong: "#ffffff",
-  rim: "rgba(17,17,20,0.05)",
+  rim: "rgba(17,17,20,0.04)",
 } as const;
 
 /** The soft lift under glass: wide and faint rather than tight and dark. */
@@ -118,33 +126,15 @@ export function Gradient({
   angle?: "vertical" | "diagonal";
   glow?: string;
 }) {
-  // Unique per instance: two gradients with the same id on one screen would
-  // both render the first one's colours on web.
-  const id = useId().replace(/:/g, "");
-  return (
-    <View pointerEvents="none" style={StyleSheet.absoluteFill}>
-      <Svg width="100%" height="100%" preserveAspectRatio="none">
-        <Defs>
-          <LinearGradient
-            id={`g${id}`}
-            x1="0"
-            y1="0"
-            x2={angle === "diagonal" ? "1" : "0"}
-            y2="1"
-          >
-            <Stop offset="0" stopColor={from} />
-            <Stop offset="1" stopColor={to} />
-          </LinearGradient>
-          {glow ? (
-            <RadialGradient id={`r${id}`} cx="0.85" cy="0.1" r="0.7">
-              <Stop offset="0" stopColor={glow} stopOpacity="0.9" />
-              <Stop offset="1" stopColor={glow} stopOpacity="0" />
-            </RadialGradient>
-          ) : null}
-        </Defs>
-        <Rect x="0" y="0" width="100%" height="100%" fill={`url(#g${id})`} />
-        {glow ? <Rect x="0" y="0" width="100%" height="100%" fill={`url(#r${id})`} /> : null}
-      </Svg>
-    </View>
-  );
+  /*
+   * NEUTRAL REDESIGN (November 2026): surfaces are flat. A light gradient is
+   * a plain white fill, a dark one is its own first stop, and one that fades
+   * into the canvas (the old top-of-screen wash) draws nothing. The props
+   * stay so the fifty call sites need no change.
+   */
+  void angle;
+  void glow;
+  if (to === surface.canvas) return null;
+  const fill = isDark(from) ? from : "#ffffff";
+  return <View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: fill }]} />;
 }

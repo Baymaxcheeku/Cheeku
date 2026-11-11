@@ -103,7 +103,7 @@ export default function MemoryScreen() {
         <View style={[glassShadow, { borderRadius: 32, overflow: "hidden" }]}>
           <Gradient from={lilac.deep} to={lilac.mist} angle="diagonal" glow="#ffffff" />
           <View style={{ padding: 20, gap: 6 }}>
-            <Text style={{ fontFamily: font.semibold, fontSize: 11, letterSpacing: 0.8, textTransform: "uppercase", color: brand[600] }}>What I remember about {name}</Text>
+            <Text style={{ fontFamily: font.medium, fontSize: 12, color: ink[500] }}>What I remember about {name}</Text>
             <Text style={{ fontFamily: font.semibold, fontSize: 24, letterSpacing: -0.7, color: ink[900] }}>{ctx.clock.label}</Text>
             <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 19, color: ink[700] }}>
               {memoryLine(ctx)}. Everything I say about {name} is read against this.

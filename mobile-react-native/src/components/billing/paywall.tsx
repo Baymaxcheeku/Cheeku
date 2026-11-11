@@ -256,7 +256,7 @@ function PlanChooser({
       {/* A grabber, and the close control as far from the CTA as it can be. */}
       <View className="flex-row items-start">
         <View className="min-w-0 flex-1">
-          <Text style={{ fontFamily: font.semibold, fontSize: 12, letterSpacing: 1.2, textTransform: "uppercase", color: brand[600] }}>
+          <Text style={{ fontFamily: font.medium, fontSize: 12, color: ink[500] }}>
             {copy.eyebrow}
           </Text>
           {/*
@@ -293,7 +293,7 @@ function PlanChooser({
           className="mt-5 border-l-2 pl-3"
           style={{ borderLeftColor: brand[200] }}
         >
-          <Text className="text-2xs font-bold uppercase text-ink-300" style={{ letterSpacing: 1 }}>
+          <Text className="text-2xs font-bold text-ink-300" style={{ letterSpacing: 1 }}>
             Held for you
           </Text>
           <Text className="mt-1 text-sm italic leading-[18px] text-ink-700" numberOfLines={2}>

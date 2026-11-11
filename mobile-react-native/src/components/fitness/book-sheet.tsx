@@ -109,7 +109,7 @@ export function BookSheet({
         <View style={{ flexDirection: "row", alignItems: "center", gap: 14 }}>
           <ActivityArt id={session.activity} size={56} radius={18} />
           <View style={{ flex: 1, minWidth: 0 }}>
-            <Text style={{ fontFamily: font.semibold, fontSize: 11, letterSpacing: 0.9, textTransform: "uppercase", color: brand[600] }}>Book a class</Text>
+            <Text style={{ fontFamily: font.medium, fontSize: 12, color: ink[500] }}>Book a class</Text>
             <Text numberOfLines={2} style={{ fontFamily: font.semibold, fontSize: 20, letterSpacing: -0.3, color: ink[900] }}>{session.title}</Text>
             <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 13, color: ink[500] }}>{studio.name}</Text>
           </View>

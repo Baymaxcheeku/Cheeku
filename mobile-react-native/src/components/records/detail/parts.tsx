@@ -53,7 +53,7 @@ export function Section({ title, right, children, style }: { title: string; righ
 }
 
 export function Eyebrow({ children, color = ink[500] }: { children: string; color?: string }) {
-  return <Text style={{ fontFamily: font.semibold, fontSize: 12, letterSpacing: 0.6, textTransform: "uppercase", color }}>{children}</Text>;
+  return <Text style={{ fontFamily: font.medium, fontSize: 12, color }}>{children}</Text>;
 }
 
 export type Fact = { label: string; value: string | null | undefined; icon?: LucideIcon };

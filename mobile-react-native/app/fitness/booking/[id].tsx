@@ -106,7 +106,7 @@ export default function FitnessBooking() {
             <View style={{ flexDirection: "row", alignItems: "center", gap: 14 }}>
               <ActivityArt id={b.activity} size={56} radius={18} />
               <View style={{ flex: 1, minWidth: 0 }}>
-                <Text style={{ fontFamily: font.semibold, fontSize: 11, letterSpacing: 0.9, textTransform: "uppercase", color: booked ? brand[600] : ink[500] }}>{STATUS[b.status] ?? b.status}{past && booked ? " · ended" : ""}</Text>
+                <Text style={{ fontFamily: font.medium, fontSize: 12, color: booked ? brand[600] : ink[500] }}>{STATUS[b.status] ?? b.status}{past && booked ? " · ended" : ""}</Text>
                 <Text numberOfLines={2} style={{ fontFamily: font.semibold, fontSize: 20, letterSpacing: -0.3, color: ink[900] }}>{b.title}</Text>
                 <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 13, color: ink[700] }}>For {forWho === "you" ? "you" : member?.name} · {b.studioName}</Text>
               </View>

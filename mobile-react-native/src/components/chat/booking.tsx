@@ -149,7 +149,7 @@ function Shell({ icon: Icon, eyebrow, title, sub, children }: { icon: AppIcon; e
           <Icon size={20} color={ink[900]} />
         </View>
         <View style={{ flex: 1, minWidth: 0 }}>
-          <Text style={{ fontFamily: font.semibold, fontSize: 11, letterSpacing: 0.9, textTransform: "uppercase", color: brand[600] }}>{eyebrow}</Text>
+          <Text style={{ fontFamily: font.medium, fontSize: 12, color: ink[500] }}>{eyebrow}</Text>
           <Text numberOfLines={2} style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900], marginTop: 1 }}>{title}</Text>
           <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 1 }}>{sub}</Text>
         </View>
@@ -298,7 +298,7 @@ export function BookedCard({ event, onOpen }: { event: BookedEvent; onOpen?: (ro
         <View style={{ flex: 1, minWidth: 0 }}>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
             <CalendarCheck2 size={12} color={ink[900]} />
-            <Text style={{ fontFamily: font.semibold, fontSize: 11, letterSpacing: 0.9, textTransform: "uppercase", color: brand[600] }}>Booked</Text>
+            <Text style={{ fontFamily: font.medium, fontSize: 12, color: ink[500] }}>Booked</Text>
           </View>
           <Text numberOfLines={2} style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900], marginTop: 1 }}>{event.title}</Text>
           <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 1 }}>{event.when} · {event.where}</Text>

@@ -172,7 +172,7 @@ export default function ArticleReader() {
 
         {/* Sources are part of the article. */}
         <View style={{ marginHorizontal: 20, marginTop: 26 }}>
-          <Text style={{ fontFamily: font.semibold, fontSize: 12, letterSpacing: 0.8, textTransform: "uppercase", color: ink[300] }}>Sources</Text>
+          <Text style={{ fontFamily: font.medium, fontSize: 12, color: ink[300] }}>Sources</Text>
           <View style={[glassShadow, { marginTop: 8, borderRadius: 24, overflow: "hidden", backgroundColor: glass.fillStrong, borderWidth: 1, borderColor: glass.rim }]}>
             {data.sources.map((source, i) => {
               const openable = Boolean(source.url);
@@ -227,7 +227,7 @@ export default function ArticleReader() {
 function InShort({ points, s }: { points: string[]; s: CategoryStyle }) {
   return (
     <View style={{ padding: 16, borderRadius: 24, backgroundColor: s.field, marginBottom: 18 }}>
-      <Text style={{ fontFamily: font.semibold, fontSize: 12, letterSpacing: 0.8, textTransform: "uppercase", color: s.accent }}>In short</Text>
+      <Text style={{ fontFamily: font.medium, fontSize: 12, color: s.accent }}>In short</Text>
       <View style={{ gap: 10, marginTop: 10 }}>
         {points.map((p, i) => (
           <View key={i} style={{ flexDirection: "row", gap: 10 }}>

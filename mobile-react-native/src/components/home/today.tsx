@@ -15,7 +15,6 @@ import {
   Moon,
   Pill,
   Salad,
-  Sparkles,
   Stethoscope,
   Syringe,
   Undo2,
@@ -70,27 +69,22 @@ export function UnlockCard({ stage, signals }: { stage: "starter" | "building"; 
   const copy = UNLOCK_COPY[stage];
 
   return (
-    <View className="overflow-hidden rounded-2xl" style={glassShadow}>
-      <Gradient from={lilac.base} to={lilac.deep} glow="#ffffff" />
-
-      <View pointerEvents="box-none" style={{ position: "absolute", right: 4, top: 26 }}>
-        <MascotFigure size={118} moment="present" hop />
-      </View>
+    <View className="overflow-hidden rounded-2xl" style={{ backgroundColor: "#fff" }}>
 
       <View className="p-4">
         <Glass className="flex-row items-center gap-1.5 self-start rounded-pill py-1.5 pl-2 pr-3">
           <View className="h-5 w-5 items-center justify-center rounded-pill" style={{ backgroundColor: brand[600] }}>
             <Lock size={11} color="#fff" strokeWidth={2.6} />
           </View>
-          <Text style={{ fontFamily: font.bold, fontSize: 11, letterSpacing: 1, color: brand[700], textTransform: "uppercase" }}>{copy.eyebrow}</Text>
+          <Text style={{ fontFamily: font.medium, fontSize: 12, color: ink[500] }}>{copy.eyebrow}</Text>
         </Glass>
 
-        <View style={{ paddingRight: "36%", marginTop: 14 }}>
+        <View style={{ marginTop: 14 }}>
           <Text accessibilityRole="header" style={{ fontFamily: font.semibold, fontSize: 24, lineHeight: 28, letterSpacing: -0.6, color: ink[900] }}>
             {copy.title}
           </Text>
         </View>
-        <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 19.5, color: ink[700], marginTop: 8, paddingRight: "34%" }}>{copy.body}</Text>
+        <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 19.5, color: ink[700], marginTop: 8 }}>{copy.body}</Text>
 
         <Glass strong className="mt-4 rounded-xl px-3 py-1.5">
           {rows.map((r, i) => (
@@ -209,10 +203,10 @@ export function LockedPreview() {
 export function TodayHeadline({ name, isSelf }: { name: string; isSelf: boolean }) {
   const [lead, accent] = isSelf ? [`Hi ${name},`, "here's today."] : [`${name}'s day,`, "one step at a time."];
   return (
-    <Text accessibilityRole="header" style={{ fontFamily: font.medium, fontSize: 34, lineHeight: 40, letterSpacing: -1.1, color: ink[900] }}>
+    <Text accessibilityRole="header" style={{ fontFamily: font.semibold, fontSize: 30, lineHeight: 36, letterSpacing: -0.9, color: ink[900] }}>
       {lead}
       {"\n"}
-      <Text style={{ fontFamily: font.italic, color: brand[600] }}>{accent}</Text>
+      <Text style={{ color: ink[300] }}>{accent}</Text>
     </Text>
   );
 }
@@ -351,11 +345,8 @@ export function StepCard({
   if (doneStep || !step) {
     const allDone = !doneStep;
     return (
-      <View className="overflow-hidden rounded-2xl" style={[glassShadow, { minHeight: 250 }]}>
+      <View className="overflow-hidden rounded-2xl" style={{ backgroundColor: "#fff" }}>
         <Gradient from={lilac.base} to={lilac.deep} glow="#ffffff" />
-        <View pointerEvents="box-none" style={{ position: "absolute", right: -10, bottom: -12 }}>
-          <MascotFigure size={168} moment={allDone ? "joy" : "celebrate"} hop />
-        </View>
         <View className="flex-1 p-4">
           <View className="flex-row gap-2">
             <Glass className="flex-row items-center gap-1.5 rounded-pill px-3 py-1.5">
@@ -366,7 +357,7 @@ export function StepCard({
             </Glass>
             {streak.count > 0 ? <Chip icon={Flame}>{`Day ${streak.count}`}</Chip> : null}
           </View>
-          <View style={{ paddingRight: "40%", marginTop: 20 }}>
+          <View style={{ marginTop: 16 }}>
             <Text style={{ fontFamily: font.semibold, fontSize: 24, lineHeight: 29, letterSpacing: -0.6, color: ink[900] }}>
               {milestone ?? (allDone ? "All done for today." : streak.count > 1 ? `${streak.count} days in a row.` : "First one done.")}
             </Text>
@@ -402,11 +393,8 @@ export function StepCard({
   // A task that needs more than a tap (steps, a meal, a reading) opens its sheet in the plan.
   const action = step.cta ?? (step.kind === "dose" ? { label: ACTION_LABEL.dose, route: "/medicines" } : step.kind !== "habit" ? { label: ACTION_LABEL[step.kind], route: `/today?task=${encodeURIComponent(step.key)}` } : null);
   return (
-    <View className="overflow-hidden rounded-2xl" style={[glassShadow, { minHeight: 300 }]}>
+    <View className="overflow-hidden rounded-2xl" style={{ backgroundColor: "#fff" }}>
       <Gradient from={lilac.base} to={lilac.deep} glow="#ffffff" />
-      <View pointerEvents="box-none" style={{ position: "absolute", right: -4, bottom: -12 }}>
-        <MascotFigure size={due ? 128 : 160} moment={due ? "think" : "present"} hop />
-      </View>
       <View className="flex-1 p-4">
         <View className="flex-row gap-2">
           {due ? (
@@ -421,13 +409,10 @@ export function StepCard({
         </View>
 
         {/* Title, then at most two short lines: their reason and the payoff. */}
-        <View style={{ paddingRight: "36%", marginTop: 20 }}>
+        <View style={{ marginTop: 16 }}>
           <Text style={{ fontFamily: font.semibold, fontSize: 24, lineHeight: 30, letterSpacing: -0.6, color: ink[900] }}>{step.title}</Text>
           {step.reason ? (
-            <View className="flex-row items-center gap-1.5" style={{ marginTop: 10 }}>
-              <Sparkles size={13} color={ink[900]} />
-              <Text numberOfLines={1} style={{ flex: 1, fontFamily: font.semibold, fontSize: 13, color: brand[700] }}>{step.reason}</Text>
-            </View>
+            <Text numberOfLines={1} style={{ fontFamily: font.medium, fontSize: 13, color: brand[600], marginTop: 8 }}>{step.reason}</Text>
           ) : null}
           <Text numberOfLines={2} style={{ fontFamily: font.regular, fontSize: 15, lineHeight: 20, color: ink[700], marginTop: step.reason ? 4 : 10 }}>{step.why}</Text>
         </View>
@@ -599,7 +584,7 @@ export function PlanPreview({ plan, skip, onOpen }: { plan: Plan; skip: string |
                 <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>
                   {t.title}
                 </Text>
-                <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 12, color: t.personal ? brand[700] : ink[500], marginTop: 1 }}>
+                <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 12, color: ink[500], marginTop: 1 }}>
                   {[t.goal ? "Your goal" : t.personal ? (t.reason ?? "For you") : null, PILLARS.find((p) => p.key === t.pillar)?.label, t.window !== "anytime" ? WINDOW_LABEL[t.window] : null].filter(Boolean).join(" · ")}
                 </Text>
               </View>

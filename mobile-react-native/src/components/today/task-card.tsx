@@ -11,7 +11,6 @@ import {
   Pill,
   Plus,
   Salad,
-  Sparkles,
   Stethoscope,
   Timer,
   Undo2,
@@ -136,10 +135,7 @@ export function TaskCard({
       </View>
 
       {task.reason ? (
-        <View className="mt-3 flex-row items-center gap-1.5">
-          <Sparkles size={13} color={ink[900]} />
-          <Text style={{ flex: 1, fontFamily: font.medium, fontSize: 13, color: brand[700] }}>{task.reason}</Text>
-        </View>
+        <Text style={{ fontFamily: font.medium, fontSize: 13, color: brand[600], marginTop: 12 }}>{task.reason}</Text>
       ) : null}
       {!done || task.kind === "meal" ? (
         <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 18.5, color: ink[700], marginTop: task.reason ? 4 : 8 }}>

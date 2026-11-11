@@ -97,8 +97,6 @@ export function RecordsHeader({ title, subtitle }: { title: string; subtitle: st
           </Text>
           <Text style={{ fontFamily: font.regular, fontSize: 15, color: ink[500], marginTop: 4 }}>{subtitle}</Text>
         </View>
-        {/* The filing clerk: Cheeku at his desk, typing away. Tap him. */}
-        <MascotFigure size={72} moment="working" hop />
         {/*
          * No add button here (owner, 2026-11-01): the centre + in the tab bar
          * already adds a record from every screen, and whatever is filed lands

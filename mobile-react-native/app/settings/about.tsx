@@ -97,7 +97,7 @@ export default function About() {
           </View>
 
           <View style={{ paddingHorizontal: 24, alignItems: "center" }}>
-            <Text style={{ fontFamily: font.semibold, fontSize: 12, letterSpacing: 1.2, textTransform: "uppercase", color: brand[600] }}>
+            <Text style={{ fontFamily: font.medium, fontSize: 12, color: ink[500] }}>
               About <Brand ai size={12} style={{ textTransform: "none", letterSpacing: 0.2 }} />
             </Text>
             <Text accessibilityRole="header" style={{ fontFamily: font.semibold, fontSize: 34, lineHeight: 37, letterSpacing: -1, color: ink[900], textAlign: "center", marginTop: 8 }}>

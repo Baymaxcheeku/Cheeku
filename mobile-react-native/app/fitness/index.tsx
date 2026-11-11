@@ -90,7 +90,7 @@ export default function Fitness() {
         <StaggerItem index={0}>
           <View className="mt-2 overflow-hidden rounded-2xl p-5" style={glassShadow}>
             <Gradient from={lilac.base} to={lilac.deep} glow="#ffffff" />
-            <Text style={{ fontFamily: font.semibold, fontSize: 11, letterSpacing: 0.9, textTransform: "uppercase", color: brand[600] }}>Gyms and studios, one class at a time</Text>
+            <Text style={{ fontFamily: font.medium, fontSize: 12, color: ink[500] }}>Gyms and studios, one class at a time</Text>
             <Text style={{ fontFamily: font.semibold, fontSize: 28, lineHeight: 33, letterSpacing: -0.8, color: ink[900], marginTop: 6 }}>Classes for {first}</Text>
             <Text style={{ fontFamily: font.regular, fontSize: 15, lineHeight: 21, color: ink[700], marginTop: 4 }}>
               {lead ? `Picked from ${first === "you" ? "your" : `${first}'s`} health profile, with ${NEED_PHRASE[lead]} first. One class at a time, no membership.` : "Yoga, gym, swimming, dance and more. One class at a time, no membership."}
@@ -164,7 +164,7 @@ export default function Fitness() {
               >
                 <ActivityArt id={next.activity} size={44} radius={14} />
                 <View style={{ flex: 1, minWidth: 0 }}>
-                  <Text style={{ fontFamily: font.semibold, fontSize: 11, letterSpacing: 0.9, textTransform: "uppercase", color: brand[200] }}>Next class</Text>
+                  <Text style={{ fontFamily: font.medium, fontSize: 12, color: brand[200] }}>Next class</Text>
                   <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 15, color: "#fff" }}>{next.title}</Text>
                   <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 12, color: brand[100] }}>{dayLabel(next.startsAt)}, {timeLabel(next.startsAt)} · {next.studioName}</Text>
                 </View>

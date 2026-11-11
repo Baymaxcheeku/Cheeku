@@ -97,7 +97,7 @@ export function ScanConfirm({
               <Icon size={24} color={style.tint} />
             </View>
             <View style={{ flex: 1, minWidth: 0 }}>
-              <Text style={{ fontFamily: font.semibold, fontSize: 11, letterSpacing: 0.9, textTransform: "uppercase", color: style.tint }}>{DOC_TYPE_LABEL[extraction.docType]}</Text>
+              <Text style={{ fontFamily: font.medium, fontSize: 12, color: style.tint }}>{DOC_TYPE_LABEL[extraction.docType]}</Text>
               <Text numberOfLines={2} style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>{extraction.title}</Text>
             </View>
             {member ? (

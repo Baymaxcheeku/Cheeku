@@ -8,7 +8,6 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { CardListSkeleton } from "@/components/ui/skeleton";
 import { Tap } from "@/components/ui/tap";
 import { firstName } from "@/components/home/ask-hero";
-import { MascotFigure } from "@/components/illustrations/sprout";
 import { BreathingSheet, MealSheet, ReadingSheet, Sheet, StepsSheet } from "@/components/today/sheets";
 import { GoalBanner, GoalPicker, GoalSheet } from "@/components/today/goals";
 import { RemindersPrompt } from "@/components/today/reminders-prompt";
@@ -200,13 +199,9 @@ export default function TodayPlan() {
       <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + 40 }} showsVerticalScrollIndicator={false}>
         {/* The day at a glance */}
         <StaggerItem index={0}>
-          <View className="mx-5 mt-3 overflow-hidden rounded-2xl" style={glassShadow}>
-            <Gradient from={lilac.base} to={lilac.deep} glow="#ffffff" />
-            <View pointerEvents="none" style={{ position: "absolute", right: -4, bottom: -10 }}>
-              <MascotFigure size={112} moment={plan.done === plan.total && plan.total > 0 ? "joy" : "present"} />
-            </View>
-            <View className="p-4" style={{ paddingRight: 110 }}>
-              <Text style={{ fontFamily: font.bold, fontSize: 11, letterSpacing: 1.2, color: brand[700] }}>{profile.isPrimary ? "YOUR DAY" : `${firstName(profile.name).toUpperCase()}'S DAY`}</Text>
+          <View className="mx-5 mt-3 overflow-hidden rounded-2xl bg-surface">
+            <View className="p-4">
+              <Text style={{ fontFamily: font.medium, fontSize: 12, color: ink[500] }}>{profile.isPrimary ? "Your day" : `${firstName(profile.name)}'s day`}</Text>
               <View className="mt-2 flex-row items-center gap-3">
                 <ProgressRing done={plan.done} total={plan.total} />
                 <View className="min-w-0 flex-1">

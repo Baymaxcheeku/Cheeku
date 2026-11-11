@@ -150,7 +150,7 @@ function Hero({ card }: { card: Scorecard }) {
       <View style={{ flexDirection: "row", alignItems: "center", gap: 16 }}>
         <ScoreRing clear={card.score.clear} />
         <View style={{ flex: 1 }}>
-          <Text style={{ fontFamily: font.bold, fontSize: 11, letterSpacing: 1.2, textTransform: "uppercase", color: t.fg }}>Checked on 10 standards</Text>
+          <Text style={{ fontFamily: font.medium, fontSize: 12, color: t.fg }}>Checked on 10 standards</Text>
           <Text accessibilityRole="header" style={{ fontFamily: font.semibold, fontSize: 20, lineHeight: 26, letterSpacing: -0.5, color: ink[900], marginTop: 4 }}>{card.verdict.title}</Text>
         </View>
       </View>

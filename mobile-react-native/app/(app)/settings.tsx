@@ -42,7 +42,6 @@ import {
 } from "@/lib/account/actions";
 import { Tap } from "@/components/ui/tap";
 import { Sheet } from "@/components/ui/sheet";
-import { CheekuPeek } from "@/components/mascot/lottie";
 import { Avatar } from "@/components/ui/avatar";
 import { Glass, Gradient, glass, glassShadow } from "@/components/ui/glass";
 import { Backdrop } from "@/components/ui/screen";
@@ -165,7 +164,6 @@ export default function Settings() {
        * sits behind the card so only his head and shoulders ever show.
        */}
       <View className="mx-5 mt-4">
-        <CheekuPeek size={80} moment="idle" style={{ position: "absolute", right: 22, top: -44 }} />
       <View className="overflow-hidden rounded-2xl p-4" style={glassShadow}>
         <Gradient from="#ffffff" to={lilac.base} glow="#ffffff" />
         <View className="flex-row items-center gap-3.5">
@@ -452,7 +450,7 @@ function AccountData({ onDeleted }: { onDeleted: () => void }) {
   return (
     <>
       <View className="mt-6">
-        <Text className="px-5 text-xs font-bold uppercase tracking-wide text-ink-300">
+        <Text className="px-5 text-xs font-bold text-ink-300">
           Your data
         </Text>
         <View className="mx-5 mt-2 overflow-hidden rounded-card bg-surface" style={shadow.e1}>

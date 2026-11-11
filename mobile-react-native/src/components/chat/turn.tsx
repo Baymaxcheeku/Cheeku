@@ -269,7 +269,7 @@ function Revisions({ memory }: { memory: TurnMemory }) {
 function ReadingStrip({ memory, onOpenRecord }: { memory: TurnMemory; onOpenRecord: (id: string) => void }) {
   return (
     <View style={{ gap: 6 }}>
-      <Text style={{ fontFamily: font.semibold, fontSize: 11, letterSpacing: 0.6, textTransform: "uppercase", color: ink[500], paddingHorizontal: 4 }}>What I read</Text>
+      <Text style={{ fontFamily: font.medium, fontSize: 12, color: ink[500], paddingHorizontal: 4 }}>What I read</Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingRight: 8 }}>
         {memory.reading.map((r) => {
           const tone = r.tier && r.tier !== "reassure" ? TIER_STYLE[r.tier] : null;
@@ -387,7 +387,7 @@ function LoopNudge({ title, when, because, onPress }: { title: string; when: str
         <BookOpenText size={16} color={ink[900]} />
       </View>
       <View style={{ flex: 1, gap: 2 }}>
-        <Text style={{ fontFamily: font.semibold, fontSize: 11, letterSpacing: 0.5, textTransform: "uppercase", color: brand[600] }}>Still open · {when}</Text>
+        <Text style={{ fontFamily: font.medium, fontSize: 12, color: ink[500] }}>Still open · {when}</Text>
         <Text style={{ fontFamily: font.semibold, fontSize: 13, color: ink[900] }}>{title}</Text>
         <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[700] }}>{because}</Text>
       </View>
