@@ -81,7 +81,9 @@ const GAP = 2.2;
 
 const rad = (d: number) => (d * Math.PI) / 180;
 const mid = (i: number) => START + SPAN * i + SPAN / 2;
-const at = (deg: number, rx: number, ry: number) => ({ x: CX + rx * Math.cos(rad(deg)), y: CY + ry * Math.sin(rad(deg)) });
+/* Rounded, so the page drawn on the server and the one in the browser agree to the digit. */
+const r2 = (v: number) => Math.round(v * 100) / 100;
+const at = (deg: number, rx: number, ry: number) => ({ x: r2(CX + rx * Math.cos(rad(deg))), y: r2(CY + ry * Math.sin(rad(deg))) });
 
 function arc(i: number) {
   const a = START + SPAN * i + GAP;
@@ -152,12 +154,12 @@ function layout(): Spot[] {
       s.y = Math.min(H - 18, Math.max(18, s.y));
     }
   }
-  return spots;
+  return spots.map((s) => ({ ...s, x: r2(s.x), y: r2(s.y) }));
 }
 
 const TOPICS = layout();
 
-const pct = (v: number, of: number) => `${(v / of) * 100}%`;
+const pct = (v: number, of: number) => `${((v / of) * 100).toFixed(3)}%`;
 
 function useOrbit(enabled: boolean) {
   const angle = useMotionValue(mid(0));
@@ -347,8 +349,8 @@ function MobileRing({ part, onPick }: { part: number; onPick: (i: number) => voi
             const a = START + SPAN * i + 3;
             const b = START + SPAN * (i + 1) - 3;
             const r = 130;
-            const s = { x: 150 + r * Math.cos(rad(a)), y: 150 + r * Math.sin(rad(a)) };
-            const e = { x: 150 + r * Math.cos(rad(b)), y: 150 + r * Math.sin(rad(b)) };
+            const s = { x: r2(150 + r * Math.cos(rad(a))), y: r2(150 + r * Math.sin(rad(a))) };
+            const e = { x: r2(150 + r * Math.cos(rad(b))), y: r2(150 + r * Math.sin(rad(b))) };
             return (
               <motion.path
                 key={q.name}
