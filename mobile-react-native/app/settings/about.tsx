@@ -102,7 +102,7 @@ export default function About() {
             </Text>
             <Text accessibilityRole="header" style={{ fontFamily: font.semibold, fontSize: 34, lineHeight: 37, letterSpacing: -1, color: ink[900], textAlign: "center", marginTop: 8 }}>
               Your family&apos;s health,{"\n"}
-              <Text style={{ fontFamily: font.italic, color: brand[600] }}>remembered.</Text>
+              <Text style={{ color: ink[300] }}>remembered.</Text>
             </Text>
             <Text style={{ fontFamily: font.regular, fontSize: 15, lineHeight: 23, color: ink[700], textAlign: "center", marginTop: 12, maxWidth: 330 }}>
               <Brand /> keeps every report, every reading and every conversation, for every person in your family. So when something isn&apos;t right, the answer starts from everything that came before.

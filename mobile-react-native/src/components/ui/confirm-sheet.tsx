@@ -3,7 +3,7 @@ import { ActivityIndicator, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Sheet } from "@/components/ui/sheet";
-import { brand, semantic, surface } from "@/theme/tokens";
+import { brand, semantic, surface, ink } from "@/theme/tokens";
 import { feel } from "@/lib/feel";
 import { Tap } from "@/components/ui/tap";
 
@@ -78,7 +78,7 @@ export function ConfirmSheet({
             className="h-13 items-center justify-center rounded-pill"
             style={{
               height: 52,
-              backgroundColor: destructive ? semantic.danger : brand[600],
+              backgroundColor: destructive ? semantic.danger : ink[900],
               opacity: busy ? 0.6 : 1,
             }}
           >

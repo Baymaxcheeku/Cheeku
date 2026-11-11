@@ -46,7 +46,6 @@ export default function Appointments() {
     <View className="flex-1 bg-canvas">
       <Backdrop />
       <ScreenHeader
-        title="Appointments"
         right={
           <GlassCircle label="Book a doctor" onPress={() => router.push("/book/consult")}>
             <Plus size={21} color={ink[900]} />

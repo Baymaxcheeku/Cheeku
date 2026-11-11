@@ -79,7 +79,7 @@ export function ScanConfirm({
           <View style={{ flex: 1 }}>
             <Text accessibilityRole="header" style={{ fontFamily: font.medium, fontSize: 28, lineHeight: 34, letterSpacing: -1, color: ink[900] }}>
               {doubtful.length ? "Did I read\n" : "All read\n"}
-              <Text style={{ fontFamily: font.italic, color: brand[600] }}>{doubtful.length ? "this right?" : "clearly."}</Text>
+              <Text style={{ color: ink[300] }}>{doubtful.length ? "this right?" : "clearly."}</Text>
             </Text>
             <Text style={{ fontFamily: font.regular, fontSize: 15, lineHeight: 21, color: ink[500], marginTop: 6 }}>
               {doubtful.length

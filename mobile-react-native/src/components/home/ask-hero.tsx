@@ -128,7 +128,7 @@ export function HomeHeadline({ name, isSelf }: { name: string; isSelf: boolean }
     >
       {lead}
       {"\n"}
-      <Text style={{ fontFamily: font.italic, color: brand[600] }}>{accent}</Text>
+      <Text style={{ color: ink[300] }}>{accent}</Text>
     </Text>
   );
 }

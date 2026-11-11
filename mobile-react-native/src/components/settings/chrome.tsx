@@ -159,7 +159,7 @@ export function SaveButton({
         alignItems: "center",
         justifyContent: "center",
         // Brand, never green, for "Saved": green means a health result here.
-        backgroundColor: saved ? brand[700] : brand[600],
+        backgroundColor: ink[900],
         opacity: pending ? 0.6 : 1,
       }}
       scale={0.98}

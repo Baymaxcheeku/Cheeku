@@ -5,7 +5,7 @@ import { Pressable } from "@/components/ui/pressable";
 import { Avatar } from "@/components/ui/avatar";
 import { KID_FACE_IDS } from "@/lib/profiles/face-pool";
 import { allFaces, type Face } from "@/lib/profiles/faces";
-import { brand, ink, lilac } from "@/theme/tokens";
+import { brand, ink, lilac, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
 import { Tap } from "@/components/ui/tap";
 
@@ -134,14 +134,11 @@ function PhotoButton({ icon, label, onPress }: { icon: React.ReactNode; label: s
         alignItems: "center",
         justifyContent: "center",
         gap: 8,
-        borderWidth: 1.5,
-        borderStyle: "dashed",
-        borderColor: brand[300],
-        backgroundColor: pressed ? lilac.base : "rgba(241,240,254,0.7)",
+        backgroundColor: pressed ? surface.line : surface.tint,
       })}
     >
       {icon}
-      <Text style={{ fontFamily: font.semibold, fontSize: 13, color: brand[700] }}>{label}</Text>
+      <Text style={{ fontFamily: font.semibold, fontSize: 13, color: ink[900] }}>{label}</Text>
     </Pressable>
   );
 }

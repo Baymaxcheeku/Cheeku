@@ -272,7 +272,7 @@ function SoonCard({ booking }: { booking: Booking }) {
         accessibilityRole="button"
         disabled={on}
         onPress={join}
-        style={{ height: 46, borderRadius: 999, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, backgroundColor: on ? brand[50] : brand[600] }} scale={0.98}
+        style={{ height: 46, borderRadius: 999, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, backgroundColor: on ? brand[50] : ink[900] }} scale={0.98}
       >
         {on ? <Check size={16} color={brand[700]} /> : <BellRing size={16} color="#fff" />}
         <Text style={{ fontFamily: font.semibold, fontSize: 15, color: on ? brand[700] : "#fff" }}>{on ? "You're on the list" : "Tell me when it's live"}</Text>

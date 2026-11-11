@@ -44,7 +44,7 @@ export default function Insurance() {
   return (
     <View className="flex-1 bg-canvas">
       <Backdrop />
-      <ScreenHeader title="Insurance" fallback="/settings" />
+      <ScreenHeader fallback="/settings" />
       <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 8, paddingBottom: insets.bottom + 32, gap: 14 }} showsVerticalScrollIndicator={false}>
         <PageTitle title="Your family's cover" line="Every policy in one place, and what each one covers, in plain words." />
 

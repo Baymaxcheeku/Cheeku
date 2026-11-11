@@ -80,7 +80,7 @@ export function ReadMark({ read, size = 10 }: { read: boolean; size?: number }) 
   }
   return (
     <View style={{ width: size + 6, height: size + 6, borderRadius: (size + 6) / 2, backgroundColor: semantic.cautionBg, alignItems: "center", justifyContent: "center" }}>
-      <View style={{ width: size, height: size, borderRadius: size / 2, backgroundColor: semantic.caution }} />
+      <View style={{ width: size, height: size, borderRadius: size / 2, backgroundColor: brand[600] }} />
     </View>
   );
 }
@@ -208,9 +208,7 @@ export function NotificationRow({
         gap: 13,
         paddingHorizontal: 14,
         paddingVertical: compact ? 11 : 14,
-        backgroundColor: pressed ? "rgba(74,42,222,0.08)" : unread ? "rgba(255,175,35,0.07)" : "transparent",
-        borderLeftWidth: 3,
-        borderLeftColor: unread ? semantic.caution : "transparent",
+        backgroundColor: pressed ? surface.tint : "transparent",
         borderTopWidth: first ? 0 : 1,
         borderTopColor: "rgba(15,16,48,0.06)",
         transform: [{ scale: pressed ? 0.992 : 1 }],
@@ -259,11 +257,11 @@ export function NotificationRow({
                   paddingRight: 6,
                   height: 24,
                   borderRadius: 999,
-                  backgroundColor: unread ? brand[600] : brand[50],
+                  backgroundColor: surface.tint,
                 }}
               >
-                <Text style={{ fontFamily: font.semibold, fontSize: 12, color: unread ? "#fff" : brand[700] }}>{action}</Text>
-                <ChevronRight size={13} color={unread ? "#fff" : brand[700]} strokeWidth={2.4} />
+                <Text style={{ fontFamily: font.semibold, fontSize: 12, color: ink[900] }}>{action}</Text>
+                <ChevronRight size={13} color={ink[900]} strokeWidth={2.4} />
               </View>
             ) : null}
           </View>

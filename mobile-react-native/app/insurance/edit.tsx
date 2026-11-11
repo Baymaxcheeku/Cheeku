@@ -105,7 +105,7 @@ export default function EditPolicy() {
   return (
     <KeyboardAvoidingView className="flex-1 bg-canvas" behavior={Platform.OS === "ios" ? "padding" : undefined}>
       <Backdrop />
-      <ScreenHeader title={existing ? "Edit policy" : "Add a policy"} fallback="/insurance" />
+      <ScreenHeader fallback="/insurance" />
       <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 8, paddingBottom: insets.bottom + 120, gap: 18 }} showsVerticalScrollIndicator={false}>
         {!existing ? <PageTitle title="Your health insurance" line="The basics are enough to start. Everything else is optional." /> : null}
 

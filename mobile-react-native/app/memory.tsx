@@ -326,7 +326,7 @@ function Row({ icon: Icon, title, detail }: { icon: LucideIcon; title: string; d
 
 function Pill({ label, icon: Icon, onPress, dark }: { label: string; icon?: LucideIcon; onPress: () => void; dark?: boolean }) {
   return (
-    <Tap accessibilityRole="button" onPress={onPress} style={{ flexDirection: "row", alignItems: "center", gap: 6, height: 36, paddingHorizontal: 13, borderRadius: 999, backgroundColor: dark ? brand[600] : surface.tint }}>
+    <Tap accessibilityRole="button" onPress={onPress} style={{ flexDirection: "row", alignItems: "center", gap: 6, height: 36, paddingHorizontal: 13, borderRadius: 999, backgroundColor: dark ? ink[900] : surface.tint }}>
       {Icon ? <Icon size={14} color={dark ? "#fff" : ink[900]} /> : null}
       <Text style={{ fontFamily: font.semibold, fontSize: 13, color: dark ? "#fff" : ink[900] }}>{label}</Text>
     </Tap>

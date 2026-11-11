@@ -208,7 +208,7 @@ function SmallPill({ label, onPress, dark, icon: Icon }: { label: string; onPres
       accessibilityRole="button"
       onPress={onPress}
       className="h-9 flex-row items-center gap-1.5 rounded-pill px-3.5"
-      style={{ backgroundColor: dark ? brand[600] : "#fff", borderWidth: dark ? 0 : 1, borderColor: surface.line }}
+      style={{ backgroundColor: dark ? ink[900] : "#fff", borderWidth: dark ? 0 : 1, borderColor: surface.line }}
     >
       {Icon ? <Icon size={14} color={dark ? "#fff" : ink[900]} /> : null}
       <Text style={{ fontFamily: font.semibold, fontSize: 13, color: dark ? "#fff" : ink[900] }}>{label}</Text>
@@ -247,7 +247,7 @@ function MedCard({ med, onStock, onSchedule }: { med: MedView; onStock: () => vo
 function Stat({ label, value, sub, warn }: { label: string; value: string; sub: string; warn?: boolean }) {
   return (
     <View className="flex-1 rounded-lg p-3" style={{ backgroundColor: warn ? semantic.cautionBg : surface.tint }}>
-      <Text style={{ fontFamily: font.medium, fontSize: 11, letterSpacing: 0.4, color: ink[500] }}>{label.toUpperCase()}</Text>
+      <Text style={{ fontFamily: font.medium, fontSize: 12, color: ink[500] }}>{label}</Text>
       <Text style={{ fontFamily: font.semibold, fontSize: 17, color: warn ? semantic.cautionText : ink[900], marginTop: 2 }}>{value}</Text>
       <Text numberOfLines={2} style={{ fontFamily: font.regular, fontSize: 12, lineHeight: 16, color: ink[500], marginTop: 2 }}>
         {sub}

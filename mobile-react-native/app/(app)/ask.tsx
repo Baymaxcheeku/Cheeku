@@ -395,7 +395,7 @@ export default function Ask() {
                 <MascotFigure size={132} moment="present" move="float" hop />
                 <Text style={{ fontFamily: font.semibold, fontSize: 24, letterSpacing: -0.7, color: ink[900], marginTop: 6, textAlign: "center" }}>
                   Hi, I&apos;m{" "}
-                  <Text style={{ fontFamily: font.italic, color: brand[600] }}>
+                  <Text style={{ color: ink[300] }}>
                     <Brand />
                   </Text>
                 </Text>
