@@ -85,7 +85,8 @@ export function Nav() {
     <header className="sticky top-0 z-40">
       <div ref={bar} className={`relative bg-white/90 backdrop-blur-xl transition-shadow duration-200 ${raised || menu ? "shadow-[0_1px_0_var(--color-hair)]" : ""}`}>
         <nav aria-label="Main" className="mx-auto flex h-[68px] max-w-[1240px] items-center gap-8 px-5 sm:px-8">
-          <a href="#top" className="font-[family-name:var(--font-display)] text-[30px] leading-none text-ink" aria-label="Cheeku, back to top">
+          <a href="#top" className="flex items-center gap-2 font-[family-name:var(--font-display)] text-[30px] leading-none text-ink" aria-label="Cheeku, back to top">
+            <img src="/brand/cheeku-mark-flat.svg" alt="" width={34} height={34} className="size-[34px]" />
             Cheeku
           </a>
           <ul className="hidden items-center gap-1 lg:flex" onMouseLeave={closeSoon}>

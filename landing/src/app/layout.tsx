@@ -30,7 +30,7 @@ const description =
 export const metadata: Metadata = {
   title,
   description,
-  icons: { icon: "/favicon.png" },
+  icons: { icon: [{ url: "/icon.svg", type: "image/svg+xml" }, { url: "/favicon.png", sizes: "48x48" }], apple: "/apple-icon.png" },
   openGraph: { title, description, type: "website", locale: "en_IN" },
   twitter: { card: "summary_large_image", title, description },
 };

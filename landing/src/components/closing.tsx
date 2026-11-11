@@ -88,7 +88,7 @@ export function Closing() {
 
       <footer className="mx-auto max-w-[1180px] px-6 py-10">
         <div className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
-          <span className="font-[family-name:var(--font-display)] text-[26px] leading-none">Cheeku</span>
+          <span className="flex items-center gap-2 font-[family-name:var(--font-display)] text-[26px] leading-none"><img src="/brand/cheeku-mark-flat.svg" alt="" width={30} height={30} className="size-[30px]" />Cheeku</span>
           <p className="max-w-[640px] text-[13px] leading-relaxed text-ink-3">
             Cheeku does not diagnose, prescribe or replace your doctor. In an emergency, call 112 or go to the nearest hospital. App screens show sample data and some bookings in them are previews. Photographs are illustrations, not real families.
           </p>

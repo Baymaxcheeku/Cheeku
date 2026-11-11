@@ -156,21 +156,29 @@ for common AI-looking patterns. Notes:
 
 ## Logo
 
-The mark is a small purple character that is three things at once: a face (Cheeku is someone you talk to), a speech bubble (you just ask) and a chikoo with two leaves (the fruit the name comes from). No letters in it.
+The logo is a little purple sparrow, the gauraiya that lives in every Indian home and turns up at the window each morning. Calm (closed, smiling eyes), friendly (round, nothing sharp), and always around. No letters in it.
 
-All files live in `public/brand/`. `kit-sheet.png` shows every version and the rules.
+There are two versions:
+
+- **3D sparrow** for anywhere with room: the app, the website, posters, social posts. These are generated renders (Figma AI), cut out onto transparent backgrounds.
+- **Flat sparrow** (SVG, drawn by hand to match) for anything under 48 px and for one-colour use: favicons, print, stamps, embroidery.
+
+All files live in `public/brand/`. `kit-sheet.png` shows every version, the colours and the rules.
 
 | File | Use it for |
 | --- | --- |
-| `cheeku-mark.svg` | The full face, 40 px and up |
-| `cheeku-mark-flat.svg` | Small sizes, no pupils or cheeks |
-| `cheeku-mark-purple.svg`, `-ink.svg`, `-white.svg` | One colour, face cut out |
-| `lockup-horizontal(-white).svg`, `lockup-stacked(-white).svg` | Mark with the name |
-| `app-icon.svg`, `app-icon-rounded.svg`, `app-icon-purple.svg`, `*-1024.png` | App stores and home screen |
-| `favicon.svg`, `favicon-32/180/512.png` | Browser tab and bookmarks |
-| `mood-*.svg` | Stickers, empty screens, little wins |
-| `alt-family-heart.svg`, `alt-sprout-home.svg` | The two directions not picked, kept for reference |
+| `cheeku-sparrow-1024.png`, `cheeku-sparrow.webp` | The main 3D sparrow |
+| `mood-hello`, `mood-thinking`, `mood-celebrate`, `mood-calm` (`.webp` and `-1024.png`) | Greetings, "let me check", little wins, all-clear screens |
+| `cheeku-mark-flat.svg` | Flat sparrow, full colour |
+| `cheeku-mark-purple.svg`, `-ink.svg`, `-white.svg` | One colour, eyes and beak cut out |
+| `lockup-horizontal(-white).svg`, `lockup-stacked(-white).svg` | Flat sparrow with the name (name drawn from Instrument Serif as outlines) |
+| `app-icon-1024.png`, `-512`, `-180` | App stores and home screen (square, the store rounds the corners) |
+| `favicon.svg`, `favicon-16/32/48/192/512.png` | Browser tab and bookmarks |
 
-Keep clear space of half the mark's height on every side. Don't recolour the face, stretch it or tilt it. To change the shapes, edit `scripts/logo.py` and run it with fonttools installed: `python scripts/logo.py public/brand public/fonts/InstrumentSerif_400Regular.ttf` (the wordmark is drawn from Instrument Serif as outlines, so the SVGs need no font).
+The site uses the flat sparrow in the nav and footer, `public/icon.svg` and `public/favicon.png` for the tab, and `public/apple-icon.png` for iPhone home screens.
 
-The site does not use the new mark yet. It goes into the nav and the tab icon once it's approved.
+Colours: sparrow #7A6AF2, Cheeku purple #4A2ADE, belly lilac #DDD6FE, beak #FF8A3D, blush #F6A5CF, ink #17123A.
+
+Keep clear space of half the sparrow's height around it. Don't stretch it, recolour it, add a shadow to the flat version, or put it on a busy photo without a white or lilac tile behind it.
+
+The renders were made with an AI image tool, so before trademark filing get a professional search, and have a designer redraw the 3D sparrow as a proper 3D model if you need new poses that match exactly.
