@@ -3,7 +3,7 @@
 import { AnimatePresence, motion, useInView } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 
-import { Img } from "./img";
+import { Img, useWarm } from "./img";
 import { Phone } from "./phone";
 import { Dots, Typed } from "./typed";
 import { EASE, Heading } from "./ui";
@@ -116,6 +116,7 @@ function Chat({ ask, answer }: { ask: string; answer: string }) {
 
 export function Journeys() {
   const [i, setI] = useState(0);
+  useWarm(JOURNEYS.flatMap((x) => [x.screen, x.photo]));
   const j = JOURNEYS[i]!;
   return (
     <section id="for-you" className="bg-soft py-24 sm:py-28">
@@ -124,7 +125,7 @@ export function Journeys() {
           Wherever your family <em>is right now</em>
         </Heading>
 
-        <div role="tablist" aria-label="Pick your situation" className="-mx-6 mt-12 flex gap-2.5 overflow-x-auto px-6 pb-2 [scrollbar-width:none] lg:mx-0 lg:justify-center lg:px-0">
+        <div role="tablist" aria-label="Pick your situation" className="-mx-6 mt-10 flex gap-3 overflow-x-auto px-6 py-2 [scrollbar-width:none] lg:mx-0 lg:justify-center lg:px-2">
           {JOURNEYS.map((x, n) => {
             const on = n === i;
             return (
@@ -136,7 +137,7 @@ export function Journeys() {
                 aria-selected={on}
                 aria-controls="journey-panel"
                 onClick={() => setI(n)}
-                className={`relative h-[104px] w-[150px] shrink-0 cursor-pointer overflow-hidden rounded-2xl text-left transition-[box-shadow,opacity] duration-200 ${on ? "opacity-100 shadow-[0_0_0_2px_var(--color-purple-600),var(--shadow-md)]" : "opacity-75 hover:opacity-100"}`}
+                className={`relative h-[104px] w-[150px] shrink-0 cursor-pointer overflow-hidden rounded-2xl text-left transition-[box-shadow,opacity] duration-200 ${on ? "opacity-100 outline outline-2 outline-offset-2 outline-purple-600" : "opacity-80 hover:opacity-100"}`}
               >
                 <Img src={x.photo} alt="" position="object-center" />
                 <span className="absolute inset-x-1.5 bottom-1.5 rounded-xl bg-white/90 px-2.5 py-1.5 text-[13px] font-medium leading-tight text-ink backdrop-blur">{x.tab}</span>

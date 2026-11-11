@@ -153,3 +153,24 @@ for common AI-looking patterns. Notes:
 - Do not use its `live` mode without reading the README section on it first:
   its Apply step can start a second agent with permission checks turned off.
 - `/impeccable init` writes a `PRODUCT.md` here. It has not been run yet.
+
+## Logo
+
+The mark is a small purple character that is three things at once: a face (Cheeku is someone you talk to), a speech bubble (you just ask) and a chikoo with two leaves (the fruit the name comes from). No letters in it.
+
+All files live in `public/brand/`. `kit-sheet.png` shows every version and the rules.
+
+| File | Use it for |
+| --- | --- |
+| `cheeku-mark.svg` | The full face, 40 px and up |
+| `cheeku-mark-flat.svg` | Small sizes, no pupils or cheeks |
+| `cheeku-mark-purple.svg`, `-ink.svg`, `-white.svg` | One colour, face cut out |
+| `lockup-horizontal(-white).svg`, `lockup-stacked(-white).svg` | Mark with the name |
+| `app-icon.svg`, `app-icon-rounded.svg`, `app-icon-purple.svg`, `*-1024.png` | App stores and home screen |
+| `favicon.svg`, `favicon-32/180/512.png` | Browser tab and bookmarks |
+| `mood-*.svg` | Stickers, empty screens, little wins |
+| `alt-family-heart.svg`, `alt-sprout-home.svg` | The two directions not picked, kept for reference |
+
+Keep clear space of half the mark's height on every side. Don't recolour the face, stretch it or tilt it. To change the shapes, edit `scripts/logo.py` and run it with fonttools installed: `python scripts/logo.py public/brand public/fonts/InstrumentSerif_400Regular.ttf` (the wordmark is drawn from Instrument Serif as outlines, so the SVGs need no font).
+
+The site does not use the new mark yet. It goes into the nav and the tab icon once it's approved.

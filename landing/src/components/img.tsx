@@ -31,3 +31,23 @@ export function Img({ src, alt, className = "", priority = false, fit = "cover",
     </span>
   );
 }
+
+/*
+ * Fetch a set of images quietly once the page has settled, so a tab or card
+ * that shows one later has it already. The first paint is never held up.
+ */
+export function useWarm(urls: readonly string[]) {
+  const key = urls.join("|");
+  useEffect(() => {
+    const go = () => {
+      for (const u of key.split("|")) {
+        const im = new Image();
+        im.decoding = "async";
+        im.src = u;
+      }
+    };
+    // Wait until the first paint is out of the way, then fetch quietly.
+    const id = window.setTimeout(go, 900);
+    return () => window.clearTimeout(id);
+  }, [key]);
+}

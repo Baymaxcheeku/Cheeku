@@ -1,3 +1,6 @@
+"use client";
+
+import { useWarm } from "./img";
 import { Phone } from "./phone";
 import { Heading, Soon } from "./ui";
 
@@ -36,6 +39,7 @@ const SOON = [
 
 /** A stack of cards: each one slides up and rests on the last. */
 export function FollowThrough() {
+  useWarm(CARDS.map((c) => c.screen));
   return (
     <section id="follow-through" className="mx-auto max-w-[1180px] px-6 py-24 sm:py-28">
       <Heading sub="An answer is not the end. Cheeku stays with it until the thing is done.">
