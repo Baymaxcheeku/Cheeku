@@ -123,6 +123,8 @@ export async function planTurn(args: {
   usage: { messageId: string; factIds: string[] }[];
   model: ChatModel;
   newId: () => string;
+  /** Lines from optional layers (lib/extensions), already short and factual. Read alongside the notes. */
+  extraNotes?: readonly string[];
 }): Promise<TurnPlan> {
   const text = args.text.trim();
   const gate = detect(text);
@@ -233,7 +235,7 @@ export async function planTurn(args: {
 
   const aboutJaundice = keys.includes("bilirubin_total") || symptoms.some((s) => s.model.id === "jaundice");
   const aboutDates = /\b(week|weeks|due|edd|lmp|scan|dating|trimester|leave|travel|fly)\b/i.test(text) || reads.some((r) => r.threshold.modifiers.some((m) => m.startsWith("trimester") || m === "pregnant"));
-  const notes = ctx.notes.filter((n) => (n.kind === "blood_group" && aboutJaundice) || (n.kind === "dating" && aboutDates)).map((n) => n.text);
+  const notes = [...ctx.notes.filter((n) => (n.kind === "blood_group" && aboutJaundice) || (n.kind === "dating" && aboutDates)).map((n) => n.text), ...(args.extraNotes ?? [])];
 
   const logged = parsed
     .filter((p) => p.key !== "bp_diastolic")

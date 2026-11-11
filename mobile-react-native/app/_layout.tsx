@@ -26,6 +26,12 @@ import { ShareIntake } from "@/components/scan/share-intake";
 import { ToastHost } from "@/components/notifications/toast";
 import { SaveBar } from "@/components/ui/save-bar";
 import { persistOptions } from "@/lib/offline/cache";
+/*
+ * OPTIONAL LAYERS. Each line below switches one on (see lib/extensions).
+ * Delete the line, and the layer's folder and routes, to remove it: nothing
+ * else in the app refers to it.
+ */
+import "@/modules/wearables/register";
 import { startOnlineManager } from "@/lib/offline/status";
 import { DeviceFrame } from "@/components/ui/device-frame";
 import { surface } from "@/theme/tokens";

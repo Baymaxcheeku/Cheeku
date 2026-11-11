@@ -1,3 +1,4 @@
+import { extensions } from "@/lib/extensions";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import {
@@ -247,6 +248,7 @@ export default function Settings() {
         <Row icon={UserCog} title="Personal information" body="Name, date of birth and contact" href="/settings/personal" />
         <Row icon={HeartPulse} title="Health profile" body="Conditions, allergies and medicines" href="/settings/health" />
         <Row icon={ShieldPlus} title="Insurance" body="Your family's cover and what it includes" href="/insurance" />
+        {extensions().map((e) => (e.profileRow ? <Row key={e.id} icon={e.profileRow.icon as never} title={e.profileRow.title} body={e.profileRow.body} href={e.profileRow.href as never} /> : null))}
         <LocationRow />
         <Row icon={ShieldCheck} title="Security" body="App lock, password and sign-ins" href="/settings/security" />
         <Row icon={LockKeyhole} title="Privacy & consent" body="Your choices, documents and rights" href="/settings/privacy" />
