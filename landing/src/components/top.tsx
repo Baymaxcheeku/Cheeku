@@ -1,6 +1,6 @@
 "use client";
 
-import { Activity, ArrowRight, Baby, CalendarCheck, ChevronDown, FileText, FolderOpen, HeartHandshake, Languages, Menu, MessageCircle, PersonStanding, Pill, Sprout, Users, X, type LucideIcon } from "lucide-react";
+import { Activity, ArrowRight, Baby, CalendarCheck, ChevronDown, ClipboardList, FileText, FolderOpen, HeartHandshake, Languages, Menu, MessageCircle, PersonStanding, Pill, Sprout, Stethoscope, Truck, Users, Watch, X, type LucideIcon } from "lucide-react";
 import { AnimatePresence, motion, useMotionValueEvent, useReducedMotion, useScroll } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 
@@ -16,7 +16,11 @@ const DOES: Item[] = [
   { icon: Pill, title: "Medicine check", line: "Every tablet, looked at together", href: "#follow-through", tint: "bg-[#fff0e3] text-[#b4560a]" },
   { icon: Users, title: "Family file", line: "One for each person at home", href: "#family", tint: "bg-purple-100 text-purple-700" },
   { icon: CalendarCheck, title: "Tests and doctors", line: "Booked, collected from home", href: "#follow-through", tint: "bg-[#e4f6ee] text-[#12754a]" },
+  { icon: ClipboardList, title: "Before the visit", line: "A note the doctor reads first", href: "#follow-through", tint: "bg-[#e6f5f7] text-[#136a78]" },
+  { icon: Truck, title: "Medicines delivered", line: "The checked prescription, at home", href: "#follow-through", tint: "bg-[#e4f6ee] text-[#12754a]" },
   { icon: Activity, title: "Daily plan", line: "One small step, every day", href: "#follow-through", tint: "bg-[#fdeaf1] text-[#b0285f]" },
+  { icon: Watch, title: "Watch and phone", line: "Steps, sleep and heart rate", href: "#follow-through", tint: "bg-[#fff2d9] text-[#865000]" },
+  { icon: Stethoscope, title: "Everything we cover", line: "From a 2 am fever to Papa's sugar", href: "#care", tint: "bg-[#e6f5f7] text-[#136a78]" },
   { icon: MessageCircle, title: "Ask Cheeku", line: "By chat or by voice", href: "#ask", tint: "bg-purple-600 text-white" },
   { icon: Languages, title: "Your language", line: "Hindi, Hinglish, English and more", href: "#ask", tint: "bg-[#f3ecff] text-[#6b3fd4]" },
   { icon: HeartHandshake, title: "Family care", line: "Know how everyone is doing", href: "#for-you", tint: "bg-[#e6f5f7] text-[#136a78]" },
@@ -145,6 +149,7 @@ export function Nav() {
                   </ul>
                   <div className="mt-3 flex gap-6 border-t border-hair px-2.5 pt-4 text-[14px] text-ink-2">
                     <a href="#how" onClick={() => setMenu(null)} className="hover:text-ink">How it works</a>
+                    <a href="#care" onClick={() => setMenu(null)} className="hover:text-ink">Everything we cover</a>
                     <a href="#faq" onClick={() => setMenu(null)} className="hover:text-ink">Is it safe</a>
                     <a href="#film" onClick={() => setMenu(null)} className="hover:text-ink">Watch the film</a>
                   </div>

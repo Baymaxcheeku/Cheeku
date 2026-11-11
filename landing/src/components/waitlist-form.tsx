@@ -2,7 +2,7 @@
 
 import { ArrowRight, Check, Loader2 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import { useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 
 import { joinWaitlist } from "@/lib/waitlist";
 
@@ -15,13 +15,30 @@ export function WaitlistForm({ source, onPurple = false, center = false }: { sou
   const [state, setState] = useState<"idle" | "busy" | "done">("idle");
   const [saved, setSaved] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [trap, setTrap] = useState("");
+  const input = useRef<HTMLInputElement>(null);
+  // Which button brought the person here: "nav", "hero", "memory"... Kept with the signup.
+  const via = useRef<string | null>(null);
+
+  useEffect(() => {
+    const onClick = (e: MouseEvent) => {
+      const a = (e.target as HTMLElement | null)?.closest?.('a[href="#join"]');
+      if (!a) return;
+      const where = a.closest("header") ? "nav" : (a.closest("section[id], div[id]")?.id ?? "page");
+      via.current = where.slice(0, 30);
+      // Land on the field, ready to type, once the scroll has settled.
+      window.setTimeout(() => input.current?.focus({ preventScroll: true }), 700);
+    };
+    document.addEventListener("click", onClick);
+    return () => document.removeEventListener("click", onClick);
+  }, []);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (state === "busy") return;
     setError(null);
     setState("busy");
-    const r = await joinWaitlist(email, "family", source);
+    const r = await joinWaitlist(email, "family", via.current ? `${source}:${via.current}` : source, trap);
     if (r.ok) {
       setSaved(r.saved);
       setState("done");
@@ -61,7 +78,10 @@ export function WaitlistForm({ source, onPurple = false, center = false }: { sou
               <label htmlFor={`${id}-email`} className="sr-only">
                 Your email
               </label>
+              {/* Left empty by people; filled by bots, which are then quietly ignored. */}
+              <input type="text" name="company" tabIndex={-1} autoComplete="off" aria-hidden value={trap} onChange={(e) => setTrap(e.target.value)} className="absolute -left-[9999px] h-0 w-0 opacity-0" />
               <input
+                ref={input}
                 id={`${id}-email`}
                 type="email"
                 inputMode="email"
