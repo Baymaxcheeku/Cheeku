@@ -1,4 +1,4 @@
-import { addDays, lastDays } from "./days";
+import { addDays, lastDays, shortDate } from "./days";
 import type { DaySummary, MetricKey } from "./types";
 
 /*
@@ -193,6 +193,41 @@ export function snapshot(days: readonly DaySummary[], today: string, stepsGoal: 
   };
 
   return { tiles: [stepsTile, sleepTile, rhrTile], headline: headline(stepsTrend, sleepTrend, rhrTrend), hasData };
+}
+
+/**
+ * Every metric worth a look, in a fixed order, for the swipeable strip on
+ * Home: today's three first (as in the snapshot), then the rest that have a
+ * reading in the last week. Metrics with nothing recorded are left out, so a
+ * phone with only steps shows one slide, not ten empty ones.
+ */
+export function lensTiles(days: readonly DaySummary[], today: string, stepsGoal: number): SnapshotTile[] {
+  const first = snapshot(days, today, stepsGoal).tiles.filter((t) => t.value !== "–");
+  const rest: SnapshotTile[] = [];
+  for (const key of METRIC_ORDER) {
+    if (key === "steps" || key === "sleep" || key === "restingHr") continue;
+    const meta = METRICS[key];
+    const last = latest(days, key, today, 7);
+    if (!last) continue;
+    const t = trend(days, key, today);
+    let value = meta.format(last.value);
+    if (key === "bp") {
+      const pair = [...days].reverse().find((d) => d.day <= today && d.systolic !== null && d.diastolic !== null);
+      if (pair) value = `${Math.round(pair.systolic!)}/${Math.round(pair.diastolic!)}`;
+    }
+    const line = meta.kind === "total" ? trendLine(key, t) : null;
+    rest.push({
+      key,
+      label: key === "hrv" ? "HRV" : meta.label,
+      value,
+      unit: meta.unit,
+      line: line ? cap(line) : last.day === today ? "Today" : shortDate(last.day),
+      tone: line ? trendTone(key, t) : "plain",
+      bars: bars(days, key, today),
+      progress: null,
+    });
+  }
+  return [...first, ...rest];
 }
 
 function cap(s: string): string {

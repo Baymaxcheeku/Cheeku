@@ -4,7 +4,7 @@ vi.mock("expo-constants", () => ({ default: { executionEnvironment: "storeClient
 vi.mock("react-native", () => ({ Platform: { OS: "ios" } }));
 
 import { addDays, dayKey, lastDays, startOfDay } from "./days";
-import { chatNotes, hoursMinutes, series, snapshot, trend, trendLine, trendTone } from "./insights";
+import { chatNotes, hoursMinutes, lensTiles, series, snapshot, trend, trendLine, trendTone } from "./insights";
 import { isBlank, mergeDays } from "./merge";
 import { demo } from "./sources/demo";
 import { emptyDay, type DaySummary } from "./types";
@@ -176,5 +176,22 @@ describe("sample data", () => {
       expect(d.restingHr).toBeGreaterThan(55);
       expect(d.restingHr).toBeLessThan(80);
     }
+  });
+});
+
+describe("lens tiles", () => {
+  it("leads with today's three, then only metrics that have a reading", async () => {
+    const days = await demo.read(lastDays(14, TODAY));
+    const keys = lensTiles(days, TODAY, 8000).map((t) => t.key);
+    expect(keys.slice(0, 3)).toEqual(["steps", "sleep", "restingHr"]);
+    expect(keys.length).toBeGreaterThan(5);
+    expect(new Set(keys).size).toBe(keys.length);
+  });
+
+  it("shows blood pressure as a pair and skips what was never recorded", () => {
+    const d = { ...emptyDay(TODAY), steps: 4000, systolic: 128, diastolic: 84, sources: ["apple_health" as const] };
+    const tiles = lensTiles([d], TODAY, 8000);
+    expect(tiles.map((t) => t.key)).toEqual(["steps", "bp"]);
+    expect(tiles[1]!.value).toBe("128/84");
   });
 });

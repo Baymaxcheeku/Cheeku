@@ -11,10 +11,11 @@ import { font } from "@/theme/type";
 
 import { DEFAULT_STEPS_GOAL, WEARABLES_ENABLED } from "../config";
 import { dayKey } from "../days";
-import { snapshot, type SnapshotTile } from "../insights";
+import { lensTiles, snapshot } from "../insights";
 import { dismissPrompt, useWearables, useWearableSync } from "../queries";
 import { demoOnly } from "../store";
-import { ago, Bars, Ring, SampleTag, toneColor } from "./parts";
+import { LensStrip } from "./lens-strip";
+import { ago, SampleTag } from "./parts";
 
 /*
  * Home's snapshot of the body: three numbers, a week of bars under each, and
@@ -65,56 +66,32 @@ export function WearablesHomeCard({ profileId, isPrimary }: HomeCardProps) {
   }
 
   const goal = prefs.data?.steps_goal && prefs.data.steps_goal >= 1000 ? prefs.data.steps_goal : DEFAULT_STEPS_GOAL;
-  const snap = snapshot(state.data.days, dayKey(new Date()), goal);
+  const today = dayKey(new Date());
+  const snap = snapshot(state.data.days, today, goal);
+  const tiles = lensTiles(state.data.days, today, goal);
   const sample = demoOnly(state.data);
 
   return (
     <View className="mt-4 px-5">
-      <Tap accessibilityRole="button" accessibilityLabel="Your body today. Open details." onPress={() => router.push("/wearables" as never)} style={{ borderRadius: 24, backgroundColor: "#fff", padding: 16 }} scale={0.99}>
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+      <View style={{ borderRadius: 24, backgroundColor: "#fff", padding: 16, overflow: "hidden" }}>
+        <Tap accessibilityRole="button" accessibilityLabel="Your body today. Open all your numbers." onPress={() => router.push("/wearables" as never)} hitSlop={6} style={{ flexDirection: "row", alignItems: "center", gap: 8 }} scale={0.99}>
           <Text style={{ flex: 1, fontFamily: font.semibold, fontSize: 17, letterSpacing: -0.2, color: ink[900] }}>Your body today</Text>
           {sample ? <SampleTag /> : <Text style={{ fontFamily: font.regular, fontSize: 12, color: ink[300] }}>Updated {ago(state.data.lastSyncAt)}</Text>}
           <ChevronRight size={18} color={ink[300]} />
-        </View>
+        </Tap>
 
-        <View style={{ flexDirection: "row", gap: 8, marginTop: 14 }}>
-          {snap.tiles.map((t) => (
-            <Tile key={t.key} tile={t} />
-          ))}
-        </View>
+        {tiles.length ? (
+          <View style={{ marginTop: 12 }}>
+            <LensStrip tiles={tiles} onOpen={(key) => router.push(`/wearables/${key}` as never)} />
+          </View>
+        ) : null}
 
         {snap.headline ? (
-          <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[700], marginTop: 12 }}>{snap.headline}</Text>
+          <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[700], marginTop: 10 }}>{snap.headline}</Text>
         ) : !snap.hasData ? (
           <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[500], marginTop: 12 }}>Nothing has come through yet. Open your health app once, then pull to refresh.</Text>
         ) : null}
-      </Tap>
-    </View>
-  );
-}
-
-function Tile({ tile }: { tile: SnapshotTile }) {
-  return (
-    <View style={{ flex: 1, borderRadius: 16, backgroundColor: surface.tint, padding: 12, minHeight: 124 }}>
-      <Text numberOfLines={1} style={{ fontFamily: font.medium, fontSize: 12, color: ink[500] }}>{tile.label}</Text>
-      <View style={{ flexDirection: "row", alignItems: "flex-end", gap: 3, marginTop: 6 }}>
-        <Text numberOfLines={1} adjustsFontSizeToFit style={{ flexShrink: 1, fontFamily: font.semibold, fontSize: 22, letterSpacing: -0.6, color: ink[900] }}>{tile.value}</Text>
-        {tile.unit ? <Text style={{ fontFamily: font.medium, fontSize: 11, color: ink[500], marginBottom: 4 }}>{tile.unit}</Text> : null}
       </View>
-      <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 11, color: toneColor(tile.tone), marginTop: 1 }}>{tile.line}</Text>
-      <View style={{ flex: 1 }} />
-      {tile.progress !== null ? (
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginTop: 8 }}>
-          <Ring size={26} stroke={4} progress={tile.progress} />
-          <View style={{ flex: 1 }}>
-            <Bars values={tile.bars} height={22} />
-          </View>
-        </View>
-      ) : (
-        <View style={{ marginTop: 8 }}>
-          <Bars values={tile.bars} height={22} />
-        </View>
-      )}
     </View>
   );
 }
