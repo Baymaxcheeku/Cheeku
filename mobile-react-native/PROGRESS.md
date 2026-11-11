@@ -4177,3 +4177,32 @@ route-by-route pass misses:
 All seven batches are done. Verified the same way throughout: `tsc`, 563
 tests, web build screenshots against the local mock backend. ESLint could not
 run in the cloud session. Nothing here has been verified on a device.
+
+## Phone test of the redesign: four fixes · 2026-11-11
+
+The owner ran `main` on an iPhone in Expo Go after batch 7.
+
+**Sign-out logged "A query that was dehydrated as pending ended up
+rejecting [home-context]: signed out".** `persistOptions` passes its own
+`shouldDehydrateQuery` (the allowlist), which replaces the library's default,
+and the default is the check that a query succeeded. So a read still in
+flight was written out with its promise, and sign-out rejects home-context
+mid-flight. `shouldPersistQuery` now also requires `status === "success"`;
+`cache.test.ts` covers pending and error.
+
+**Every face was a bare coloured circle.** Not caused by the redesign: the
+avatar code and the PNGs are unchanged and the faces draw in the web build.
+It is the Expo Go behaviour first seen on 2026-11-01. The cause is still not
+known from a cloud session. `Avatar` no longer leaves a blank disc: if the
+face reports an error, or has not drawn within 900 ms, a person glyph stands
+in, and goes when the face draws. The development warning still fires and
+is what will name the cause.
+
+**Record cards looked broken.** The icon tile was white on a white card
+after the gradients went flat, leaving a violet icon floating beside a blank
+avatar. The tile is the canvas grey, the icon ink, the type label grey.
+
+**"Ask Ch..." in the tab bar.** The name is set in Inter now and no longer
+fits; the tab reads "Ask" (the accessibility label is still "Ask Cheeku").
+
+Verified: `tsc`, 564 tests, web build screenshots. Not verified on a device.
