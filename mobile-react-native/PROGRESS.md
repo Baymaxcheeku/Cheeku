@@ -4206,3 +4206,47 @@ avatar. The tile is the canvas grey, the icon ink, the type label grey.
 fits; the tab reads "Ask" (the accessibility label is still "Ask Cheeku").
 
 Verified: `tsc`, 564 tests, web build screenshots. Not verified on a device.
+
+## Wearables module · 2026-11-11
+
+Phones and watches now feed Cheeku, built as a layer the main app does not
+know about.
+
+**Plug and play.** `src/lib/extensions` gives the main app four slots: a Home
+card, a Profile row, chat notes and a sign-out hook. A crashing card hides
+itself, chat notes time out after 1.2 s and are capped. The wearables module
+fills the slots from one import line in `app/_layout.tsx`. Removing that line
+(or `EXPO_PUBLIC_WEARABLES=off`) leaves the app exactly as before. The module
+README lists every step to remove it for good.
+
+**Sources.** Apple Health (`@kingstinct/react-native-healthkit`, read only),
+Health Connect (`react-native-health-connect`, eleven read permissions),
+Google Health API for Fitbit and Pixel Watch (through the new
+`wearables-google` Edge Function, off by default), Strava as a guide to
+switch on its health-app sharing (its API terms forbid AI use of its data).
+In Expo Go and on the web, labelled sample data shows how it looks; it is
+never stored on the server or given to the chat.
+
+**Where it goes.** Days from all sources merge into one summary a day
+(`merge.ts`: totals take the largest, readings follow a source priority,
+workouts dedupe within ten minutes). They are kept on the phone and upserted
+to `wearable_days` (migration 0044) for the longevity engine. Today's steps go
+into `daily_logs` as an ordinary steps row, so Today's plan picks them up with
+no change to its code. Chat gets two or three short lines of real trends.
+
+**Screens.** Connect a device, Your body (steps ring, week of tiles,
+workouts, connected list), a page per metric (14-day bars, average, best,
+what it means, a caution note on device readings, Ask Cheeku), and a Home
+card "Your body today" for the account holder only.
+
+**Backend.** 0044 adds `wearable_days` (RLS, own family only, sane value
+checks) and two locked tables for the Google sign-in that the app cannot
+read. Manual step `0044-step-1-of-1.sql` and `0044-check.sql`.
+`wearables-google` does the OAuth with a single-use ten-minute state, keeps
+the refresh token server side, and returns daily roll-ups. Google's roll-up
+field names are read defensively and need one check against a real test
+account.
+
+Verified: `tsc`, 589 tests (25 new), `expo config` with the three new plugins,
+web build screenshots with sample data. Not verified on a device: HealthKit
+and Health Connect need an EAS build.

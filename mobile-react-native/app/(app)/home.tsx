@@ -1,3 +1,4 @@
+import { HomeExtensions } from "@/lib/extensions/slots";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useFocusEffect, useRouter } from "expo-router";
@@ -299,6 +300,9 @@ export default function Home() {
           ) : null}
         </>
       )}
+
+      {/* Optional layers (lib/extensions). Empty unless one is registered. */}
+      <HomeExtensions profileId={profile.id} isPrimary={profile.isPrimary} firstName={firstName(profile.name)} />
 
       <StaggerItem index={onToday ? 6 : 5}>
         <CareSection />

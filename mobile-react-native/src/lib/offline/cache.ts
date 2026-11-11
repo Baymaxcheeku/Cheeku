@@ -1,3 +1,4 @@
+import { extensionsSignOut } from "@/lib/extensions";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createAsyncStoragePersister } from "@tanstack/query-async-storage-persister";
 import type { Query } from "@tanstack/react-query";
@@ -153,6 +154,8 @@ export async function offlineCacheBytes(): Promise<number> {
 }
 
 export async function clearOfflineCache(): Promise<void> {
+  // Optional layers (wearables) keep their own copy on the phone; it goes too.
+  await extensionsSignOut();
   try {
     await AsyncStorage.removeItem(CACHE_KEY);
   } catch {

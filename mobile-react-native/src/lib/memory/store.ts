@@ -1,3 +1,4 @@
+import { extensionChatNotes } from "@/lib/extensions";
 import { useInfiniteQuery, useQuery, type QueryClient } from "@tanstack/react-query";
 import { randomUUID } from "expo-crypto";
 
@@ -146,6 +147,7 @@ export async function sendTurn(args: {
       usage: factUsage(args.thread),
       model: spent ? mockModel : chatModel(),
       newId: randomUUID,
+      extraNotes: await extensionChatNotes(args.profileId),
     });
   } catch (e) {
     if (e instanceof ModelBusy) return { ok: false, message: BUSY };
