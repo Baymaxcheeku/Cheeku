@@ -16,7 +16,6 @@ import { Tap } from "@/components/ui/tap";
 import { glass, glassShadow } from "@/components/ui/glass";
 import { brand, ink, shadow, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
-import { brandify } from "@/components/ui/brand";
 import { feel } from "@/lib/feel";
 
 const ICONS: Record<string, { icon: LucideIcon; label: string; short: string }> = {
@@ -27,7 +26,7 @@ const ICONS: Record<string, { icon: LucideIcon; label: string; short: string }> 
   // `short` is what fits under the icon in the pill; `label` is what a screen
   // reader announces.
   records: { icon: FolderClosed, label: "Health records", short: "Records" },
-  ask: { icon: MessageCircleHeart, label: "Ask Cheeku", short: "Ask Cheeku" },
+  ask: { icon: MessageCircleHeart, label: "Ask Cheeku", short: "Ask" },
   settings: { icon: User, label: "Profile", short: "Profile" },
 };
 
@@ -117,8 +116,7 @@ export function TabBar({ state, emitter, navigateToTab }: BottomTabBarProps) {
                     numberOfLines={1}
                     style={{ fontFamily: active ? font.semibold : font.medium, fontSize: 11, color: active ? brand[700] : ink[500] }}
                   >
-                    {/* The serif wordmark runs small at 10.5, so it is set up a size. */}
-                    {brandify(meta.short, { size: 12.5 })}
+                    {meta.short}
                   </Text>
                 </View>
               </Tap>

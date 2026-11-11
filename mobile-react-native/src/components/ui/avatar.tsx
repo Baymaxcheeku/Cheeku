@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { UserRound } from "lucide-react-native";
 import { Image, View, type ImageSourcePropType } from "react-native";
 import { SvgXml } from "react-native-svg";
 
@@ -56,6 +57,25 @@ export function Avatar({
   // forever, so after one expired link a newly saved photo never showed.
   const [brokenUrl, setBrokenUrl] = useState<string | null>(null);
   const broken = Boolean(photo) && brokenUrl === photo;
+  /*
+   * The bundled face can fail to draw on a phone (Expo Go, 2026-11-01 and
+   * again 2026-11-11: every face came up as a bare coloured circle). A blank
+   * disc reads as broken, so when the image reports an error a plain person
+   * glyph stands in. The cause is still logged in development.
+   *
+   * An image on iOS can also do neither: never load and never error. So the
+   * glyph also appears if the face has not drawn within a moment, and goes
+   * the instant it does. The wait keeps it from flashing on a normal load.
+   */
+  const [faceFailed, setFaceFailed] = useState(false);
+  const [faceLoaded, setFaceLoaded] = useState(false);
+  const [waitedLong, setWaitedLong] = useState(false);
+  useEffect(() => {
+    if (faceLoaded) return;
+    const t = setTimeout(() => setWaitedLong(true), 900);
+    return () => clearTimeout(t);
+  }, [faceLoaded]);
+  const standIn = faceFailed || (waitedLong && !faceLoaded);
   const generated = svg ? null : generatedAvatar(profileId ?? "", index);
   const markup = svg ?? generated?.svg ?? "";
   const art = image ?? generated?.image ?? null;
@@ -83,8 +103,23 @@ export function Avatar({
        * errored either left nothing to fall back to. Now the worst case is the
        * person's face from the set instead of an empty circle.
        */}
-      {art ? (
-        <Image alt="" source={art} style={{ width: inner, height: inner }} onError={onImageFailure("Avatar face", art)} accessibilityIgnoresInvertColors />
+      {art && standIn ? (
+        <View style={{ position: "absolute", top: 0, left: 0, width: inner, height: inner, alignItems: "center", justifyContent: "center" }}>
+          <UserRound size={Math.max(12, Math.round(inner * 0.55))} color="rgba(17,17,20,0.55)" strokeWidth={1.8} />
+        </View>
+      ) : null}
+      {art && !faceFailed ? (
+        <Image
+          alt=""
+          source={art}
+          style={{ width: inner, height: inner }}
+          onLoad={() => setFaceLoaded(true)}
+          onError={(e) => {
+            setFaceFailed(true);
+            onImageFailure("Avatar face", art)?.(e);
+          }}
+          accessibilityIgnoresInvertColors
+        />
       ) : markup ? (
         <SvgXml xml={markup} width={inner} height={inner} />
       ) : null}

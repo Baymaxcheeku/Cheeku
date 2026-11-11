@@ -106,10 +106,10 @@ export function RecordCard({
       <View className="flex-row items-center gap-3.5 overflow-hidden rounded-xl p-2.5 pr-3" style={shadow.e1}>
         <Gradient from={style.wash} to="#ffffff" />
         <View
-          className="h-[68px] w-[68px] items-center justify-center rounded-xl"
-          style={{ backgroundColor: "rgba(255,255,255,0.9)", borderWidth: 1, borderColor: "rgba(255,255,255,0.95)" }}
+          className="h-[56px] w-[56px] items-center justify-center rounded-lg"
+          style={{ backgroundColor: surface.tint }}
         >
-          <style.icon size={26} color={style.tint} strokeWidth={1.7} />
+          <style.icon size={24} color={ink[900]} strokeWidth={1.7} />
           <View style={{ position: "absolute", right: -4, bottom: -4, borderRadius: 999, borderWidth: 2, borderColor: "#fff" }}>
             <Avatar svg={face.svg} image={face.image} background={face.background} size={24} />
           </View>
@@ -117,7 +117,7 @@ export function RecordCard({
 
         <View className="min-w-0 flex-1 gap-0.5">
           <View className="flex-row items-center gap-2">
-            <Text style={{ fontFamily: font.semibold, fontSize: 12, color: style.tint }}>{style.label}</Text>
+            <Text style={{ fontFamily: font.medium, fontSize: 12, color: ink[500] }}>{style.label}</Text>
             {severity ? (
               <View className="rounded-pill px-2 py-0.5" style={{ backgroundColor: severity.bg }}>
                 <Text style={{ fontFamily: font.bold, fontSize: 11, color: severity.fg }}>{severity.label}</Text>

@@ -14,9 +14,18 @@ const { shouldPersistQuery } = await import("./cache");
  * not a rendering bug — it is a chat transcript, or a billing state, sitting in
  * a file that outlives the session.
  */
-const ask = (key: unknown[]) => shouldPersistQuery({ queryKey: key } as never);
+const ask = (key: unknown[], status: "success" | "pending" | "error" = "success") =>
+  shouldPersistQuery({ queryKey: key, state: { status } } as never);
 
 describe("what is allowed to persist", () => {
+  it("never writes out a read that is still in flight or that failed", () => {
+    // Sign-out rejects home-context mid-flight; a pending entry on disk made
+    // the persister log an error on the phone.
+    expect(ask(["home-context"], "pending")).toBe(false);
+    expect(ask(["records"], "error")).toBe(false);
+    expect(ask(["home-context"], "success")).toBe(true);
+  });
+
   it("caches the record reads, which is the point of the feature", () => {
     expect(ask(["records", "profile-id"])).toBe(true);
     expect(ask(["records-list", { docType: "lab" }])).toBe(true);
