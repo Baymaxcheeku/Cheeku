@@ -36,7 +36,7 @@ export function AppointmentCard({ appt, hero }: { appt: Appointment; hero?: bool
       <View className="min-w-0 flex-1">
         <View className="flex-row items-center gap-1.5">
           {online ? <MonitorPlay size={13} color={ink[900]} /> : <Building2 size={13} color={hue.orange.fg} />}
-          <Text style={{ fontFamily: font.semibold, fontSize: 12, color: online ? brand[700] : "#a3530a" }}>
+          <Text style={{ fontFamily: font.semibold, fontSize: 12, color: online ? brand[700] : "#3a3a41" }}>
             {online ? "Video call" : "Clinic visit"}
             {cancelled ? " · Cancelled" : ""}
           </Text>

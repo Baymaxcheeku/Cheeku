@@ -39,10 +39,10 @@ import { supabase } from "@/lib/supabase/client";
  * sign-up belong to the same world.
  */
 const CHAPTER: Record<"meet" | "memory" | "family" | "care", { bg: string; fg: string }> = {
-  meet: { bg: brand[50], fg: brand[600] },
+  meet: { bg: brand[50], fg: ink[900] },
   memory: { bg: hue.blue.wash, fg: hue.blue.fg },
   family: { bg: hue.rose.bg, fg: hue.rose.fg },
-  care: { bg: hue.ocean.bg, fg: "#0b6f99" },
+  care: { bg: hue.ocean.bg, fg: ink[900] },
 };
 
 /*
@@ -193,7 +193,7 @@ export default function Welcome() {
             <Text style={[type.eyebrow, { color: chapter.fg }]}>{panel.eyebrow}</Text>
           </View>
           <Text accessibilityRole="header" style={type.hero}>
-            {panel.lead} <Text style={{ color: brand[600] }}>{panel.accent}</Text>
+            {panel.lead} <Text style={{ color: ink[300] }}>{panel.accent}</Text>
           </Text>
           <Text style={[type.body, { marginTop: 12 }]}>{panel.body}</Text>
         </View>
@@ -334,7 +334,7 @@ function SceneMemory({ compact }: { compact: boolean }) {
       <BubblePop delay={0.75} style={{ alignSelf: "center", marginVertical: compact ? 10 : 14 }}>
         <View className="flex-row items-center gap-1.5 rounded-pill px-3 py-1.5" style={{ backgroundColor: brand[50] }}>
           <FolderCheck size={13} color={ink[900]} />
-          <Text style={{ fontFamily: font.bold, fontSize: 12, color: brand[700] }}>Saved to Mummy&apos;s file</Text>
+          <Text style={{ fontFamily: font.semibold, fontSize: 12, color: ink[700] }}>Saved to Mummy&apos;s file</Text>
         </View>
       </BubblePop>
 
@@ -380,7 +380,7 @@ function SceneFamily({ faces, compact }: { faces: readonly string[]; compact: bo
     <View className="flex-1 items-center justify-center px-6">
       <BubblePop delay={0.7} style={{ alignSelf: "flex-end", marginBottom: 6 }}>
         <View className="rounded-pill bg-surface px-3 py-1.5" style={shadow.e1}>
-          <Text style={{ fontFamily: font.bold, fontSize: 12, color: brand[700] }}>Up to 4 people</Text>
+          <Text style={{ fontFamily: font.semibold, fontSize: 12, color: ink[700] }}>Up to 4 people</Text>
         </View>
       </BubblePop>
 
@@ -394,7 +394,7 @@ function SceneFamily({ faces, compact }: { faces: readonly string[]; compact: bo
               </View>
               <View
                 className="-mt-3 rounded-pill px-2.5 py-1"
-                style={[shadow.e1, { backgroundColor: i === 1 ? brand[600] : surface.base }]}
+                style={[shadow.e1, { backgroundColor: i === 1 ? ink[900] : surface.base }]}
               >
                 <Text
                   style={{ fontFamily: font.bold, fontSize: 12, color: i === 1 ? "#ffffff" : ink[700] }}

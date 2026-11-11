@@ -4151,3 +4151,29 @@ foundation had done most of it; this pass cleared the rest:
 
 Verified the same way: `tsc`, 563 tests, web build screenshots. Not verified
 on a device.
+
+## Neutral redesign, batch 6 and 7 · 2026-11-11
+
+**Batch 6, onboarding and sign-in.** The mascot stays here by the owner's
+choice, so this changed least: the second headline line and the step label
+are grey instead of violet (`OnboardingHeadline`, `StepLabel` in
+`components/onboarding/chrome.tsx`, plus welcome and sign-in), the welcome
+chapter and journey icons are ink, and "Choose a file" on the first report
+card is ink on white.
+
+**Batch 7, final sweep.** A search of every screen and component for what a
+route-by-route pass misses:
+
+- The last decorative hard-coded colours (record type tints, lab test art,
+  appointment and refund labels) resolve to the neutral ink. What is left
+  with a colour of its own carries health meaning (the records pulse bar,
+  the semantic set) or is onboarding art.
+- The mascot leaves three more cards: the health file strip on Home, the
+  scan review header and the push permission prompt (now a bell icon).
+- Every remaining mascot was checked against the rule: Ask and chat turns,
+  empty and loading states, success and celebration moments, onboarding, the
+  app lock and consent gates, and About.
+
+All seven batches are done. Verified the same way throughout: `tsc`, 563
+tests, web build screenshots against the local mock backend. ESLint could not
+run in the cloud session. Nothing here has been verified on a device.

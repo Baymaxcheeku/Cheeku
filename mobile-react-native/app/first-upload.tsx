@@ -151,8 +151,8 @@ export default function FirstUpload() {
 
               <View className="mt-5">
                 <Button variant="secondary" onPress={() => open("file")}>
-                  <Text style={[type.button, { color: brand[700] }]}>Choose a file</Text>
-                  <ArrowRight size={18} color={brand[700]} />
+                  <Text style={[type.button, { color: ink[900] }]}>Choose a file</Text>
+                  <ArrowRight size={18} color={ink[900]} />
                 </Button>
               </View>
 

@@ -4,7 +4,6 @@ import { ScrollView, Text, View } from "react-native";
 
 import { Tap } from "@/components/ui/tap";
 import { ArticlePill } from "@/components/learn/parts";
-import { CheekuPeek } from "@/components/mascot/lottie";
 import { Avatar } from "@/components/ui/avatar";
 import { Glass } from "@/components/ui/glass";
 import { whenLabel, type HealthFile } from "@/lib/health/file";
@@ -103,11 +102,8 @@ export function FileCard({ file, member, loading }: { file: HealthFile | null | 
       accessibilityRole="button"
       accessibilityLabel={`${whose}. ${stats.map((s) => s.join(" ")).join(", ")}`}
       onPress={() => router.push("/health-file")}
-      style={{ marginHorizontal: 20, marginTop: 52 }} scale={0.98}
+      style={{ marginHorizontal: 20, marginTop: 16 }} scale={0.98}
     >
-      {/* Cheeku peeks over the card's top edge every few seconds, glancing
-          about, then ducks back down: Home's quiet sign of life. */}
-      <CheekuPeek size={78} moment="idle" style={{ position: "absolute", right: 26, top: -42 }} />
       <Glass strong className="rounded-2xl" style={{ padding: 14 }}>
         <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
           <View>

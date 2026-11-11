@@ -4,7 +4,6 @@ import { ScrollView, Text, TextInput, View } from "react-native";
 import Animated, { FadeIn, LinearTransition } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { MascotFigure } from "@/components/illustrations/sprout";
 import { TYPE_STYLE } from "@/components/records/record-card";
 import { Avatar } from "@/components/ui/avatar";
 import { glass, glassShadow } from "@/components/ui/glass";
@@ -87,7 +86,6 @@ export function ScanConfirm({
                 : "Have a quick look, then save it to the file."}
             </Text>
           </View>
-          <MascotFigure size={84} moment={doubtful.length ? "present" : "celebrate"} move="sway" hop />
         </View>
 
         {/* What it is and whose. */}

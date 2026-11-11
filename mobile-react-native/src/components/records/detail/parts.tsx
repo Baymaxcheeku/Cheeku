@@ -158,7 +158,7 @@ const PAYMENT_TONE: Record<PaymentStatus, { bg: string; fg: string }> = {
   paid: { bg: brand[50], fg: brand[700] },
   due: { bg: ink[900], fg: "#ffffff" },
   partial: { bg: ink[900], fg: "#ffffff" },
-  refunded: { bg: hue.slate.bg, fg: "#2f4a7a" },
+  refunded: { bg: hue.slate.bg, fg: "#3a3a41" },
   cancelled: { bg: "rgba(15,16,48,0.06)", fg: ink[500] },
 };
 
@@ -261,7 +261,7 @@ export function MedicineCard({ m, startIso, extra }: { m: Medicine; startIso: st
 
       {timing || m.note || extra ? (
         <View style={{ gap: 6 }}>
-          {timing ? <Chip text={timing} bg={hue.orange.wash} fg="#8a4b08" /> : null}
+          {timing ? <Chip text={timing} bg={hue.orange.wash} fg="#3a3a41" /> : null}
           {m.note ? <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[500] }}>{m.note}</Text> : null}
           {extra ? <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[500] }}>{extra}</Text> : null}
         </View>

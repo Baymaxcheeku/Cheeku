@@ -209,7 +209,7 @@ export default function SignIn() {
           <View className="flex-1 pb-3">
             <Text accessibilityRole="header" style={type.title}>
               Welcome to{"\n"}
-              <Text style={{ color: brand[600] }}><Brand ai /></Text>
+              <Text style={{ color: ink[300] }}><Brand ai /></Text>
             </Text>
           </View>
           <View className="items-center">
