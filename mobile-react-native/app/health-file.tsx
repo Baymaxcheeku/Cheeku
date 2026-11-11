@@ -437,7 +437,7 @@ const UPCOMING: Record<UpcomingKind, { icon: LucideIcon; bg: string; fg: string 
   next_dose: { icon: Syringe, bg: hue.rose.bg, fg: hue.rose.fg },
   renewal: { icon: ShieldPlus, bg: hue.ocean.bg, fg: hue.ocean.fg },
   appointment: { icon: Stethoscope, bg: hue.blue.wash, fg: hue.blue.fg },
-  lab_visit: { icon: TestTube, bg: lilac.base, fg: "#6b4fc4" },
+  lab_visit: { icon: TestTube, bg: lilac.base, fg: "#3a3a41" },
   refill: { icon: RefreshCw, bg: hue.plum.bg, fg: hue.plum.fg },
 };
 

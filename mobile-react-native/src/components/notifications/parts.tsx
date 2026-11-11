@@ -99,7 +99,7 @@ export const KIND_STYLE: Record<NotificationKind, Tone> = {
   lab_cancelled: { bg: hue.slate.bg, fg: ink[500], icon: FlaskConical },
   family_added: { bg: hue.rose.bg, fg: hue.rose.fg, icon: UserRoundPlus },
   family_removed: { bg: hue.slate.bg, fg: ink[500], icon: UserRoundMinus },
-  plan_changed: { bg: lilac.base, fg: "#7b3fd4", icon: Crown },
+  plan_changed: { bg: lilac.base, fg: "#3a3a41", icon: Crown },
   plan_ended: { bg: hue.slate.bg, fg: ink[500], icon: Crown },
   password_changed: { bg: hue.slate.bg, fg: ink[700], icon: KeyRound },
   support_update: { bg: hue.slate.bg, fg: ink[700], icon: LifeBuoy },
@@ -313,8 +313,8 @@ export function PushPrimer({ onEnable, onLater, busy }: { onEnable: () => void; 
   return (
     <Glass strong className="mt-4 overflow-hidden rounded-xl p-4">
       <View className="flex-row items-start gap-3">
-        <View style={{ width: 56, height: 56, borderRadius: 16, backgroundColor: brand[50], alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
-          <MascotBust size={60} mood="curious" pose="listen" />
+        <View style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: surface.tint, alignItems: "center", justifyContent: "center" }}>
+          <BellRing size={20} color={ink[900]} />
         </View>
         <View className="flex-1">
           <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>Want a tap on the shoulder?</Text>

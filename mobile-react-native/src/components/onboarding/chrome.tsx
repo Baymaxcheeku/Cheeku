@@ -119,7 +119,7 @@ export function OnboardingHeader({
 export function StepLabel({ step }: { step: number }) {
   return (
     <Text
-      style={[type.eyebrow, { color: brand[600], marginBottom: 8 }]}
+      style={[type.eyebrow, { color: ink[500], marginBottom: 8 }]}
       accessibilityElementsHidden
       importantForAccessibility="no-hide-descendants"
     >
@@ -184,7 +184,7 @@ export function Headline({
     <Text accessibilityRole="header" style={type[size]}>
       {lead}
       {breakLine ? "\n" : " "}
-      <Text style={{ color: brand[600] }}>{accent}</Text>
+      <Text style={{ color: ink[300] }}>{accent}</Text>
     </Text>
   );
 }

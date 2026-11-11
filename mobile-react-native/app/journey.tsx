@@ -193,10 +193,10 @@ const TINT: Record<string, string> = {
 };
 
 const TINT_FG: Record<string, string> = {
-  expecting: "#7b3fd4",
+  expecting: ink[900],
   fertility: hue.blue.fg,
   caregiver: hue.orange.fg,
   new_parent: hue.rose.fg,
-  optimiser: "#1f8a45",
-  other: brand[600],
+  optimiser: ink[900],
+  other: ink[900],
 };

@@ -270,7 +270,7 @@ export function BookingInvoiceBody({ record, details }: { record: RecordDetail; 
 
   return (
     <View>
-      <AmountHero total={details.total} status={details.status} caption={caption} tint="#6b4fc4" />
+      <AmountHero total={details.total} status={details.status} caption={caption} tint="#3a3a41" />
 
       <Section title={`${details.tests.length} test${details.tests.length === 1 ? "" : "s"} booked`}>
         <Card>
