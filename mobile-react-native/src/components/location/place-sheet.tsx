@@ -92,7 +92,7 @@ export function PlaceSheet({
               returnKeyType="search"
               style={{ flex: 1, fontFamily: font.regular, fontSize: 15, color: ink[900], paddingVertical: 0 }}
             />
-            {busy ? <ActivityIndicator size="small" color={brand[600]} /> : q ? (
+            {busy ? <ActivityIndicator size="small" color={ink[900]} /> : q ? (
               <Tap accessibilityRole="button" accessibilityLabel="Clear" onPress={() => setQ("")} style={{ width: 32, height: 32, alignItems: "center", justifyContent: "center" }}>
                 <X size={16} color={ink[500]} />
               </Tap>
@@ -109,7 +109,7 @@ export function PlaceSheet({
               style={{ height: 48, borderRadius: 999, backgroundColor: brand[50], flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8 }}
               scale={0.98}
             >
-              <LocateFixed size={16} color={brand[600]} />
+              <LocateFixed size={16} color={ink[900]} />
               <Text style={{ fontFamily: font.semibold, fontSize: 15, color: brand[700] }}>{locateLabel}</Text>
             </Tap>
           ) : null}
@@ -125,7 +125,7 @@ export function PlaceSheet({
               style={{ flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 10, paddingHorizontal: 12, borderRadius: 16, backgroundColor: "#fff" }}
               scale={0.98}
             >
-              <MapPin size={16} color={brand[600]} />
+              <MapPin size={16} color={ink[900]} />
               <View style={{ flex: 1, minWidth: 0 }}>
                 <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{p.label}</Text>
                 {p.formatted ? <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 12, color: ink[500] }}>{p.formatted}</Text> : null}

@@ -225,7 +225,7 @@ export default function Who() {
                         <View
                           pointerEvents="none"
                           className="absolute -right-0.5 -top-0.5 h-5 w-5 items-center justify-center rounded-pill"
-                          style={{ backgroundColor: brand[600], borderWidth: 2, borderColor: "#fff" }}
+                          style={{ backgroundColor: ink[900], borderWidth: 2, borderColor: "#fff" }}
                         >
                           <Check size={10} color="#fff" strokeWidth={3.5} />
                         </View>

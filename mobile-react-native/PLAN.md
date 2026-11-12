@@ -471,8 +471,18 @@ haptics has to be seen on a simulator or a device before it counts as done.
 - **Meal photos are not read by a model yet.** The plate is read from the
   taps (`src/lib/home/meals.ts`); `daily_logs.analysis` is reserved for the
   server's reading of the photo and the app cannot write it.
-- **Wearables.** Steps are typed with a screenshot as proof. Apple Health and
-  Google Fit (Health Connect) are the next step and need a native build.
+- **Chat model: Archit to connect.** Prompt, schema and renderer are in
+  `supabase/functions/cheeku-chat/prompt.ts`, guide in
+  `docs/master/CHEEKU_CHAT_PROMPT.md`. Until `EXPO_PUBLIC_CHAT_MODEL=edge` and
+  the function secrets are set, the stand-in (with the sparrow's scripted
+  turns) answers.
+- **Wearables need a native build and one SQL step.** The module is in
+  (`src/modules/wearables`, see its README): Apple Health and Health Connect
+  run only in an EAS development or store build, not Expo Go. Migration 0044
+  has to be run before real days are kept. Google Health (Fitbit, Pixel
+  Watch) is built but off until Google approves the restricted scopes and the
+  `wearables-google` function is deployed with its two secrets. Strava comes
+  only through the phone's health app (Strava's API terms bar AI use).
 - **No morning nudge yet.** The step is on Home only. A push at the person's
   chosen time, respecting `families.home_stage`, is the next piece.
 - **`privacy_requests` has no one working it.** Needs an admin view or an

@@ -7,6 +7,9 @@ import { ageWords, type SymptomMatch } from "./symptoms";
 import type { ThresholdRead } from "./thresholds";
 import type { Tier } from "./types";
 import { coverDigest } from "@/lib/insurance/explain";
+import type { WorldDigest } from "@/lib/chat/world";
+
+export type { WorldDigest };
 
 /*
  * THE MODEL CONTRACT.
@@ -78,7 +81,26 @@ export type MemoryDigest = {
    * unknown, and the model must say so rather than guess.
    */
   cover: { insurer: string; lines: string[] }[];
+  /**
+   * Everything around the person (lib/chat/world.ts): the longevity areas,
+   * today's goal and logs, bookings coming up and just done, the watch's
+   * lines, and, when asked from the account holder's chat, a family round-up.
+   * Optional: absent on older callers and in tests.
+   */
+  world?: WorldDigest;
 };
+
+/*
+ * THINGS THE CHAT CAN DO, NOT ONLY SAY. The model proposes; the app shows each
+ * as a button and does nothing until the person taps it. Logging steps or
+ * sleep said in the message is the one exception, done by rules before the
+ * model is asked, and listed in `memory.logged`.
+ */
+export type ChatAction =
+  /** Make this the person's goal: tomorrow's plan leans on it (lib/home/goals). */
+  | { type: "set_goal"; goal: "sleep" | "weight" | "sugar" | "legs" | "calm"; label: string }
+  /** Open a screen in the app. Only routes on the allow-list in lib/chat/actions.ts. */
+  | { type: "open"; route: string; label: string };
 
 export type ModelRequest = {
   question: string;
@@ -96,6 +118,8 @@ export type ModelReply = {
   basis: "grounded" | "general" | "silent";
   /** Offer to connect them with a doctor nearby or online, under the answer. */
   careOffer?: boolean;
+  /** Buttons under the answer (see ChatAction). At most three are shown. */
+  actions?: ChatAction[];
 };
 
 export interface ChatModel {

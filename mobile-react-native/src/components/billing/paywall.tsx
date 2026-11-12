@@ -256,7 +256,7 @@ function PlanChooser({
       {/* A grabber, and the close control as far from the CTA as it can be. */}
       <View className="flex-row items-start">
         <View className="min-w-0 flex-1">
-          <Text style={{ fontFamily: font.semibold, fontSize: 12, letterSpacing: 1.2, textTransform: "uppercase", color: brand[600] }}>
+          <Text style={{ fontFamily: font.medium, fontSize: 12, color: ink[500] }}>
             {copy.eyebrow}
           </Text>
           {/*
@@ -293,7 +293,7 @@ function PlanChooser({
           className="mt-5 border-l-2 pl-3"
           style={{ borderLeftColor: brand[200] }}
         >
-          <Text className="text-2xs font-bold uppercase text-ink-300" style={{ letterSpacing: 1 }}>
+          <Text className="text-2xs font-bold text-ink-300" style={{ letterSpacing: 1 }}>
             Held for you
           </Text>
           <Text className="mt-1 text-sm italic leading-[18px] text-ink-700" numberOfLines={2}>
@@ -343,7 +343,7 @@ function PlanChooser({
           accessibilityLabel={`Continue with ${selected.name}, ${formatPrice(selected.priceInPaise)} per ${selected.period}`}
           onPress={() => onSelect(selected)}
           className="h-[54px] items-center justify-center rounded-pill"
-          style={{ backgroundColor: brand[600] }}
+          style={{ backgroundColor: ink[900] }}
         >
           <Text className="text-lg font-bold text-white">Continue</Text>
         </Tap>
@@ -551,7 +551,7 @@ function Checkout({
       <View className="mt-4 rounded-card bg-brand-50 p-4">
         <View className="flex-row items-start gap-3">
           <View className="h-11 w-11 items-center justify-center rounded-tile bg-surface">
-            <Icon size={20} color={brand[600]} />
+            <Icon size={20} color={ink[900]} />
           </View>
           <View className="min-w-0 flex-1">
             <Text className="text-lg font-bold text-ink-900">{plan.name}</Text>
@@ -577,7 +577,7 @@ function Checkout({
           {plan.features.map((label) => (
             <View key={label} className="flex-row items-start gap-2.5">
               <View className="h-5 w-5 items-center justify-center rounded-pill bg-surface" style={{ marginTop: 1 }}>
-                <Check size={11} color={brand[600]} strokeWidth={3} />
+                <Check size={11} color={ink[900]} strokeWidth={3} />
               </View>
               <Text className="flex-1 text-sm leading-[18px] text-ink-700">{label}</Text>
             </View>
@@ -589,7 +589,7 @@ function Checkout({
         className="mt-3 flex-row items-start gap-2 rounded-card px-3.5 py-3"
         style={{ backgroundColor: "rgba(255,255,255,0.8)", borderWidth: 1, borderColor: surface.line }}
       >
-        <CalendarClock size={15} color={brand[600]} style={{ marginTop: 1 }} />
+        <CalendarClock size={15} color={ink[900]} style={{ marginTop: 1 }} />
         <Text className="flex-1 text-xs leading-[17px] text-ink-700">
           {isDaily
             ? `${formatPrice(plan.priceInPaise)} charged once. Nothing renews. The pass ends after ${DAILY_PASS_HOURS} hours.`
@@ -665,7 +665,7 @@ function Checkout({
           disabled={pending}
           onPress={onPay}
           className="mt-3 h-14 flex-row items-center justify-center gap-2 rounded-pill"
-          style={{ backgroundColor: brand[600], opacity: pending ? 0.6 : 1 }}
+          style={{ backgroundColor: ink[900], opacity: pending ? 0.6 : 1 }}
         >
           {pending ? (
             <ActivityIndicator color="#fff" />
@@ -731,7 +731,7 @@ function Success({
               className="h-7 w-7 items-center justify-center rounded-pill"
               style={{ backgroundColor: brand[50] }}
             >
-              <Check size={14} color={brand[600]} />
+              <Check size={14} color={ink[900]} />
             </View>
             <Text className="flex-1 text-sm text-ink-700">{feature}</Text>
           </View>
@@ -742,7 +742,7 @@ function Success({
         accessibilityRole="button"
         onPress={onDone}
         className="mt-5 h-14 items-center justify-center rounded-pill"
-        style={{ backgroundColor: brand[600] }}
+        style={{ backgroundColor: ink[900] }}
       >
         <Text className="text-lg font-semibold text-white">
           {pendingQuestion ? "Send my question" : "Start a chat"}

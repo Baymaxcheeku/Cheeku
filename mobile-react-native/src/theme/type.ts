@@ -53,6 +53,7 @@ export const type = {
   bodySmall: { fontFamily: font.regular, fontSize: 13, lineHeight: 19, color: ink[500] },
   label: { fontFamily: font.semibold, fontSize: 15, lineHeight: 19, color: ink[900] },
   caption: { fontFamily: font.medium, fontSize: 12, lineHeight: 16, color: ink[500] },
-  eyebrow: { fontFamily: font.bold, fontSize: 11, lineHeight: 14, letterSpacing: 1.2, textTransform: "uppercase" },
-  button: { fontFamily: font.bold, fontSize: 17, lineHeight: 20, color: "#ffffff" },
+  // Sentence case, no tracking: a quiet label, not a shout.
+  eyebrow: { fontFamily: font.medium, fontSize: 12, lineHeight: 16, letterSpacing: 0, textTransform: "none" },
+  button: { fontFamily: font.semibold, fontSize: 17, lineHeight: 20, color: "#ffffff" },
 } satisfies Record<string, TextStyle>;

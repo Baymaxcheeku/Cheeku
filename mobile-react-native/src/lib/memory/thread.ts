@@ -1,3 +1,5 @@
+import { safeActions } from "@/lib/chat/safe-actions";
+import type { ChatAction } from "./model";
 import type { ProductAssessment } from "@/lib/ai/mock/scenarios";
 
 import type { BookingIntent } from "./intent";
@@ -51,6 +53,8 @@ export type TurnMemory = {
   booking?: (BookingIntent & { forName: string }) | null;
   /** A booking that was made, written into the thread by the booking flows. */
   event?: BookedEvent | null;
+  /** Buttons under the answer: make a goal, open a screen (lib/chat/actions). */
+  actions?: ChatAction[];
 };
 
 /**
@@ -106,6 +110,7 @@ export function toTurnMemory(plan: TurnPlan): TurnMemory {
     hardStop: plan.decision.hardStop ? { title: plan.decision.hardStop.title, text: plan.decision.hardStop.text, where: plan.decision.hardStop.where } : null,
     clock: plan.context.clock.label,
     booking: plan.booking ? { ...plan.booking, forName: plan.context.subject.firstName } : null,
+    actions: safeActions(plan.reply?.actions),
   };
 }
 
@@ -170,6 +175,7 @@ function readMemory(v: unknown): TurnMemory | null {
     clock: typeof o.clock === "string" ? o.clock : "",
     booking: o.booking && typeof o.booking === "object" ? o.booking : null,
     event: o.event && typeof o.event === "object" ? o.event : null,
+    actions: safeActions(o.actions),
   };
 }
 

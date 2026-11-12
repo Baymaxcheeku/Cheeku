@@ -54,10 +54,10 @@ const TYPE_STYLE: Record<DocType, TypeStyle> = {
   prescription: { icon: Pill, tint: hue.teal.fg, wash: hue.teal.bg, label: "Prescription" },
   scan: { icon: ScanLine, tint: hue.indigo.fg, wash: surface.line, label: "Scan" },
   vaccination: { icon: Syringe, tint: hue.rose.fg, wash: hue.rose.bg, label: "Vaccination" },
-  discharge: { icon: Stethoscope, tint: "#a9631a", wash: "#fdf0dc", label: "Discharge" },
+  discharge: { icon: Stethoscope, tint: "#3a3a41", wash: "#f5f5f7", label: "Discharge" },
   bill: { icon: ReceiptText, tint: hue.slate.fg, wash: hue.slate.bg, label: "Bill" },
   consultation_invoice: { icon: ReceiptIndianRupee, tint: hue.blue.fg, wash: hue.blue.wash, label: "Consultation invoice" },
-  booking_invoice: { icon: CalendarCheck, tint: "#6b4fc4", wash: lilac.base, label: "Booking invoice" },
+  booking_invoice: { icon: CalendarCheck, tint: "#3a3a41", wash: lilac.base, label: "Booking invoice" },
   insurance: { icon: ShieldPlus, tint: hue.ocean.fg, wash: hue.ocean.bg, label: "Insurance" },
   medication: { icon: Tablets, tint: hue.plum.fg, wash: hue.plum.bg, label: "Medication" },
   other: { icon: ReceiptText, tint: hue.slate.fg, wash: hue.slate.bg, label: "Document" },
@@ -106,10 +106,10 @@ export function RecordCard({
       <View className="flex-row items-center gap-3.5 overflow-hidden rounded-xl p-2.5 pr-3" style={shadow.e1}>
         <Gradient from={style.wash} to="#ffffff" />
         <View
-          className="h-[68px] w-[68px] items-center justify-center rounded-xl"
-          style={{ backgroundColor: "rgba(255,255,255,0.9)", borderWidth: 1, borderColor: "rgba(255,255,255,0.95)" }}
+          className="h-[56px] w-[56px] items-center justify-center rounded-lg"
+          style={{ backgroundColor: surface.tint }}
         >
-          <style.icon size={26} color={style.tint} strokeWidth={1.7} />
+          <style.icon size={24} color={ink[900]} strokeWidth={1.7} />
           <View style={{ position: "absolute", right: -4, bottom: -4, borderRadius: 999, borderWidth: 2, borderColor: "#fff" }}>
             <Avatar svg={face.svg} image={face.image} background={face.background} size={24} />
           </View>
@@ -117,7 +117,7 @@ export function RecordCard({
 
         <View className="min-w-0 flex-1 gap-0.5">
           <View className="flex-row items-center gap-2">
-            <Text style={{ fontFamily: font.semibold, fontSize: 12, color: style.tint }}>{style.label}</Text>
+            <Text style={{ fontFamily: font.medium, fontSize: 12, color: ink[500] }}>{style.label}</Text>
             {severity ? (
               <View className="rounded-pill px-2 py-0.5" style={{ backgroundColor: severity.bg }}>
                 <Text style={{ fontFamily: font.bold, fontSize: 11, color: severity.fg }}>{severity.label}</Text>

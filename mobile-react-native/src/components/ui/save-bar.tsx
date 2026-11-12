@@ -58,7 +58,7 @@ export function SaveBar() {
           paddingLeft: 14,
           paddingRight: 8,
           borderRadius: 24,
-          backgroundColor: brand[600],
+          backgroundColor: ink[900],
           shadowColor: ink[900],
           shadowOpacity: 0.22,
           shadowRadius: 18,

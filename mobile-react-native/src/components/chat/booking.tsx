@@ -146,10 +146,10 @@ function Shell({ icon: Icon, eyebrow, title, sub, children }: { icon: AppIcon; e
     <View style={[glassShadow, { borderRadius: 24, backgroundColor: "#fff", borderWidth: 1, borderColor: glass.rim, overflow: "hidden" }]}>
       <View style={{ flexDirection: "row", alignItems: "center", gap: 12, padding: 14, backgroundColor: brand[50] }}>
         <View style={{ width: 42, height: 42, borderRadius: 16, backgroundColor: "#fff", alignItems: "center", justifyContent: "center" }}>
-          <Icon size={20} color={brand[600]} />
+          <Icon size={20} color={ink[900]} />
         </View>
         <View style={{ flex: 1, minWidth: 0 }}>
-          <Text style={{ fontFamily: font.semibold, fontSize: 11, letterSpacing: 0.9, textTransform: "uppercase", color: brand[600] }}>{eyebrow}</Text>
+          <Text style={{ fontFamily: font.medium, fontSize: 12, color: ink[500] }}>{eyebrow}</Text>
           <Text numberOfLines={2} style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900], marginTop: 1 }}>{title}</Text>
           <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 1 }}>{sub}</Text>
         </View>
@@ -183,7 +183,7 @@ function Cta({ label, onPress, disabled }: { label: string; onPress?: () => void
       accessibilityRole="button"
       disabled={disabled || !onPress}
       onPress={onPress}
-      style={{ height: 48, borderRadius: 999, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, backgroundColor: brand[600], opacity: disabled || !onPress ? 0.45 : 1 }} scale={0.98}
+      style={{ height: 48, borderRadius: 999, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, backgroundColor: ink[900], opacity: disabled || !onPress ? 0.45 : 1 }} scale={0.98}
     >
       <Text style={{ fontFamily: font.semibold, fontSize: 15, color: "#fff" }}>{label}</Text>
       <ArrowRight size={16} color="#fff" />
@@ -208,7 +208,7 @@ function LabCard({ booking, onStart }: { booking: Booking; onStart?: (b: Booking
             return (
               <View key={pick.id} style={{ flexDirection: "row", alignItems: "flex-start", gap: 10 }}>
                 <View style={{ width: 20, height: 20, borderRadius: 999, backgroundColor: brand[50], alignItems: "center", justifyContent: "center", marginTop: 1 }}>
-                  <Check size={11} color={brand[600]} strokeWidth={3} />
+                  <Check size={11} color={ink[900]} strokeWidth={3} />
                 </View>
                 <View style={{ flex: 1 }}>
                   <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{test?.name ?? pick.label}</Text>
@@ -227,7 +227,7 @@ function LabCard({ booking, onStart }: { booking: Booking; onStart?: (b: Booking
 
       {tests.length ? (
         <View style={{ flexDirection: "row", alignItems: "center", gap: 8, padding: 10, borderRadius: 16, backgroundColor: surface.tint }}>
-          <Hourglass size={14} color={brand[600]} />
+          <Hourglass size={14} color={ink[900]} />
           <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 13, lineHeight: 17, color: ink[700] }}>
             {fasting >= 8 ? `Fast ${fasting} hours before: water is fine. Morning slots only.` : "No fasting needed."}
             {samples.length ? ` ${samples.join(" and ")} sample.` : ""}
@@ -272,7 +272,7 @@ function SoonCard({ booking }: { booking: Booking }) {
         accessibilityRole="button"
         disabled={on}
         onPress={join}
-        style={{ height: 46, borderRadius: 999, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, backgroundColor: on ? brand[50] : brand[600] }} scale={0.98}
+        style={{ height: 46, borderRadius: 999, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, backgroundColor: on ? brand[50] : ink[900] }} scale={0.98}
       >
         {on ? <Check size={16} color={brand[700]} /> : <BellRing size={16} color="#fff" />}
         <Text style={{ fontFamily: font.semibold, fontSize: 15, color: on ? brand[700] : "#fff" }}>{on ? "You're on the list" : "Tell me when it's live"}</Text>
@@ -292,13 +292,13 @@ export function BookedCard({ event, onOpen }: { event: BookedEvent; onOpen?: (ro
       style={({ pressed }) => [glassShadow, { borderRadius: 24, backgroundColor: pressed ? brand[50] : "#fff", borderWidth: 1, borderColor: glass.rim, padding: 14, gap: 10 }]}
     >
       <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
-        <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: brand[600], alignItems: "center", justifyContent: "center" }}>
+        <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: ink[900], alignItems: "center", justifyContent: "center" }}>
           <Icon size={18} color="#fff" />
         </View>
         <View style={{ flex: 1, minWidth: 0 }}>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
-            <CalendarCheck2 size={12} color={brand[600]} />
-            <Text style={{ fontFamily: font.semibold, fontSize: 11, letterSpacing: 0.9, textTransform: "uppercase", color: brand[600] }}>Booked</Text>
+            <CalendarCheck2 size={12} color={ink[900]} />
+            <Text style={{ fontFamily: font.medium, fontSize: 12, color: ink[500] }}>Booked</Text>
           </View>
           <Text numberOfLines={2} style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900], marginTop: 1 }}>{event.title}</Text>
           <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 1 }}>{event.when} · {event.where}</Text>

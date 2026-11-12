@@ -58,8 +58,8 @@ export default function ServiceBooking() {
           <View style={{ flexDirection: "row", alignItems: "center" }}>
             <View style={{ flex: 1 }}>
               <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-                <CalendarCheck2 size={14} color={brand[600]} />
-                <Text style={{ fontFamily: font.semibold, fontSize: 12, letterSpacing: 1, textTransform: "uppercase", color: brand[600] }}>{cancelled ? "Cancelled" : fresh ? "You're booked" : "Booked"}</Text>
+                <CalendarCheck2 size={14} color={ink[900]} />
+                <Text style={{ fontFamily: font.medium, fontSize: 12, color: ink[500] }}>{cancelled ? "Cancelled" : fresh ? "You're booked" : "Booked"}</Text>
               </View>
               <Text style={{ fontFamily: font.semibold, fontSize: 24, lineHeight: 28, letterSpacing: -0.6, color: ink[900], marginTop: 6 }}>{r.title}</Text>
               <Text style={{ fontFamily: font.regular, fontSize: 15, color: ink[700], marginTop: 4 }}>For {r.forName} · {whenText(r)}</Text>

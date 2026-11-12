@@ -7,7 +7,6 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { LocationChip } from "@/components/location/location-chip";
 import { Tap } from "@/components/ui/tap";
-import { MascotFigure } from "@/components/illustrations/sprout";
 import { Grid2, SPECIALTY_ICON } from "@/components/services/parts";
 import { Brand } from "@/components/ui/brand";
 import { Gradient, glass, glassShadow } from "@/components/ui/glass";
@@ -68,14 +67,10 @@ export default function DoctorsHub() {
               <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[700], marginTop: 5 }}>
                 Tell <Brand /> what&apos;s going on. You pick the area, it names the right department and writes the doctor a note.
               </Text>
-              <View style={{ flexDirection: "row", alignItems: "center", gap: 6, alignSelf: "flex-start", marginTop: 12, height: 38, paddingHorizontal: 14, borderRadius: 999, backgroundColor: brand[600] }}>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 6, alignSelf: "flex-start", marginTop: 12, height: 38, paddingHorizontal: 14, borderRadius: 999, backgroundColor: ink[900] }}>
                 <Text style={{ fontFamily: font.semibold, fontSize: 13, color: "#fff" }}>Start pre-consultation</Text>
                 <ArrowRight size={15} color="#fff" />
               </View>
-            </View>
-            <View style={{ width: 104, height: 112, alignItems: "center", justifyContent: "flex-end" }}>
-              <View style={{ position: "absolute", bottom: 6, width: 92, height: 92, borderRadius: 999, backgroundColor: lilac.base }} />
-              <MascotFigure size={100} moment="think" hop />
             </View>
           </View>
         </Tap>
@@ -113,7 +108,7 @@ export default function DoctorsHub() {
         )}
 
         <Pressable accessibilityRole="button" onPress={() => router.push("/appointments" as never)} style={({ pressed }) => [glassShadow, { flexDirection: "row", alignItems: "center", gap: 12, padding: 14, borderRadius: 24, backgroundColor: pressed ? brand[50] : "#fff", marginTop: 8 }]}>
-          <CalendarClock size={19} color={brand[600]} />
+          <CalendarClock size={19} color={ink[900]} />
           <Text style={{ flex: 1, fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>Your appointments</Text>
           <ChevronRight size={18} color={ink[300]} />
         </Pressable>

@@ -25,7 +25,7 @@ export function NoteCard({ intake, compact }: { intake: Intake; compact?: boolea
       <View className="p-4">
         <View className="flex-row items-center gap-2">
           <View className="h-8 w-8 items-center justify-center rounded-md" style={{ backgroundColor: brand[50] }}>
-            <ClipboardList size={16} color={brand[600]} />
+            <ClipboardList size={16} color={ink[900]} />
           </View>
           <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>Pre-consultation note</Text>
         </View>

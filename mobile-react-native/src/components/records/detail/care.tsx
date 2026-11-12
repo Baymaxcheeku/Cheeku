@@ -136,7 +136,7 @@ export function PrescriptionBody({ record, details, isPrimary }: { record: Recor
             <Bullets items={details.tests} color={hue.teal.fg} />
             <PillButton
               tone="light"
-              icon={<FlaskConical size={17} color={brand[600]} />}
+              icon={<FlaskConical size={17} color={ink[900]} />}
               onPress={() => {
                 setPrescription(record.id);
                 router.push("/labs");
@@ -169,7 +169,7 @@ function FollowUp({ record, date, with: withWhom, isPrimary }: { record: RecordD
       <Card style={{ gap: 12 }}>
         <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
           <View style={{ width: 44, height: 44, borderRadius: 16, backgroundColor: brand[50], alignItems: "center", justifyContent: "center" }}>
-            <CalendarCheck size={20} color={brand[600]} />
+            <CalendarCheck size={20} color={ink[900]} />
           </View>
           <View style={{ flex: 1 }}>
             <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{shortDate(date)}</Text>
@@ -252,8 +252,8 @@ export function DischargeBody({ record, details, isPrimary }: { record: RecordDe
       {/* The stay, as a short timeline: in, what was done, out. */}
       <Card style={{ marginTop: 12 }}>
         <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-          <View style={{ width: 44, height: 44, borderRadius: 16, backgroundColor: "#fdf0dc", alignItems: "center", justifyContent: "center" }}>
-            <BedDouble size={20} color="#a9631a" />
+          <View style={{ width: 44, height: 44, borderRadius: 16, backgroundColor: "#f5f5f7", alignItems: "center", justifyContent: "center" }}>
+            <BedDouble size={20} color="#3a3a41" />
           </View>
           <View style={{ flex: 1 }}>
             <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>{stay ? `${stay} day${stay === 1 ? "" : "s"} in hospital` : "Hospital stay"}</Text>

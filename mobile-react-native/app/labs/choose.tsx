@@ -42,7 +42,7 @@ export default function ChooseLab() {
   return (
     <View className="flex-1 bg-canvas">
       <Backdrop />
-      <ScreenHeader title="Choose a lab" fallback="/labs" />
+      <ScreenHeader fallback="/labs" />
       <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: insets.bottom + 30 }} showsVerticalScrollIndicator={false}>
         {/* With nothing in the cart every lab "does all of it" for ₹0, which is
             true and useless. The title and the list wait for a test. */}

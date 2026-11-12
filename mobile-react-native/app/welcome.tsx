@@ -39,10 +39,10 @@ import { supabase } from "@/lib/supabase/client";
  * sign-up belong to the same world.
  */
 const CHAPTER: Record<"meet" | "memory" | "family" | "care", { bg: string; fg: string }> = {
-  meet: { bg: brand[50], fg: brand[600] },
+  meet: { bg: brand[50], fg: ink[900] },
   memory: { bg: hue.blue.wash, fg: hue.blue.fg },
   family: { bg: hue.rose.bg, fg: hue.rose.fg },
-  care: { bg: hue.ocean.bg, fg: "#0b6f99" },
+  care: { bg: hue.ocean.bg, fg: ink[900] },
 };
 
 /*
@@ -145,7 +145,7 @@ export default function Welcome() {
             accessibilityLabel={`Go to screen ${i + 1} of ${PANELS.length}`}
             onPress={() => go(i)}
           >
-            <FillBar value={i <= index ? 1 : 0} color={brand[600]} track={brand[100]} height={5} />
+            <FillBar value={i <= index ? 1 : 0} color={ink[900]} track={brand[100]} height={5} />
           </Tap>
         ))}
       </View>
@@ -193,7 +193,7 @@ export default function Welcome() {
             <Text style={[type.eyebrow, { color: chapter.fg }]}>{panel.eyebrow}</Text>
           </View>
           <Text accessibilityRole="header" style={type.hero}>
-            {panel.lead} <Text style={{ color: brand[600] }}>{panel.accent}</Text>
+            {panel.lead} <Text style={{ color: ink[300] }}>{panel.accent}</Text>
           </Text>
           <Text style={[type.body, { marginTop: 12 }]}>{panel.body}</Text>
         </View>
@@ -271,7 +271,7 @@ function SceneMeet({ compact }: { compact: boolean }) {
         <BubblePop delay={replyAt - 0.9} from="left" style={{ flexShrink: 1, marginBottom: 10 }}>
           <View
             className="rounded-xl px-4 py-3"
-            style={[shadow.e2, { backgroundColor: brand[600], borderBottomLeftRadius: 6, minWidth: 64 }]}
+            style={[shadow.e2, { backgroundColor: ink[900], borderBottomLeftRadius: 6, minWidth: 64 }]}
           >
             {replied ? (
               <Animated.Text
@@ -333,8 +333,8 @@ function SceneMemory({ compact }: { compact: boolean }) {
 
       <BubblePop delay={0.75} style={{ alignSelf: "center", marginVertical: compact ? 10 : 14 }}>
         <View className="flex-row items-center gap-1.5 rounded-pill px-3 py-1.5" style={{ backgroundColor: brand[50] }}>
-          <FolderCheck size={13} color={brand[600]} />
-          <Text style={{ fontFamily: font.bold, fontSize: 12, color: brand[700] }}>Saved to Mummy&apos;s file</Text>
+          <FolderCheck size={13} color={ink[900]} />
+          <Text style={{ fontFamily: font.semibold, fontSize: 12, color: ink[700] }}>Saved to Mummy&apos;s file</Text>
         </View>
       </BubblePop>
 
@@ -351,7 +351,7 @@ function SceneMemory({ compact }: { compact: boolean }) {
             className="mt-3 flex-row items-center gap-1.5 self-start rounded-pill px-2.5 py-1"
             style={{ backgroundColor: brand[50] }}
           >
-            <FileText size={11} color={brand[600]} />
+            <FileText size={11} color={ink[900]} />
             <Text style={{ fontFamily: font.bold, fontSize: 11, color: brand[700] }}>
               From: Thyroid profile, 14 Mar
             </Text>
@@ -380,7 +380,7 @@ function SceneFamily({ faces, compact }: { faces: readonly string[]; compact: bo
     <View className="flex-1 items-center justify-center px-6">
       <BubblePop delay={0.7} style={{ alignSelf: "flex-end", marginBottom: 6 }}>
         <View className="rounded-pill bg-surface px-3 py-1.5" style={shadow.e1}>
-          <Text style={{ fontFamily: font.bold, fontSize: 12, color: brand[700] }}>Up to 4 people</Text>
+          <Text style={{ fontFamily: font.semibold, fontSize: 12, color: ink[700] }}>Up to 4 people</Text>
         </View>
       </BubblePop>
 
@@ -394,7 +394,7 @@ function SceneFamily({ faces, compact }: { faces: readonly string[]; compact: bo
               </View>
               <View
                 className="-mt-3 rounded-pill px-2.5 py-1"
-                style={[shadow.e1, { backgroundColor: i === 1 ? brand[600] : surface.base }]}
+                style={[shadow.e1, { backgroundColor: i === 1 ? ink[900] : surface.base }]}
               >
                 <Text
                   style={{ fontFamily: font.bold, fontSize: 12, color: i === 1 ? "#ffffff" : ink[700] }}
@@ -418,7 +418,7 @@ function SceneFamily({ faces, compact }: { faces: readonly string[]; compact: bo
               backgroundColor: brand[50],
             }}
           >
-            <Plus size={18} color={brand[600]} />
+            <Plus size={18} color={ink[900]} />
           </View>
         </BubblePop>
       </View>
@@ -426,7 +426,7 @@ function SceneFamily({ faces, compact }: { faces: readonly string[]; compact: bo
       <BubblePop delay={0.9} style={{ marginTop: compact ? 14 : 20 }}>
         <View className="flex-row items-center gap-2.5 rounded-pill bg-surface py-2.5 pl-2.5 pr-4" style={shadow.e2}>
           <View className="h-8 w-8 items-center justify-center rounded-pill" style={{ backgroundColor: brand[50] }}>
-            <ShieldCheck size={16} color={brand[600]} />
+            <ShieldCheck size={16} color={ink[900]} />
           </View>
           <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[700] }}>
             <Text style={{ fontFamily: font.bold, color: ink[900] }}>Private by default.</Text> Never sold, never used for ads.

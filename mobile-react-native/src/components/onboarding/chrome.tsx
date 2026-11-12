@@ -82,7 +82,7 @@ export function OnboardingHeader({
             accessibilityLabel={`Step ${step} of ${total}, ${SETUP_STEPS[step - 1]}`}
             accessibilityValue={{ min: 0, max: total, now: step }}
           >
-            <FillBar value={step / total} color={brand[600]} track={brand[100]} height={8} />
+            <FillBar value={step / total} color={ink[900]} track={brand[100]} height={8} />
           </View>
         ) : (
           <View className="flex-1" />
@@ -119,7 +119,7 @@ export function OnboardingHeader({
 export function StepLabel({ step }: { step: number }) {
   return (
     <Text
-      style={[type.eyebrow, { color: brand[600], marginBottom: 8 }]}
+      style={[type.eyebrow, { color: ink[500], marginBottom: 8 }]}
       accessibilityElementsHidden
       importantForAccessibility="no-hide-descendants"
     >
@@ -184,7 +184,7 @@ export function Headline({
     <Text accessibilityRole="header" style={type[size]}>
       {lead}
       {breakLine ? "\n" : " "}
-      <Text style={{ color: brand[600] }}>{accent}</Text>
+      <Text style={{ color: ink[300] }}>{accent}</Text>
     </Text>
   );
 }

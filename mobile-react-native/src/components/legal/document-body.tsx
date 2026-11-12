@@ -28,13 +28,13 @@ export function DocumentBody({ doc }: { doc: LegalDocument }) {
       </Text>
 
       <View className="mt-3 rounded-xl p-4" style={{ backgroundColor: brand[50], borderWidth: 1, borderColor: brand[100] }}>
-        <Text style={{ fontFamily: font.bold, fontSize: 11, letterSpacing: 1.2, color: brand[700] }}>IN SHORT</Text>
+        <Text style={{ fontFamily: font.medium, fontSize: 12, color: ink[500] }}>In short</Text>
         <Text style={{ fontFamily: font.medium, fontSize: 15, lineHeight: 22, color: ink[900], marginTop: 6 }}>{doc.summary}</Text>
       </View>
 
       {doc.changes.length ? (
         <View className="mt-3 rounded-xl p-4" style={{ backgroundColor: surface.base, borderWidth: 1, borderColor: surface.line }}>
-          <Text style={{ fontFamily: font.bold, fontSize: 11, letterSpacing: 1.2, color: ink[500] }}>WHAT CHANGED</Text>
+          <Text style={{ fontFamily: font.medium, fontSize: 12, color: ink[500] }}>What changed</Text>
           {doc.changes.map((c) => (
             <Bullet key={c} text={c} />
           ))}
@@ -75,7 +75,7 @@ export function DocumentBody({ doc }: { doc: LegalDocument }) {
             }
             return (
               <View key={i} className="mt-3 flex-row gap-2.5 rounded-lg p-3.5" style={{ backgroundColor: surface.base, borderWidth: 1, borderColor: brand[100] }}>
-                <Info size={16} color={brand[600]} style={{ marginTop: 2 }} />
+                <Info size={16} color={ink[900]} style={{ marginTop: 2 }} />
                 <Text style={{ flex: 1, fontFamily: font.semibold, fontSize: 15, lineHeight: 21, color: ink[900] }}>{b.note}</Text>
               </View>
             );

@@ -116,7 +116,7 @@ export default function FirstUpload() {
          * dragged on a phone.
          */}
         <BubblePop delay={0.1} style={{ marginTop: 22 }}>
-          <View className="overflow-hidden rounded-xl" style={[shadow.e2, { backgroundColor: brand[600] }]}>
+          <View className="overflow-hidden rounded-xl" style={[shadow.e2, { backgroundColor: ink[900] }]}>
             <View className="p-5">
               <View className="flex-row items-start gap-3.5">
                 <View
@@ -151,8 +151,8 @@ export default function FirstUpload() {
 
               <View className="mt-5">
                 <Button variant="secondary" onPress={() => open("file")}>
-                  <Text style={[type.button, { color: brand[700] }]}>Choose a file</Text>
-                  <ArrowRight size={18} color={brand[700]} />
+                  <Text style={[type.button, { color: ink[900] }]}>Choose a file</Text>
+                  <ArrowRight size={18} color={ink[900]} />
                 </Button>
               </View>
 
@@ -180,7 +180,7 @@ export default function FirstUpload() {
                 style={i > 0 ? { borderTopWidth: 1, borderTopColor: surface.line } : undefined}
               >
                 <View className="h-11 w-11 items-center justify-center rounded-lg bg-brand-50">
-                  <Icon size={19} color={brand[600]} />
+                  <Icon size={19} color={ink[900]} />
                 </View>
                 <View className="min-w-0 flex-1">
                   <Text style={type.label}>{route.title}</Text>

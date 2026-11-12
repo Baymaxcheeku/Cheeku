@@ -11,7 +11,12 @@
 //
 //   { paragraphs: string[], citations: {documentId,label}[], followUps: string[],
 //     tier?: "reassure"|"monitor"|"contact_today"|"go_now", basis,
-//     careOffer?: boolean, modelId? }
+//     careOffer?: boolean, actions?: ChatAction[], modelId? }
+//
+// The memory now carries `world` too (longevity areas, today's goal and
+// logs, bookings, the watch, a family round-up when asked). The system prompt
+// and a renderer for all of it are in prompt.ts; the guide is
+// docs/master/CHEEKU_CHAT_PROMPT.md.
 //
 // THE FLOOR IS NOT A SUGGESTION. The app takes the higher of the model's tier
 // and the floor, so a model can make an answer more careful and never less.
@@ -105,6 +110,8 @@ Deno.serve(async (req) => {
       tier: TIERS.includes(out.tier as string) ? out.tier : null,
       basis: out.basis ?? "general",
       careOffer: out.careOffer === true,
+      // Buttons the model proposes; the app keeps only known goals and allowed screens.
+      actions: Array.isArray(out.actions) ? out.actions.slice(0, 3) : [],
       modelId: typeof out.modelId === "string" ? out.modelId : "cheeku-ft",
     });
   } catch {

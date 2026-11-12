@@ -13,7 +13,7 @@ import { Paywall } from "@/components/billing/paywall";
 import { Button } from "@/components/ui/button";
 import { clearAudience, readAudience } from "@/lib/auth/audience";
 import { formatPrice, PLANS } from "@/lib/billing/plans";
-import { brand, lilac, surface } from "@/theme/tokens";
+import { brand, lilac, surface, ink } from "@/theme/tokens";
 import { startFresh } from "@/lib/nav/start-fresh";
 
 /**
@@ -110,7 +110,7 @@ export default function Plan() {
           <Gradient from="#ffffff" to={lilac.base} glow="#ffffff" />
           <View className="flex-row items-start gap-3">
             <View className="h-11 w-11 items-center justify-center rounded-tile bg-brand-50">
-              <Users size={20} color={brand[600]} />
+              <Users size={20} color={ink[900]} />
             </View>
             <View className="min-w-0 flex-1">
               <View className="flex-row items-center gap-2">
@@ -138,7 +138,7 @@ export default function Plan() {
             {family.features.map((feature) => (
               <View key={feature} className="flex-row items-start gap-2">
                 {/* Brand, not green: a plan feature is not a health result. */}
-                <Check size={14} color={brand[600]} strokeWidth={2.6} style={{ marginTop: 2 }} />
+                <Check size={14} color={ink[900]} strokeWidth={2.6} style={{ marginTop: 2 }} />
                 <Text className="flex-1 text-sm leading-[18px] text-ink-700">{feature}</Text>
               </View>
             ))}

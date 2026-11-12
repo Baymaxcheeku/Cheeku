@@ -111,7 +111,7 @@ export default function Medicines() {
                   accessibilityRole="button"
                   onPress={() => router.push({ pathname: "/services/request", params: { service: "medicines", offering: "refill" } })}
                   className="h-9 items-center justify-center rounded-pill px-3.5"
-                  style={{ backgroundColor: brand[600] }}
+                  style={{ backgroundColor: ink[900] }}
                 >
                   <Text style={{ fontFamily: font.semibold, fontSize: 13, color: "#fff" }}>Refill</Text>
                 </Tap>
@@ -208,7 +208,7 @@ function SmallPill({ label, onPress, dark, icon: Icon }: { label: string; onPres
       accessibilityRole="button"
       onPress={onPress}
       className="h-9 flex-row items-center gap-1.5 rounded-pill px-3.5"
-      style={{ backgroundColor: dark ? brand[600] : "#fff", borderWidth: dark ? 0 : 1, borderColor: surface.line }}
+      style={{ backgroundColor: dark ? ink[900] : "#fff", borderWidth: dark ? 0 : 1, borderColor: surface.line }}
     >
       {Icon ? <Icon size={14} color={dark ? "#fff" : ink[900]} /> : null}
       <Text style={{ fontFamily: font.semibold, fontSize: 13, color: dark ? "#fff" : ink[900] }}>{label}</Text>
@@ -223,7 +223,7 @@ function MedCard({ med, onStock, onSchedule }: { med: MedView; onStock: () => vo
     <View className="rounded-xl bg-white p-4" style={[glassShadow, { borderWidth: 1, borderColor: surface.line }]}>
       <View className="flex-row items-start gap-3">
         <View className="h-10 w-10 items-center justify-center rounded-lg" style={{ backgroundColor: brand[50] }}>
-          <Pill size={18} color={brand[600]} />
+          <Pill size={18} color={ink[900]} />
         </View>
         <View className="min-w-0 flex-1">
           <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{med.name}</Text>
@@ -247,7 +247,7 @@ function MedCard({ med, onStock, onSchedule }: { med: MedView; onStock: () => vo
 function Stat({ label, value, sub, warn }: { label: string; value: string; sub: string; warn?: boolean }) {
   return (
     <View className="flex-1 rounded-lg p-3" style={{ backgroundColor: warn ? semantic.cautionBg : surface.tint }}>
-      <Text style={{ fontFamily: font.medium, fontSize: 11, letterSpacing: 0.4, color: ink[500] }}>{label.toUpperCase()}</Text>
+      <Text style={{ fontFamily: font.medium, fontSize: 12, color: ink[500] }}>{label}</Text>
       <Text style={{ fontFamily: font.semibold, fontSize: 17, color: warn ? semantic.cautionText : ink[900], marginTop: 2 }}>{value}</Text>
       <Text numberOfLines={2} style={{ fontFamily: font.regular, fontSize: 12, lineHeight: 16, color: ink[500], marginTop: 2 }}>
         {sub}

@@ -188,7 +188,7 @@ export default function BookLab() {
           </View>
           {fasting ? (
             <View style={{ flexDirection: "row", gap: 8, alignItems: "center", marginTop: 10 }}>
-              <Hourglass size={14} color={brand[600]} />
+              <Hourglass size={14} color={ink[900]} />
               <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 13, color: ink[700] }}>Needs a {fasting}-hour fast, so only morning windows. Water is fine. I&apos;ll remind you the night before.</Text>
             </View>
           ) : null}
@@ -197,7 +197,7 @@ export default function BookLab() {
         {/* Where. */}
         <Section title="Where?">
           <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 10, padding: 14, borderRadius: 16, backgroundColor: "#fff", borderWidth: 1.5, borderColor: surface.line }}>
-            <MapPin size={17} color={brand[600]} style={{ marginTop: 2 }} />
+            <MapPin size={17} color={ink[900]} style={{ marginTop: 2 }} />
             <TextInput value={address} onChangeText={setAddress} placeholder="Flat, building, street, area, pincode" placeholderTextColor={ink[300]} multiline maxLength={300} style={{ flex: 1, minHeight: 60, fontFamily: font.regular, fontSize: 15, lineHeight: 21, color: ink[900], textAlignVertical: "top" }} />
           </View>
           <UseMyAddress profileId={who?.id} onUse={(a) => setAddress(a)} />

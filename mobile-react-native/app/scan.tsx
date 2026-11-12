@@ -362,9 +362,9 @@ export default function Scan() {
                   {done ? (
                     <Check size={18} color="#ffffff" strokeWidth={3} />
                   ) : current ? (
-                    <ActivityIndicator size="small" color={brand[600]} />
+                    <ActivityIndicator size="small" color={ink[900]} />
                   ) : (
-                    <Icon size={18} color={brand[600]} />
+                    <Icon size={18} color={ink[900]} />
                   )}
                 </View>
                 <View className="min-w-0 flex-1">
@@ -416,14 +416,9 @@ export default function Scan() {
       contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 8, paddingBottom: insets.bottom + 24 }}
       showsVerticalScrollIndicator={false}
     >
-      <View style={{ flexDirection: "row", alignItems: "flex-end" }}>
-        <Text accessibilityRole="header" style={{ flex: 1, fontFamily: font.medium, fontSize: 28, lineHeight: 36, letterSpacing: -1, color: ink[900] }}>
-          What are we{"\n"}
-          <Text style={{ fontFamily: font.italic, color: brand[600] }}>filing today?</Text>
-        </Text>
-        {/* Open arms: "hand it over". Worried at his desk if the last try failed. */}
-        <MascotFigure size={92} moment={phase === "error" ? "worried" : "present"} move={phase === "error" ? undefined : "sway"} hop />
-      </View>
+      <Text accessibilityRole="header" style={{ fontFamily: font.semibold, fontSize: 28, lineHeight: 33, letterSpacing: -0.8, color: ink[900] }}>
+        What are we filing today?
+      </Text>
       <Text style={{ fontFamily: font.regular, fontSize: 15, lineHeight: 20, color: ink[500], marginTop: 8 }}>
         I&apos;ll read it and pull out the key details. You check everything before it&apos;s saved.
       </Text>
@@ -478,7 +473,7 @@ export default function Scan() {
         <Text style={{ fontFamily: font.semibold, fontSize: 13, color: brand[600] }}>
           {docType && !MAIN.some((m) => m.type === docType) ? `Something else: ${DOC_TYPE_LABEL[docType]}` : "Something else"}
         </Text>
-        <ChevronDown size={15} color={brand[600]} style={{ transform: [{ rotate: moreTypes ? "180deg" : "0deg" }] }} />
+        <ChevronDown size={15} color={ink[900]} style={{ transform: [{ rotate: moreTypes ? "180deg" : "0deg" }] }} />
       </Tap>
       {moreTypes ? (
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingBottom: 4 }}>
@@ -614,8 +609,8 @@ function SharedCard({ file, onDrop }: { file: SharedFile; onDrop: () => void }) 
   return (
     <View style={[glassShadow, { marginTop: 18, borderRadius: 24, padding: 14, backgroundColor: "#fff", borderWidth: 1, borderColor: glass.rim, gap: 8 }]}>
       <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-        <Share2 size={13} color={brand[600]} />
-        <Text style={{ fontFamily: font.semibold, fontSize: 11, letterSpacing: 0.9, textTransform: "uppercase", color: brand[600] }}>Shared with Cheeku</Text>
+        <Share2 size={13} color={ink[900]} />
+        <Text style={{ fontFamily: font.medium, fontSize: 12, color: ink[500] }}>Shared with Cheeku</Text>
       </View>
       <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
         <View style={{ width: 48, height: 48, borderRadius: 16, backgroundColor: pdf ? hue.orange.bg : hue.blue.bg, alignItems: "center", justifyContent: "center" }}>

@@ -83,7 +83,7 @@ export default function Labs() {
       <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: insets.bottom + (cart.tests.length ? 110 : 30) }} showsVerticalScrollIndicator={false}>
         <Text accessibilityRole="header" style={{ fontFamily: font.medium, fontSize: 28, lineHeight: 36, letterSpacing: -1, color: ink[900], marginTop: 6 }}>
           Tests at home,{"\n"}
-          <Text style={{ fontFamily: font.italic, color: brand[600] }}>results in {member?.isPrimary === false ? `${first}'s` : "your"} file.</Text>
+          <Text style={{ color: ink[300] }}>results in {member?.isPrimary === false ? `${first}'s` : "your"} file.</Text>
         </Text>
         <View style={{ marginTop: 12 }}>
           <LocationChip profileId={member?.id} prefix="Collecting near" />
@@ -217,7 +217,7 @@ function AddButton({ added, onPress, dark }: { added: boolean; onPress: () => vo
       accessibilityLabel={added ? "Remove from cart" : "Add to cart"}
       onPress={onPress}
       hitSlop={6}
-      style={{ width: 40, height: 40, borderRadius: 999, alignItems: "center", justifyContent: "center", backgroundColor: added ? brand[700] : dark ? brand[600] : "#fff", borderWidth: added || dark ? 0 : 1, borderColor: "rgba(15,16,48,0.1)" }} scale={0.95}
+      style={{ width: 40, height: 40, borderRadius: 999, alignItems: "center", justifyContent: "center", backgroundColor: added ? brand[600] : dark ? ink[900] : "#fff", borderWidth: added || dark ? 0 : 1, borderColor: "rgba(15,16,48,0.1)" }} scale={0.95}
     >
       {added ? <Check size={18} color="#fff" strokeWidth={2.6} /> : <Plus size={18} color={dark ? "#fff" : ink[900]} strokeWidth={2.4} />}
     </Tap>
@@ -291,7 +291,7 @@ function PrescriptionSheet({ open, profileId, name, onClose }: { open: boolean; 
                   <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{r.title}</Text>
                   <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[500] }}>{[formatEventDate(r.eventDate), r.doctor].filter(Boolean).join(" · ")}</Text>
                 </View>
-                {on ? <Check size={18} color={brand[600]} /> : null}
+                {on ? <Check size={18} color={ink[900]} /> : null}
               </Tap>
             );
           })}

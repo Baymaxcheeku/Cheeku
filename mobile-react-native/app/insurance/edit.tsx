@@ -105,7 +105,7 @@ export default function EditPolicy() {
   return (
     <KeyboardAvoidingView className="flex-1 bg-canvas" behavior={Platform.OS === "ios" ? "padding" : undefined}>
       <Backdrop />
-      <ScreenHeader title={existing ? "Edit policy" : "Add a policy"} fallback="/insurance" />
+      <ScreenHeader fallback="/insurance" />
       <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 8, paddingBottom: insets.bottom + 120, gap: 18 }} showsVerticalScrollIndicator={false}>
         {!existing ? <PageTitle title="Your health insurance" line="The basics are enough to start. Everything else is optional." /> : null}
 
@@ -158,7 +158,7 @@ export default function EditPolicy() {
         <View style={[glassShadow, { backgroundColor: "#fff", borderRadius: 24, padding: 14, borderWidth: 1, borderColor: surface.line, gap: 10 }]}>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
             <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: brand[50], alignItems: "center", justifyContent: "center" }}>
-              <Paperclip size={18} color={brand[600]} />
+              <Paperclip size={18} color={ink[900]} />
             </View>
             <View style={{ flex: 1, minWidth: 0 }}>
               <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>
@@ -185,7 +185,7 @@ export default function EditPolicy() {
         <Tap accessibilityRole="button" accessibilityState={{ expanded: more }} onPress={() => setMore((m) => !m)} scale={0.99} style={{ flexDirection: "row", alignItems: "center", gap: 6, alignSelf: "flex-start", paddingVertical: 4 }}>
           <Text style={{ fontFamily: font.semibold, fontSize: 15, color: brand[600] }}>More about this policy</Text>
           <View style={{ transform: [{ rotate: more ? "180deg" : "0deg" }] }}>
-            <ChevronDown size={17} color={brand[600]} />
+            <ChevronDown size={17} color={ink[900]} />
           </View>
         </Tap>
 

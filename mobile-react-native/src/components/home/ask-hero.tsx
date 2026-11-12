@@ -128,7 +128,7 @@ export function HomeHeadline({ name, isSelf }: { name: string; isSelf: boolean }
     >
       {lead}
       {"\n"}
-      <Text style={{ fontFamily: font.italic, color: brand[600] }}>{accent}</Text>
+      <Text style={{ color: ink[300] }}>{accent}</Text>
     </Text>
   );
 }
@@ -355,7 +355,7 @@ export function CheekuCard({
             alignItems: "center",
           }}
         >
-          <View className="z-10 h-[52px] w-[52px] items-center justify-center rounded-pill" style={{ backgroundColor: brand[600] }}>
+          <View className="z-10 h-[52px] w-[52px] items-center justify-center rounded-pill" style={{ backgroundColor: ink[900] }}>
             <MessageCircleHeart size={21} color="#ffffff" strokeWidth={1.9} />
           </View>
           <Glass

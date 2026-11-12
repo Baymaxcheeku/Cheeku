@@ -228,7 +228,7 @@ export default function RecordDetailScreen() {
           <Card style={{ marginTop: 12 }}>
             <View className="flex-row items-start gap-3">
               <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: brand[50], alignItems: "center", justifyContent: "center" }}>
-                <BadgeCheck size={19} color={brand[600]} />
+                <BadgeCheck size={19} color={ink[900]} />
               </View>
               <View className="flex-1">
                 <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>Did I read this right?</Text>
@@ -250,7 +250,7 @@ export default function RecordDetailScreen() {
         {/* The original. */}
         {source ? (
           <Glass strong className="mt-5 flex-row items-center gap-3 rounded-xl p-4">
-            <BadgeCheck size={18} color={brand[600]} />
+            <BadgeCheck size={18} color={ink[900]} />
             <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 13, lineHeight: 19, color: ink[700] }}>
               {source === "lab_partner"
                 ? `Sent straight from ${(rec.extraction as { partner?: string }).partner ?? "the lab"}, so there is no scanned page. Every value is exactly as the lab reported it.`
@@ -268,7 +268,7 @@ export default function RecordDetailScreen() {
           {`Ask Cheeku about this ${noun}`}
         </PillButton>
         {rec.docType === "lab_report" || rec.docType === "scan" || rec.docType === "discharge" ? (
-          <PillButton tone="light" onPress={() => router.push("/book/consult")} icon={<Stethoscope size={18} color={brand[600]} />} style={{ marginTop: 10 }}>
+          <PillButton tone="light" onPress={() => router.push("/book/consult")} icon={<Stethoscope size={18} color={ink[900]} />} style={{ marginTop: 10 }}>
             Book a doctor about it
           </PillButton>
         ) : null}
@@ -414,7 +414,7 @@ function Insight({ record }: { record: Detail }) {
       <Gradient from={lilac.base} to={surface.tint} />
       <View className="flex-row items-center gap-2.5">
         <View className="h-9 w-9 items-center justify-center rounded-md bg-white">
-          <Lightbulb size={17} color={brand[600]} />
+          <Lightbulb size={17} color={ink[900]} />
         </View>
         <Text style={{ flex: 1, fontFamily: font.semibold, fontSize: 15, color: brand[700] }}>{insight.headline}</Text>
       </View>

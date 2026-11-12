@@ -40,7 +40,7 @@ export function ProductAssessmentCard({ assessment }: { assessment: ProductAsses
   return (
     <View className="min-w-0 gap-3">
       <View className="rounded-card p-3.5" style={{ backgroundColor: tone.bg }}>
-        <Text className="text-2xs font-bold uppercase tracking-wide text-ink-500">
+        <Text className="text-2xs font-bold text-ink-500">
           Overall safety
         </Text>
         <View className="mt-1.5 flex-row items-start gap-3">
@@ -83,7 +83,7 @@ export function ProductAssessmentCard({ assessment }: { assessment: ProductAsses
 
       {assessment.ingredients.length > 0 ? (
         <View className="rounded-card bg-surface p-3.5" style={{ borderWidth: 1, borderColor: surface.line }}>
-          <Text className="text-2xs font-bold uppercase tracking-wide text-ink-500">
+          <Text className="text-2xs font-bold text-ink-500">
             Ingredients
           </Text>
           <View className="mt-2 gap-2">

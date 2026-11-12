@@ -1,8 +1,7 @@
 import { Children, Fragment, isValidElement, type ReactNode } from "react";
 import { Text, type TextStyle } from "react-native";
 
-import { brand, lilac } from "@/theme/tokens";
-import { font } from "@/theme/type";
+import { lilac } from "@/theme/tokens";
 
 /*
  * THE WORDMARK.
@@ -18,12 +17,17 @@ import { font } from "@/theme/type";
  *
  * `onDark` swaps to a light violet for text on the ink and violet buttons,
  * where brand violet would vanish.
+ *
+ * NEUTRAL REDESIGN (November 2026): inside a sentence the name is now set in
+ * the sentence's own face and colour. A violet serif italic in the middle of
+ * every other line was one more thing competing for the eye. The serif
+ * wordmark lives where the product signs itself: onboarding and About.
  */
 export const BRAND_ON_DARK = lilac.deep;
 
 export function Brand({ ai = false, onDark = false, size, style }: { ai?: boolean; onDark?: boolean; size?: number; style?: TextStyle }) {
   return (
-    <Text style={[{ fontFamily: font.brand, color: onDark ? BRAND_ON_DARK : brand[600], letterSpacing: 0.1 }, size ? { fontSize: size } : null, style]}>
+    <Text style={[size ? { fontSize: size } : null, style]}>
       {ai ? "Cheeku AI" : "Cheeku"}
     </Text>
   );

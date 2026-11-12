@@ -4060,3 +4060,265 @@ Reported on an iPhone while moving around the app and going back: a red console 
 **Not verified:** on the iPhone itself. Typecheck, lint (0 errors) and all 560 tests pass.
 
 **Follow-up, same day.** The owner still saw the warning. One gap was left: Expo Router queues navigation, so a second tap on back while the screen is still sliding out reads the old stack, passes `canGoBack()`, and sends a GO_BACK with nowhere to go. `goBack` now ignores a repeat within 600ms, the length of the slide. Three tests cover back, fallback and the double tap. Note that `main` doesn't have any of this yet, so a build from `main` still shows the warning.
+
+## Neutral redesign, batch 0 and 1 · 2026-11-11
+
+**Why.** The owner's review: too many things competing on every screen, and
+a look that reads as generated. The reference they liked is a grey-white
+canvas, flat white cards, black actions and one accent used only for state.
+An audit of all 59 screens found the same causes everywhere: lavender on
+every surface, violet doing every job (buttons, links, icons, labels, hero
+cards), glass and shadow on every card, a colour per category, the mascot
+inside cards on 34 files, uppercase tracked labels, and violet italic
+headline lines.
+
+**Decisions (owner, 2026-11-11).** Neutral canvas with ink actions and violet
+as the single accent. The mascot stays in Ask, empty states and onboarding
+only, and stays the blob for now (the sparrow is the logo, not yet the app
+character). Restyle and declutter are allowed; flow, data and backend are not
+touched.
+
+**Batch 0, foundation.** Done in `src/theme/tokens.ts`, `tailwind.config.js`
+and the shared components, so most screens changed without being opened:
+
+- ink, canvas, surfaces and lines are neutral; `lilac.*` and every `hue.*`
+  resolve to neutrals; `brand` 50 to 300 are neutral and 400 up stay violet.
+- `Gradient` draws a flat fill (white, or its own first stop when dark, or
+  nothing when it fades into the canvas). `Backdrop` draws nothing.
+- `glass.fill` is the canvas grey (a chip on a white card), `fillStrong` is
+  white (a panel on the canvas); shadows are near zero except `e2`.
+- `Button`, `PillButton`, `GlassCircle dark`, save bars and message bubbles
+  are ink. A scripted pass moved 47 solid violet backgrounds to ink and 204
+  unconditional icon colours to ink; ticks, badges, toggles, selection and
+  links keep violet.
+- `<Brand />` inside a sentence is plain text; `type.eyebrow` and 29 inline
+  uppercase labels are sentence-case captions.
+
+**Batch 1, core tabs.** Home, Today's plan, Ask, Records, Profile: mascot out
+of cards and headers, text at full width, grey second headline line, grey
+plan sub-lines, no sparkle icons.
+
+**Still to do.** Batches 2 to 6 (records and health, family, booking,
+settings, onboarding): per-screen leftovers such as hard-coded pink, teal and
+peach fills, mascots in cards and stacked boxes.
+
+**Verified.** `tsc` and 563 vitest tests pass. Screens were looked at in the
+web build against the local mock backend only. ESLint would not start in the
+cloud session (module resolution error), so lint was not run. Not verified on
+a device.
+
+## Neutral redesign, batch 2 and 3 · 2026-11-11
+
+Records and health (record detail, prescription check, health file, medicines,
+memory, add a record, conversations) and family (family, add member, member,
+family care, notifications). The foundation had already carried most of it;
+this pass cleared what it could not reach:
+
+- Buttons whose violet sat behind a condition (`dark ? brand[600] : ...`) are
+  ink: the medicines and memory pills, task card actions, family care's
+  "Open day", the confirm sheet, the settings save bar, the slot CTA.
+- Notifications: rows are plain white, no amber wash or left rule; unread is
+  one violet dot; the row action is a quiet chip, not a filled pill.
+- Add a record: no mascot beside the headline, and the headline is one line.
+- Every violet italic headline line in the app is a grey second line.
+- Screens that showed a header title above a page title keep the page title
+  only (family, insurance, lab bookings, choose a lab, appointments).
+- Medicines stat labels and the reading sheet label are sentence case.
+- The photo buttons on a member page are grey fills, not violet dashes.
+
+Verified the same way as batch 1: `tsc`, 563 tests, web build screenshots.
+Not verified on a device.
+
+## Neutral redesign, batch 4 and 5 · 2026-11-11
+
+Booking and services (services, doctors, booking flow, appointments, labs,
+fitness, insurance) and settings, legal, learn and articles. Again the
+foundation had done most of it; this pass cleared the rest:
+
+- Service tiles are compact white cards: icon in a grey square, title, line,
+  grey chevron. The corner art, floating dots and violet arrow circle are
+  gone, so four services fit where two did.
+- The mascot leaves "Just tell Cheeku what you need", "Not sure who to see?"
+  and the Help header. Those cards use the full width for words.
+- Lab test and lab partner pages lose the tall empty hero; a small icon or
+  badge sits above the title.
+- Fitness reason chips are grey text, no sparkle; one per card is enough.
+- The plan card and the featured plan are ink, not violet.
+- Learn and articles: one neutral style for every category in place of teal,
+  blue, rose and orange sets.
+- Settings mini-labels (`Eyebrow`) default to grey; "On this phone", "In
+  short" and "What changed" are sentence case.
+
+Verified the same way: `tsc`, 563 tests, web build screenshots. Not verified
+on a device.
+
+## Neutral redesign, batch 6 and 7 · 2026-11-11
+
+**Batch 6, onboarding and sign-in.** The mascot stays here by the owner's
+choice, so this changed least: the second headline line and the step label
+are grey instead of violet (`OnboardingHeadline`, `StepLabel` in
+`components/onboarding/chrome.tsx`, plus welcome and sign-in), the welcome
+chapter and journey icons are ink, and "Choose a file" on the first report
+card is ink on white.
+
+**Batch 7, final sweep.** A search of every screen and component for what a
+route-by-route pass misses:
+
+- The last decorative hard-coded colours (record type tints, lab test art,
+  appointment and refund labels) resolve to the neutral ink. What is left
+  with a colour of its own carries health meaning (the records pulse bar,
+  the semantic set) or is onboarding art.
+- The mascot leaves three more cards: the health file strip on Home, the
+  scan review header and the push permission prompt (now a bell icon).
+- Every remaining mascot was checked against the rule: Ask and chat turns,
+  empty and loading states, success and celebration moments, onboarding, the
+  app lock and consent gates, and About.
+
+All seven batches are done. Verified the same way throughout: `tsc`, 563
+tests, web build screenshots against the local mock backend. ESLint could not
+run in the cloud session. Nothing here has been verified on a device.
+
+## Phone test of the redesign: four fixes · 2026-11-11
+
+The owner ran `main` on an iPhone in Expo Go after batch 7.
+
+**Sign-out logged "A query that was dehydrated as pending ended up
+rejecting [home-context]: signed out".** `persistOptions` passes its own
+`shouldDehydrateQuery` (the allowlist), which replaces the library's default,
+and the default is the check that a query succeeded. So a read still in
+flight was written out with its promise, and sign-out rejects home-context
+mid-flight. `shouldPersistQuery` now also requires `status === "success"`;
+`cache.test.ts` covers pending and error.
+
+**Every face was a bare coloured circle.** Not caused by the redesign: the
+avatar code and the PNGs are unchanged and the faces draw in the web build.
+It is the Expo Go behaviour first seen on 2026-11-01. The cause is still not
+known from a cloud session. `Avatar` no longer leaves a blank disc: if the
+face reports an error, or has not drawn within 900 ms, a person glyph stands
+in, and goes when the face draws. The development warning still fires and
+is what will name the cause.
+
+**Record cards looked broken.** The icon tile was white on a white card
+after the gradients went flat, leaving a violet icon floating beside a blank
+avatar. The tile is the canvas grey, the icon ink, the type label grey.
+
+**"Ask Ch..." in the tab bar.** The name is set in Inter now and no longer
+fits; the tab reads "Ask" (the accessibility label is still "Ask Cheeku").
+
+Verified: `tsc`, 564 tests, web build screenshots. Not verified on a device.
+
+## Wearables module · 2026-11-11
+
+Phones and watches now feed Cheeku, built as a layer the main app does not
+know about.
+
+**Plug and play.** `src/lib/extensions` gives the main app four slots: a Home
+card, a Profile row, chat notes and a sign-out hook. A crashing card hides
+itself, chat notes time out after 1.2 s and are capped. The wearables module
+fills the slots from one import line in `app/_layout.tsx`. Removing that line
+(or `EXPO_PUBLIC_WEARABLES=off`) leaves the app exactly as before. The module
+README lists every step to remove it for good.
+
+**Sources.** Apple Health (`@kingstinct/react-native-healthkit`, read only),
+Health Connect (`react-native-health-connect`, eleven read permissions),
+Google Health API for Fitbit and Pixel Watch (through the new
+`wearables-google` Edge Function, off by default), Strava as a guide to
+switch on its health-app sharing (its API terms forbid AI use of its data).
+In Expo Go and on the web, labelled sample data shows how it looks; it is
+never stored on the server or given to the chat.
+
+**Where it goes.** Days from all sources merge into one summary a day
+(`merge.ts`: totals take the largest, readings follow a source priority,
+workouts dedupe within ten minutes). They are kept on the phone and upserted
+to `wearable_days` (migration 0044) for the longevity engine. Today's steps go
+into `daily_logs` as an ordinary steps row, so Today's plan picks them up with
+no change to its code. Chat gets two or three short lines of real trends.
+
+**Screens.** Connect a device, Your body (steps ring, week of tiles,
+workouts, connected list), a page per metric (14-day bars, average, best,
+what it means, a caution note on device readings, Ask Cheeku), and a Home
+card "Your body today" for the account holder only.
+
+**Backend.** 0044 adds `wearable_days` (RLS, own family only, sane value
+checks) and two locked tables for the Google sign-in that the app cannot
+read. Manual step `0044-step-1-of-1.sql` and `0044-check.sql`.
+`wearables-google` does the OAuth with a single-use ten-minute state, keeps
+the refresh token server side, and returns daily roll-ups. Google's roll-up
+field names are read defensively and need one check against a real test
+account.
+
+Verified: `tsc`, 589 tests (25 new), `expo config` with the three new plugins,
+web build screenshots with sample data. Not verified on a device: HealthKit
+and Health Connect need an EAS build.
+
+## Faces that go blank, and the swipeable "Your body today" · 2026-11-11
+
+**Faces.** On the owner's iPhone in Expo Go, faces drew on Home and came up
+as the person glyph on Profile and in the family sheet (and, before the
+glyph, as empty circles on Add a record and the chat header). No error was
+ever raised, which is why the earlier logging caught nothing. What the
+screens have in common: Home mounts first, and every later screen asks React
+Native's `<Image>` for the same bundled picture at a different size. On iOS
+each new size is a fresh request to the dev server, and some of those never
+finish and never fail. Avatars, Cheeku's face and stills, and the onboarding
+faces now draw through `expo-image`, which keeps one decoded copy of each
+picture in memory and on disk and reuses it at any size. A face that has not
+drawn after 1.2 s is asked for again, twice at most, with the glyph in the
+meantime. `expo-image` ships in Expo Go, so no new build is needed.
+
+**Your body today.** The three fixed tiles became a strip you swipe sideways
+without leaving Home: every metric with a reading this week (`lensTiles`),
+the slide in the middle in focus with viewfinder corners, its neighbours
+turned away round a barrel, a ruler of ticks sliding underneath with a long
+tick per metric, one haptic tick when it settles, a small nudge once per
+visit to show it moves. Tap the slide in focus to open that metric; tap a
+neighbour to bring it to the middle. Reduce Motion gets a plain paging row.
+Screen readers get it as one adjustable control.
+
+Verified: `tsc`, all tests (2 new), web build screenshots of Profile faces
+and the strip at three scroll positions. Not verified on a phone: snapping
+and the haptic tick only happen on a device.
+
+## Chat reads everything: longevity areas, the world around a person, the sparrow's voice · 2026-11-11
+
+The owner asked for Cheeku's chat to read and act on everything, feeding a
+longevity engine, with a written prompt ready for Archit, who connects the
+real model this week. Their answers: prompt and contract now, stand-in
+conversations until then; voice a playful sparrow; the chat can log, set
+goals, start bookings, run a weekly check-in and a family round-up; the
+longevity engine is areas and trends, no score.
+
+**Longevity engine** (`src/lib/longevity`). Six areas (heart and BP, sugar,
+sleep, movement, weight, check-ups), each on track / watch / act with a plain
+reason, from report values, readings said in chat, open follow-ups, and the
+watch through a new fifth extension slot, `longevitySignals`. Worst signal
+wins, numbers older than 18 months are dropped, children get check-ups and
+watch areas only, Indian BMI cut-offs. No score, by decision.
+
+**World** (`src/lib/chat/world.ts`). Each turn now also carries the areas,
+today's goal and logs, bookings coming up and just done (doctor, home test,
+class), the watch's lines, and, only from the account holder's own chat when
+asked "how is everyone", one line per family member. Best effort, 1.5 s cap.
+The family sheet's privacy line now says so.
+
+**Actions** (`src/lib/chat/actions.ts`, `safe-actions.ts`). A reply can carry
+up to three buttons: make a goal (writes `daily_prefs.goal`, so tomorrow's
+plan follows) or open an allowed screen. Anything else is dropped. Steps and
+sleep said in a message ("walked 6k", "slept 5 hours", "soya 7 ghante") are
+saved to `daily_logs` before the answer and acknowledged in it.
+
+**The sparrow** (`src/lib/memory/sparrow.ts`). Scripted stand-in turns in
+Cheeku's voice for: how am I doing, the week (with Tired / Okay / Flying),
+goals, the watch, bookings, the family round-up, and logged activity. They
+never run on a symptom or when the floor is monitor or higher.
+
+**For Archit.** `supabase/functions/cheeku-chat/prompt.ts` has the system
+prompt, the reply JSON schema and `renderRequest()`; the Edge Function now
+passes `actions` through; the guide with the golden conversations and a
+ten-point check is `docs/master/CHEEKU_CHAT_PROMPT.md`.
+
+Also: lines from optional layers were being shown under every answer as
+info callouts. They now reach the model only.
+
+Verified: `tsc`, 603 tests (12 new), web build: five flows driven end to
+end on the story family with sample watch data. Not verified on a phone.

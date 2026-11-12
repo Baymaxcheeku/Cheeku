@@ -21,6 +21,8 @@ const eslintConfig = [
       "mobile-react-native/marketing/**",
       // Deno code, deployed to Supabase, with its own imports and globals.
       "mobile-react-native/supabase/functions/**",
+      // The marketing site: its own project with its own tooling.
+      "landing/**",
     ],
   },
   ...compat.extends("next/core-web-vitals", "next/typescript"),

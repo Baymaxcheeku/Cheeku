@@ -17,8 +17,8 @@ import { Tap } from "@/components/ui/tap";
  * place.
  */
 
-export function Eyebrow({ children, color = brand[600] }: { children: string; color?: string }) {
-  return <Text style={{ fontFamily: font.semibold, fontSize: 12, letterSpacing: 1.1, textTransform: "uppercase", color }}>{children}</Text>;
+export function Eyebrow({ children, color = ink[500] }: { children: string; color?: string }) {
+  return <Text style={{ fontFamily: font.medium, fontSize: 12, color }}>{children}</Text>;
 }
 
 export function Title({ children }: { children: React.ReactNode }) {
@@ -104,7 +104,7 @@ export function Reason({ icon: Icon, lead, text }: { icon: LucideIcon; lead: str
   return (
     <View style={{ flexDirection: "row", gap: 12, alignItems: "flex-start" }}>
       <View style={{ width: 34, height: 34, borderRadius: 12, backgroundColor: brand[50], alignItems: "center", justifyContent: "center" }}>
-        <Icon size={16} color={brand[600]} />
+        <Icon size={16} color={ink[900]} />
       </View>
       <View style={{ flex: 1 }}>
         <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{lead}</Text>

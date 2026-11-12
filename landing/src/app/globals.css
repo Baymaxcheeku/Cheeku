@@ -1,0 +1,119 @@
+@import "tailwindcss";
+
+/*
+ * Structure studied from octohealth.com (see docs/research/octohealth):
+ * a full-screen photograph, a calm serif with italic emphasis, pill buttons,
+ * photo cards, moving chips, stacked cards, one pinned rotating wheel.
+ * Everything else is Cheeku's: the words, the purple, the photographs of
+ * Indian families and the real app screens.
+ *
+ * Colour by weight: 60% white, 30% brand purple, 10% marigold for the one
+ * call to action.
+ */
+@theme {
+  --color-page: #ffffff;
+  --color-soft: #f8f6fd;
+  --color-hair: rgb(26 18 74 / 0.1);
+
+  --color-ink: #17123a;
+  --color-ink-2: #4b4768;
+  --color-ink-3: #6f6b8c;
+
+  --color-purple-50: #f4f1ff;
+  --color-purple-100: #e9e4ff;
+  --color-purple-200: #d6cdfd;
+  --color-purple-300: #b9adf9;
+  --color-purple-500: #5b4ef0;
+  --color-purple-600: #4a2ade;
+  --color-purple-700: #3b22c4;
+  --color-purple-900: #1f1573;
+  --color-purple-950: #130d4d;
+
+  --color-loud: #ff6a2b;
+  --color-loud-hover: #ff7c44;
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-serif), ui-serif, Georgia, serif;
+
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --shadow-sm: 0 1px 2px rgb(23 18 58 / 0.06);
+  --shadow-md: 0 10px 30px -8px rgb(23 18 58 / 0.14);
+  --shadow-lg: 0 30px 70px -24px rgb(23 18 58 / 0.38);
+
+  --animate-slide: slide 60s linear infinite;
+  --animate-slide-back: slide 72s linear infinite reverse;
+
+  @keyframes slide {
+    to { transform: translateX(-50%); }
+  }
+}
+
+html {
+  background: var(--color-page);
+  color: var(--color-ink);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  scroll-behavior: smooth;
+  scroll-padding-top: 96px;
+  scrollbar-color: var(--color-purple-300) transparent;
+  caret-color: var(--color-purple-600);
+}
+
+body {
+  font-family: var(--font-sans);
+  overflow-x: clip;
+}
+
+::selection {
+  background: var(--color-purple-600);
+  color: white;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-purple-600);
+  outline-offset: 3px;
+  border-radius: 12px;
+}
+
+/* The display voice: one serif, regular weight, italic for the words that matter. */
+@utility display {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 1.02;
+  text-wrap: balance;
+}
+
+/* A sheet of glass over a photograph: what is behind it stays visible, softened. */
+@utility glass {
+  background: rgb(255 255 255 / 0.14);
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  border: 1px solid rgb(255 255 255 / 0.24);
+}
+
+@utility glass-white {
+  background: rgb(255 255 255 / 0.82);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid rgb(255 255 255 / 0.9);
+  box-shadow: var(--shadow-md);
+}
+
+.paused * {
+  animation-play-state: paused !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation: none !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .glass { background: var(--color-purple-900); backdrop-filter: none; }
+  .glass-white { background: white; backdrop-filter: none; }
+}

@@ -61,7 +61,7 @@ export default function LabBookings() {
   return (
     <View className="flex-1 bg-canvas">
       <Backdrop />
-      <ScreenHeader title="Lab bookings" fallback="/labs" />
+      <ScreenHeader fallback="/labs" />
       <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: insets.bottom + 30 }} refreshControl={<RefreshControl refreshing={bookings.isRefetching} onRefresh={() => void bookings.refetch()} tintColor={brand[600]} />}>
         <PageTitle title="Your lab tests" line="The whole family's, each report filed with the right person." style={{ marginTop: 6 }} />
         {open.length ? <Text style={{ fontFamily: font.semibold, fontSize: 13, color: ink[500], marginTop: 20, marginBottom: 8 }}>In progress</Text> : null}
@@ -71,7 +71,7 @@ export default function LabBookings() {
         {bookings.isPending ? <CardListSkeleton count={3} /> : null}
         {bookings.isSuccess && all.length === 0 ? (
           <Glass strong className="mt-6 items-center rounded-2xl px-6 py-8">
-            <FlaskConical size={30} color={brand[600]} />
+            <FlaskConical size={30} color={ink[900]} />
             <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900], marginTop: 10 }}>No lab tests yet</Text>
             <Text style={{ fontFamily: font.regular, fontSize: 15, lineHeight: 20, color: ink[500], marginTop: 4, textAlign: "center" }}>
               Book a home collection and the report files itself.

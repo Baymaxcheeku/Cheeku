@@ -4,7 +4,6 @@ import { ScrollView, Text, TextInput, View } from "react-native";
 import Animated, { FadeIn, LinearTransition } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { MascotFigure } from "@/components/illustrations/sprout";
 import { TYPE_STYLE } from "@/components/records/record-card";
 import { Avatar } from "@/components/ui/avatar";
 import { glass, glassShadow } from "@/components/ui/glass";
@@ -79,7 +78,7 @@ export function ScanConfirm({
           <View style={{ flex: 1 }}>
             <Text accessibilityRole="header" style={{ fontFamily: font.medium, fontSize: 28, lineHeight: 34, letterSpacing: -1, color: ink[900] }}>
               {doubtful.length ? "Did I read\n" : "All read\n"}
-              <Text style={{ fontFamily: font.italic, color: brand[600] }}>{doubtful.length ? "this right?" : "clearly."}</Text>
+              <Text style={{ color: ink[300] }}>{doubtful.length ? "this right?" : "clearly."}</Text>
             </Text>
             <Text style={{ fontFamily: font.regular, fontSize: 15, lineHeight: 21, color: ink[500], marginTop: 6 }}>
               {doubtful.length
@@ -87,7 +86,6 @@ export function ScanConfirm({
                 : "Have a quick look, then save it to the file."}
             </Text>
           </View>
-          <MascotFigure size={84} moment={doubtful.length ? "present" : "celebrate"} move="sway" hop />
         </View>
 
         {/* What it is and whose. */}
@@ -97,7 +95,7 @@ export function ScanConfirm({
               <Icon size={24} color={style.tint} />
             </View>
             <View style={{ flex: 1, minWidth: 0 }}>
-              <Text style={{ fontFamily: font.semibold, fontSize: 11, letterSpacing: 0.9, textTransform: "uppercase", color: style.tint }}>{DOC_TYPE_LABEL[extraction.docType]}</Text>
+              <Text style={{ fontFamily: font.medium, fontSize: 12, color: style.tint }}>{DOC_TYPE_LABEL[extraction.docType]}</Text>
               <Text numberOfLines={2} style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>{extraction.title}</Text>
             </View>
             {member ? (
@@ -129,7 +127,7 @@ export function ScanConfirm({
               style={{ flexDirection: "row", alignItems: "center", gap: 10, padding: 14 }}
             >
               <View style={{ width: 28, height: 28, borderRadius: 999, backgroundColor: brand[50], alignItems: "center", justifyContent: "center" }}>
-                <Check size={15} color={brand[600]} strokeWidth={3} />
+                <Check size={15} color={ink[900]} strokeWidth={3} />
               </View>
               <Text style={{ flex: 1, fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>
                 {clear.length} read clearly
@@ -199,7 +197,7 @@ function CheckRow({
       ]}
     >
       <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-        {done ? <Check size={15} color={brand[600]} strokeWidth={3} /> : <CircleHelp size={15} color={hue.orange.fg} />}
+        {done ? <Check size={15} color={ink[900]} strokeWidth={3} /> : <CircleHelp size={15} color={hue.orange.fg} />}
         <Text style={{ flex: 1, fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{item.label}</Text>
         <Text style={{ fontFamily: font.medium, fontSize: 11, color: done ? brand[600] : hue.orange.fg }}>{done ? "Checked" : "Not sure"}</Text>
       </View>

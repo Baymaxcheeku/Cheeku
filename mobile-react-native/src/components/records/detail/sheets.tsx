@@ -89,7 +89,7 @@ export function OptionsSheet({
                   <Text style={{ fontFamily: font.semibold, fontSize: 15, color }}>{o.label}</Text>
                   {o.sub ? <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 1 }}>{o.sub}</Text> : null}
                 </View>
-                {busy ? <ActivityIndicator color={brand[600]} /> : o.selected ? <Check size={18} color={brand[600]} strokeWidth={2.6} /> : null}
+                {busy ? <ActivityIndicator color={ink[900]} /> : o.selected ? <Check size={18} color={ink[900]} strokeWidth={2.6} /> : null}
               </Pressable>
             );
           })}

@@ -35,7 +35,7 @@ export function RemindersPrompt({ meds }: { meds: boolean }) {
   return (
     <View className="mx-5 mt-4 flex-row items-center gap-3 rounded-xl p-3.5" style={[glassShadow, { backgroundColor: "#fff", borderWidth: 1, borderColor: surface.line }]}>
       <View className="h-10 w-10 items-center justify-center rounded-lg" style={{ backgroundColor: lilac.base }}>
-        <BellRing size={18} color={brand[600]} />
+        <BellRing size={18} color={ink[900]} />
       </View>
       <View className="min-w-0 flex-1">
         <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{meds ? "Get a nudge at dose time" : "Get a nudge at the right time"}</Text>
@@ -48,7 +48,7 @@ export function RemindersPrompt({ meds }: { meds: boolean }) {
           void enablePush().then(() => qc.invalidateQueries({ queryKey: ["push-permission"] }));
         }}
         className="h-9 items-center justify-center rounded-pill px-3.5"
-        style={{ backgroundColor: brand[600] }}
+        style={{ backgroundColor: ink[900] }}
       >
         <Text style={{ fontFamily: font.semibold, fontSize: 13, color: "#fff" }}>Turn on</Text>
       </Tap>

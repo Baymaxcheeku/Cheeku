@@ -1,3 +1,4 @@
+import { extensions } from "@/lib/extensions";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import {
@@ -42,7 +43,6 @@ import {
 } from "@/lib/account/actions";
 import { Tap } from "@/components/ui/tap";
 import { Sheet } from "@/components/ui/sheet";
-import { CheekuPeek } from "@/components/mascot/lottie";
 import { Avatar } from "@/components/ui/avatar";
 import { Glass, Gradient, glass, glassShadow } from "@/components/ui/glass";
 import { Backdrop } from "@/components/ui/screen";
@@ -165,7 +165,6 @@ export default function Settings() {
        * sits behind the card so only his head and shoulders ever show.
        */}
       <View className="mx-5 mt-4">
-        <CheekuPeek size={80} moment="idle" style={{ position: "absolute", right: 22, top: -44 }} />
       <View className="overflow-hidden rounded-2xl p-4" style={glassShadow}>
         <Gradient from="#ffffff" to={lilac.base} glow="#ffffff" />
         <View className="flex-row items-center gap-3.5">
@@ -202,7 +201,7 @@ export default function Settings() {
           ]}
           scale={0.98}
         >
-          <View className="h-10 w-10 items-center justify-center rounded-pill" style={{ backgroundColor: brand[600] }}>
+          <View className="h-10 w-10 items-center justify-center rounded-pill" style={{ backgroundColor: ink[900] }}>
             <Crown size={17} color="#fff" />
           </View>
           <View className="min-w-0 flex-1">
@@ -214,7 +213,7 @@ export default function Settings() {
             </Text>
           </View>
           <Text style={{ fontFamily: font.semibold, fontSize: 13, color: brand[600] }}>{canUpgrade ? "Upgrade" : "Manage"}</Text>
-          <ChevronRight size={15} color={brand[600]} />
+          <ChevronRight size={15} color={ink[900]} />
         </Tap>
       </View>
       </View>
@@ -249,6 +248,7 @@ export default function Settings() {
         <Row icon={UserCog} title="Personal information" body="Name, date of birth and contact" href="/settings/personal" />
         <Row icon={HeartPulse} title="Health profile" body="Conditions, allergies and medicines" href="/settings/health" />
         <Row icon={ShieldPlus} title="Insurance" body="Your family's cover and what it includes" href="/insurance" />
+        {extensions().map((e) => (e.profileRow ? <Row key={e.id} icon={e.profileRow.icon as never} title={e.profileRow.title} body={e.profileRow.body} href={e.profileRow.href as never} /> : null))}
         <LocationRow />
         <Row icon={ShieldCheck} title="Security" body="App lock, password and sign-ins" href="/settings/security" />
         <Row icon={LockKeyhole} title="Privacy & consent" body="Your choices, documents and rights" href="/settings/privacy" />
@@ -452,7 +452,7 @@ function AccountData({ onDeleted }: { onDeleted: () => void }) {
   return (
     <>
       <View className="mt-6">
-        <Text className="px-5 text-xs font-bold uppercase tracking-wide text-ink-300">
+        <Text className="px-5 text-xs font-bold text-ink-300">
           Your data
         </Text>
         <View className="mx-5 mt-2 overflow-hidden rounded-card bg-surface" style={shadow.e1}>
@@ -464,9 +464,9 @@ function AccountData({ onDeleted }: { onDeleted: () => void }) {
           >
             <View className="h-9 w-9 items-center justify-center rounded-tile bg-brand-50">
               {busy === "export" ? (
-                <ActivityIndicator size="small" color={brand[600]} />
+                <ActivityIndicator size="small" color={ink[900]} />
               ) : (
-                <Download size={17} color={brand[600]} />
+                <Download size={17} color={ink[900]} />
               )}
             </View>
             <View className="min-w-0 flex-1">
@@ -620,7 +620,7 @@ function Row({
       style={{ borderBottomWidth: 1, borderBottomColor: "rgba(15,16,48,0.05)" }}
     >
       <View className="h-10 w-10 items-center justify-center rounded-md" style={{ backgroundColor: brand[50] }}>
-        <Icon size={18} color={brand[600]} strokeWidth={1.9} />
+        <Icon size={18} color={ink[900]} strokeWidth={1.9} />
       </View>
       <View className="min-w-0 flex-1">
         <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{brandify(title)}</Text>

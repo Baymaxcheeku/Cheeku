@@ -72,7 +72,7 @@ export default function Chats() {
 
         {groups.map((g) => (
           <View key={g.month} style={{ gap: 8 }}>
-            <Text style={{ fontFamily: font.semibold, fontSize: 12, letterSpacing: 0.6, textTransform: "uppercase", color: ink[500] }}>{g.month}</Text>
+            <Text style={{ fontFamily: font.medium, fontSize: 12, color: ink[500] }}>{g.month}</Text>
             <View style={[glassShadow, { borderRadius: 24, backgroundColor: "#fff", overflow: "hidden" }]}>
               {g.items.map((s, i) => (
                 <Pressable

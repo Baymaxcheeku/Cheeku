@@ -79,7 +79,7 @@ export function CareSection() {
         </View>
         <Tap accessibilityRole="button" onPress={() => open("/services")} hitSlop={8} style={{ flexDirection: "row", alignItems: "center", gap: 2, paddingBottom: 2 }}>
           <Text style={{ fontFamily: font.semibold, fontSize: 13, color: brand[600] }}>See all</Text>
-          <ChevronRight size={15} color={brand[600]} />
+          <ChevronRight size={15} color={ink[900]} />
         </Tap>
       </View>
 

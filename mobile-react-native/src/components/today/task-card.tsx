@@ -11,7 +11,6 @@ import {
   Pill,
   Plus,
   Salad,
-  Sparkles,
   Stethoscope,
   Timer,
   Undo2,
@@ -66,7 +65,7 @@ function SmallButton({ label, onPress, dark, icon: Icon }: { label: string; onPr
         flexDirection: "row",
         alignItems: "center",
         gap: 6,
-        backgroundColor: dark ? brand[600] : "#fff",
+        backgroundColor: dark ? ink[900] : "#fff",
         borderWidth: dark ? 0 : 1,
         borderColor: surface.line,
       }}
@@ -136,10 +135,7 @@ export function TaskCard({
       </View>
 
       {task.reason ? (
-        <View className="mt-3 flex-row items-center gap-1.5">
-          <Sparkles size={13} color={brand[600]} />
-          <Text style={{ flex: 1, fontFamily: font.medium, fontSize: 13, color: brand[700] }}>{task.reason}</Text>
-        </View>
+        <Text style={{ fontFamily: font.medium, fontSize: 13, color: brand[600], marginTop: 12 }}>{task.reason}</Text>
       ) : null}
       {!done || task.kind === "meal" ? (
         <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 18.5, color: ink[700], marginTop: task.reason ? 4 : 8 }}>
@@ -165,7 +161,7 @@ export function TaskCard({
             </Text>
             {proof ? (
               <View className="flex-row items-center gap-1">
-                <BadgeCheck size={13} color={brand[600]} />
+                <BadgeCheck size={13} color={ink[900]} />
                 <Text style={{ fontFamily: font.semibold, fontSize: 12, color: brand[700] }}>Screenshot added</Text>
               </View>
             ) : null}
@@ -291,7 +287,7 @@ export function TaskRow({ task, onExpand, onDone }: { task: PlanTask; onExpand: 
     <View className="flex-row items-center gap-3 py-2.5">
       <Tap accessibilityRole="button" accessibilityLabel={`${task.title}. Show details`} onPress={onExpand} scale={0.98} className="min-w-0 flex-1 flex-row items-center gap-3">
         <View className="h-9 w-9 items-center justify-center rounded-md" style={{ backgroundColor: done ? brand[600] : brand[50] }}>
-          {done ? <Check size={16} color="#fff" strokeWidth={3} /> : <Icon size={17} color={brand[600]} strokeWidth={1.9} />}
+          {done ? <Check size={16} color="#fff" strokeWidth={3} /> : <Icon size={17} color={ink[900]} strokeWidth={1.9} />}
         </View>
         <View className="min-w-0 flex-1">
           <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 15, color: done ? ink[500] : ink[900] }}>
@@ -304,7 +300,7 @@ export function TaskRow({ task, onExpand, onDone }: { task: PlanTask; onExpand: 
       </Tap>
       {quick ? (
         <Tap accessibilityRole="button" accessibilityLabel={`Done: ${task.title}`} onPress={onDone} scale={0.95} hitSlop={6} className="h-9 w-9 items-center justify-center rounded-pill" style={{ borderWidth: 1.5, borderColor: brand[200] }}>
-          <Check size={16} color={brand[600]} strokeWidth={2.6} />
+          <Check size={16} color={ink[900]} strokeWidth={2.6} />
         </Tap>
       ) : null}
     </View>

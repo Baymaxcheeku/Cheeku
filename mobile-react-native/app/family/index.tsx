@@ -43,7 +43,7 @@ export default function Family() {
   return (
     <View className="flex-1 bg-canvas">
       <Backdrop />
-      <ScreenHeader title="Family" fallback="/settings" />
+      <ScreenHeader fallback="/settings" />
       <ScrollView
         contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: insets.bottom + 28 }}
         showsVerticalScrollIndicator={false}

@@ -209,7 +209,7 @@ export default function SignIn() {
           <View className="flex-1 pb-3">
             <Text accessibilityRole="header" style={type.title}>
               Welcome to{"\n"}
-              <Text style={{ color: brand[600] }}><Brand ai /></Text>
+              <Text style={{ color: ink[300] }}><Brand ai /></Text>
             </Text>
           </View>
           <View className="items-center">
@@ -217,7 +217,7 @@ export default function SignIn() {
               <View
                 accessibilityLiveRegion="polite"
                 className="rounded-lg px-3 py-1.5"
-                style={[shadow.e1, { backgroundColor: brand[600], borderBottomRightRadius: 4 }]}
+                style={[shadow.e1, { backgroundColor: ink[900], borderBottomRightRadius: 4 }]}
               >
                 <Text style={{ fontFamily: font.bold, fontSize: 13, color: "#ffffff" }}>{copy.greet}</Text>
               </View>
@@ -402,7 +402,7 @@ function PasswordMeter({ length }: { length: number }) {
   return (
     <View className="mt-2.5 flex-row items-center gap-2.5">
       <View className="flex-1">
-        <FillBar value={length / MIN_PASSWORD} color={brand[600]} track={brand[100]} height={5} />
+        <FillBar value={length / MIN_PASSWORD} color={ink[900]} track={brand[100]} height={5} />
       </View>
       <Text style={{ fontFamily: font.semibold, fontSize: 12, color: done ? brand[700] : ink[500] }}>
         {done

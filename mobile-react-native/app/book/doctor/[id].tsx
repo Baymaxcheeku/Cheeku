@@ -121,9 +121,9 @@ export default function DoctorProfile() {
           </View>
 
           <View style={{ flexDirection: "row", gap: 8, marginTop: 14 }}>
-            <Fact icon={<GraduationCap size={16} color={brand[600]} />} label="Experience" value={`${d.years} years`} />
-            <Fact icon={<Languages size={16} color={brand[600]} />} label="Speaks" value={d.languages.slice(0, 2).join(", ") + (d.languages.length > 2 ? ` +${d.languages.length - 2}` : "")} />
-            <Fact icon={<ShieldCheck size={16} color={brand[600]} />} label="Degree" value={d.qualifications.split(",")[0] ?? ""} />
+            <Fact icon={<GraduationCap size={16} color={ink[900]} />} label="Experience" value={`${d.years} years`} />
+            <Fact icon={<Languages size={16} color={ink[900]} />} label="Speaks" value={d.languages.slice(0, 2).join(", ") + (d.languages.length > 2 ? ` +${d.languages.length - 2}` : "")} />
+            <Fact icon={<ShieldCheck size={16} color={ink[900]} />} label="Degree" value={d.qualifications.split(",")[0] ?? ""} />
           </View>
 
           <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900], marginTop: 26, marginBottom: 8 }}>About {firstName}</Text>
@@ -170,7 +170,7 @@ export default function DoctorProfile() {
         <View style={[glassShadow, { height: 58, paddingHorizontal: 22, borderRadius: 999, backgroundColor: "#fff", justifyContent: "center" }]}>
           <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>₹{d.fee[mode]}</Text>
         </View>
-        <Tap accessibilityRole="button" onPress={book} style={[glassShadow, { flex: 1, height: 58, borderRadius: 999, backgroundColor: brand[600], alignItems: "center", justifyContent: "center" }]} scale={0.98}>
+        <Tap accessibilityRole="button" onPress={book} style={[glassShadow, { flex: 1, height: 58, borderRadius: 999, backgroundColor: ink[900], alignItems: "center", justifyContent: "center" }]} scale={0.98}>
           <Text style={{ fontFamily: font.semibold, fontSize: 17, color: "#fff" }}>{mode === "online" ? "Book a video slot" : "Book a clinic visit"}</Text>
         </Tap>
       </View>

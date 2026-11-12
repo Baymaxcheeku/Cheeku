@@ -29,10 +29,10 @@ module.exports = {
     extend: {
       colors: {
         brand: {
-          50: "#f1f0fe",
-          100: "#dcdafb",
-          200: "#c6c6f6",
-          300: "#aeaeea",
+          50: "#f5f5f7",
+          100: "#ebebef",
+          200: "#dcdce2",
+          300: "#c4c4cc",
           400: "#8a82f5",
           500: "#5b4ef0",
           600: "#4a2ade",
@@ -41,16 +41,16 @@ module.exports = {
           900: "#14136b",
           950: "#0a0a3c",
         },
-        canvas: "#fafafe",
+        canvas: "#f2f2f4",
         surface: "#ffffff",
-        "surface-tint": "#f6f6fe",
+        "surface-tint": "#f5f5f7",
         ink: {
-          900: "#0f1030",
-          700: "#3a3b57",
-          500: "#6b6c8a",
-          300: "#9696ae",
+          900: "#111114",
+          700: "#3a3a41",
+          500: "#6d6d78",
+          300: "#a1a1ab",
         },
-        line: "#e8e8f4",
+        line: "#e6e6ea",
 
         /* Health status only. Never decorative. */
         safe: "#23af5f",

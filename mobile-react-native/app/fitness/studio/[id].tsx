@@ -103,7 +103,7 @@ export default function StudioScreen() {
               style={{ alignSelf: "flex-start", marginTop: 14, height: 40, paddingHorizontal: 14, borderRadius: 999, backgroundColor: "#fff", flexDirection: "row", alignItems: "center", gap: 6 }}
               scale={0.96}
             >
-              <Navigation size={14} color={brand[600]} />
+              <Navigation size={14} color={ink[900]} />
               <Text style={{ fontFamily: font.semibold, fontSize: 13, color: ink[900] }}>Directions</Text>
             </Tap>
           </View>

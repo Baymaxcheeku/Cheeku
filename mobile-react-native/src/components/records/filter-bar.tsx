@@ -285,7 +285,7 @@ function OptionSheet({
                 >
                   {option.label}
                 </Text>
-                {on ? <Check size={17} color={brand[600]} /> : null}
+                {on ? <Check size={17} color={ink[900]} /> : null}
               </Tap>
             );
           })}

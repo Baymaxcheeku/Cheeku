@@ -1,3 +1,4 @@
+import { extensionsSignOut } from "@/lib/extensions";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createAsyncStoragePersister } from "@tanstack/query-async-storage-persister";
 import type { Query } from "@tanstack/react-query";
@@ -105,6 +106,16 @@ export const persister: Persister = {
 const PERSISTED = new Set(["records", "records-list", "records-context", "record", "home-context"]);
 
 export function shouldPersistQuery(query: Query): boolean {
+  /*
+   * Only a query that FINISHED, successfully. Passing our own filter replaces
+   * the library's default, which is exactly this check, so without it a query
+   * still in flight was written out with its promise attached. Signing out
+   * rejects home-context mid-flight ("signed out"), and the persister then
+   * logged "A query that was dehydrated as pending ended up rejecting" on the
+   * phone (owner, 2026-11-11). A pending or failed read is not worth keeping
+   * anyway: there is nothing in it to show offline.
+   */
+  if (query.state?.status !== "success") return false;
   const root = query.queryKey[0];
   return typeof root === "string" && PERSISTED.has(root);
 }
@@ -143,6 +154,8 @@ export async function offlineCacheBytes(): Promise<number> {
 }
 
 export async function clearOfflineCache(): Promise<void> {
+  // Optional layers (wearables) keep their own copy on the phone; it goes too.
+  await extensionsSignOut();
   try {
     await AsyncStorage.removeItem(CACHE_KEY);
   } catch {

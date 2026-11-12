@@ -163,7 +163,7 @@ export function BillBody({ record, details }: { record: RecordDetail; details: B
 
       <PillButton
         tone="light"
-        icon={<Share2 size={17} color={brand[600]} />}
+        icon={<Share2 size={17} color={ink[900]} />}
         style={{ marginTop: 16 }}
         onPress={() =>
           share(`${details.vendor} bill`, [
@@ -251,7 +251,7 @@ export function ConsultationInvoiceBody({ record, details }: { record: RecordDet
       ) : null}
       <PillButton
         tone="light"
-        icon={<Share2 size={17} color={brand[600]} />}
+        icon={<Share2 size={17} color={ink[900]} />}
         style={{ marginTop: 10 }}
         onPress={() => share(`Consultation invoice ${details.invoiceNo}`, [details.doctor.name, details.appointment.day ? shortDate(details.appointment.day) : "", `Total ${rupees(details.total)} · ${PAYMENT_LABEL[details.status]}`].filter(Boolean))}
       >
@@ -270,7 +270,7 @@ export function BookingInvoiceBody({ record, details }: { record: RecordDetail; 
 
   return (
     <View>
-      <AmountHero total={details.total} status={details.status} caption={caption} tint="#6b4fc4" />
+      <AmountHero total={details.total} status={details.status} caption={caption} tint="#3a3a41" />
 
       <Section title={`${details.tests.length} test${details.tests.length === 1 ? "" : "s"} booked`}>
         <Card>
@@ -301,7 +301,7 @@ export function BookingInvoiceBody({ record, details }: { record: RecordDetail; 
       ) : null}
       <PillButton
         tone="light"
-        icon={<Share2 size={17} color={brand[600]} />}
+        icon={<Share2 size={17} color={ink[900]} />}
         style={{ marginTop: 10 }}
         onPress={() => share(`${details.partner} invoice ${details.invoiceNo}`, [...details.tests.map((t) => `${t.name} ${rupees(t.price)}`), `Total ${rupees(details.total)} · ${PAYMENT_LABEL[details.status]}`])}
       >

@@ -80,7 +80,7 @@ export function ReadMark({ read, size = 10 }: { read: boolean; size?: number }) 
   }
   return (
     <View style={{ width: size + 6, height: size + 6, borderRadius: (size + 6) / 2, backgroundColor: semantic.cautionBg, alignItems: "center", justifyContent: "center" }}>
-      <View style={{ width: size, height: size, borderRadius: size / 2, backgroundColor: semantic.caution }} />
+      <View style={{ width: size, height: size, borderRadius: size / 2, backgroundColor: brand[600] }} />
     </View>
   );
 }
@@ -99,7 +99,7 @@ export const KIND_STYLE: Record<NotificationKind, Tone> = {
   lab_cancelled: { bg: hue.slate.bg, fg: ink[500], icon: FlaskConical },
   family_added: { bg: hue.rose.bg, fg: hue.rose.fg, icon: UserRoundPlus },
   family_removed: { bg: hue.slate.bg, fg: ink[500], icon: UserRoundMinus },
-  plan_changed: { bg: lilac.base, fg: "#7b3fd4", icon: Crown },
+  plan_changed: { bg: lilac.base, fg: "#3a3a41", icon: Crown },
   plan_ended: { bg: hue.slate.bg, fg: ink[500], icon: Crown },
   password_changed: { bg: hue.slate.bg, fg: ink[700], icon: KeyRound },
   support_update: { bg: hue.slate.bg, fg: ink[700], icon: LifeBuoy },
@@ -208,9 +208,7 @@ export function NotificationRow({
         gap: 13,
         paddingHorizontal: 14,
         paddingVertical: compact ? 11 : 14,
-        backgroundColor: pressed ? "rgba(74,42,222,0.08)" : unread ? "rgba(255,175,35,0.07)" : "transparent",
-        borderLeftWidth: 3,
-        borderLeftColor: unread ? semantic.caution : "transparent",
+        backgroundColor: pressed ? surface.tint : "transparent",
         borderTopWidth: first ? 0 : 1,
         borderTopColor: "rgba(15,16,48,0.06)",
         transform: [{ scale: pressed ? 0.992 : 1 }],
@@ -259,11 +257,11 @@ export function NotificationRow({
                   paddingRight: 6,
                   height: 24,
                   borderRadius: 999,
-                  backgroundColor: unread ? brand[600] : brand[50],
+                  backgroundColor: surface.tint,
                 }}
               >
-                <Text style={{ fontFamily: font.semibold, fontSize: 12, color: unread ? "#fff" : brand[700] }}>{action}</Text>
-                <ChevronRight size={13} color={unread ? "#fff" : brand[700]} strokeWidth={2.4} />
+                <Text style={{ fontFamily: font.semibold, fontSize: 12, color: ink[900] }}>{action}</Text>
+                <ChevronRight size={13} color={ink[900]} strokeWidth={2.4} />
               </View>
             ) : null}
           </View>
@@ -315,8 +313,8 @@ export function PushPrimer({ onEnable, onLater, busy }: { onEnable: () => void; 
   return (
     <Glass strong className="mt-4 overflow-hidden rounded-xl p-4">
       <View className="flex-row items-start gap-3">
-        <View style={{ width: 56, height: 56, borderRadius: 16, backgroundColor: brand[50], alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
-          <MascotBust size={60} mood="curious" pose="listen" />
+        <View style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: surface.tint, alignItems: "center", justifyContent: "center" }}>
+          <BellRing size={20} color={ink[900]} />
         </View>
         <View className="flex-1">
           <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>Want a tap on the shoulder?</Text>
@@ -358,7 +356,7 @@ export function PushBlocked({ onOpenSettings }: { onOpenSettings: () => void }) 
         backgroundColor: pressed ? lilac.base : brand[50],
       })}
     >
-      <BellRing size={17} color={brand[600]} />
+      <BellRing size={17} color={ink[900]} />
       <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[700] }}>
         Phone alerts are off for <Brand />. Everything still lands here.{" "}
         <Text style={{ fontFamily: font.semibold, color: brand[700] }}>Turn on in Settings</Text>

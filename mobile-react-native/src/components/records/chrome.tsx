@@ -64,11 +64,11 @@ const DOC_TINT: Record<DocType, { bg: string; fg: string }> = {
   lab_report: { bg: brand[50], fg: brand[600] },
   prescription: { bg: hue.orange.wash, fg: hue.orange.fg },
   discharge: { bg: hue.blue.wash, fg: hue.blue.fg },
-  scan: { bg: lilac.base, fg: "#7b3fd4" },
+  scan: { bg: lilac.base, fg: "#3a3a41" },
   bill: { bg: hue.slate.bg, fg: hue.slate.fg },
   vaccination: { bg: hue.rose.bg, fg: hue.rose.fg },
   consultation_invoice: { bg: hue.blue.wash, fg: hue.blue.fg },
-  booking_invoice: { bg: lilac.base, fg: "#6b4fc4" },
+  booking_invoice: { bg: lilac.base, fg: "#3a3a41" },
   insurance: { bg: hue.ocean.bg, fg: hue.ocean.fg },
   medication: { bg: hue.plum.bg, fg: hue.plum.fg },
   other: { bg: surface.canvas, fg: ink[500] },
@@ -97,8 +97,6 @@ export function RecordsHeader({ title, subtitle }: { title: string; subtitle: st
           </Text>
           <Text style={{ fontFamily: font.regular, fontSize: 15, color: ink[500], marginTop: 4 }}>{subtitle}</Text>
         </View>
-        {/* The filing clerk: Cheeku at his desk, typing away. Tap him. */}
-        <MascotFigure size={72} moment="working" hop />
         {/*
          * No add button here (owner, 2026-11-01): the centre + in the tab bar
          * already adds a record from every screen, and whatever is filed lands

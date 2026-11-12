@@ -72,7 +72,7 @@ export default function FitnessBookings() {
         {all.length === 0 ? (
           <View style={{ alignItems: "center", gap: 12, marginTop: 40 }}>
             <View style={{ width: 72, height: 72, borderRadius: 999, backgroundColor: lilac.base, alignItems: "center", justifyContent: "center" }}>
-              <Dumbbell size={30} color={brand[600]} />
+              <Dumbbell size={30} color={ink[900]} />
             </View>
             <Text style={{ fontFamily: font.semibold, fontSize: 20, color: ink[900] }}>No classes yet</Text>
             <Text style={{ fontFamily: font.regular, fontSize: 15, color: ink[500], textAlign: "center" }}>Book one class at a time, at a gym or studio near you.</Text>

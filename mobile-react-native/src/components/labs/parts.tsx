@@ -76,19 +76,19 @@ export function PartnerBadge({ partner, size = 52 }: { partner: Pick<LabPartner,
  * to scroll past, so it is soft colour and one clear icon.
  */
 const ART: { match: (t: LabTest) => boolean; Icon: LucideIcon; from: string; to: string; fg: string }[] = [
-  { match: (t) => t.kind === "package" && t.categories.includes("senior"), Icon: Leaf, from: hue.teal.bg, to: hue.teal.bg, fg: "#0f7a5c" },
+  { match: (t) => t.kind === "package" && t.categories.includes("senior"), Icon: Leaf, from: hue.teal.bg, to: hue.teal.bg, fg: "#3a3a41" },
   { match: (t) => t.kind === "package" && t.categories.includes("women"), Icon: Flower2, from: "#ffdcee", to: hue.rose.bg, fg: hue.rose.fg },
   { match: (t) => t.kind === "package", Icon: Package, from: lilac.base, to: lilac.mist, fg: brand[600] },
   { match: (t) => t.categories.includes("diabetes"), Icon: Activity, from: hue.blue.bg, to: hue.blue.wash, fg: hue.blue.fg },
-  { match: (t) => t.categories.includes("heart"), Icon: HeartPulse, from: hue.rose.bg, to: hue.rose.bg, fg: "#c2334a" },
-  { match: (t) => t.categories.includes("vitamins"), Icon: Sun, from: "#fff1d6", to: hue.orange.wash, fg: "#b7700a" },
+  { match: (t) => t.categories.includes("heart"), Icon: HeartPulse, from: hue.rose.bg, to: hue.rose.bg, fg: "#3a3a41" },
+  { match: (t) => t.categories.includes("vitamins"), Icon: Sun, from: "#f5f5f7", to: hue.orange.wash, fg: "#3a3a41" },
   { match: (t) => t.categories.includes("women"), Icon: Baby, from: "#ffdcee", to: hue.rose.bg, fg: hue.rose.fg },
   { match: (t) => t.categories.includes("fever"), Icon: Thermometer, from: hue.orange.bg, to: hue.orange.wash, fg: hue.orange.fg },
-  { match: (t) => t.sample.startsWith("Blood"), Icon: Droplet, from: lilac.violet, to: lilac.mist, fg: "#7b3fd4" },
+  { match: (t) => t.sample.startsWith("Blood"), Icon: Droplet, from: lilac.violet, to: lilac.mist, fg: "#3a3a41" },
 ];
 
 export function artFor(t: LabTest) {
-  return ART.find((a) => a.match(t)) ?? { Icon: FlaskConical, from: lilac.base, to: surface.tint, fg: "#3f5bd9" };
+  return ART.find((a) => a.match(t)) ?? { Icon: FlaskConical, from: lilac.base, to: surface.tint, fg: "#3a3a41" };
 }
 
 export function TestArt({ test, size = 64, radius = 20 }: { test: LabTest; size?: number; radius?: number }) {
@@ -117,7 +117,7 @@ export function CartBar({ count, from, label, onPress, bottom }: { count: number
         style={[glassShadow, {
           height: 64,
           borderRadius: 999,
-          backgroundColor: brand[600],
+          backgroundColor: ink[900],
           flexDirection: "row",
           alignItems: "center",
           paddingLeft: 22,
