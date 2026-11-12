@@ -92,7 +92,7 @@ export function WaitlistForm({ source, onPurple = false, center = false }: { sou
                 placeholder="Your email"
                 aria-invalid={Boolean(error)}
                 aria-describedby={error ? `${id}-error` : undefined}
-                className="w-0 min-w-0 flex-1 bg-transparent text-[16px] text-ink outline-none placeholder:text-ink-3"
+                className="inner-field w-0 min-w-0 flex-1 bg-transparent text-[16px] text-ink outline-none placeholder:text-ink-3"
               />
               <button
                 type="submit"

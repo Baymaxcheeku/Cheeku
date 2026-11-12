@@ -1,15 +1,17 @@
 "use client";
 
-import { animate, motion, useInView, useMotionValue, useMotionValueEvent, useReducedMotion, useScroll, useSpring, useTransform } from "motion/react";
+import { animate, AnimatePresence, motion, useMotionValue, useMotionValueEvent, useReducedMotion, useScroll, useSpring, useTransform } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 
-import { EASE, PauseButton, Reveal } from "./ui";
+import { EASE, Reveal } from "./ui";
 
 /*
  * Everything a family brings to Cheeku, as one ring.
  *
  * Six kinds of need sit on the ring, and the everyday things people ask
- * about sit around it. A small Cheeku dot keeps going round: wherever it is,
+ * about sit around it. On wide screens the section holds still while you
+ * scroll, and each step of the scroll carries the Cheeku dot to the next
+ * part (it dwells on each one, then glides on). Wherever it is,
  * that part of the ring lights up and the middle says what Cheeku does
  * there. Hover or tap a part to stop the dot on it.
  *
@@ -98,7 +100,7 @@ function arc(i: number) {
  * pushing move any two labels that would touch apart, and keep every label
  * clear of the ring and inside the drawing. Worked out once, at load.
  */
-type Spot = { part: number; text: string; x: number; y: number; side: "left" | "right" | "center"; w: number };
+type Spot = { part: number; text: string; x: number; y: number; side: "left" | "right" | "center"; w: number; far: boolean };
 
 function layout(): Spot[] {
   const spots: Spot[] = PARTS.flatMap((p, i) =>
@@ -108,7 +110,7 @@ function layout(): Spot[] {
       const pos = at(deg, (R + o) * 1.2, R + o * 0.8);
       const c = Math.cos(rad(deg));
       const side: Spot["side"] = c > 0.25 ? "left" : c < -0.25 ? "right" : "center";
-      return { part: i, text: t, x: pos.x, y: pos.y, side, w: t.length * 7.7 + 22 };
+      return { part: i, text: t, x: pos.x, y: pos.y, side, w: t.length * 7.7 + 22, far: j % 2 === 1 };
     }),
   );
   const box = (s: Spot) => {
@@ -161,174 +163,221 @@ const TOPICS = layout();
 
 const pct = (v: number, of: number) => `${((v / of) * 100).toFixed(3)}%`;
 
-function useOrbit(enabled: boolean) {
-  const angle = useMotionValue(mid(0));
-  const [held, setHeld] = useState<number | null>(null);
-  const [part, setPart] = useState(0);
+/* How far the scroll travels per part while the section is pinned, in viewport heights. */
+const PER_PART_VH = 60;
 
-  useMotionValueEvent(angle, "change", (v) => {
-    const norm = (((v - START) % 360) + 360) % 360;
-    setPart(Math.min(PARTS.length - 1, Math.floor(norm / SPAN)));
-  });
-
-  useEffect(() => {
-    if (held !== null) {
-      // Turn the short way round to the part that was picked.
-      const now = angle.get();
-      let to = mid(held);
-      while (to - now > 180) to -= 360;
-      while (now - to > 180) to += 360;
-      const c = animate(angle, to, { duration: 0.6, ease: EASE });
-      return () => c.stop();
-    }
-    if (!enabled) return;
-    // About four seconds a part, one full turn in under half a minute.
-    const from = angle.get();
-    const c = animate(angle, from + 360, { duration: 26, ease: "linear", repeat: Infinity });
-    return () => c.stop();
-  }, [enabled, held, angle]);
-
-  return { angle, part: held ?? part, held, setHeld };
+/** A step function with soft edges: dwell on each part, glide between them. */
+function dwell(v: number): number {
+  const i = Math.floor(v);
+  const f = v - i;
+  const e = f < 0.3 ? 0 : f > 0.7 ? 1 : (f - 0.3) / 0.4;
+  return i + e * e * (3 - 2 * e);
 }
 
 export function CareRing() {
   const ref = useRef<HTMLElement>(null);
   const still = useReducedMotion() ?? false;
-  const inView = useInView(ref, { margin: "-20% 0px" });
-  const [paused, setPaused] = useState(false);
-  const { angle, part, held, setHeld } = useOrbit(inView && !paused && !still);
+  const [held, setHeld] = useState<number | null>(null);
+  const [scrolled, setScrolled] = useState(0);
+  const heldRef = useRef<number | null>(null);
+  heldRef.current = held;
 
-  // The ring closes as the section arrives.
-  const { scrollYProgress } = useScroll({ target: ref, offset: ["start 85%", "start 15%"] });
-  const drawn = useSpring(useTransform(scrollYProgress, [0, 1], [still ? 1 : 0.04, 1]), { stiffness: 90, damping: 24 });
+  // While pinned: 0 at the first part, 1 at the last, with a beat at each end.
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end end"] });
+  const travel = useTransform(scrollYProgress, [0.05, 0.92], [0, PARTS.length - 1], { clamp: true });
+  const smooth = useSpring(useTransform(travel, dwell), { stiffness: 140, damping: 28 });
+  const angle = useTransform(smooth, (v) => mid(0) + v * SPAN);
+  useMotionValueEvent(travel, "change", (v) => setScrolled(Math.min(PARTS.length - 1, Math.max(0, Math.round(v)))));
 
-  const dot = useTransform(angle, (d) => at(d, R, R));
-  const dotX = useTransform(dot, (p) => pct(p.x, W));
-  const dotY = useTransform(dot, (p) => pct(p.y, H));
+  // The ring closes as the section arrives, and the stage tilts up to face you.
+  const { scrollYProgress: arrive } = useScroll({ target: ref, offset: ["start 95%", "start start"] });
+  const drawn = useSpring(useTransform(arrive, [0, 1], [still ? 1 : 0.04, 1]), { stiffness: 90, damping: 24 });
+  const tilt = useTransform(arrive, [0, 1], [still ? 0 : 16, 0]);
+  const leave = useTransform(scrollYProgress, [0.94, 1], [0, still ? 0 : -6]);
+  const rotateX = useTransform([tilt, leave] as const, ([a, b]: number[]) => a! + b!);
+  const lift = useTransform(arrive, [0, 1], [still ? 1 : 0.92, 1]);
 
+  // Two depths of labels drift at different speeds, so the ring has a near and a far.
+  const nearY = useTransform(scrollYProgress, [0, 1], [still ? 0 : 6, still ? 0 : -6]);
+  const farY = useTransform(scrollYProgress, [0, 1], [still ? 0 : 16, still ? 0 : -16]);
+
+  // The dot follows the scroll, unless a part is being hovered: then it goes there.
+  const dotAngle = useMotionValue(mid(0));
+  useMotionValueEvent(angle, "change", (v) => {
+    if (heldRef.current === null) dotAngle.set(v);
+  });
+  useEffect(() => {
+    const c = animate(dotAngle, held === null ? angle.get() : mid(held), { duration: 0.5, ease: EASE });
+    return () => c.stop();
+  }, [held, angle, dotAngle]);
+  const trail = useSpring(dotAngle, { stiffness: 60, damping: 18 });
+  const dotX = useTransform(dotAngle, (d) => pct(at(d, R, R).x, W));
+  const dotY = useTransform(dotAngle, (d) => pct(at(d, R, R).y, H));
+  const trailX = useTransform(trail, (d) => pct(at(d, R, R).x, W));
+  const trailY = useTransform(trail, (d) => pct(at(d, R, R).y, H));
+
+  const part = held ?? scrolled;
   const active = PARTS[part]!;
 
+  /** Scrolls the page to the point where part `i` is in focus. */
+  function goTo(i: number) {
+    const el = ref.current;
+    if (!el || still) return setHeld(i);
+    const top = el.getBoundingClientRect().top + window.scrollY;
+    const span = el.offsetHeight - window.innerHeight;
+    window.scrollTo({ top: top + span * (0.05 + (0.87 * i) / (PARTS.length - 1)), behavior: "smooth" });
+  }
+
   return (
-    <section ref={ref} id="care" aria-labelledby="care-title" className="relative overflow-hidden bg-white py-24 sm:py-28">
-      {/* Wide screens: the ring, its six parts and everything around it. */}
-      <div className="relative mx-auto hidden max-w-[1240px] px-5 lg:block">
-        <div className="relative mx-auto aspect-[1200/900] w-full">
-          <svg viewBox={`0 0 ${W} ${H}`} className="absolute inset-0 h-full w-full" aria-hidden>
-            <defs>
-              <radialGradient id="care-glow" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stopColor="#f4f1ff" />
-                <stop offset="70%" stopColor="#f8f6fd" />
-                <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
-              </radialGradient>
-            </defs>
-            <circle cx={CX} cy={CY} r={R - 6} fill="url(#care-glow)" />
-            {PARTS.map((p, i) => (
-              <motion.path
-                key={p.name}
-                d={arc(i)}
-                fill="none"
-                stroke={p.stroke}
-                strokeLinecap="round"
-                style={{ pathLength: drawn }}
-                animate={{ strokeWidth: part === i ? 11 : 6, opacity: part === i ? 1 : 0.5 }}
-                transition={{ duration: 0.45, ease: EASE }}
-              />
-            ))}
-          </svg>
+    <section
+      ref={ref}
+      id="care"
+      aria-labelledby="care-title"
+      className="relative bg-white py-24 sm:py-28 lg:py-0"
+      style={{ ["--care-h" as string]: still ? "auto" : `${PARTS.length * PER_PART_VH + 100}vh` }}
+    >
+      <div className="lg:h-[var(--care-h)]">
+        {/* Wide screens: pinned while the scroll walks the ring. */}
+        <div className="relative hidden overflow-hidden lg:sticky lg:top-[68px] lg:flex lg:h-[calc(100svh-68px)] lg:items-center lg:justify-center" style={{ perspective: 1600 }}>
+          {/* A soft light in the active part's colour, behind everything. */}
+          <motion.div aria-hidden className="pointer-events-none absolute left-1/2 top-1/2 size-[70vmin] -translate-x-1/2 -translate-y-1/2 rounded-full blur-3xl" animate={{ backgroundColor: active.pill }} transition={{ duration: 0.8, ease: EASE }} />
 
-          {/* The Cheeku dot going round. */}
-          {!still && (
-            <motion.span aria-hidden className="absolute z-10 -ml-[9px] -mt-[9px] size-[18px] rounded-full border-[3px] border-white bg-purple-600 shadow-[0_4px_14px_-2px_rgb(74_42_222/0.6)]" style={{ left: dotX, top: dotY }} />
-          )}
-
-          {/* Everything people bring, around the ring. */}
-          <ul aria-label="What people ask Cheeku about" className="absolute inset-0">
-            {TOPICS.map((t, n) => {
-              const on = t.part === part;
-              const shift = t.side === "left" ? "0%" : t.side === "right" ? "-100%" : "-50%";
-              return (
-                <motion.li
-                  key={t.text}
-                  className="absolute whitespace-nowrap"
-                  style={{ left: pct(t.x, W), top: pct(t.y, H), x: shift, y: "-50%" }}
-                  initial={still ? false : { opacity: 0, filter: "blur(6px)" }}
-                  whileInView={{ opacity: 1, filter: "blur(0px)" }}
-                  viewport={{ once: true, margin: "-10% 0px" }}
-                  transition={{ duration: 0.7, delay: 0.35 + Math.min(n * 0.018, 0.75), ease: EASE }}
-                >
-                  <span className={`inline-flex items-center gap-2 text-[15px] transition-colors duration-300 ${on ? "font-medium text-ink" : "text-ink-3"}`}>
-                    <span aria-hidden className="size-1.5 rounded-full transition-transform duration-300" style={{ background: PARTS[t.part]!.stroke, transform: `scale(${on ? 1.4 : 0.8})` }} />
-                    {t.text}
-                  </span>
-                </motion.li>
-              );
-            })}
-          </ul>
-
-          {/* The six parts, sitting on the ring. Hover or focus one to hold the dot there. */}
-          <div role="group" aria-label="Kinds of care" className="absolute inset-0" onMouseLeave={() => setHeld(null)}>
-            {PARTS.map((p, i) => {
-              const pos = at(mid(i), R, R);
-              const on = part === i;
-              return (
-                <button
+          <motion.div
+            className="relative aspect-[1200/900]"
+            style={{ width: "min(1200px, calc(100vw - 40px), calc((100svh - 108px) * 1.3333))", rotateX, scale: lift, containerType: "inline-size" }}
+          >
+            <svg viewBox={`0 0 ${W} ${H}`} className="absolute inset-0 h-full w-full overflow-visible" aria-hidden>
+              <defs>
+                <radialGradient id="care-glow" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stopColor="#ffffff" />
+                  <stop offset="70%" stopColor="#faf9ff" />
+                  <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
+                </radialGradient>
+                <filter id="care-soft" x="-20%" y="-20%" width="140%" height="140%">
+                  <feGaussianBlur stdDeviation="10" />
+                </filter>
+              </defs>
+              <circle cx={CX} cy={CY} r={R - 6} fill="url(#care-glow)" />
+              {/* The lit part glows a little beneath its own line. */}
+              <AnimatePresence>
+                <motion.path key={part} d={arc(part)} fill="none" stroke={active.stroke} strokeLinecap="round" strokeWidth={30} filter="url(#care-soft)" initial={{ opacity: 0 }} animate={{ opacity: 0.45 }} exit={{ opacity: 0 }} transition={{ duration: 0.5 }} />
+              </AnimatePresence>
+              {PARTS.map((p, i) => (
+                <motion.path
                   key={p.name}
-                  type="button"
-                  aria-pressed={held === i}
-                  onMouseEnter={() => setHeld(i)}
-                  onFocus={() => setHeld(i)}
-                  onBlur={() => setHeld(null)}
-                  onClick={() => setHeld(held === i ? null : i)}
-                  className="absolute z-20 cursor-pointer rounded-[14px] px-4 py-2 text-[17px] font-semibold tracking-[-0.01em] transition-[transform,box-shadow] duration-300 ease-[var(--ease)]"
-                  style={{
-                    left: pct(pos.x, W),
-                    top: pct(pos.y, H),
-                    background: p.pill,
-                    color: p.ink,
-                    boxShadow: on ? `0 10px 28px -10px ${p.stroke}, inset 0 0 0 1.5px ${p.stroke}` : `inset 0 0 0 1px ${p.stroke}66`,
-                    transform: `translate(-50%, -50%) scale(${on ? 1.06 : 1})`,
-                  }}
-                >
-                  {p.name}
-                </button>
-              );
-            })}
-          </div>
+                  d={arc(i)}
+                  fill="none"
+                  stroke={p.stroke}
+                  strokeLinecap="round"
+                  style={{ pathLength: drawn }}
+                  animate={{ strokeWidth: part === i ? 12 : 5, opacity: part === i ? 1 : 0.4 }}
+                  transition={{ duration: 0.5, ease: EASE }}
+                />
+              ))}
+            </svg>
 
-          {/* The middle: the promise, and what Cheeku does in the part that is lit. */}
-          <div className="absolute left-1/2 top-1/2 w-[400px] -translate-x-1/2 -translate-y-1/2 text-center">
-            <Reveal>
-              <h2 id="care-title" className="display text-[52px] text-ink">
-                Whatever comes up, <em className="text-purple-700">for anyone at home</em>
-              </h2>
-            </Reveal>
-            <div className="relative mt-5 h-[84px]">
-              <motion.p
-                key={part}
-                aria-live="polite"
-                initial={{ opacity: 0, y: still ? 0 : 6, filter: "blur(4px)" }}
-                animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                transition={{ duration: 0.45, ease: EASE }}
-                className="text-[17px] leading-relaxed text-ink-2"
-              >
-                <span className="font-medium" style={{ color: active.ink }}>
-                  {active.name}.
-                </span>{" "}
-                {active.line}
-              </motion.p>
-            </div>
-          </div>
+            {/* The Cheeku dot, with a faint trail that lags behind it. */}
+            {!still && (
+              <>
+                <motion.span aria-hidden className="absolute z-10 -ml-[7px] -mt-[7px] size-[14px] rounded-full bg-purple-300/60 blur-[2px]" style={{ left: trailX, top: trailY }} />
+                <motion.span aria-hidden className="absolute z-10 -ml-[10px] -mt-[10px] size-[20px] rounded-full border-[3px] border-white bg-purple-600 shadow-[0_6px_18px_-2px_rgb(74_42_222/0.65)]" style={{ left: dotX, top: dotY }} />
+              </>
+            )}
 
-          {!still && (
-            <div className="absolute bottom-0 right-0">
-              <PauseButton paused={paused} onToggle={() => setPaused((v) => !v)} label="the turning ring" />
+            {/* Everything people bring, around the ring: near and far rows, the lit part in focus. */}
+            <ul aria-label="What people ask Cheeku about" className="absolute inset-0">
+              {TOPICS.map((t, n) => {
+                const on = t.part === part;
+                const shift = t.side === "left" ? "0%" : t.side === "right" ? "-100%" : "-50%";
+                return (
+                  <motion.li key={t.text} className="absolute whitespace-nowrap" style={{ left: pct(t.x, W), top: pct(t.y, H), x: shift, translateY: "-50%", y: t.far ? farY : nearY }}>
+                    <motion.span
+                      className={`inline-flex items-center gap-[0.55em] text-[max(12px,1.25cqw)] ${on ? "font-medium text-ink" : "text-ink-3"}`}
+                      initial={still ? false : { opacity: 0, filter: "blur(6px)" }}
+                      whileInView={{ opacity: 1 }}
+                      viewport={{ once: true }}
+                      animate={{ opacity: on ? 1 : t.far ? 0.42 : 0.6, scale: on ? 1.03 : t.far ? 0.95 : 0.98, filter: on || still ? "blur(0px)" : t.far ? "blur(1.4px)" : "blur(0.6px)" }}
+                      transition={{ duration: 0.5, delay: on ? Math.min(n % 7, 6) * 0.03 : 0, ease: EASE }}
+                    >
+                      <span aria-hidden className="size-1.5 rounded-full transition-transform duration-300" style={{ background: PARTS[t.part]!.stroke, transform: `scale(${on ? 1.5 : 0.8})` }} />
+                      {t.text}
+                    </motion.span>
+                  </motion.li>
+                );
+              })}
+            </ul>
+
+            {/* The six parts, sitting on the ring. Hover to hold the dot there, click to scroll to it. */}
+            <div role="group" aria-label="Kinds of care" className="absolute inset-0" onMouseLeave={() => setHeld(null)}>
+              {PARTS.map((p, i) => {
+                const pos = at(mid(i), R, R);
+                const on = part === i;
+                return (
+                  <button
+                    key={p.name}
+                    type="button"
+                    aria-pressed={on}
+                    onMouseEnter={() => setHeld(i)}
+                    onFocus={() => setHeld(i)}
+                    onBlur={() => setHeld(null)}
+                    onClick={() => {
+                      setHeld(null);
+                      goTo(i);
+                    }}
+                    className="absolute z-20 cursor-pointer whitespace-nowrap rounded-[0.85em] px-[0.95em] py-[0.45em] text-[max(13px,1.42cqw)] font-semibold tracking-[-0.01em] transition-[transform,box-shadow] duration-300 ease-[var(--ease)]"
+                    style={{
+                      left: pct(pos.x, W),
+                      top: pct(pos.y, H),
+                      background: p.pill,
+                      color: p.ink,
+                      boxShadow: on ? `0 14px 30px -12px ${p.stroke}, inset 0 0 0 1.5px ${p.stroke}` : `inset 0 0 0 1px ${p.stroke}66`,
+                      transform: `translate(-50%, -50%) scale(${on ? 1.08 : 0.97})`,
+                    }}
+                  >
+                    {p.name}
+                  </button>
+                );
+              })}
             </div>
-          )}
+
+            {/* The middle: the promise, what Cheeku does in the lit part, and where you are. */}
+            <div className="absolute left-1/2 top-1/2 w-[34%] -translate-x-1/2 -translate-y-1/2 text-center">
+              <Reveal>
+                <h2 id="care-title" className="display text-[max(30px,4.3cqw)] text-ink">
+                  Whatever comes up, <em className="text-purple-700">for anyone at home</em>
+                </h2>
+              </Reveal>
+              <div className="relative mt-5 h-[84px]">
+                <AnimatePresence mode="wait">
+                  <motion.p
+                    key={part}
+                    aria-live="polite"
+                    initial={{ opacity: 0, y: still ? 0 : 10, filter: "blur(6px)" }}
+                    animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                    exit={{ opacity: 0, y: still ? 0 : -8, filter: "blur(6px)" }}
+                    transition={{ duration: 0.35, ease: EASE }}
+                    className="text-[max(14px,1.42cqw)] leading-relaxed text-ink-2"
+                  >
+                    <span className="font-medium" style={{ color: active.ink }}>
+                      {active.name}.
+                    </span>{" "}
+                    {active.line}
+                  </motion.p>
+                </AnimatePresence>
+              </div>
+              {/* Where you are in the six: a short bar for each, the lit one long and coloured. */}
+              <div aria-hidden className="mt-4 flex items-center justify-center gap-1.5">
+                {PARTS.map((p, i) => (
+                  <motion.span key={p.name} className="h-1.5 rounded-full" animate={{ width: i === part ? 26 : 6, backgroundColor: i === part ? p.stroke : "#e4e1f0" }} transition={{ duration: 0.4, ease: EASE }} />
+                ))}
+              </div>
+            </div>
+          </motion.div>
         </div>
-      </div>
 
-      {/* Phones and tablets: the promise, the six parts as tabs, and what each covers. */}
-      <MobileRing part={part} onPick={(i) => setHeld(i)} />
+        {/* Phones and tablets: the promise, the six parts as tabs, and what each covers. */}
+        <MobileRing part={part} onPick={(i) => setHeld(i)} />
+      </div>
     </section>
   );
 }
