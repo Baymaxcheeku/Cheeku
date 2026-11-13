@@ -208,6 +208,13 @@ main { padding-bottom: 60px; }
       <p class="cap">The model phases each hire in over the year, so seats are funded in fractions; the month shown is when a seat is at least half funded, and the cost is exactly what the model spends on it. Salaries are the model's average for each team (2027 rupees, +10% a year, +20% for benefits). A Chief of Staff usually costs more than the team average; the model funds that from the same team budget.</p></div>
   </section>
 
+  <section id="doctor">
+    <div class="sh"><div class="k">Cheeku Doctor</div><h2>The doctor operation the seed pays for</h2><p id="rxLede"></p></div>
+    <div class="tiles" id="rxTiles"></div>
+    <div class="card"><h3>Quarter by quarter</h3><div class="tw"><table id="rxTable" class="num"></table></div>
+      <p class="cap">Doctors sit in cost of revenue, not in the team above: a per-case MBBS panel at ₹25 a review runs the pilot; from 300 reviews a day salaried doctors (₹48k a month loaded, about 2,000 reviews each) take the base load and the panel covers peaks. One clinical lead per 15 doctors, a head of clinical from 1,000 reviews a day, one ops person per 400 reviews a day, and ₹5 a review for audits, AI intake, messages and indemnity insurance. The one-off at launch covers the legal opinion (₹4 lakh), indemnity and onboarding (₹2 lakh) and pilot refunds and promos (₹4 lakh).</p></div>
+  </section>
+
   <section id="notes">
     <div class="sh"><div class="k">Methodology</div><h2>How the numbers are built</h2></div>
     <div class="card"><ul class="tight small">
@@ -215,6 +222,7 @@ main { padding-bottom: 60px; }
       <li><b>Seed only, or with the Series A.</b> Our plan raises a Series A around month 13. "Seed only" shows how long ₹26 crore lasts if that round is delayed; "Seed + Series A" shows the full plan.</li>
       <li><b>Defend mode.</b> If runway falls below six months without new funding, we cut marketing by 65%, compute by 50% and hardware work by 80%, and freeze hiring. The toggle shows the effect.</li>
       <li><b>Revenue</b> comes from subscriptions, care bookings through partners, employer plans and fitness bookings, net of app store fees, payment costs and partner costs.</li>
+      <li><b>Cheeku Doctor</b> launches in February 2027. Its doctors, clinical leads and ops scale with reviews a day and are counted in cost of revenue; the one-off launch cost is an operating cost in the launch month.</li>
       <li><b>Salaries</b> are team averages in 2027 rupees, rising 10% a year, plus 20% for benefits and statutory costs. Individual offers vary around the average within each team's budget.</li>
     </ul></div>
   </section>
@@ -328,7 +336,21 @@ const BASE = {
   rxRate: [0.02, 0.03, 0.04, 0.045, 0.05],          // doctor reviews per active user a month
   rxMixPass: 0.5, rxMixIncl: 0.4, rxMixExtra: 0.1,  // bought as a pass, included in a plan (2 Solo, 5 Family), extra at ₹39
   priceRxExtra: 39,
-  rxCost: [70, 50, 40, 39, 38],                     // ₹ all-in per review: doctor, clinical leads, ops, audits, AI, insurance
+  // Doctor operations, built up from the playbook staffing table (₹65 a review at 100 a day, ₹49 at 1,000, ₹39 at 5,000, ₹37 at 20,000).
+  rxDocLoaded: 48000,      // ₹ a month, salaried MBBS (₹40k pay, loaded)
+  rxDocCapacity: 2000,     // reviews a month per salaried doctor: 12 an hour, 80% busy
+  rxSalariedFrom: 300,     // reviews a day before any doctor goes on payroll; below it the per-case panel does everything
+  rxSalariedShare: 0.71,   // share of reviews on payroll once salaried; the panel takes peaks
+  rxPanelFee: 25,          // ₹ a review, per-case MBBS panel
+  rxPanelPerDoc: 900,      // reviews a month per panel doctor (headcount only)
+  rxLeadCost: 120000,      // ₹ a month per clinical lead, one per 15 doctors
+  rxPilotLead: 60000,      // ₹ a month, part-time clinical lead during the pilot
+  rxHeadCost: 270000,      // ₹ a month, head of clinical from 1,000 reviews a day
+  rxHeadFrom: 1000,
+  rxOpsCost: 30000,        // ₹ a month per ops and support person, one per 400 reviews a day
+  rxOpsPer: 400,
+  rxVarCost: 5,            // ₹ a review: audits, AI intake, messages, indemnity insurance
+  rxLaunch: 10,            // ₹ lakh one-off at soft launch: legal opinion 4, indemnity and onboarding 2, pilot refunds and promos 4
   rxAttach: 16, rxAttachCost: 0.2,                  // ₹ medicine and home-test take per review, partner cost on it
   rxConvLift: 0.07,                                 // extra paying share from the doctor hook (break-even needs about 6%)
   // Pendant
@@ -527,7 +549,21 @@ function run(s) {
     const rxPass = m.rxCases * s.rxMixPass * s.pricePass / (1 + s.gst), rxExtra = m.rxCases * s.rxMixExtra * s.priceRxExtra / (1 + s.gst);
     m.rRx = rxPass + rxExtra;
     m.rRxAttach = m.rxCases * s.rxAttach;
-    m.cRx = m.rxCases * s.rxCost[y] + rxPass * s.storeFee + rxExtra * s.webFee + m.rRxAttach * s.rxAttachCost;
+    // Doctor operations: payroll for the base load, the per-case panel for peaks, clinical leads, ops and per-review costs.
+    m.rxPerDay = m.rxCases / 30;
+    const salaried = m.rxPerDay >= s.rxSalariedFrom ? m.rxCases * s.rxSalariedShare : 0;
+    m.rxDocsSal = salaried / s.rxDocCapacity;
+    m.rxDocsPanel = (m.rxCases - salaried) / s.rxPanelPerDoc;
+    const docs = m.rxDocsSal + m.rxDocsPanel;
+    m.rxLeads = m.rxCases > 0 ? (m.rxPerDay < s.rxSalariedFrom ? 0.5 : Math.ceil(docs / 15)) : 0;
+    m.rxOps = m.rxCases > 0 ? Math.max(1, Math.ceil(m.rxPerDay / s.rxOpsPer)) : 0;
+    m.cRxDoc = m.rxDocsSal * s.rxDocLoaded + (m.rxCases - salaried) * s.rxPanelFee;
+    m.cRxClin = m.rxCases > 0 ? (m.rxPerDay < s.rxSalariedFrom ? s.rxPilotLead : m.rxLeads * s.rxLeadCost + (m.rxPerDay >= s.rxHeadFrom ? s.rxHeadCost : 0)) : 0;
+    m.cRxOps = m.rxOps * s.rxOpsCost;
+    m.cRxVar = m.rxCases * s.rxVarCost;
+    m.cRxFees = rxPass * s.storeFee + rxExtra * s.webFee + m.rRxAttach * s.rxAttachCost;
+    m.cRx = m.cRxDoc + m.cRxClin + m.cRxOps + m.cRxVar + m.cRxFees;
+    m.rxCostPer = m.rxCases > 0 ? (m.cRxDoc + m.cRxClin + m.cRxOps + m.cRxVar) / m.rxCases : 0;
     m.rev = m.rSub + m.rMkt + m.rFit + m.rAds + m.rIns + m.rCorp + m.rInsurer + m.rState + m.rLlm + m.rHw + m.rRx + m.rRxAttach;
     // Serving costs: free users below the cap, days at the cap, paying accounts and corporate seats.
     const cpc = t < s.ownGpuMonth ? s.cpcRented : s.cpcOwn[y];
@@ -557,7 +593,8 @@ function run(s) {
     m.oPendant = s.pendantRnd[y] * CR / 12 * (defending ? s.defendPendant : 1);
     m.oOffice = seats * s.seatShare * s.seatCost * Math.pow(1.06, y);
     m.oGa = s.gaFixed[y] * LAKH + m.rev * s.gaPct;
-    m.opex = m.oPeople + m.oMkt + m.oCorpSales + m.oLlm + m.oPendant + m.oOffice + m.oGa;
+    m.oRxLaunch = t === s.rxStart ? s.rxLaunch * LAKH : 0;
+    m.opex = m.oPeople + m.oMkt + m.oCorpSales + m.oLlm + m.oPendant + m.oOffice + m.oGa + m.oRxLaunch;
     m.ebitda = m.gp - m.opex;
     // Below the line
     m.interest = Math.max(0, cash) * s.interest / 12;
@@ -579,7 +616,7 @@ function run(s) {
   return out;
 }
 
-const SUMKEYS = ['rSub', 'rMkt', 'rFit', 'rAds', 'rIns', 'rCorp', 'rCorpDirect', 'rCorpHr', 'rCorpGift', 'rInsurer', 'rState', 'rLlm', 'rHw', 'rRx', 'rRxAttach', 'cRx', 'rxCases', 'rev', 'gmv', 'gmvFit',
+const SUMKEYS = ['rSub', 'rMkt', 'rFit', 'rAds', 'rIns', 'rCorp', 'rCorpDirect', 'rCorpHr', 'rCorpGift', 'rInsurer', 'rState', 'rLlm', 'rHw', 'rRx', 'rRxAttach', 'cRx', 'rxCases', 'cRxDoc', 'cRxClin', 'cRxOps', 'cRxVar', 'cRxFees', 'oRxLaunch', 'rev', 'gmv', 'gmvFit',
   'cChat', 'cVoice', 'cOcr', 'cCloud', 'cStore', 'cMkt', 'cFit', 'cAds', 'cIns', 'cCorp', 'cB2b', 'cHw', 'cogs', 'gp',
   'oPeople', 'oMkt', 'oCorpSales', 'oLlm', 'oPendant', 'oOffice', 'oGa', 'opex', 'ebitda', 'interest', 'tax', 'net', 'cfo', 'funding',
   'chats', 'chatsFree', 'chatsCap', 'chatsPaid', 'passes', 'newPaid', 'newOrganic', 'corpNewClients', 'giftBilled', 'fitSessions'];
@@ -594,6 +631,8 @@ function annual(rows) {
     a.subsEnd = last.subs; a.seatsEnd = last.seats; a.corpClientsEnd = last.corpClients; a.hrPartnersEnd = last.hrPartners;
     a.hcEnd = last.hcTotal; a.cashEnd = last.cash; a.deferredEnd = last.deferred;
     a.hc = last.hc; a.arrExit = last.rev * 12;
+    a.rxPerDayEnd = last.rxPerDay; a.rxDocsSalEnd = last.rxDocsSal; a.rxDocsPanelEnd = last.rxDocsPanel; a.rxLeadsEnd = last.rxLeads; a.rxOpsEnd = last.rxOps;
+    a.rxCostPer = a.rxCases > 0 ? (a.cRxDoc + a.cRxClin + a.cRxOps + a.cRxVar) / a.rxCases : 0;
     return a;
   });
 }
@@ -822,7 +861,7 @@ const ROSTER = {
     // use of funds
     (function () {
       const sum = k => R.reduce((a, r) => a + (typeof k === 'function' ? k(r) : r[k]), 0);
-      const people = sum('oPeople'), growth = sum(r => r.oMkt + r.oCorpSales), mdl = sum(r => r.oLlm + r.cChat + r.cVoice + r.cOcr + r.cCloud), ops = sum(r => r.oOffice + r.oGa + r.oPendant);
+      const people = sum('oPeople'), growth = sum(r => r.oMkt + r.oCorpSales), mdl = sum(r => r.oLlm + r.cChat + r.cVoice + r.cOcr + r.cCloud), ops = sum(r => r.oOffice + r.oGa + r.oPendant + r.oRxLaunch);
       const tot = people + growth + mdl + ops;
       const items = [['People', people, '--c-people', 35], ['Growth', growth, '--c-mkt', 33], ['Model and compute', mdl, '--c-model', 18], ['Ops, office, G&A, pendant', ops, '--c-ops', 14]];
       const W = 560, H = 210, L = 175, Rr = 110, T = 10, rh = 46;
@@ -834,15 +873,45 @@ const ROSTER = {
         s.appendChild(el('line', { x1: X(it[3]), x2: X(it[3]), y1: y - 4, y2: y + 22, stroke: C.muted, 'stroke-width': 2 }));
         s.appendChild(el('text', { x: Math.max(X(pct), X(it[3])) + 8, y: y + 13, 'font-size': 12, 'font-weight': 650, fill: C.ink }, `${pct.toFixed(0)}% · ${cr1(it[1])}`)); });
       $('fundsCap').textContent = `Grey ticks are the seed deck's split (35/33/18/14). Over the first 18 months the model spends ${cr1(tot)} across these buckets; "model and compute" includes chat, voice and cloud inference.`;
-      const lines = [['People', people], ['Marketing', sum('oMkt')], ['Employer sales costs', sum('oCorpSales')], ['Compute and data (GPUs, tuning, evals)', sum('oLlm')], ['Chat, voice, report reading and cloud', sum(r => r.cChat + r.cVoice + r.cOcr + r.cCloud)], ['Pendant R&D', sum('oPendant')], ['Office', sum('oOffice')], ['G&A (legal, audit, tools, insurance)', sum('oGa')], ['Other cost of revenue (store fees, partners, doctor reviews)', sum(r => r.cogs - r.cChat - r.cVoice - r.cOcr - r.cCloud)]];
+      const lines = [['People', people], ['Marketing', sum('oMkt')], ['Employer sales costs', sum('oCorpSales')], ['Compute and data (GPUs, tuning, evals)', sum('oLlm')], ['Chat, voice, report reading and cloud', sum(r => r.cChat + r.cVoice + r.cOcr + r.cCloud)], ['Pendant R&D', sum('oPendant')], ['Office', sum('oOffice')], ['G&A (legal, audit, tools, insurance)', sum('oGa')], ['Cheeku Doctor: doctors, clinical leads, ops, audits', sum(r => r.cRxDoc + r.cRxClin + r.cRxOps + r.cRxVar)], ['Cheeku Doctor launch, one-off', sum('oRxLaunch')], ['Other cost of revenue (store fees, partners)', sum(r => r.cogs - r.cChat - r.cVoice - r.cOcr - r.cCloud - r.cRxDoc - r.cRxClin - r.cRxOps - r.cRxVar)]];
       const spend = lines.reduce((a, l) => a + l[1], 0), rev = sum('rev');
       $('lineTable').innerHTML = `<thead><tr><th>Line</th><th>₹ cr</th></tr></thead><tbody>` + lines.map(l => `<tr><td style="white-space:normal">${l[0]}</td><td>${C_(l[1]).toFixed(2)}</td></tr>`).join('') +
         `<tr class="tot"><td>Total spend</td><td>${C_(spend).toFixed(2)}</td></tr><tr><td>Revenue</td><td>${C_(rev).toFixed(2)}</td></tr><tr class="tot"><td>Net burn before interest</td><td>${C_(spend - rev).toFixed(2)}</td></tr></tbody>`;
     })();
 
+
+    // Cheeku Doctor operation
+    (function () {
+      const n0 = v => Math.round(v).toLocaleString('en-IN');
+      const Q = [0, 1, 2, 3, 4, 5].map(q => R.slice(q * 3, q * 3 + 3));
+      const qs = rr => k => rr.reduce((a, r) => a + (typeof k === 'function' ? k(r) : r[k]), 0);
+      const ops = r => r.cRxDoc + r.cRxClin + r.cRxOps + r.cRxVar;
+      const all18 = qs(R);
+      const cases = all18('rxCases'), cost = all18(ops), revRx = all18(r => r.rRx + r.rRxAttach), launch = all18('oRxLaunch');
+      const end = R[17];
+      $('rxTiles').innerHTML = [
+        [n0(end.rxPerDay), 'doctor reviews a day by ' + MON(17)],
+        [n0(end.rxDocsSal + end.rxDocsPanel), 'doctors (' + n0(end.rxDocsSal) + ' salaried, ' + n0(end.rxDocsPanel) + ' panel)'],
+        ['₹' + (cases ? (cost / cases).toFixed(0) : '–'), 'all-in cost a review over 18 months'],
+        [lk(cost + launch), '₹ lakh on the doctor operation in 18 months, incl. launch'],
+      ].map(t => `<div class="tile"><span class="v">${t[0]}</span><span class="l">${t[1]}</span></div>`).join('');
+      $('rxLede').textContent = `Soft launch in ${MON(S.rxStart - OFF < 0 ? 0 : S.rxStart - OFF)}. Over the first 18 months about ${n0(cases)} reviews run through the operation, costing ${lk(cost)} lakh plus a ${lk(launch)} lakh launch, against ${lk(revRx)} lakh earned directly from passes, extra reviews and the medicines and tests that follow. Reviews included in Solo and Family plans are paid back through more paying accounts, which sit in subscription revenue.`;
+      const head = ['Quarter ending', ...Q.map(rr => MON(R.indexOf(rr[2])))];
+      const rowsQ = [
+        ['Reviews a day, quarter end', rr => n0(rr[2].rxPerDay)], ['Reviews in the quarter', rr => n0(qs(rr)('rxCases'))],
+        ['Salaried doctors (FTE)', rr => rr[2].rxDocsSal.toFixed(1)], ['Panel doctors, per case', rr => rr[2].rxDocsPanel.toFixed(1)],
+        ['Clinical leads', rr => rr[2].rxLeads < 1 ? (rr[2].rxLeads ? 'part-time' : '0') : n0(rr[2].rxLeads)], ['Ops and support', rr => n0(rr[2].rxOps)],
+        ['Doctors, ₹ lakh', rr => lk(qs(rr)('cRxDoc'))], ['Clinical leads, ₹ lakh', rr => lk(qs(rr)('cRxClin'))], ['Ops, ₹ lakh', rr => lk(qs(rr)('cRxOps'))], ['Audits, AI, messages, insurance, ₹ lakh', rr => lk(qs(rr)('cRxVar'))],
+        ['Cost a review, ₹', rr => { const c = qs(rr)('rxCases'); return c ? '₹' + (qs(rr)(ops) / c).toFixed(0) : '–'; }],
+        ['Earned from passes, extras and what follows, ₹ lakh', rr => lk(qs(rr)(r => r.rRx + r.rRxAttach))],
+        ['Launch one-off, ₹ lakh', rr => lk(qs(rr)('oRxLaunch'))],
+      ];
+      $('rxTable').innerHTML = `<thead><tr>${head.map(h => `<th>${h}</th>`).join('')}</tr></thead><tbody>` + rowsQ.map(([l, f]) => `<tr><td style="white-space:normal;min-width:260px">${l}</td>${Q.map(rr => `<td>${f(rr)}</td>`).join('')}</tr>`).join('') + `</tbody>`;
+    })();
+
     // monthly chart
     const B = [['oPeople', 'People', '--c-people'], ['oMkt', 'Marketing', '--c-mkt'], ['oCorpSales', 'Employer sales', '--c-hiring'], ['oLlm', 'Compute and data', '--c-model'], ['ops', 'Pendant, office, G&A', '--c-ops'], ['cogs', 'Cost of revenue', '--muted']];
-    const val = (r, k) => k === 'ops' ? r.oPendant + r.oOffice + r.oGa : r[k];
+    const val = (r, k) => k === 'ops' ? r.oPendant + r.oOffice + r.oGa + r.oRxLaunch : r[k];
     $('keyMonthly').innerHTML = B.map(b => `<span><i class="sw" style="background:var(${b[2]})"></i>${b[1]}</span>`).join('') + `<span><i class="sw" style="background:var(--c-rev)"></i>Revenue</span><span><i class="sw" style="background:var(--ink)"></i>Cash (right axis)</span>`;
     (function () {
       const W = 1040, H = 340, L = 50, Rr = 64, T = 20, Bt = 40;
@@ -867,9 +936,9 @@ const ROSTER = {
     $('monthlyCap').textContent = st.fund === 'plan' ? 'Model plan: the ₹70 crore Series A lands in ' + MON(13) + '.' : `Seed only. ${R.some(r => r.cash < 0) ? 'Cash goes below zero inside 18 months: the plan as written needs the Series A.' : 'Cash stays above zero for 18 months at these settings.'}${R.some(r => r.defending) ? ' Defend mode switches on in ' + MON(R.findIndex(r => r.defending)) + '.' : ''}`;
 
     // monthly table
-    const cols = [['m', 'Month'], ['hc', 'Team'], ['oPeople', 'People'], ['oMkt', 'Marketing'], ['oCorpSales', 'Employer sales'], ['oLlm', 'Compute'], ['oPendant', 'Pendant'], ['oOffice', 'Office'], ['oGa', 'G&A'], ['cogs', 'Cost of revenue'], ['rev', 'Revenue'], ['ebitda', 'EBITDA'], ['funding', 'Funding'], ['cash', 'Cash']];
-    const cell = (r, k, i) => k === 'm' ? MON(i) + (r.defending ? ' ·' : '') : k === 'hc' ? r.hcTotal.toFixed(1) : lk(r[k]);
-    const tot = k => R.reduce((a, r) => a + r[k], 0);
+    const cols = [['m', 'Month'], ['hc', 'Team'], ['oPeople', 'People'], ['oMkt', 'Marketing'], ['oCorpSales', 'Employer sales'], ['oLlm', 'Compute'], ['oPendant', 'Pendant'], ['oOffice', 'Office'], ['oGa', 'G&A, Doctor launch'], ['cogs', 'Cost of revenue'], ['rev', 'Revenue'], ['ebitda', 'EBITDA'], ['funding', 'Funding'], ['cash', 'Cash']];
+    const cell = (r, k, i) => k === 'm' ? MON(i) + (r.defending ? ' ·' : '') : k === 'hc' ? r.hcTotal.toFixed(1) : k === 'oGa' ? lk(r.oGa + r.oRxLaunch) : lk(r[k]);
+    const tot = k => R.reduce((a, r) => a + r[k] + (k === 'oGa' ? r.oRxLaunch : 0), 0);
     $('monthTable').innerHTML = `<thead><tr>${cols.map(c => `<th>${c[1]}</th>`).join('')}</tr></thead><tbody>` + R.map((r, i) => `<tr>${cols.map(c => `<td${(c[0] === 'cash' && r.cash < 0) || (c[0] === 'ebitda') ? ' class="neg"' : ''}>${cell(r, c[0], i)}</td>`).join('')}</tr>`).join('') +
       `<tr class="tot"><td>18 months</td><td>${R[17].hcTotal.toFixed(1)}</td>${['oPeople', 'oMkt', 'oCorpSales', 'oLlm', 'oPendant', 'oOffice', 'oGa', 'cogs', 'rev', 'ebitda', 'funding'].map(k => `<td>${lk(tot(k))}</td>`).join('')}<td>${lk(R[17].cash)}</td></tr></tbody>`;
     window.__csv = [cols.map(c => c[1]).join(',')].concat(R.map((r, i) => cols.map(c => cell(r, c[0], i)).join(','))).join('\n');
@@ -938,7 +1007,7 @@ const ROSTER = {
     const decHc = FUNCS.reduce((a, f) => a + f[3], 0);
     const oneoff = ONEOFF.reduce((a, x) => a + x[1] * LAKH, 0);
     const dec = { label: AMON(-1), hc: decHc, people: decTeam, mkt: 20 * LAKH, corp: 0, product: 1.5 * LAKH, opsga: S.gaFixed[0] * LAKH, oneoff, pendant: 0 };
-    const rowOf = (r, t) => ({ label: AMON(t), hc: r.hcTotal - (opt ? (r.hc.b2b || 0) + (r.hc.hardware || 0) : 0), people: r.oPeople - held(r, t), mkt: r.oMkt, corp: r.oCorpSales, product: r.cogs - r.rev + r.oLlm, opsga: r.oOffice + r.oGa, oneoff: 0, pendant: opt ? 0 : r.oPendant, rev: r.rev });
+    const rowOf = (r, t) => ({ label: AMON(t), hc: r.hcTotal - (opt ? (r.hc.b2b || 0) + (r.hc.hardware || 0) : 0), people: r.oPeople - held(r, t), mkt: r.oMkt, corp: r.oCorpSales, product: r.cogs - r.rev + r.oLlm, opsga: r.oOffice + r.oGa + r.oRxLaunch, oneoff: 0, pendant: opt ? 0 : r.oPendant, rev: r.rev });
     const months = [dec].concat(R.slice(0, close + 1).map(rowOf));
     const tot = m => m.people + m.mkt + m.corp + m.product + m.opsga + m.oneoff + m.pendant;
     let cum = 0; months.forEach(m => { m.total = tot(m); cum += m.total; m.cum = cum; m.left = ANGEL - cum; });
