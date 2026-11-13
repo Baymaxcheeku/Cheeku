@@ -35,6 +35,7 @@ Share each one from its Share menu with the other founders as **editors**. Viewe
 | Scheduled agents (Routines) | claude.ai Routines | Routines | `routines/README.md` |
 | Seed spend model (₹26 cr, 18 months) | https://claude.ai/artifact/1KcTgwdfJ7w7yG2ccyHdwB | Page | `spend-model/index.html` |
 | Angel two-pager (seed pitch) | https://claude.ai/artifact/9Mm8Ky3xtmRe3TqmVEmhAm | Page | `pitch/angel-two-pager.html` |
+| Investment memo, 3 pages (data to action, Nov 2026) | https://claude.ai/artifact/RtKLzvZ3GZwZxYrgwRTZXZ | Page | `pitch/investment-memo.html` |
 | Financial model v2 | https://claude.ai/artifact/JP51ovW13s8yVXLBV9tTej | Page | `vision-board/engine.js`, `model/report.js` |
 | Cheeku Doctor playbook (₹49 doctor review: strategy, execution, unit economics) | https://claude.ai/artifact/MYcXgcBemv1hSgKRzLR97d | Page | `cheeku-doctor/`, built by `cheeku-doctor/build.py` |
 | Cheeku Doctor build sheet (internal tech execution, Dec 2026 to Mar 2027) | https://claude.ai/artifact/34LHxbWbTw42UeY2WQaPKt | Page | `cheeku-doctor/cheeku-doctor-build.html`, built by `cheeku-doctor/build_tech.py` |
