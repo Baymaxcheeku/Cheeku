@@ -21,13 +21,27 @@ cr = lambda n, d=1: ('%.' + str(d) + 'f') % (n / CR)
 
 # ---- channel plan: shares of the model's marketing line, and CAC ceilings per new active user ----
 CH = [('perf', 'Performance ads, agency-run', 'var(--accent)'), ('creator', 'Creator army', 'var(--navy)'), ('hero', 'Hero campaign: free report decode', '#A39CF7'),
-      ('ref', 'Referral and family invites', '#E8590C'), ('brand', 'Brand, PR and store listing', 'var(--lav)')]
+      ('ref', 'Referral and family invites', '#E8590C'), ('brand', 'Brand, PR and store listing', 'var(--lav)'),
+      ('campus', 'Campus ambassadors', '#0F7538'), ('stays', 'QR in hotels, hostels, PGs', '#3CCF7C'), ('camps', 'Society health camps', '#A7E8C2')]
 PH = [  # name, months (t), mix %, CAC ceilings
-    ('Launch', range(0, 3), dict(perf=50, creator=20, hero=15, ref=5, brand=10), dict(perf=150, creator=120, hero=80, ref=60, brand=160)),
-    ('Creator scale', range(3, 9), dict(perf=35, creator=35, hero=10, ref=12, brand=8), dict(perf=165, creator=110, hero=90, ref=85, brand=160)),
-    ('Loops', range(9, 12), dict(perf=30, creator=35, hero=8, ref=15, brand=12), dict(perf=170, creator=108, hero=90, ref=82, brand=165)),
-    ('Scale, 2028', range(12, 18), dict(perf=30, creator=35, hero=5, ref=15, brand=15), dict(perf=190, creator=125, hero=110, ref=95, brand=200)),
+    ('Launch', range(0, 2), dict(perf=50, creator=20, hero=15, ref=5, brand=10, campus=0, stays=0, camps=0),
+     dict(perf=150, creator=120, hero=80, ref=60, brand=160, campus=95, stays=60, camps=300)),
+    ('Ground game', range(2, 6), dict(perf=34, creator=25, hero=8, ref=8, brand=7, campus=12, stays=2, camps=4),
+     dict(perf=160, creator=115, hero=90, ref=80, brand=160, campus=100, stays=60, camps=300)),
+    ('Loops', range(6, 12), dict(perf=25, creator=28, hero=5, ref=10, brand=6, campus=15, stays=5, camps=6),
+     dict(perf=180, creator=118, hero=95, ref=88, brand=170, campus=100, stays=60, camps=300)),
+    ('Scale, 2028', range(12, 18), dict(perf=27, creator=30, hero=4, ref=12, brand=10, campus=9, stays=4, camps=4),
+     dict(perf=200, creator=130, hero=115, ref=100, brand=210, campus=110, stays=70, camps=320)),
 ]
+# Offline unit assumptions (our estimates): ambassador stipend and payout, activations per room, camp cost.
+AMB_FEE, AMB_PAY, PAY_SHARE, AMB_PER_CAMPUS = 15000, 15, 0.12, 3
+ROOM_RATE, CAMP_COST = 0.06, 20000
+def offline(t):
+    sp, _ = split(t)
+    sc, ac = sp['campus']; ss, a_s = sp['stays']; sk, ak = sp['camps']
+    amb = max(0, sc - AMB_PAY * ac * PAY_SHARE) / AMB_FEE
+    return dict(camp_spend=sc, camp_users=ac, amb=amb, campuses=amb / AMB_PER_CAMPUS, stay_spend=ss, stay_users=a_s, rooms=a_s / ROOM_RATE,
+                camps_spend=sk, camps_users=ak, camps=sk / CAMP_COST)
 def phase_of(t): return next(p for p in PH if t in p[1])
 def split(t):
     p = phase_of(t); mk = M[t]['mkt']; raw = {k: mk * p[2][k] / 100 / p[3][k] for k, _, _ in CH}
@@ -98,8 +112,53 @@ def channel_table():
         mk = sum(v[0] for v in tot.values()); us = sum(v[1] for v in tot.values())
         rows.append('<tr class="hl"><td>%s · %s to %s</td><td>₹%s L</td><td>100%%</td><td>₹%d</td><td>%s</td></tr>' % (name, mon(rng[0]), mon(rng[-1]), lakh(mk, 0), round(mk / us), inr(us)))
         for k, lab, col in CH:
+            if not mix[k]: continue
             rows.append('<tr><td><i class="sw" style="background:%s"></i>%s</td><td>₹%s L</td><td>%d%%</td><td>₹%d</td><td>%s</td></tr>' % (col, lab, lakh(tot[k][0], 0), mix[k], cac[k], inr(tot[k][1])))
     return '<table><thead><tr><th>Phase and channel</th><th>Spend</th><th>Share</th><th>CAC ceiling</th><th>New active users</th></tr></thead><tbody>' + ''.join(rows) + '</tbody></table>'
+
+def venues():
+    items, labels = [], []
+    V = [(0, 'campus', 'Campus', 'Ambassadors and codes'), (10, 'stay', 'Hotel, hostel, PG', 'A QR in every room'), (20, 'soc', 'Housing society', 'Health camp on a Sunday')]
+    for x, kind, t1, t2 in V:
+        items += ISO.prism(x, 0, 6, 6, 0.4, 0, 'p')
+        if kind == 'campus':
+            items += ISO.prism(x + 0.8, 1.0, 4.4, 2.2, 2.6, 0.4, 'w')
+            items += ISO.prism(x + 0.6, 0.8, 4.8, 2.6, 0.4, 3.0, 'n')
+            items += ISO.prism(x + 2.4, 3.2, 1.2, 0.05, 1.4, 0.4, 'a')
+            for i in range(3): items += ISO.prism(x + 1.0 + i * 1.6, 4.4, 0.5, 0.5, 1.2, 0.4, 'a')
+        elif kind == 'stay':
+            items += ISO.prism(x + 1.0, 1.0, 4.0, 3.6, 4.2, 0.4, 'w')
+            for r in range(3):
+                for c in range(3): items += ISO.prism(x + 1.4 + c * 1.2, 4.6, 0.7, 0.05, 0.7, 1.0 + r * 1.2, 'a')
+            items += ISO.prism(x + 4.4, 4.9, 0.9, 0.9, 0.9, 0.4, 'n')
+        else:
+            items += ISO.prism(x + 0.6, 0.6, 1.8, 1.8, 4.6, 0.4, 'w')
+            items += ISO.prism(x + 3.4, 0.6, 1.8, 1.8, 3.6, 0.4, 'w')
+            items += ISO.prism(x + 1.6, 3.4, 2.8, 1.8, 1.0, 0.4, 'a')
+            items += ISO.prism(x + 1.5, 3.3, 3.0, 2.0, 0.25, 1.4, 'n')
+        tx, ty = ISO.iso(x + 3, 3, 5.4)
+        labels.append('<text x="%.1f" y="%.1f" class="fv" text-anchor="middle" style="font-size:22px">%s</text>' % (tx, ty - 26, t1))
+        labels.append('<text x="%.1f" y="%.1f" class="fl" text-anchor="middle">%s</text>' % (tx, ty - 10, t2))
+    items.sort(key=lambda z: z[0])
+    return '<svg class="iso" viewBox="-120 -100 620 380" role="img" aria-label="Three offline venues: a campus with ambassadors, a hotel or PG with a QR code in every room, and a housing society hosting a health camp">' + ''.join(z[1] for z in items) + ''.join(labels) + '</svg>'
+
+def ground_table():
+    cols = [(2, 'Mar 2027'), (5, 'Jun 2027'), (8, 'Sep 2027'), (11, 'Dec 2027'), (17, 'Jun 2028')]
+    O = {t: offline(t) for t, _ in cols}
+    rows = [('Campus ambassadors', lambda o: inr(o['amb'])), ('Campuses', lambda o: inr(o['campuses'])), ('Users a month from campuses', lambda o: inr(o['camp_users'])),
+            ('Rooms and beds with a QR', lambda o: inr(round(o['rooms'], -3))), ('Users a month from stays', lambda o: inr(o['stay_users'])),
+            ('Society camps a month', lambda o: inr(o['camps'])), ('Users a month from camps', lambda o: inr(o['camps_users'])),
+            ('Ground game spend a month', lambda o: '₹%s L' % lakh(o['camp_spend'] + o['stay_spend'] + o['camps_spend'])),
+            ('Share of paid users that month', None)]
+    head = '<thead><tr><th>From the plan</th>' + ''.join('<th>%s</th>' % l for _, l in cols) + '</tr></thead>'
+    body = ''
+    for lab, f in rows:
+        if f is None:
+            cells = ''.join('<td>%d%%</td>' % round((O[t]['camp_users'] + O[t]['stay_users'] + O[t]['camps_users']) / M[t]['paid'] * 100) for t, _ in cols)
+            body += '<tr class="hl"><td>%s</td>%s</tr>' % (lab, cells)
+        else:
+            body += '<tr><td>%s</td>%s</tr>' % (lab, ''.join('<td>%s</td>' % f(O[t]) for t, _ in cols))
+    return '<table>' + head + '<tbody>' + body + '</tbody></table>'
 
 def month_table():
     rows = []
@@ -187,7 +246,7 @@ html = f'''<!DOCTYPE html>
     <h1>Customer acquisition plan. <em>Launch to Series A.</em></h1>
     <p class="hookline">"A licensed doctor for everyday illness. ₹49, about 20 minutes."</p>
     <p class="lede">That one line is the acquisition plan. A sick day is the most frequent health moment in an Indian family, so it is the cheapest moment to win them. We buy the first visit with paid ads, earn the second with creators families trust, and let the family file and its invites do the rest.</p>
-    <div class="tags"><span class="tag v">Launch January 2027</span><span class="tag">Cheeku Doctor from February</span><span class="tag">Same numbers as the financial model, base case</span></div>
+    <div class="tags"><span class="tag v">Launch January 2027</span><span class="tag">Cheeku Doctor from February</span><span class="tag">Campuses, stays and societies from March</span><span class="tag">Same numbers as the financial model, base case</span></div>
     <div class="stats">
       <div class="stat"><b>{lakh(m13['mau'], 0)} lakh</b><span>monthly users by February 2028, when the Series A lands</span></div>
       <div class="stat"><b>₹{cr(seedMkt)} cr</b><span>marketing from the seed, December 2026 to January 2028</span></div>
@@ -240,7 +299,7 @@ html = f'''<!DOCTYPE html>
 
   <section class="blk">
     <div class="k">Spend, month by month</div>
-    <h2>Agency first. <em>Creators take over by summer.</em></h2>
+    <h2>Agency first. <em>Creators and the ground game by summer.</em></h2>
     <div class="box scroll">{key}{chart()}{phasebar()}</div>
     <div class="scroll">{channel_table()}</div>
     <p class="cap">Total spend each month is the financial model's marketing line: ₹{SS['mktBudget'][0]} lakh a month in 2027, ₹{SS['mktBudget'][1]} lakh a month from January 2028 (the Series A lands in February), plus ₹20 lakh before launch in December 2026. Channel shares and CAC ceilings are our plan; in every phase they blend to the model's cost per active user (₹{SS['cac'][0]} in 2027, ₹{SS['cac'][1]} in 2028).</p>
@@ -277,6 +336,23 @@ html = f'''<!DOCTYPE html>
         <p class="cap">Our hiring targets for the programme. Paid from the creator line: ₹8 lakh a month in the launch phase, ₹14 lakh from April.</p></div>
       <div class="box"><h3>How it runs</h3><ul><li>The growth lead runs it from the launch quarter; a dedicated creator lead joins by August. A creator portal gives codes, briefs and weekly payouts</li><li>One brief a week, three proven hooks, creators film it their way</li><li>Top 10% of videos become paid ads the same week</li><li>Every health claim comes from a script bank signed by our clinical lead</li><li>Paid partnership labels on every post, as ASCI requires</li></ul></div>
     </div>
+  </section>
+
+  <section class="blk">
+    <div class="k">The ground game, from March 2027</div>
+    <h2>Meet people where they get sick. <em>Pay only when it works.</em></h2>
+    <p class="lede">Three offline channels, opened through our own networks. Students away from home and travellers in a strange city are the sick-day user at their most alone; housing societies are where whole families decide together.</p>
+    <div class="isoWrap scroll">{venues()}</div>
+    <div class="grid3">
+      <div class="box"><h3>Campus ambassadors</h3><p>Colleges and universities in the metros, starting with campuses the founders know. Three ambassadors per campus run hostel drives, sick-bay posters and fest stalls.</p>
+        <ul><li>₹10k to ₹20k a month each (₹15k average), against a floor of 100 activated users</li><li>Plus ₹10 to ₹20 per user who joins with their code and buys a Sick Day Pass, a plan or a care booking</li><li>Cost cap: ₹{PH[1][3]['campus']} per active user</li></ul></div>
+      <div class="box"><h3>QR in every room</h3><p>Hotel chains, hostels and PG networks put a card by the bed: "Unwell? A licensed doctor for ₹49, about 20 minutes. Or ask Cheeku about your reports."</p>
+        <ul><li>We pay printing, placement and ₹20 per activated guest</li><li>The property earns 10% of the commerce its guests bring for 12 months: doctor reviews, medicines, tests</li><li>Cost cap: ₹{PH[1][3]['stays']} per active user. Assumes one active user per room every 17 months</li></ul></div>
+      <div class="box"><h3>Society health camps</h3><p>Weekend camps in gated societies through NoBroker and MyGate: BP, sugar and BMI checks, a doctor's talk, the family file set up on the spot.</p>
+        <ul><li>About ₹20,000 a camp: doctor, kit, society fee</li><li>The lab partner runs the free checks for its bookings</li><li>About 65 families activated per camp; cost cap ₹{PH[1][3]['camps']} per active user, our dearest channel and our best payers</li></ul></div>
+    </div>
+    <div class="scroll">{ground_table()}</div>
+    <p class="cap">All from the plan's channel split, inside the model's marketing line: nothing is added to spend. Ambassador fees, room and camp yields are our planning estimates; March is a pilot in two cities and each channel scales only if it holds its cost cap for a month. Partner revenue shares come out of the commerce they bring, never ahead of it.</p>
   </section>
 
   <section class="blk">
@@ -336,6 +412,7 @@ html = f'''<!DOCTYPE html>
     <h2>We check weekly. <em>We move money when a number misses.</em></h2>
     <div class="gates">
       <div class="gate"><time>Week 4</time><div><b>Install to active at 30% or better; cost per active user under ₹150</b></div><span class="if">If not: pause the bottom half of creatives, move the lead hook to whichever of doctor or report decode activates better.</span></div>
+      <div class="gate"><time>March pilot</time><div><b>10 campuses and 30 ambassadors live in two cities; one stays partner; 8 society camps</b></div><span class="if">Each offline channel scales only after a month inside its cost cap. If ambassadors miss 100 users each, drop to the top half and cut the fee to the ₹10k floor.</span></div>
       <div class="gate"><time>End of March</time><div><b>Blended paid CAC at ₹120; 100 active creators; day-30 retention at 30%</b></div><span class="if">If CAC is over ₹150 for three weeks: cut performance by 20% and move it to the hero campaign and referral credits.</span></div>
       <div class="gate"><time>End of June</time><div><b>Creators bring a third of paid users at ₹110 or less; agency contract reviewed</b></div><span class="if">If creators cost more than ads: keep the top 20%, stop the rest, hold the agency another quarter.</span></div>
       <div class="gate"><time>End of September</time><div><b>Word of mouth matches paid, month for month; first 15 employers signed</b></div><span class="if">If word of mouth lags: double the referral credit and test a free first doctor review for invited family.</span></div>
@@ -347,13 +424,13 @@ html = f'''<!DOCTYPE html>
   <section class="blk">
     <div class="k">Team and guardrails</div>
     <div class="grid2">
-      <div class="box"><h3>Who runs it</h3><ul><li><b>Athar</b> owns growth until the growth lead joins in the launch quarter</li><li><b>Agency</b> runs paid from December to at least June</li><li><b>Creator lead</b> second hire; content and community lead third</li><li><b>Performance marketer</b> joins in 2028 and brings paid in-house</li><li><b>Deepesh</b> runs employers, benefits platforms and pharmacy partners</li><li>Growth team: {M[11]['growthHc']:.0f} people by December 2027, {M[17]['growthHc']:.0f} by June 2028, as in the model</li></ul></div>
+      <div class="box"><h3>Who runs it</h3><ul><li><b>Athar</b> owns growth until the growth lead joins in the launch quarter</li><li><b>Agency</b> runs paid from December to at least June</li><li><b>Creator lead</b> second hire; content and community lead third</li><li><b>Performance marketer</b> joins in 2028 and brings paid in-house</li><li><b>Deepesh</b> runs employers, benefits platforms, pharmacy partners, and the university, stays and society deals</li><li><b>Campus lead</b>, a contractor paid from the campus line, runs ambassadors until the partnerships manager joins</li><li>Growth team: {M[11]['growthHc']:.0f} people by December 2027, {M[17]['growthHc']:.0f} by June 2028, as in the model</li></ul></div>
       <div class="box"><h3>What we will not do</h3><ul><li>No cure or guarantee claims; no before and after</li><li>Doctors explain, they do not endorse; qualifications shown on every post</li><li>No ₹49 doctor ads in a city before the doctors are live there</li><li>No antibiotics or controlled drugs, so no ads that imply them</li><li>Paid partnerships labelled; health data never used for ad targeting</li><li>A written legal opinion on advertising a doctor review before the first doctor ad runs</li></ul></div>
     </div>
   </section>
 
   <div class="cta2">
-    <p class="fine">Sources and basis: Cheeku financial model v2, base case (marketing, cost per active user, word of mouth, churn, users, paying families, doctor reviews, employer numbers). Channel shares, channel CAC ceilings, install and activation rates, creator counts and fees are our planning estimates and are replaced by measured numbers from the first weeks of spend. Projections are not guarantees. Confidential. November 2026.</p>
+    <p class="fine">Sources and basis: Cheeku financial model v2, base case (marketing, cost per active user, word of mouth, churn, users, paying families, doctor reviews, employer numbers). Channel shares, channel CAC ceilings, install and activation rates, creator counts and fees, ambassador fees, room yields and camp costs are our planning estimates and are replaced by measured numbers from the first weeks of spend. Projections are not guarantees. Confidential. November 2026.</p>
   </div>
 </article>
 
