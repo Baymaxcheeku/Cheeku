@@ -163,6 +163,8 @@ extra = '''
 .gate .if { color: var(--warn); }
 @media (max-width: 760px) { .gate { grid-template-columns: minmax(0, 1fr); } }
 .cta2 { padding: 26px 32px 30px; display: grid; gap: 8px; border-top: 1px solid var(--line); }
+.hero h1 { max-width: 24ch; }
+.hookline { font: italic 400 clamp(22px, 3vw, 30px)/1.2 var(--display); color: var(--accent-2); }
 .fine { font-size: 11.5px; color: var(--muted); max-width: 90ch; }
 '''
 key = '<div class="key">' + ''.join('<span><i class="sw" style="background:%s"></i>%s</span>' % (c, l) for _, l, c in CH) + '</div>'
@@ -180,9 +182,10 @@ html = f'''<!DOCTYPE html>
 <body>
 
 <article class="sheet" aria-label="Sheet 1: the plan in one view">
-  <div class="pagehead"><span class="logo">Cheeku</span><span>Customer acquisition plan · launch to Series A · 1 / 4</span></div>
+  <div class="pagehead"><span class="logo">Cheeku</span><span>Growth marketing · 1 / 4</span></div>
   <section class="hero">
-    <h1>A licensed doctor for everyday illness. <em>₹49, about 20 minutes.</em></h1>
+    <h1>Customer acquisition plan. <em>Launch to Series A.</em></h1>
+    <p class="hookline">"A licensed doctor for everyday illness. ₹49, about 20 minutes."</p>
     <p class="lede">That one line is the acquisition plan. A sick day is the most frequent health moment in an Indian family, so it is the cheapest moment to win them. We buy the first visit with paid ads, earn the second with creators families trust, and let the family file and its invites do the rest.</p>
     <div class="tags"><span class="tag v">Launch January 2027</span><span class="tag">Cheeku Doctor from February</span><span class="tag">Same numbers as the financial model, base case</span></div>
     <div class="stats">
@@ -221,7 +224,7 @@ html = f'''<!DOCTYPE html>
 </article>
 
 <article class="sheet" aria-label="Sheet 2: who, where and how much">
-  <div class="pagehead"><span class="logo">Cheeku</span><span>Customer acquisition plan · 2 / 4</span></div>
+  <div class="pagehead"><span class="logo">Cheeku</span><span>Growth marketing · 2 / 4</span></div>
 
   <section class="blk" style="border-top:0">
     <div class="k">Who we go after</div>
@@ -256,7 +259,7 @@ html = f'''<!DOCTYPE html>
 </article>
 
 <article class="sheet" aria-label="Sheet 3: creators, loops and B2B">
-  <div class="pagehead"><span class="logo">Cheeku</span><span>Customer acquisition plan · 3 / 4</span></div>
+  <div class="pagehead"><span class="logo">Cheeku</span><span>Growth marketing · 3 / 4</span></div>
 
   <section class="blk" style="border-top:0">
     <div class="k">The creator army</div>
@@ -312,7 +315,7 @@ html = f'''<!DOCTYPE html>
 </article>
 
 <article class="sheet" aria-label="Sheet 4: numbers, gates and team">
-  <div class="pagehead"><span class="logo">Cheeku</span><span>Customer acquisition plan · 4 / 4</span></div>
+  <div class="pagehead"><span class="logo">Cheeku</span><span>Growth marketing · 4 / 4</span></div>
 
   <section class="blk" style="border-top:0">
     <div class="k">Month by month</div>
