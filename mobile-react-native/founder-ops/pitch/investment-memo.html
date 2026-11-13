@@ -260,18 +260,20 @@ svg text { font-family: var(--body); }
   .mwatch svg { width: 16px; height: 16px; fill: #fff; }
   .mwatch span { font-weight: 500; opacity: .8; font-size: 13px; }
 }
-.mix { background: var(--soft); border-radius: 16px; padding: 16px; display: grid; gap: 12px; }
+.mix { display: grid; gap: 10px; }
 .mixhead { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; }
-.mixhead b { font: 400 22px/1.1 var(--display); } .mixhead span { font-size: 12px; color: var(--muted); }
-.mixbar { display: flex; height: 18px; border-radius: 9px; overflow: hidden; gap: 2px; }
-.mixgrid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
-.mixgrid > div { background: var(--page); border-radius: 12px; padding: 12px; display: grid; gap: 3px; align-content: start; }
-.mixgrid i { width: 12px; height: 12px; border-radius: 4px; display: block; margin-bottom: 4px; }
-.mixgrid b { font-size: 18px; font-variant-numeric: tabular-nums; } .mixgrid .t { font-size: 13px; font-weight: 650; color: var(--ink); }
-.mixgrid span { font-size: 12px; color: var(--muted); line-height: 1.4; }
-.mixnote { font-size: 13px; color: var(--ink-2); }
-@media (max-width: 620px) { .mixgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 380px) { .mixgrid { grid-template-columns: minmax(0, 1fr); } }
+.mixhead b { font-size: 14.5px; } .mixhead span { font-size: 12.5px; color: var(--muted); }
+.mixbar { display: flex; gap: 3px; height: 64px; border-radius: 14px; overflow: hidden; }
+.mixbar > div { min-width: 0; display: grid; align-content: center; gap: 1px; padding: 0 12px; }
+.mixbar b { font-size: 13px; line-height: 1.2; } .mixbar span { font-size: 12.5px; opacity: .85; font-variant-numeric: tabular-nums; }
+.mixleg { display: none; }
+@media (max-width: 620px) {
+  .mixbar { height: 14px; border-radius: 7px; } .mixbar b, .mixbar span { display: none; }
+  .mixleg { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 8px 12px; font-size: 12.5px; color: var(--ink-2); }
+  .mixleg span { display: grid; grid-template-columns: 10px minmax(0,1fr); column-gap: 8px; align-items: center; }
+  .mixleg i { width: 10px; height: 10px; border-radius: 3px; grid-row: 1; }
+  .mixleg b { grid-column: 2; color: var(--ink); font-size: 14px; }
+}
 .web { display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 18px; border-radius: 999px; background: var(--soft-2); color: var(--navy); font-weight: 700; text-decoration: none; font-size: 15px; }
 
 </style>
@@ -415,21 +417,13 @@ svg text { font-family: var(--body); }
           <div><span><b>Solo</b><span>2 doctor reviews a month, unlimited</span></span><em>₹99</em></div>
           <div><span><b>Family</b><span>5 reviews shared, up to 4 people</span></span><em>₹249</em></div>
         </div>
-        <span class="cap">Extra doctor review ₹39. Plans are one of four engines, see below.</span>
+        <span class="cap">Extra doctor review ₹39. Plans are one of four engines.</span>
       </div>
     </div>
     <div class="mix">
-      <div class="mixhead"><b>Where the ₹921 crore comes from</b><span>2031, base case</span></div>
-      <div class="mixbar" role="img" aria-label="2031 revenue mix: care booked in chat 31%, B2B and platform 32%, plans and doctor reviews 21%, insurance 16%">
-        <div style="flex:288;background:var(--accent)"></div><div style="flex:290;background:var(--navy)"></div><div style="flex:198;background:#A39CF7"></div><div style="flex:145;background:#DCD8FF"></div>
-      </div>
-      <div class="mixgrid">
-        <div><i style="background:var(--accent)"></i><b>₹288 cr</b><span class="t">Care booked in chat</span><span>Labs, doctors, physio, medicines and fitness at partner price plus our margin.</span></div>
-        <div><i style="background:var(--navy)"></i><b>₹290 cr</b><span class="t">B2B and platform</span><span>Employers, health partners and India's health model by API. The larger play, built on consented data.</span></div>
-        <div><i style="background:#A39CF7"></i><b>₹198 cr</b><span class="t">Plans and Cheeku Doctor</span><span>Solo, Family and the ₹49 sick day, plus what follows a review.</span></div>
-        <div><i style="background:#DCD8FF"></i><b>₹145 cr</b><span class="t">Insurance</span><span>Policy listings first, then the risk layer insurers have never had.</span></div>
-      </div>
-      <p class="mixnote">Subscriptions are about a sixth of revenue. Most of it comes from acting on health, not from charging for answers.</p>
+      <div class="mixhead"><b>2031 revenue by engine</b><span>₹921 cr, base case</span></div>
+      <div class="mixbar" role="img" aria-label="2031 revenue: care booked in chat ₹288 crore, B2B and platform ₹290 crore, plans and Cheeku Doctor ₹198 crore, insurance ₹145 crore"><div style="flex:288;background:var(--accent);color:#fff"><b>Care booked in chat</b><span>₹288 cr</span></div><div style="flex:290;background:var(--navy);color:#fff"><b>B2B and platform</b><span>₹290 cr</span></div><div style="flex:198;background:#A39CF7;color:#14136B"><b>Plans and Doctor</b><span>₹198 cr</span></div><div style="flex:145;background:#DCD8FF;color:#14136B"><b>Insurance</b><span>₹145 cr</span></div></div>
+      <div class="mixleg"><span><i style="background:var(--accent)"></i>Care booked in chat <b>₹288 cr</b></span><span><i style="background:var(--navy)"></i>B2B and platform <b>₹290 cr</b></span><span><i style="background:#A39CF7"></i>Plans and Doctor <b>₹198 cr</b></span><span><i style="background:#DCD8FF"></i>Insurance <b>₹145 cr</b></span></div>
     </div>
   </section>
 
