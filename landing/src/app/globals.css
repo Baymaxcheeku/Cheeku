@@ -76,6 +76,12 @@ body {
   border-radius: 12px;
 }
 
+/* A field inside a pill that draws its own focus ring: no second ring inside it. */
+.inner-field:focus-visible {
+  outline: none;
+  border-radius: 0;
+}
+
 /* The display voice: one serif, regular weight, italic for the words that matter. */
 @utility display {
   font-family: var(--font-display);

@@ -39,7 +39,7 @@ photographs and app screens are Cheeku's. Product facts are in `PRODUCT.md`.
 | How it works (three photo cards), the product film | `how.tsx` |
 | The family, sliding past | `people.tsx` |
 | Six family situations, each with a photo and a real app screen | `journeys.tsx` |
-| The care ring: everything families bring, round six kinds of care | `care-ring.tsx` |
+| The care ring: pinned on wide screens, each scroll step lights the next of six kinds of care | `care-ring.tsx` |
 | Stacked cards: twelve things Cheeku follows through on, and what is coming | `follow.tsx` |
 | The pinned wheel of everything Cheeku remembers | `memory.tsx` |
 | Cheeku against Google and WhatsApp | `compare.tsx` |
