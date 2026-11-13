@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cheeku Acquisition Plan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:opsz,wght@14..32,400..750&display=swap">
+<style>
+/* Layout: printed "sheets" stacked on a grey desk, as in the two-pager. Sheet 1 is the product and guardrails,
+   sheet 2 is execution, sheet 3 is pricing and unit economics. Every block leads with a picture, then a few lines. */
+:root {
+  --bg: #EEEEF3; --page: #FFFFFF; --soft: #F5F5F8; --soft-2: #EBEAF5; --lav: #DCD8FB;
+  --ink: #17171C; --ink-2: #3A3A42; --muted: #6E6E78; --line: rgba(20, 20, 40, .1);
+  --accent: #5B4EF0; --accent-2: #3B2BC9; --accent-soft: #EEECFF; --navy: #14136B; --on-navy: #FFFFFF;
+  --safe: #0F7538; --safe-bg: #E7F7EE; --warn: #A63A08; --warn-bg: #FFF0E6; --bad: #C00A1C; --bad-bg: #FEF1F3;
+  --iso-t: #EBEAF5; --iso-l: #D3CEF7; --iso-r: #BDB6F2; --a-t: #8A82F5; --a-l: #5B4EF0; --a-r: #3B2BC9;
+  --n-t: #3B3A8F; --n-l: #14136B; --n-r: #0C0B4A; --w-t: #FFFFFF; --w-l: #E4E2F3; --w-r: #CFCBEA;
+  --c-t: #FFE3CF; --c-l: #F6C7A6; --c-r: #E8A579; --e-t: #FFD5DA; --e-l: #F59AA5; --e-r: #E5606F;
+  --display: 'Instrument Serif', Georgia, 'Times New Roman', serif;
+  --body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+  /* the app's own palette, kept light in both themes because these are phone screens */
+  --app-canvas: #F2F2F4; --app-card: #FFFFFF; --app-ink: #111114; --app-ink-2: #3A3A41; --app-muted: #6D6D78;
+  --app-line: #E6E6EA; --app-violet: #5B4EF0; --app-violet-soft: #EEECFF; --app-safe: #0F7538; --app-safe-bg: #E7F7EE;
+  --app-warn: #8F5400; --app-warn-bg: #FFF4E0; --app-frame: #1B1B22;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #08080B; --page: #141418; --soft: #1C1C22; --soft-2: #22203A; --lav: #2E2A55;
+  --ink: #F4F4F7; --ink-2: #D2D2DA; --muted: #9A9AA4; --line: rgba(255, 255, 255, .1);
+  --accent: #8F87FF; --accent-2: #B3ADFF; --accent-soft: #24213F; --navy: #2C2A85; --on-navy: #FFFFFF;
+  --safe: #3CCF7C; --safe-bg: #11301F; --warn: #FFA061; --warn-bg: #3A2214; --bad: #FF7A7A; --bad-bg: #3A1518;
+  --iso-t: #2A2846; --iso-l: #211F3A; --iso-r: #1A182E; --a-t: #8F87FF; --a-l: #6A61E8; --a-r: #4C43C4;
+  --n-t: #4B49B0; --n-l: #34328A; --n-r: #24226A; --w-t: #3A3A48; --w-l: #2E2E3A; --w-r: #24242E;
+  --c-t: #6B4127; --c-l: #563320; --c-r: #45291A; --e-t: #6E2830; --e-l: #592027; --e-r: #47191F;
+  color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #08080B; --page: #141418; --soft: #1C1C22; --soft-2: #22203A; --lav: #2E2A55;
+  --ink: #F4F4F7; --ink-2: #D2D2DA; --muted: #9A9AA4; --line: rgba(255, 255, 255, .1);
+  --accent: #8F87FF; --accent-2: #B3ADFF; --accent-soft: #24213F; --navy: #2C2A85; --on-navy: #FFFFFF;
+  --safe: #3CCF7C; --safe-bg: #11301F; --warn: #FFA061; --warn-bg: #3A2214; --bad: #FF7A7A; --bad-bg: #3A1518;
+  --iso-t: #2A2846; --iso-l: #211F3A; --iso-r: #1A182E; --a-t: #8F87FF; --a-l: #6A61E8; --a-r: #4C43C4;
+  --n-t: #4B49B0; --n-l: #34328A; --n-r: #24226A; --w-t: #3A3A48; --w-l: #2E2E3A; --w-r: #24242E;
+  --c-t: #6B4127; --c-l: #563320; --c-r: #45291A; --e-t: #6E2830; --e-l: #592027; --e-r: #47191F;
+  color-scheme: dark; }
+
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 400 15px/1.5 var(--body); -webkit-font-smoothing: antialiased;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 8px 40px; }
+h1, h2, h3, h4 { margin: 0; text-wrap: balance; font-weight: 400; }
+p { margin: 0; }
+.num, td, .t-num { font-variant-numeric: tabular-nums; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 6px; }
+svg { display: block; max-width: 100%; height: auto; }
+svg text { font-family: var(--body); }
+
+.sheet { max-width: 1060px; margin: 18px auto; background: var(--page); border-radius: 28px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,.05), 0 12px 40px rgba(20,20,40,.08); }
+.pagehead { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 20px 32px 0; font-size: 11.5px; font-weight: 650; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); flex-wrap: wrap; }
+.logo { font: italic 400 26px/1 var(--display); color: var(--accent); letter-spacing: 0; text-transform: none; }
+.blk { padding: 30px 32px; display: grid; gap: 16px; border-top: 1px solid var(--line); min-width: 0; }
+.k { font-size: 11.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); }
+.blk h2 { font: 400 clamp(28px, 4.4vw, 40px)/1.06 var(--display); letter-spacing: -0.005em; }
+.blk h2 em, .hero h1 em { color: var(--accent); }
+.lede { color: var(--ink-2); max-width: 66ch; }
+.cap { font-size: 12px; color: var(--muted); }
+.grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.box { background: var(--soft); border-radius: 18px; padding: 18px; display: grid; gap: 8px; align-content: start; min-width: 0; }
+.box h3 { font: 650 15px/1.3 var(--body); }
+.box p, .box li { font-size: 13.5px; color: var(--ink-2); line-height: 1.45; }
+.box ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
+.scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+@media (max-width: 760px) { .grid2, .grid3 { grid-template-columns: minmax(0, 1fr); } .blk { padding: 24px 18px; } .pagehead { padding: 16px 18px 0; } }
+
+/* hero */
+.hero { padding: 34px 32px 30px; display: grid; gap: 18px; background: radial-gradient(110% 90% at 100% 0%, var(--soft-2) 0%, var(--page) 62%); }
+.hero h1 { font: 400 clamp(38px, 6.6vw, 64px)/1.0 var(--display); letter-spacing: -0.012em; max-width: 17ch; }
+.hero .lede { font-size: 16.5px; }
+.tags { display: flex; flex-wrap: wrap; gap: 8px; }
+.tag { display: inline-flex; align-items: center; height: 28px; padding: 0 12px; border-radius: 999px; font-size: 12.5px; font-weight: 650; background: var(--soft); color: var(--ink-2); }
+.tag.v { background: var(--accent-soft); color: var(--accent-2); }
+.stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.stat { background: var(--soft); border-radius: 16px; padding: 14px; display: grid; gap: 2px; }
+.stat b { font: 400 34px/1 var(--display); color: var(--ink); }
+.stat span { font-size: 12.5px; color: var(--muted); line-height: 1.35; }
+@media (max-width: 760px) { .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } .hero { padding: 26px 18px; } }
+
+/* price ladder of alternatives */
+.alts { display: grid; gap: 8px; }
+.alt { display: grid; grid-template-columns: 210px minmax(0, 1fr) 110px; gap: 14px; align-items: center; }
+.alt .nm b { display: block; font-size: 14px; }
+.alt .nm span { font-size: 12px; color: var(--muted); }
+.alt .bar { height: 14px; border-radius: 7px; background: var(--soft-2); position: relative; overflow: hidden; }
+.alt .bar i { position: absolute; inset: 0 auto 0 0; border-radius: 7px; background: var(--lav); }
+.alt .bar i.rng { background: repeating-linear-gradient(90deg, var(--lav) 0 6px, transparent 6px 10px); }
+.alt.us .bar i { background: var(--accent); }
+.alt .pr { font-weight: 650; font-size: 14px; text-align: right; }
+.alt .gap { font-size: 12px; color: var(--muted); }
+.alt.us .nm b, .alt.us .pr { color: var(--accent); }
+@media (max-width: 640px) { .alt { grid-template-columns: minmax(0, 1fr) 90px; } .alt .bar { grid-column: 1 / -1; grid-row: 2; } }
+
+/* isometric */
+.isoWrap { background: var(--soft); border-radius: 22px; padding: 12px 8px 4px; }
+.iso { width: 100%; min-width: 600px; max-height: 520px; }
+.p-t { fill: var(--iso-t); } .p-l { fill: var(--iso-l); } .p-r { fill: var(--iso-r); }
+.pc-t { fill: var(--c-t); } .pc-l { fill: var(--c-l); } .pc-r { fill: var(--c-r); }
+.pe-t { fill: var(--e-t); } .pe-l { fill: var(--e-l); } .pe-r { fill: var(--e-r); }
+.a-t { fill: var(--a-t); } .a-l { fill: var(--a-l); } .a-r { fill: var(--a-r); }
+.n-t { fill: var(--n-t); } .n-l { fill: var(--n-l); } .n-r { fill: var(--n-r); }
+.w-t { fill: var(--w-t); } .w-l { fill: var(--w-l); } .w-r { fill: var(--w-r); }
+.s-t, .s-l, .s-r { fill: var(--accent-soft); }
+.c-t { fill: var(--c-t); } .c-l { fill: var(--c-l); } .c-r { fill: var(--c-r); }
+.e-t { fill: var(--e-t); } .e-l { fill: var(--e-l); } .e-r { fill: var(--e-r); }
+.path { stroke: var(--accent); stroke-width: 3; stroke-linecap: round; fill: none; }
+.path.br { stroke: var(--warn); stroke-dasharray: 6 6; }
+.path.em { stroke: var(--bad); stroke-dasharray: 6 6; }
+.path.back { stroke: var(--accent); stroke-dasharray: 2 6; }
+.nb { fill: var(--accent); } .nb-c { fill: #E8590C; } .nb-e { fill: #E10A1E; } .nbt { fill: #FFFFFF; font-size: 13px; font-weight: 700; text-anchor: middle; } .ld { stroke: var(--muted); stroke-width: 1; stroke-dasharray: 2 3; }
+.legend { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px 16px; }
+.legend div { display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: 8px; align-items: start; }
+.legend i { width: 24px; height: 24px; border-radius: 50%; background: var(--accent); color: #FFFFFF; font: 700 12px/24px var(--body); text-align: center; font-style: normal; }
+.legend i.c { background: #E8590C; } .legend i.e { background: #E10A1E; }
+.legend b { display: block; font-size: 13.5px; } .legend span { font-size: 12px; color: var(--muted); line-height: 1.35; }
+@media (max-width: 760px) { .legend { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.lt { fill: var(--ink); font-size: 13px; font-weight: 650; } .lt-c { fill: var(--warn); } .lt-e { fill: var(--bad); }
+.ls { fill: var(--muted); font-size: 11.5px; }
+.tg { fill: var(--muted); font-size: 11px; font-weight: 600; font-style: italic; }
+
+/* doors */
+.doors { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.door { border-radius: 18px; padding: 16px; display: grid; gap: 8px; align-content: start; }
+.door .lv { font-size: 11px; font-weight: 750; letter-spacing: .08em; text-transform: uppercase; }
+.door h3 { font: 400 24px/1.1 var(--display); }
+.door p { font-size: 13.5px; line-height: 1.45; }
+.door.d1 { background: var(--accent-soft); } .door.d1 .lv { color: var(--accent-2); }
+.door.d2 { background: var(--warn-bg); } .door.d2 .lv, .door.d2 h3 { color: var(--warn); }
+.door.d3 { background: var(--bad-bg); } .door.d3 .lv, .door.d3 h3 { color: var(--bad); }
+.door p { color: var(--ink-2); }
+@media (max-width: 760px) { .doors { grid-template-columns: minmax(0, 1fr); } }
+
+/* chips */
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chips span { font-size: 12.5px; padding: 4px 10px; border-radius: 999px; background: var(--page); color: var(--ink-2); border: 1px solid var(--line); }
+.chips.no span { color: var(--bad); border-color: var(--bad-bg); background: var(--bad-bg); }
+
+/* phone screens */
+.phones { display: flex; flex-wrap: wrap; justify-content: center; gap: 22px 18px; padding: 6px 2px 14px; max-width: 740px; margin: 0 auto; }
+.phone { flex: none; width: 232px; display: grid; gap: 10px; }
+.phone figcaption { font-size: 12.5px; color: var(--ink-2); line-height: 1.4; }
+.phone figcaption b { display: block; color: var(--ink); font-size: 13px; }
+figure { margin: 0; }
+.dev { width: 232px; height: 470px; border-radius: 36px; background: var(--app-frame); padding: 8px; box-shadow: 0 18px 40px rgba(20,20,60,.18); }
+.scr { width: 100%; height: 100%; border-radius: 29px; background: var(--app-canvas); overflow: hidden; display: flex; flex-direction: column; font-family: var(--body); color: var(--app-ink); position: relative; }
+.sb { height: 26px; display: flex; justify-content: space-between; align-items: center; padding: 0 18px; font-size: 10px; font-weight: 650; color: var(--app-ink); }
+.isl { width: 64px; height: 16px; border-radius: 10px; background: var(--app-frame); }
+.ah { display: flex; align-items: center; justify-content: space-between; padding: 4px 14px 8px; }
+.ah .br { font: italic 400 20px/1 var(--display); color: var(--app-violet); }
+.ah .mi { font-size: 10px; color: var(--app-muted); font-weight: 600; }
+.ab { flex: 1; padding: 0 12px; display: flex; flex-direction: column; gap: 8px; overflow: hidden; }
+.bub { max-width: 82%; font-size: 10.5px; line-height: 1.4; padding: 7px 10px; border-radius: 14px; }
+.bub.me { align-self: flex-end; background: var(--app-ink); color: #FFFFFF; border-bottom-right-radius: 4px; }
+.bub.ai { align-self: flex-start; background: var(--app-card); color: var(--app-ink); border-bottom-left-radius: 4px; }
+.cd { background: var(--app-card); border-radius: 16px; padding: 10px; display: grid; gap: 6px; }
+.cd .t { font-size: 11px; font-weight: 650; }
+.cd .s { font-size: 9.5px; color: var(--app-muted); line-height: 1.35; }
+.ch { display: flex; flex-wrap: wrap; gap: 5px; }
+.ch span { font-size: 9.5px; padding: 4px 8px; border-radius: 999px; background: var(--app-canvas); color: var(--app-ink-2); font-weight: 600; }
+.ch span.on { background: var(--app-violet); color: #FFFFFF; }
+.mem { font-size: 9.5px; color: var(--app-violet); background: var(--app-violet-soft); padding: 6px 8px; border-radius: 10px; line-height: 1.35; }
+.btn { background: var(--app-ink); color: #FFFFFF; border-radius: 999px; text-align: center; font-size: 11px; font-weight: 650; padding: 9px 10px; }
+.btn.ghost { background: var(--app-card); color: var(--app-ink); border: 1px solid var(--app-line); }
+.row { display: flex; justify-content: space-between; align-items: center; gap: 6px; font-size: 10px; color: var(--app-ink-2); }
+.row b { color: var(--app-ink); }
+.tick { color: var(--app-safe); font-weight: 700; }
+.sheetUp { margin-top: auto; background: var(--app-card); border-radius: 22px 22px 0 0; padding: 12px; display: grid; gap: 7px; box-shadow: 0 -8px 24px rgba(0,0,0,.08); }
+.grab { width: 34px; height: 4px; border-radius: 2px; background: var(--app-line); justify-self: center; }
+.price { font: 650 20px/1 var(--body); }
+.trk { display: grid; gap: 7px; }
+.trk div { display: grid; grid-template-columns: 16px minmax(0, 1fr) auto; gap: 7px; align-items: center; font-size: 10px; color: var(--app-ink-2); }
+.dot { width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--app-line); background: var(--app-card); }
+.dot.ok { background: var(--app-safe); border-color: var(--app-safe); }
+.dot.now { background: var(--app-violet); border-color: var(--app-violet); box-shadow: 0 0 0 3px var(--app-violet-soft); }
+.av { width: 30px; height: 30px; border-radius: 50%; background: var(--app-violet-soft); color: var(--app-violet); font-size: 11px; font-weight: 700; display: grid; place-items: center; flex: none; }
+.rxh { display: flex; gap: 8px; align-items: center; }
+.qr { width: 46px; height: 46px; border-radius: 6px; background:
+  conic-gradient(from 90deg at 30% 30%, var(--app-ink) 25%, transparent 0) 0 0 / 11px 11px, var(--app-card); border: 3px solid var(--app-card); outline: 1px solid var(--app-line); }
+.med { border-top: 1px solid var(--app-line); padding-top: 6px; display: grid; gap: 1px; }
+.med b { font-size: 10.5px; } .med span { font-size: 9.5px; color: var(--app-muted); }
+.safeTag { font-size: 9.5px; font-weight: 650; color: var(--app-safe); background: var(--app-safe-bg); border-radius: 999px; padding: 3px 8px; justify-self: start; }
+.sample { font-size: 11px; color: var(--muted); }
+
+/* doctor console */
+.console { background: var(--app-canvas); border-radius: 18px; border: 8px solid var(--app-frame); overflow: hidden; color: var(--app-ink); min-width: 760px; }
+.cbar { display: flex; align-items: center; gap: 10px; padding: 8px 14px; background: var(--app-card); border-bottom: 1px solid var(--app-line); font-size: 11px; color: var(--app-muted); }
+.cbar .br { font: italic 400 18px/1 var(--display); color: var(--app-violet); }
+.cbar .pill { margin-left: auto; background: var(--app-safe-bg); color: var(--app-safe); font-weight: 650; padding: 3px 9px; border-radius: 999px; }
+.cgrid { display: grid; grid-template-columns: 220px minmax(0, 1fr) 230px; gap: 10px; padding: 10px; }
+.q { background: var(--app-card); border-radius: 12px; padding: 9px; display: grid; gap: 2px; font-size: 10.5px; }
+.q.on { outline: 2px solid var(--app-violet); }
+.q b { font-size: 11px; } .q .w { color: var(--app-warn); font-weight: 650; }
+.pane { background: var(--app-card); border-radius: 12px; padding: 12px; display: grid; gap: 8px; align-content: start; }
+.pane h4 { font: 650 12px/1.3 var(--body); }
+.kv { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 4px 10px; font-size: 10.5px; }
+.kv span:nth-child(odd) { color: var(--app-muted); }
+.flags { display: flex; flex-wrap: wrap; gap: 4px; }
+.flags span { font-size: 9.5px; font-weight: 600; padding: 3px 7px; border-radius: 999px; background: var(--app-safe-bg); color: var(--app-safe); }
+.dx { display: flex; flex-wrap: wrap; gap: 5px; }
+.dx span { font-size: 10px; padding: 5px 9px; border-radius: 999px; border: 1px solid var(--app-line); }
+.dx span.on { background: var(--app-violet); color: #FFFFFF; border-color: var(--app-violet); }
+.acts { display: grid; gap: 6px; }
+
+/* timeline */
+.tl { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 0; position: relative; min-width: 820px; }
+.tl::before { content: ""; position: absolute; left: 4%; right: 4%; top: 34px; height: 3px; background: var(--soft-2); border-radius: 2px; }
+.tl div { display: grid; gap: 6px; justify-items: center; align-content: start; text-align: center; padding: 0 6px; position: relative; }
+.tl time { font: 650 12px/1 var(--body); color: var(--accent-2); font-variant-numeric: tabular-nums; }
+.tl i { width: 18px; height: 18px; border-radius: 50%; background: var(--page); border: 3px solid var(--accent); z-index: 1; }
+.tl div.dk i { background: var(--accent); }
+.tl b { font-size: 12.5px; } .tl span { font-size: 11.5px; color: var(--muted); line-height: 1.35; }
+
+/* state machine */
+.sm { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.sm span { font-size: 12px; font-weight: 650; padding: 6px 10px; border-radius: 10px; background: var(--accent-soft); color: var(--accent-2); }
+.sm span.k2 { background: var(--navy); color: var(--on-navy); }
+.sm em { font-style: normal; color: var(--muted); font-size: 13px; }
+.sm.side span { background: var(--soft); color: var(--ink-2); font-weight: 600; }
+
+/* tables */
+table { border-collapse: collapse; width: 100%; font-size: 13px; }
+th, td { padding: 9px 10px; text-align: right; border-bottom: 1px solid var(--line); white-space: nowrap; }
+thead th { white-space: normal; vertical-align: bottom; line-height: 1.3; }
+th:first-child, td:first-child { text-align: left; }
+thead th { font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
+tr.hl td { background: var(--accent-soft); color: var(--ink); font-weight: 650; }
+td.neg { color: var(--bad); } td.pos { color: var(--safe); }
+
+/* build map */
+.own { display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 650; padding: 2px 8px; border-radius: 999px; background: var(--page); color: var(--ink-2); border: 1px solid var(--line); }
+.bm { display: grid; gap: 6px; }
+.bm div { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: center; font-size: 13px; padding: 8px 10px; border-radius: 12px; background: var(--page); }
+
+/* gantt */
+.gantt { display: grid; grid-template-columns: 170px minmax(0, 1fr); gap: 8px 12px; align-items: center; min-width: 640px; }
+.gantt .lb { font-size: 13px; font-weight: 650; }
+.gantt .lb span { display: block; font-size: 11.5px; color: var(--muted); font-weight: 500; }
+.gtrack { position: relative; height: 26px; background: var(--soft); border-radius: 8px; }
+.gtrack i { position: absolute; top: 0; bottom: 0; border-radius: 8px; background: var(--lav); display: flex; align-items: center; padding: 0 8px; font-size: 11px; font-style: normal; font-weight: 650; color: var(--accent-2); white-space: nowrap; }
+.gtrack i.pl { background: var(--accent); color: #FFFFFF; }
+.gscale { grid-column: 2; display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); }
+
+/* plans */
+.plans { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.plan { border-radius: 22px; padding: 20px; display: grid; gap: 12px; align-content: start; background: var(--soft); }
+.plan.fam { background: var(--navy); color: var(--on-navy); }
+.plan .who { font-size: 11.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); }
+.plan.fam .who { color: #C9C4FA; }
+.plan h3 { font: 400 28px/1.05 var(--display); }
+.plan .pp { font: 650 34px/1 var(--body); letter-spacing: -0.02em; }
+.plan .pp small { font-size: 14px; font-weight: 500; opacity: .7; }
+.plan ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 7px; }
+.plan li { font-size: 13.5px; line-height: 1.4; display: grid; grid-template-columns: 16px minmax(0, 1fr); gap: 8px; }
+.plan li::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); margin-top: 6px; }
+.plan.fam li::before { background: #C9C4FA; }
+.plan li.new { font-weight: 650; }
+.worth { font-size: 12.5px; border-radius: 12px; padding: 10px 12px; background: var(--page); color: var(--ink-2); line-height: 1.4; }
+.plan.fam .worth { background: rgba(255,255,255,.1); color: #E8E6FF; }
+@media (max-width: 860px) { .plans { grid-template-columns: minmax(0, 1fr); } }
+
+/* waterfall */
+.wf { display: grid; gap: 6px; }
+.wfr { display: grid; grid-template-columns: 170px minmax(0, 1fr) 64px; gap: 10px; align-items: center; font-size: 12.5px; }
+.wfr .tr { position: relative; height: 18px; }
+.wfr .tr i { position: absolute; top: 0; height: 18px; border-radius: 4px; }
+.wfr .tr i.tot { background: var(--accent); } .wfr .tr i.minus { background: var(--bad-bg); outline: 1px solid var(--bad); outline-offset: -1px; }
+.wfr .tr i.plus { background: var(--safe-bg); outline: 1px solid var(--safe); outline-offset: -1px; }
+.wfr .tr i.sub { background: var(--lav); }
+.wfr .tr .zero { position: absolute; top: -3px; bottom: -3px; width: 1px; background: var(--muted); }
+.wfr .v { text-align: right; font-weight: 650; font-variant-numeric: tabular-nums; }
+.wfr .v.neg { color: var(--bad); } .wfr .v.pos { color: var(--safe); }
+@media (max-width: 640px) { .wfr { grid-template-columns: 120px minmax(0, 1fr) 54px; } }
+
+/* bars */
+.vb { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; align-items: end; height: 230px; padding-top: 10px; }
+.vb div { display: flex; flex-direction: column; gap: 6px; align-items: center; justify-content: flex-end; height: 100%; }
+.vb i { width: 70%; max-width: 120px; border-radius: 10px 10px 4px 4px; background: var(--lav); display: block; }
+.vb div.hl i { background: var(--accent); }
+.vb b { font-size: 15px; } .vb span { font-size: 11.5px; color: var(--muted); text-align: center; line-height: 1.3; }
+
+/* loop into longevity */
+.loopL { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; }
+.loopL div { background: var(--soft); border-radius: 16px; padding: 14px; display: grid; gap: 6px; align-content: start; position: relative; }
+.loopL div:last-child { background: var(--navy); color: var(--on-navy); }
+.loopL div:last-child span { color: #D9D6FF; }
+.loopL b { font-size: 13.5px; } .loopL span { font-size: 12.5px; color: var(--ink-2); line-height: 1.4; }
+.loopL .ix { font: 400 26px/1 var(--display); color: var(--accent); }
+.loopL div:last-child .ix { color: #C9C4FA; }
+@media (max-width: 860px) { .loopL { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+.callout { background: var(--navy); color: var(--on-navy); border-radius: 20px; padding: 18px 20px; display: grid; gap: 6px; }
+.callout b { font: 400 24px/1.15 var(--display); }
+.callout p { color: #E1DEFF; font-size: 13.5px; }
+.src { font-size: 11.5px; color: var(--muted); line-height: 1.55; }
+.src ol { margin: 0; padding-left: 18px; display: grid; gap: 3px; }
+@media (prefers-reduced-motion: no-preference) { .dot.now { animation: pulse 2s ease-in-out infinite; } @keyframes pulse { 50% { box-shadow: 0 0 0 6px var(--app-violet-soft); } } }
+
+.fv { font: 400 26px/1 var(--display); fill: var(--ink); } .fl { font-size: 11px; fill: var(--muted); font-weight: 600; }
+.iso { max-height: 520px; min-width: 640px; }
+.legend.five { grid-template-columns: repeat(5, minmax(0, 1fr)); } .legend p { margin: 0; }
+@media (max-width: 760px) { .legend.five { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.sw { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 8px; }
+.key { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 12.5px; color: var(--ink-2); }
+.phasebar { display: flex; gap: 4px; min-width: 760px; margin: 0 10px 0 46px; }
+.phasebar div { background: var(--accent-soft); border-radius: 10px; padding: 8px 10px; display: grid; gap: 1px; min-width: 0; }
+.phasebar b { font-size: 12.5px; color: var(--accent-2); } .phasebar span { font-size: 11px; color: var(--muted); white-space: nowrap; }
+.icps { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.icp { background: var(--soft); border-radius: 18px; padding: 16px; display: grid; gap: 8px; align-content: start; }
+.icp.front { background: var(--navy); color: #fff; }
+.icp .lv { font-size: 11px; font-weight: 750; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); } .icp.front .lv { color: #C9C4FA; }
+.icp h3 { font: 400 23px/1.08 var(--display); }
+.icp p { font-size: 13px; line-height: 1.45; color: var(--ink-2); } .icp.front p { color: #D9D6FF; }
+.icp .hook { font: italic 400 17px/1.25 var(--display); color: var(--accent-2); border-top: 1px solid var(--line); padding-top: 8px; } .icp.front .hook { color: #fff; border-color: rgba(255,255,255,.2); }
+@media (max-width: 900px) { .icps { grid-template-columns: repeat(2, minmax(0, 1fr)); } } @media (max-width: 520px) { .icps { grid-template-columns: minmax(0, 1fr); } }
+.levs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.lev { background: var(--soft); border-radius: 18px; padding: 16px; display: grid; gap: 6px; align-content: start; }
+.lev .lv { font-size: 11px; font-weight: 750; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+.lev b { font: 400 22px/1.1 var(--display); } .lev p { font-size: 13px; color: var(--ink-2); line-height: 1.45; }
+.gain { font-size: 12.5px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 8px; line-height: 1.6; } .gain span { font-weight: 700; color: var(--safe); font-size: 14px; }
+@media (max-width: 900px) { .levs { grid-template-columns: repeat(2, minmax(0, 1fr)); } } @media (max-width: 520px) { .levs { grid-template-columns: minmax(0, 1fr); } }
+.tiers { display: grid; gap: 8px; }
+.tier { display: grid; grid-template-columns: 150px minmax(0, 1fr) 150px 130px; gap: 14px; align-items: center; background: var(--soft); border-radius: 14px; padding: 12px 16px; }
+.tier b { font-size: 14.5px; } .tier span { font-size: 13px; color: var(--ink-2); line-height: 1.4; } .tier .n { font: 400 24px/1 var(--display); color: var(--accent); } .tier .pay { font-size: 12.5px; color: var(--muted); }
+.tier.t1 { background: var(--navy); color: #fff; } .tier.t1 span { color: #D9D6FF; } .tier.t1 .n { color: #fff; } .tier.t1 .pay { color: #C9C4FA; }
+@media (max-width: 760px) { .tier { grid-template-columns: minmax(0, 1fr) auto; } .tier span, .tier .pay { grid-column: 1 / -1; } }
+.ramp { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; align-items: end; }
+.ramp div { display: grid; gap: 6px; justify-items: center; } .ramp i { display: block; width: 100%; border-radius: 10px 10px 4px 4px; background: var(--accent); }
+.ramp b { font: 400 24px/1 var(--display); } .ramp span { font-size: 12px; color: var(--muted); }
+.splitbar { display: flex; height: 54px; border-radius: 14px; overflow: hidden; gap: 3px; }
+.splitbar div { display: grid; align-content: center; padding: 0 14px; min-width: 0; } .splitbar b { font-size: 13.5px; } .splitbar span { font-size: 12px; opacity: .85; }
+.b2b { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 760px) { .b2b { grid-template-columns: minmax(0, 1fr); } }
+.gates { display: grid; gap: 8px; }
+.gate { display: grid; grid-template-columns: 120px minmax(0, 1fr) minmax(0, 1fr); gap: 14px; align-items: start; background: var(--soft); border-radius: 14px; padding: 12px 16px; font-size: 13.5px; }
+.gate time { font-weight: 700; color: var(--accent-2); } .gate b { display: block; } .gate span { color: var(--ink-2); }
+.gate .if { color: var(--warn); }
+@media (max-width: 760px) { .gate { grid-template-columns: minmax(0, 1fr); } }
+.cta2 { padding: 26px 32px 30px; display: grid; gap: 8px; border-top: 1px solid var(--line); }
+.fine { font-size: 11.5px; color: var(--muted); max-width: 90ch; }
+</style>
+</head>
+<body>
+
+<article class="sheet" aria-label="Sheet 1: the plan in one view">
+  <div class="pagehead"><span class="logo">Cheeku</span><span>Customer acquisition plan · launch to Series A · 1 / 4</span></div>
+  <section class="hero">
+    <h1>A licensed doctor for everyday illness. <em>₹49, about 20 minutes.</em></h1>
+    <p class="lede">That one line is the acquisition plan. A sick day is the most frequent health moment in an Indian family, so it is the cheapest moment to win them. We buy the first visit with paid ads, earn the second with creators families trust, and let the family file and its invites do the rest.</p>
+    <div class="tags"><span class="tag v">Launch January 2027</span><span class="tag">Cheeku Doctor from February</span><span class="tag">Same numbers as the financial model, base case</span></div>
+    <div class="stats">
+      <div class="stat"><b>7 lakh</b><span>monthly users by February 2028, when the Series A lands</span></div>
+      <div class="stat"><b>₹6.2 cr</b><span>marketing from the seed, December 2026 to January 2028</span></div>
+      <div class="stat"><b>₹120</b><span>to win one active user from paid, 2027 ceiling</span></div>
+      <div class="stat"><b>12,880</b><span>paying families by February 2028</span></div>
+    </div>
+  </section>
+
+  <section class="blk">
+    <div class="k">The funnel, 2027</div>
+    <h2>Five steps. <em>Each one has an owner and a number.</em></h2>
+    <div class="isoWrap scroll"><svg class="iso" viewBox="-90 -185 680 590" role="img" aria-label="2027 acquisition funnel: 12.1 lakh installs from paid, 7.8 lakh new active users, 4.9 lakh monthly users in December, 63,411 doctor reviews and 5,908 paying families"><line x1="-79.2" y1="44.2" x2="453.4" y2="351.8" class="path"/><polygon class="p-r" points="52.0,30.0 0.0,60.0 0.0,54.0 52.0,24.0"/><polygon class="p-l" points="-52.0,30.0 0.0,60.0 0.0,54.0 -52.0,24.0"/><polygon class="p-t" points="0.0,-6.0 52.0,24.0 0.0,54.0 -52.0,24.0"/><polygon class="w-r" points="39.0,24.0 0.0,46.5 0.0,-58.5 39.0,-81.0"/><polygon class="w-l" points="-39.0,24.0 0.0,46.5 0.0,-58.5 -39.0,-81.0"/><polygon class="w-t" points="0.0,-103.5 39.0,-81.0 0.0,-58.5 -39.0,-81.0"/><polygon class="p-r" points="168.9,97.5 116.9,127.5 116.9,121.5 168.9,91.5"/><polygon class="p-l" points="65.0,97.5 116.9,127.5 116.9,121.5 65.0,91.5"/><polygon class="p-t" points="116.9,61.5 168.9,91.5 116.9,121.5 65.0,91.5"/><polygon class="s-r" points="155.9,91.5 116.9,114.0 116.9,30.0 155.9,7.5"/><polygon class="s-l" points="77.9,91.5 116.9,114.0 116.9,30.0 77.9,7.5"/><polygon class="s-t" points="116.9,-15.0 155.9,7.5 116.9,30.0 77.9,7.5"/><polygon class="p-r" points="285.8,165.0 233.8,195.0 233.8,189.0 285.8,159.0"/><polygon class="p-l" points="181.9,165.0 233.8,195.0 233.8,189.0 181.9,159.0"/><polygon class="p-t" points="233.8,129.0 285.8,159.0 233.8,189.0 181.9,159.0"/><polygon class="a-r" points="272.8,159.0 233.8,181.5 233.8,115.5 272.8,93.0"/><polygon class="a-l" points="194.9,159.0 233.8,181.5 233.8,115.5 194.9,93.0"/><polygon class="a-t" points="233.8,70.5 272.8,93.0 233.8,115.5 194.9,93.0"/><polygon class="p-r" points="402.7,232.5 350.7,262.5 350.7,256.5 402.7,226.5"/><polygon class="p-l" points="298.8,232.5 350.7,262.5 350.7,256.5 298.8,226.5"/><polygon class="p-t" points="350.7,196.5 402.7,226.5 350.7,256.5 298.8,226.5"/><polygon class="a-r" points="389.7,226.5 350.7,249.0 350.7,207.0 389.7,184.5"/><polygon class="a-l" points="311.8,226.5 350.7,249.0 350.7,207.0 311.8,184.5"/><polygon class="a-t" points="350.7,162.0 389.7,184.5 350.7,207.0 311.8,184.5"/><polygon class="p-r" points="519.6,300.0 467.7,330.0 467.7,324.0 519.6,294.0"/><polygon class="p-l" points="415.7,300.0 467.7,330.0 467.7,324.0 415.7,294.0"/><polygon class="p-t" points="467.7,264.0 519.6,294.0 467.7,324.0 415.7,294.0"/><polygon class="n-r" points="506.6,294.0 467.7,316.5 467.7,294.0 506.6,271.5"/><polygon class="n-l" points="428.7,294.0 467.7,316.5 467.7,294.0 428.7,271.5"/><polygon class="n-t" points="467.7,249.0 506.6,271.5 467.7,294.0 428.7,271.5"/><text x="0.0" y="-117.0" class="fv" text-anchor="middle">12.1 lakh</text><text x="0.0" y="-101.0" class="fl" text-anchor="middle">Installs from paid</text><circle cx="-37.7" cy="65.8" r="12" class="nb"/><text x="-37.7" y="70.2" class="nbt">1</text><text x="116.9" y="-28.5" class="fv" text-anchor="middle">7.8 lakh</text><text x="116.9" y="-12.5" class="fl" text-anchor="middle">New active users</text><circle cx="79.2" cy="133.2" r="12" class="nb"/><text x="79.2" y="137.8" class="nbt">2</text><text x="233.8" y="57.0" class="fv" text-anchor="middle">4.9 lakh</text><text x="233.8" y="73.0" class="fl" text-anchor="middle">Monthly users, Dec</text><circle cx="196.2" cy="200.8" r="12" class="nb"/><text x="196.2" y="205.2" class="nbt">3</text><text x="350.7" y="148.5" class="fv" text-anchor="middle">63,411</text><text x="350.7" y="164.5" class="fl" text-anchor="middle">Doctor reviews in year</text><circle cx="313.1" cy="268.2" r="12" class="nb"/><text x="313.1" y="272.8" class="nbt">4</text><text x="467.7" y="235.5" class="fv" text-anchor="middle">5,908</text><text x="467.7" y="251.5" class="fl" text-anchor="middle">Paying families, Dec</text><circle cx="430.0" cy="335.8" r="12" class="nb"/><text x="430.0" y="340.2" class="nbt">5</text></svg></div>
+    <div class="legend five">
+      <div><i>1</i><p><b>Installs</b><span>About 12.1 lakh from paid, at roughly ₹40 each.</span></p></div>
+      <div><i>2</i><p><b>Active in week one</b><span>One in three asks a question or adds a report. 4.0 lakh from paid, 3.8 lakh from word of mouth.</span></p></div>
+      <div><i>3</i><p><b>Still here in December</b><span>4.9 lakh monthly users, after 12% monthly churn.</span></p></div>
+      <div><i>4</i><p><b>Doctor reviews</b><span>63,411 in the year, 328 a day by December.</span></p></div>
+      <div><i>5</i><p><b>Paying families</b><span>5,908 on Solo or Family in December.</span></p></div>
+    </div>
+    <p class="cap">Steps 2 to 5 are the financial model's base case. Installs and the one-in-three activation rate are our planning estimates behind the model's ₹120 per active user; the first four weeks of spend replace them with measured numbers.</p>
+  </section>
+
+  <section class="blk">
+    <div class="k">Four levers</div>
+    <h2>What moves the plan, <em>and by how much.</em></h2>
+    <div class="levs">
+      <div class="lev"><span class="lv">Lever 1 · cost</span><b>CAC ₹120 to ₹102</b><p>Creators and referral take share from ads. 15% cheaper users, same budget.</p><div class="gain"><span>+1,15,102</span> monthly users by Feb 2028<br><span>+2,142</span> paying families by Feb 2028</div></div>
+      <div class="lev"><span class="lv">Lever 2 · retention</span><b>Churn 12% to 10%</b><p>The daily plan, due reminders and a doctor on sick days give a reason to return.</p><div class="gain"><span>+86,852</span> monthly users by Feb 2028<br><span>+1,626</span> paying families by Feb 2028</div></div>
+      <div class="lev"><span class="lv">Lever 3 · word of mouth</span><b>Organic 14% to 16%</b><p>Family invites, prescription share cards and report-decode forwards on WhatsApp.</p><div class="gain"><span>+89,199</span> monthly users by Feb 2028<br><span>+1,670</span> paying families by Feb 2028</div></div>
+      <div class="lev"><span class="lv">Lever 4 · paying share</span><b>Conversion up 20%</b><p>Sick-day users who got help subscribe. More doctor reviews, more plans.</p><div class="gain">Same users, more of them pay<br><span>+2,576</span> paying families by Feb 2028</div></div>
+    </div>
+    <p class="cap">Each lever is run through the financial model on its own against the base case. If paid CAC runs 40% over plan (₹168), monthly users by February 2028 fall to 5.1 lakh; the gates on sheet 4 are there to catch that in weeks, not quarters.</p>
+  </section>
+</article>
+
+<article class="sheet" aria-label="Sheet 2: who, where and how much">
+  <div class="pagehead"><span class="logo">Cheeku</span><span>Customer acquisition plan · 2 / 4</span></div>
+
+  <section class="blk" style="border-top:0">
+    <div class="k">Who we go after</div>
+    <h2>One person runs the family's health. <em>We meet them on a bad day.</em></h2>
+    <div class="icps">
+      <div class="icp front"><span class="lv">Front door · everyone</span><h3>The sick-day searcher</h3><p>Fever, cold, acidity at 10 pm. Today they ask the chemist or search online. Highest frequency, lowest trust in what is on offer.</p><p class="hook">"A licensed doctor for everyday illness. ₹49, about 20 minutes."</p></div>
+      <div class="icp"><span class="lv">Wedge 1</span><h3>Expecting and new parents</h3><p>About 80 lakh urban births a year. Daily questions, high spend, a new report every month.</p><p class="hook">"Week 20, sudden pain, next appointment Tuesday. Ask Cheeku now."</p></div>
+      <div class="icp"><span class="lv">Wedge 2</span><h3>Caregivers of parents</h3><p>Diabetes, BP, heart. One adult child manages three doctors' prescriptions over WhatsApp.</p><p class="hook">"Send Papa's prescription. 10 checks, in a minute, free."</p></div>
+      <div class="icp"><span class="lv">Wedge 3</span><h3>Women's health</h3><p>Periods, PCOS, thyroid. Reports scattered across clinics, questions they would rather not ask in person.</p><p class="hook">"Every report in one file. Read in plain Hindi or English."</p></div>
+    </div>
+    <p class="cap">Launch cities follow doctor capacity: the ₹49 hook runs only where Cheeku Doctor is live (one pilot city from February, more from April). Everywhere else the lead hook is the free report decode and the prescription check.</p>
+  </section>
+
+  <section class="blk">
+    <div class="k">Spend, month by month</div>
+    <h2>Agency first. <em>Creators take over by summer.</em></h2>
+    <div class="box scroll"><div class="key"><span><i class="sw" style="background:var(--accent)"></i>Performance ads, agency-run</span><span><i class="sw" style="background:var(--navy)"></i>Creator army</span><span><i class="sw" style="background:#A39CF7"></i>Hero campaign: free report decode</span><span><i class="sw" style="background:#E8590C"></i>Referral and family invites</span><span><i class="sw" style="background:var(--lav)"></i>Brand, PR and store listing</span></div><svg viewBox="0 0 980 300" role="img" aria-label="Marketing spend by channel, month by month, with new users from paid and from word of mouth"><line x1="46" x2="970" y1="254.0" y2="254.0" stroke="var(--line)"/><text x="38" y="258.0" font-size="11" fill="var(--muted)" text-anchor="end">0</text><line x1="46" x2="970" y1="180.8" y2="180.8" stroke="var(--line)"/><text x="38" y="184.8" font-size="11" fill="var(--muted)" text-anchor="end">40</text><line x1="46" x2="970" y1="107.5" y2="107.5" stroke="var(--line)"/><text x="38" y="111.5" font-size="11" fill="var(--muted)" text-anchor="end">80</text><line x1="46" x2="970" y1="34.3" y2="34.3" stroke="var(--line)"/><text x="38" y="38.3" font-size="11" fill="var(--muted)" text-anchor="end">120</text><text x="46" y="11" font-size="11" fill="var(--muted)">₹ lakh a month</text><rect x="51.0" y="217.4" width="41.3" height="36.6" fill="var(--accent)"/><rect x="51.0" y="202.7" width="41.3" height="14.6" fill="var(--navy)"/><rect x="51.0" y="191.8" width="41.3" height="11.0" fill="#A39CF7"/><rect x="51.0" y="188.1" width="41.3" height="3.7" fill="#E8590C"/><rect x="51.0" y="180.8" width="41.3" height="7.3" fill="var(--lav)"/><text x="71.7" y="272" font-size="10.5" fill="var(--ink-2)" text-anchor="middle">Jan</text><text x="51.0" y="288" font-size="10.5" font-weight="700" fill="var(--muted)">2027</text><rect x="102.3" y="217.4" width="41.3" height="36.6" fill="var(--accent)"/><rect x="102.3" y="202.7" width="41.3" height="14.6" fill="var(--navy)"/><rect x="102.3" y="191.8" width="41.3" height="11.0" fill="#A39CF7"/><rect x="102.3" y="188.1" width="41.3" height="3.7" fill="#E8590C"/><rect x="102.3" y="180.8" width="41.3" height="7.3" fill="var(--lav)"/><text x="123.0" y="272" font-size="10.5" fill="var(--ink-2)" text-anchor="middle">Feb</text><rect x="153.7" y="217.4" width="41.3" height="36.6" fill="var(--accent)"/><rect x="153.7" y="202.7" width="41.3" height="14.6" fill="var(--navy)"/><rect x="153.7" y="191.8" width="41.3" height="11.0" fill="#A39CF7"/><rect x="153.7" y="188.1" width="41.3" height="3.7" fill="#E8590C"/><rect x="153.7" y="180.8" width="41.3" height="7.3" fill="var(--lav)"/><text x="174.3" y="272" font-size="10.5" fill="var(--ink-2)" text-anchor="middle">Mar</text><rect x="205.0" y="228.4" width="41.3" height="25.6" fill="var(--accent)"/><rect x="205.0" y="202.7" width="41.3" height="25.6" fill="var(--navy)"/><rect x="205.0" y="195.4" width="41.3" height="7.3" fill="#A39CF7"/><rect x="205.0" y="186.6" width="41.3" height="8.8" fill="#E8590C"/><rect x="205.0" y="180.8" width="41.3" height="5.9" fill="var(--lav)"/><text x="225.7" y="272" font-size="10.5" fill="var(--ink-2)" text-anchor="middle">Apr</text><rect x="256.3" y="228.4" width="41.3" height="25.6" fill="var(--accent)"/><rect x="256.3" y="202.7" width="41.3" height="25.6" fill="var(--navy)"/><rect x="256.3" y="195.4" width="41.3" height="7.3" fill="#A39CF7"/><rect x="256.3" y="186.6" width="41.3" height="8.8" fill="#E8590C"/><rect x="256.3" y="180.8" width="41.3" height="5.9" fill="var(--lav)"/><text x="277.0" y="272" font-size="10.5" fill="var(--ink-2)" text-anchor="middle">May</text><rect x="307.7" y="228.4" width="41.3" height="25.6" fill="var(--accent)"/><rect x="307.7" y="202.7" width="41.3" height="25.6" fill="var(--navy)"/><rect x="307.7" y="195.4" width="41.3" height="7.3" fill="#A39CF7"/><rect x="307.7" y="186.6" width="41.3" height="8.8" fill="#E8590C"/><rect x="307.7" y="180.8" width="41.3" height="5.9" fill="var(--lav)"/><text x="328.3" y="272" font-size="10.5" fill="var(--ink-2)" text-anchor="middle">Jun</text><rect x="359.0" y="228.4" width="41.3" height="25.6" fill="var(--accent)"/><rect x="359.0" y="202.7" width="41.3" height="25.6" fill="var(--navy)"/><rect x="359.0" y="195.4" width="41.3" height="7.3" fill="#A39CF7"/><rect x="359.0" y="186.6" width="41.3" height="8.8" fill="#E8590C"/><rect x="359.0" y="180.8" width="41.3" height="5.9" fill="var(--lav)"/><text x="379.7" y="272" font-size="10.5" fill="var(--ink-2)" text-anchor="middle">Jul</text><rect x="410.3" y="228.4" width="41.3" height="25.6" fill="var(--accent)"/><rect x="410.3" y="202.7" width="41.3" height="25.6" fill="var(--navy)"/><rect x="410.3" y="195.4" width="41.3" height="7.3" fill="#A39CF7"/><rect x="410.3" y="186.6" width="41.3" height="8.8" fill="#E8590C"/><rect x="410.3" y="180.8" width="41.3" height="5.9" fill="var(--lav)"/><text x="431.0" y="272" font-size="10.5" fill="var(--ink-2)" text-anchor="middle">Aug</text><rect x="461.7" y="228.4" width="41.3" height="25.6" fill="var(--accent)"/><rect x="461.7" y="202.7" width="41.3" height="25.6" fill="var(--navy)"/><rect x="461.7" y="195.4" width="41.3" height="7.3" fill="#A39CF7"/><rect x="461.7" y="186.6" width="41.3" height="8.8" fill="#E8590C"/><rect x="461.7" y="180.8" width="41.3" height="5.9" fill="var(--lav)"/><text x="482.3" y="272" font-size="10.5" fill="var(--ink-2)" text-anchor="middle">Sep</text><rect x="513.0" y="232.0" width="41.3" height="22.0" fill="var(--accent)"/><rect x="513.0" y="206.4" width="41.3" height="25.6" fill="var(--navy)"/><rect x="513.0" y="200.5" width="41.3" height="5.9" fill="#A39CF7"/><rect x="513.0" y="189.6" width="41.3" height="11.0" fill="#E8590C"/><rect x="513.0" y="180.8" width="41.3" height="8.8" fill="var(--lav)"/><text x="533.7" y="272" font-size="10.5" fill="var(--ink-2)" text-anchor="middle">Oct</text><rect x="564.3" y="232.0" width="41.3" height="22.0" fill="var(--accent)"/><rect x="564.3" y="206.4" width="41.3" height="25.6" fill="var(--navy)"/><rect x="564.3" y="200.5" width="41.3" height="5.9" fill="#A39CF7"/><rect x="564.3" y="189.6" width="41.3" height="11.0" fill="#E8590C"/><rect x="564.3" y="180.8" width="41.3" height="8.8" fill="var(--lav)"/><text x="585.0" y="272" font-size="10.5" fill="var(--ink-2)" text-anchor="middle">Nov</text><rect x="615.7" y="232.0" width="41.3" height="22.0" fill="var(--accent)"/><rect x="615.7" y="206.4" width="41.3" height="25.6" fill="var(--navy)"/><rect x="615.7" y="200.5" width="41.3" height="5.9" fill="#A39CF7"/><rect x="615.7" y="189.6" width="41.3" height="11.0" fill="#E8590C"/><rect x="615.7" y="180.8" width="41.3" height="8.8" fill="var(--lav)"/><text x="636.3" y="272" font-size="10.5" fill="var(--ink-2)" text-anchor="middle">Dec</text><rect x="667.0" y="188.1" width="41.3" height="65.9" fill="var(--accent)"/><rect x="667.0" y="111.2" width="41.3" height="76.9" fill="var(--navy)"/><rect x="667.0" y="100.2" width="41.3" height="11.0" fill="#A39CF7"/><rect x="667.0" y="67.3" width="41.3" height="33.0" fill="#E8590C"/><rect x="667.0" y="34.3" width="41.3" height="33.0" fill="var(--lav)"/><text x="687.7" y="272" font-size="10.5" fill="var(--ink-2)" text-anchor="middle">Jan</text><text x="667.0" y="288" font-size="10.5" font-weight="700" fill="var(--muted)">2028</text><rect x="718.3" y="188.1" width="41.3" height="65.9" fill="var(--accent)"/><rect x="718.3" y="111.2" width="41.3" height="76.9" fill="var(--navy)"/><rect x="718.3" y="100.2" width="41.3" height="11.0" fill="#A39CF7"/><rect x="718.3" y="67.3" width="41.3" height="33.0" fill="#E8590C"/><rect x="718.3" y="34.3" width="41.3" height="33.0" fill="var(--lav)"/><text x="739.0" y="272" font-size="10.5" fill="var(--ink-2)" text-anchor="middle">Feb</text><rect x="769.7" y="188.1" width="41.3" height="65.9" fill="var(--accent)"/><rect x="769.7" y="111.2" width="41.3" height="76.9" fill="var(--navy)"/><rect x="769.7" y="100.2" width="41.3" height="11.0" fill="#A39CF7"/><rect x="769.7" y="67.3" width="41.3" height="33.0" fill="#E8590C"/><rect x="769.7" y="34.3" width="41.3" height="33.0" fill="var(--lav)"/><text x="790.3" y="272" font-size="10.5" fill="var(--ink-2)" text-anchor="middle">Mar</text><rect x="821.0" y="188.1" width="41.3" height="65.9" fill="var(--accent)"/><rect x="821.0" y="111.2" width="41.3" height="76.9" fill="var(--navy)"/><rect x="821.0" y="100.2" width="41.3" height="11.0" fill="#A39CF7"/><rect x="821.0" y="67.3" width="41.3" height="33.0" fill="#E8590C"/><rect x="821.0" y="34.3" width="41.3" height="33.0" fill="var(--lav)"/><text x="841.7" y="272" font-size="10.5" fill="var(--ink-2)" text-anchor="middle">Apr</text><rect x="872.3" y="188.1" width="41.3" height="65.9" fill="var(--accent)"/><rect x="872.3" y="111.2" width="41.3" height="76.9" fill="var(--navy)"/><rect x="872.3" y="100.2" width="41.3" height="11.0" fill="#A39CF7"/><rect x="872.3" y="67.3" width="41.3" height="33.0" fill="#E8590C"/><rect x="872.3" y="34.3" width="41.3" height="33.0" fill="var(--lav)"/><text x="893.0" y="272" font-size="10.5" fill="var(--ink-2)" text-anchor="middle">May</text><rect x="923.7" y="188.1" width="41.3" height="65.9" fill="var(--accent)"/><rect x="923.7" y="111.2" width="41.3" height="76.9" fill="var(--navy)"/><rect x="923.7" y="100.2" width="41.3" height="11.0" fill="#A39CF7"/><rect x="923.7" y="67.3" width="41.3" height="33.0" fill="#E8590C"/><rect x="923.7" y="34.3" width="41.3" height="33.0" fill="var(--lav)"/><text x="944.3" y="272" font-size="10.5" fill="var(--ink-2)" text-anchor="middle">Jun</text><line x1="51.0" x2="195.0" y1="296" y2="296" stroke="var(--accent)" stroke-width="2"/><text x="51.0" y="292" font-size="11" font-weight="650" fill="var(--accent-2)"></text><line x1="205.0" x2="503.0" y1="296" y2="296" stroke="var(--accent)" stroke-width="2"/><text x="205.0" y="292" font-size="11" font-weight="650" fill="var(--accent-2)"></text><line x1="513.0" x2="657.0" y1="296" y2="296" stroke="var(--accent)" stroke-width="2"/><text x="513.0" y="292" font-size="11" font-weight="650" fill="var(--accent-2)"></text><line x1="667.0" x2="965.0" y1="296" y2="296" stroke="var(--accent)" stroke-width="2"/><text x="667.0" y="292" font-size="11" font-weight="650" fill="var(--accent-2)"></text></svg><div class="phasebar"><div style="flex:3"><b>Launch</b><span>Jan '27 to Mar '27</span></div><div style="flex:6"><b>Creator scale</b><span>Apr '27 to Sep '27</span></div><div style="flex:3"><b>Loops</b><span>Oct '27 to Dec '27</span></div><div style="flex:6"><b>Scale, 2028</b><span>Jan '28 to Jun '28</span></div></div></div>
+    <div class="scroll"><table><thead><tr><th>Phase and channel</th><th>Spend</th><th>Share</th><th>CAC ceiling</th><th>New active users</th></tr></thead><tbody><tr class="hl"><td>Launch · Jan '27 to Mar '27</td><td>₹120 L</td><td>100%</td><td>₹120</td><td>1,00,000</td></tr><tr><td><i class="sw" style="background:var(--accent)"></i>Performance ads, agency-run</td><td>₹60 L</td><td>50%</td><td>₹150</td><td>40,000</td></tr><tr><td><i class="sw" style="background:var(--navy)"></i>Creator army</td><td>₹24 L</td><td>20%</td><td>₹120</td><td>20,000</td></tr><tr><td><i class="sw" style="background:#A39CF7"></i>Hero campaign: free report decode</td><td>₹18 L</td><td>15%</td><td>₹80</td><td>22,500</td></tr><tr><td><i class="sw" style="background:#E8590C"></i>Referral and family invites</td><td>₹6 L</td><td>5%</td><td>₹60</td><td>10,000</td></tr><tr><td><i class="sw" style="background:var(--lav)"></i>Brand, PR and store listing</td><td>₹12 L</td><td>10%</td><td>₹160</td><td>7,500</td></tr><tr class="hl"><td>Creator scale · Apr '27 to Sep '27</td><td>₹240 L</td><td>100%</td><td>₹120</td><td>2,00,000</td></tr><tr><td><i class="sw" style="background:var(--accent)"></i>Performance ads, agency-run</td><td>₹84 L</td><td>35%</td><td>₹165</td><td>50,955</td></tr><tr><td><i class="sw" style="background:var(--navy)"></i>Creator army</td><td>₹84 L</td><td>35%</td><td>₹110</td><td>76,432</td></tr><tr><td><i class="sw" style="background:#A39CF7"></i>Hero campaign: free report decode</td><td>₹24 L</td><td>10%</td><td>₹90</td><td>26,690</td></tr><tr><td><i class="sw" style="background:#E8590C"></i>Referral and family invites</td><td>₹29 L</td><td>12%</td><td>₹85</td><td>33,913</td></tr><tr><td><i class="sw" style="background:var(--lav)"></i>Brand, PR and store listing</td><td>₹19 L</td><td>8%</td><td>₹160</td><td>12,011</td></tr><tr class="hl"><td>Loops · Oct '27 to Dec '27</td><td>₹120 L</td><td>100%</td><td>₹120</td><td>1,00,000</td></tr><tr><td><i class="sw" style="background:var(--accent)"></i>Performance ads, agency-run</td><td>₹36 L</td><td>30%</td><td>₹170</td><td>20,882</td></tr><tr><td><i class="sw" style="background:var(--navy)"></i>Creator army</td><td>₹42 L</td><td>35%</td><td>₹108</td><td>38,348</td></tr><tr><td><i class="sw" style="background:#A39CF7"></i>Hero campaign: free report decode</td><td>₹10 L</td><td>8%</td><td>₹90</td><td>10,518</td></tr><tr><td><i class="sw" style="background:#E8590C"></i>Referral and family invites</td><td>₹18 L</td><td>15%</td><td>₹82</td><td>21,646</td></tr><tr><td><i class="sw" style="background:var(--lav)"></i>Brand, PR and store listing</td><td>₹14 L</td><td>12%</td><td>₹165</td><td>8,606</td></tr><tr class="hl"><td>Scale, 2028 · Jan '28 to Jun '28</td><td>₹720 L</td><td>100%</td><td>₹140</td><td>5,14,286</td></tr><tr><td><i class="sw" style="background:var(--accent)"></i>Performance ads, agency-run</td><td>₹216 L</td><td>30%</td><td>₹190</td><td>1,13,373</td></tr><tr><td><i class="sw" style="background:var(--navy)"></i>Creator army</td><td>₹252 L</td><td>35%</td><td>₹125</td><td>2,01,049</td></tr><tr><td><i class="sw" style="background:#A39CF7"></i>Hero campaign: free report decode</td><td>₹36 L</td><td>5%</td><td>₹110</td><td>32,638</td></tr><tr><td><i class="sw" style="background:#E8590C"></i>Referral and family invites</td><td>₹108 L</td><td>15%</td><td>₹95</td><td>1,13,373</td></tr><tr><td><i class="sw" style="background:var(--lav)"></i>Brand, PR and store listing</td><td>₹108 L</td><td>15%</td><td>₹200</td><td>53,852</td></tr></tbody></table></div>
+    <p class="cap">Total spend each month is the financial model's marketing line: ₹40 lakh a month in 2027, ₹120 lakh a month from January 2028 (the Series A lands in February), plus ₹20 lakh before launch in December 2026. Channel shares and CAC ceilings are our plan; in every phase they blend to the model's cost per active user (₹120 in 2027, ₹140 in 2028).</p>
+  </section>
+
+  <section class="blk">
+    <div class="k">January to March · the agency sprint</div>
+    <h2>Rent the paid engine. <em>Own the data.</em></h2>
+    <div class="grid3">
+      <div class="box"><h3>What the agency runs</h3><ul><li>Meta and Google app campaigns, Android first</li><li>40 to 60 new creatives a month, Hindi and English</li><li>Weekly creative and audience tests</li><li>Fee inside the performance line, about 10% of managed spend</li></ul></div>
+      <div class="box"><h3>What stays with us</h3><ul><li>Ad accounts, pixels and the attribution tool are ours from day one</li><li>Every script is cleared by our clinical lead</li><li>Activation is the target, not installs: paid on cost per active user</li><li>90-day contract, weekly review, exit at 30 days' notice</li></ul></div>
+      <div class="box"><h3>What we learn by March</h3><ul><li>Real cost per install and per active user, by city and language</li><li>The three hooks that work, out of about 150 tested</li><li>Which ICP activates and stays</li><li>Whether the ₹49 doctor hook beats the free report decode</li></ul></div>
+    </div>
+    <p class="cap">December's ₹20 lakh pays for the waitlist, the first 30 creators' content bank, store listing work, agency onboarding and about ₹5 lakh of test spend, so January starts with tested creatives.</p>
+  </section>
+</article>
+
+<article class="sheet" aria-label="Sheet 3: creators, loops and B2B">
+  <div class="pagehead"><span class="logo">Cheeku</span><span>Customer acquisition plan · 3 / 4</span></div>
+
+  <section class="blk" style="border-top:0">
+    <div class="k">The creator army</div>
+    <h2>Hundreds of small voices <em>beat one big one.</em></h2>
+    <p class="lede">The consumer AI apps that grew fastest, Cal AI among them, did it with many small creators posting short videos and paid on results. Health needs one more thing: trust. So doctors lead and everyday creators carry it.</p>
+    <div class="tiers">
+      <div class="tier t1"><b>Doctor voices</b><span>MBBS and MD creators explain everyday illness and reports. They teach; they do not endorse. Retainer, qualifications shown.</span><span class="n">10 → 25</span><span class="pay">₹40k to ₹1 lakh a month</span></div>
+      <div class="tier"><b>Micro creators</b><span>10k to 1 lakh followers: mothers, caregivers, fitness, regional language. Real use on camera: decode a report, check Papa's prescription.</span><span class="n">50 → 300</span><span class="pay">₹3k to ₹8k a video, plus ₹30 per active user</span></div>
+      <div class="tier"><b>Affiliate army</b><span>Students, homemakers, pharmacists with a personal code. No fee, paid only on results. The long tail that keeps CAC falling.</span><span class="n">0 → 1,000</span><span class="pay">₹25 to ₹40 per active user</span></div>
+      <div class="tier"><b>Launch spikes</b><span>A few large family and health channels for launch week and Cheeku Doctor's city launches.</span><span class="n">3 to 5</span><span class="pay">₹3 to ₹6 lakh each, from the brand line</span></div>
+    </div>
+    <div class="grid2">
+      <div class="box"><h3>Active creators and affiliates</h3>
+        <div class="ramp"><div><b>30</b><i style="height:10px"></i><span>Dec '26</span></div><div><b>100</b><i style="height:22px"></i><span>Mar '27</span></div><div><b>300</b><i style="height:48px"></i><span>Jun '27</span></div><div><b>700</b><i style="height:92px"></i><span>Sep '27</span></div><div><b>1,300</b><i style="height:150px"></i><span>Dec '27</span></div></div>
+        <p class="cap">Our hiring targets for the programme. Paid from the creator line: ₹8 lakh a month in the launch phase, ₹14 lakh from April.</p></div>
+      <div class="box"><h3>How it runs</h3><ul><li>The growth lead runs it from the launch quarter; a dedicated creator lead joins by August. A creator portal gives codes, briefs and weekly payouts</li><li>One brief a week, three proven hooks, creators film it their way</li><li>Top 10% of videos become paid ads the same week</li><li>Every health claim comes from a script bank signed by our clinical lead</li><li>Paid partnership labels on every post, as ASCI requires</li></ul></div>
+    </div>
+  </section>
+
+  <section class="blk">
+    <div class="k">Loops that cost nothing</div>
+    <h2>3.8 lakh users in 2027 <em>arrive without an ad.</em></h2>
+    <div class="grid3">
+      <div class="box"><h3>Family invite</h3><p>The Family plan needs the family. Adding a parent or partner sends an invite; each family brings two to four people.</p></div>
+      <div class="box"><h3>Share cards</h3><p>A decoded report, a prescription check score, a doctor's prescription: each ends in a card built to forward on WhatsApp.</p></div>
+      <div class="box"><h3>Referral credit</h3><p>Give a free doctor review, get one. Costs us about ₹40 when used, against ₹120 for a paid user.</p></div>
+    </div>
+    <p class="cap">The model counts word of mouth as 14% of last month's users joining each month in 2027. The referral line (5% to 15% of spend) pays for the credits.</p>
+  </section>
+
+  <section class="blk">
+    <div class="k">B2C and B2B</div>
+    <h2>Consumers first. <em>Employers once we pass 1 lakh users.</em></h2>
+    <div class="splitbar" role="img" aria-label="Acquisition spend to January 2028: consumer marketing ₹6.2 crore, employer sales ₹13 lakh">
+      <div style="flex:620;background:var(--accent);color:#fff"><b>B2C marketing</b><span>₹6.2 cr to Jan '28</span></div>
+      <div style="flex:60;background:var(--navy);color:#fff"><b>B2B</b><span>₹13 L</span></div>
+    </div>
+    <div class="b2b">
+      <div class="box"><h3>Employers, direct</h3><p>Starts May '27, two months after consumer users pass 1 lakh. Deepesh leads; the first account executive joins mid-2027.</p><ul><li>3 companies a month in year one, 8 in year two</li><li>About ₹40,000 to win one: demos, a wellness talk, onboarding, plus 5% commission</li><li>Employees get Family at 30% off</li></ul></div>
+      <div class="box"><h3>HR benefits platforms</h3><p>Listed in flexible-benefits and group-insurance catalogues, which keep a share of each sale.</p><ul><li>2 platforms live in the first year, 4 in the second</li><li>No upfront cost: they earn only when a plan is sold</li></ul></div>
+      <div class="box"><h3>Gifting</h3><p>Year-long Family plans bought in bulk, mostly for Diwali. Paid up front.</p><ul><li>3,000 plans in the first year, 12,000 in the second</li><li>Sold by the same employer team</li></ul></div>
+    </div>
+    <div class="scroll"><table><thead><tr><th>B2B, from the model</th><th>Dec 2027</th><th>Jun 2028</th><th>Dec 2028</th></tr></thead><tbody>
+      <tr><td>Companies signed</td><td>23</td><td>48</td><td>91</td></tr>
+      <tr><td>Employee seats</td><td>5,756</td><td>15,689</td><td>31,109</td></tr>
+      <tr><td>Active users from employers</td><td>7,482</td><td>20,395</td><td>40,441</td></tr>
+      <tr><td>Share of all monthly users</td><td>1.5%</td><td>1.8%</td><td>2.1%</td></tr>
+      <tr><td>Employer sales cost in the year</td><td>₹12 L</td><td></td><td>₹47 L</td></tr>
+      <tr><td>Employer revenue in the year</td><td>₹0.4 cr</td><td></td><td>₹3.3 cr</td></tr>
+    </tbody></table></div>
+    <p class="cap">B2B is small in users and large in trust: an employer's name on the plan is the cheapest proof a family can get. Insurers come later; the model's first paid insurer contract is in 2029, with an unpaid wellness pilot before the Series A. Partner pharmacies and labs carry a QR for the ₹49 doctor at the counter, funded from the brand line.</p>
+  </section>
+</article>
+
+<article class="sheet" aria-label="Sheet 4: numbers, gates and team">
+  <div class="pagehead"><span class="logo">Cheeku</span><span>Customer acquisition plan · 4 / 4</span></div>
+
+  <section class="blk" style="border-top:0">
+    <div class="k">Month by month</div>
+    <h2>The plan the seed pays for, <em>in one table.</em></h2>
+    <div class="scroll"><table><thead><tr><th>Month</th><th>Marketing, ₹ lakh</th><th>New users, paid</th><th>New users, word of mouth</th><th>Monthly users, lakh</th><th>Paying families</th><th>Doctor reviews a day</th><th>Companies signed</th><th>Employee seats</th></tr></thead><tbody><tr><td>Jan '27</td><td>40</td><td>33,333</td><td>0</td><td>0.63</td><td>722</td><td>0</td><td>0</td><td>0</td></tr><tr><td>Feb '27</td><td>40</td><td>33,333</td><td>8,867</td><td>0.98</td><td>1,195</td><td>65</td><td>0</td><td>0</td></tr><tr><td>Mar '27</td><td>40</td><td>33,333</td><td>13,711</td><td>1.33</td><td>1,625</td><td>89</td><td>0</td><td>0</td></tr><tr><td>Apr '27</td><td>40</td><td>33,333</td><td>18,652</td><td>1.69</td><td>2,064</td><td>113</td><td>0</td><td>0</td></tr><tr><td>May '27</td><td>40</td><td>33,333</td><td>23,691</td><td>2.07</td><td>2,512</td><td>138</td><td>3</td><td>581</td></tr><tr><td>Jun '27</td><td>40</td><td>33,333</td><td>28,832</td><td>2.45</td><td>2,969</td><td>163</td><td>6</td><td>1,157</td></tr><tr><td>Jul '27</td><td>40</td><td>33,333</td><td>34,075</td><td>2.84</td><td>3,435</td><td>189</td><td>9</td><td>1,728</td></tr><tr><td>Aug '27</td><td>40</td><td>33,333</td><td>39,423</td><td>3.24</td><td>3,910</td><td>216</td><td>12</td><td>2,358</td></tr><tr><td>Sep '27</td><td>40</td><td>33,333</td><td>44,878</td><td>3.64</td><td>4,395</td><td>243</td><td>15</td><td>3,025</td></tr><tr><td>Oct '27</td><td>40</td><td>33,333</td><td>50,443</td><td>4.06</td><td>4,889</td><td>271</td><td>17</td><td>4,149</td></tr><tr><td>Nov '27</td><td>40</td><td>33,333</td><td>56,118</td><td>4.49</td><td>5,394</td><td>299</td><td>20</td><td>5,060</td></tr><tr><td>Dec '27</td><td>40</td><td>33,333</td><td>61,907</td><td>4.92</td><td>5,908</td><td>328</td><td>23</td><td>5,756</td></tr><tr><td>Jan '28</td><td>120</td><td>85,714</td><td>62,968</td><td>5.93</td><td>10,947</td><td>593</td><td>26</td><td>6,300</td></tr><tr class="hl"><td>Feb '28</td><td>120</td><td>85,714</td><td>76,000</td><td>6.97</td><td>12,880</td><td>697</td><td>28</td><td>6,841</td></tr><tr><td>Mar '28</td><td>120</td><td>85,714</td><td>89,423</td><td>8.04</td><td>14,872</td><td>804</td><td>31</td><td>7,482</td></tr><tr><td>Apr '28</td><td>120</td><td>85,714</td><td>1,03,249</td><td>9.14</td><td>16,923</td><td>914</td><td>33</td><td>8,014</td></tr><tr><td>May '28</td><td>120</td><td>85,714</td><td>1,17,489</td><td>10.34</td><td>19,036</td><td>1,034</td><td>41</td><td>13,673</td></tr><tr><td>Jun '28</td><td>120</td><td>85,714</td><td>1,32,156</td><td>11.53</td><td>21,212</td><td>1,153</td><td>48</td><td>15,689</td></tr></tbody></table></div>
+    <p class="cap">Financial model, base case. The highlighted row is February 2028, the month the Series A is due: 7.0 lakh monthly users and 12,880 paying families, the milestones on our ask. By then 5.7 lakh users have come from paid and 5.2 lakh from word of mouth.</p>
+  </section>
+
+  <section class="blk">
+    <div class="k">Does it pay back</div>
+    <h2>Not in year one. <em>From 2029, clearly.</em></h2>
+    <div class="scroll"><table><thead><tr><th>Year</th><th>Marketing</th><th>New users, paid</th><th>New users, word of mouth</th><th>Paid CAC</th><th>Blended CAC</th><th>Lifetime margin a user</th><th>Monthly users, Dec</th></tr></thead><tbody><tr><td>2027</td><td>₹4.8 cr</td><td>4.0 lakh</td><td>3.8 lakh</td><td>₹120</td><td>₹61</td><td class="neg">−₹13</td><td>4.9 lakh</td></tr><tr><td>2028</td><td>₹14.4 cr</td><td>10.3 lakh</td><td>17.1 lakh</td><td>₹140</td><td>₹53</td><td class="neg">₹29</td><td>19.5 lakh</td></tr><tr><td>2029</td><td>₹42.0 cr</td><td>26.2 lakh</td><td>49.5 lakh</td><td>₹160</td><td>₹55</td><td class="pos">₹119</td><td>59.5 lakh</td></tr><tr><td>2030</td><td>₹90.0 cr</td><td>50.0 lakh</td><td>110.3 lakh</td><td>₹180</td><td>₹56</td><td class="pos">₹235</td><td>138.6 lakh</td></tr><tr><td>2031</td><td>₹144.0 cr</td><td>72.0 lakh</td><td>202.1 lakh</td><td>₹200</td><td>₹53</td><td class="pos">₹354</td><td>257.9 lakh</td></tr></tbody></table></div>
+    <p class="cap">Lifetime margin is gross profit per active user a month divided by monthly churn. In 2027 and 2028 a user costs more than they return: care bookings and plans are still ramping, and we are buying the family file. From 2029 a user returns more than twice the blended cost, and by 2031 more than six times. Blended CAC counts every new user, paid or not.</p>
+  </section>
+
+  <section class="blk">
+    <div class="k">Gates</div>
+    <h2>We check weekly. <em>We move money when a number misses.</em></h2>
+    <div class="gates">
+      <div class="gate"><time>Week 4</time><div><b>Install to active at 30% or better; cost per active user under ₹150</b></div><span class="if">If not: pause the bottom half of creatives, move the lead hook to whichever of doctor or report decode activates better.</span></div>
+      <div class="gate"><time>End of March</time><div><b>Blended paid CAC at ₹120; 100 active creators; day-30 retention at 30%</b></div><span class="if">If CAC is over ₹150 for three weeks: cut performance by 20% and move it to the hero campaign and referral credits.</span></div>
+      <div class="gate"><time>End of June</time><div><b>Creators bring a third of paid users at ₹110 or less; agency contract reviewed</b></div><span class="if">If creators cost more than ads: keep the top 20%, stop the rest, hold the agency another quarter.</span></div>
+      <div class="gate"><time>End of September</time><div><b>Word of mouth matches paid, month for month; first 15 employers signed</b></div><span class="if">If word of mouth lags: double the referral credit and test a free first doctor review for invited family.</span></div>
+      <div class="gate"><time>February 2028</time><div><b>7 lakh monthly users, 12,880 paying families, 697 doctor reviews a day</b></div><span class="if">These are the Series A milestones. Marketing has already stepped up to ₹120 lakh a month from January.</span></div>
+    </div>
+    <p class="cap">Weekly dashboard: cost per install, install to active, cost per active user by channel, day-1, day-7 and day-30 retention, doctor reviews a day and wait time, share of new users from word of mouth. If runway falls under six months the model's defence plan cuts marketing by 65%.</p>
+  </section>
+
+  <section class="blk">
+    <div class="k">Team and guardrails</div>
+    <div class="grid2">
+      <div class="box"><h3>Who runs it</h3><ul><li><b>Athar</b> owns growth until the growth lead joins in the launch quarter</li><li><b>Agency</b> runs paid from December to at least June</li><li><b>Creator lead</b> second hire; content and community lead third</li><li><b>Performance marketer</b> joins in 2028 and brings paid in-house</li><li><b>Deepesh</b> runs employers, benefits platforms and pharmacy partners</li><li>Growth team: 3 people by December 2027, 5 by June 2028, as in the model</li></ul></div>
+      <div class="box"><h3>What we will not do</h3><ul><li>No cure or guarantee claims; no before and after</li><li>Doctors explain, they do not endorse; qualifications shown on every post</li><li>No ₹49 doctor ads in a city before the doctors are live there</li><li>No antibiotics or controlled drugs, so no ads that imply them</li><li>Paid partnerships labelled; health data never used for ad targeting</li><li>A written legal opinion on advertising a doctor review before the first doctor ad runs</li></ul></div>
+    </div>
+  </section>
+
+  <div class="cta2">
+    <p class="fine">Sources and basis: Cheeku financial model v2, base case (marketing, cost per active user, word of mouth, churn, users, paying families, doctor reviews, employer numbers). Channel shares, channel CAC ceilings, install and activation rates, creator counts and fees are our planning estimates and are replaced by measured numbers from the first weeks of spend. Projections are not guarantees. Confidential. November 2026.</p>
+  </div>
+</article>
+
+</body>
+</html>
