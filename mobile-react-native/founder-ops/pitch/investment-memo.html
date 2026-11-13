@@ -248,13 +248,15 @@ svg text { font-family: var(--body); }
 .demo { align-items: center; }
 .watch { align-self: center; height: auto; }
 .watch img { width: 100%; height: auto !important; aspect-ratio: auto !important; object-fit: fill !important; }
-.mwatch { display: none; }
+.mwatch, .mlink { display: none; }
 @media (max-width: 620px) {
   .demo { grid-template-columns: minmax(0, 1fr); gap: 10px; }
   .scan { display: none; }
   .watch .playb { width: 52px; height: 52px; margin: -26px 0 0 -26px; box-shadow: 0 8px 22px rgba(23,22,110,.35), 0 0 0 7px rgba(91,78,240,.18); }
   .watch .playb svg { width: 20px; height: 20px; }
   .mwatch { display: flex; align-items: center; justify-content: center; gap: 10px; height: 52px; border-radius: 999px; background: var(--accent); color: #fff; font-weight: 700; font-size: 15.5px; text-decoration: none; }
+  .mlink { display: block; text-align: center; font-size: 12.5px; color: var(--muted); }
+  .mlink a { font-weight: 650; -webkit-user-select: all; user-select: all; }
   .mwatch svg { width: 16px; height: 16px; fill: #fff; }
   .mwatch span { font-weight: 500; opacity: .8; font-size: 13px; }
 }
@@ -281,6 +283,7 @@ svg text { font-family: var(--body); }
         <span class="scan-t"><b>See Cheeku in 2 minutes</b><span>Tap to play, or scan with your phone camera.</span><span class="url">youtu.be/yXfRjphjQn0</span></span>
       </a>
       <a class="mwatch" href="https://youtu.be/yXfRjphjQn0" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L7.5 3.64A1 1 0 0 0 6 4.5z"/></svg>Watch the 2-minute demo <span>YouTube</span></a>
+      <p class="mlink">Link not opening? Copy it: <a href="https://youtu.be/yXfRjphjQn0" target="_blank" rel="noopener">youtu.be/yXfRjphjQn0</a></p>
     </div>
   </section>
 
