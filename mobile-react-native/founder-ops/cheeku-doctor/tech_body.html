@@ -1,0 +1,331 @@
+<!-- ============================ SHEET 1 ============================ -->
+<article class="sheet">
+  <div class="pagehead"><span class="logo">Cheeku</span><span>Cheeku Doctor · technical execution · internal, tech team only · v1, Nov 2026</span></div>
+  <header class="hero">
+    <div class="tags"><span class="tag v">Archit · Suraj · Athar</span><span class="tag">Soft launch mid-Feb 2027</span><span class="tag">Fully running by 31 Mar 2027</span></div>
+    <h1>Build the ₹49 doctor review <em>on what we already have.</em></h1>
+    <p class="lede">This is the build sheet: what we make, where it lives in the repo, how each piece talks to the next, and in which week it ships. The product and pricing case is in the Cheeku Doctor playbook. Nothing here lets the AI diagnose or prescribe; it collects the history and a registered doctor decides.</p>
+    <div class="stats">
+      <div class="stat"><b>6</b><span>migrations, 0045 to 0050</span></div>
+      <div class="stat"><b>6</b><span>new Edge Functions, plus 3 reused</span></div>
+      <div class="stat"><b>2</b><span>new surfaces: the app flow and a doctor console</span></div>
+      <div class="stat"><b>2</b><span>store builds: the January build carries everything native, switched off</span></div>
+    </div>
+  </header>
+
+  <section class="blk">
+    <div class="k">Architecture</div>
+    <h2>Three surfaces, one Supabase project, <em>four partners.</em></h2>
+    <div class="arch">
+      <div class="col">
+        <span class="ch">Surfaces</span>
+        <div class="node app"><b>Member app</b><span>Expo 58, iOS and Android. Intake inside chat, case card, prescription viewer, check-in</span><code>app/(app)/doctor/*</code></div>
+        <div class="node"><b>Doctor console</b><span>Small web app for doctors only. Queue, case, sign. MFA required</span><code>doctor-console/</code></div>
+        <div class="node"><b>Verify page</b><span>One public page a chemist opens from the QR code. Validity only, no history</span><code>fn rx-verify</code></div>
+      </div>
+      <div class="col mid">
+        <span class="ch">Supabase (existing project)</span>
+        <div class="node db"><b>Postgres + row-level security</b><span>consult_cases, case_events, doctors, payments, e_prescriptions, formulary</span></div>
+        <div class="two-n">
+          <div class="node db"><b>Realtime</b><span>Doctor queue, case card</span></div>
+          <div class="node db"><b>Storage</b><span>Private <code>rx</code> bucket, signed URLs</span></div>
+        </div>
+        <div class="two-n">
+          <div class="node db"><b>pg_cron</b><span>Overflow, refunds, check-ins, every minute</span></div>
+          <div class="node db"><b>Auth roles</b><span>member, doctor, clinical_lead, ops</span></div>
+        </div>
+        <div class="node fn"><b>Edge Functions</b><span><i>new</i> quickrx-intake · quickrx-pay · payments-webhook · rx-issue · rx-verify · quickrx-tick</span><span><i class="re">reused</i> rx-score · push-dispatch · partner-gateway (from the LabStack plan)</span></div>
+      </div>
+      <div class="col">
+        <span class="ch">Partners</span>
+        <div class="node ext"><b>Payments</b><span>Razorpay UPI for a review. Play and App Store billing for plans and the pass</span></div>
+        <div class="node ext"><b>LabStack</b><span>Pharmacy orders, home tests, consult overflow</span></div>
+        <div class="node ext"><b>Telephony</b><span>Masked calls, doctor to patient. Exotel or Knowlarity</span></div>
+        <div class="node ext"><b>Model endpoint</b><span>Existing <code>cheeku-chat</code> for phrasing questions only</span></div>
+      </div>
+    </div>
+    <p class="cap">Rule carried over from the app: the device never calls a partner and never holds a partner key. Every partner call goes through an Edge Function with keys in Supabase secrets.</p>
+  </section>
+
+  <section class="blk">
+    <div class="k">One case, end to end</div>
+    <h2>Who calls whom, <em>in order.</em></h2>
+    <div class="scroll seqWrap">{{SEQ}}</div>
+    <p class="cap">Solid arrows are calls, dashed arrows are pushes or Realtime events. Every status change goes through one database function, <code>case_transition()</code>, which also writes the event log.</p>
+  </section>
+
+  <section class="blk">
+    <div class="k">The case</div>
+    <h2>One state machine, <em>enforced in the database.</em></h2>
+    <div class="scroll"><div class="fsm">{{FSM}}</div></div>
+    <div class="scroll"><table>
+      <thead><tr><th>Transition</th><th>Who can make it</th><th>Where</th><th>Guard</th></tr></thead>
+      <tbody>
+        <tr><td>draft → eligible / ineligible</td><td>System</td><td><code>quickrx-intake</code></td><td class="l">Server re-runs safety gate and eligibility; never trusts the app's verdict</td></tr>
+        <tr><td>eligible → paid</td><td>System</td><td><code>payments-webhook</code></td><td class="l">Verified gateway signature, or a plan allowance debited in the same transaction</td></tr>
+        <tr><td>paid → queued</td><td>System</td><td>trigger</td><td class="l">Sets <code>sla_claim_at</code> = +10 min, <code>sla_issue_at</code> = +30 min</td></tr>
+        <tr><td>queued → claimed</td><td>Doctor</td><td><code>claim_case()</code> RPC</td><td class="l">On shift, verified, <code>FOR UPDATE SKIP LOCKED</code>, one open case per doctor</td></tr>
+        <tr><td>claimed → needs_info ↔ claimed</td><td>Doctor, member</td><td>RPC</td><td class="l">Message stored in case_messages; claim clock pauses</td></tr>
+        <tr><td>claimed → approved</td><td>Doctor</td><td><code>decide_case()</code> RPC</td><td class="l">Diagnosis chosen, every drug in the formulary for this protocol, review time over 45 s</td></tr>
+        <tr><td>approved → rx_issued</td><td>System</td><td><code>rx-issue</code></td><td class="l">PDF stored, hash and verify code written, record and ledger updated</td></tr>
+        <tr><td>claimed → declined / moved_to_video</td><td>Doctor</td><td>RPC</td><td class="l">Reason code required; refund or credit queued automatically</td></tr>
+        <tr><td>queued → expired → refunded</td><td>System</td><td><code>quickrx-tick</code></td><td class="l">Unclaimed at 30 min; refund through the original rail; allowance restored</td></tr>
+        <tr><td>rx_issued → followup_due → closed</td><td>System, member</td><td>cron + RPC</td><td class="l">"Worse" re-runs the safety gate and opens the care door</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section class="blk">
+    <div class="k">Data model</div>
+    <h2>Six migrations, <em>0045 to 0050.</em></h2>
+    <div class="er">
+      <div class="tbl"><h4>doctors <em>0045</em></h4><ul><li><b>id</b> uuid · auth user</li><li>name, qualification</li><li>reg_no, council</li><li>nmr_verified_at</li><li>indemnity_until</li><li>status: onboarding | live | paused</li><li>pay_model: panel | salaried</li></ul></div>
+      <div class="tbl"><h4>doctor_shifts <em>0045</em></h4><ul><li><b>id</b></li><li>doctor_id → doctors</li><li>starts_at, ends_at</li><li>city</li><li>checked_in_at</li></ul></div>
+      <div class="tbl"><h4>formulary <em>0045</em></h4><ul><li><b>id</b></li><li>generic_name, strength, form</li><li>tpg_list: O | A</li><li>schedule</li><li>protocols text[]</li><li>max_days, max_daily_dose</li></ul></div>
+      <div class="tbl wide"><h4>consult_cases <em>0046</em></h4><ul><li><b>id</b> · short_code A1042</li><li>member_id, account_id</li><li>protocol_id, protocol_version</li><li>status (enum, 16 states)</li><li>entry: pass | included | extra</li><li>answers jsonb · eligibility jsonb</li><li>safety_lexicon_version</li><li>price_paise, payment_id</li><li>doctor_id, claimed_at, decided_at</li><li>diagnosis_code, decline_reason</li><li>sla_claim_at, sla_issue_at</li><li>city, created_at</li></ul></div>
+      <div class="tbl"><h4>case_events <em>0047</em></h4><ul><li><b>id</b></li><li>case_id → consult_cases</li><li>from_status, to_status</li><li>actor_role, actor_id</li><li>at</li><li>data jsonb (no free text)</li></ul></div>
+      <div class="tbl"><h4>case_messages <em>0047</em></h4><ul><li><b>id</b></li><li>case_id</li><li>sender: doctor | member</li><li>body</li><li>at</li></ul></div>
+      <div class="tbl"><h4>e_prescriptions <em>0048</em></h4><ul><li><b>id</b></li><li>case_id, member_id, doctor_id</li><li>items jsonb (formulary ids, dose, days)</li><li>advice</li><li>pdf_path, sha256</li><li>verify_code (10 chars)</li><li>record_id → records</li></ul></div>
+      <div class="tbl"><h4>payments <em>0049</em></h4><ul><li><b>id</b></li><li>case_id or tier</li><li>rail: razorpay | play | appstore</li><li>order_id, payment_id</li><li>amount_paise, status</li><li>refund_id, refunded_at</li></ul></div>
+      <div class="tbl"><h4>review_allowances <em>0049</em></h4><ul><li><b>account_id, month</b></li><li>included: 2 or 5</li><li>used</li><li>per_member jsonb (max 2)</li></ul></div>
+      <div class="tbl"><h4>case_audits <em>0050</em></h4><ul><li><b>id</b></li><li>case_id, auditor_id</li><li>verdict: agree | minor | major</li><li>notes</li></ul></div>
+      <div class="tbl"><h4>followups <em>0050</em></h4><ul><li><b>id</b></li><li>case_id</li><li>due_at, sent_at</li><li>response: better | same | worse</li></ul></div>
+      <div class="tbl"><h4>app_config rows <em>0050</em></h4><ul><li>quickrx_enabled</li><li>quickrx_cities</li><li>quickrx_hours</li><li>quickrx_price_paise</li></ul></div>
+    </div>
+    <p class="cap">Follows the repo's rule: each migration ships with its <code>supabase/manual/*-step-*.sql</code> files and a <code>*-check.sql</code>. Nothing changes in production until those are run in the SQL editor.</p>
+  </section>
+
+  <section class="blk">
+    <div class="k">Who can read what</div>
+    <h2>Row-level security, <em>table by table.</em></h2>
+    <div class="scroll"><table class="rls">
+      <thead><tr><th>Table</th><th>Member</th><th>Doctor</th><th>Clinical lead</th><th>Ops</th></tr></thead>
+      <tbody>
+        <tr><td>consult_cases</td><td>Own and family cases they manage</td><td>Queued cases (summary only) and cases they claimed</td><td>All, read</td><td>Status and SLA fields only</td></tr>
+        <tr><td>answers, current medicines</td><td>Own</td><td>Claimed case only, until closed + 24 h</td><td>Audited cases</td><td class="no">Never</td></tr>
+        <tr><td>e_prescriptions</td><td>Own</td><td>Ones they signed</td><td>All, read</td><td class="no">Never</td></tr>
+        <tr><td>payments</td><td>Own</td><td class="no">Never</td><td class="no">Never</td><td>All, read; refunds through RPC</td></tr>
+        <tr><td>doctors, shifts</td><td>Name, qualification, reg. no. of their doctor</td><td>Own row</td><td>All</td><td>All</td></tr>
+        <tr><td>case_audits</td><td class="no">Never</td><td>Audits of their own cases</td><td>All, write</td><td class="no">Never</td></tr>
+      </tbody>
+    </table></div>
+    <p class="cap">Doctors never see payment status, so approval can't follow the money. Logs carry case ids and rule ids, never symptoms or names, the same rule <code>safety/detect</code> already follows.</p>
+  </section>
+</article>
+
+<!-- ============================ SHEET 2 ============================ -->
+<article class="sheet">
+  <div class="pagehead"><span class="logo">Cheeku</span><span>Sheet 2 of 3 · components</span></div>
+
+  <section class="blk" style="border-top:0">
+    <div class="k">Component 1 · Protocol engine</div>
+    <h2>Ten conditions as data, <em>compiled like the safety lexicon.</em></h2>
+    <div class="grid2">
+      <div class="box">
+        <h3>Where</h3>
+        <pre class="code">src/lib/quickrx/
+  protocols.yaml            ← clinical lead signs this
+  protocols.generated.ts    ← pnpm quickrx:build
+  engine.ts                 ← pure, sync, no network
+  eligibility.ts
+  engine.test.ts
+  fixtures/must-refer.ts    ← frozen red-flag suite
+supabase/functions/_shared/quickrx/  ← same engine, server copy</pre>
+      </div>
+      <div class="box">
+        <h3>One protocol, in YAML</h3>
+        <pre class="code">- id: uri_sore_throat
+  version: 3
+  signed_by: clinical_lead · 2027-01-08
+  ask: [temp_max, days, swallow, breath,
+        rash, pregnancy, chronic, age]
+  refer_if:
+    - days &gt; 3
+    - temp_max &gt;= 103
+    - breath == "short"
+    - swallow == "cannot"
+  diagnoses: [viral_uri, viral_pharyngitis,
+              allergic_rhinitis, needs_exam]
+  formulary: [paracetamol_650, saline_gargle,
+              cetirizine_10, lozenges]</pre>
+      </div>
+    </div>
+    <div class="grid3">
+      <div class="box"><h3>Contract</h3><p>Same shape as <code>safety/detect</code>: pure, synchronous, under 50 ms, no I/O. Returns <code>eligible | refer | escalate</code> with rule ids, never text.</p></div>
+      <div class="box"><h3>Runs twice</h3><p>On the device for instant feedback, then again in <code>quickrx-intake</code>. The server's answer is the one that counts.</p></div>
+      <div class="box"><h3>Frozen suite</h3><p>Every red flag has a must-refer fixture in English, Hindi and Hinglish. CI fails if any one stops firing. Changes need the clinical lead's sign-off in the PR.</p></div>
+    </div>
+  </section>
+
+  <section class="blk">
+    <div class="k">Component 2 · Intake in the app</div>
+    <h2>Chips inside the chat, <em>not a new form.</em></h2>
+    <div class="flowRow">
+      <div><b>Entry</b><span>Safety gate returns clear and the classifier matches one of 10 conditions. A chip appears: "Get a doctor's prescription · ₹49"</span><code>chat/actions</code></div>
+      <div><b>Questions</b><span>One card per question from the protocol. The model may rephrase the wording in Hinglish, never the options</span><code>QuickRxCard.tsx</code></div>
+      <div><b>Prefill</b><span>Age, sex, allergies, current medicines, pregnancy flag from memory and profiles</span><code>memory/digest</code></div>
+      <div><b>Check</b><span>Local engine, then <code>quickrx-intake</code>. Refer shows the care door; escalate shows Go now</span><code>quickrx/engine</code></div>
+      <div><b>Checkout</b><span>Bottom sheet: price or "Included · 1 of 2 left", consent, pay</span><code>DoctorCheckout.tsx</code></div>
+      <div><b>Case card</b><span>Realtime on the case row: claimed, reviewing, ready</span><code>app/(app)/doctor/[id]</code></div>
+    </div>
+    <p class="cap">New routes: <code>app/(app)/doctor/[id].tsx</code> (case) and <code>app/(app)/prescription/[id].tsx</code> (already exists for uploaded prescriptions; extend it for issued ones). Copy follows <code>docs/content-system.md</code>; add the new strings to <code>copy.test.ts</code>.</p>
+  </section>
+
+  <section class="blk">
+    <div class="k">Component 3 · Payments</div>
+    <h2>Two rails, <em>one server truth.</em></h2>
+    <div class="grid2">
+      <div class="box"><h3>A review (pass, extra)</h3><ol class="steps"><li><code>quickrx-pay</code> creates a Razorpay order for the case</li><li>App opens Razorpay's UPI intent sheet (native SDK, in the January build)</li><li><code>payments-webhook</code> verifies the signature and calls <code>case_transition(paid)</code></li><li>The app's own success callback is ignored for state; it only shows a spinner</li></ol><p class="warn">Blocked on: Apple 3.1.3(d) and Google Play confirming a consult can be paid outside store billing. Fallback: a consumable in-app purchase, same webhook shape.</p></div>
+      <div class="box"><h3>Plans and allowances</h3><ol class="steps"><li>Solo and Family stay on store billing; the existing tier logic in <code>billing/</code> decides the allowance (2 or 5)</li><li><code>debit_allowance()</code> runs inside the same transaction as <code>eligible → paid</code></li><li>A decline, refer or expiry restores it in the same transaction</li><li>The demo function <code>activate_tier_demo</code> and its flag are dropped first (see migration 0012 note)</li></ol></div>
+    </div>
+    <div class="grid3">
+      <div class="box"><h3>Idempotency</h3><p>Order id = case id. A repeated webhook is a no-op; a repeated tap reopens the same order.</p></div>
+      <div class="box"><h3>Refunds</h3><p>Only <code>quickrx-tick</code> and the ops RPC can refund, through the original rail, logged in case_events.</p></div>
+      <div class="box"><h3>Money in paise</h3><p>Integers everywhere, as <code>billing/plans.ts</code> already does. ₹49 is 4900.</p></div>
+    </div>
+  </section>
+
+  <section class="blk">
+    <div class="k">Component 4 · Queue and doctor console</div>
+    <h2>Claim, decide, sign. <em>Nothing else on the screen.</em></h2>
+    <div class="grid2">
+      <div class="box"><h3>Queue</h3><ul><li>Realtime subscription on <code>consult_cases where status = 'queued' and city in shift.cities</code></li><li><code>claim_case()</code> picks the oldest with <code>SKIP LOCKED</code>; one open case per doctor</li><li>Sound and browser notification for a new case; oldest wait shown in the header</li><li>Summary only until claimed: age band, sex, condition, wait</li></ul></div>
+      <div class="box"><h3>Decide</h3><ul><li>Diagnosis chips from the protocol; plan stays hidden until one is picked</li><li>Plan prefilled from the formulary for that diagnosis; edits limited to dose, days and advice within <code>max_days</code> and <code>max_daily_dose</code></li><li>Approve needs a 4-digit signing PIN; review timer must pass 45 s</li><li>Call patient (masked), ask a question, move to video, decline with reason</li></ul></div>
+    </div>
+    <div class="grid3">
+      <div class="box"><h3>Stack</h3><p>A separate small web app in <code>doctor-console/</code>: React with Vite, supabase-js, its own Vercel project. Not part of the member app's web export.</p></div>
+      <div class="box"><h3>Auth</h3><p>Supabase Auth, role <code>doctor</code> set by ops only after registration is verified. TOTP MFA required. Session ends at shift end.</p></div>
+      <div class="box"><h3>Never</h3><p>No free-text drug entry. No access to past cases after closure + 24 h. No payment information.</p></div>
+    </div>
+  </section>
+
+  <section class="blk">
+    <div class="k">Component 5 · Issuing the prescription</div>
+    <h2>A signed PDF, <em>a code a chemist can check.</em></h2>
+    <div class="flowRow">
+      <div><b>Trigger</b><span><code>approved</code> fires <code>rx-issue</code> through a database webhook</span></div>
+      <div><b>Render</b><span>PDF with pdf-lib in Deno: doctor name, qualification, reg. no., patient name, age, sex, date, diagnosis, generic names in capitals, dose, days, advice, mode of consult</span></div>
+      <div><b>Seal</b><span>SHA-256 of the PDF stored; 10-character verify code; QR to <code>rx-verify</code></span></div>
+      <div><b>File</b><span>Private <code>rx</code> bucket; a prescription record in <code>records</code>; medicine ledger rows</span></div>
+      <div><b>Check</b><span>Existing <code>rx-score</code> runs the 10 checks against her other medicines; a conflict goes back to the doctor before release</span></div>
+      <div><b>Notify</b><span><code>push-dispatch</code>: "Dr. Mehta has sent your prescription"</span></div>
+    </div>
+    <p class="cap">The verify page shows only: valid or not, doctor name and reg. no., date, medicine names, patient initials. No history, no diagnosis.</p>
+  </section>
+
+  <section class="blk">
+    <div class="k">Component 6 · The clock, <code>quickrx-tick</code></div>
+    <h2>A clock that runs every minute <em>and keeps every promise.</em></h2>
+    <div class="scroll"><table>
+      <thead><tr><th>When</th><th>Condition</th><th>Action</th></tr></thead>
+      <tbody>
+        <tr><td>+5 min</td><td class="l">Queued, unclaimed</td><td class="l">Alert backup panel (push and SMS to on-call doctors)</td></tr>
+        <tr><td>+10 min</td><td class="l">Still unclaimed</td><td class="l">Offer to LabStack consult overflow through <code>partner-gateway</code></td></tr>
+        <tr><td>+30 min</td><td class="l">No prescription</td><td class="l"><code>expired → refunded</code>, allowance restored, apology push</td></tr>
+        <tr><td>Claimed +12 min</td><td class="l">No decision</td><td class="l">Nudge the doctor; at +20 min release the claim back to the queue</td></tr>
+        <tr><td>Issued +24 h</td><td class="l">Follow-up due</td><td class="l">Push "How are you feeling?"; no answer by +48 h closes the case</td></tr>
+        <tr><td>Daily 02:00</td><td class="l">All cases closed yesterday</td><td class="l">Sample 10% into case_audits for the clinical lead</td></tr>
+      </tbody>
+    </table></div>
+    <p class="cap">Scheduled with <code>pg_cron</code> calling the function through <code>pg_net</code>. The function is idempotent; two runs in the same minute change nothing.</p>
+  </section>
+
+  <section class="blk">
+    <div class="k">Component 7 · Fulfilment</div>
+    <h2>Deliver through LabStack, <em>or hand it to any chemist.</em></h2>
+    <div class="grid2">
+      <div class="box"><h3>Delivery</h3><p>"Order medicines" calls <code>partner-gateway</code> (the LabStack plan's P0 task) with the formulary ids mapped to <code>drugMasterId</code> by the brand-to-salt resolver. The partner pharmacist checks the prescription before dispatch. Order lands in <code>partner_orders</code>.</p></div>
+      <div class="box"><h3>Download</h3><p>Signed URL to the PDF, valid 7 days, regenerated on demand. The QR works at any chemist without the app.</p></div>
+    </div>
+  </section>
+</article>
+
+<!-- ============================ SHEET 3 ============================ -->
+<article class="sheet">
+  <div class="pagehead"><span class="logo">Cheeku</span><span>Sheet 3 of 3 · plan, quality, release</span></div>
+
+  <section class="blk" style="border-top:0">
+    <div class="k">When</div>
+    <h2>Seventeen weeks, <em>two store builds.</em></h2>
+    <div class="scroll"><div class="tgantt">
+      <div class="tscale"><span>Dec</span><span>Jan</span><span>Feb</span><span>Mar</span></div>
+      {{GANTT}}
+    </div></div>
+    <div class="miles">
+      <div><span class="mk">Build 1 · January store build</span><b>Public launch, Cheeku Doctor off</b><span>Carries everything native: Razorpay SDK, new routes, case card. Hidden behind <code>quickrx_enabled</code>.</span></div>
+      <div class="on"><span class="mk">Mid-Feb · flag on</span><b>Soft launch</b><span>One city, invited beta families, 8 am to midnight, panel doctors. No new store review needed.</span></div>
+      <div><span class="mk">Build 2 · early March</span><b>Hindi voice intake, delivery</b><span>Fixes from the soft launch. Second city switched on by flag.</span></div>
+      <div class="dk"><span class="mk">31 Mar</span><b>Fully running</b><span>Open to every member in two cities; capacity for 1,000 reviews a day; audits and refunds automated.</span></div>
+    </div>
+    <p class="cap"><code>expo-updates</code> is not installed, so anything native or any new screen must be in a store build. That is why the January build carries the whole flow, switched off.</p>
+  </section>
+
+  <section class="blk">
+    <div class="k">Who</div>
+    <h2>Owners, <em>by component.</em></h2>
+    <div class="scroll"><table>
+      <thead><tr><th>Component</th><th>Owner</th><th>With</th><th>Ships</th></tr></thead>
+      <tbody>
+        <tr><td>Migrations 0045–0050, RLS, <code>case_transition()</code></td><td>Archit</td><td>Suraj</td><td>Dec wk 3</td></tr>
+        <tr><td>Protocol engine, YAML, frozen red-flag suite</td><td>Suraj</td><td>Clinical lead</td><td>Dec wk 4</td></tr>
+        <tr><td>Intake cards, checkout sheet, case card, routes</td><td>Athar</td><td>Archit</td><td>Jan wk 2 (in Build 1)</td></tr>
+        <tr><td>Razorpay order, webhook, refunds, allowances</td><td>Archit</td><td>Athar</td><td>Jan wk 3</td></tr>
+        <tr><td>Doctor console: queue, case, decide, sign, MFA</td><td>Archit</td><td>Athar (design)</td><td>Jan wk 4</td></tr>
+        <tr><td><code>rx-issue</code>, PDF, verify page, record and ledger writes</td><td>Archit</td><td>Suraj (rx-score)</td><td>Feb wk 1</td></tr>
+        <tr><td><code>quickrx-tick</code>: overflow, expiry, follow-ups, audit sampling</td><td>Archit</td><td>Suraj</td><td>Feb wk 1</td></tr>
+        <tr><td>Masked calling</td><td>Archit</td><td>Deepesh (vendor)</td><td>Feb wk 2</td></tr>
+        <tr><td>Ops dashboard: queue health, refunds, audits</td><td>Athar</td><td>Archit</td><td>Feb wk 2</td></tr>
+        <tr><td>Hindi voice intake, phrasing evals</td><td>Suraj</td><td></td><td>Mar wk 2 (Build 2)</td></tr>
+        <tr><td>LabStack delivery from a prescription</td><td>Archit</td><td>Suraj (salt matcher)</td><td>Mar wk 2</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section class="blk">
+    <div class="k">How we know it works</div>
+    <h2>Tests before code reaches a doctor, <em>metrics after.</em></h2>
+    <div class="grid2">
+      <div class="box"><h3>Tests</h3><ul><li><b>Unit (vitest):</b> protocol engine, eligibility, allowance maths, price in paise; frozen must-refer suite</li><li><b>Database (tests/db):</b> every RLS row above, every illegal transition refused</li><li><b>Contract:</b> Razorpay webhook fixtures, LabStack fixtures from the sandbox</li><li><b>Copy:</b> new strings added to <code>copy.test.ts</code></li><li><b>Dry run:</b> 200 synthetic cases through real doctors on staging before any real member</li></ul></div>
+      <div class="box"><h3>Live metrics</h3><ul><li>Paid to claimed, p50 and p90 (target p90 under 10 min)</li><li>Paid to prescription, p90 under 25 min</li><li>Doctor approval rate per doctor (alert outside 70% to 92%)</li><li>Refund rate (alert over 5%), webhook failures (alert on any)</li><li>Refer and escalate rate by protocol</li><li>Check-in: better, same, worse at 48 h</li></ul></div>
+    </div>
+    <div class="grid3">
+      <div class="box"><h3>Alerts go to</h3><p>An ops channel and the on-call engineer. Queue over 10 minutes pages the clinical lead too.</p></div>
+      <div class="box"><h3>Logs</h3><p>Case id, rule ids, timings. Never answers, names or medicines, as in the safety gate.</p></div>
+      <div class="box"><h3>Kill switch</h3><p><code>quickrx_enabled = false</code> hides the chip within a minute; open cases still finish.</p></div>
+    </div>
+  </section>
+
+  <section class="blk">
+    <div class="k">Definition of done</div>
+    <h2>Before the flag goes on <em>for one real member.</em></h2>
+    <div class="check">
+      <div><i></i><span>Written legal opinion on the telemedicine rules and CDSCO received</span></div>
+      <div><i></i><span>Ten protocols and the formulary signed by the clinical lead, in the repo</span></div>
+      <div><i></i><span>Must-refer suite at 100% in English, Hindi and Hinglish</span></div>
+      <div><i></i><span>Every RLS rule tested; doctors cannot see payments</span></div>
+      <div><i></i><span>Payment rail confirmed with Apple and Google, or the in-app purchase fallback live</span></div>
+      <div><i></i><span>Refund tested end to end on both rails</span></div>
+      <div><i></i><span>10 panel doctors verified on the National Medical Register, insured, trained, 20 shadow cases each</span></div>
+      <div><i></i><span>200-case dry run: p90 under 25 min, zero missed red flags</span></div>
+      <div><i></i><span>Kill switch tested in production</span></div>
+      <div><i></i><span>Device check on iOS and Android, not just the web preview</span></div>
+    </div>
+  </section>
+
+  <section class="blk">
+    <div class="k">Decisions we still owe</div>
+    <h2>Six calls, <em>each with a date.</em></h2>
+    <div class="scroll"><table>
+      <thead><tr><th>Decision</th><th>Options</th><th>Lean</th><th>By</th></tr></thead>
+      <tbody>
+        <tr><td>Payment rail for a review</td><td class="l">Razorpay UPI outside store billing, or a consumable in-app purchase</td><td class="l">Razorpay, if both stores confirm</td><td>15 Dec</td></tr>
+        <tr><td>Doctor's signature</td><td class="l">Signing PIN plus stored signature image, or Aadhaar eSign per prescription</td><td class="l">PIN and image, eSign later; counsel to confirm</td><td>15 Dec</td></tr>
+        <tr><td>Telephony vendor</td><td class="l">Exotel or Knowlarity, masked numbers, call recording off</td><td class="l">Whichever LabStack already uses</td><td>5 Jan</td></tr>
+        <tr><td>Console hosting</td><td class="l">Separate Vercel project, or under the existing one</td><td class="l">Separate project; never a root vercel.json</td><td>15 Dec</td></tr>
+        <tr><td>Protocols at runtime</td><td class="l">Compiled into the app, or fetched from the database</td><td class="l">Compiled, version pinned per case; server copy is the authority</td><td>10 Dec</td></tr>
+        <tr><td>Data retention for cases</td><td class="l">As long as the member keeps their account, or a fixed period</td><td class="l">Follow counsel's reading of the guidelines and DPDP</td><td>5 Jan</td></tr>
+      </tbody>
+    </table></div>
+    <p class="src">Repo facts as of 13 Nov 2026: Expo 58, React Native 0.88, Supabase with migrations to 0044, <code>safety/detect</code> with a YAML lexicon, <code>cheeku-chat</code>, <code>rx-score</code> and <code>push-dispatch</code> deployed as Edge Functions, demo billing waiting on Razorpay, no <code>expo-updates</code>. Product and pricing decisions: Cheeku Doctor playbook.</p>
+  </section>
+</article>
