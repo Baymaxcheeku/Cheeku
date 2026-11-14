@@ -88,6 +88,117 @@ def memory_stack():
     items.sort(key=lambda z: z[0])
     return '<svg class="iso stack" viewBox="-120 -230 500 360" role="img" aria-label="The longitudinal memory as six layers, from the subject graph at the bottom to area history at the top">' + ''.join(z[1] for z in items) + ''.join(labels) + '</svg>'
 
+
+# ------------------------------------------------------- three doors in --
+def doors_iso():
+    P = ISO.prism; items, labels, paths = [], [], []
+    # the person, centre
+    cx, cy = 13, 7
+    items += P(cx - 1, cy - 1, 6, 6, 0.4, 0, 'p')
+    items += P(cx + 0.9, cy + 0.9, 2.2, 2.2, 3.4, 0.4, 'a')       # body
+    items += P(cx + 1.3, cy + 1.3, 1.4, 1.4, 1.2, 3.8, 'n')       # head
+    # doors: eaten (plate), taken (bottle), applied (tube)
+    D = [(0, 0, 'Eaten', 'Food snaps', 'w'), (0, 8, 'Taken', 'Medicines, supplements, drinks', 'a'), (0, 16, 'Applied', 'Creams, oils, skincare', 'c')]
+    for x, y, t, sub, k in D:
+        items += P(x, y, 4, 4, 0.4, 0, 'p')
+        if t == 'Eaten':
+            items += P(x + 0.6, y + 0.6, 2.8, 2.8, 0.2, 0.4, 'w')
+            items += P(x + 1.0, y + 1.0, 1.0, 1.0, 0.35, 0.6, 'c'); items += P(x + 2.1, y + 1.2, 0.9, 0.8, 0.3, 0.6, 'a'); items += P(x + 1.3, y + 2.2, 1.4, 0.8, 0.25, 0.6, 's')
+        elif t == 'Taken':
+            items += P(x + 1.3, y + 1.3, 1.4, 1.4, 1.8, 0.4, 'a'); items += P(x + 1.4, y + 1.4, 1.2, 1.2, 0.4, 2.2, 'n')
+            items += P(x + 2.9, y + 2.3, 0.5, 0.5, 0.25, 0.4, 'w')
+        else:
+            items += P(x + 1.0, y + 1.5, 2.2, 0.9, 0.7, 0.4, 'c'); items += P(x + 3.2, y + 1.7, 0.5, 0.5, 0.5, 0.5, 'n')
+        (x1, y1), (x2, y2) = ISO.iso(x + 4, y + 2, 0), ISO.iso(cx - 1, cy + 2, 0)
+        paths.append('<line x1="%.1f" y1="%.1f" x2="%.1f" y2="%.1f" class="path"/>' % (x1, y1, x2, y2))
+        tx, ty = ISO.iso(x + 2, y + 2, 2.6)
+        labels.append('<text x="%.1f" y="%.1f" class="lt" text-anchor="middle">%s</text><text x="%.1f" y="%.1f" class="ls" text-anchor="middle">%s</text>' % (tx, ty - 22, t, tx, ty - 8, sub))
+    # outputs: understand, act
+    O = [(25, -1, 'Understand', 'What it means for you', 'n'), (25, 7, 'Practise', 'One habit, today', 'a'), (25, 15, 'Act', 'Care, fitness, a test', 'c')]
+    for x, y, t, sub, k in O:
+        items += P(x, y, 4, 4, 0.4, 0, 'p'); items += P(x + 0.8, y + 0.8, 2.4, 2.4, 1.2 if t != 'Act' else 1.6, 0.4, k)
+        (x1, y1), (x2, y2) = ISO.iso(cx + 5, cy + 2, 0), ISO.iso(x, y + 2, 0)
+        paths.append('<line x1="%.1f" y1="%.1f" x2="%.1f" y2="%.1f" class="path back"/>' % (x1, y1, x2, y2))
+        tx, ty = ISO.iso(x + 2, y + 2, 2.4)
+        labels.append('<text x="%.1f" y="%.1f" class="lt" text-anchor="middle">%s</text><text x="%.1f" y="%.1f" class="ls" text-anchor="middle">%s</text>' % (tx, ty - 22, t, tx, ty - 8, sub))
+    tx, ty = ISO.iso(cx + 2, cy + 2, 5.4)
+    labels.append('<text x="%.1f" y="%.1f" class="lt" text-anchor="middle">This person</text><text x="%.1f" y="%.1f" class="ls" text-anchor="middle">clock, areas, medicines, goals</text>' % (tx, ty - 22, tx, ty - 8))
+    items.sort(key=lambda z: z[0])
+    return '<svg class="iso doors" viewBox="-260 -90 620 470" role="img" aria-label="Three ways things enter the body, eaten, taken and applied, read against this person, then turned into understanding, a habit and an action">' + ''.join(paths) + ''.join(z[1] for z in items) + ''.join(labels) + '</svg>'
+
+def lens(kind, title, sub, steps, reads, never):
+    st = ''.join('<li>%s</li>' % x for x in steps)
+    rd = ''.join('<li>%s</li>' % x for x in reads)
+    return '<div class="lens %s"><span class="lv">%s</span><h3>%s</h3><ol>%s</ol><div class="rd"><b>Reads it against</b><ul>%s</ul></div><p class="nv"><b>Never:</b> %s</p></div>' % (kind, sub, title, st, rd, never)
+
+LENSES = ''.join([
+    lens('l1', 'Eaten', 'Food snaps', [
+        'Snap the plate, or pick it from the diary. Breakfast, lunch, dinner, chai.',
+        'The model names the Indian dishes and suggests tags: roti, dal, rice, fried, sweet, packaged. The person confirms with one tap.',
+        'Portion in hands and katoris, never grams or calories.',
+        'One line on the plate and at most two tips tied to their own numbers.',
+        'Patterns over a week: "rice at dinner 5 of 7 nights", "no protein at breakfast".'],
+        ['Sugar, weight, BP, LDL, liver, kidney, iron marks', 'Pregnancy week and trimester', 'Diabetes or thyroid medicines, timing', 'The goal they picked'],
+        'calorie counts, "bad food", diets, fasting advice for pregnancy, children or diabetes on medicines.'),
+    lens('l2', 'Taken', 'Medicines, supplements, drinks', [
+        'Snap the strip, bottle, sachet or label, or let the Rx fill it in.',
+        'Read the ingredients and the licence: drug, FSSAI food supplement or cosmetic.',
+        'Add to the ledger by ingredient, with dose and how often.',
+        'Check stacking, upper limits for age, clashes with prescribed medicines, pregnancy and breastfeeding.',
+        'Say it plainly, with what to ask the doctor or pharmacist.'],
+        ['Every active medicine, by ingredient', 'Age, kidney and liver values', 'Pregnancy, breastfeeding', 'Allergies on file'],
+        'telling anyone to start, stop or change a prescribed medicine; rating a doctor.'),
+    lens('l3', 'Applied', 'Creams, oils, skincare, hair', [
+        'Snap the tube, jar or bottle; the label and ingredient list are read.',
+        'Flag ingredients that matter for this person: steroids, retinoids, high salicylic acid, hydroquinone, mercury, strong fragrance.',
+        'Check where and on whom: a baby\'s nappy area, broken skin, the face, pregnancy.',
+        'Keep it in the ledger with the medicines, so a steroid cream counts.',
+        'Route to a dermatologist when a pattern needs one.'],
+        ['Age and stage (newborn, child, pregnant)', 'Skin conditions and allergies on file', 'Other steroids already in the ledger'],
+        'naming a skin disease from a photo of skin; product recommendations paid for by a brand.'),
+])
+
+ROUTES = [
+    ('Rice and sweets at most dinners; HbA1c at watch', 'A 12-week sugar plan; a walk after dinner on the daily plan', 'Dietitian consult (care); HbA1c retest in 3 months (lab)'),
+    ('Low iron on the report; tea with every meal', 'Tea an hour away from meals; lemon on dal', 'Iron studies retest in 3 months (lab)'),
+    ('Under 4,000 steps a week; weight at watch', '10-minute walk after lunch; stairs task', 'Beginner fitness class near home (fitness)'),
+    ('Three vitamin D products at once', 'Explain the stack; one question for the doctor', 'Cheeku Doctor review, ₹49, or the prescriber'),
+    ('Steroid cream used daily for weeks', 'Explain why steroids need a plan', 'Dermatologist consult (care)'),
+    ('Packaged snacks and pickle most days; BP at act', 'Salt habits on the plan; morning BP readings', 'Doctor consult (care); BP monitor via partner'),
+    ('Pregnant, week 20, skipping breakfast', 'Gentle breakfast habit; iron and folic acid reminder', 'Gynaecologist follow-up (care); no diets'),
+    ('Child, fried snacks after school most days', 'Swap ideas the child can pick from', 'Paediatric nutritionist only if growth is off (care)'),
+]
+def routes_table():
+    rows = ''.join('<tr><td class="l">%s</td><td class="l">%s</td><td class="l"><b>%s</b></td></tr>' % r for r in ROUTES)
+    return '<table><thead><tr><th class="l">What the engine sees</th><th class="l">Practise (free, on the plan)</th><th class="l">Act (booked in the chat)</th></tr></thead><tbody>' + rows + '</tbody></table>'
+
+PROFILES = [
+    ('Expecting', 'journey: expecting · pregnancy clock', 'Iron, sugar in pregnancy, BP, weight gain by week, scans due', 'Iron with vitamin C, no raw papaya or unpasteurised milk, caffeine under 200 mg', 'Safe in pregnancy? Retinoids, high salicylic, some herbal supplements flagged', 'Gynaecologist, scans, GTT at 24 to 28 weeks', 'No weight-loss goals, no BMI marks, pregnancy red flags skip the model'),
+    ('New parent and baby', 'journey: new_parent · day of life', 'Baby: weight, jaundice by day, feeds, vaccines. Parent: sleep, recovery, mood', 'Breastfeeding diet, what passes into milk', 'Baby creams and oils: steroids, fragrance, nappy area', 'Paediatrician, vaccines, postpartum check', 'Thresholds by day of life; a newborn fever goes straight to a doctor'),
+    ('Child', 'clock: child or teen', 'Growth, check-ups, vaccines, activity, sleep', 'Lunchbox and after-school snacks, no labels like "bad food"', 'Lice shampoos, acne creams for teens', 'Paediatrician, dentist, eye check', 'Gentle habits only; no weight or sugar goals; parent sees, child is not shamed'),
+    ('Student or young adult', 'age 18 to 30 · campus', 'Sleep, movement, sick days, mental load', 'Mess and hostel food, protein, late-night eating', 'Gym supplements and protein powders, acne products', 'Cheeku Doctor on sick days, fitness classes', 'No supplement selling; protein claims checked against the label'),
+    ('Working adult at watch', 'sugar, BP or weight at watch', 'Sugar, BP, LDL, weight, sleep, steps', 'Rice and roti balance, chai sugar, office and outside food', 'Painkillers taken often, pre-workout drinks', 'Dietitian, retest in 3 to 6 months, fitness', 'The plan is habits, not a diet; the doctor decides on medicines'),
+    ('Women\'s health', 'journey: fertility · PCOS or thyroid on file', 'Cycles, weight, sugar and insulin markers, thyroid, iron', 'Protein and fibre, timing with thyroid medicine', 'Hair and skin products, hormone-related ingredients', 'Gynaecologist, endocrinologist, labs', 'No fertility promises; cycle data is private by default'),
+    ('Parent cared for by a child', 'journey: caregiver · older adult', 'BP, sugar, kidney, falls, medicines, check-ups', 'Salt, soft protein, hydration, sugar in sweets at festivals', 'Many medicines: stacking, interactions, kidney doses', 'Doctor, home tests, physio, elder care at home', 'Alerts go to the caregiver with consent; the parent can always see their own file'),
+    ('Health optimiser', 'journey: optimiser · all areas on track', 'Trends, retests on time, sleep and fitness depth', 'Protein, fibre, eating window, alcohol', 'Supplement stacks, skincare actives', 'Full-body panels yearly, fitness, coaching', 'Evidence only: no anti-ageing claims, no unproven supplements'),
+]
+def profiles_html():
+    out = []
+    for name, who, watches, eaten, body, act, rule in PROFILES:
+        out.append('<div class="prof"><span class="lv">%s</span><h3>%s</h3><dl><dt>Watches</dt><dd>%s</dd><dt>Eaten</dt><dd>%s</dd><dt>Taken and applied</dt><dd>%s</dd><dt>Acts through</dt><dd>%s</dd></dl><p class="nv">%s</p></div>' % (who, name, watches, eaten, body, act, rule))
+    return '<div class="profs">' + ''.join(out) + '</div>'
+
+PRACTICES = [
+    ('Move', '10-minute walk after meals · 7,000 steps · two strength sessions a week · stairs over lifts', 'Sugar, weight, heart, movement'),
+    ('Eat', 'Half the plate sabzi · protein at every meal · tea away from meals · less salt, pickle and packaged food · fruit over juice', 'Sugar, BP, LDL, weight, iron'),
+    ('Sleep', 'Same wake time daily · screens off 30 minutes before bed · no chai after 4 pm', 'Sleep, heart, sugar'),
+    ('Mind', 'Two minutes of slow breathing · a walk outside · one call to a friend', 'Sleep, BP'),
+    ('Check', 'Morning BP twice a week · weigh once a week · retests on time · medicines at the same time daily', 'Check-ups, heart, sugar'),
+    ('Apply', 'Sunscreen outdoors · patch-test new products · no steroid creams without a plan', 'Skin, the ledger'),
+]
+def practices_html():
+    return '<div class="pracs">' + ''.join('<div class="prac"><b>%s</b><span>%s</span><em>Moves: %s</em></div>' % p for p in PRACTICES) + '</div>'
+
 css = re.search(r'<style>(.*?)</style>', (here.parent / 'cheeku-doctor' / 'template.html').read_text(), re.S).group(1)
 extra = '''
 .hero h1 { max-width: 26ch; }
@@ -120,6 +231,30 @@ pre.code .c { color: #A9A3F5; }
 @media (max-width: 860px) { .build { grid-template-columns: minmax(0, 1fr); } }
 .state { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; }
 .state.b { background: var(--safe-bg); color: var(--safe); } .state.n { background: var(--accent-soft); color: var(--accent-2); }
+.doors .lt, .doors .ls { paint-order: stroke; stroke: var(--soft); stroke-width: 5px; stroke-linejoin: round; }
+.lenses { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.lens { border-radius: 18px; padding: 16px; display: grid; gap: 10px; align-content: start; background: var(--soft); }
+.lens.l1 { background: var(--accent-soft); } .lens.l3 { background: var(--warn-bg); }
+.lens .lv { font-size: 11px; font-weight: 750; letter-spacing: .08em; text-transform: uppercase; color: var(--accent-2); }
+.lens.l3 .lv { color: var(--warn); }
+.lens h3 { font: 400 26px/1.05 var(--display); }
+.lens ol { margin: 0; padding-left: 18px; display: grid; gap: 5px; font-size: 13px; color: var(--ink-2); line-height: 1.4; }
+.lens .rd { background: var(--page); border-radius: 12px; padding: 10px 12px; font-size: 12.5px; }
+.lens .rd b { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+.lens .rd ul { margin: 4px 0 0; padding-left: 16px; display: grid; gap: 2px; color: var(--ink-2); }
+.nv { font-size: 12.5px; color: var(--bad); line-height: 1.4; } .nv b { color: var(--bad); }
+@media (max-width: 860px) { .lenses { grid-template-columns: minmax(0, 1fr); } }
+.profs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.prof { background: var(--soft); border-radius: 18px; padding: 16px; display: grid; gap: 8px; align-content: start; }
+.prof .lv { font-size: 11px; font-weight: 650; color: var(--muted); }
+.prof h3 { font: 400 22px/1.1 var(--display); }
+.prof dl { margin: 0; display: grid; gap: 6px; } .prof dt { font-size: 10.5px; font-weight: 750; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); } .prof dd { margin: 0; font-size: 12.5px; color: var(--ink-2); line-height: 1.4; }
+.prof .nv { border-top: 1px solid var(--line); padding-top: 8px; }
+@media (max-width: 1000px) { .profs { grid-template-columns: repeat(2, minmax(0, 1fr)); } } @media (max-width: 560px) { .profs { grid-template-columns: minmax(0, 1fr); } }
+.pracs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.prac { background: var(--soft); border-radius: 16px; padding: 14px; display: grid; gap: 6px; align-content: start; }
+.prac b { font: 400 22px/1 var(--display); color: var(--accent); } .prac span { font-size: 13px; color: var(--ink-2); line-height: 1.45; } .prac em { font-style: normal; font-size: 11.5px; color: var(--muted); }
+@media (max-width: 760px) { .pracs { grid-template-columns: minmax(0, 1fr); } }
 .fine { font-size: 11.5px; color: var(--muted); padding: 0 32px 26px; max-width: 100ch; }
 '''
 
@@ -150,6 +285,15 @@ chat_flow = fsteps([
     ('gate', 'The floor holds', 'The answer\'s care tier is the higher of the model\'s and the rules\'. A model can make it more careful, never less.', S_),
     ('', 'Back into memory', 'Numbers said in the chat ("BP 138/88 today") become facts; corrections supersede the old value and the answer says so.', Ar),
 ])
+food_flow = fsteps([
+    ('', 'Snap the plate', 'Camera from the plan, the chat or the + button. Works offline; uploads later.', A),
+    ('', 'The model reads it', 'Names Indian dishes and suggests tags and a portion in katoris. Unsure items are asked, not guessed.', S_),
+    ('', 'One tap to confirm', 'The person fixes or confirms. Confirmed tags are what the rules run on.', A),
+    ('gate', 'Rules read it against this person', 'Sugar, BP, LDL, liver, kidney, iron, pregnancy week, medicines. Code picks the line and tips.', Ar),
+    ('model', 'The model says it kindly', 'One line on the plate, at most two tips, in their language. Never "bad food", never calories.', S_),
+    ('', 'Patterns over a week', 'Rice at dinner 5 of 7 nights; no protein at breakfast. Feeds the Sunday review and the areas.', Ar),
+    ('', 'Practise or act', 'A habit on tomorrow\'s plan, or a dietitian or fitness class booked when the pattern and the numbers both point there.', A),
+])
 daily_flow = fsteps([
     ('', 'Morning nudge', 'One line, built from the area most in need: "Walk 10 minutes after lunch today. Your sugar plan, week 3."', A),
     ('', 'Today\'s plan', 'Two to four tasks from the goal, after anything due (a medicine, a retest).', A),
@@ -159,6 +303,9 @@ daily_flow = fsteps([
 ])
 
 INPUTS = [
+    ('Food snap', 'Photo of the plate, then one tap to confirm the tags', 'daily_logs (kind meal) + intake_items', 'Dishes, tags, portion in katoris, time, the photo', 'Medium: a photo, confirmed by the person', 'Suraj'),
+    ('Taken product snap', 'Photo of a strip, bottle, sachet, protein tub or drink label', 'intake_items → ledger', 'Ingredients, dose, licence class, how often', 'High for the label, medium for how often', 'Suraj'),
+    ('Applied product snap', 'Photo of a cream, oil, shampoo or skincare label', 'intake_items → ledger', 'Ingredients, where it is used, how often', 'High for the label', 'Suraj'),
     ('Lab report', 'Upload, WhatsApp share, or auto-filed from a booked partner test', 'documents, entities → series', 'Values, units, ranges, sample date, lab', 'Highest', 'Suraj'),
     ('Prescription', 'Photo or PDF; Cheeku Doctor writes its own', 'documents → ledger, rx_scorecards', 'Medicines by ingredient, dose, duration, prescriber, 10 checks', 'High', 'Suraj'),
     ('Chat and voice', 'What people tell Cheeku in their own words', 'memory_facts', 'Readings, symptoms, corrections, goals', 'Medium: said, not measured', 'Suraj'),
@@ -203,6 +350,9 @@ REACT = [
     ('Two values disagree', '"Your report says 78 kg on 2 Nov; you told me 74 kg yesterday. I am using the report until the next weigh-in. Was 74 from a home scale?"'),
     ('Signal older than 18 months', '"Your last cholesterol test was in 2024. That is too old to go by, so I have not marked your heart area. A lipid test would tell us where you are."'),
     ('Only the watch says so', '"Your watch shows about 5.5 hours of sleep this week." Softer words, no medical claim: a watch estimate is not a sleep study.'),
+    ('A plate with rice, fried snack and sweet; HbA1c 6.1%', '"Nice that dal is in. With your sugar in the early-warning band, swapping the sweet for fruit tomorrow helps most. Want to try a walk after dinner too?"'),
+    ('Three vitamin D products in the ledger', '"Your multivitamin, the calcium tablet and the D3 sachet all carry vitamin D, about 4,000 IU a day together. Worth checking with your doctor whether you need all three."'),
+    ('Steroid cream on a baby\'s nappy area', '"This cream has a steroid. On a baby\'s nappy area it needs a doctor\'s plan for how long. Can I book the paediatrician?"'),
     ('Pregnant, or a child', 'No weight or sugar goals, no BMI marks. Only gentle habits for children. Pregnancy questions follow the pregnancy clock and its own red flags.'),
     ('A hard stop in the message', 'The model is not called. The answer is the hard-stop card: where to go, what to say, one tap to call.'),
 ]
@@ -225,6 +375,12 @@ CONTRACT = '''<span class="c">// LongevityState: what the app and the AI layer b
                  "why": "HbA1c 5.9% and a parent with diabetes", "ruleVersion": "cad-2027.1" } ],
   "plan": { "goal": "sugar", "week": 3, "tasks": ["walk_after_lunch", "no_sugar_chai"] },
   "loops": [ { "title": "Lipid profile", "dueBy": "2027-01-10", "overdue": true } ],
+  "intake": {                                         <span class="c">// last 7 days, what went in</span>
+    "meals": 17, "patterns": ["rice_dinner_5_of_7", "no_protein_breakfast"],
+    "ledger": [ { "name": "Vitamin D3 60K", "class": "food_supplement", "ingredients": ["cholecalciferol"], "flags": ["stacking"] },
+                { "name": "Betamethasone cream", "class": "drug", "route": "skin", "flags": ["steroid_long_use"] } ]
+  },
+  "lens": { "journey": "caregiver", "stage": "adult", "never": ["weight_goal_in_pregnancy"] },
   "changes": [ { "key": "ldl", "from": 162, "to": 138, "date": "2027-03-10",
                  "line": "LDL 162 to 138, down 15% since the plan started" } ]
 }'''
@@ -255,7 +411,19 @@ create table report_chunks (                <span class="c">-- retrieval, one pe
   embed_model text not null,                <span class="c">-- never search across two models</span>
   sample_date date
 );
-<span class="c">-- RLS on all three: the owner's family only, same rules as documents.</span>'''
+create table intake_items (                 <span class="c">-- what is taken and applied, beyond prescriptions</span>
+  id uuid primary key default gen_random_uuid(),
+  profile_id uuid references profiles not null,
+  kind text not null,                       <span class="c">-- taken | applied</span>
+  name text not null,
+  licence_class text,                       <span class="c">-- drug | food_supplement | cosmetic | unknown</span>
+  ingredients jsonb not null,               <span class="c">-- [{key, amount, unit}]</span>
+  route text,                               <span class="c">-- mouth | skin | scalp | eye…</span>
+  frequency text, started_on date, stopped_on date,
+  photo_path text, confidence real
+);
+<span class="c">-- Food stays in daily_logs (kind meal); the model's reading goes in daily_logs.analysis.</span>
+<span class="c">-- RLS on all four: the owner's family only, same rules as documents.</span>'''
 
 html = f'''<!DOCTYPE html>
 <html lang="en">
@@ -270,14 +438,14 @@ html = f'''<!DOCTYPE html>
 <body>
 
 <article class="sheet" aria-label="Sheet 1: what the engine is">
-  <div class="pagehead"><span class="logo">Cheeku</span><span>Longevity engine · build document · 1 / 4</span></div>
+  <div class="pagehead"><span class="logo">Cheeku</span><span>Longevity engine · build document · 1 / 6</span></div>
   <section class="hero">
     <h1>The longevity engine. <em>Every number a family has, turned into the next right habit.</em></h1>
-    <p class="lede">It reads everything a family shares, keeps it on one timeline per person, marks six areas of health, and turns the ones that need attention into a daily plan, a nudge and the next test. The model explains; rules and code decide. This document is how we build it: Suraj owns the AI and retrieval, Archit the app and data layer.</p>
+    <p class="lede">It reads what each person eats, takes and puts on their skin, along with every report, reading and watch day. It keeps it on one timeline per person, marks six areas of health, and turns the ones that need attention into a daily plan, a nudge and the next test. The model explains; rules and code decide. This document is how we build it: Suraj owns the AI and retrieval, Archit the app and data layer.</p>
     <div class="tags"><span class="tag v">Areas, not a score</span><span class="tag">Rules decide, the model explains</span><span class="tag">Partial beats wrong</span><span class="tag">For the team only</span></div>
     <div class="stats">
       <div class="stat"><b>6</b><span>areas per person: heart, sugar, weight, sleep, movement, check-ups</span></div>
-      <div class="stat"><b>9</b><span>kinds of input, from lab reports to the watch</span></div>
+      <div class="stat"><b>12</b><span>kinds of input: what is eaten, taken and applied, reports, the watch</span></div>
       <div class="stat"><b>18 mo</b><span>a signal older than this is dropped, never trusted</span></div>
       <div class="stat"><b>₹0.07</b><span>a chat with about 4,000 tokens of family context</span></div>
     </div>
@@ -299,11 +467,46 @@ html = f'''<!DOCTYPE html>
   </section>
 </article>
 
-<article class="sheet" aria-label="Sheet 2: inputs and memory">
-  <div class="pagehead"><span class="logo">Cheeku</span><span>Longevity engine · 2 / 4</span></div>
+<article class="sheet" aria-label="Sheet 2: what goes into the body">
+  <div class="pagehead"><span class="logo">Cheeku</span><span>Longevity engine · 2 / 6</span></div>
+  <section class="blk" style="border-top:0">
+    <div class="k">The three doors</div>
+    <h2>Eaten, taken, applied. <em>Everything that goes into the body, read for this person.</em></h2>
+    <p class="lede">Reports show where a person is. What they eat, take and put on their skin every day is what moves them. Each is a snap away, read against their own numbers, and turned into one thing to understand, one habit and, when it needs one, a booking.</p>
+    <div class="isoWrap scroll">{doors_iso()}</div>
+    <div class="lenses">{LENSES}</div>
+    <p class="cap">Built on what exists: the plate reader in <code>src/lib/home/meals.ts</code> (photo kept, tags confirmed, one line and two tips, no calories), the product check, and the medicine ledger in <code>src/lib/memory/ledger.ts</code>, which already sorts drug, FSSAI food and cosmetic licences and catches ingredient stacking. New: the model reads the photo to suggest the tags, supplements and applied products join the ledger, and weekly patterns feed the areas.</p>
+  </section>
+  <section class="blk">
+    <div class="k">From what we see to what they do</div>
+    <h2>Understand, practise, act. <em>Care and fitness are one tap away.</em></h2>
+    <div class="scroll">{routes_table()}</div>
+    <p class="cap">Every act ends in something the family can book inside the chat: a dietitian, a doctor, a dermatologist, a fitness class, a home test, or Cheeku Doctor for ₹49. A booking is suggested once, with one line of why, and never pushed again that week. The plan and the nudges are free; the booking is where we earn.</p>
+  </section>
+</article>
+
+<article class="sheet" aria-label="Sheet 3: personal by design">
+  <div class="pagehead"><span class="logo">Cheeku</span><span>Longevity engine · 3 / 6</span></div>
+  <section class="blk" style="border-top:0">
+    <div class="k">Personal by design</div>
+    <h2>Same engine, <em>a different engine for every person.</em></h2>
+    <p class="lede">The engine picks its lens from the person's clock (age, pregnancy week, day of life), their journey, the conditions and medicines on file, and their goal. What it watches, how it reads a plate or a label, where it routes, and what it must never say all change with it.</p>
+    {profiles_html()}
+    <p class="cap">A family holds several of these at once: a pregnant mother, a father with BP at watch and a grandparent on six medicines each get their own engine, and the caregiver sees the family view. The journey field is a hint for content, never a clinical fact; the clock and records decide the thresholds.</p>
+  </section>
+  <section class="blk">
+    <div class="k">Good practices</div>
+    <h2>Small habits, <em>chosen by the area that needs them.</em></h2>
+    {practices_html()}
+    <p class="cap">Each practice is a task in the habit catalogue (<code>src/lib/home/catalog.ts</code>), written to the content system's rules. The plan picks two to four a day from the person's focus areas and goal, after anything due. Practices that a stage forbids (weight goals in pregnancy, strength work for a newborn's mother in week one) are never offered.</p>
+  </section>
+</article>
+
+<article class="sheet" aria-label="Sheet 4: inputs and memory">
+  <div class="pagehead"><span class="logo">Cheeku</span><span>Longevity engine · 4 / 6</span></div>
   <section class="blk" style="border-top:0">
     <div class="k">What goes in</div>
-    <h2>Nine inputs. <em>Each one knows where it came from.</em></h2>
+    <h2>Twelve inputs. <em>Each one knows where it came from.</em></h2>
     <div class="scroll">{inputs_table()}</div>
     <p class="cap">Trust decides which value wins when two disagree: a lab report beats a home reading, a home reading beats a number remembered in chat. The engine never resolves a contradiction silently; it shows both and says which it is using.</p>
   </section>
@@ -326,8 +529,8 @@ html = f'''<!DOCTYPE html>
   </section>
 </article>
 
-<article class="sheet" aria-label="Sheet 3: how it works">
-  <div class="pagehead"><span class="logo">Cheeku</span><span>Longevity engine · 3 / 4</span></div>
+<article class="sheet" aria-label="Sheet 5: how it works">
+  <div class="pagehead"><span class="logo">Cheeku</span><span>Longevity engine · 5 / 6</span></div>
   <section class="blk" style="border-top:0">
     <div class="k">Flow 1 · a new report</div>
     <h2>From a photo <em>to a changed plan, in under a minute.</em></h2>
@@ -353,20 +556,25 @@ html = f'''<!DOCTYPE html>
     </div>
   </section>
   <section class="blk">
+    <div class="k">Flow 3 · a food snap</div>
+    <h2>From a photo of lunch <em>to tomorrow's habit.</em></h2>
+    {food_flow}
+  </section>
+  <section class="blk">
     <div class="k">How the model reacts</div>
     <h2>Same engine output, <em>said the way a good doctor would.</em></h2>
     {react()}
     <p class="cap">The model writes; it never diagnoses, never names a disease the person does not already have on record, never tells anyone to start or stop a medicine. It can propose actions only from an allowed list: start a goal, book a test, book a doctor, open a screen.</p>
   </section>
   <section class="blk">
-    <div class="k">Flow 3 · every day</div>
+    <div class="k">Flow 4 · every day</div>
     <h2>Daily, weekly, quarterly. <em>Something is always due.</em></h2>
     {daily_flow}
   </section>
 </article>
 
-<article class="sheet" aria-label="Sheet 4: build plan">
-  <div class="pagehead"><span class="logo">Cheeku</span><span>Longevity engine · 4 / 4</span></div>
+<article class="sheet" aria-label="Sheet 6: build plan">
+  <div class="pagehead"><span class="logo">Cheeku</span><span>Longevity engine · 6 / 6</span></div>
   <section class="blk" style="border-top:0">
     <div class="k">Personal targets</div>
     <h2>The next test, <em>set by the person's own numbers and family.</em></h2>
@@ -391,19 +599,25 @@ html = f'''<!DOCTYPE html>
         <li>Prompt: how the model reads <code>LongevityState</code> and cites</li>
         <li>Model routing and costs: Haiku, Sarvam or GPT-OSS by evals</li>
         <li>Longevity eval set: 300 questions in English, Hindi and Hinglish</li>
+        <li>Plate reader: Indian dish recognition to tags, 500 labelled photos first</li>
+        <li>Label reader for strips, supplements and cosmetics, with licence class</li>
       </ul></div>
       <div class="box"><h3>Archit · app and data layer</h3><ul>
-        <li>Three new tables with RLS, migrations after 0044</li>
+        <li>Four new tables with RLS, migrations after 0044</li>
         <li>Snapshot writer: recompute areas on any new input, write on change</li>
         <li>Target scheduler: daily job that opens loops when tests fall due</li>
         <li>Server-side watch sync into <code>wearable_days</code></li>
         <li>The model request carries <code>LongevityState</code>; metering as today</li>
         <li>Under 300 ms to rebuild one person's state</li>
+        <li>Intake ledger: supplements and applied products next to prescriptions</li>
+        <li>Weekly food patterns job, written to the state</li>
       </ul></div>
       <div class="box"><h3>Athar and clinical lead</h3><ul>
         <li>Area cards, change cards and the Sunday review on Home</li>
         <li>Plan tasks and nudges, written to the content system</li>
         <li>Family history: two questions at sign-up</li>
+        <li>Snap flows for plate, taken and applied, one tap to confirm</li>
+        <li>Profile lenses: what each journey and stage sees and never sees</li>
         <li><b>Clinical lead</b> signs cut-offs, cadences and every red flag</li>
         <li>Monthly review of 50 real answers with the clinical lead</li>
       </ul></div>
@@ -421,6 +635,9 @@ html = f'''<!DOCTYPE html>
       <div class="lb">Sunday review<span>Athar</span></div><div class="gtrack"><i style="left:26%;width:16%">Mar to Apr '27</i></div>
       <div class="lb">Watch signals server-side<span>Archit</span></div><div class="gtrack"><i style="left:34%;width:18%">Q2 '27</i></div>
       <div class="lb">Family history targets<span>Suraj, Athar</span></div><div class="gtrack"><i style="left:42%;width:26%">Q2 to Q3 '27</i></div>
+      <div class="lb">Plate reader from photos<span>Suraj, Athar</span></div><div class="gtrack"><i style="left:26%;width:26%">Mar to Jun '27</i></div>
+      <div class="lb">Taken and applied ledger<span>Archit, Suraj</span></div><div class="gtrack"><i style="left:34%;width:22%">Apr to Jun '27</i></div>
+      <div class="lb">Profile lenses<span>Athar, clinical lead</span></div><div class="gtrack"><i style="left:18%;width:34%">Feb to Jun '27</i></div>
       <div class="lb">Adapted model explains<span>Suraj</span></div><div class="gtrack"><i style="left:78%;width:22%">Q1 '28</i></div>
       <div class="gscale"><span>Nov '26</span><span>Mar '27</span><span>Jul '27</span><span>Nov '27</span><span>Mar '28</span></div>
     </div></div>
@@ -430,7 +647,7 @@ html = f'''<!DOCTYPE html>
     <div class="k">How we know it works</div>
     <div class="grid3">
       <div class="box"><h3>Correct</h3><ul><li>99% of extracted values match the report</li><li>Every eval answer cites the right number and mark</li><li>Zero answers below the safety floor</li></ul></div>
-      <div class="box"><h3>Useful</h3><ul><li>60% of active users with three or more areas known by day 30</li><li>Half of due retests booked within 7 days</li><li>Areas moving from act to watch, tracked monthly</li></ul></div>
+      <div class="box"><h3>Useful</h3><ul><li>60% of active users with three or more areas known by day 30</li><li>Half of due retests booked within 7 days</li><li>Areas moving from act to watch, tracked monthly</li><li>3 or more meals snapped a week by 30% of actives</li><li>1 in 10 act suggestions booked</li></ul></div>
       <div class="box"><h3>Fast and cheap</h3><ul><li>State rebuilt in under 300 ms</li><li>Answer starts in under 2 seconds</li><li>About ₹0.07 a chat, about ₹0 per embedding</li></ul></div>
     </div>
   </section>
