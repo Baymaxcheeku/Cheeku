@@ -35,6 +35,7 @@ Share each one from its Share menu with the other founders as **editors**. Viewe
 | Scheduled agents (Routines) | claude.ai Routines | Routines | `routines/README.md` |
 | Seed spend model (₹26 cr, 18 months) | https://claude.ai/artifact/1KcTgwdfJ7w7yG2ccyHdwB | Page | `spend-model/index.html` |
 | Customer acquisition plan (launch to Series A) | https://claude.ai/artifact/CqinAEWv2SY7e6LDiKmDTt | Page | `growth/` (`node data.js > data.json`, then `python3 build.py`) |
+| Longevity engine build document (Suraj, Archit) | https://claude.ai/artifact/2GSgfFJHp9mA7cUopqnmdQ | Page | `longevity/` (`python3 build.py`) |
 | Angel two-pager (seed pitch) | https://claude.ai/artifact/9Mm8Ky3xtmRe3TqmVEmhAm | Page | `pitch/angel-two-pager.html` |
 | Investment memo, 3 pages (data to action, Nov 2026) | https://claude.ai/artifact/RtKLzvZ3GZwZxYrgwRTZXZ | Page | `pitch/investment-memo.html` |
 | Financial model v2 | https://claude.ai/artifact/JP51ovW13s8yVXLBV9tTej | Page | `vision-board/engine.js`, `model/report.js` |
