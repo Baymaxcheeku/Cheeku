@@ -16,6 +16,12 @@ const B=[
  {k:'fund',eyebrow:'Strategy and Fundraise · Founders only',t1:'The story',t2:'and the numbers.',sub:'₹921 cr revenue in 2031 · 65% gross margin · EBITDA positive May 2030',img:'mascot/celebrate-still.png',chips:['Decks','Models','Raise'],dark:true},
  {k:'dr',eyebrow:'Data Room · Founders only',t1:'Ready for',t2:'diligence.',sub:'Final, investor-ready files. Shared with investors through Papermark.',img:'mascot/think-still.png',chips:['9 sections','Checklist','Q&A log'],dark:true},
 ];
+const EXTRA=[
+ {k:'comp',eyebrow:'Growth · Competition intelligence',t1:'Know every player,',t2:'win the family.',sub:'August AI, MedMitra, Counsel Health, Maatra, Lifelong and more. Screenshots, sources and where we win.',img:'mascot/idle-still.png',chips:['Landscape','Players','Sources','Images'],dark:false},
+ {k:'supply',eyebrow:'Growth · Care supply network',t1:'Every booking,',t2:'fulfilled.',sub:'Labs, doctors, medicines, fitness and new care categories, with a backup partner in each.',img:'care/medicines.png',chips:['LabStack','Fitpass','Doctor panel','Backups'],dark:false},
+ {k:'research',eyebrow:'Engineering · Model research',t1:'Measure first,',t2:'then build.',sub:'What each AI job costs, how search works in every language, and the road to our own model.',img:'mascot/think-still.png',chips:['Costs','Embeddings','Own model'],dark:false},
+];
+const ONLY=process.argv[2]==='extra';
 function html(b){
  const bg=b.dark?'radial-gradient(circle at 78% 45%, #3b2bc9 0%, #22208f 30%, #14136b 70%)':'radial-gradient(circle at 78% 45%, #d9d3ff 0%, #ece9ff 32%, #f7f6ff 68%, #fbfaff 100%)';
  const ink=b.dark?'#ffffff':'#0f1030', acc=b.dark?'#b9b3f7':'#5b4ef0', sub=b.dark?'#d9d6ff':'#3a3b57', eye=b.dark?'#b9b3f7':'#5b4ef0';
@@ -31,7 +37,7 @@ function html(b){
  .c{display:flex;gap:12px;margin-top:6px} .c span{font-size:22px;font-weight:600;padding:9px 20px;border-radius:999px;background:${chipBg};border:1.5px solid ${chipBd};color:${chipTx}}
  .ring{position:absolute;border-radius:50%;border:3px solid ${ring}}
  .dot{position:absolute;border-radius:50%;background:${acc};opacity:.55}
- .m{position:absolute;right:340px;top:50%;transform:translateY(-50%);height:${b.img.startsWith('care')?300:420}px;filter:drop-shadow(0 26px 40px rgba(42,31,107,.25))}
+ .m{position:absolute;right:340px;top:50%;transform:translateY(-50%);height:${b.img==='care/medicines.png'?380:b.img.startsWith('care')?300:420}px;filter:drop-shadow(0 26px 40px rgba(42,31,107,.25))}
  .halo{position:absolute;right:250px;top:50%;width:560px;height:560px;transform:translateY(-50%);border-radius:50%;background:${b.dark?'rgba(255,255,255,0.06)':'rgba(255,255,255,0.75)'}}
  .brand{position:absolute;right:90px;bottom:40px;font-family:IS;font-style:italic;font-size:38px;color:${acc}}
  </style></head><body>
@@ -46,5 +52,5 @@ function html(b){
  <div class="l"><p class="e">${b.eyebrow}</p><h1>${b.t1}<br><i>${b.t2}</i></h1><p class="s">${b.sub}</p><div class="c">${b.chips.map(c=>`<span>${c}</span>`).join('')}</div></div>
  </body></html>`;}
 (async()=>{const br=await chromium.launch();const p=await br.newPage({viewport:{width:W,height:H},deviceScaleFactor:1});
- for(const b of B){await p.setContent(html(b),{waitUntil:'load'});await p.waitForTimeout(200);await p.screenshot({path:path.join(__dirname,`banner-${b.k}.png`)});}
+ for(const b of (ONLY?EXTRA:B.concat(EXTRA))){await p.setContent(html(b),{waitUntil:'load'});await p.waitForTimeout(200);await p.screenshot({path:path.join(__dirname,`banner-${b.k}.png`)});}
  await br.close();})();
