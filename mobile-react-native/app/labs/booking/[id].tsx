@@ -12,7 +12,7 @@ import { Enter } from "@/components/ui/motion";
 import { Backdrop, PillButton, ScreenHeader } from "@/components/ui/screen";
 import { feel } from "@/lib/feel";
 import { fastingFor } from "@/lib/labs/logic";
-import { advanceLabDemo, BOOKINGS_KEY, postReview, useCatalog, useLabBookings } from "@/lib/labs/queries";
+import { advanceLabDemo, BOOKINGS_KEY, labTime, postReview, useCatalog, useLabBookings } from "@/lib/labs/queries";
 import { canChange, problemOf, stageAt, stagesFor } from "@/lib/partner/lab-stages";
 import { clock, istIso, labstack, LIVE } from "@/lib/partner/labstack";
 import { PartnerError } from "@/lib/partner/types";
@@ -96,7 +96,9 @@ export default function LabBooking() {
   const cancelled = status === "CANCELED" || b.status === "cancelled";
   const reportReady = (status === "REPORT_DELIVERED" || status === "PARTIAL_DELIVERED") && Boolean(b.resultDocumentId ?? o?.resultDocumentId);
   const resultId = b.resultDocumentId ?? o?.resultDocumentId ?? null;
-  const when = o ? `${formatEventDate(o.appointment.slice(0, 10))}, ${clock(o.appointment.slice(11, 16))}` : `${formatEventDate(b.slotDate)}, ${b.slotWindow}`;
+  // The time is read in India, whatever zone the server wrote it in ("…Z" from the database).
+  const istDay = o ? new Date(o.appointment).toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" }) : "";
+  const when = o ? `${formatEventDate(istDay)}, ${labTime(o.appointment)}` : `${formatEventDate(b.slotDate)}, ${b.slotWindow}`;
   const fasting = catalog.data ? fastingFor(catalog.data.tests, b.tests) : 0;
   const refresh = () => Promise.all([qc.invalidateQueries({ queryKey: BOOKINGS_KEY }), qc.invalidateQueries({ queryKey: ["lab-order", id] }), qc.invalidateQueries({ queryKey: ["notifications"] })]);
   const first = member?.isPrimary ? "you" : (member?.name.split(" ")[0] ?? "them");

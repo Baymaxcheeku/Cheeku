@@ -1,4 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { labTime } from "@/lib/labs/queries";
 import { useEffect, useMemo } from "react";
 
 import { doctorById } from "@/lib/booking/catalog";
@@ -52,7 +53,7 @@ function docsFrom(ctx: MemoryContext): DocIn[] {
 
 async function readBookings(profileId: string): Promise<{ labs: LabIn[]; classes: ClassIn[] }> {
   const [labs, classes] = await Promise.all([
-    supabase.from("lab_bookings").select("id, tests, slot_date, slot_window, status, created_at, result_document_id").eq("profile_id", profileId).order("created_at", { ascending: false }).limit(6),
+    supabase.from("lab_bookings").select("id, tests, slot_date, slot_window, appointment_at, status, created_at, result_document_id").eq("profile_id", profileId).order("created_at", { ascending: false }).limit(6),
     supabase.from("fitness_bookings").select("id, session_title, studio_name, starts_at, status, created_at").eq("profile_id", profileId).order("starts_at", { ascending: false }).limit(6),
   ]);
   const ids = [...new Set((labs.data ?? []).flatMap((l) => (Array.isArray(l.tests) ? (l.tests as string[]) : [])))];
@@ -66,7 +67,7 @@ async function readBookings(profileId: string): Promise<{ labs: LabIn[]; classes
       id: String(l.id),
       tests: (Array.isArray(l.tests) ? (l.tests as string[]) : []).map((t) => names.get(t) ?? t),
       slotDate: String(l.slot_date),
-      slotWindow: String(l.slot_window),
+      slotWindow: l.slot_window ? String(l.slot_window) : labTime(str(l.appointment_at)),
       status: String(l.status),
       createdAt: String(l.created_at),
       resultDocumentId: str(l.result_document_id),

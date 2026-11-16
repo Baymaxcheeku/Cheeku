@@ -48,11 +48,12 @@ export function usePushSetup() {
     const tests = catalog.data.tests;
     void syncLabReminders(
       labs.data.map((b) => {
+        // Partner bookings carry the exact time; preview ones a window like "8-10 am".
         const [y, m, d] = b.slotDate.split("-").map(Number);
-        const hour = Number(b.slotWindow.split("-")[0]) + (b.slotWindow.startsWith("4") ? 12 : 0);
+        const hour = Number((b.slotWindow ?? "").split("-")[0]) + ((b.slotWindow ?? "").startsWith("4") ? 12 : 0);
         return {
           id: b.id,
-          start: new Date(y ?? 0, (m ?? 1) - 1, d ?? 1, hour),
+          start: b.appointmentAt ? new Date(b.appointmentAt) : new Date(y ?? 0, (m ?? 1) - 1, d ?? 1, Number.isFinite(hour) ? hour : 8),
           fastingHours: fastingFor(tests, b.tests),
           open: b.status === "booked" || b.status === "assigned",
         };

@@ -84,7 +84,10 @@ export type LabBooking = {
   collectionFee: number;
   total: number;
   slotDate: string;
-  slotWindow: SlotWindow;
+  /** "8-10 am" for preview bookings; live partner bookings have an exact time instead, shown as "11:00 am". */
+  slotWindow: string;
+  /** Live partner bookings: the exact collection time (ISO). */
+  appointmentAt: string | null;
   address: string;
   status: BookingStatus;
   statusAt: string;
@@ -104,7 +107,8 @@ type BookingRow = {
   collection_fee: number;
   total: number;
   slot_date: string;
-  slot_window: SlotWindow;
+  slot_window: SlotWindow | null;
+  appointment_at?: string | null;
   address: string;
   status: BookingStatus;
   status_at: string;
@@ -113,6 +117,14 @@ type BookingRow = {
   lab_name?: string | null;
   lab_logo?: string | null;
 };
+
+/** A partner booking's exact time in India as "11:00 am"; "" when unknown. */
+export function labTime(iso: string | null): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  return d.toLocaleString("en-IN", { hour: "numeric", minute: "2-digit", hour12: true, timeZone: "Asia/Kolkata" }).toLowerCase();
+}
 
 function toBooking(r: BookingRow): LabBooking {
   return {
@@ -124,7 +136,8 @@ function toBooking(r: BookingRow): LabBooking {
     collectionFee: r.collection_fee,
     total: r.total,
     slotDate: r.slot_date,
-    slotWindow: r.slot_window,
+    slotWindow: r.slot_window ?? labTime(r.appointment_at ?? null),
+    appointmentAt: r.appointment_at ?? null,
     address: r.address,
     status: r.status,
     statusAt: r.status_at,
