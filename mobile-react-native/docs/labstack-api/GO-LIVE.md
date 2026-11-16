@@ -44,14 +44,16 @@ Only if LabStack says its lab webhook header is not called `key`: add `LABSTACK_
 
 With the CLI instead: `supabase functions deploy labstack` and `supabase functions deploy labstack-webhook --no-verify-jwt`.
 
-## 4. Sync the lab catalogue (1 minute)
+## 4. Sync the lab catalogue (2 minutes)
 
-1. **Edge Functions**, open `labstack`, then **Test** (top right).
-2. Role: **service_role**. Method POST. Body:
+1. Make up a long password (20+ letters and numbers; it's only for you). In **Edge Functions**, **Secrets**, add it as `LABSTACK_ADMIN_TOKEN`.
+2. **Edge Functions**, open `labstack`, then **Test** (top right). Method **POST**.
+3. Request Body:
    ```
    {"op":"admin.syncCatalogue","input":{"pincode":"560038"}}
    ```
-3. Press **Send**. The answer lists how many of our tests were linked, any it couldn't find (`notFound`), and how many packages came in. Send me the `notFound` list and I'll map those by hand.
+4. Headers: name `x-admin-token`, value: the same password.
+5. **Send Request**. The answer lists how many of our tests were linked, any it couldn't find (`notFound`), and how many packages came in. Send me the `notFound` list and I'll map those by hand.
 
 ## 5. Give LabStack our webhook addresses
 

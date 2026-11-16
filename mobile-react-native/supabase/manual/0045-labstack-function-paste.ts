@@ -485,7 +485,7 @@ const ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
 
 const CORS = {
   "access-control-allow-origin": "*",
-  "access-control-allow-headers": "authorization, x-client-info, apikey, content-type",
+  "access-control-allow-headers": "authorization, x-client-info, apikey, content-type, x-admin-token",
   "access-control-allow-methods": "POST, OPTIONS",
 };
 
@@ -1077,6 +1077,31 @@ const upsert = (table: string, row: unknown) =>
     if (!r.ok) throw new Fail(`Couldn't save ${table}.`);
   });
 
+// ---------------------------------------------------------------- owner --
+
+/** Same length and every byte equal, without stopping early (no timing hints). */
+function same(a: string, b: string): boolean {
+  const x = new TextEncoder().encode(a);
+  const y = new TextEncoder().encode(b);
+  let diff = x.length ^ y.length;
+  for (let i = 0; i < Math.max(x.length, y.length); i++) diff |= (x[i] ?? 0) ^ (y[i] ?? 0);
+  return diff === 0;
+}
+
+/**
+ * Owner-only upkeep (the catalogue sync). Either:
+ *  - header x-admin-token equal to the LABSTACK_ADMIN_TOKEN secret (a long
+ *    password the owner makes up; used from the dashboard's Test panel), or
+ *  - the service role key itself (scripts, the CLI).
+ * App users never have either.
+ */
+const ADMIN_TOKEN = Deno.env.get("LABSTACK_ADMIN_TOKEN") ?? "";
+function isOwner(req: Request, authorization: string): boolean {
+  const token = req.headers.get("x-admin-token") ?? "";
+  if (ADMIN_TOKEN.length >= 16 && token && same(token, ADMIN_TOKEN)) return true;
+  return Boolean(SERVICE_KEY) && same(authorization, `Bearer ${SERVICE_KEY}`);
+}
+
 // ----------------------------------------------------------------- serve --
 
 type Op = (ctx: Ctx, input: In) => Promise<unknown>;
@@ -1094,7 +1119,9 @@ Deno.serve(async (req) => {
 
   // Owner-only upkeep, with the service role key (never in the app).
   if (body?.op === "admin.syncCatalogue") {
-    if (!SERVICE_KEY || authorization !== `Bearer ${SERVICE_KEY}`) return json({ error: "Not allowed.", code: "unauthorized" }, 403);
+    if (!isOwner(req, authorization)) {
+      return json({ error: "Not allowed. Add the header x-admin-token with the value of your LABSTACK_ADMIN_TOKEN secret (GO-LIVE.md, step 4).", code: "unauthorized" }, 403);
+    }
     try {
       return json(await syncCatalogue((body.input ?? {}) as In));
     } catch (e) {
