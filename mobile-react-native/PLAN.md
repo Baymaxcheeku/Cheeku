@@ -471,11 +471,23 @@ haptics has to be seen on a simulator or a device before it counts as done.
 - **Meal photos are not read by a model yet.** The plate is read from the
   taps (`src/lib/home/meals.ts`); `daily_logs.analysis` is reserved for the
   server's reading of the photo and the app cannot write it.
-- **Chat model: Archit to connect.** Prompt, schema and renderer are in
-  `supabase/functions/cheeku-chat/prompt.ts`, guide in
-  `docs/master/CHEEKU_CHAT_PROMPT.md`. Until `EXPO_PUBLIC_CHAT_MODEL=edge` and
-  the function secrets are set, the stand-in (with the sparrow's scripted
-  turns) answers.
+- **Chat model: Gemini is wired in, not yet deployed** (2026-11-16).
+  `cheeku-chat` answers with Gemini when the `GEMINI_API_KEY` secret is set
+  (`gemini-3.5-flash-lite`, then `gemini-3.5-flash`; `GEMINI_MODEL` and
+  `GEMINI_FALLBACK_MODEL` override), until `CHEEKU_MODEL_URL` points at the
+  fine-tuned model, which then wins. In order: 0035 applied (else 503 and the
+  stand-in answers), deploy `cheeku-chat` (CLI, or paste
+  `supabase/manual/cheeku-chat-function-paste.ts`), set the secret, then
+  `EXPO_PUBLIC_CHAT_MODEL=edge` in the app's env (local and Vercel). **The key
+  must be on a billed Google Cloud project**: on Gemini's free tier Google may
+  use prompts to improve its products, and every prompt is a health record.
+  flash-lite sometimes keeps the bird jokes when the floor is monitor or
+  above, against the prompt; watch it in review.
+  **Medicine questions need a clinician's read** (2026-11-16): the prompt now
+  lets Cheeku name the over-the-counter TYPE for an otherwise healthy adult
+  (dextromethorphan for a dry cough, guaifenesin for a chesty one), never a
+  brand or dose, and nothing for under 4s, pregnancy, over 70 or a long-term
+  condition (`prompt.ts`, "When they ask what to take").
 - **Wearables need a native build and one SQL step.** The module is in
   (`src/modules/wearables`, see its README): Apple Health and Health Connect
   run only in an EAS development or store build, not Expo Go. Migration 0044

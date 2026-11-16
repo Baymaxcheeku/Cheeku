@@ -4440,3 +4440,79 @@ like "Annual health check-up" no longer starts the big-picture answer.
 - **Not run**: the Edge Functions against the real sandbox (needs the keys,
   tonight). Payment model still open (reminder set for 7:30 pm).
 
+
+## Chat model: Gemini behind cheeku-chat · 2026-11-16
+
+- **Why Gemini now**: the fine-tuned model has no URL yet, and the chat has run
+  on the stand-in since the contract was written. The function already did the
+  hard parts (JWT, metering through `claim_model_call`, reply shaping), and
+  `prompt.ts` already held the system prompt, the reply schema and the
+  renderer, so Gemini is a second branch in `index.ts`, not a new function.
+  The app needs no change: it still sends one ModelRequest to `cheeku-chat`.
+- **Order of preference, by secrets only**: `CHEEKU_MODEL_URL` (fine-tuned)
+  wins, else `GEMINI_API_KEY`, else 503 and the stand-in. Switching to the
+  fine-tuned model later is a secrets change, not a release.
+- **Why on the server and not the phone**: an `EXPO_PUBLIC_*` value is built
+  into the app bundle, so a Gemini key in the app is a key anyone can lift and
+  spend, and a direct call would skip the meter (rule: every model call is
+  claimed first). The key lives only in Edge Function secrets.
+- **Models**: `gemini-3.5-flash-lite` first (about 2.2 to 2.7s per turn through
+  the function with a realistic digest), `gemini-3.5-flash` behind it (about
+  2 to 3s with `thinkingLevel: "low"`, 5s+ without). `gemini-2.5-*` answers
+  404 for new keys ("no longer available to new users"), which is why the
+  fallback also moves on from a 404.
+- **When it falls back**: timeout, 404, 408, 429, 5xx, a block, a cut-off or a
+  reply that is not the JSON object we asked for. Not on 400/401/403: a bad key
+  fails the same way twice and only doubles the wait. The first model gets two
+  thirds of the 24s budget.
+- **Structured output**: Gemini accepts `REPLY_SCHEMA` as written (`oneOf`,
+  `const`, nullable `tier`) through `responseJsonSchema`, checked against both
+  models before relying on it. The app still re-reads every field.
+- **Nothing is logged** but a model name and an HTTP status. The key goes in
+  the `x-goog-api-key` header, never the URL.
+- **Data**: the digest leaves for Google. On the free tier Google may use
+  prompts to improve its products, so the key must be on a billed project
+  before any real person's chat goes through it; this belongs in the privacy
+  policy's processor list when a lawyer next reads it.
+- **Seen in testing**: flash-lite sometimes keeps the sparrow's jokes ("hopped
+  through your numbers") when the floor is monitor, which the prompt forbids.
+  Tier never went below the floor in our runs, and the app enforces that anyway.
+- **Checked**: 665 tests (15 new in `src/lib/memory/gemini-edge.test.ts`),
+  typecheck; `index.ts` and the paste file run end to end under Node with a
+  Deno shim against the real Gemini API (meter stubbed): grounded reply with
+  the right citation, fallback from a retired model, bad key fails fast in
+  180ms, meter refusal never reaches the model, signed-out 401, bad body 400.
+- **Not run**: the deployed function on Supabase (this session's CLI account
+  has no access to the project), the meter against the real database, and the
+  chat on a phone.
+
+## Chat: medicine questions answered, not refused · 2026-11-16
+
+- **What people saw**: "which cough syrup" got "I cannot recommend medicines,
+  check with your doctor" every time, opening with an unrelated blood test.
+  Gemini was answering (200 in under 2s); the prompt only said "never
+  prescribe", so it refused anything near a medicine.
+- **A real bug underneath**: `renderRequest` sent each symptom guide's
+  mechanism but dropped `homeCare`, `watchFor` and `askForReadings`, so the
+  model had no safe advice to give instead. All three are rendered now.
+- **The rule we chose**: lead with home care; for an otherwise healthy adult
+  name the usual over-the-counter type and what it does, pharmacist picks,
+  follow the pack; never a brand, dose, antibiotic or codeine; nothing over the
+  counter for under 4s (India labels cold and cough combinations not for under
+  4), pregnancy, over 70 or a long-term condition; always the "see a doctor
+  if" signs. Needs a clinician's read (PLAN Open).
+- **Also in the prompt**: no listing of records at the top, dates as people say
+  them, no record ids in the text, no bird jokes on symptoms or medicines.
+- **The other reason answers repeated**: a free family gets 25 model calls a
+  day (0035: free_daily 20 + free_model_extra 5). Past that the meter says
+  "daily" and the app quietly uses the stand-in, which repeats itself. Probe
+  runs spend the same allowance.
+- **`npm run chat:probe`** (scripts/chat-probe): runs planTurn and the app's
+  own chatModel() signed in as a real account against the live function and
+  says who answered each question: GEMINI, STAND-IN (with the HTTP status) or
+  RULES. Login from CHAT_PROBE_EMAIL / CHAT_PROBE_PASSWORD in .env.local;
+  CHAT_PROBE_Q="a|b" for your own questions, CHAT_PROBE_FULL=1 for the whole
+  reply, CHAT_PROBE_OUT=file to keep the report. Saves no messages.
+- **Checked live** after deploying: adult dry cough (suppressant type,
+  pharmacist, home care, doctor signs), 3-year-old (no syrup, home care,
+  honey over 1, breathing signs), "can I stop my metformin" (still refuses).
