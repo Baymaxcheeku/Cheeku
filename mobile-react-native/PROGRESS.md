@@ -4440,3 +4440,48 @@ like "Annual health check-up" no longer starts the big-picture answer.
 - **Not run**: the Edge Functions against the real sandbox (needs the keys,
   tonight). Payment model still open (reminder set for 7:30 pm).
 
+
+## Chat model: Gemini behind cheeku-chat · 2026-11-16
+
+- **Why Gemini now**: the fine-tuned model has no URL yet, and the chat has run
+  on the stand-in since the contract was written. The function already did the
+  hard parts (JWT, metering through `claim_model_call`, reply shaping), and
+  `prompt.ts` already held the system prompt, the reply schema and the
+  renderer, so Gemini is a second branch in `index.ts`, not a new function.
+  The app needs no change: it still sends one ModelRequest to `cheeku-chat`.
+- **Order of preference, by secrets only**: `CHEEKU_MODEL_URL` (fine-tuned)
+  wins, else `GEMINI_API_KEY`, else 503 and the stand-in. Switching to the
+  fine-tuned model later is a secrets change, not a release.
+- **Why on the server and not the phone**: an `EXPO_PUBLIC_*` value is built
+  into the app bundle, so a Gemini key in the app is a key anyone can lift and
+  spend, and a direct call would skip the meter (rule: every model call is
+  claimed first). The key lives only in Edge Function secrets.
+- **Models**: `gemini-3.5-flash-lite` first (about 2.2 to 2.7s per turn through
+  the function with a realistic digest), `gemini-3.5-flash` behind it (about
+  2 to 3s with `thinkingLevel: "low"`, 5s+ without). `gemini-2.5-*` answers
+  404 for new keys ("no longer available to new users"), which is why the
+  fallback also moves on from a 404.
+- **When it falls back**: timeout, 404, 408, 429, 5xx, a block, a cut-off or a
+  reply that is not the JSON object we asked for. Not on 400/401/403: a bad key
+  fails the same way twice and only doubles the wait. The first model gets two
+  thirds of the 24s budget.
+- **Structured output**: Gemini accepts `REPLY_SCHEMA` as written (`oneOf`,
+  `const`, nullable `tier`) through `responseJsonSchema`, checked against both
+  models before relying on it. The app still re-reads every field.
+- **Nothing is logged** but a model name and an HTTP status. The key goes in
+  the `x-goog-api-key` header, never the URL.
+- **Data**: the digest leaves for Google. On the free tier Google may use
+  prompts to improve its products, so the key must be on a billed project
+  before any real person's chat goes through it; this belongs in the privacy
+  policy's processor list when a lawyer next reads it.
+- **Seen in testing**: flash-lite sometimes keeps the sparrow's jokes ("hopped
+  through your numbers") when the floor is monitor, which the prompt forbids.
+  Tier never went below the floor in our runs, and the app enforces that anyway.
+- **Checked**: 665 tests (15 new in `src/lib/memory/gemini-edge.test.ts`),
+  typecheck; `index.ts` and the paste file run end to end under Node with a
+  Deno shim against the real Gemini API (meter stubbed): grounded reply with
+  the right citation, fallback from a retired model, bad key fails fast in
+  180ms, meter refusal never reaches the model, signed-out 401, bad body 400.
+- **Not run**: the deployed function on Supabase (this session's CLI account
+  has no access to the project), the meter against the real database, and the
+  chat on a phone.
