@@ -301,6 +301,9 @@ export function sparrowTurn(req: ModelRequest): ModelReply | null {
   const w = req.memory.world;
   if (!w || !calm(req) || req.memory.symptoms.length) return null;
   const q = req.question;
+  // A question asked about one record ("About Annual health check-up: ...") is for
+  // the record answers; "health check" in a title must not start the big-picture turn.
+  if (/^About [^:]{1,120}: /.test(q)) return null;
   if (w.today.justLogged.length && !req.memory.logged.length) return loggedActivity(req, w);
   if (w.family) return familyTurn(req, w);
   if (WEEK.test(q)) return week(req, w);

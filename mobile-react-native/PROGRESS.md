@@ -4355,3 +4355,25 @@ spoke a different language from it.
 - No star or sparkle icons anywhere: ratings read "4.3 out of 5", the review
   sheet rates with 1 to 5 number buttons, Daily nudges use a sunrise, dance
   classes sound lines, sample watch data an eye.
+
+## Reports and bookings speak in chat · 2026-11-16
+
+Cheeku now tells the person what happened, in their chat, once each:
+
+- **A report filed** (lab report, scan, discharge): what moved since last time
+  and what is outside the printed range. "What does it mean?" asks about it,
+  scoped to that record; "Open it" opens the record.
+- **A prescription filed**: how many medicines, with "Check the medicines"
+  (the prescription scorecard).
+- **A home test**: booked, then the day before ("Tomorrow, 6-8 am: the
+  collector comes for HbA1c and Lipid profile"); when the result is filed,
+  the report note says "Your HbA1c result is back".
+- **A class**: a reminder on the day, a check-in after.
+- **A doctor visit**: "Prepare for it" before, "Add the prescription" after.
+
+Two at a time, newest report first, then what is about to happen. The daily
+note waits while there is news. Shown notes are remembered on the phone, per
+person. `src/lib/chat/notes.ts` (pure, tested), `src/lib/chat/use-notes.ts`.
+
+The sparrow now steps aside for a question scoped to one record, so a title
+like "Annual health check-up" no longer starts the big-picture answer.

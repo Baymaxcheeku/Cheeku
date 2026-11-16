@@ -81,6 +81,12 @@ describe("the sparrow, per area", () => {
   });
 });
 
+describe("questions about one record", () => {
+  it("are left to the record answers, even when the title sounds like a health check", () => {
+    expect(sparrowTurn(ask("About Annual health check-up (11 Oct 2026): What does this report say?", SUGAR_WATCH))).toBeNull();
+  });
+});
+
 describe("dates in bookings", () => {
   it("read short and the same everywhere", () => {
     expect(dayLabel("2026-11-13")).toBe("Fri 13 Nov");

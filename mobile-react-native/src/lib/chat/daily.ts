@@ -17,7 +17,8 @@ export function areasView(areas: Area[]): AreasView {
  * have to guess. Pure: the screen passes in the areas and the clock.
  */
 
-export type NoteButton = { label: string; send?: string; route?: string };
+/** `record`: ask about that record (the chat scopes the question to it). */
+export type NoteButton = { label: string; send?: string; route?: string; record?: string };
 export type DailyNote = { key: string; greeting: string; line: string; primary: NoteButton; secondary: NoteButton | null };
 
 export function partOfDay(hour: number): "morning" | "afternoon" | "evening" {

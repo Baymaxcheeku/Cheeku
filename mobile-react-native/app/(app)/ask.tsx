@@ -30,6 +30,7 @@ import { AssistantTurn, UserBubble } from "@/components/chat/turn";
 import { MascotBust, MascotFigure } from "@/components/illustrations/sprout";
 import { DailyCard, ShortcutRow } from "@/components/chat/front-door";
 import { dailyNote, shortcuts, type NoteButton, type Shortcut } from "@/lib/chat/daily";
+import { useChatNotes } from "@/lib/chat/use-notes";
 import { useAreas } from "@/lib/longevity/use-areas";
 import { TypingDots } from "@/components/onboarding/motion";
 import { EmergencyEscalation } from "@/components/safety/emergency-escalation";
@@ -138,6 +139,7 @@ export default function Ask() {
   const [logOpen, setLogOpen] = useState(false);
   const [hiddenNote, setHiddenNote] = useState<string | null>(null);
   const areas = useAreas(memberId);
+  const told = useChatNotes(memberId, ctx, member?.name.split(/\s+/)[0] ?? "them");
   const input = useRef<TextInputInstance>(null);
   const scroller = useRef<ScrollViewInstance>(null);
   const stickToEnd = useRef(true);
@@ -178,7 +180,8 @@ export default function Ask() {
     });
   }
 
-  async function send(raw: string) {
+  /** `aboutOverride`: scope this one question to a record, set in the same tap (a note's button). */
+  async function send(raw: string, aboutOverride?: { id: string; title: string; date: string | null } | null) {
     const text = raw.trim();
     if (!text || pendingText || !memberId) return;
 
@@ -238,7 +241,7 @@ export default function Ask() {
     setDraft("");
     setPendingText(text);
     try {
-      const res = await sendTurn({ text, profileId, thread, bundle, about: profileId === memberId ? about : null, isPrimary: Boolean(everyone.find((p) => p.id === profileId)?.isPrimary), qc });
+      const res = await sendTurn({ text, profileId, thread, bundle, about: profileId === memberId ? (aboutOverride !== undefined ? aboutOverride : about) : null, isPrimary: Boolean(everyone.find((p) => p.id === profileId)?.isPrimary), qc });
       if (!res.ok) {
         if (res.quota) {
           setPaywallFor(text);
@@ -354,13 +357,33 @@ export default function Ask() {
   const today = todayIso();
   const talkedToday = messages.some((m) => m.role === "user" && m.createdAt.slice(0, 10) === today);
   const note = memberId && !talkedToday && !pendingText ? dailyNote({ name, self: isSelf, areas: areas.data, now: new Date() }) : null;
-  const showNote = note && hiddenNote !== `${memberId}:${today}:${note.key}` ? note : null;
+  const showNoteRaw = note && hiddenNote !== `${memberId}:${today}:${note.key}` ? note : null;
   const chips = shortcuts(isSelf && everyoneHere.length > 1);
 
   function onNoteButton(b: NoteButton) {
-    if (b.send) void send(b.send);
+    if (b.send && b.record) {
+      const d = memory.data?.documents.find((x) => x.id === b.record);
+      const scoped = d ? { id: b.record, title: String(d.title ?? "this record"), date: (d.event_date as string | null) ?? null } : null;
+      setAboutId(b.record);
+      void send(b.send, scoped);
+    } else if (b.send) void send(b.send);
     else if (b.route) router.push(b.route as never);
   }
+  // What happened since they last looked: new reports, bookings, visits. Two at a time.
+  const shownNotes = pendingText ? [] : told.notes.slice(0, 2);
+  // News first: the daily note waits while there is something new to say.
+  const showNote = shownNotes.length ? null : showNoteRaw;
+  const noteCards = shownNotes.map((n) => (
+    <DailyCard
+      key={n.key}
+      note={{ key: n.key, greeting: n.title, line: n.line, primary: n.primary, secondary: n.secondary }}
+      onButton={(b) => {
+        told.seen(n.key);
+        onNoteButton(b);
+      }}
+      onClose={() => told.seen(n.key)}
+    />
+  ));
   function onShortcut(sc: Shortcut) {
     if (sc.key === "log") {
       setLogOpen(true);
@@ -438,6 +461,8 @@ export default function Ask() {
                   I keep {name}&apos;s health memory: every report, every reading you tell me, everything we talk about. Tell me what&apos;s going on and I&apos;ll read it against {name}&apos;s history.
                 </Text>
               </View>
+
+              {noteCards.length ? <View className="mt-5 w-full gap-3">{noteCards}</View> : null}
 
               {showNote ? (
                 <View className="mt-5 w-full">
@@ -547,6 +572,8 @@ export default function Ask() {
                   />
                 );
               })}
+
+              {noteCards}
 
               {showNote ? <DailyCard note={showNote} onButton={onNoteButton} onClose={() => setHiddenNote(`${memberId}:${today}:${showNote.key}`)} /> : null}
 
