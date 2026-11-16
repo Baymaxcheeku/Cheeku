@@ -138,6 +138,8 @@ export default function Ask() {
   const [aboutId, setAboutId] = useState<string | null>(record ?? null);
   const [logOpen, setLogOpen] = useState(false);
   const [hiddenNote, setHiddenNote] = useState<string | null>(null);
+  // Once they start talking, Cheeku's notes stay quiet for the rest of this visit.
+  const [talking, setTalking] = useState(false);
   const areas = useAreas(memberId);
   const told = useChatNotes(memberId, ctx, member?.name.split(/\s+/)[0] ?? "them");
   const input = useRef<TextInputInstance>(null);
@@ -183,6 +185,9 @@ export default function Ask() {
   /** `aboutOverride`: scope this one question to a record, set in the same tap (a note's button). */
   async function send(raw: string, aboutOverride?: { id: string; title: string; date: string | null } | null) {
     const text = raw.trim();
+    // Typing past Cheeku's notes counts as having read them: they don't follow every answer down.
+    if (text && shownNotes.length) told.seen(...shownNotes.map((n) => n.key));
+    if (text) setTalking(true);
     if (!text || pendingText || !memberId) return;
 
     // THE GATE. Before the network, before the model, before anything.
@@ -324,7 +329,12 @@ export default function Ask() {
     const key = q ? `${q}|${qAt ?? ""}` : null;
     if (!key || sentInitial.current === key || !memory.data || !thread.data) return;
     sentInitial.current = key;
-    void send(q!);
+    // Carried in with a record (a lab result): scope this question to it, and keep it scoped.
+    const d = record ? memory.data.documents.find((x) => x.id === record) : null;
+    if (d && record) {
+      setAboutId(record);
+      void send(q!, { id: record, title: String(d.title ?? "this record"), date: (d.event_date as string | null) ?? null });
+    } else void send(q!);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [q, qAt, memory.data, thread.data]);
 
@@ -370,7 +380,7 @@ export default function Ask() {
     else if (b.route) router.push(b.route as never);
   }
   // What happened since they last looked: new reports, bookings, visits. Two at a time.
-  const shownNotes = pendingText ? [] : told.notes.slice(0, 2);
+  const shownNotes = pendingText || talking ? [] : told.notes.slice(0, 2);
   // News first: the daily note waits while there is something new to say.
   const showNote = shownNotes.length ? null : showNoteRaw;
   const noteCards = shownNotes.map((n) => (

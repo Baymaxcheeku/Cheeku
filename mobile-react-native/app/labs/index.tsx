@@ -11,6 +11,7 @@ import { LocationChip } from "@/components/location/location-chip";
 import { Tap } from "@/components/ui/tap";
 import { Sheet } from "@/components/ui/sheet";
 import { CartBar, rupees, SampleNote, TestArt } from "@/components/labs/parts";
+import { AskRow } from "@/components/home/today";
 import { Glass, GlassCircle, Gradient, glass, glassShadow } from "@/components/ui/glass";
 import { useReducedMotion } from "@/components/ui/motion";
 import { Backdrop, ScreenHeader } from "@/components/ui/screen";
@@ -142,6 +143,11 @@ export default function Labs() {
               </View>
               {cart.prescriptionId ? <Check size={20} color={hue.orange.fg} /> : <ChevronRight size={18} color={ink[500]} />}
             </Tap>
+
+            {/* Not sure what to book: Cheeku answers from what's due and the areas to watch. */}
+            <View style={{ marginTop: 12 }}>
+              <AskRow title="Not sure which tests?" sub={`Cheeku checks what's due for ${member?.isPrimary === false ? first : "you"}`} q="Which tests should I do this year?" />
+            </View>
 
             {/* Suggested. */}
             {suggested.length ? (

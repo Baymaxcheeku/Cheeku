@@ -598,17 +598,27 @@ export function PlanPreview({ plan, skip, onOpen }: { plan: Plan; skip: string |
 }
 
 /** A quiet "ask" row for Today, where the big ask bar would compete with the step. */
-export function AskRow() {
+/**
+ * The quiet "ask Cheeku" row. Home uses the defaults; other screens (Lab tests)
+ * pass their own words and the question it asks, so the chat opens already
+ * talking about what the person was looking at.
+ */
+export function AskRow({ title = "Ask about food, a symptom or a reading", sub = "Answered against your own numbers", q }: { title?: string; sub?: string; q?: string } = {}) {
   const router = useRouter();
   return (
-    <Tap accessibilityRole="button" accessibilityLabel="Ask Cheeku" onPress={() => router.push("/ask")} scale={0.98}>
+    <Tap
+      accessibilityRole="button"
+      accessibilityLabel={`${title}. Ask Cheeku`}
+      onPress={() => (q ? router.push({ pathname: "/ask", params: { q, t: String(Date.now()) } }) : router.push("/ask"))}
+      scale={0.98}
+    >
       <Glass strong className="flex-row items-center gap-3 rounded-xl p-3.5">
         <View className="h-10 w-10 items-center justify-center rounded-pill" style={{ backgroundColor: ink[900] }}>
           <MessageCircle size={18} color="#fff" strokeWidth={1.9} />
         </View>
         <View className="min-w-0 flex-1">
-          <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>Ask about food, a symptom or a reading</Text>
-          <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 1 }}>Answered against your own numbers</Text>
+          <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{title}</Text>
+          <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 1 }}>{sub}</Text>
         </View>
         <ChevronRight size={16} color={ink[300]} />
       </Glass>

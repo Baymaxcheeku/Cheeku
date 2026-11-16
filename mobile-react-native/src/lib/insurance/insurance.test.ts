@@ -148,6 +148,21 @@ describe("chat", () => {
     expect(coverReply("is a knee replacement covered?", "Nisha", [p], NOW).paragraphs[0]).toContain("don't say");
     expect(coverReply("tell me about my policy", "Nisha", [p], NOW).paragraphs[0]).toContain("Active till");
   });
+  it("answers a hospital stay from the saved terms, not with silence", () => {
+    expect(coverTopic("Does my insurance cover hospital stays?")).toBe("hospital");
+    expect(coverTopic("is it covered if I'm admitted?")).toBe("hospital");
+    expect(coverTopic("are bills after hospital covered?")).toBe("pre_post");
+    const r = coverReply("Does my insurance cover hospital stays?", "Nisha", [policy()], NOW).paragraphs;
+    expect(r[0]).toMatch(/^Yes\. A stay in hospital is what this policy is for/);
+    expect(r[1]).toMatch(/^What shapes the bill: /);
+    expect(r.join(" ")).not.toContain("don't say");
+  });
+  it("reads a named condition as the pre-existing wait", () => {
+    expect(coverTopic("is my diabetes covered?")).toBe("condition");
+    expect(coverTopic("is my migraine covered?", ["Migraine"])).toBe("condition");
+    const r = coverReply("is my diabetes covered?", "Nisha", [policy()], NOW).paragraphs;
+    expect(r[0]).toContain("pre-existing condition");
+  });
   it("points at adding a policy when there is none", () => {
     const r = coverReply("am I covered for surgery?", "Imaad", [], NOW);
     expect(r.paragraphs[0]).toContain("Imaad");

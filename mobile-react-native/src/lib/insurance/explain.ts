@@ -23,6 +23,8 @@ export type CoverTopic =
   | "amount"
   | "exclusions"
   | BenefitKey
+  | "hospital"
+  | "condition"
   | "general";
 
 const TOPIC_WORDS: [CoverTopic, RegExp][] = [
@@ -43,10 +45,17 @@ export function isCoverQuestion(text: string): boolean {
   return /\b(is|are|am|will|would|does)\b[^?.!]{0,50}\b(covered|cover it)\b/i.test(text) || /\bcoverage\b/i.test(text);
 }
 
-export function coverTopic(text: string): CoverTopic {
+/** A stay in hospital: the core of every health policy. Checked after the benefits, so "after hospital" stays pre/post. */
+const HOSPITAL = /hospital (stay|stays|bill|bills|admission)|hospitali[sz](ed|ation)|\badmitted\b|\badmission\b|in-?patient|\bicu\b|stay(ing)? in (the )?hospital/i;
+/** Long-term conditions people ask about by name ("is my diabetes covered?"). */
+const CONDITION_WORDS = /diabet|sugar|\bbp\b|blood pressure|hypertens|thyroid|asthma|heart|cholesterol|kidney|arthritis|pcos|pcod/i;
+
+export function coverTopic(text: string, conditions: readonly string[] = []): CoverTopic {
   for (const [topic, re] of TOPIC_WORDS) if (re.test(text)) return topic;
   const lower = text.toLowerCase();
   for (const b of BENEFITS) if (b.words.some((w) => lower.includes(w))) return b.key;
+  if (HOSPITAL.test(text)) return "hospital";
+  if (asksIfCovered(text) && (CONDITION_WORDS.test(text) || conditions.some((c) => c.length >= 3 && lower.includes(c.toLowerCase())))) return "condition";
   return "general";
 }
 
@@ -138,6 +147,16 @@ function topicAnswer(p: Policy, topic: CoverTopic, now: Date): string[] {
       ];
     case "renewal":
       return [statusLine(p, now)];
+    case "hospital":
+      return hospitalAnswer(p, now);
+    case "condition": {
+      const ped = p.waiting.find((w) => w.label === PRE_EXISTING);
+      return [
+        "If it was there before the policy was bought, the insurer treats it as a pre-existing condition: hospital care for it is covered only once that waiting period is over, and only if it was declared when buying.",
+        ped ? waitingLine(ped, now) : `No pre-existing waiting period is saved for this policy. The policy schedule says how long it is; ${where(p)} can confirm.`,
+        "Treatment that doesn't need a hospital stay, like regular medicines and doctor visits, is usually outside a hospital policy unless OPD cover is included.",
+      ];
+    }
     case "amount":
       return [p.claimed > 0 ? `${rupeesShort(s.remaining)} of ${rupeesShort(p.sumInsured)} is left this policy year (${rupeesShort(p.claimed)} used).` : `${rupeesShort(p.sumInsured)} of cover this policy year. No claims are saved against it.`];
     case "exclusions":
@@ -158,13 +177,35 @@ function topicAnswer(p: Policy, topic: CoverTopic, now: Date): string[] {
   }
 }
 
+/** "Does it cover hospital stays?": yes is what the policy is for; the saved terms say what shapes the bill. */
+function hospitalAnswer(p: Policy, now: Date): string[] {
+  const s = policyState(p, now);
+  if (s.status === "expired" || s.status === "not_started") return [statusLine(p, now)];
+  const left = p.claimed > 0 ? `with ${rupeesShort(s.remaining)} of ${rupeesShort(p.sumInsured)} left this policy year` : `up to ${rupeesShort(p.sumInsured)} this policy year`;
+  const out = [
+    p.policyType === "top_up"
+      ? `Hospital stays are what a top-up pays for, once a bill crosses the deductible in its schedule, ${left}.`
+      : `Yes. A stay in hospital is what this policy is for: ${p.insurer} pays for it, ${left}.`,
+  ];
+  const terms: string[] = [];
+  terms.push(p.roomRent ? `a room-rent limit (${p.roomRent.charAt(0).toLowerCase()}${p.roomRent.slice(1)})` : "no room-rent limit saved");
+  if (p.coPay) terms.push(`a co-pay of ${p.coPay}`);
+  if (p.cashless !== null) terms.push(p.cashless ? `cashless at network hospitals${p.tpa ? ` through ${where(p)}` : ""}` : "not cashless, so you pay and claim it back");
+  out.push(`What shapes the bill: ${listWords(terms)}.`);
+  const waiting = p.waiting.filter((w) => (waitingLeft(w, now) ?? 1) > 0);
+  // A waiting period still running is the one thing that can turn a stay down.
+  for (const w of waiting.slice(0, 2)) out.push(waitingLine(w, now));
+  if (p.benefits.includes("pre_post")) out.push("Bills from just before and after the stay (tests, follow-up visits) are listed as included too.");
+  return out;
+}
+
 export type CoverReply = { paragraphs: string[]; followUps: string[] };
 
 /**
  * The chat's answer to an insurance question, from the person's own policies.
  * `name` is whose chat this is; `policies` are the ones that cover them.
  */
-export function coverReply(text: string, name: string, policies: Policy[], now: Date = new Date()): CoverReply {
+export function coverReply(text: string, name: string, policies: Policy[], now: Date = new Date(), conditions: readonly string[] = []): CoverReply {
   if (!policies.length) {
     return {
       paragraphs: [
@@ -174,7 +215,7 @@ export function coverReply(text: string, name: string, policies: Policy[], now: 
       followUps: [],
     };
   }
-  const topic = coverTopic(text);
+  const topic = coverTopic(text, conditions);
   const live = policies.filter((p) => policyState(p, now).status !== "expired");
   const use = live.length ? live : policies;
   const paragraphs: string[] = [];
@@ -184,7 +225,16 @@ export function coverReply(text: string, name: string, policies: Policy[], now: 
   }
   if (!live.length) paragraphs.push(`Every policy saved for ${name} has ended, so check the dates or renew first.`);
   paragraphs.push("This is from the policy details you saved. The insurer's policy wording is what counts on a claim.");
-  const follow = topic === "general" ? ["Is room rent capped?", "Any waiting periods?", "How do I claim?"] : topic === "claim" ? ["Is it cashless?", "How much cover is left?"] : ["How do I claim?", "What isn't covered?"];
+  const follow =
+    topic === "general"
+      ? ["Is room rent capped?", "Any waiting periods?", "How do I claim?"]
+      : topic === "claim"
+        ? ["Is it cashless?", "How much cover is left?"]
+        : topic === "hospital"
+          ? ["How do I claim?", "Is room rent capped?", "What isn't covered?"]
+          : topic === "condition"
+            ? ["Any waiting periods?", "Is OPD covered?"]
+            : ["How do I claim?", "What isn't covered?"];
   return { paragraphs, followUps: follow };
 }
 

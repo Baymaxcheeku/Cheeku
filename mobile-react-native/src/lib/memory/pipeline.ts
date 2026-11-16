@@ -324,7 +324,7 @@ export async function planTurn(args: {
 
 /** What Cheeku says when asked to book something. Rules, in plain words. */
 export function coverModelReply(text: string, ctx: MemoryContext): ModelReply {
-  const r = coverReply(text, ctx.subject.firstName, ctx.cover);
+  const r = coverReply(text, ctx.subject.firstName, ctx.cover, new Date(), ctx.subject.conditions);
   return { paragraphs: r.paragraphs, citations: [], followUps: r.followUps, basis: ctx.cover.length ? "grounded" : "silent" };
 }
 

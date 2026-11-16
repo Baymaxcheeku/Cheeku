@@ -81,6 +81,48 @@ describe("the sparrow, per area", () => {
   });
 });
 
+describe("tests, from Lab tests", () => {
+  const VITD = { key: "vitamin_d", name: "Vitamin D (25-OH)", unit: "ng/mL", latest: { date: "2026-10-11", value: 26, source: "record" }, previous: null, change: null, read: "Below the printed range.", tier: null, refRange: "30-100", flag: "low", focus: false };
+  const withData = (q: string): ModelRequest => ({ ...ask(q, SUGAR_WATCH), memory: { ...DIGEST, readings: [VITD], loops: [{ title: "HbA1c", when: "Due in 8 weeks", type: "repeat_test" }], world: SUGAR_WATCH } });
+  it("lists the tests on the person's list and why", () => {
+    const r = sparrowTurn(withData("Which tests should I do this year?"))!;
+    expect(r.paragraphs[0]).toBe("Already on Arjun's list:\n• HbA1c, due in 8 weeks");
+    expect(r.paragraphs.join(" ")).toContain("HbA1c is the test that tracks it");
+    expect(r.followUps).toContain("Book my HbA1c again");
+  });
+  it("answers 'should I get' from the last result, not from the medicine list", () => {
+    const r = sparrowTurn(withData("Should I get a Vitamin D test?"))!;
+    expect(r.paragraphs[0]).toBe("Last Vitamin D (25-OH) for Arjun: 26 ng/mL on 11 Oct 2026. Below the printed range.");
+    expect(r.paragraphs[1]).toContain("Nothing on file says it's due again yet");
+  });
+  it("says it's due when it is on the list", () => {
+    expect(sparrowTurn(withData("Do I need my HbA1c again?"))!.paragraphs.join(" ")).toContain("So yes, it's due.");
+  });
+  it("leaves questions that aren't about a test alone", () => {
+    expect(sparrowTurn(withData("Do I need a doctor?"))).toBeNull();
+    expect(sparrowTurn(withData("Should I get a flu shot?"))).toBeNull();
+  });
+});
+
+describe("classes, from Fitness", () => {
+  const withPerson = (q: string, over: Partial<MemoryDigest["person"]> = {}): ModelRequest => ({ ...ask(q), memory: { ...DIGEST, person: { ...DIGEST.person, ...over }, world: emptyWorld() } });
+  it("picks classes with the same rules as the class list", () => {
+    const r = sparrowTurn(withPerson("Which class suits me best?", { conditions: ["Hypertension"] }))!;
+    expect(r.paragraphs[0]).toMatch(/^For Arjun, picked with BP in mind:/);
+    expect(r.actions?.[0]).toMatchObject({ route: "/fitness" });
+  });
+  it("says no to HIIT with high BP, and names better fits", () => {
+    const r = sparrowTurn(withPerson("Is HIIT good for me?", { conditions: ["Hypertension"] }))!;
+    expect(r.paragraphs[0]).toBe("HIIT isn't one I'd pick for Arjun right now: it's hard on BP.");
+    expect(r.paragraphs[1]).toMatch(/^Better fits: /);
+  });
+  it("says yes to yoga, with the doctor's note when it applies", () => {
+    expect(sparrowTurn(withPerson("Is yoga good for me?"))!.paragraphs[0]).toMatch(/^Yoga suits Arjun/);
+    const older = sparrowTurn(withPerson("Is yoga good for me?", { ageYears: 68, conditions: ["Heart disease"] }))!;
+    expect(older.paragraphs[1]).toContain("Check with your doctor");
+  });
+});
+
 describe("questions about one record", () => {
   it("are left to the record answers, even when the title sounds like a health check", () => {
     expect(sparrowTurn(ask("About Annual health check-up (11 Oct 2026): What does this report say?", SUGAR_WATCH))).toBeNull();

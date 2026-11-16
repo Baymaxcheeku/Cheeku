@@ -1,3 +1,5 @@
+import { activityById, activityIn, INTENSITY_RANK } from "@/lib/fitness/catalog";
+import { fitFor, NEED_PHRASE, NEED_RULES, reasonFor, type Fit } from "@/lib/fitness/match";
 import { goalForArea } from "@/lib/longevity/areas";
 
 import type { ChatAction, MemoryDigest, ModelReply, ModelRequest, WorldDigest } from "./model";
@@ -26,6 +28,21 @@ export const AREA_Q = /\b(?:how(?:'s| is| are)|what about|tell me about|explain)
 export const GOALS = /\b((?:change|switch|pick|set|choose|update) (?:my |a |the )?(?:goal|plan)s?|my goals?|plan and goals?|goals? and plan)\b/i;
 /** The "Book" shortcut: what can be set up, before they name a test or a doctor. */
 export const BOOK_MENU = /\b(book something|start a booking|i want to book|help me book|what can you book|book for (?:me|us))\b/i;
+/** "Which tests should I do this year?" from Lab tests. */
+export const TESTS_DUE = /\b(?:(?:which|what) (?:blood )?tests? (?:should|do|must|to) (?:i|we|he|she|they|get|do)|tests? (?:are |is )?due|(?:yearly|annual) (?:tests?|check-?ups?)|what should i test)\b/i;
+/** "Should I get a Vitamin D test?" from a test's page. Group 1 is the test. */
+export const TEST_NEED = /\b(?:should (?:i|we) (?:get|do|take|book|repeat)|do (?:i|we) need|is it time for) (?:a |an |the |my )?(.{2,40}?)(?: tests?| checks?| again)?\s*\??$/i;
+const TEST_WORDS = /hba1c|lipid|cholesterol|thyroid|tsh|vitamin|cbc|blood count|sugar|glucose|kidney|creatinine|liver|iron|ferritin|b12|urine|full body|haemoglobin|hemoglobin/i;
+/** "Which class suits me?" from Fitness. */
+export const CLASS_PICK = /\b(?:which|what) (?:kind of )?(?:class|classes|exercise|workout|activity)\b.{0,30}\b(?:suits?|right|good|best|should)\b|\bwhat (?:class|exercise) should (?:i|we)\b/i;
+/** "Is zumba good for me?" from a studio page. */
+export const ACTIVITY_OK = /\b(?:is|are|would|will|can i do|should i (?:do|try))\b.{0,40}\b(?:good|right|okay|ok|safe|suit|suits|fine)\b/i;
+const MONTH = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const onDate = (iso: string) => {
+  const [y, m, d] = iso.slice(0, 10).split("-").map(Number);
+  return y && m && d ? `${d} ${MONTH[m - 1]} ${y}` : iso;
+};
+const plain = (t: string) => t.toLowerCase().replace(/\s*\(.*?\)/g, "").replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
 const AREA_WORD: Record<string, string> = { heart: "heart", "heart and bp": "heart", bp: "heart", "blood pressure": "heart", sugar: "sugar", sleep: "sleep", movement: "movement", moving: "movement", steps: "movement", weight: "weight", checkups: "checkups", "check-ups": "checkups" };
 const WANTS = /\b(want|wanna|help me|trying|i'?d like|goal|plan to|need to|chahta|chahti|start)\b/i;
 const GOAL_WORDS: { goal: "sleep" | "weight" | "sugar" | "legs" | "calm"; match: RegExp }[] = [
@@ -197,6 +214,96 @@ function areaTurn(req: ModelRequest, w: WorldDigest, key: string): ModelReply {
   return { paragraphs, citations: [], followUps: ["How am I doing overall?", "How was my week?"], basis: "grounded", actions: actions.slice(0, 3) };
 }
 
+/** The tests on the person's list, and why, from their own follow-ups and areas. */
+function testsDue(req: ModelRequest, w: WorldDigest): ModelReply {
+  const name = req.memory.person.firstName;
+  const due = req.memory.loops.filter((l) => TEST_WORDS.test(l.title) || /test|result|repeat/i.test(l.type));
+  const why: string[] = [];
+  const area = (k: string) => w.longevity.find((a) => a.area === k && (a.status === "watch" || a.status === "act"));
+  if (area("sugar")) why.push("Sugar is one to keep an eye on, and HbA1c is the test that tracks it.");
+  if (area("heart")) why.push("Heart and BP is one to keep an eye on, and a lipid profile tracks the cholesterol side of it.");
+  const paragraphs: string[] = [];
+  if (due.length) paragraphs.push(`Already on ${name}'s list:\n${due.slice(0, 4).map((l) => `• ${l.title}, ${l.when.toLowerCase()}`).join("\n")}`);
+  else paragraphs.push(`Nothing is on ${name}'s list as due right now.`);
+  paragraphs.push(...why);
+  paragraphs.push("Beyond these, one yearly full check covers the basics. Which extra tests make sense is your doctor's call; I can write out what to ask.");
+  const hba1c = due.find((l) => /hba1c/i.test(l.title));
+  return {
+    paragraphs,
+    citations: [],
+    followUps: [...(hba1c ? ["Book my HbA1c again"] : []), "Prepare for my appointment"],
+    basis: due.length || why.length ? "grounded" : "general",
+    actions: [open("/labs", "Book a test at home")],
+  };
+}
+
+/** "Should I get a Vitamin D test?": the last result and whether it's on the list, never a yes from nowhere. */
+function testNeed(req: ModelRequest, target: string): ModelReply | null {
+  const name = req.memory.person.firstName;
+  const t = plain(target).replace(/^(a|an|the|my) /, "");
+  if (t.length < 2) return null;
+  const r = req.memory.readings.find((x) => plain(x.name).startsWith(t) || plain(x.key).startsWith(t.replace(/ /g, "_")) || t.startsWith(plain(x.name)));
+  const loop = req.memory.loops.find((l) => plain(l.title).includes(t));
+  if (!r && !loop && !TEST_WORDS.test(t)) return null;
+  const label = r?.name ?? loop?.title ?? target;
+  const paragraphs: string[] = [];
+  if (r) paragraphs.push(`Last ${r.name} for ${name}: ${r.latest.value}${r.unit ? ` ${r.unit}` : ""} on ${onDate(r.latest.date)}${r.read ? `. ${r.read}` : "."}`);
+  if (loop) paragraphs.push(`It's on ${name}'s list: ${loop.title}, ${loop.when.toLowerCase()}. So yes, it's due.`);
+  else if (r) paragraphs.push("Nothing on file says it's due again yet. If the doctor asked for a repeat, or something has changed, it's worth doing.");
+  else paragraphs.push(`There's no ${target} result on file for ${name}, so I can't say how it looked before. Whether to test is your doctor's call; it's a simple home collection if they ask for it.`);
+  return { paragraphs, citations: [], followUps: ["Which tests should I do this year?"], basis: r || loop ? "grounded" : "general", actions: [open("/labs", `Book ${label.length > 18 ? "it" : label} at home`)] };
+}
+
+/** The fitness matcher's view of this person, from the digest: the same rules the class list uses. */
+/** "an aerobics", "a yoga": the article and the word, lowercased. */
+const an = (w: string) => `${/^[aeiou]/i.test(w) ? "an" : "a"} ${w.toLowerCase()}`;
+const lowerFirst = (t: string) => t.charAt(0).toLowerCase() + t.slice(1);
+
+function fitOf(req: ModelRequest): Fit {
+  const p = req.memory.person;
+  return fitFor({ conditions: p.conditions, goal: null, ageYears: p.ageYears, pregnant: p.modifiers.includes("pregnant"), bmi: null });
+}
+
+function classPick(req: ModelRequest): ModelReply {
+  const name = req.memory.person.firstName;
+  const fit = fitOf(req);
+  const top = fit.ranked.slice(0, 3);
+  const why = fit.needs.length ? `picked with ${fit.needs.slice(0, 2).map((n) => NEED_PHRASE[n]).join(" and ")} in mind` : "a good place to start";
+  const paragraphs = [
+    `For ${name}, ${why}:\n${top.map((a) => `• ${activityById(a)?.label}${reasonFor(fit, a) ? `: ${lowerFirst(reasonFor(fit, a)!)}` : ""}`).join("\n")}`,
+    fit.doctorNote ? "Check with your doctor before starting anything new, and tell the studio too." : "Start with a beginners' class and go at your own pace. One class at a time, no membership.",
+  ];
+  return { paragraphs, citations: [], followUps: top[0] ? [`Find ${an(activityById(top[0])!.label)} class nearby`] : [], basis: fit.needs.length ? "grounded" : "general", actions: [open("/fitness", "See classes nearby")] };
+}
+
+function activityOk(req: ModelRequest, id: NonNullable<ReturnType<typeof activityIn>>): ModelReply {
+  const name = req.memory.person.firstName;
+  const a = activityById(id)!;
+  const fit = fitOf(req);
+  const better = fit.ranked.filter((x) => x !== id).slice(0, 2).map((x) => activityById(x)!.label.toLowerCase());
+  const avoidedBy = fit.needs.find((n) => NEED_RULES[n].avoid?.includes(id));
+  const tooHard = INTENSITY_RANK[a.intensity] > INTENSITY_RANK[fit.cap];
+  const jumpy = fit.noImpact && a.impact;
+  if (fit.avoid.has(id) || tooHard || jumpy) {
+    const why = avoidedBy ? `it's hard on ${NEED_PHRASE[avoidedBy]}` : jumpy ? "the jumping is hard on the knees and joints" : tooHard ? "it's a harder pace than suits right now" : "it isn't a fit right now";
+    return {
+      paragraphs: [`${a.label} isn't one I'd pick for ${name} right now: ${why}.`, ...(better.length ? [`Better fits: ${better.join(" or ")}.`] : []), "If the doctor has said it's fine, go easy and tell the instructor."],
+      citations: [],
+      followUps: better[0] ? [`Find ${an(better[0])} class nearby`] : [],
+      basis: "grounded",
+      actions: [open("/fitness", "See classes that suit")],
+    };
+  }
+  const reason = reasonFor(fit, id);
+  return {
+    paragraphs: [`${a.label} suits ${name}${reason ? `: ${lowerFirst(reason)}` : ""}.`, fit.doctorNote ? "Check with your doctor before starting, and tell the instructor about your health." : "Start with a beginners' class and go at your own pace."],
+    citations: [],
+    followUps: [`Find ${an(a.label)} class nearby`],
+    basis: fit.needs.length ? "grounded" : "general",
+    actions: [open("/fitness", `Find ${an(a.label)} class`)],
+  };
+}
+
 const GOAL_PITCH: Record<keyof typeof GOAL_LABEL, string> = { sleep: "I want to sleep better", weight: "I want to lose weight", sugar: "I want to control my sugar", legs: "I want to walk more", calm: "I want to stress less" };
 
 function goalsMenu(req: ModelRequest, w: WorldDigest): ModelReply {
@@ -306,6 +413,15 @@ export function sparrowTurn(req: ModelRequest): ModelReply | null {
   if (/^About [^:]{1,120}: /.test(q)) return null;
   if (w.today.justLogged.length && !req.memory.logged.length) return loggedActivity(req, w);
   if (w.family) return familyTurn(req, w);
+  if (TESTS_DUE.test(q)) return testsDue(req, w);
+  if (CLASS_PICK.test(q)) return classPick(req);
+  const act = ACTIVITY_OK.test(q) ? activityIn(q) : null;
+  if (act) return activityOk(req, act);
+  const need = TEST_NEED.exec(q);
+  if (need) {
+    const r = testNeed(req, need[1]!);
+    if (r) return r;
+  }
   if (WEEK.test(q)) return week(req, w);
   if (LONGEVITY.test(q)) return longevity(req, w);
   if (WANTS.test(q)) {
