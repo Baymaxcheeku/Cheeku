@@ -77,3 +77,42 @@ describe("the server checks with the same rules", () => {
     expect(server.split("\n").slice(1).join("\n")).toBe(app);
   });
 });
+
+describe("the dashboard paste files", () => {
+  it("match the Edge Function source (regenerate with node supabase/functions/labstack/bundle.mjs)", async () => {
+    const { readFileSync } = await import("node:fs");
+    const { resolve } = await import("node:path");
+    const { build } = (await import("../../../supabase/functions/labstack/bundle.mjs")) as { build: () => Record<string, string> };
+    for (const [name, text] of Object.entries(build())) {
+      expect(readFileSync(resolve(__dirname, "../../../supabase/manual", name), "utf8"), name).toBe(text);
+    }
+  });
+});
+
+describe("partner doctors as our doctors", async () => {
+  const { asDoctor, departmentOf, partnerSpeciality } = await import("@/lib/booking/partner-doctors");
+  const list = [
+    { name: "General Physician", count: 12 },
+    { name: "Cardiology", count: 3 },
+    { name: "Psychiatry", count: 2 },
+    { name: "Clinical Psychology", count: 1 },
+    { name: "Dermatology", count: 0 },
+  ];
+  it("finds the partner's name for each department, or none", () => {
+    expect(partnerSpeciality("gp", list)).toBe("General Physician");
+    expect(partnerSpeciality("cardio", list)).toBe("Cardiology");
+    expect(partnerSpeciality("psych", list)).toBe("Clinical Psychology");
+    expect(partnerSpeciality("psychiatry", list)).toBe("Psychiatry");
+    expect(partnerSpeciality("derm", list)).toBeNull(); // nobody listed
+  });
+  it("reads a provider's department back, GP when unclear", () => {
+    expect(departmentOf(["Paediatrics"])).toBe("paeds");
+    expect(departmentOf(["Psychiatry"])).toBe("psychiatry");
+    expect(departmentOf(["Family Medicine"])).toBe("gp");
+  });
+  it("turns a provider into a bookable doctor with an ls- id and only the modes it offers", () => {
+    const d = asDoctor({ lsId: 42, name: "Dr. Asha Rao", gender: "FEMALE", specialities: ["Cardiology"], languages: ["English"], years: 9, rating: 4.6, ratings: 20, types: ["ONLINE"], photo: null, place: "Indiranagar", distanceKm: 2, followUpUntil: null });
+    expect(d).toMatchObject({ id: "ls-42", specialty: "cardio", fee: { online: 0 } });
+    expect(d.fee.clinic).toBeUndefined();
+  });
+});

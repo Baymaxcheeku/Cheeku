@@ -22,13 +22,11 @@ import {
   type AddressParts,
 } from "./validate.ts";
 import {
-  consultOut, Fail, fileBase64, insert, itemOut, labOrderOut, ls, one, packOf, patch, pharmaOut, pickupOut, refreshConsult, refreshLab, refreshPharma, remove, rows, rpc,
+  consultOut, Fail, fileBase64, SERVICE_KEY, SUPABASE_URL, insert, itemOut, labOrderOut, ls, one, packOf, patch, pharmaOut, pickupOut, refreshConsult, refreshLab, refreshPharma, remove, rows, rpc,
   type ConsultRow, type LabRow, type PharmaRow,
 } from "./partner.ts";
 
-const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
 const ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
-const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 
 const CORS = {
   "access-control-allow-origin": "*",

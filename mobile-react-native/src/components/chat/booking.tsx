@@ -11,6 +11,7 @@ import {
   Hourglass,
   LocateFixed,
   Stethoscope,
+  Video,
 } from "lucide-react-native";
 import { useState } from "react";
 import { Tap } from "@/components/ui/tap";
@@ -56,9 +57,9 @@ type Booking = BookingIntent & { forName: string };
 
 const WAITLIST_ID: Record<string, string> = {};
 
-export function BookingCard({ booking, onStart }: { booking: Booking; onStart?: (b: Booking) => void }) {
+export function BookingCard({ booking, onStart, onNow }: { booking: Booking; onStart?: (b: Booking) => void; onNow?: (b: Booking) => void }) {
   if (booking.service === "lab") return <LabCard booking={booking} onStart={onStart} />;
-  if (booking.service === "doctor") return <DoctorCard booking={booking} onStart={onStart} />;
+  if (booking.service === "doctor") return <DoctorCard booking={booking} onStart={onStart} onNow={onNow} />;
   if (booking.service === "medicine" || booking.service === "care") return <ServiceLinkCard booking={booking} onStart={onStart} />;
   if (booking.service === "fitness") return <FitnessCard booking={booking} onStart={onStart} />;
   return <SoonCard booking={booking} />;
@@ -242,16 +243,24 @@ function LabCard({ booking, onStart }: { booking: Booking; onStart?: (b: Booking
   );
 }
 
-function DoctorCard({ booking, onStart }: { booking: Booking; onStart?: (b: Booking) => void }) {
+function DoctorCard({ booking, onStart, onNow }: { booking: Booking; onStart?: (b: Booking) => void; onNow?: (b: Booking) => void }) {
   const sp = booking.specialty && booking.specialty in SPECIALTIES ? SPECIALTIES[booking.specialty as SpecialtyId] : null;
   const how = booking.mode === "online" ? "video call" : booking.mode === "clinic" ? "at a clinic nearby" : "online or at a clinic";
+  // Doctors on call are general physicians on video, so "now" is offered only when that fits.
+  const canNow = Boolean(onNow) && (!sp || sp.id === "gp") && booking.mode !== "clinic";
   return (
     <Shell icon={Stethoscope} eyebrow="Pre-consultation" title={sp ? `See a ${sp.label.toLowerCase()}` : "See a doctor"} sub={`For ${booking.forName} · ${how}`}>
       <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 19, color: ink[700] }}>
         A few quick questions, then a note the doctor reads before you meet, with {booking.forName}&apos;s readings and medicines attached.
       </Text>
-      <Steps items={["A few questions", "Note for the doctor", "Pick a doctor and slot"]} />
+      <Steps items={["A few questions", "Note for the doctor", "Pick a doctor and time"]} />
       <Cta label="Start pre-consultation" onPress={onStart ? () => onStart(booking) : undefined} />
+      {canNow ? (
+        <Tap accessibilityRole="button" onPress={() => onNow?.(booking)} style={{ height: 44, borderRadius: 999, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, borderWidth: 1, borderColor: glass.rim, backgroundColor: "#fff" }} scale={0.98}>
+          <Video size={16} color={ink[900]} />
+          <Text style={{ fontFamily: font.semibold, fontSize: 14, color: ink[900] }}>Unwell now? Talk to a doctor in minutes</Text>
+        </Tap>
+      ) : null}
     </Shell>
   );
 }

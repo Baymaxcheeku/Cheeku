@@ -14,6 +14,10 @@ import { useReducedMotion } from "@/components/ui/motion";
 import { SPECIALTIES, addDays, dayName, doctorById, slotsFor, type Mode, type Slot } from "@/lib/booking/catalog";
 import { useAppointmentList } from "@/lib/booking/appointments";
 import { useBookingDraft } from "@/lib/booking/draft";
+import { lsIdOf } from "@/lib/booking/partner-doctors";
+import { labstack } from "@/lib/partner/labstack";
+import { PartnerError } from "@/lib/partner/types";
+import { useLiveSlots } from "@/lib/partner/use-doctors";
 import { doctorFace } from "@/lib/booking/faces";
 import { brand, ink, lilac } from "@/theme/tokens";
 import { font } from "@/theme/type";
@@ -48,6 +52,12 @@ export default function SlotScreen() {
   const days = useMemo(() => Array.from({ length: 7 }, (_, i) => addDays(new Date(), i)), []);
   const [dayIndex, setDayIndex] = useState(0);
   const [slot, setSlot] = useState<Slot | null>(null);
+  const [moveError, setMoveError] = useState<string | null>(null);
+
+  // Partner doctors: real open times from the network (hooks run before any early return).
+  const partner = lsIdOf(doctor?.id) !== null;
+  const modeFor: Mode = doctor && mode && doctor.fee[mode] !== undefined ? mode : doctor?.fee.online !== undefined ? "online" : "clinic";
+  const live = useLiveSlots(partner ? doctor : undefined, modeFor, days[dayIndex] ?? new Date());
 
   if (!doctor) {
     return (
@@ -63,20 +73,28 @@ export default function SlotScreen() {
   const offers = (["online", "clinic"] as const).filter((k) => doctor.fee[k] !== undefined);
   const m: Mode = mode && doctor.fee[mode] !== undefined ? mode : (offers[0] ?? "online");
   const day = days[dayIndex] ?? addDays(new Date(), 0);
-  const slots = slotsFor(doctor, m, day);
+  const slots = partner ? (live.data ?? []) : slotsFor(doctor, m, day);
   const fee = doctor.fee[m] ?? 0;
   const face = doctorFace(doctor);
 
-  function confirm() {
+  async function confirm() {
     if (!slot || !doctor) return;
     // Rescheduling moves the existing appointment rather than adding a second.
     if (reschedule) {
+      if (partner) {
+        try {
+          await labstack().consult.reschedule(reschedule, slot.id);
+        } catch (e) {
+          setMoveError(e instanceof PartnerError ? e.message : "Couldn't move it. Try another time.");
+          return;
+        }
+      }
       appointments.reschedule(reschedule, day.toISOString(), slot.label);
       router.replace(`/appointments/${reschedule}` as never);
       return;
     }
     // New bookings go through Confirm: who it's for, call type, tests, sharing.
-    router.push({ pathname: "/book/confirm", params: { id: doctor.id, mode: m, day: day.toISOString(), slot: slot.label } } as never);
+    router.push({ pathname: "/book/confirm", params: { id: doctor.id, mode: m, day: day.toISOString(), slot: slot.label, ...(partner ? { start: slot.id } : {}) } } as never);
   }
 
   return (
@@ -89,9 +107,11 @@ export default function SlotScreen() {
           <GlassCircle label="Go back" onPress={() => goBack(router, "/book/doctors")}>
             <ChevronLeft size={21} color={ink[900]} />
           </GlassCircle>
-          <Glass className="rounded-pill px-3 py-1.5">
-            <Text style={{ fontFamily: font.semibold, fontSize: 12, color: brand[700] }}>Preview</Text>
-          </Glass>
+          {partner ? <View /> : (
+            <Glass className="rounded-pill px-3 py-1.5">
+              <Text style={{ fontFamily: font.semibold, fontSize: 12, color: brand[700] }}>Preview</Text>
+            </Glass>
+          )}
         </View>
         <View className="flex-row items-end gap-4 px-5 pb-5 pt-2">
           <View className="overflow-hidden rounded-xl" style={[glassShadow, { width: 104, height: 116, backgroundColor: face?.background }]}>
@@ -132,7 +152,7 @@ export default function SlotScreen() {
                 >
                   {k === "online" ? <MonitorPlay size={16} color={on ? brand[600] : ink[500]} /> : <Building2 size={16} color={on ? brand[600] : ink[500]} />}
                   <Text style={{ fontFamily: on ? font.semibold : font.medium, fontSize: 15, color: on ? ink[900] : ink[500] }}>
-                    {k === "online" ? `Video · ₹${doctor.fee.online}` : `Clinic · ₹${doctor.fee.clinic}`}
+                    {k === "online" ? `Video${doctor.fee.online ? ` · ₹${doctor.fee.online}` : ""}` : `Clinic${doctor.fee.clinic ? ` · ₹${doctor.fee.clinic}` : ""}`}
                   </Text>
                 </Tap>
               );
@@ -235,11 +255,16 @@ export default function SlotScreen() {
               </View>
             );
           })}
-          {slots.every((s) => s.taken) ? (
+          {partner && live.isPending ? (
+            <Text style={{ fontFamily: font.regular, fontSize: 15, color: ink[500], marginTop: 12 }}>Checking open times…</Text>
+          ) : partner && live.error ? (
+            <Text style={{ fontFamily: font.regular, fontSize: 15, color: ink[500], marginTop: 12 }}>Couldn&apos;t load times. Pick the day again to retry.</Text>
+          ) : slots.every((s) => s.taken) ? (
             <Text style={{ fontFamily: font.regular, fontSize: 15, color: ink[500], marginTop: 12 }}>
-              Fully booked on this day. Try another day.
+              {slots.length ? "Fully booked on this day. Try another day." : "No open times on this day. Try another day."}
             </Text>
           ) : null}
+          {moveError ? <Text style={{ fontFamily: font.medium, fontSize: 14, color: "#b42318", marginTop: 12 }}>{moveError}</Text> : null}
         </Animated.View>
 
         {intake ? (
@@ -254,13 +279,13 @@ export default function SlotScreen() {
           reference's detail screens. */}
       <View className="flex-row items-center gap-3 px-5 pt-3" style={{ paddingBottom: insets.bottom + 12 }}>
         <Glass strong className="h-14 justify-center rounded-pill px-5">
-          <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>₹{fee}</Text>
+          <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>{fee ? `₹${fee}` : partner ? "Fee on booking" : "₹0"}</Text>
         </Glass>
         <Tap
           accessibilityRole="button"
           accessibilityState={{ disabled: !slot }}
           disabled={!slot}
-          onPress={confirm}
+          onPress={() => void confirm()}
           style={{
             flex: 1,
             height: 56,

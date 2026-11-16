@@ -112,7 +112,7 @@ export default function DoctorProfile() {
                     {m === "online" ? <MonitorPlay size={15} color={on ? "#fff" : brand[600]} /> : <Building2 size={15} color={on ? "#fff" : hue.orange.fg} />}
                     <Text style={{ fontFamily: font.medium, fontSize: 13, color: on ? "rgba(255,255,255,0.8)" : ink[500] }}>{m === "online" ? "Video call" : "Clinic visit"}</Text>
                   </View>
-                  <Text style={{ fontFamily: font.semibold, fontSize: 20, color: on ? "#fff" : ink[900], marginTop: 6 }}>₹{d.fee[m]}</Text>
+                  <Text style={{ fontFamily: font.semibold, fontSize: 20, color: on ? "#fff" : ink[900], marginTop: 6 }}>{d.fee[m] ? `₹${d.fee[m]}` : "On booking"}</Text>
                   <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 12, color: on ? "rgba(255,255,255,0.7)" : ink[500], marginTop: 2 }}>{next ? `Next ${next}` : "Fully booked"}</Text>
                 </Tap>
               );
@@ -167,7 +167,7 @@ export default function DoctorProfile() {
       {/* Sticky, as in the reference: price, then Book. */}
       <View style={{ position: "absolute", left: 16, right: 16, bottom: insets.bottom + 12, flexDirection: "row", gap: 10 }}>
         <View style={[glassShadow, { height: 58, paddingHorizontal: 22, borderRadius: 999, backgroundColor: "#fff", justifyContent: "center" }]}>
-          <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>₹{d.fee[mode]}</Text>
+          <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>{d.fee[mode] ? `₹${d.fee[mode]}` : "Fee on booking"}</Text>
         </View>
         <Tap accessibilityRole="button" onPress={book} style={[glassShadow, { flex: 1, height: 58, borderRadius: 999, backgroundColor: ink[900], alignItems: "center", justifyContent: "center" }]} scale={0.98}>
           <Text style={{ fontFamily: font.semibold, fontSize: 17, color: "#fff" }}>{mode === "online" ? "Book a video slot" : "Book a clinic visit"}</Text>

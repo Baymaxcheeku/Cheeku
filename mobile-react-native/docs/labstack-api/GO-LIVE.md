@@ -2,12 +2,25 @@
 
 Everything is built and works today in **preview** (sample data, nothing booked with anyone). These steps turn on the real UAT sandbox. Do them in order. Nobody pastes a key into chat; keys go only into Supabase.
 
+## What's pending, in one list
+
+| # | What | File | Where it goes |
+| --- | --- | --- | --- |
+| 0 | See which migrations you already have | `supabase/manual/0000-check-what-is-applied.sql` (and `0044-check.sql`) | SQL Editor |
+| 1 | Migration 0045 (partner tables) | `supabase/manual/0045-step-1-of-1.sql` | SQL Editor |
+| 2 | Check 0045 | `supabase/manual/0045-check.sql` (8 rows, all "yes") | SQL Editor |
+| 3 | Edge Function `labstack` | `supabase/manual/0045-labstack-function-paste.ts` | Edge Functions, Via Editor |
+| 4 | Edge Function `labstack-webhook` | `supabase/manual/0045-labstack-webhook-function-paste.ts` | Edge Functions, Via Editor, JWT check OFF |
+| 5 | Secrets | the 4 below | Edge Functions, Secrets |
+
+If `0044-check.sql` shows any "NO", run the 0044 step first (and older ones the same way); 0045 needs 0027 and 0036.
+
 ## 1. Run the migration (2 minutes)
 
 1. Open supabase.com, then your project.
 2. Left menu: **SQL Editor**, then **New query**.
-3. Open `supabase/migrations/0045_labstack.sql` from the repo, copy all of it, paste it in, press **Run**.
-4. You should see "Success". Running it twice is safe.
+3. Open `supabase/manual/0045-step-1-of-1.sql`, copy all of it, paste it in, press **Run**. "Success" means done. Running it twice is safe.
+4. New query again, paste `supabase/manual/0045-check.sql`, **Run**. Every row should say **yes**.
 
 ## 2. Add the secrets (3 minutes)
 
@@ -23,16 +36,13 @@ Everything is built and works today in **preview** (sample data, nothing booked 
 
 Only if LabStack says its lab webhook header is not called `key`: add `LABSTACK_WEBHOOK_HEADER` with the name they give.
 
-## 3. Deploy the two functions (5 minutes)
+## 3. Deploy the two functions (5 minutes, no CLI needed)
 
-From a computer with the Supabase CLI, in `mobile-react-native/`:
+1. Left menu: **Edge Functions**, then **Deploy a new function**, then **Via Editor**.
+2. Name it exactly `labstack`. Delete the sample code, paste all of `supabase/manual/0045-labstack-function-paste.ts`, press **Deploy**. Leave "Enforce JWT verification" ON.
+3. Again: **Deploy a new function**, **Via Editor**, name `labstack-webhook`, paste `supabase/manual/0045-labstack-webhook-function-paste.ts`. Turn **Enforce JWT verification OFF** (LabStack has no Supabase login; the function checks LabStack's signature itself). **Deploy**.
 
-```
-supabase functions deploy labstack
-supabase functions deploy labstack-webhook --no-verify-jwt
-```
-
-(Or ask me in a session that can reach your project and I'll walk it with you.)
+With the CLI instead: `supabase functions deploy labstack` and `supabase functions deploy labstack-webhook --no-verify-jwt`.
 
 ## 4. Sync the lab catalogue (1 minute)
 
@@ -67,11 +77,10 @@ Rebuild or restart the app. The "Preview" notes disappear and every booking goes
 
 1. **Labs**: book a home collection for tomorrow. Then in UAT move it on with `triggerOrderLifecycle` (I can run these) up to REPORT_DELIVERED. The booking screen should walk the steps, and the report should appear in Records with its values.
 2. **Medicines**: search metformin, pick a pharmacy, attach a prescription, place, then cancel.
-3. **Doctors**: book a video visit, open "Join", cancel. Then "Talk to a doctor now" and cancel the request.
+3. **Doctors**: in chat say "book a doctor for me". The card offers the pre-consultation (questions, note, then partner doctors and live times) and, for a GP on video, "Talk to a doctor in minutes". Book a video visit, open "Join", cancel. Then "Talk to a doctor now" and cancel the request.
 4. **Webhooks**: ask LabStack to fire `testWebhook` on a lab order and an appointment. Supabase, Table Editor, `partner_events` should get a row each.
 
 ## Still open
 
 - **Payment** (your decision tonight): pay after collection, the partner's 16-minute payment link, or our own gateway, and how our margin is settled against the wallet. Until decided, every order is placed with `isPaymentRequired: false`.
 - Production base URL (only the sandbox is documented).
-- Doctor list in live mode still shows our sample doctors; the gateway's `consult.providers` is ready, the list screen switches over once the payment model is set.

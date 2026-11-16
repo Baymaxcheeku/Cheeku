@@ -35,10 +35,20 @@ const LOOK: Record<string, FaceTraits & { bg: string }> = {
 
 const cache = new Map<string, { svg: string; background: string }>();
 
+/** A partner doctor borrows one of the looks above, matched to their gender. */
+const WOMEN = ["d1", "d3", "d5", "d8", "d11", "d12", "d14", "d16"];
+const MEN = ["d2", "d4", "d7", "d10", "d13", "d17"];
+function stand(d: Doctor): string {
+  const pool = d.gender === "FEMALE" ? WOMEN : d.gender === "MALE" ? MEN : [...WOMEN, ...MEN];
+  let h = 0;
+  for (const c of d.id) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+  return pool[h % pool.length]!;
+}
+
 export function doctorFace(d: Doctor): { svg: string; background: string } {
   const hit = cache.get(d.id);
   if (hit) return hit;
-  const { bg, ...look } = LOOK[d.id] ?? { bg: "e3dcff" };
+  const { bg, ...look } = LOOK[d.id] ?? LOOK[stand(d)] ?? { bg: "e3dcff" };
   const face = { svg: faceSvg(`cheeku-doctor-${d.id}`, bg, { ...look, ...CALM }), background: `#${bg}` };
   cache.set(d.id, face);
   return face;

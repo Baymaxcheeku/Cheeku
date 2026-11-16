@@ -12,6 +12,7 @@ import { Tap } from "@/components/ui/tap";
 import { useAppointmentList } from "@/lib/booking/appointments";
 import { SPECIALTIES, doctorById, type Mode } from "@/lib/booking/catalog";
 import { useBookingDraft } from "@/lib/booking/draft";
+import { lsIdOf } from "@/lib/booking/partner-doctors";
 import { todayIso } from "@/lib/memory/clock";
 import { buildContext } from "@/lib/memory/context";
 import { recordBooking, threadKey, useMemory } from "@/lib/memory/store";
@@ -50,7 +51,7 @@ export default function ConfirmConsult() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const qc = useQueryClient();
-  const { id, mode, day, slot, ls } = useLocalSearchParams<{ id: string; mode: Mode; day: string; slot: string; ls?: string }>();
+  const { id, mode, day, slot, ls, start } = useLocalSearchParams<{ id: string; mode: Mode; day: string; slot: string; ls?: string; start?: string }>();
   const doctor = doctorById(id);
   const { intake, book } = useBookingDraft();
   const appointments = useAppointmentList();
@@ -108,12 +109,13 @@ export default function ConfirmConsult() {
     try {
       const note = intake ? [`About: ${intake.concern}`, intake.details ? `In their words: ${intake.details}` : "", `Since: ${intake.since}`, `Getting in the way: ${intake.impact}`, `Tried: ${intake.tried}`].filter(Boolean).join("\n") : "";
       if (LIVE) {
-        if (!ls) throw new PartnerError("This doctor isn't on the live network. Pick one from the list again.", "invalid");
+        const lsId = lsIdOf(doctor.id) ?? (ls ? Number(ls) : null);
+        if (!lsId) throw new PartnerError("This doctor isn't on the live network. Pick one from the list again.", "invalid");
         ({ appointmentId } = await labstack().consult.book({
           profileId: member!.id,
-          lsProviderId: Number(ls),
+          lsProviderId: lsId,
           appointmentType: online ? "ONLINE" : "CENTER_VISIT",
-          appointment: startIso(day, slot),
+          appointment: start ?? startIso(day, slot),
           meetingType: meeting,
           patient: patient.result!.patient,
           address: null,
@@ -122,6 +124,8 @@ export default function ConfirmConsult() {
           suggestedTestIds: sendTests ? dueTests : [],
           shareDocumentIds: share ? reports.map((r) => r.id) : [],
         }));
+        // Kept on the phone too, under the partner booking's id, so Appointments, reminders and Join work as before.
+        appointments.add({ id: appointmentId, doctorId: doctor.id, mode, day, slotLabel: slot, forName, concern: intake?.concern ?? "General consultation", profileId: member?.id });
       } else {
         appointmentId = appointments.add({ doctorId: doctor.id, mode, day, slotLabel: slot, forName, concern: intake?.concern ?? "General consultation", profileId: member?.id }).id;
       }
@@ -193,7 +197,7 @@ export default function ConfirmConsult() {
 
         <Section title="Fee">
           <View className="rounded-xl bg-white p-4" style={{ borderWidth: 1, borderColor: surface.line }}>
-            <Line label={online ? "Online consultation" : "Clinic consultation"} value={`₹${fee}`} strong />
+            <Line label={online ? "Online consultation" : "Clinic consultation"} value={fee ? `₹${fee}` : "Shown with the booking"} strong />
           </View>
         </Section>
 

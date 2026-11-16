@@ -6,8 +6,8 @@
 // Nothing in here trusts the caller. The gateway checks who is asking before
 // it calls any of this; the webhook only ever uses an id to pull.
 
-const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
-const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+export const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
+export const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 const LS_BASE = (Deno.env.get("LABSTACK_BASE_URL") ?? "https://integration.labstack.in").replace(/\/+$/, "");
 const LS_KEY = Deno.env.get("LABSTACK_API_KEY") ?? "";
 

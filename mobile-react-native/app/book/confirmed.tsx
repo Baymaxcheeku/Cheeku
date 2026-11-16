@@ -24,6 +24,7 @@ import { font } from "@/theme/type";
 import { feel } from "@/lib/feel";
 import { Tap } from "@/components/ui/tap";
 import { startFresh } from "@/lib/nav/start-fresh";
+import { LIVE } from "@/lib/partner/labstack";
 
 /*
  * Book a doctor — done.
@@ -106,7 +107,7 @@ export default function Confirmed() {
             You&apos;re booked{intake?.forName && intake.forName !== "Me" ? ` for ${intake.forName}` : ""}!
           </Text>
           <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 4, textAlign: "center" }}>
-            Preview booking. No real appointment was made.
+            {LIVE ? "The doctor's desk has it, with your note." : "Preview booking. No real appointment was made."}
           </Text>
         </View>
 
@@ -143,7 +144,7 @@ export default function Confirmed() {
             )}
             <View className="mt-1 flex-row items-center justify-between rounded-lg px-3.5 py-3" style={{ backgroundColor: lilac.mist }}>
               <Text style={{ fontFamily: font.medium, fontSize: 13, color: ink[700] }}>{online ? "Consultation fee" : "Pay at the clinic"}</Text>
-              <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>₹{doctor.fee[booking.mode]}</Text>
+              <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>{doctor.fee[booking.mode] ? `₹${doctor.fee[booking.mode]}` : "On the bill"}</Text>
             </View>
           </View>
         </Glass>

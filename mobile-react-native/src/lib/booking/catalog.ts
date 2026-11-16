@@ -17,6 +17,8 @@
  * └──────────────────────────────────────────────────────────────────────────┘
  */
 
+import { partnerDoctor } from "@/lib/booking/partner-doctors";
+
 export type Mode = "online" | "clinic";
 
 export type SpecialtyId =
@@ -98,6 +100,8 @@ export type Doctor = {
   /** Fee in rupees, per mode. Absent when the doctor does not offer it. */
   fee: Partial<Record<Mode, number>>;
   clinic: { name: string; area: string; km: number; opd: string };
+  /** Partner doctors only, so the illustrated face matches. */
+  gender?: "MALE" | "FEMALE" | "OTHERS" | null;
 };
 
 const D = (d: Doctor) => d;
@@ -128,7 +132,8 @@ export function doctorsFor(specialty: SpecialtyId, mode: Mode): Doctor[] {
 }
 
 export function doctorById(id: string | undefined): Doctor | undefined {
-  return DOCTORS.find((d) => d.id === id);
+  // Live doctors from the partner network carry "ls-" ids (booking/partner-doctors.ts).
+  return DOCTORS.find((d) => d.id === id) ?? (id?.startsWith("ls-") ? partnerDoctor(id) : undefined);
 }
 
 /*

@@ -99,6 +99,15 @@ export const STORAGE_REGISTRY: readonly StoredItem[] = [
     lasts: "Until you sign out",
   },
   {
+    key: "cheeku.partnerDoctors",
+    label: "Doctors you looked at",
+    why: "Names and departments of partner doctors, so your appointments show who they are with.",
+    where: "keychain",
+    contains: "preference",
+    scope: "account",
+    lasts: "Until you sign out",
+  },
+  {
     key: "cheeku.preview.*",
     label: "Sample orders (preview only)",
     why: "Practice lab, medicine and doctor bookings made before partners are switched on. Nothing is sent anywhere.",

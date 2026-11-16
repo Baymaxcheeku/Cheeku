@@ -5,6 +5,7 @@ import { doctorById, SPECIALTIES, type Mode } from "@/lib/booking/catalog";
 import { cancelConsultationInvoice, fileConsultationInvoice, rescheduleConsultationInvoice } from "@/lib/records/record-actions";
 import { recordDeviceEvent } from "@/lib/notifications/queries";
 import { kv } from "@/lib/storage";
+import { hydratePartnerDoctors } from "@/lib/booking/partner-doctors-store";
 
 /*
  * Booked appointments, kept on this device.
@@ -49,7 +50,8 @@ type Store = {
   items: Appointment[];
   loaded: boolean;
   load: () => Promise<void>;
-  add: (a: Omit<Appointment, "id" | "status" | "createdAt" | "invoiceId">) => Appointment;
+  /** `id` given: a partner booking, kept under the gateway's id; no sample invoice is filed for it. */
+  add: (a: Omit<Appointment, "id" | "status" | "createdAt" | "invoiceId"> & { id?: string }) => Appointment;
   reschedule: (id: string, day: string, slotLabel: string) => void;
   cancel: (id: string) => void;
 };
@@ -136,6 +138,8 @@ export const useAppointments = create<Store>((set, get) => ({
   load: async () => {
     if (get().loaded) return;
     try {
+      // Partner doctors first, so a live appointment shows its doctor straight away.
+      await hydratePartnerDoctors();
       const raw = await kv.get(KEY);
       set({ items: raw ? (JSON.parse(raw) as Appointment[]) : [], loaded: true });
     } catch {
@@ -143,9 +147,10 @@ export const useAppointments = create<Store>((set, get) => ({
     }
   },
   add: (a) => {
+    const { id: partnerId, ...rest } = a;
     const appt: Appointment = {
-      ...a,
-      id: `a${Date.now().toString(36)}`,
+      ...rest,
+      id: partnerId ?? `a${Date.now().toString(36)}`,
       status: "booked",
       createdAt: new Date().toISOString(),
     };
@@ -153,6 +158,7 @@ export const useAppointments = create<Store>((set, get) => ({
     set({ items });
     persist(items);
     inbox(appt, "booked");
+    if (partnerId) return appt;
     void fileInvoice(appt, (invoiceId) => {
       const next = get().items.map((x) => (x.id === appt.id ? { ...x, invoiceId } : x));
       set({ items: next });

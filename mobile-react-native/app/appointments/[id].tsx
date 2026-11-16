@@ -35,6 +35,7 @@ import {
   whenLabel,
 } from "@/lib/booking/appointments";
 import { SPECIALTIES, doctorById } from "@/lib/booking/catalog";
+import { lsIdOf } from "@/lib/booking/partner-doctors";
 import { doctorFace } from "@/lib/booking/faces";
 import { brand, hue, ink, lilac } from "@/theme/tokens";
 import { font } from "@/theme/type";
@@ -217,7 +218,7 @@ export default function AppointmentDetail() {
           <Row icon={<ClipboardCheck size={17} color={ink[900]} />} title="Pre-consultation note shared" line={`For ${appt.forName === "Me" ? "you" : appt.forName} · ${appt.concern}`} />
           <View className="flex-row items-center justify-between rounded-lg px-3.5 py-3" style={{ backgroundColor: lilac.mist }}>
             <Text style={{ fontFamily: font.medium, fontSize: 13, color: ink[700] }}>{online ? "Consultation fee" : "Pay at the clinic"}</Text>
-            <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>₹{fee}</Text>
+            <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>{fee ? `₹${fee}` : "On the bill"}</Text>
           </View>
         </Glass>
 
@@ -288,7 +289,17 @@ export default function AppointmentDetail() {
         confirmLabel="Yes, cancel it"
         cancelLabel="Keep it"
         destructive
-        onConfirm={() => {
+        onConfirm={async () => {
+          // A partner booking is cancelled with the doctor's desk first; if that fails it stays booked.
+          if (lsIdOf(doctor.id) !== null) {
+            try {
+              await labstack().consult.cancel(appt.id, "Cancelled by the patient");
+            } catch (e) {
+              setConfirmCancel(false);
+              setJoinNote(e instanceof PartnerError ? e.message : "Couldn't cancel it. Try again in a minute.");
+              return;
+            }
+          }
           cancel(appt.id);
           setConfirmCancel(false);
         }}

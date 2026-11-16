@@ -577,6 +577,11 @@ export default function Ask() {
                     onOpenMemory={() => router.push("/memory")}
                     onBook={(mode) => (mode === "online" ? router.push({ pathname: "/book/instant", params: { who: memberId ?? "" } } as never) : router.push({ pathname: "/book/consult", params: { mode, who: name } }))}
                     onStartBooking={startBooking}
+                    onNowBooking={(b) => {
+                      const first = b.forName.split(/\s+/)[0]?.toLowerCase();
+                      const who = (family.data?.access.selectable ?? []).find((p) => p.name.split(/\s+/)[0]?.toLowerCase() === first)?.id ?? memberId ?? "";
+                      router.push({ pathname: "/book/instant", params: { who } } as never);
+                    }}
                     onOpenRoute={(route) => router.push(route as never)}
                     onSetGoal={memberId ? (goal) => applyGoal(qc, memberId, goal, todayIso()) : undefined}
                   />
