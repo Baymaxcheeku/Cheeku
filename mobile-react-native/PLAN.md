@@ -471,6 +471,11 @@ haptics has to be seen on a simulator or a device before it counts as done.
 - **Meal photos are not read by a model yet.** The plate is read from the
   taps (`src/lib/home/meals.ts`); `daily_logs.analysis` is reserved for the
   server's reading of the photo and the app cannot write it.
+- **Chat pace limits are OFF for review and demos** (2026-11-17,
+  `supabase/manual/chat-limits-demo.sql`: 1000 a minute, 10000 an hour;
+  1000 a day). **Restore 6 a minute and 60 an hour before launch** (the
+  revert line is in that file): the burst limits are what stop one account
+  running up the Gemini bill.
 - **Chat model: Gemini answers, no stand-in** (deployed 2026-11-16; stand-in
   removed 2026-11-17).
   `cheeku-chat` answers with Gemini when the `GEMINI_API_KEY` secret is set
