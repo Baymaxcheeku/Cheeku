@@ -13,7 +13,7 @@ import {
   Lock,
   Pill,
   Rocket,
-  Sparkles,
+  Sunrise,
   Tag,
   Users2,
   type LucideIcon,
@@ -71,7 +71,7 @@ const GROUPS: { title: string; rows: { key: Key; icon: LucideIcon; tint: string;
       },
       {
         key: "dailyNudges",
-        icon: Sparkles,
+        icon: Sunrise,
         tint: hue.teal.bg,
         fg: hue.teal.fg,
         title: "Daily nudges",

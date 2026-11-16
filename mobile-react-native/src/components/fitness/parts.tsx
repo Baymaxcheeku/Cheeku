@@ -12,8 +12,7 @@ import {
   MapPin,
   Music,
   PersonStanding,
-  Sparkles,
-  Star,
+  AudioLines,
   Target,
   Wind,
   Zap,
@@ -47,7 +46,7 @@ export const ACTIVITY_ART: Record<ActivityId, Art> = {
   yoga: { icon: Flower2, fg: hue.teal.fg, bg: hue.teal.bg },
   zumba: { icon: Music, fg: hue.orange.fg, bg: hue.orange.bg },
   swimming: { icon: Droplets, fg: hue.blue.fg, bg: hue.blue.bg },
-  dance: { icon: Sparkles, fg: hue.plum.fg, bg: hue.plum.bg },
+  dance: { icon: AudioLines, fg: hue.plum.fg, bg: hue.plum.bg },
   pilates: { icon: PersonStanding, fg: hue.rose.fg, bg: hue.rose.bg },
   functional: { icon: Flame, fg: hue.orange.fg, bg: hue.orange.wash },
   hiit: { icon: Zap, fg: hue.indigo.fg, bg: brand[100] },
@@ -178,8 +177,7 @@ export function StudioCard({ studio, km, reason, onPress }: { studio: Studio; km
             </View>
             {studio.rating ? (
               <View style={{ flexDirection: "row", alignItems: "center", gap: 3 }}>
-                <Star size={12} color={hue.orange.fg} fill={hue.orange.fg} />
-                <Text style={{ fontFamily: font.medium, fontSize: 12, color: ink[500] }}>{studio.rating.toFixed(1)} ({studio.reviews})</Text>
+                <Text style={{ fontFamily: font.medium, fontSize: 12, color: ink[500] }}>{studio.rating.toFixed(1)} rating · {studio.reviews}</Text>
               </View>
             ) : null}
             {studio.sample ? <Text style={{ fontFamily: font.semibold, fontSize: 10, color: ink[300], letterSpacing: 0.6 }}>SAMPLE</Text> : null}
