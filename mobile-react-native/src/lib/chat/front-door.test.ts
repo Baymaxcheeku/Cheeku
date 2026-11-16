@@ -81,6 +81,29 @@ describe("the sparrow, per area", () => {
   });
 });
 
+describe("tests, from Lab tests", () => {
+  const VITD = { key: "vitamin_d", name: "Vitamin D (25-OH)", unit: "ng/mL", latest: { date: "2026-10-11", value: 26, source: "record" }, previous: null, change: null, read: "Below the printed range.", tier: null, refRange: "30-100", flag: "low", focus: false };
+  const withData = (q: string): ModelRequest => ({ ...ask(q, SUGAR_WATCH), memory: { ...DIGEST, readings: [VITD], loops: [{ title: "HbA1c", when: "Due in 8 weeks", type: "repeat_test" }], world: SUGAR_WATCH } });
+  it("lists the tests on the person's list and why", () => {
+    const r = sparrowTurn(withData("Which tests should I do this year?"))!;
+    expect(r.paragraphs[0]).toBe("Already on Arjun's list:\n• HbA1c, due in 8 weeks");
+    expect(r.paragraphs.join(" ")).toContain("HbA1c is the test that tracks it");
+    expect(r.followUps).toContain("Book my HbA1c again");
+  });
+  it("answers 'should I get' from the last result, not from the medicine list", () => {
+    const r = sparrowTurn(withData("Should I get a Vitamin D test?"))!;
+    expect(r.paragraphs[0]).toBe("Last Vitamin D (25-OH) for Arjun: 26 ng/mL on 11 Oct 2026. Below the printed range.");
+    expect(r.paragraphs[1]).toContain("Nothing on file says it's due again yet");
+  });
+  it("says it's due when it is on the list", () => {
+    expect(sparrowTurn(withData("Do I need my HbA1c again?"))!.paragraphs.join(" ")).toContain("So yes, it's due.");
+  });
+  it("leaves questions that aren't about a test alone", () => {
+    expect(sparrowTurn(withData("Do I need a doctor?"))).toBeNull();
+    expect(sparrowTurn(withData("Should I get a flu shot?"))).toBeNull();
+  });
+});
+
 describe("questions about one record", () => {
   it("are left to the record answers, even when the title sounds like a health check", () => {
     expect(sparrowTurn(ask("About Annual health check-up (11 Oct 2026): What does this report say?", SUGAR_WATCH))).toBeNull();

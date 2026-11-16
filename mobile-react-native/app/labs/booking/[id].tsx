@@ -1,6 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { Check, FastForward, FileText, MapPin, PenLine } from "lucide-react-native";
+import { Check, FastForward, FileText, MapPin, MessageCircle, PenLine } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
 import { RefreshControl, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -173,6 +173,16 @@ export default function LabBooking() {
               }}
             >
               {`Open ${member?.isPrimary ? "your" : `${first}'s`} report`}
+            </PillButton>
+            <PillButton
+              tone="light"
+              icon={<MessageCircle size={17} color={ink[900]} />}
+              onPress={() => {
+                void switchMember(b.profileId);
+                router.push({ pathname: "/ask", params: { record: b.resultDocumentId!, q: "What did my last blood report say?", t: String(Date.now()) } });
+              }}
+            >
+              Ask Cheeku about the result
             </PillButton>
             <PillButton tone="light" icon={<PenLine size={17} color={ink[900]} />} onPress={() => setRating(true)}>
               {`Rate ${partner.name}`}

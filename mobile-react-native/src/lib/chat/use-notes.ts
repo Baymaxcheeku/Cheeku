@@ -75,7 +75,7 @@ async function readBookings(profileId: string): Promise<{ labs: LabIn[]; classes
   };
 }
 
-export function useChatNotes(profileId: string | undefined, ctx: MemoryContext | null, name: string): { notes: ChatNote[]; seen: (key: string) => void } {
+export function useChatNotes(profileId: string | undefined, ctx: MemoryContext | null, name: string): { notes: ChatNote[]; seen: (...keys: string[]) => void } {
   const qc = useQueryClient();
   const bookings = useQuery({ queryKey: ["chat-notes", profileId, "bookings"], queryFn: () => readBookings(profileId!), enabled: Boolean(profileId), staleTime: 60_000 });
   const seenQ = useQuery({
@@ -104,10 +104,10 @@ export function useChatNotes(profileId: string | undefined, ctx: MemoryContext |
     return all.filter((n) => !seenQ.data!.has(n.key));
   }, [ctx, seenQ.data, bookings.data, appts, profileId, name]);
 
-  function seen(key: string) {
-    if (!profileId) return;
+  function seen(...keys: string[]) {
+    if (!profileId || !keys.length) return;
     const next = new Set(seenQ.data ?? []);
-    next.add(key);
+    for (const k of keys) next.add(k);
     qc.setQueryData(["chat-notes", profileId, "seen"], next);
     void kv.set(seenKey(profileId), JSON.stringify([...next].slice(-SEEN_CAP)));
   }

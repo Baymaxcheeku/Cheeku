@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Tap } from "@/components/ui/tap";
 import { artFor, PartnerBadge, RatingLine, rupees, SampleNote } from "@/components/labs/parts";
+import { AskRow } from "@/components/home/today";
 import { Glass, Gradient, glass, glassShadow } from "@/components/ui/glass";
 import { ScreenHeader } from "@/components/ui/screen";
 import { quote } from "@/lib/labs/logic";
@@ -108,6 +109,15 @@ export default function LabTestDetail() {
             <Fact icon={<Droplet size={16} color={ink[900]} />} label="Sample" value={test.sample} />
             <Fact icon={<Hourglass size={16} color={ink[900]} />} label="Fasting" value={test.fastingHours ? `${test.fastingHours} hours` : "Not needed"} />
             <Fact icon={<Clock3 size={16} color={ink[900]} />} label="Report" value={labs.length ? `in ${Math.min(...labs.map((l) => l.p.reportHours))}h` : "-"} />
+          </View>
+
+          {/* Do I need it? Cheeku answers from the last result and what's due. */}
+          <View style={{ marginTop: 16 }}>
+            <AskRow
+              title={test.kind === "package" ? "Is this the right package?" : "Do I need this test?"}
+              sub={test.kind === "package" ? "Cheeku checks what's due and why" : "Cheeku checks the last result and what's due"}
+              q={test.kind === "package" ? "Which tests should I do this year?" : `Should I get a ${test.name.replace(/\s*\(.*?\)/g, "").trim()} test?`}
+            />
           </View>
 
           {inside.length ? (

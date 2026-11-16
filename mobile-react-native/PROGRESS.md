@@ -4377,3 +4377,22 @@ person. `src/lib/chat/notes.ts` (pure, tested), `src/lib/chat/use-notes.ts`.
 
 The sparrow now steps aside for a question scoped to one record, so a title
 like "Annual health check-up" no longer starts the big-picture answer.
+
+## Insurance answers and Ask on Lab tests · 2026-11-16
+
+- **Hospital stays**: "Does my insurance cover hospital stays?" used to say the
+  saved details were silent. A stay in hospital is what a health policy is
+  for, so Cheeku now says yes with the cover left this year, then what shapes
+  the bill from the saved terms (room rent, co-pay, cashless) and any waiting
+  period still running. Top-ups say the deductible applies. Expired or not yet
+  started policies say so instead.
+- **Named conditions**: "Is my diabetes covered?" reads as the pre-existing
+  wait, with the saved end date if there is one. Never a yes from nowhere.
+- **Lab tests**: "Not sure which tests?" on the Lab tests screen, "Do I need
+  this test?" on each test (packages ask which tests are due), and "Ask
+  Cheeku about the result" on a ready booking (scoped to the result).
+- **New sparrow answers**: which tests are due (from the person's open
+  follow-ups and the areas to watch) and "should I get an X test" (the last
+  result and whether it's on the list). A test named like a medicine
+  (Vitamin D) no longer gets the medicine-list answer.
+- Chat notes stay quiet once the person starts typing in a visit.
