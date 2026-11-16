@@ -100,6 +100,7 @@ function readReply(v: unknown): (ModelReply & { modelId?: string }) | null {
     basis: o.basis === "grounded" || o.basis === "silent" ? o.basis : "general",
     careOffer: o.careOffer === true,
     actions: Array.isArray(o.actions) ? (o.actions as ModelReply["actions"]) : undefined,
+    photoSummary: typeof o.photoSummary === "string" && o.photoSummary.trim() ? o.photoSummary.trim().slice(0, 400) : null,
     modelId: typeof o.modelId === "string" ? o.modelId : undefined,
   };
 }

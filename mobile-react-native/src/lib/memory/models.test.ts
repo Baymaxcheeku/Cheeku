@@ -33,6 +33,13 @@ describe("the chat model: Gemini through cheeku-chat, no stand-in", () => {
     expect(m.id).toBe("gemini:gemini-3.5-flash-lite");
   });
 
+  it("reads what the photo showed, so it can be saved in place of the photo", async () => {
+    invoke.mockResolvedValue({ data: { paragraphs: ["ok"], photoSummary: "  Strip of cetirizine 10 mg.  " }, error: null });
+    expect((await chatModel().respond(req())).photoSummary).toBe("Strip of cetirizine 10 mg.");
+    invoke.mockResolvedValue({ data: { paragraphs: ["ok"] }, error: null });
+    expect((await chatModel().respond(req())).photoSummary).toBeNull();
+  });
+
   it("sends the photo with the request", async () => {
     invoke.mockResolvedValue({ data: { paragraphs: ["a strip of paracetamol"] }, error: null });
     await chatModel().respond({ ...req(), image: { mimeType: "image/jpeg", data: "abc" } });

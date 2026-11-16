@@ -71,6 +71,8 @@ PHOTO says when a photo came with the question. Look at it carefully and say pla
 - If the photo is blurry, too dark, cut off or you cannot read it, say exactly that and ask for a clearer one. Never guess a medicine's name or a number you cannot read.
 - If it has nothing to do with health, say so kindly in one line and ask what they wanted to know.
 - Never describe or comment on a person's face, looks or identity.
+- Always fill photoSummary: one or two plain sentences of what the photo shows, as a record for later (the photo itself is usually not kept). Names, strengths, values and dates you can actually read; no advice, no diagnosis, nothing about faces. Example: "Strip of Cetirizine Hydrochloride 10 mg tablets (antihistamine), 10 tablets, marked may cause drowsiness." Without a photo, leave it null.
+- "Photos shown before" in MEMORY is what earlier photos showed. Use it when they refer back ("the tablets I showed you").
 
 # Keep it about the question
 - Do not open by listing the records you looked at. Mention a record only when it bears on what they asked.
@@ -89,7 +91,7 @@ WORLD.family appears only when the account holder asked about everyone. Give one
 
 # Output
 Reply ONLY with JSON matching REPLY_SCHEMA:
-paragraphs (array of strings; a list is a heading line then "• " lines in one string), citations, followUps (0 to 3 short chips in the person's own words), tier (optional, never below FLOOR), basis ("grounded" if from their data, "general" if general knowledge, "silent" if nothing to go on), careOffer (true to offer a doctor nearby or online), actions (optional, as above).
+paragraphs (array of strings; a list is a heading line then "• " lines in one string), citations, followUps (0 to 3 short chips in the person's own words), tier (optional, never below FLOOR), basis ("grounded" if from their data, "general" if general knowledge, "silent" if nothing to go on), careOffer (true to offer a doctor nearby or online), actions (optional, as above), photoSummary (with a photo: what it shows; else null).
 `.trim();
 
 export const REPLY_SCHEMA = {
@@ -103,6 +105,7 @@ export const REPLY_SCHEMA = {
     tier: { type: ["string", "null"], enum: ["reassure", "monitor", "contact_today", "go_now", null] },
     basis: { type: "string", enum: ["grounded", "general", "silent"] },
     careOffer: { type: "boolean" },
+    photoSummary: { type: ["string", "null"], maxLength: 400 },
     actions: {
       type: "array",
       maxItems: 3,
@@ -145,6 +148,7 @@ export function renderRequest(body: Obj): string {
   out.push(list("Records (id: title, date)", arr(m.records).slice(0, 12).map((r) => `${r.id}: ${r.title}, ${r.date ?? "no date"}${arr(r.values).length ? `. ${arr(r.values).slice(0, 6).map((v) => `${v.name} ${v.value}${v.flag ? ` (${v.flag})` : ""}`).join(", ")}` : ""}`)));
   out.push(list("Symptom guides", arr(m.symptoms).map((s) => `${s.label}: ${s.mechanism}${strs(s.homeCare).length ? ` Home care: ${strs(s.homeCare).join(" ")}` : ""}${strs(s.watchFor).length ? ` See a doctor if: ${strs(s.watchFor).join("; ")}.` : ""}`)));
   out.push(list("Readings that would help (ask for one)", strs(m.askForReadings)));
+  out.push(list("Photos shown before (newest first)", arr(m.photos).map((p) => `${p.date}: ${p.summary}`)));
   out.push(list("Insurance", arr(m.cover).flatMap((c) => strs(c.lines).map((l) => `${c.insurer}: ${l}`))));
   out.push(list("Notes", strs(m.notes)));
   if (w) {
@@ -404,6 +408,8 @@ function shape(out: Record<string, unknown>, modelId: string): Response {
     careOffer: out.careOffer === true,
     // Buttons the model proposes; the app keeps only known goals and allowed screens.
     actions: Array.isArray(out.actions) ? out.actions.slice(0, 3) : [],
+    // What a photo showed: saved as memory in place of the photo.
+    photoSummary: typeof out.photoSummary === "string" && out.photoSummary.trim() ? out.photoSummary.trim().slice(0, 400) : null,
     modelId,
   });
 }

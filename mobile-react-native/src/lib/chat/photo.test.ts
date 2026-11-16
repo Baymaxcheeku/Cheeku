@@ -26,7 +26,7 @@ vi.mock("expo-image-manipulator", () => ({
   },
 }));
 
-const { fit, pickChatPhoto, within } = await import("./photo");
+const { fit, keepableCopy, pickChatPhoto, within } = await import("./photo");
 
 describe("chat photos", () => {
   it("shrinks the long side and never upscales", () => {
@@ -42,12 +42,19 @@ describe("chat photos", () => {
     expect(requestMediaLibraryPermissionsAsync).not.toHaveBeenCalled();
   });
 
-  it("makes the 1280 copy, then the thumbnail from that copy, and says when it starts", async () => {
+  it("makes one 1280 copy for the model, keeps no thumbnail, and says when it starts", async () => {
     launchImageLibraryAsync.mockResolvedValue({ canceled: false, assets: [{ uri: "file://p.heic", width: 4000, height: 3000 }] });
     const picked = vi.fn();
     const got = await pickChatPhoto("library", picked);
     expect(picked).toHaveBeenCalledOnce();
-    expect(got).toEqual({ uri: "file://p.heic>1280", image: { mimeType: "image/jpeg", data: "B641280" }, thumb: "data:image/jpeg;base64,B64256" });
+    expect(got).toEqual({ uri: "file://p.heic>1280", image: { mimeType: "image/jpeg", data: "B641280" }, original: { uri: "file://p.heic", width: 4000, height: 3000 } });
+  });
+
+  it("re-draws the kept copy at 2048 px from the original, so no EXIF is stored", async () => {
+    launchImageLibraryAsync.mockResolvedValue({ canceled: false, assets: [{ uri: "file://p.heic", width: 4000, height: 3000 }] });
+    const got = await pickChatPhoto("library");
+    if (!got || typeof got === "string") throw new Error("no photo");
+    expect(await keepableCopy(got)).toBe("file://p.heic>2048");
   });
 
   it("turns a picker failure into a sentence instead of hanging", async () => {

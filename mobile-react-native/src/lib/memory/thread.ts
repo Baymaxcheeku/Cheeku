@@ -180,15 +180,28 @@ function readMemory(v: unknown): TurnMemory | null {
   };
 }
 
-export type ChatAttachment =
-  | { kind: "photo"; thumb: string }
-  | { kind: "product"; scenarioId: string; title: string; thumbnail: string };
+/*
+ * A photo asked about: by default only `summary` (what Cheeku saw) is kept and
+ * the picture is gone. `path` is set when they chose "Keep photo": the
+ * picture in the private documents bucket. `thumb` is only on rows from the
+ * first version (2026-11-17), which kept a small preview.
+ */
+export type PhotoAttachment = { kind: "photo"; summary: string | null; path: string | null; thumb: string | null };
 
-/** Only shapes the bubble can draw; a photo thumbnail must be a JPEG or PNG data: URI. */
+export type ChatAttachment = PhotoAttachment | { kind: "product"; scenarioId: string; title: string; thumbnail: string };
+
+/** Only shapes the bubble can draw; a thumbnail must be a JPEG or PNG data: URI. */
 export function readAttachment(v: unknown): ChatAttachment | null {
   if (!v || typeof v !== "object") return null;
   const o = v as Record<string, unknown>;
-  if (o.kind === "photo") return typeof o.thumb === "string" && /^data:image\/(jpeg|png);base64,/.test(o.thumb) ? { kind: "photo", thumb: o.thumb } : null;
+  if (o.kind === "photo") {
+    return {
+      kind: "photo",
+      summary: typeof o.summary === "string" && o.summary.trim() ? o.summary.trim() : null,
+      path: typeof o.path === "string" && /^[0-9a-f-]{36}\/[0-9a-f-]{36}\/chat-[0-9a-f-]{36}\.jpg$/.test(o.path) ? o.path : null,
+      thumb: typeof o.thumb === "string" && /^data:image\/(jpeg|png);base64,/.test(o.thumb) ? o.thumb : null,
+    };
+  }
   if (o.kind === "product" && typeof o.thumbnail === "string") return { kind: "product", scenarioId: String(o.scenarioId ?? ""), title: String(o.title ?? ""), thumbnail: o.thumbnail };
   return null;
 }

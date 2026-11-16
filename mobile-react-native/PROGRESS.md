@@ -4582,3 +4582,28 @@ like "Annual health check-up" no longer starts the big-picture answer.
   copy (one full-size decode, not two); preparing has a 20 s limit and every
   failure is a sentence. `PhotoSheet` is deleted.
 
+
+## Chat photos: a summary is the memory, the photo is optional · 2026-11-17
+
+- **The ask**: "load the image locally, store its summary in the db as memory,
+  remove the image, and give an option to save it as it is in the bucket."
+- **Default**: the photo stays on the phone (shown in the thread for this
+  visit only). Gemini returns `photoSummary` (one or two sentences of what it
+  shows, no advice) and that alone is saved, on the person's message
+  (`attachment: {kind: "photo", summary, path: null}`). After the app closes
+  the bubble reads "Photo not kept" with the summary. The thumbnail the first
+  version kept is gone.
+- **Memory**: `photosFor()` reads the last 8 summaries for the member, they
+  ride in `MemoryDigest.photos`, and the prompt lists them as "Photos shown
+  before", so "the tablets I showed you" works days later. No migration:
+  messages.attachment is jsonb already.
+- **Keep photo** (a switch on the preview, off each time): a copy re-drawn at
+  2048 px (no EXIF) goes to the private documents bucket at
+  `<user>/<profile>/chat-<uuid>.jpg` (0005's folder policy), uploaded only
+  after the answer exists, removed again if the message fails to save, and
+  shown through an hour-long signed URL. `readAttachment` only accepts that
+  path shape.
+- **"Image fails to send"** on 2026-11-17 was the meter: the account had made
+  25 model calls in 24 h (free_daily 20 + free_model_extra 5), so every turn
+  was refused before Gemini. `chat-limits-1000.sql` is the fix; it has not
+  been run yet.

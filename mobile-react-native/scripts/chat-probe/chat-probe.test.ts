@@ -105,7 +105,7 @@ it("reports who answered each question", async () => {
     const full = process.env.CHAT_PROBE_FULL === "1";
     const first = full ? (plan.reply?.paragraphs ?? []).join("\n   ") || "(safety script, no model)" : plan.reply?.paragraphs?.[0] ?? "(safety script, no model)";
     const shown = full ? first : `${first.slice(0, 150)}${first.length > 150 ? "..." : ""}`;
-    rows.push(`\nQ: ${q}\n   -> ${who}  [${ms} ms${fn ? `, function ${fn.status} in ${fn.ms} ms` : ""}]\n   "${shown}"${full && plan.reply?.followUps?.length ? `\n   chips: ${plan.reply.followUps.join(" / ")}` : ""}`);
+    rows.push(`\nQ: ${q}\n   -> ${who}  [${ms} ms${fn ? `, function ${fn.status} in ${fn.ms} ms` : ""}]\n   "${shown}"${full && plan.reply?.followUps?.length ? `\n   chips: ${plan.reply.followUps.join(" / ")}` : ""}${IMAGE ? `\n   saved as memory: ${plan.reply?.photoSummary ?? "(no photoSummary)"}` : ""}`);
   }
   const report = `\n===== WHO ANSWERED (${today}) =====${rows.join("\n")}\n`;
   console.log(report);

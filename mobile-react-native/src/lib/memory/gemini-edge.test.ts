@@ -137,6 +137,12 @@ describe("a photo with the question", () => {
     expect(JSON.stringify(sent)).toContain('"inlineData":{"mimeType":"image/jpeg","data":"aGVsbG8="}');
   });
 
+  it("hands earlier photos' descriptions to the model as memory", () => {
+    const text = renderRequest({ question: "are those tablets ok?", history: [], memory: { photos: [{ date: "2026-11-17", summary: "Strip of cetirizine 10 mg." }] }, floor: {} });
+    expect(text).toContain("## Photos shown before (newest first)\n- 2026-11-17: Strip of cetirizine 10 mg.");
+    expect(REPLY_SCHEMA.properties.photoSummary).toBeTruthy();
+  });
+
   it("is announced in the rendered request, so the model knows to look", () => {
     const base = { question: "what is this?", history: [], memory: {}, floor: {} };
     expect(renderRequest({ ...base, image })).toContain("# PHOTO\nThey sent one photo");

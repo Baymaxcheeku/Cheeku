@@ -91,6 +91,8 @@ function shape(out: Record<string, unknown>, modelId: string): Response {
     careOffer: out.careOffer === true,
     // Buttons the model proposes; the app keeps only known goals and allowed screens.
     actions: Array.isArray(out.actions) ? out.actions.slice(0, 3) : [],
+    // What a photo showed: saved as memory in place of the photo.
+    photoSummary: typeof out.photoSummary === "string" && out.photoSummary.trim() ? out.photoSummary.trim().slice(0, 400) : null,
     modelId,
   });
 }

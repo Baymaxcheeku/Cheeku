@@ -279,7 +279,7 @@ export async function planTurn(args: {
       logged,
       changes: [...changes.map((c) => c.text), ...labFlags.map((r) => r.text)],
       askForReadings: missingReadings,
-    }), world: args.world ? await args.world(ctx).catch(() => undefined) : undefined },
+    }), ...(args.bundle.photos?.length ? { photos: args.bundle.photos.slice(0, 8) } : {}), world: args.world ? await args.world(ctx).catch(() => undefined) : undefined },
     floor: { tier: floor.tier, reasons: floor.reasons.map((r) => r.text) },
     ...(args.image ? { image: args.image } : {}),
   });

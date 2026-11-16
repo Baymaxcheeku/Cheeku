@@ -3,6 +3,8 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import {
   ArrowUp,
   ArrowUpRight,
+  Bookmark,
+  Check,
   ArrowLeftRight,
   BookOpen,
   Camera,
@@ -137,6 +139,8 @@ export default function Ask() {
   const [photoBusy, setPhotoBusy] = useState(false);
   /** The photo waiting to go with the next message, shown above the composer. */
   const [photo, setPhoto] = useState<ChatPhoto | null>(null);
+  /** "Keep photo": off by default, so only what Cheeku saw is saved. Per photo. */
+  const [keepThis, setKeepThis] = useState(false);
   /** The photo in flight, for the pending bubble. */
   const [pendingPhoto, setPendingPhoto] = useState<ChatPhoto | null>(null);
   const [focused, setFocused] = useState(false);
@@ -254,7 +258,7 @@ export default function Ask() {
     setPendingText(text);
     setPendingPhoto(withPhoto);
     try {
-      const res = await sendTurn({ text, profileId, thread, bundle, about: profileId === memberId ? (aboutOverride !== undefined ? aboutOverride : about) : null, isPrimary: Boolean(everyone.find((p) => p.id === profileId)?.isPrimary), photo: withPhoto, qc });
+      const res = await sendTurn({ text, profileId, thread, bundle, about: profileId === memberId ? (aboutOverride !== undefined ? aboutOverride : about) : null, isPrimary: Boolean(everyone.find((p) => p.id === profileId)?.isPrimary), photo: withPhoto, keepPhoto: Boolean(withPhoto) && keepThis, qc });
       if (!res.ok) {
         // Nothing was saved: put their words and photo back to send again.
         if (withPhoto) setPhoto(withPhoto);
@@ -271,6 +275,9 @@ export default function Ask() {
         return;
       }
       appendToThread(res.assistant ? [res.user, res.assistant] : [res.user], profileId);
+      if (withPhoto) setKeepThis(false);
+      if (res.photoNotKept) setError("Couldn't keep the photo, so only what it showed was saved.");
+      if (withPhoto) void qc.invalidateQueries({ queryKey: memoryKey(profileId) });
       setAboutId(null);
       if (res.plan.facts.length || res.plan.revisions.length) refreshMemory(qc, profileId);
       void qc.invalidateQueries({ queryKey: ["ask-context", profileId, "quota"] });
@@ -294,7 +301,10 @@ export default function Ask() {
     try {
       const got = await pickChatPhoto(source, () => setPhotoBusy(true));
       if (typeof got === "string") setError(got);
-      else if (got) setPhoto(got);
+      else if (got) {
+        setPhoto(got);
+        setKeepThis(false);
+      }
     } finally {
       setPhotoBusy(false);
     }
@@ -637,7 +647,7 @@ export default function Ask() {
 
               {pendingText ? (
                 <>
-                  <UserBubble message={{ id: "pending", conversationId: "", role: "user", content: pendingText, createdAt: "", tier: null, memory: null, citations: [], safety: "clear", attachment: pendingPhoto ? { kind: "photo", thumb: pendingPhoto.thumb } : null, assessment: null }} />
+                  <UserBubble message={{ id: "pending", conversationId: "", role: "user", content: pendingText, createdAt: "", tier: null, memory: null, citations: [], safety: "clear", attachment: pendingPhoto ? { kind: "photo", summary: null, path: null, thumb: pendingPhoto.uri } : null, assessment: null }} />
                   <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
                     <MascotBust size={28} mood="thinking" motion="idle" />
                     <Glass strong className="rounded-xl px-4 py-3.5" style={{ borderTopLeftRadius: 6 }}>
@@ -711,10 +721,22 @@ export default function Ask() {
             </View>
           ) : photo ? (
             <View style={{ flexDirection: "row", alignItems: "center", gap: 12, alignSelf: "flex-start", padding: 6, paddingRight: 8, borderRadius: 20, backgroundColor: glass.fillStrong, borderWidth: 1, borderColor: glass.rim }}>
-              <Image source={{ uri: photo.thumb }} accessibilityLabel="Photo to ask about" style={{ width: 56, height: 56, borderRadius: 14 }} resizeMode="cover" />
-              <View style={{ maxWidth: 200 }}>
-                <Text style={{ fontFamily: font.semibold, fontSize: 13, color: ink[900] }}>Photo added</Text>
-                <Text style={{ fontFamily: font.regular, fontSize: 12, color: ink[500] }}>Ask anything about it, or just send</Text>
+              <Image source={{ uri: photo.uri }} accessibilityLabel="Photo to ask about" style={{ width: 56, height: 56, borderRadius: 14 }} resizeMode="cover" />
+              <View style={{ maxWidth: 190, gap: 6 }}>
+                <Text style={{ fontFamily: font.semibold, fontSize: 13, color: ink[900] }}>Ask anything about it</Text>
+                <Tap
+                  scale={0.97}
+                  accessibilityRole="switch"
+                  accessibilityLabel="Keep photo"
+                  accessibilityHint="Saves a copy in your private storage. Off: only what Cheeku saw is remembered."
+                  accessibilityState={{ checked: keepThis }}
+                  onPress={() => setKeepThis((v) => !v)}
+                  hitSlop={8}
+                  style={{ flexDirection: "row", alignItems: "center", gap: 6, alignSelf: "flex-start", height: 28, paddingHorizontal: 10, borderRadius: 999, backgroundColor: keepThis ? brand[600] : surface.tint }}
+                >
+                  {keepThis ? <Check size={13} color="#fff" /> : <Bookmark size={13} color={ink[700]} />}
+                  <Text style={{ fontFamily: font.semibold, fontSize: 12, color: keepThis ? "#fff" : ink[700] }}>{keepThis ? "Photo will be kept" : "Keep photo"}</Text>
+                </Tap>
               </View>
               <Tap scale={0.95} accessibilityRole="button" accessibilityLabel="Remove photo" onPress={() => setPhoto(null)} hitSlop={10} style={{ width: 32, height: 32, borderRadius: 999, alignItems: "center", justifyContent: "center", backgroundColor: surface.tint }}>
                 <X size={15} color={ink[700]} />
