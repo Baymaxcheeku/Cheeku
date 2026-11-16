@@ -20,6 +20,13 @@ export const LONGEVITY = /\b(how am i doing|how(?:'s| is) (?:my|\w+'?s?) health|
 export const WEEK = /\b(my week|(?:\w+'s )?week(?:ly)? (?:summary|check.?in|review)|how was (?:my|the|\w+'s) week|this week so far|weekly|hafta|hafte)\b/i;
 export const DEVICE = /\b(how did i sleep|my sleep|sleep (?:this|last) week|my steps|steps (?:this|today)|resting heart|heart rate|hrv|my watch|fitbit|apple health|health connect|workouts?|how active)\b/i;
 export const CARE = /\b(my (?:bookings?|appointments?|tests booked|classes)|upcoming|what(?:'s| is) booked|any (?:bookings?|appointments?)|next (?:test|appointment|class))\b/i;
+/** "How is my sugar doing?", "tell me about my sleep": one area, from Home's area strip or typed. */
+export const AREA_Q = /\b(?:how(?:'s| is| are)|what about|tell me about|explain) (?:my |\w+'s |the )?(heart(?: and bp)?|bp|blood pressure|sugar|sleep|movement|moving|steps|weight|check-?ups)\b/i;
+/** The "Goals" shortcut: change or pick the goal the daily plan is built around. */
+export const GOALS = /\b((?:change|switch|pick|set|choose|update) (?:my |a |the )?(?:goal|plan)s?|my goals?|plan and goals?|goals? and plan)\b/i;
+/** The "Book" shortcut: what can be set up, before they name a test or a doctor. */
+export const BOOK_MENU = /\b(book something|start a booking|i want to book|help me book|what can you book|book for (?:me|us))\b/i;
+const AREA_WORD: Record<string, string> = { heart: "heart", "heart and bp": "heart", bp: "heart", "blood pressure": "heart", sugar: "sugar", sleep: "sleep", movement: "movement", moving: "movement", steps: "movement", weight: "weight", checkups: "checkups", "check-ups": "checkups" };
 const WANTS = /\b(want|wanna|help me|trying|i'?d like|goal|plan to|need to|chahta|chahti|start)\b/i;
 const GOAL_WORDS: { goal: "sleep" | "weight" | "sugar" | "legs" | "calm"; match: RegExp }[] = [
   { goal: "weight", match: /\b(lose weight|weight (?:loss|kam)|reduce (?:my )?weight|lose \d+ ?kg|patla|slim down)\b/i },
@@ -45,7 +52,7 @@ function opener(q: string): string {
 /** How an area reads mid-sentence: "your heart and BP", not "heart and bp". */
 const AREA_SAY: Record<string, string> = { heart: "your heart and BP", sugar: "sugar", sleep: "sleep", movement: "moving more", weight: "weight", checkups: "the check-ups" };
 
-const WORD = { on_track: "on track", watch: "worth watching", act: "needs a step", unknown: "not enough to go on" } as const;
+const WORD = { on_track: "on track", watch: "keep an eye on it", act: "needs a step", unknown: "not enough to go on" } as const;
 
 function calm(req: ModelRequest): boolean {
   const t = req.floor.tier;
@@ -147,6 +154,72 @@ function week(req: ModelRequest, w: WorldDigest): ModelReply {
   };
 }
 
+/** What helps each area, in one line. General knowledge, said plainly. */
+const AREA_HELP: Record<string, string> = {
+  heart: "What helps: a 20-minute walk most days, less salt and fried food, and BP checked once a month if there's a machine at home.",
+  sugar: "What helps: a short walk after meals, dal or salad before rice, and fewer sweet drinks. Small, daily, boring: that's what moves HbA1c.",
+  sleep: "What helps: the same bedtime every night, the phone out of the room, and no tea or coffee after 4 pm.",
+  movement: "What helps: a few hundred more steps each week, not a big jump. Stairs and a walk after dinner add up fast.",
+  weight: "What helps: one food swap at a time and a weigh-in once a week, same day, same time. Half a kilo a week is plenty.",
+  checkups: "What helps: one yearly check-up on the calendar, and repeat tests booked when they're due. I'll remind you.",
+};
+
+const AREA_ROUTE: Record<string, [string, string]> = {
+  heart: ["/labs", "Book a heart check"],
+  sugar: ["/labs", "Book a sugar test"],
+  sleep: ["/wearables/sleep", "Open my sleep"],
+  movement: ["/fitness", "Find a class nearby"],
+  weight: ["/today", "Today's plan"],
+  checkups: ["/labs", "Book a check-up"],
+};
+
+function areaTurn(req: ModelRequest, w: WorldDigest, key: string): ModelReply {
+  const name = req.memory.person.firstName;
+  const a = w.longevity.find((x) => x.area === key);
+  const label = a?.label ?? ({ heart: "Heart and BP", sugar: "Sugar", sleep: "Sleep", movement: "Movement", weight: "Weight", checkups: "Check-ups" } as Record<string, string>)[key] ?? key;
+  const goal = goalForArea(key as never);
+  const route = AREA_ROUTE[key];
+  const actions: ChatAction[] = [];
+  if (goal && a && a.status !== "on_track") actions.push(goalAction(goal));
+  if (route) actions.push(open(route[0], route[1]));
+  if (!a || a.status === "unknown") {
+    const how = key === "sleep" || key === "movement" ? "Connect a watch, or just tell me (\"slept 6 hours\", \"walked 5k\")" : "A recent blood report would tell me";
+    return { paragraphs: [`${label}: nothing to go on for ${name} yet. ${how}, and I'll keep an eye on it from then.`, AREA_HELP[key] ?? ""].filter(Boolean), citations: [], followUps: ["How am I doing overall?"], basis: "silent", actions: key === "sleep" || key === "movement" ? [open("/wearables/connect", "Connect a watch"), ...actions.slice(0, 1)] : actions };
+  }
+  const lines = key === "sleep" || key === "movement" ? w.device.filter((d) => (key === "sleep" ? /sleep/i : /step|active|walk/i).test(d)).map((d) => d.replace(/^Sample data, not a real reading\. /, "")) : [];
+  const paragraphs = [
+    `${label}, for ${name}: ${WORD[a.status]}.`,
+    a.line,
+    ...(lines.length ? [`From the watch:\n${lines.map((l) => `• ${l}`).join("\n")}`] : []),
+    ...(a.sample ? ["(Some of this is sample data for now, not a real reading.)"] : []),
+    a.status === "on_track" ? "Nothing to change here. Keep doing what you're doing." : AREA_HELP[key] ?? "",
+  ].filter(Boolean);
+  return { paragraphs, citations: [], followUps: ["How am I doing overall?", "How was my week?"], basis: "grounded", actions: actions.slice(0, 3) };
+}
+
+const GOAL_PITCH: Record<keyof typeof GOAL_LABEL, string> = { sleep: "I want to sleep better", weight: "I want to lose weight", sugar: "I want to control my sugar", legs: "I want to walk more", calm: "I want to stress less" };
+
+function goalsMenu(req: ModelRequest, w: WorldDigest): ModelReply {
+  const focus = areasOf(w).find((a) => a.status === "act") ?? areasOf(w).find((a) => a.status === "watch") ?? null;
+  const suggested = focus ? goalForArea(focus.area as never) : null;
+  const paragraphs = [
+    w.today.goal ? `Right now the plan is built around: ${w.today.goal}.` : "No goal picked yet, so the plan is a general one.",
+    suggested && focus ? `If you're asking me, I'd pick ${GOAL_LABEL[suggested]}: ${focus.line}` : "Pick the one that matters most this month. One goal at a time works better than five.",
+  ];
+  const others = (Object.keys(GOAL_PITCH) as (keyof typeof GOAL_LABEL)[]).filter((g) => g !== suggested).slice(0, 3).map((g) => GOAL_PITCH[g]);
+  return { paragraphs, citations: [], followUps: others, basis: "grounded", actions: [...(suggested ? [goalAction(suggested)] : []), open("/today", "See today's plan")] };
+}
+
+function bookMenu(req: ModelRequest, w: WorldDigest): ModelReply {
+  const name = req.memory.person.firstName;
+  const due = req.memory.loops.find((l) => /due|repeat|follow/i.test(`${l.title} ${l.when}`));
+  const paragraphs = [
+    `What should I set up for ${name}? I can book a test at home, a doctor (online or in a clinic) or a class nearby, and everything I book is filed in ${name}'s memory.`,
+    ...(due ? [`Already on the list: ${due.title}, ${due.when.toLowerCase()}. I'll remind you when it's time to book it.`] : []),
+  ];
+  return { paragraphs, citations: [], followUps: ["Book a test at home", "Find a doctor", "Find a yoga class nearby"], basis: "grounded", actions: [open("/labs", "Test at home"), open("/fitness", "Class nearby"), open("/services", "All services")] };
+}
+
 const GOAL_TEXT: Record<keyof typeof GOAL_LABEL, string> = {
   weight: "Slow and steady wins this one: half a kilo a week is plenty, and it stays off. I'll shape the daily plan around one food swap and a walk, and keep weight in your weekly check-in.",
   sleep: "Good sleep fixes more than people think: sugar, mood, cravings, BP. I'll put a wind-down step in the evening plan and watch your nights with you.",
@@ -199,7 +272,8 @@ function care(req: ModelRequest, w: WorldDigest): ModelReply {
   const paragraphs: string[] = [];
   if (upcoming.length) paragraphs.push(`Coming up for ${name}:\n${upcoming.map((u) => `• ${u}`).join("\n")}`);
   if (recent.length) paragraphs.push(`Recently:\n${recent.map((u) => `• ${u}`).join("\n")}`);
-  paragraphs.push("When a result comes back, I'll file it under the right person and tell you what changed.");
+  if ([...upcoming, ...recent].some((l) => /^(Home test|Doctor)/.test(l))) paragraphs.push("When a result comes back, I'll file it under the right person and tell you what changed.");
+  else if (!upcoming.length) paragraphs.push(`Nothing coming up. Want me to book the next one?`);
   return { paragraphs, citations: [], followUps: [], basis: "grounded", actions: [open("/appointments", "My appointments")] };
 }
 
@@ -234,6 +308,13 @@ export function sparrowTurn(req: ModelRequest): ModelReply | null {
   if (WANTS.test(q)) {
     const g = GOAL_WORDS.find((x) => x.match.test(q));
     if (g) return goalTurn(req, w, g.goal);
+  }
+  if (GOALS.test(q)) return goalsMenu(req, w);
+  if (BOOK_MENU.test(q)) return bookMenu(req, w);
+  const area = AREA_Q.exec(q);
+  if (area) {
+    const key = AREA_WORD[area[1]!.toLowerCase()];
+    if (key) return areaTurn(req, w, key);
   }
   if (DEVICE.test(q)) return device(req, w);
   if (CARE.test(q)) return care(req, w);

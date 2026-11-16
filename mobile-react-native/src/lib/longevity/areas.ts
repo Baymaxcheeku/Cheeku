@@ -166,3 +166,8 @@ export function focusAreas(areas: readonly Area[]): Area[] {
 export function goalForArea(key: AreaKey): "sleep" | "weight" | "sugar" | "legs" | null {
   return key === "sleep" ? "sleep" : key === "weight" ? "weight" : key === "sugar" ? "sugar" : key === "movement" ? "legs" : null;
 }
+
+/** What to type in chat to hear about one area. The sparrow answers it (AREA_Q in lib/memory/sparrow). */
+export function areaQuestion(a: Pick<Area, "key" | "label">): string {
+  return a.key === "checkups" ? "How are my check-ups?" : `How is my ${a.key === "heart" ? "heart and BP" : a.label.toLowerCase()} doing?`;
+}

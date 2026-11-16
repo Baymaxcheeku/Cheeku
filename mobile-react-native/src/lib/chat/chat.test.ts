@@ -79,7 +79,7 @@ describe("the sparrow's turns", () => {
 
   it("answers the big picture with areas and offers the matching goal", () => {
     const r = sparrowTurn(ask("How am I doing overall?", world))!;
-    expect(r.paragraphs.join("\n")).toContain("Sugar: worth watching");
+    expect(r.paragraphs.join("\n")).toContain("Sugar: keep an eye on it");
     expect(r.actions?.[0]).toMatchObject({ type: "set_goal", goal: "sugar" });
   });
   it("turns a wish into a goal button", () => {
