@@ -1,6 +1,6 @@
 import { safeActions } from "@/lib/chat/safe-actions";
 import type { ChatAction } from "./model";
-import type { ProductAssessment } from "@/lib/ai/mock/scenarios";
+import type { ProductAssessment } from "@/lib/ai/product-assessment";
 
 import type { BookingIntent } from "./intent";
 import { loopWhen } from "./loops";
@@ -85,7 +85,8 @@ export type ThreadMessage = {
   memory: TurnMemory | null;
   citations: { documentId: string; label: string }[];
   safety: "clear" | "tier2" | "escalated";
-  attachment: { kind: "product"; scenarioId: string; title: string; thumbnail: string } | null;
+  /** "photo": a picture asked about, kept as a small thumbnail. "product": the old demo picker's rows. */
+  attachment: ChatAttachment | null;
   assessment: ProductAssessment | null;
 };
 
@@ -179,9 +180,22 @@ function readMemory(v: unknown): TurnMemory | null {
   };
 }
 
+export type ChatAttachment =
+  | { kind: "photo"; thumb: string }
+  | { kind: "product"; scenarioId: string; title: string; thumbnail: string };
+
+/** Only shapes the bubble can draw; a photo thumbnail must be a JPEG or PNG data: URI. */
+export function readAttachment(v: unknown): ChatAttachment | null {
+  if (!v || typeof v !== "object") return null;
+  const o = v as Record<string, unknown>;
+  if (o.kind === "photo") return typeof o.thumb === "string" && /^data:image\/(jpeg|png);base64,/.test(o.thumb) ? { kind: "photo", thumb: o.thumb } : null;
+  if (o.kind === "product" && typeof o.thumbnail === "string") return { kind: "product", scenarioId: String(o.scenarioId ?? ""), title: String(o.title ?? ""), thumbnail: o.thumbnail };
+  return null;
+}
+
 export function readThreadRow(r: Row): ThreadMessage {
   const safety = r.safety_status === "tier2" || r.safety_status === "escalated" ? r.safety_status : "clear";
-  const attachment = r.attachment && typeof r.attachment === "object" ? (r.attachment as ThreadMessage["attachment"]) : null;
+  const attachment = readAttachment(r.attachment);
   return {
     id: String(r.id),
     conversationId: String(r.conversation_id),

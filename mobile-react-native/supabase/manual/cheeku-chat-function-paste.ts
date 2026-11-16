@@ -62,6 +62,16 @@ People ask "which cough syrup", "what can I take for a headache". A flat "I can'
 - Children under 4: no cough or cold syrups at all (in India these combinations are labelled not for under 4). Under 1: no honey. Children, pregnancy, over 70 or a long-term condition: no over-the-counter suggestions; give the home care and the doctor step.
 - Always include when to see a doctor, from "See a doctor if" in Symptom guides.
 
+# When they send a photo
+PHOTO says when a photo came with the question. Look at it carefully and say plainly what you can see before anything else.
+- A medicine (strip, bottle, box): read the name and the active ingredients off the pack. Say what it is usually for, in one line. Then check it against MEMORY: allergies, conditions, current medicines, pregnancy, age. Say clearly if anything clashes or might. Never a dose beyond "follow the pack or the doctor's prescription"; never tell them to start or stop it.
+- A food or product label: read the parts that matter for this person (sugar, salt, caffeine, an ingredient tied to an allergy or condition in MEMORY).
+- A lab report or prescription: read the values or medicines you can see, tie them to MEMORY, and suggest adding it to their records (open /health-file) so Cheeku remembers it.
+- Skin, a rash, a wound, an eye, a stool or anything on the body: describe what you see in plain words, never name a condition, and give the home care and the "see a doctor if" signs. If it could be serious (spreading redness, blackened skin, a deep wound, blood), set tier to contact_today or higher. Anything on a baby or a child's body: lean to a doctor.
+- If the photo is blurry, too dark, cut off or you cannot read it, say exactly that and ask for a clearer one. Never guess a medicine's name or a number you cannot read.
+- If it has nothing to do with health, say so kindly in one line and ask what they wanted to know.
+- Never describe or comment on a person's face, looks or identity.
+
 # Keep it about the question
 - Do not open by listing the records you looked at. Mention a record only when it bears on what they asked.
 - Write dates the way people say them ("2 June"), never 2026-06-02. Never show record ids in the text; ids go only in citations.
@@ -149,6 +159,7 @@ export function renderRequest(body: Obj): string {
     if (Array.isArray(w.family)) out.push(list("Family round-up", arr(w.family).map((f) => `${f.name}${f.you ? " (you)" : f.relation ? ` (${f.relation})` : ""}: ${f.line}`)));
   }
   out.push(`# THREAD\n${arr(body.history).slice(-8).map((h) => `${h.role === "user" ? "Them" : "Cheeku"}: ${String(h.content).slice(0, 400)}`).join("\n") || "none"}`);
+  out.push(`# PHOTO\n${body.image ? "They sent one photo with this question. It comes after this text." : "none"}`);
   out.push(`# QUESTION\n${body.question}`);
   return out.join("\n\n");
 }
@@ -171,6 +182,12 @@ export function renderRequest(body: Obj): string {
 // reply is logged: it is one person's health memory. Only a model name and an
 // HTTP status ever reach console.
 //
+// A PHOTO (2026-11-17). When the turn carries one, it goes as an inlineData
+// part after the text, in the same single user turn. Only image/jpeg, png or
+// webp, at most MAX_IMAGE_CHARS of base64 (the app sends a re-drawn 1280 px
+// JPEG, a few hundred KB); anything else is dropped, never forwarded. The
+// photo is not stored or logged here either.
+//
 // Keep this file free of imports (prompt.ts is passed in) so it can be joined
 // into the dashboard paste file, supabase/manual/cheeku-chat-function-paste.ts.
 
@@ -188,11 +205,26 @@ export type GeminiResult =
 
 const ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models";
 
+export type GeminiImage = { mimeType: string; data: string };
+
+/** About 3 MB of picture. The app's re-drawn JPEG is a tenth of that. */
+export const MAX_IMAGE_CHARS = 4_000_000;
+const IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
+
+/** The photo from a request body, or null if there is none or it isn't one we forward. */
+export function readImage(v: unknown): GeminiImage | null {
+  if (!v || typeof v !== "object") return null;
+  const o = v as Record<string, unknown>;
+  if (typeof o.mimeType !== "string" || !IMAGE_TYPES.has(o.mimeType)) return null;
+  if (typeof o.data !== "string" || !o.data.length || o.data.length > MAX_IMAGE_CHARS || !/^[A-Za-z0-9+/]+=*$/.test(o.data)) return null;
+  return { mimeType: o.mimeType, data: o.data };
+}
+
 /** The generateContent body for one turn. Pure, so it can be tested. */
-export function geminiBody(system: string, user: string, schema: unknown, thinking = "low"): Record<string, unknown> {
+export function geminiBody(system: string, user: string, schema: unknown, thinking = "low", image: GeminiImage | null = null): Record<string, unknown> {
   return {
     systemInstruction: { parts: [{ text: system }] },
-    contents: [{ role: "user", parts: [{ text: user }] }],
+    contents: [{ role: "user", parts: [{ text: user }, ...(image ? [{ inlineData: { mimeType: image.mimeType, data: image.data } }] : [])] }],
     generationConfig: {
       responseMimeType: "application/json",
       responseJsonSchema: schema,
@@ -239,9 +271,10 @@ export async function askGemini(
   user: string,
   schema: unknown,
   budgetMs = 24_000,
+  image: GeminiImage | null = null,
 ): Promise<GeminiResult> {
   const models = [...new Set(cfg.models.map((m) => m.trim()).filter(Boolean))];
-  const body = JSON.stringify(geminiBody(system, user, schema, cfg.thinking || "low"));
+  const body = JSON.stringify(geminiBody(system, user, schema, cfg.thinking || "low", image));
   const deadline = Date.now() + budgetMs;
   let last: GeminiResult = { ok: false, error: "model_unreachable" };
 
@@ -287,7 +320,8 @@ export async function askGemini(
 // (mobile-react-native/src/lib/memory). What it sends here is one
 // ModelRequest (see src/lib/memory/model.ts):
 //
-//   { question, history[], memory: MemoryDigest, floor: { tier, reasons[] } }
+//   { question, history[], memory: MemoryDigest, floor: { tier, reasons[] },
+//     image?: { mimeType, data } }   (one photo they asked about, base64; never stored)
 //
 // and what it expects back is one ModelReply:
 //
@@ -310,13 +344,13 @@ export async function askGemini(
 //      and renderRequest() from prompt.ts. GEMINI_MODEL (default
 //      gemini-3.5-flash-lite) first, then GEMINI_FALLBACK_MODEL (default
 //      gemini-3.5-flash).
-//   3. neither: 503 and the app uses its built-in stand-in.
+//   3. neither: 503, and the app says Cheeku couldn't answer (it has no stand-in).
 //
 // EVERY CALL IS CLAIMED FIRST. claim_model_call() (migration 0035) runs as the
 // caller, through their own JWT, and refuses a spent free allowance, bursts
 // (6 a minute, 60 an hour) and the daily ceiling. A refusal is a 429 with the
 // reason; nothing reaches the model. If the meter can't be reached the answer
-// is 503, never an unmetered call: the app falls back to its stand-in.
+// is 503, never an unmetered call: the app says it couldn't answer.
 //
 // Deploy:  supabase functions deploy cheeku-chat
 //          (JWT verification stays ON: only a signed-in member can call it)
@@ -326,7 +360,7 @@ export async function askGemini(
 //          The key must be on a billed Google Cloud project: on the free tier
 //          Google may use prompts to improve its products, and these prompts
 //          are health records.
-// App:     EXPO_PUBLIC_CHAT_MODEL=edge
+// App:     nothing to set; every model turn comes here (2026-11-17).
 
 
 const TIERS = ["reassure", "monitor", "contact_today", "go_now"];
@@ -390,6 +424,9 @@ Deno.serve(async (req) => {
   }
   if (typeof body.question !== "string" || !body.memory || typeof body.memory !== "object") return json({ error: "bad_request" }, 400);
   if ((body.question as string).length > 2000) return json({ error: "too_long" }, 413);
+  // A photo that is not one we forward is refused before the meter, so it costs no chat.
+  const image = body.image === undefined || body.image === null ? null : readImage(body.image);
+  if (body.image != null && !image) return json({ error: "bad_image", maxChars: MAX_IMAGE_CHARS }, 400);
 
   const authorization = req.headers.get("authorization");
   if (!authorization) return json({ error: "signed_out" }, 401);
@@ -411,6 +448,8 @@ Deno.serve(async (req) => {
       SYSTEM_PROMPT,
       renderRequest(body),
       REPLY_SCHEMA,
+      24_000,
+      image,
     );
     if (!got.ok) return json({ error: got.error, ...(got.status ? { status: got.status } : {}) }, got.error === "model_unreachable" ? 504 : 502);
     return shape(got.reply, `gemini:${got.model}`);

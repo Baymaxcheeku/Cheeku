@@ -15,6 +15,12 @@
 // reply is logged: it is one person's health memory. Only a model name and an
 // HTTP status ever reach console.
 //
+// A PHOTO (2026-11-17). When the turn carries one, it goes as an inlineData
+// part after the text, in the same single user turn. Only image/jpeg, png or
+// webp, at most MAX_IMAGE_CHARS of base64 (the app sends a re-drawn 1280 px
+// JPEG, a few hundred KB); anything else is dropped, never forwarded. The
+// photo is not stored or logged here either.
+//
 // Keep this file free of imports (prompt.ts is passed in) so it can be joined
 // into the dashboard paste file, supabase/manual/cheeku-chat-function-paste.ts.
 
@@ -32,11 +38,26 @@ export type GeminiResult =
 
 const ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models";
 
+export type GeminiImage = { mimeType: string; data: string };
+
+/** About 3 MB of picture. The app's re-drawn JPEG is a tenth of that. */
+export const MAX_IMAGE_CHARS = 4_000_000;
+const IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
+
+/** The photo from a request body, or null if there is none or it isn't one we forward. */
+export function readImage(v: unknown): GeminiImage | null {
+  if (!v || typeof v !== "object") return null;
+  const o = v as Record<string, unknown>;
+  if (typeof o.mimeType !== "string" || !IMAGE_TYPES.has(o.mimeType)) return null;
+  if (typeof o.data !== "string" || !o.data.length || o.data.length > MAX_IMAGE_CHARS || !/^[A-Za-z0-9+/]+=*$/.test(o.data)) return null;
+  return { mimeType: o.mimeType, data: o.data };
+}
+
 /** The generateContent body for one turn. Pure, so it can be tested. */
-export function geminiBody(system: string, user: string, schema: unknown, thinking = "low"): Record<string, unknown> {
+export function geminiBody(system: string, user: string, schema: unknown, thinking = "low", image: GeminiImage | null = null): Record<string, unknown> {
   return {
     systemInstruction: { parts: [{ text: system }] },
-    contents: [{ role: "user", parts: [{ text: user }] }],
+    contents: [{ role: "user", parts: [{ text: user }, ...(image ? [{ inlineData: { mimeType: image.mimeType, data: image.data } }] : [])] }],
     generationConfig: {
       responseMimeType: "application/json",
       responseJsonSchema: schema,
@@ -83,9 +104,10 @@ export async function askGemini(
   user: string,
   schema: unknown,
   budgetMs = 24_000,
+  image: GeminiImage | null = null,
 ): Promise<GeminiResult> {
   const models = [...new Set(cfg.models.map((m) => m.trim()).filter(Boolean))];
-  const body = JSON.stringify(geminiBody(system, user, schema, cfg.thinking || "low"));
+  const body = JSON.stringify(geminiBody(system, user, schema, cfg.thinking || "low", image));
   const deadline = Date.now() + budgetMs;
   let last: GeminiResult = { ok: false, error: "model_unreachable" };
 

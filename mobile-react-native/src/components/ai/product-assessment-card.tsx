@@ -1,7 +1,7 @@
 import { Info, ShieldAlert, ShieldCheck, ShieldX, type LucideIcon } from "lucide-react-native";
 import { Text, View } from "react-native";
 
-import type { ProductAssessment, SafetyLevel } from "@/lib/ai/mock/scenarios";
+import type { ProductAssessment, SafetyLevel } from "@/lib/ai/product-assessment";
 import { ink, semantic, surface } from "@/theme/tokens";
 
 const VERDICT_COPY: Record<SafetyLevel, string> = {

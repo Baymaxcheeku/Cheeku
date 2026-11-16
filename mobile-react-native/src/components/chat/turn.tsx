@@ -18,7 +18,7 @@ import {
   Video,
 } from "lucide-react-native";
 import { useState } from "react";
-import { Linking, ScrollView, Share, Text, View } from "react-native";
+import { Image, Linking, ScrollView, Share, Text, View } from "react-native";
 import { SvgXml } from "react-native-svg";
 
 import { Tap } from "@/components/ui/tap";
@@ -55,7 +55,14 @@ const tel = (n: string) => void Linking.openURL(`tel:${n.replace(/[^\d+]/g, "")}
 export function UserBubble({ message }: { message: ThreadMessage }) {
   return (
     <View style={{ maxWidth: "85%", alignSelf: "flex-end", alignItems: "flex-end", gap: 6 }}>
-      {message.attachment ? (
+      {message.attachment?.kind === "photo" ? (
+        <Image
+          source={{ uri: message.attachment.thumb }}
+          accessibilityLabel="Photo you asked about"
+          style={[glassShadow, { width: 128, height: 128, borderRadius: 18, borderBottomRightRadius: 6, backgroundColor: "#fff" }]}
+          resizeMode="cover"
+        />
+      ) : message.attachment?.kind === "product" ? (
         <View style={[glassShadow, { flexDirection: "row", alignItems: "center", gap: 8, borderRadius: 16, backgroundColor: "#fff", paddingHorizontal: 10, paddingVertical: 8 }]}>
           <SvgXml xml={message.attachment.thumbnail} width={28} height={28} />
           <Text style={{ fontFamily: font.medium, fontSize: 12, color: ink[700] }}>{message.attachment.title}</Text>

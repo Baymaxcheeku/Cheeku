@@ -107,6 +107,8 @@ export type ModelRequest = {
   history: { role: "user" | "assistant"; content: string }[];
   memory: MemoryDigest;
   floor: { tier: Tier | null; reasons: string[] };
+  /** One photo they asked about (lib/chat/photo): a re-drawn JPEG, base64, sent once and never stored. */
+  image?: { mimeType: "image/jpeg"; data: string };
 };
 
 export type ModelReply = {

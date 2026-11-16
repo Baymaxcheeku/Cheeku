@@ -4516,3 +4516,38 @@ like "Annual health check-up" no longer starts the big-picture answer.
 - **Checked live** after deploying: adult dry cough (suppressant type,
   pharmacist, home care, doctor signs), 3-year-old (no syrup, home care,
   honey over 1, breathing signs), "can I stop my metformin" (still refuses).
+
+## Chat: photos go to Gemini, the stand-in is gone · 2026-11-17
+
+- **The ask**: "add camera to add images and ask via Gemini, delete the
+  hard-coded mock data; rule-based routing is fine."
+- **No stand-in.** `lib/memory/mock-model.ts` (canned paragraphs), the canned
+  answer engine (`lib/ai/mock/answer.ts`, `knowledge.ts`) and the fixed
+  product picker (`ProductPicker`, `scenarios.ts`, `askAboutProduct`) are
+  deleted. `chatModel()` always calls `cheeku-chat`; `EXPO_PUBLIC_CHAT_MODEL`
+  no longer exists. A turn the model can't answer throws: `ModelBusy` (pace),
+  `ModelUnavailable("quota")` (allowance or daily ceiling: plans sheet) or
+  `ModelUnavailable("down")` ("couldn't answer, try again"; words and photo
+  stay in the composer). Nothing is saved for a refused turn, so the thread
+  never fills with repeats again.
+- **Why one rules answer survives**: if the floor is contact-today or go-now
+  and the model fails, an error would leave a worried person with nothing.
+  They get `floorReply`: "talk to a doctor today" (or go now) with the rules'
+  reasons, `modelId` `rules:floor`. Emergencies, hard-stops, bookings,
+  insurance-only questions and logging stay with the rules, as before.
+- **Photos**: the camera button opens a sheet (take or choose). The picture is
+  re-drawn as a 1280 px JPEG (drops EXIF, so no GPS), sent once as
+  `ModelRequest.image`, forwarded by the function as an `inlineData` part
+  (JPEG/PNG/WebP, at most 4M base64 chars, else 400 before the meter), and
+  never stored. A 256 px thumbnail is kept on the person's message
+  (`attachment: {kind: "photo", thumb}`) so the thread shows it; `readAttachment`
+  only accepts a JPEG/PNG data URI there. A photo always goes to the model,
+  even when the words alone would be a booking or an insurance question.
+- **The prompt** got "# When they send a photo": say what is visible first;
+  read medicine packs and labels against allergies, conditions and medicines;
+  never name a condition from a body photo, lean to a doctor for children;
+  ask for a clearer shot instead of guessing; never comment on faces.
+- **Tests**: pipeline tests used the stand-in's prose as their oracle. They
+  now use an echo model and check what reached the model (the digest), which
+  is what the rules owe Gemini. New tests for the error paths, the floor
+  answer, the photo routing and the function's image handling.

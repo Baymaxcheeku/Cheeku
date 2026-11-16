@@ -10,8 +10,8 @@ import { supabase } from "@/lib/supabase/client";
 
 import { todayIso } from "./clock";
 import type { MemoryBundle } from "./context";
-import { mockModel } from "./mock-model";
-import { chatModel, ModelBusy } from "./models";
+import type { ChatPhoto } from "@/lib/chat/photo";
+import { chatModel, ModelBusy, ModelUnavailable, noModel } from "./models";
 import { planTurn, type TurnPlan } from "./pipeline";
 import { BOOKING_REPLY, eventMemory, factUsage, readThreadRow, replyText, SITTING_GAP_MS, sittingFor, toTurnMemory, type BookedEvent, type ThreadMessage } from "./thread";
 import type { Fact, Tier } from "./types";
@@ -108,6 +108,9 @@ export type SendResult =
 
 const QUOTA_SPENT = "You've used today's free chats. They reset tomorrow.";
 const BUSY = "That's a lot of messages in a short time. Give it a minute, then send it again.";
+const DOWN = "Cheeku couldn't answer just now. Nothing was sent. Try again in a moment.";
+/** Sent as the words when only a photo is sent. */
+export const PHOTO_QUESTION = "What can you tell me from this photo?";
 
 export async function sendTurn(args: {
   text: string;
@@ -118,9 +121,11 @@ export async function sendTurn(args: {
   about?: { id: string; title: string; date: string | null } | null;
   /** The account holder's own profile: only there can Cheeku give a family round-up. */
   isPrimary?: boolean;
+  /** A photo to ask about (lib/chat/photo). Goes to the model once; only its thumbnail is kept. */
+  photo?: ChatPhoto | null;
   qc?: QueryClient;
 }): Promise<SendResult> {
-  const text = args.text.trim();
+  const text = args.text.trim() || (args.photo ? PHOTO_QUESTION : "");
   if (!text) return { ok: false, message: "Type something first." };
   if (text.length > 1000) return { ok: false, message: "That's a lot for one message. Try splitting it in two." };
 
@@ -137,8 +142,8 @@ export async function sendTurn(args: {
   /*
    * The allowance is read BEFORE planning. With it spent, the turn is still
    * planned (that is where an emergency is recognised, and an emergency is
-   * never refused) but on the on-device stand-in, so a refused question costs
-   * no model call. The server meter refuses it as well; this just avoids asking.
+   * never refused) but with no model, so a refused question costs no model
+   * call. The server meter refuses it as well; this just avoids asking.
    */
   // Steps or sleep said in the message go straight into the day's logs, so
   // the plan and the longevity areas see them, and the answer can say so.
@@ -155,13 +160,15 @@ export async function sendTurn(args: {
       today: todayIso(),
       history: args.thread.slice(-12).map((m) => ({ role: m.role, content: m.content })),
       usage: factUsage(args.thread),
-      model: spent ? mockModel : chatModel(),
+      model: spent ? noModel : chatModel(),
+      image: args.photo?.image,
       newId: randomUUID,
       extraNotes: await extensionChatNotes(args.profileId),
       world: (ctx) => gatherWorld({ profileId: args.profileId, ctx, question: text, isPrimary: Boolean(args.isPrimary), day: todayIso(), justLogged }),
     });
   } catch (e) {
     if (e instanceof ModelBusy) return { ok: false, message: BUSY };
+    if (e instanceof ModelUnavailable) return e.reason === "quota" ? { ok: false, quota: true, message: QUOTA_SPENT } : { ok: false, message: DOWN };
     throw e;
   }
   const emergency = plan.status !== "answered";
@@ -177,7 +184,16 @@ export async function sendTurn(args: {
 
   const safety = emergency ? "escalated" : plan.gate.status === "tier2" ? "tier2" : "clear";
   const now = new Date().toISOString();
-  const userRow = { id: randomUUID(), conversation_id: conversationId, user_id: userId, role: "user", content: text, citations: [], safety_status: safety };
+  const userRow = {
+    id: randomUUID(),
+    conversation_id: conversationId,
+    user_id: userId,
+    role: "user",
+    content: text,
+    citations: [],
+    safety_status: safety,
+    attachment: args.photo ? { kind: "photo", thumb: args.photo.thumb } : null,
+  };
   const memory = toTurnMemory(plan);
   const assistantRow =
     plan.status === "escalate"
@@ -188,6 +204,7 @@ export async function sendTurn(args: {
           user_id: userId,
           role: "assistant",
           content: replyText(plan),
+          attachment: null,
           citations: [
             ...(about ? [{ documentId: about.id, label: about.title }] : []),
             ...(plan.reply?.citations ?? []).filter((c) => c.documentId !== about?.id),

@@ -19,12 +19,12 @@ import {
 import { AskSkeleton } from "@/components/ui/skeleton";
 import { MemoryIcon, ReadsIcon, type AppIcon } from "@/components/ui/icons";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, View, type ScrollViewInstance, type TextInputInstance } from "react-native";
+import { Image, KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, View, type ScrollViewInstance, type TextInputInstance } from "react-native";
 import { Pressable } from "@/components/ui/pressable";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ProductAssessmentCard } from "@/components/ai/product-assessment-card";
-import { ProductPicker } from "@/components/ai/product-picker";
+import { PhotoSheet } from "@/components/chat/photo-sheet";
 import { Paywall } from "@/components/billing/paywall";
 import { AssistantTurn, UserBubble } from "@/components/chat/turn";
 import { MascotBust, MascotFigure } from "@/components/illustrations/sprout";
@@ -37,7 +37,8 @@ import { EmergencyEscalation } from "@/components/safety/emergency-escalation";
 import { Brand } from "@/components/ui/brand";
 import { Glass, GlassCircle, glass, glassShadow } from "@/components/ui/glass";
 import { Backdrop } from "@/components/ui/screen";
-import { askAboutProduct, chatQuota } from "@/lib/ai/chat";
+import { chatQuota } from "@/lib/ai/chat";
+import { pickChatPhoto, type ChatPhoto } from "@/lib/chat/photo";
 import { FREE_CHAT_SOFT_LINE } from "@/lib/billing/plans";
 import { promptEntriesFor } from "@/lib/ask/prompts";
 import { profileSignalsFor } from "@/lib/knowledge/queries";
@@ -46,8 +47,8 @@ import { memoryStarters, type Starter } from "@/lib/memory/starters";
 import { memberIntent } from "@/lib/memory/intent";
 import { applyGoal } from "@/lib/chat/actions";
 import { todayIso } from "@/lib/memory/clock";
-import { fetchMemory, fetchThread, memoryKey, refreshMemory, sendTurn, threadKey, useMemory, useThread } from "@/lib/memory/store";
-import { inOrder, sittingFor, withDayBreaks, type ThreadMessage, type TurnMemory } from "@/lib/memory/thread";
+import { fetchMemory, fetchThread, memoryKey, PHOTO_QUESTION, refreshMemory, sendTurn, threadKey, useMemory, useThread } from "@/lib/memory/store";
+import { inOrder, withDayBreaks, type ThreadMessage, type TurnMemory } from "@/lib/memory/thread";
 import { useLabCart } from "@/lib/labs/queries";
 import { useFamily, useSwitchMember } from "@/lib/profiles/family";
 import { shortDate } from "@/lib/records/details";
@@ -134,6 +135,10 @@ export default function Ask() {
   const [escalation, setEscalation] = useState<SafetyResult | null>(null);
   const [paywallFor, setPaywallFor] = useState<string | null>(null);
   const [pickerOpen, setPickerOpen] = useState(false);
+  /** The photo waiting to go with the next message, shown above the composer. */
+  const [photo, setPhoto] = useState<ChatPhoto | null>(null);
+  /** The photo in flight, for the pending bubble. */
+  const [pendingPhoto, setPendingPhoto] = useState<ChatPhoto | null>(null);
   const [focused, setFocused] = useState(false);
   const [aboutId, setAboutId] = useState<string | null>(record ?? null);
   const [logOpen, setLogOpen] = useState(false);
@@ -161,6 +166,7 @@ export default function Ask() {
       setError(null);
       setAboutId(null);
       setPendingText(null);
+      setPhoto(null);
       stickToEnd.current = true;
     }
     lastMember.current = memberId;
@@ -183,8 +189,8 @@ export default function Ask() {
   }
 
   /** `aboutOverride`: scope this one question to a record, set in the same tap (a note's button). */
-  async function send(raw: string, aboutOverride?: { id: string; title: string; date: string | null } | null) {
-    const text = raw.trim();
+  async function send(raw: string, aboutOverride?: { id: string; title: string; date: string | null } | null, withPhoto: ChatPhoto | null = null) {
+    const text = raw.trim() || (withPhoto ? PHOTO_QUESTION : "");
     // Typing past Cheeku's notes counts as having read them: they don't follow every answer down.
     if (text && shownNotes.length) told.seen(...shownNotes.map((n) => n.key));
     if (text) setTalking(true);
@@ -244,18 +250,23 @@ export default function Ask() {
     stickToEnd.current = true;
     setError(null);
     setDraft("");
+    setPhoto(null);
     setPendingText(text);
+    setPendingPhoto(withPhoto);
     try {
-      const res = await sendTurn({ text, profileId, thread, bundle, about: profileId === memberId ? (aboutOverride !== undefined ? aboutOverride : about) : null, isPrimary: Boolean(everyone.find((p) => p.id === profileId)?.isPrimary), qc });
+      const res = await sendTurn({ text, profileId, thread, bundle, about: profileId === memberId ? (aboutOverride !== undefined ? aboutOverride : about) : null, isPrimary: Boolean(everyone.find((p) => p.id === profileId)?.isPrimary), photo: withPhoto, qc });
       if (!res.ok) {
+        // Nothing was saved: put their words and photo back to send again.
+        if (withPhoto) setPhoto(withPhoto);
+        const back = raw.trim();
         if (res.quota) {
           setPaywallFor(text);
-          setDraft(text);
+          setDraft(back);
           return;
         }
         if (verdict.status !== "escalate") {
           setError(res.message);
-          setDraft(text);
+          setDraft(back);
         }
         return;
       }
@@ -265,7 +276,23 @@ export default function Ask() {
       void qc.invalidateQueries({ queryKey: ["ask-context", profileId, "quota"] });
     } finally {
       setPendingText(null);
+      setPendingPhoto(null);
     }
+  }
+
+  async function choosePhoto(source: "camera" | "library") {
+    setPickerOpen(false);
+    // Let the sheet close before the system picker opens over it.
+    await new Promise((r) => setTimeout(r, 250));
+    const got = await pickChatPhoto(source);
+    if (typeof got === "string") {
+      setError(got);
+      return;
+    }
+    if (!got) return;
+    setError(null);
+    setPhoto(got);
+    setTimeout(() => input.current?.focus(), 50);
   }
 
   /** The booking card's button: the same flows the marketplace uses, filled in. */
@@ -300,24 +327,6 @@ export default function Ask() {
     }
   }
 
-  async function sendProduct(scenarioId: string) {
-    setPickerOpen(false);
-    setError(null);
-    setPendingText("Checking a product…");
-    stickToEnd.current = true;
-    try {
-      const result = await askAboutProduct(scenarioId, sittingFor(messages), "clear");
-      if (!result.ok) {
-        if (result.quota) setPaywallFor("");
-        else setError(result.message);
-        return;
-      }
-      void qc.invalidateQueries({ queryKey: threadKey(memberId) });
-    } finally {
-      setPendingText(null);
-    }
-  }
-
   useEffect(() => {
     if (upload === "1") setPickerOpen(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -329,6 +338,11 @@ export default function Ask() {
     const key = q ? `${q}|${qAt ?? ""}` : null;
     if (!key || sentInitial.current === key || !memory.data || !thread.data) return;
     sentInitial.current = key;
+    // From Home's camera button: their words wait in the box for the photo.
+    if (upload === "1") {
+      setDraft(q!);
+      return;
+    }
     // Carried in with a record (a lab result): scope this question to it, and keep it scoped.
     const d = record ? memory.data.documents.find((x) => x.id === record) : null;
     if (d && record) {
@@ -594,7 +608,7 @@ export default function Ask() {
 
               {pendingText ? (
                 <>
-                  {pendingText !== "Checking a product…" ? <UserBubble message={{ id: "pending", conversationId: "", role: "user", content: pendingText, createdAt: "", tier: null, memory: null, citations: [], safety: "clear", attachment: null, assessment: null }} /> : null}
+                  <UserBubble message={{ id: "pending", conversationId: "", role: "user", content: pendingText, createdAt: "", tier: null, memory: null, citations: [], safety: "clear", attachment: pendingPhoto ? { kind: "photo", thumb: pendingPhoto.thumb } : null, assessment: null }} />
                   <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
                     <MascotBust size={28} mood="thinking" motion="idle" />
                     <Glass strong className="rounded-xl px-4 py-3.5" style={{ borderTopLeftRadius: 6 }}>
@@ -661,7 +675,19 @@ export default function Ask() {
               </Text>
             </Tap>
           ) : null}
-          {!draft.trim() || logOpen ? <ShortcutRow items={chips} logOpen={logOpen} disabled={Boolean(pendingText)} onShortcut={onShortcut} onLog={onLog} onCloseLog={() => setLogOpen(false)} /> : null}
+          {photo ? (
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 12, alignSelf: "flex-start", padding: 6, paddingRight: 8, borderRadius: 20, backgroundColor: glass.fillStrong, borderWidth: 1, borderColor: glass.rim }}>
+              <Image source={{ uri: photo.thumb }} accessibilityLabel="Photo to ask about" style={{ width: 56, height: 56, borderRadius: 14 }} resizeMode="cover" />
+              <View style={{ maxWidth: 200 }}>
+                <Text style={{ fontFamily: font.semibold, fontSize: 13, color: ink[900] }}>Photo added</Text>
+                <Text style={{ fontFamily: font.regular, fontSize: 12, color: ink[500] }}>Ask anything about it, or just send</Text>
+              </View>
+              <Tap scale={0.95} accessibilityRole="button" accessibilityLabel="Remove photo" onPress={() => setPhoto(null)} hitSlop={10} style={{ width: 32, height: 32, borderRadius: 999, alignItems: "center", justifyContent: "center", backgroundColor: surface.tint }}>
+                <X size={15} color={ink[700]} />
+              </Tap>
+            </View>
+          ) : null}
+          {(!draft.trim() && !photo) || logOpen ? <ShortcutRow items={chips} logOpen={logOpen} disabled={Boolean(pendingText)} onShortcut={onShortcut} onLog={onLog} onCloseLog={() => setLogOpen(false)} /> : null}
           <View
             className="flex-row items-end gap-1.5 rounded-xl p-1.5 pl-4"
             style={[glassShadow, { backgroundColor: glass.fillStrong, borderWidth: focused ? 1.5 : 1, borderColor: focused ? brand[300] : glass.rim }]}
@@ -672,24 +698,24 @@ export default function Ask() {
               onChangeText={setDraft}
               onFocus={() => setFocused(true)}
               onBlur={() => setFocused(false)}
-              placeholder={about ? `What do you want to know about it?` : `Ask, or tell me what's going on with ${name}`}
+              placeholder={photo ? "What do you want to know about it?" : about ? `What do you want to know about it?` : `Ask, or tell me what's going on with ${name}`}
               placeholderTextColor={ink[300]}
               accessibilityLabel="Message Cheeku"
               multiline
               className="flex-1 py-2"
               style={{ maxHeight: 120, fontSize: 15, color: ink[900], fontFamily: "Inter_400Regular" }}
             />
-            <Tap scale={0.95} accessibilityRole="button" accessibilityLabel="Ask about a product" onPress={() => setPickerOpen(true)} className="h-10 w-10 items-center justify-center rounded-pill">
+            <Tap scale={0.95} accessibilityRole="button" accessibilityLabel="Ask about a photo" disabled={Boolean(pendingText)} onPress={() => setPickerOpen(true)} className="h-10 w-10 items-center justify-center rounded-pill">
               <Camera size={19} color={ink[900]} />
             </Tap>
             <Tap scale={0.95}
               accessibilityRole="button"
               accessibilityLabel="Send"
-              accessibilityState={{ disabled: Boolean(pendingText) || !draft.trim() }}
-              disabled={Boolean(pendingText) || !draft.trim()}
-              onPress={() => void send(draft)}
+              accessibilityState={{ disabled: Boolean(pendingText) || (!draft.trim() && !photo) }}
+              disabled={Boolean(pendingText) || (!draft.trim() && !photo)}
+              onPress={() => void send(draft, undefined, photo)}
               className="h-11 w-11 items-center justify-center rounded-pill"
-              style={{ backgroundColor: ink[900], opacity: pendingText || !draft.trim() ? 0.35 : 1 }}
+              style={{ backgroundColor: ink[900], opacity: pendingText || (!draft.trim() && !photo) ? 0.35 : 1 }}
             >
               <ArrowUp size={19} color="#ffffff" />
             </Tap>
@@ -697,7 +723,7 @@ export default function Ask() {
         </View>
       </View>
 
-      <ProductPicker open={pickerOpen} onClose={() => setPickerOpen(false)} onPick={(id) => void sendProduct(id)} />
+      <PhotoSheet open={pickerOpen} onClose={() => setPickerOpen(false)} onPick={(source) => void choosePhoto(source)} />
       <EmergencyEscalation result={escalation} onClose={() => setEscalation(null)} />
       <Paywall
         open={paywallFor !== null}

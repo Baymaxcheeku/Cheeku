@@ -5,7 +5,8 @@
 // (mobile-react-native/src/lib/memory). What it sends here is one
 // ModelRequest (see src/lib/memory/model.ts):
 //
-//   { question, history[], memory: MemoryDigest, floor: { tier, reasons[] } }
+//   { question, history[], memory: MemoryDigest, floor: { tier, reasons[] },
+//     image?: { mimeType, data } }   (one photo they asked about, base64; never stored)
 //
 // and what it expects back is one ModelReply:
 //
@@ -28,13 +29,13 @@
 //      and renderRequest() from prompt.ts. GEMINI_MODEL (default
 //      gemini-3.5-flash-lite) first, then GEMINI_FALLBACK_MODEL (default
 //      gemini-3.5-flash).
-//   3. neither: 503 and the app uses its built-in stand-in.
+//   3. neither: 503, and the app says Cheeku couldn't answer (it has no stand-in).
 //
 // EVERY CALL IS CLAIMED FIRST. claim_model_call() (migration 0035) runs as the
 // caller, through their own JWT, and refuses a spent free allowance, bursts
 // (6 a minute, 60 an hour) and the daily ceiling. A refusal is a 429 with the
 // reason; nothing reaches the model. If the meter can't be reached the answer
-// is 503, never an unmetered call: the app falls back to its stand-in.
+// is 503, never an unmetered call: the app says it couldn't answer.
 //
 // Deploy:  supabase functions deploy cheeku-chat
 //          (JWT verification stays ON: only a signed-in member can call it)
@@ -44,9 +45,9 @@
 //          The key must be on a billed Google Cloud project: on the free tier
 //          Google may use prompts to improve its products, and these prompts
 //          are health records.
-// App:     EXPO_PUBLIC_CHAT_MODEL=edge
+// App:     nothing to set; every model turn comes here (2026-11-17).
 
-import { askGemini } from "./gemini.ts";
+import { askGemini, MAX_IMAGE_CHARS, readImage } from "./gemini.ts";
 import { REPLY_SCHEMA, renderRequest, SYSTEM_PROMPT } from "./prompt.ts";
 
 const TIERS = ["reassure", "monitor", "contact_today", "go_now"];
@@ -110,6 +111,9 @@ Deno.serve(async (req) => {
   }
   if (typeof body.question !== "string" || !body.memory || typeof body.memory !== "object") return json({ error: "bad_request" }, 400);
   if ((body.question as string).length > 2000) return json({ error: "too_long" }, 413);
+  // A photo that is not one we forward is refused before the meter, so it costs no chat.
+  const image = body.image === undefined || body.image === null ? null : readImage(body.image);
+  if (body.image != null && !image) return json({ error: "bad_image", maxChars: MAX_IMAGE_CHARS }, 400);
 
   const authorization = req.headers.get("authorization");
   if (!authorization) return json({ error: "signed_out" }, 401);
@@ -131,6 +135,8 @@ Deno.serve(async (req) => {
       SYSTEM_PROMPT,
       renderRequest(body),
       REPLY_SCHEMA,
+      24_000,
+      image,
     );
     if (!got.ok) return json({ error: got.error, ...(got.status ? { status: got.status } : {}) }, got.error === "model_unreachable" ? 504 : 502);
     return shape(got.reply, `gemini:${got.model}`);
