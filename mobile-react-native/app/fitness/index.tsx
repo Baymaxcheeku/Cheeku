@@ -15,6 +15,7 @@ import { CardListSkeleton } from "@/components/ui/skeleton";
 import { Tap } from "@/components/ui/tap";
 import { feel } from "@/lib/feel";
 import { activityById, activityIn, type ActivityId } from "@/lib/fitness/catalog";
+import { AskRow } from "@/components/home/today";
 import { NEED_PHRASE, rankStudios, type Match } from "@/lib/fitness/match";
 import { useFitnessBookings, upcoming } from "@/lib/fitness/queries";
 import { useFitnessFit, useMatches, useStudiosNear } from "@/lib/fitness/use-fitness";
@@ -198,6 +199,9 @@ export default function Fitness() {
                 </Text>
               )}
             </View>
+
+            {/* Not sure what to try: Cheeku picks with the same rules as this list. */}
+            <AskRow title="Not sure which class?" sub={`Cheeku picks from ${member?.isPrimary === false ? `${first}'s` : "your"} health`} q="Which class suits me best?" />
 
             <View style={{ gap: 10 }}>
               <SectionTitle>Studios near you</SectionTitle>

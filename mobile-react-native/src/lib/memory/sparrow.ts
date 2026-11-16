@@ -1,3 +1,5 @@
+import { activityById, activityIn, INTENSITY_RANK } from "@/lib/fitness/catalog";
+import { fitFor, NEED_PHRASE, NEED_RULES, reasonFor, type Fit } from "@/lib/fitness/match";
 import { goalForArea } from "@/lib/longevity/areas";
 
 import type { ChatAction, MemoryDigest, ModelReply, ModelRequest, WorldDigest } from "./model";
@@ -31,6 +33,10 @@ export const TESTS_DUE = /\b(?:(?:which|what) (?:blood )?tests? (?:should|do|mus
 /** "Should I get a Vitamin D test?" from a test's page. Group 1 is the test. */
 export const TEST_NEED = /\b(?:should (?:i|we) (?:get|do|take|book|repeat)|do (?:i|we) need|is it time for) (?:a |an |the |my )?(.{2,40}?)(?: tests?| checks?| again)?\s*\??$/i;
 const TEST_WORDS = /hba1c|lipid|cholesterol|thyroid|tsh|vitamin|cbc|blood count|sugar|glucose|kidney|creatinine|liver|iron|ferritin|b12|urine|full body|haemoglobin|hemoglobin/i;
+/** "Which class suits me?" from Fitness. */
+export const CLASS_PICK = /\b(?:which|what) (?:kind of )?(?:class|classes|exercise|workout|activity)\b.{0,30}\b(?:suits?|right|good|best|should)\b|\bwhat (?:class|exercise) should (?:i|we)\b/i;
+/** "Is zumba good for me?" from a studio page. */
+export const ACTIVITY_OK = /\b(?:is|are|would|will|can i do|should i (?:do|try))\b.{0,40}\b(?:good|right|okay|ok|safe|suit|suits|fine)\b/i;
 const MONTH = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const onDate = (iso: string) => {
   const [y, m, d] = iso.slice(0, 10).split("-").map(Number);
@@ -248,6 +254,56 @@ function testNeed(req: ModelRequest, target: string): ModelReply | null {
   return { paragraphs, citations: [], followUps: ["Which tests should I do this year?"], basis: r || loop ? "grounded" : "general", actions: [open("/labs", `Book ${label.length > 18 ? "it" : label} at home`)] };
 }
 
+/** The fitness matcher's view of this person, from the digest: the same rules the class list uses. */
+/** "an aerobics", "a yoga": the article and the word, lowercased. */
+const an = (w: string) => `${/^[aeiou]/i.test(w) ? "an" : "a"} ${w.toLowerCase()}`;
+const lowerFirst = (t: string) => t.charAt(0).toLowerCase() + t.slice(1);
+
+function fitOf(req: ModelRequest): Fit {
+  const p = req.memory.person;
+  return fitFor({ conditions: p.conditions, goal: null, ageYears: p.ageYears, pregnant: p.modifiers.includes("pregnant"), bmi: null });
+}
+
+function classPick(req: ModelRequest): ModelReply {
+  const name = req.memory.person.firstName;
+  const fit = fitOf(req);
+  const top = fit.ranked.slice(0, 3);
+  const why = fit.needs.length ? `picked with ${fit.needs.slice(0, 2).map((n) => NEED_PHRASE[n]).join(" and ")} in mind` : "a good place to start";
+  const paragraphs = [
+    `For ${name}, ${why}:\n${top.map((a) => `• ${activityById(a)?.label}${reasonFor(fit, a) ? `: ${lowerFirst(reasonFor(fit, a)!)}` : ""}`).join("\n")}`,
+    fit.doctorNote ? "Check with your doctor before starting anything new, and tell the studio too." : "Start with a beginners' class and go at your own pace. One class at a time, no membership.",
+  ];
+  return { paragraphs, citations: [], followUps: top[0] ? [`Find ${an(activityById(top[0])!.label)} class nearby`] : [], basis: fit.needs.length ? "grounded" : "general", actions: [open("/fitness", "See classes nearby")] };
+}
+
+function activityOk(req: ModelRequest, id: NonNullable<ReturnType<typeof activityIn>>): ModelReply {
+  const name = req.memory.person.firstName;
+  const a = activityById(id)!;
+  const fit = fitOf(req);
+  const better = fit.ranked.filter((x) => x !== id).slice(0, 2).map((x) => activityById(x)!.label.toLowerCase());
+  const avoidedBy = fit.needs.find((n) => NEED_RULES[n].avoid?.includes(id));
+  const tooHard = INTENSITY_RANK[a.intensity] > INTENSITY_RANK[fit.cap];
+  const jumpy = fit.noImpact && a.impact;
+  if (fit.avoid.has(id) || tooHard || jumpy) {
+    const why = avoidedBy ? `it's hard on ${NEED_PHRASE[avoidedBy]}` : jumpy ? "the jumping is hard on the knees and joints" : tooHard ? "it's a harder pace than suits right now" : "it isn't a fit right now";
+    return {
+      paragraphs: [`${a.label} isn't one I'd pick for ${name} right now: ${why}.`, ...(better.length ? [`Better fits: ${better.join(" or ")}.`] : []), "If the doctor has said it's fine, go easy and tell the instructor."],
+      citations: [],
+      followUps: better[0] ? [`Find ${an(better[0])} class nearby`] : [],
+      basis: "grounded",
+      actions: [open("/fitness", "See classes that suit")],
+    };
+  }
+  const reason = reasonFor(fit, id);
+  return {
+    paragraphs: [`${a.label} suits ${name}${reason ? `: ${lowerFirst(reason)}` : ""}.`, fit.doctorNote ? "Check with your doctor before starting, and tell the instructor about your health." : "Start with a beginners' class and go at your own pace."],
+    citations: [],
+    followUps: [`Find ${an(a.label)} class nearby`],
+    basis: fit.needs.length ? "grounded" : "general",
+    actions: [open("/fitness", `Find ${an(a.label)} class`)],
+  };
+}
+
 const GOAL_PITCH: Record<keyof typeof GOAL_LABEL, string> = { sleep: "I want to sleep better", weight: "I want to lose weight", sugar: "I want to control my sugar", legs: "I want to walk more", calm: "I want to stress less" };
 
 function goalsMenu(req: ModelRequest, w: WorldDigest): ModelReply {
@@ -358,6 +414,9 @@ export function sparrowTurn(req: ModelRequest): ModelReply | null {
   if (w.today.justLogged.length && !req.memory.logged.length) return loggedActivity(req, w);
   if (w.family) return familyTurn(req, w);
   if (TESTS_DUE.test(q)) return testsDue(req, w);
+  if (CLASS_PICK.test(q)) return classPick(req);
+  const act = ACTIVITY_OK.test(q) ? activityIn(q) : null;
+  if (act) return activityOk(req, act);
   const need = TEST_NEED.exec(q);
   if (need) {
     const r = testNeed(req, need[1]!);

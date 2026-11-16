@@ -104,6 +104,25 @@ describe("tests, from Lab tests", () => {
   });
 });
 
+describe("classes, from Fitness", () => {
+  const withPerson = (q: string, over: Partial<MemoryDigest["person"]> = {}): ModelRequest => ({ ...ask(q), memory: { ...DIGEST, person: { ...DIGEST.person, ...over }, world: emptyWorld() } });
+  it("picks classes with the same rules as the class list", () => {
+    const r = sparrowTurn(withPerson("Which class suits me best?", { conditions: ["Hypertension"] }))!;
+    expect(r.paragraphs[0]).toMatch(/^For Arjun, picked with BP in mind:/);
+    expect(r.actions?.[0]).toMatchObject({ route: "/fitness" });
+  });
+  it("says no to HIIT with high BP, and names better fits", () => {
+    const r = sparrowTurn(withPerson("Is HIIT good for me?", { conditions: ["Hypertension"] }))!;
+    expect(r.paragraphs[0]).toBe("HIIT isn't one I'd pick for Arjun right now: it's hard on BP.");
+    expect(r.paragraphs[1]).toMatch(/^Better fits: /);
+  });
+  it("says yes to yoga, with the doctor's note when it applies", () => {
+    expect(sparrowTurn(withPerson("Is yoga good for me?"))!.paragraphs[0]).toMatch(/^Yoga suits Arjun/);
+    const older = sparrowTurn(withPerson("Is yoga good for me?", { ageYears: 68, conditions: ["Heart disease"] }))!;
+    expect(older.paragraphs[1]).toContain("Check with your doctor");
+  });
+});
+
 describe("questions about one record", () => {
   it("are left to the record answers, even when the title sounds like a health check", () => {
     expect(sparrowTurn(ask("About Annual health check-up (11 Oct 2026): What does this report say?", SUGAR_WATCH))).toBeNull();

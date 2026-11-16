@@ -4396,3 +4396,13 @@ like "Annual health check-up" no longer starts the big-picture answer.
   result and whether it's on the list). A test named like a medicine
   (Vitamin D) no longer gets the medicine-list answer.
 - Chat notes stay quiet once the person starts typing in a visit.
+
+## Ask on Fitness · 2026-11-16
+
+- "Not sure which class?" on the Fitness list and "Is aerobics right for
+  you?" on each studio page open the chat with that question.
+- The sparrow answers both with the fitness matcher itself (`fitFor` in
+  `lib/fitness/match.ts`), so the chat never disagrees with the class list:
+  the top three activities with their reasons, or a plain no ("HIIT isn't one
+  I'd pick for Arjun right now: it's hard on BP") with better fits, and the
+  doctor's note for heart conditions, pregnancy and over 60.

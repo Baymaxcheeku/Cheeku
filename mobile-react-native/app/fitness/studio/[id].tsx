@@ -1,4 +1,5 @@
 import { useLocalSearchParams } from "expo-router";
+import { AskRow } from "@/components/home/today";
 import { Navigation } from "lucide-react-native";
 import { useMemo, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
@@ -130,6 +131,12 @@ export default function StudioScreen() {
             );
           })}
         </ScrollView>
+
+        {/* Is it right for them? Same rules as the class list, in words. */}
+        {(() => {
+          const label = activityById(only ?? (activityParam as ActivityId | undefined) ?? (s.activities[0] as ActivityId))?.label;
+          return label ? <AskRow title={`Is ${label.toLowerCase()} right for ${member?.isPrimary === false ? first : "you"}?`} sub="Cheeku checks it against your health" q={`Is ${label.toLowerCase()} good for me?`} /> : null;
+        })()}
 
         {s.activities.length > 1 ? (
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginHorizontal: -20 }} contentContainerStyle={{ paddingHorizontal: 20, gap: 8 }}>
