@@ -32,8 +32,8 @@ export function build() {
       head("labstack", ["labstack/validate.ts", "labstack/partner.ts", "labstack/index.ts"], "") +
       [strip(read("validate.ts")), strip(read("partner.ts")), strip(read("index.ts"))].join("\n"),
     "0045-labstack-webhook-function-paste.ts":
-      head("labstack-webhook", ["labstack/partner.ts", "labstack-webhook/index.ts"], ", and turn OFF \"Enforce JWT verification\"") +
-      [strip(read("partner.ts")), strip(read("../labstack-webhook/index.ts"))].join("\n"),
+      head("labstack-webhook", ["labstack/validate.ts", "labstack/partner.ts", "labstack-webhook/index.ts"], ", and turn OFF \"Enforce JWT verification\"") +
+      [strip(read("validate.ts")), strip(read("partner.ts")), strip(read("../labstack-webhook/index.ts"))].join("\n"),
   };
 }
 

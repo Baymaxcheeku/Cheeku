@@ -102,6 +102,8 @@ export type Doctor = {
   clinic: { name: string; area: string; km: number; opd: string };
   /** Partner doctors only, so the illustrated face matches. */
   gender?: "MALE" | "FEMALE" | "OTHERS" | null;
+  /** Partner doctors only: their profile photo (https), when the partner has one. */
+  photo?: string | null;
 };
 
 const D = (d: Doctor) => d;

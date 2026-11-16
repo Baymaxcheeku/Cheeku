@@ -29,7 +29,7 @@ const SIGNING_SECRET = Deno.env.get("LABSTACK_SIGNING_SECRET") ?? "";
 const WEBHOOK_SECRET = Deno.env.get("LABSTACK_WEBHOOK_SECRET") ?? "";
 const WEBHOOK_HEADER = (Deno.env.get("LABSTACK_WEBHOOK_HEADER") ?? "key").toLowerCase();
 
-const ok = (body: unknown = { ok: true }, status = 200) => new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json" } });
+const reply = (body: unknown = { ok: true }, status = 200) => new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json" } });
 
 function same(a: string, b: string): boolean {
   const x = new TextEncoder().encode(a);
@@ -74,19 +74,19 @@ const done = (source: string, ref: string, event: string, status: string, error:
   }).catch(() => undefined);
 
 Deno.serve(async (req) => {
-  if (req.method !== "POST") return ok({ error: "method" }, 405);
+  if (req.method !== "POST") return reply({ error: "method" }, 405);
   const source = new URL(req.url).searchParams.get("source") ?? "";
-  if (!["labs", "pharma", "provider"].includes(source)) return ok({ error: "source" }, 400);
+  if (!["labs", "pharma", "provider"].includes(source)) return reply({ error: "source" }, 400);
 
   const raw = new Uint8Array(await req.arrayBuffer());
-  if (raw.length > 256 * 1024) return ok({ error: "too large" }, 413);
-  if (!(await verified(req, source, raw))) return ok({ error: "unauthorized" }, 401);
+  if (raw.length > 256 * 1024) return reply({ error: "too large" }, 413);
+  if (!(await verified(req, source, raw))) return reply({ error: "unauthorized" }, 401);
 
   let body: Record<string, unknown>;
   try {
     body = JSON.parse(new TextDecoder().decode(raw));
   } catch {
-    return ok({ error: "bad json" }, 400);
+    return reply({ error: "bad json" }, 400);
   }
 
   // Which thing changed, and what to call this delivery.
@@ -112,8 +112,8 @@ Deno.serve(async (req) => {
     event = String(body.event ?? body.appointmentStatus ?? "update");
     status = String(body.appointmentStatus ?? body.ts ?? "");
   }
-  if (!/^\d{1,18}$/.test(ref)) return ok({ ignored: "no id" });
-  if (!(await firstTime(kind, ref, event.slice(0, 200), status.slice(0, 100)))) return ok({ duplicate: true });
+  if (!/^\d{1,18}$/.test(ref)) return reply({ ignored: "no id" });
+  if (!(await firstTime(kind, ref, event.slice(0, 200), status.slice(0, 100)))) return reply({ duplicate: true });
 
   try {
     if (kind === "labs") {
@@ -135,10 +135,10 @@ Deno.serve(async (req) => {
       if (row) await refreshConsult(row);
     }
     await done(kind, ref, event.slice(0, 200), status.slice(0, 100), null);
-    return ok();
+    return reply();
   } catch {
     // Forget this delivery so LabStack's retry is processed, and ask for one.
     await db(`/rest/v1/partner_events?source=eq.${kind}&ref=eq.${ref}&event=eq.${encodeURIComponent(event.slice(0, 200))}&status=eq.${encodeURIComponent(status.slice(0, 100))}`, { method: "DELETE" }).catch(() => undefined);
-    return ok({ ok: false }, 503);
+    return reply({ ok: false }, 503);
   }
 });

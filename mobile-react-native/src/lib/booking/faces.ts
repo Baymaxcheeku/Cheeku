@@ -45,11 +45,12 @@ function stand(d: Doctor): string {
   return pool[h % pool.length]!;
 }
 
-export function doctorFace(d: Doctor): { svg: string; background: string } {
+export function doctorFace(d: Doctor): { svg: string; background: string; photo?: string | null } {
   const hit = cache.get(d.id);
   if (hit) return hit;
   const { bg, ...look } = LOOK[d.id] ?? LOOK[stand(d)] ?? { bg: "e3dcff" };
-  const face = { svg: faceSvg(`cheeku-doctor-${d.id}`, bg, { ...look, ...CALM }), background: `#${bg}` };
+  // The partner's real photo when it sent one; the illustration stays as the fallback.
+  const face = { svg: faceSvg(`cheeku-doctor-${d.id}`, bg, { ...look, ...CALM }), background: `#${bg}`, photo: d.photo ?? null };
   cache.set(d.id, face);
   return face;
 }

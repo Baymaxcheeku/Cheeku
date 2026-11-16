@@ -3,8 +3,8 @@
 with checks (looks_for, applied) as (values
   ('the partner lab row exists',
     exists (select 1 from lab_partners where id = 'labstack')),
-  ('lab bookings carry the partner order, status and collector',
-    (select count(*) = 4 from information_schema.columns where table_name = 'lab_bookings' and column_name in ('ls_order_id', 'ls_status', 'order_type', 'phlebo'))),
+  ('lab bookings carry the partner order, status, collector and lab logo',
+    (select count(*) = 5 from information_schema.columns where table_name = 'lab_bookings' and column_name in ('ls_order_id', 'ls_status', 'order_type', 'phlebo', 'lab_logo'))),
   ('lab tests can be linked to the partner catalogue',
     exists (select 1 from information_schema.columns where table_name = 'lab_tests' and column_name = 'ls_id')),
   ('medicine orders, doctor visits and instant consults exist, with row-level security on',

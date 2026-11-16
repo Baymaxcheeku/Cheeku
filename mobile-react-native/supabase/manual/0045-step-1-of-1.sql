@@ -25,6 +25,7 @@ alter table lab_bookings add column if not exists order_type text not null defau
 alter table lab_bookings add column if not exists appointment_at timestamptz;
 alter table lab_bookings add column if not exists ls_lab_id bigint;
 alter table lab_bookings add column if not exists lab_name text;
+alter table lab_bookings add column if not exists lab_logo text check (lab_logo is null or lab_logo like 'https://%');
 alter table lab_bookings add column if not exists lab_address text;
 alter table lab_bookings add column if not exists phlebo jsonb;
 alter table lab_bookings add column if not exists address_parts jsonb;
@@ -239,6 +240,5 @@ create policy "users read own pharma orders" on pharma_orders for select using (
 drop policy if exists "users read own consults" on consult_appointments;
 create policy "users read own consults" on consult_appointments for select using (auth.uid() = user_id);
 -- partner_events: no policy, so only the service role reads or writes it.
-
 
 commit;

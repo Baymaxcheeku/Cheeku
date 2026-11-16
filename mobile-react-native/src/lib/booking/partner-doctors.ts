@@ -1,5 +1,6 @@
 import type { Doctor, Mode, SpecialtyId } from "@/lib/booking/catalog";
 import type { Provider, Speciality } from "@/lib/partner/types";
+import { imageUrl } from "@/lib/partner/validate";
 
 /*
  * PARTNER DOCTORS AS OUR DOCTORS.
@@ -73,6 +74,7 @@ export function asDoctor(p: Provider): Doctor {
     fee: Object.fromEntries(modes.map((m) => [m, 0])) as Doctor["fee"],
     clinic: { name: p.place ?? "Clinic", area: p.place ?? "", km: p.distanceKm ?? 0, opd: "" },
     gender: p.gender,
+    photo: imageUrl(p.photo),
   };
 }
 

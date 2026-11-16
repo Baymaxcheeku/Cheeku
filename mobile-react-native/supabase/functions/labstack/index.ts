@@ -18,7 +18,7 @@
 // Needs:   migration 0045.
 
 import {
-  checkAddress, checkDob, checkEmail, checkLength, checkMobile, checkName, checkPincode, checkQuantity, checkQuery, joinAddress,
+  checkAddress, checkDob, checkEmail, checkLength, checkMobile, checkName, checkPincode, checkQuantity, checkQuery, imageUrl, joinAddress,
   type AddressParts,
 } from "./validate.ts";
 import {
@@ -158,13 +158,13 @@ const labs = {
     const service = q.service === "CENTER_VISIT" ? "CENTER_VISIT" : "HOME_SAMPLE";
     const t = await lsTests(ids(q.tests));
     const fasting = num(q.fastingHours) ?? 0;
-    const r = await ls<{ slots: { labName: string; lsLabId: number; service: "HOME_SAMPLE" | "CENTER_VISIT"; timing: string[]; distance: number | null }[] }>("GET", "/api/v1.3/availability/getSlots", {
+    const r = await ls<{ slots: { labName: string; labLogo: string | null; lsLabId: number; service: "HOME_SAMPLE" | "CENTER_VISIT"; timing: string[]; distance: number | null }[] }>("GET", "/api/v1.3/availability/getSlots", {
       query: { date, service, ...loc(q), labId: num(q.lsLabId) ?? undefined, testIds: t.testIds.join(","), packageIds: t.packageIds.join(",") },
     });
     const soon = Date.now() + 2 * 3600_000;
     return (r.slots ?? [])
       .map((s) => ({
-        lsLabId: s.lsLabId, labName: s.labName, service: s.service, distanceKm: s.distance ?? null,
+        lsLabId: s.lsLabId, labName: s.labName, labLogo: imageUrl(s.labLogo), service: s.service, distanceKm: s.distance ?? null,
         times: (s.timing ?? []).filter((x) => Date.parse(`${date}T${x}:00+05:30`) > soon && !(fasting >= 8 && Number(x.slice(0, 2)) >= 11)),
       }))
       .filter((s) => s.times.length > 0);
@@ -190,7 +190,7 @@ const labs = {
       prescription_document_id: rx,
     });
     try {
-      const r = await ls<{ order: { orderId: number; orderStatus: string; labName: string | null; labAddress: string | null; labLocality: string | null; labCity: string | null; lsLabId: number | null } }>(
+      const r = await ls<{ order: { orderId: number; orderStatus: string; labName: string | null; labLogo: string | null; labAddress: string | null; labLocality: string | null; labCity: string | null; lsLabId: number | null } }>(
         "POST", "/api/v1.3/order/placeOrder", {
           body: {
             orderType, appointment, referenceId: row.id, testIds: t.testIds, packageIds: t.packageIds, ...(lsLabId ? { labId: lsLabId } : {}),
@@ -200,7 +200,7 @@ const labs = {
       );
       const o = r.order;
       await patch("lab_bookings", `id=eq.${row.id}`, {
-        ls_order_id: o.orderId, ls_status: o.orderStatus, ls_lab_id: o.lsLabId ?? lsLabId, lab_name: o.labName,
+        ls_order_id: o.orderId, ls_status: o.orderStatus, ls_lab_id: o.lsLabId ?? lsLabId, lab_name: o.labName, lab_logo: imageUrl(o.labLogo),
         lab_address: [o.labAddress, o.labLocality, o.labCity].filter(Boolean).join(", ") || null,
       });
       return { bookingId: row.id };
@@ -414,7 +414,7 @@ const consult = {
     );
     return (r.providers ?? []).map((p) => ({
       lsId: p.lsId, name: p.name, gender: p.gender, specialities: p.specialities ?? [], languages: p.languagesKnown ?? [], years: p.yearsExperience, rating: p.rating, ratings: p.totalRatings ?? 0,
-      types: p.supportedAppointmentTypes ?? [], photo: p.profileUrl, place: [p.locality, p.city].filter(Boolean).join(", ") || null, distanceKm: p.distance ?? null, followUpUntil: p.followUpUntil,
+      types: p.supportedAppointmentTypes ?? [], photo: imageUrl(p.profileUrl), place: [p.locality, p.city].filter(Boolean).join(", ") || null, distanceKm: p.distance ?? null, followUpUntil: p.followUpUntil,
     }));
   },
 

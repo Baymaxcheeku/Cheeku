@@ -141,7 +141,7 @@ export const preview: LabStack = {
       await wait();
       const list = await partners();
       return list
-        .map((p, i) => ({ lsLabId: 5001 + i, labName: p.name, service: q.service, times: labTimes(q.date, q.fastingHours, q.service === "HOME_SAMPLE"), distanceKm: q.service === "CENTER_VISIT" ? 1.5 + i * 1.7 : null }))
+        .map((p, i) => ({ lsLabId: 5001 + i, labName: p.name, labLogo: null, service: q.service, times: labTimes(q.date, q.fastingHours, q.service === "HOME_SAMPLE"), distanceKm: q.service === "CENTER_VISIT" ? 1.5 + i * 1.7 : null }))
         .filter((s) => (q.lsLabId ? s.lsLabId === q.lsLabId : true) && s.times.length > 0);
     },
     async place(input) {
@@ -166,6 +166,7 @@ export const preview: LabStack = {
         orderType: meta.orderType ?? "HOME_SAMPLE",
         appointment: meta.appointment ?? `${data.slot_date}T07:00:00+05:30`,
         labName: (data.lab_partners as { name?: string } | null)?.name ?? null,
+        labLogo: null,
         labAddress: null,
         phlebo: assigned && meta.orderType !== "CENTER_VISIT" ? { name: "Ravi K. (sample)", phone: "9800000000", startedAt: null } : null,
         preparations: null,

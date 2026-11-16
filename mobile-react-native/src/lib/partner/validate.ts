@@ -139,3 +139,19 @@ export function checkQuery(raw: string): Check {
 export function checkLength(raw: string, max: number, what: string): Check {
   return raw.trim().length <= max ? ok(raw.trim()) : no(`${what}: up to ${max} characters.`);
 }
+
+/**
+ * A picture link fit to show: https only (phones block plain http), with a
+ * missing scheme added ("www.x.com/a.png"). Anything else is no picture.
+ */
+export function imageUrl(raw: string | null | undefined): string | null {
+  const u = (raw ?? "").trim();
+  if (!u) return null;
+  const withScheme = u.startsWith("//") ? `https:${u}` : /^[a-z]+:\/\//i.test(u) ? u.replace(/^http:\/\//i, "https://") : `https://${u}`;
+  try {
+    const url = new URL(withScheme);
+    return url.protocol === "https:" && url.hostname.includes(".") && /\.(png|jpe?g|webp|gif)$|\/[^.]*$/i.test(url.pathname) ? url.toString() : null;
+  } catch {
+    return null;
+  }
+}

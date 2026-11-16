@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { Linking, RefreshControl, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { PartnerBadge, ReviewSheet, rupees, SampleNote } from "@/components/labs/parts";
+import { monogramOf, PartnerBadge, ReviewSheet, rupees, SampleNote } from "@/components/labs/parts";
 import { CancelSheet, ProblemSheet, RescheduleSheet } from "@/components/partner/sheets";
 import { Glass, Gradient, glassShadow } from "@/components/ui/glass";
 import { Enter } from "@/components/ui/motion";
@@ -135,9 +135,9 @@ export default function LabBooking() {
         <View style={[glassShadow, { borderRadius: 32, overflow: "hidden", padding: 16 }]}>
           <Gradient from={partner.color} to="#ffffff" glow="#ffffff" />
           <View className="flex-row items-center gap-3">
-            <PartnerBadge partner={partner} size={50} />
+            <PartnerBadge partner={o?.labName ? { monogram: monogramOf(o.labName), color: partner.color } : partner} logo={o?.labLogo ?? b.labLogo} size={50} />
             <View style={{ flex: 1 }}>
-              <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>{partner.name}</Text>
+              <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>{o?.labName ?? b.labName ?? partner.name}</Text>
               <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[700], marginTop: 1 }}>For {member?.isPrimary ? "you" : member?.name} · {rupees(b.total)}</Text>
             </View>
           </View>

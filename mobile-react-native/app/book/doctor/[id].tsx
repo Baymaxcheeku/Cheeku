@@ -1,10 +1,10 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { FaceArt } from "@/components/ui/face-art";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Building2, Clock3, GraduationCap, Languages, MapPin, MonitorPlay, PenLine, ShieldCheck } from "lucide-react-native";
 import { useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { SvgXml } from "react-native-svg";
 
 import { Tap } from "@/components/ui/tap";
 import { ReviewList, ReviewSheet, SampleNote, Stars } from "@/components/labs/parts";
@@ -80,7 +80,7 @@ export default function DoctorProfile() {
           {/* Lifted above the gradient: on web an absolutely placed layer
               paints over plain siblings (the stacking bug in PROGRESS.md). */}
           <View style={[glassShadow, { zIndex: 1, width: 210, height: 210, borderRadius: 32, overflow: "hidden", marginBottom: 24, borderWidth: 5, borderColor: "#fff", backgroundColor: face.background }]}>
-            <SvgXml xml={face.svg} width={210} height={210} />
+            <FaceArt face={face} size={210} />
           </View>
           <View style={{ position: "absolute", top: 0, left: 0, right: 0 }}>
             <ScreenHeader fallback="/book/doctors" />

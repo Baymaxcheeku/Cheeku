@@ -1,10 +1,10 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { FaceArt } from "@/components/ui/face-art";
 import { Building2, ChevronLeft, Clock3, MapPin, MonitorPlay, Ticket } from "lucide-react-native";
 import { useMemo, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { SvgXml } from "react-native-svg";
 
 import { Tap } from "@/components/ui/tap";
 import { NoteCard } from "@/components/booking/note-card";
@@ -117,7 +117,7 @@ export default function SlotScreen() {
           <View className="overflow-hidden rounded-xl" style={[glassShadow, { width: 104, height: 116, backgroundColor: face?.background }]}>
             {face ? (
               <View className="flex-1 items-center justify-center">
-                <SvgXml xml={face.svg} width={120} height={120} />
+                <FaceArt face={face} size={120} />
               </View>
             ) : null}
           </View>

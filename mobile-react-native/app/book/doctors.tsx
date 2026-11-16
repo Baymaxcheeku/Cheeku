@@ -1,10 +1,10 @@
 import { useRouter } from "expo-router";
+import { FaceArt } from "@/components/ui/face-art";
 import { Building2, ChevronLeft, ClipboardCheck, Clock3, GraduationCap, Languages, MapPin, MonitorPlay } from "lucide-react-native";
 import { ScrollView, Text, View } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { SvgXml } from "react-native-svg";
 import { Tap } from "@/components/ui/tap";
 import { Glass, GlassCircle, Gradient, glass, glassShadow } from "@/components/ui/glass";
 import { useReducedMotion } from "@/components/ui/motion";
@@ -170,7 +170,7 @@ function DoctorCard({
 }: {
   doctor: Doctor;
   mode: Mode;
-  face?: { svg: string; background: string };
+  face?: { svg: string; background: string; photo?: string | null };
   rating?: Rating;
   /** The whole top of the card opens the profile; the button books. */
   onOpen: () => void;
@@ -188,7 +188,7 @@ function DoctorCard({
           {/* The illustrated face as a portrait tile, full bleed. */}
           {face ? (
             <View className="flex-1 items-center justify-center" style={{ backgroundColor: face.background }}>
-              <SvgXml xml={face.svg} width={108} height={108} />
+              <FaceArt face={face} size={108} />
             </View>
           ) : (
             <Gradient from={lilac.base} to={lilac.deep} />

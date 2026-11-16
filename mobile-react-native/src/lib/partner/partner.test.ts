@@ -116,3 +116,16 @@ describe("partner doctors as our doctors", async () => {
     expect(d.fee.clinic).toBeUndefined();
   });
 });
+
+describe("partner pictures", async () => {
+  const { imageUrl } = await import("./validate");
+  it("keeps https photos and logos, fixes a missing scheme, upgrades http, drops junk", () => {
+    expect(imageUrl("https://clinic.example/profile.png")).toBe("https://clinic.example/profile.png");
+    expect(imageUrl("www.labs.example/logo.jpg")).toBe("https://www.labs.example/logo.jpg");
+    expect(imageUrl("http://labs.example/logo.webp")).toBe("https://labs.example/logo.webp");
+    expect(imageUrl("//cdn.example/a.png")).toBe("https://cdn.example/a.png");
+    expect(imageUrl(null)).toBeNull();
+    expect(imageUrl("not a url")).toBeNull();
+    expect(imageUrl("https://x.example/logo.svg")).toBeNull(); // phones can't draw remote SVG as an image
+  });
+});

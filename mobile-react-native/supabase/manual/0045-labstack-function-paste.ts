@@ -145,6 +145,22 @@ function checkLength(raw: string, max: number, what: string): Check {
   return raw.trim().length <= max ? ok(raw.trim()) : no(`${what}: up to ${max} characters.`);
 }
 
+/**
+ * A picture link fit to show: https only (phones block plain http), with a
+ * missing scheme added ("www.x.com/a.png"). Anything else is no picture.
+ */
+function imageUrl(raw: string | null | undefined): string | null {
+  const u = (raw ?? "").trim();
+  if (!u) return null;
+  const withScheme = u.startsWith("//") ? `https:${u}` : /^[a-z]+:\/\//i.test(u) ? u.replace(/^http:\/\//i, "https://") : `https://${u}`;
+  try {
+    const url = new URL(withScheme);
+    return url.protocol === "https:" && url.hostname.includes(".") && /\.(png|jpe?g|webp|gif)$|\/[^.]*$/i.test(url.pathname) ? url.toString() : null;
+  } catch {
+    return null;
+  }
+}
+
 // Shared by the `labstack` gateway and the `labstack-webhook` receiver:
 // the LabStack client, the service-role database helper, the mappers from
 // LabStack's shapes to ours (src/lib/partner/types.ts), and the "pull the
@@ -152,6 +168,7 @@ function checkLength(raw: string, max: number, what: string): Check {
 //
 // Nothing in here trusts the caller. The gateway checks who is asking before
 // it calls any of this; the webhook only ever uses an id to pull.
+
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
 const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
@@ -253,14 +270,14 @@ async function upload(storagePath: string, bytes: Uint8Array<ArrayBuffer>, mime:
 
 type LabRow = {
   id: string; user_id: string; profile_id: string; tests: string[]; status: string; ls_order_id: number | null; ls_status: string | null;
-  order_type: "HOME_SAMPLE" | "CENTER_VISIT"; appointment_at: string | null; slot_date: string; lab_name: string | null; lab_address: string | null;
+  order_type: "HOME_SAMPLE" | "CENTER_VISIT"; appointment_at: string | null; slot_date: string; lab_name: string | null; lab_logo: string | null; lab_address: string | null;
   phlebo: { name: string; phone: string | null; startedAt: string | null } | null; result_document_id: string | null; cancel_reason: string | null;
   report_values_at: string | null; notes: string | null;
 };
 
 type LsLabDetails = {
   orderId: number; orderType: "HOME_SAMPLE" | "CENTER_VISIT"; orderStatus: string; appointment: string; phleboName: string | null; phleboNumber: string | null;
-  labName: string | null; preparations: string | null; reports: { link: string; type: "FULL" | "PARTIAL" }[] | null; cancelReason: string | null; updatedAt: string | null;
+  labName: string | null; labLogo: string | null; preparations: string | null; reports: { link: string; type: "FULL" | "PARTIAL" }[] | null; cancelReason: string | null; updatedAt: string | null;
 };
 
 /** Pull one lab order from LabStack, save what changed, file the report once it's out. */
@@ -274,6 +291,7 @@ async function refreshLab(row: LabRow): Promise<{ row: LabRow; details: LsLabDet
     appointment_at: d.appointment ?? row.appointment_at,
     slot_date: (d.appointment ?? row.appointment_at ?? row.slot_date).slice(0, 10),
     lab_name: d.labName ?? row.lab_name,
+    lab_logo: imageUrl(d.labLogo) ?? row.lab_logo,
     phlebo,
     cancel_reason: d.cancelReason ?? row.cancel_reason,
   };
@@ -351,6 +369,7 @@ function labOrderOut(row: LabRow, d: LsLabDetails | null) {
     orderType: row.order_type,
     appointment: row.appointment_at ?? `${row.slot_date}T08:00:00+05:30`,
     labName: row.lab_name,
+    labLogo: row.lab_logo,
     labAddress: row.lab_address,
     phlebo: row.phlebo,
     preparations: d?.preparations ?? null,
@@ -594,13 +613,13 @@ const labs = {
     const service = q.service === "CENTER_VISIT" ? "CENTER_VISIT" : "HOME_SAMPLE";
     const t = await lsTests(ids(q.tests));
     const fasting = num(q.fastingHours) ?? 0;
-    const r = await ls<{ slots: { labName: string; lsLabId: number; service: "HOME_SAMPLE" | "CENTER_VISIT"; timing: string[]; distance: number | null }[] }>("GET", "/api/v1.3/availability/getSlots", {
+    const r = await ls<{ slots: { labName: string; labLogo: string | null; lsLabId: number; service: "HOME_SAMPLE" | "CENTER_VISIT"; timing: string[]; distance: number | null }[] }>("GET", "/api/v1.3/availability/getSlots", {
       query: { date, service, ...loc(q), labId: num(q.lsLabId) ?? undefined, testIds: t.testIds.join(","), packageIds: t.packageIds.join(",") },
     });
     const soon = Date.now() + 2 * 3600_000;
     return (r.slots ?? [])
       .map((s) => ({
-        lsLabId: s.lsLabId, labName: s.labName, service: s.service, distanceKm: s.distance ?? null,
+        lsLabId: s.lsLabId, labName: s.labName, labLogo: imageUrl(s.labLogo), service: s.service, distanceKm: s.distance ?? null,
         times: (s.timing ?? []).filter((x) => Date.parse(`${date}T${x}:00+05:30`) > soon && !(fasting >= 8 && Number(x.slice(0, 2)) >= 11)),
       }))
       .filter((s) => s.times.length > 0);
@@ -626,7 +645,7 @@ const labs = {
       prescription_document_id: rx,
     });
     try {
-      const r = await ls<{ order: { orderId: number; orderStatus: string; labName: string | null; labAddress: string | null; labLocality: string | null; labCity: string | null; lsLabId: number | null } }>(
+      const r = await ls<{ order: { orderId: number; orderStatus: string; labName: string | null; labLogo: string | null; labAddress: string | null; labLocality: string | null; labCity: string | null; lsLabId: number | null } }>(
         "POST", "/api/v1.3/order/placeOrder", {
           body: {
             orderType, appointment, referenceId: row.id, testIds: t.testIds, packageIds: t.packageIds, ...(lsLabId ? { labId: lsLabId } : {}),
@@ -636,7 +655,7 @@ const labs = {
       );
       const o = r.order;
       await patch("lab_bookings", `id=eq.${row.id}`, {
-        ls_order_id: o.orderId, ls_status: o.orderStatus, ls_lab_id: o.lsLabId ?? lsLabId, lab_name: o.labName,
+        ls_order_id: o.orderId, ls_status: o.orderStatus, ls_lab_id: o.lsLabId ?? lsLabId, lab_name: o.labName, lab_logo: imageUrl(o.labLogo),
         lab_address: [o.labAddress, o.labLocality, o.labCity].filter(Boolean).join(", ") || null,
       });
       return { bookingId: row.id };
@@ -850,7 +869,7 @@ const consult = {
     );
     return (r.providers ?? []).map((p) => ({
       lsId: p.lsId, name: p.name, gender: p.gender, specialities: p.specialities ?? [], languages: p.languagesKnown ?? [], years: p.yearsExperience, rating: p.rating, ratings: p.totalRatings ?? 0,
-      types: p.supportedAppointmentTypes ?? [], photo: p.profileUrl, place: [p.locality, p.city].filter(Boolean).join(", ") || null, distanceKm: p.distance ?? null, followUpUntil: p.followUpUntil,
+      types: p.supportedAppointmentTypes ?? [], photo: imageUrl(p.profileUrl), place: [p.locality, p.city].filter(Boolean).join(", ") || null, distanceKm: p.distance ?? null, followUpUntil: p.followUpUntil,
     }));
   },
 

@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { PartnerBadge, rupees, SampleNote } from "@/components/labs/parts";
+import { monogramOf, PartnerBadge, rupees, SampleNote } from "@/components/labs/parts";
 import { Avatar } from "@/components/ui/avatar";
 import { Glass, glass, glassShadow } from "@/components/ui/glass";
 import { Backdrop, PillButton, ScreenHeader } from "@/components/ui/screen";
@@ -272,8 +272,9 @@ export default function BookLab() {
         <Section title="Your bill">
           <Glass strong className="rounded-xl p-4">
             <View className="flex-row items-center gap-3">
-              <PartnerBadge partner={partner} size={40} />
-              <Text style={{ flex: 1, fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{partner.name}</Text>
+              {/* Live: the lab the partner network assigns here, with its own logo. */}
+              <PartnerBadge partner={LIVE && labSlots ? { monogram: monogramOf(labSlots.labName), color: partner.color } : partner} logo={LIVE ? labSlots?.labLogo : null} size={40} />
+              <Text style={{ flex: 1, fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{LIVE && labSlots ? labSlots.labName : partner.name}</Text>
             </View>
             <View style={{ marginTop: 12, gap: 8 }}>
               {cart.tests.map((id) => {

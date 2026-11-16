@@ -6,6 +6,8 @@
 // Nothing in here trusts the caller. The gateway checks who is asking before
 // it calls any of this; the webhook only ever uses an id to pull.
 
+import { imageUrl } from "./validate.ts";
+
 export const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
 export const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 const LS_BASE = (Deno.env.get("LABSTACK_BASE_URL") ?? "https://integration.labstack.in").replace(/\/+$/, "");
@@ -106,14 +108,14 @@ async function upload(storagePath: string, bytes: Uint8Array<ArrayBuffer>, mime:
 
 export type LabRow = {
   id: string; user_id: string; profile_id: string; tests: string[]; status: string; ls_order_id: number | null; ls_status: string | null;
-  order_type: "HOME_SAMPLE" | "CENTER_VISIT"; appointment_at: string | null; slot_date: string; lab_name: string | null; lab_address: string | null;
+  order_type: "HOME_SAMPLE" | "CENTER_VISIT"; appointment_at: string | null; slot_date: string; lab_name: string | null; lab_logo: string | null; lab_address: string | null;
   phlebo: { name: string; phone: string | null; startedAt: string | null } | null; result_document_id: string | null; cancel_reason: string | null;
   report_values_at: string | null; notes: string | null;
 };
 
 type LsLabDetails = {
   orderId: number; orderType: "HOME_SAMPLE" | "CENTER_VISIT"; orderStatus: string; appointment: string; phleboName: string | null; phleboNumber: string | null;
-  labName: string | null; preparations: string | null; reports: { link: string; type: "FULL" | "PARTIAL" }[] | null; cancelReason: string | null; updatedAt: string | null;
+  labName: string | null; labLogo: string | null; preparations: string | null; reports: { link: string; type: "FULL" | "PARTIAL" }[] | null; cancelReason: string | null; updatedAt: string | null;
 };
 
 /** Pull one lab order from LabStack, save what changed, file the report once it's out. */
@@ -127,6 +129,7 @@ export async function refreshLab(row: LabRow): Promise<{ row: LabRow; details: L
     appointment_at: d.appointment ?? row.appointment_at,
     slot_date: (d.appointment ?? row.appointment_at ?? row.slot_date).slice(0, 10),
     lab_name: d.labName ?? row.lab_name,
+    lab_logo: imageUrl(d.labLogo) ?? row.lab_logo,
     phlebo,
     cancel_reason: d.cancelReason ?? row.cancel_reason,
   };
@@ -204,6 +207,7 @@ export function labOrderOut(row: LabRow, d: LsLabDetails | null) {
     orderType: row.order_type,
     appointment: row.appointment_at ?? `${row.slot_date}T08:00:00+05:30`,
     labName: row.lab_name,
+    labLogo: row.lab_logo,
     labAddress: row.lab_address,
     phlebo: row.phlebo,
     preparations: d?.preparations ?? null,

@@ -89,6 +89,9 @@ export type LabBooking = {
   statusAt: string;
   resultDocumentId: string | null;
   createdAt: string;
+  /** Live partner bookings: the lab that took it, and its logo when sent. */
+  labName: string | null;
+  labLogo: string | null;
 };
 
 type BookingRow = {
@@ -106,6 +109,8 @@ type BookingRow = {
   status_at: string;
   result_document_id: string | null;
   created_at: string;
+  lab_name?: string | null;
+  lab_logo?: string | null;
 };
 
 function toBooking(r: BookingRow): LabBooking {
@@ -124,6 +129,8 @@ function toBooking(r: BookingRow): LabBooking {
     statusAt: r.status_at,
     resultDocumentId: r.result_document_id,
     createdAt: r.created_at,
+    labName: r.lab_name ?? null,
+    labLogo: r.lab_logo ?? null,
   };
 }
 

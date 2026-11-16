@@ -1,4 +1,5 @@
 import { useRouter } from "expo-router";
+import { FaceArt } from "@/components/ui/face-art";
 import { Building2, CalendarCheck2, Check, ClipboardCheck, Clock3, MapPin, MessageCircleHeart, MonitorPlay, Ticket } from "lucide-react-native";
 import { useEffect } from "react";
 import { ScrollView, Text, View } from "react-native";
@@ -9,7 +10,6 @@ import Animated, {
   withSpring,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { SvgXml } from "react-native-svg";
 
 import { MascotBust } from "@/components/illustrations/sprout";
 import { BubblePop } from "@/components/onboarding/motion";
@@ -115,7 +115,7 @@ export default function Confirmed() {
         <Glass strong className="mt-6 overflow-hidden rounded-2xl">
           <View className="flex-row items-center gap-3.5 p-4">
             <View className="overflow-hidden rounded-lg" style={{ width: 60, height: 60, backgroundColor: face?.background }}>
-              {face ? <SvgXml xml={face.svg} width={64} height={64} /> : null}
+              {face ? <FaceArt face={face} size={64} /> : null}
             </View>
             <View className="min-w-0 flex-1">
               <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>{doctor.name}</Text>

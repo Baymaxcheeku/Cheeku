@@ -18,7 +18,7 @@ export const LAB_STATUSES = [
 ] as const;
 export type LabStatus = (typeof LAB_STATUSES)[number] | "RESCHEDULED" | "CANCELED" | "PARTIAL_DELIVERED" | "PHLEBO_NO_SHOW" | "PATIENT_MISSED" | "SAMPLE_REJECTED";
 
-export type LabSlots = { lsLabId: number; labName: string; service: LabService; times: string[]; distanceKm: number | null }[];
+export type LabSlots = { lsLabId: number; labName: string; labLogo: string | null; service: LabService; times: string[]; distanceKm: number | null }[];
 
 export type LabOrderInput = {
   profileId: string;
@@ -42,6 +42,8 @@ export type LabOrder = {
   orderType: LabService;
   appointment: string;
   labName: string | null;
+  /** The lab's logo (https) when the partner sends one. */
+  labLogo: string | null;
   labAddress: string | null;
   phlebo: { name: string; phone: string | null; startedAt: string | null } | null;
   preparations: string | null;
