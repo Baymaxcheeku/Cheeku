@@ -74,6 +74,11 @@ describe("booking intent", () => {
   it("services that are not live yet are still recognised", () => {
     expect(bookingIntent("book a prenatal yoga class", empty)).toMatchObject({ service: "fitness", activity: "prenatal_yoga" });
     expect(bookingIntent("order my medicines", empty)?.service).toBe("medicine");
+    expect(bookingIntent("Order metformin for me please", empty)).toMatchObject({ service: "medicine", drug: "metformin" });
+    expect(bookingIntent("refill my thyronorm 50", empty)).toMatchObject({ service: "medicine", drug: "thyronorm 50" });
+    expect(bookingIntent("buy dolo 650", empty)).toMatchObject({ service: "medicine", drug: "dolo 650" });
+    expect(bookingIntent("order a CBC test", empty)?.service).toBe("lab");
+    expect(bookingIntent("order food", empty)).toBeNull();
   });
 });
 

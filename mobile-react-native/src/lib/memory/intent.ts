@@ -50,6 +50,8 @@ export type BookingIntent = {
   careId?: string | null;
   /** Fitness: the kind of class named ("yoga", "swimming"), when one was. */
   activity?: ActivityId | null;
+  /** Medicines: the name asked for ("metformin"), to open the search with. */
+  drug?: string | null;
 };
 
 /** The lab catalogue as words: what people type, and what the result is filed as. */
@@ -74,13 +76,25 @@ export function withoutTestNames(text: string): string {
   return LAB_WORDS.reduce((t, w) => t.replace(new RegExp(w.match.source, "gi"), " "), text);
 }
 
-const BOOK = /\b(book|booking|schedule|arrange|set up|order|repeat|redo|re-?do|re-?test)\b|\b(get|need|want|fix)\b[^.?!]{0,30}\b(tests?|checked|check-?up|done|doctor|appointment|consult(ation)?|specialist|dietician|dietitian|gyn\w*|paediatrician|pediatrician|class(es)?|trainer|physio\w*|nurse|caregiver|therap\w*|counsell?\w*|dentist|ambulance|eye test|glasses|psych\w*|specialist)\b/i;
+const BOOK = /\b(book|booking|schedule|arrange|set up|order|re-?order|refill|buy|repeat|redo|re-?do|re-?test)\b|\b(get|need|want|fix)\b[^.?!]{0,30}\b(tests?|checked|check-?up|done|doctor|appointment|consult(ation)?|specialist|dietician|dietitian|gyn\w*|paediatrician|pediatrician|class(es)?|trainer|physio\w*|nurse|caregiver|therap\w*|counsell?\w*|dentist|ambulance|eye test|glasses|psych\w*|specialist)\b/i;
 const AGAIN = /\b(again|repeat|redo|re-?do|follow[- ]?up test|retest|re-?test|next one)\b/i;
 const LAB = /\b(tests?|lab|labs|blood ?work|blood test|sample|home collection|check-?up|diagnostics?|investigations?)\b/i;
 const DOCTOR = /\b(doctor|dr\.?|physician|paediatrician|pediatrician|specialist|consult(ation)?|appointment|gyn(a)?ecologist|gynae|gyno|dermatologist|skin doctor|ent\b|cardiologist|orthop(a)?edi[cs]t?|dietician|dietitian|nutritionist|gastro(enterologist)?|psychologist|psychiatrist|therapist|counsell?or|dentist|eye (doctor|specialist)|ophthalmologist|endocrinologist|neurologist)\b/i;
 const FITNESS = /\b(fitness|yoga|gym|trainer|workout|exercise class|pilates|zumba|prenatal class|swim(ming)?|swimming pool|dance class(es)?|cross ?fit|hiit|aerobics|kick ?boxing|meditation class(es)?|studio)\b/i;
 /** "Any yoga near me?", "find a gym", "suggest a class": looking, not just asking about it. */
 const LOOKING = /\b(near( me| by)?|nearby|around (me|here)|close by|find|suggest|recommend|show me|looking for|where can|join)\b|\b(a|an|any|some)\s+(\w+\s+){0,2}(class(es)?|sessions?)\b/i;
+/** "order metformin", "refill my thyronorm", "buy dolo 650": a medicine by name. */
+const ORDER_NAMED = /\b(order|re-?order|refill|buy|get me|deliver)\s+(?:me\s+|my\s+|some\s+|the\s+|a\s+(?:strip|pack)\s+of\s+)*([a-z][a-z0-9-]*(?:\s+[0-9]+\s*(?:mg|mcg|ml|g)?)?)/i;
+const NOT_A_DRUG = /^(a|an|the|it|this|that|food|groceries|lunch|dinner|my|me|them|again|medicine|medicines|meds|tablets?|syrup|prescription)$/i;
+
+/** The medicine named in an order, or null. */
+export function drugIn(t: string): string | null {
+  const m = ORDER_NAMED.exec(t);
+  const name = m?.[2]?.trim() ?? "";
+  if (!name || NOT_A_DRUG.test(name.split(/\s+/)[0] ?? "")) return null;
+  return name.toLowerCase();
+}
+
 const MEDICINE = /\b(order|refill|deliver|delivery|buy)\b.*\b(medicine|medicines|meds|tablets?|syrup|prescription)\b|\b(medicine|medicines|meds)\b.*\b(delivery|refill|order)\b/i;
 /*
  * Specialised care with its own service page. Checked after medicines and
@@ -173,7 +187,10 @@ export function bookingIntent(
   const again = AGAIN.test(t);
   const mode = /\b(online|video|tele|from home)\b/i.test(t) ? "online" : /\b(clinic|in person|nearby|visit)\b/i.test(t) ? "clinic" : null;
 
-  if (MEDICINE.test(t)) return { service: "medicine", again, tests: [], specialty: null, mode: null };
+  if (MEDICINE.test(t)) return { service: "medicine", again, tests: [], specialty: null, mode: null, drug: drugIn(t) };
+  // A medicine by name: "order metformin". Not when a test or a doctor is named ("order a CBC").
+  const drug = !LAB.test(t) && !named.length && !DOCTOR.test(t) ? drugIn(t) : null;
+  if (drug) return { service: "medicine", again, tests: [], specialty: null, mode: null, drug };
   const care = DOCTOR.test(t) && !/\b(ambulance|nurse|physio\w*)\b/i.test(t) ? null : CARE.find(([re]) => re.test(t))?.[1];
   if (care) return { service: "care", again, tests: [], specialty: null, mode: null, careId: care };
 

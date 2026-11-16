@@ -281,7 +281,7 @@ export default function Ask() {
       return;
     }
     if (b.service === "medicine") {
-      router.push("/pharmacy" as never);
+      router.push({ pathname: "/pharmacy", params: b.drug ? { q: b.drug } : {} } as never);
       return;
     }
     if (b.service === "fitness") {
