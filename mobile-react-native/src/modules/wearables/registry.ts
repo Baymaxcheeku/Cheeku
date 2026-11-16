@@ -1,4 +1,4 @@
-import { Activity, Bike, HeartPulse, Sparkles, Watch, type LucideIcon } from "lucide-react-native";
+import { Activity, Bike, Eye, HeartPulse, Watch, type LucideIcon } from "lucide-react-native";
 
 import { appleHealth } from "./sources/apple-health";
 import { demo } from "./sources/demo";
@@ -64,7 +64,7 @@ export const DEMO_SOURCE: SourceInfo = {
   name: "Sample data",
   line: "See how it looks before connecting anything",
   brings: ["A made-up month of steps, sleep and heart rate", "Nothing is saved or shared"],
-  icon: Sparkles,
+  icon: Eye,
   adapter: demo,
 };
 

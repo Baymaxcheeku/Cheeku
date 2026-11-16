@@ -8,7 +8,6 @@ import {
   HeartPulse,
   Leaf,
   Package,
-  Star,
   Sun,
   Thermometer,
   type LucideIcon,
@@ -39,13 +38,13 @@ export function rupees(n: number) {
   return `₹${n.toLocaleString("en-IN")}`;
 }
 
+/** A rating as words: "4 out of 5". No star glyphs (owner, 16 Nov 2026). */
 export function Stars({ rating, size = 13 }: { rating: number; size?: number }) {
+  const n = Number.isInteger(rating) ? String(rating) : rating.toFixed(1);
   return (
-    <View style={{ flexDirection: "row", gap: 1 }} accessibilityLabel={`${rating} out of 5`}>
-      {[1, 2, 3, 4, 5].map((i) => (
-        <Star key={i} size={size} color={ink[900]} fill={i <= Math.round(rating) ? ink[900] : "transparent"} strokeWidth={1.6} />
-      ))}
-    </View>
+    <Text accessibilityLabel={`${n} out of 5`} style={{ fontFamily: font.medium, fontSize: size, color: ink[500] }}>
+      {n} out of 5
+    </Text>
   );
 }
 
@@ -53,7 +52,6 @@ export function RatingLine({ rating, dim }: { rating?: Rating; dim?: boolean }) 
   if (!rating) return null;
   return (
     <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
-      <Star size={13} color={ink[900]} fill={ink[900]} />
       <Text style={{ fontFamily: font.semibold, fontSize: 13, color: ink[900] }}>{rating.rating.toFixed(1)}</Text>
       <Text style={{ fontFamily: font.regular, fontSize: 13, color: dim ? ink[300] : ink[500] }}>
         ({rating.reviews} {rating.reviews === 1 ? "review" : "reviews"})
@@ -209,8 +207,16 @@ export function ReviewSheet({
         <Text style={{ fontFamily: font.semibold, fontSize: 20, letterSpacing: -0.5, color: ink[900] }}>{title}</Text>
         <View style={{ flexDirection: "row", gap: 10, marginTop: 16, alignItems: "center" }}>
           {[1, 2, 3, 4, 5].map((i) => (
-            <Tap key={i} accessibilityRole="button" accessibilityLabel={`${i} star${i === 1 ? "" : "s"}`} onPress={() => setRating(i)} hitSlop={6}>
-              <Star size={32} color={ink[900]} fill={i <= rating ? ink[900] : "transparent"} strokeWidth={1.4} />
+            <Tap
+              key={i}
+              scale={0.95}
+              accessibilityRole="button"
+              accessibilityLabel={`${i} out of 5`}
+              accessibilityState={{ selected: i === rating }}
+              onPress={() => setRating(i)}
+              style={{ width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center", backgroundColor: i === rating ? ink[900] : "#fff", borderWidth: 1, borderColor: i === rating ? ink[900] : surface.line }}
+            >
+              <Text style={{ fontFamily: font.semibold, fontSize: 16, color: i === rating ? "#fff" : ink[900] }}>{i}</Text>
             </Tap>
           ))}
           <Text style={{ fontFamily: font.medium, fontSize: 15, color: ink[500], marginLeft: 4 }}>{labels[rating]}</Text>

@@ -78,8 +78,7 @@ export default function LabPartner() {
           {rating ? (
             <View className="mt-3 flex-row items-center gap-2">
               <Text style={{ fontFamily: font.semibold, fontSize: 20, color: ink[900] }}>{rating.rating.toFixed(1)}</Text>
-              <Stars rating={rating.rating} size={15} />
-              <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[500] }}>{rating.reviews} reviews</Text>
+              <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[500] }}>out of 5 · {rating.reviews} reviews</Text>
             </View>
           ) : null}
 

@@ -527,6 +527,71 @@ table.kpi td, table.kpi th { transition: background-color 160ms ease; }
   .board { height: calc(100dvh - 140px); }
   .moat { grid-template-columns: minmax(150px, 1fr) repeat(5, minmax(100px, 1fr)); }
 }
+
+/* ---- Roadmap: the plan as six stages on one path. One stage open at a time. ---- */
+.rm { max-width: 1240px; margin: 0 auto; width: 100%; }
+.rm-hero { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 24px; align-items: end; }
+.rm-hero h1 { margin: 0; font: 400 clamp(30px, 4vw, 46px)/1.04 var(--brand); letter-spacing: -0.01em; color: var(--ink); text-wrap: balance; }
+.rm-hero h1 em { color: var(--accent); }
+.rm-hero p { margin: 8px 0 0; color: var(--ink-2); font-size: 15px; max-width: 58ch; }
+.rm-north { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.rm-north div { background: var(--surface); border-radius: 16px; padding: 14px; box-shadow: var(--sh-1); display: grid; gap: 2px; }
+.rm-north b { font: 400 30px/1 var(--brand); color: var(--ink); } .rm-north span { font-size: 12px; color: var(--muted); line-height: 1.3; }
+.rm-map { background: var(--surface); border-radius: 24px; box-shadow: var(--sh-1); padding: 8px 8px 4px; overflow-x: auto; }
+.rm-map svg { display: block; width: 100%; min-width: 820px; height: auto; }
+.rm-st { cursor: pointer; outline: none; } .rm-st:focus-visible .rm-ring { stroke: var(--accent); stroke-width: 3; }
+.rm-st .t { fill: var(--surface-3); } .rm-st .l { fill: var(--surface-2); stroke: var(--line-2); stroke-width: .5; } .rm-st .r { fill: var(--line-2); }
+.rm-st.past .t { fill: #CFCBF7; } .rm-st.past .l { fill: #B9B3F7; } .rm-st.past .r { fill: #A39CF7; }
+.rm-st.on .t { fill: #8A82F5; } .rm-st.on .l { fill: var(--accent); } .rm-st.on .r { fill: #3B2BC9; }
+.rm-st .pt { fill: var(--surface-2); } .rm-st .pl { fill: var(--surface-3); } .rm-st .pr { fill: var(--line-2); }
+.rm-st.on .pt { fill: var(--accent-soft); }
+.rm-st .nm { font: 650 13px var(--font); fill: var(--ink); } .rm-st .wh { font: 500 11.5px var(--font); fill: var(--muted); }
+.rm-st.on .nm { fill: var(--accent); }
+.rm-st .big { font: 400 24px var(--brand); fill: var(--ink); }
+.rm-st .nb { fill: var(--surface); stroke: var(--line-2); } .rm-st.on .nb, .rm-st.past .nb { fill: var(--accent); stroke: none; }
+.rm-st .nbt { font: 700 12px var(--font); fill: var(--muted); text-anchor: middle; } .rm-st.on .nbt, .rm-st.past .nbt { fill: #fff; }
+.rm-path { stroke: var(--line-2); stroke-width: 3; stroke-linecap: round; stroke-dasharray: 2 8; fill: none; }
+.rm-here { font: 700 10.5px var(--font); fill: #fff; letter-spacing: .04em; } .rm-hereb { fill: var(--navy); }
+.rm-steps { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 12px; align-items: center; }
+.rm-pills { display: flex; gap: 6px; overflow-x: auto; padding: 2px; }
+.rm-pills button { flex: none; border: 0; background: var(--surface); box-shadow: var(--sh-1); color: var(--ink-2); font: 600 13px var(--font); padding: 8px 14px; border-radius: 999px; cursor: pointer; display: inline-flex; gap: 8px; align-items: center; }
+.rm-pills button i { font-style: normal; width: 20px; height: 20px; border-radius: 50%; background: var(--surface-3); color: var(--muted); font-size: 11px; display: grid; place-items: center; }
+.rm-pills button[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); } .rm-pills button[aria-pressed="true"] i { background: rgba(255,255,255,.25); color: #fff; }
+.rm-nav { border: 0; width: 40px; height: 40px; border-radius: 50%; background: var(--surface); box-shadow: var(--sh-1); color: var(--ink); cursor: pointer; display: grid; place-items: center; }
+.rm-nav:disabled { opacity: .35; cursor: default; }
+.rm-stage { background: var(--surface); border-radius: 24px; box-shadow: var(--sh-1); padding: 24px; display: grid; gap: 18px; }
+.rm-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 18px; align-items: start; }
+.rm-k { font-size: 11.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); }
+.rm-head h2 { margin: 4px 0 6px; font: 400 clamp(26px, 3.4vw, 36px)/1.05 var(--brand); color: var(--ink); }
+.rm-head p { margin: 0; color: var(--ink-2); font-size: 15px; max-width: 64ch; }
+.rm-prog { display: grid; gap: 6px; min-width: 150px; font-size: 12px; color: var(--muted); text-align: right; }
+.rm-prog .bar2 { height: 8px; border-radius: 4px; background: var(--surface-3); overflow: hidden; } .rm-prog .bar2 i { display: block; height: 100%; background: var(--good); border-radius: 4px; }
+.rm-kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.rm-kpis div { background: var(--surface-2); border-radius: 14px; padding: 12px 14px; display: grid; gap: 2px; }
+.rm-kpis b { font: 650 22px/1.1 var(--display); letter-spacing: -0.02em; font-variant-numeric: tabular-nums; color: var(--ink); } .rm-kpis span { font-size: 12px; color: var(--muted); }
+.rm-miles { display: flex; flex-wrap: wrap; gap: 8px; }
+.rm-mile { border: 0; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px 8px 10px; border-radius: 999px; background: var(--navy); color: var(--on-navy); font: 600 13px var(--font); text-align: left; }
+.rm-mile svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2.4; flex: none; }
+.rm-mile.done { background: var(--good); }
+.rm-tracks { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; align-items: start; }
+.rm-track { display: grid; gap: 6px; align-content: start; min-width: 0; }
+.rm-track h3 { margin: 0 0 4px; font: 650 13px var(--font); color: var(--ink); display: flex; align-items: center; gap: 8px; }
+.rm-track h3 i { width: 10px; height: 10px; border-radius: 3px; } .rm-track h3 span { color: var(--muted); font-weight: 500; }
+.rm-card { border: 0; cursor: pointer; text-align: left; width: 100%; display: grid; grid-template-columns: 10px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 10px 12px; border-radius: 12px; background: var(--surface-2); color: var(--ink); font: 500 13.5px/1.3 var(--font); transition: transform 160ms var(--ease-out), background 160ms; }
+.rm-card:hover { background: var(--surface-3); } .rm-card:active { transform: scale(.985); }
+.rm-card .dot { width: 9px; height: 9px; border-radius: 50%; border: 2px solid var(--faint); }
+.rm-card .dot.done { background: var(--good); border-color: var(--good); } .rm-card .dot.in_progress { background: var(--accent); border-color: var(--accent); }
+.rm-card .dot.at_risk, .rm-card .dot.blocked { background: var(--bad); border-color: var(--bad); }
+.rm-card .who { display: inline-flex; gap: 6px; align-items: center; } .rm-card .p0 { font-size: 10px; font-weight: 750; color: var(--accent); letter-spacing: .04em; }
+.rm-card.done .ttl { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--faint); }
+.rm-more { border: 0; background: none; color: var(--accent); font: 600 12.5px var(--font); padding: 4px 2px; cursor: pointer; text-align: left; }
+.rm-empty { font-size: 13px; color: var(--muted); padding: 8px 2px; }
+.rm-foot { font-size: 12px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 6px 18px; align-items: center; }
+.rm-foot span { display: inline-flex; align-items: center; gap: 6px; } .rm-foot .dot { width: 9px; height: 9px; border-radius: 50%; border: 2px solid var(--faint); display: inline-block; }
+.rm-foot kbd { font: 600 11px var(--font); background: var(--surface-3); border-radius: 5px; padding: 1px 6px; color: var(--ink-2); }
+@media (max-width: 1000px) { .rm-hero { grid-template-columns: 1fr; } .rm-tracks { grid-template-columns: repeat(2, minmax(0, 1fr)); } .rm-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 600px) { .rm-tracks { grid-template-columns: 1fr; } .rm-north { grid-template-columns: 1fr 1fr; } .rm-head { grid-template-columns: 1fr; } .rm-prog { text-align: left; } .rm-stage { padding: 18px; } }
+@media (prefers-reduced-motion: reduce) { .rm-card { transition: none; } }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 1ms !important; animation-delay: 0ms !important; transition-duration: 1ms !important; }
 }
@@ -537,7 +602,7 @@ table.kpi td, table.kpi th { transition: background-color 160ms ease; }
   <div class="wrap bar-in">
     <div class="brand"><b>Cheeku</b><span>Vision board</span></div>
     <nav class="seg" id="tabs" aria-label="Views">
-      <a href="#board">Board</a><a href="#owners">Owners</a><a href="#trajectory">Trajectory</a><a href="#risks">Risks</a><a href="#moats">Moats</a><a href="#decisions">Decisions</a>
+      <a href="#roadmap">Roadmap</a><a href="#board">Detail board</a><a href="#owners">Owners</a><a href="#trajectory">Trajectory</a><a href="#risks">Risks</a><a href="#moats">Moats</a><a href="#decisions">Decisions</a>
     </nav>
     <div class="tools">
       <div class="search-wrap"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input class="search" id="q" type="search" placeholder="Search  /" aria-label="Search cards"></div>
@@ -647,7 +712,7 @@ const PRI_RANK = { P0: 0, P1: 1, P2: 2 };
 const S = {
   items: new Map(), risks: new Map(), moats: new Map(), tags: new Map(), activity: [],
   plan: { scenario: 'base', drv: { ...DEFAULT_DRV } }, planVersion: null, whatIf: null,
-  view: 'board', filters: { q: '', owners: new Set(), tags: new Set(), status: new Set(), pri: new Set(), hideDone: false },
+  view: 'roadmap', stage: null, rmMore: new Set(), filters: { q: '', owners: new Set(), tags: new Set(), status: new Set(), pri: new Set(), hideDone: false },
   zoom: 'all', density: 'compact', collapsed: new Set(), expanded: new Set(),
   sheet: null, editing: null, pop: null, openHeader: null,
   db: null, user: null, room: null, comments: null, downloads: null, me: null, canEdit: false, live: false, peers: [], profiles: {},
@@ -1255,6 +1320,109 @@ document.addEventListener('keydown', e => {
   if (e.key === ' ' && !(e.target.closest && e.target.closest('button'))) { e.preventDefault(); tjPlay(); }
 });
 
+// --------------------------------------------------------------- roadmap --
+// The plan as six stages. Cards land in a stage by the period the board places them in.
+const STAGES = [
+  { id: 'build', name: 'Build and raise', when: 'Oct to Dec 2026', keys: ['2026Q4'], end: -1, h: 1.2,
+    goal: 'V1 ready for the stores, the angel close done, the agency and the first hires lined up for January.' },
+  { id: 'launch', name: 'Launch', when: 'Jan to Mar 2027', keys: ['2027Q1'], end: 2, h: 2.2,
+    goal: 'Public launch in January. Cheeku Doctor, a licensed doctor for ₹49, from February. Campuses, stays and societies from March.' },
+  { id: 'prove', name: 'Prove the habit', when: 'Apr to Dec 2027', keys: ['2027Q2', '2027Q3', '2027Q4'], end: 11, h: 3.3,
+    goal: 'Families stay past a month, creators and the ground game carry growth, employers go live.' },
+  { id: 'scale', name: 'Series A and scale', when: '2028', keys: ['2028Q1', '2028Q2', '2028Q3', '2028Q4'], end: 23, h: 4.6,
+    goal: 'The Series A lands, doctor reviews pass 1,000 a day, our adapted model takes over chat, tier 2 cities open.' },
+  { id: 'platform', name: 'Become the platform', when: '2029', keys: ['2029Q1', '2029Q2', '2029Q3', '2029Q4'], end: 35, h: 6.0,
+    goal: 'Insurers, hospitals and states start paying for the risk layer and the model. Series B.' },
+  { id: 'lead', name: 'Profit and lead', when: '2030 to 2031', keys: ['2030H1', '2030H2', '2031H1', '2031H2', 'later'], end: 59, h: 7.6,
+    goal: "Profitable for good, crores of families on one health home, India's own health model." },
+];
+const TRACKS = [
+  { name: 'Product and AI', lanes: ['product', 'ai'], color: 'var(--l-product)' },
+  { name: 'Growth and partners', lanes: ['growth', 'supply'], color: 'var(--l-growth)' },
+  { name: 'Money', lanes: ['revenue', 'b2b', 'funding'], color: 'var(--l-revenue)' },
+  { name: 'Team and trust', lanes: ['team', 'trust'], color: 'var(--l-team)' },
+];
+const stageOfPeriod = k => Math.max(0, STAGES.findIndex(st => st.keys.includes(k)));
+const nowStage = () => stageOfPeriod(NOW_P);
+function stageItems(i) {
+  return [...S.items.values()].filter(it => it.status !== 'dropped' && matches(it)).map(it => ({ it, pl: placeOf(it) })).filter(x => stageOfPeriod(x.pl.period) === i);
+}
+function rmIso(x, y, z) { const k = 13; return [(x - y) * 0.866 * k, (x + y) * 0.5 * k - z * k]; }
+function rmPrism(x, y, w, d, h, z0, c) {
+  const P = (a, b, cz) => rmIso(a, b, cz).map(v => v.toFixed(1)).join(',');
+  const top = [[x, y], [x + w, y], [x + w, y + d], [x, y + d]].map(([a, b]) => P(a, b, z0 + h)).join(' ');
+  const right = [P(x + w, y, z0), P(x + w, y + d, z0), P(x + w, y + d, z0 + h), P(x + w, y, z0 + h)].join(' ');
+  const left = [P(x, y + d, z0), P(x + w, y + d, z0), P(x + w, y + d, z0 + h), P(x, y + d, z0 + h)].join(' ');
+  return `<polygon class="${c[2]}" points="${right}"/><polygon class="${c[1]}" points="${left}"/><polygon class="${c[0]}" points="${top}"/>`;
+}
+function rmNumbers(i) {
+  const M = S.model, st = STAGES[i];
+  if (st.end < 0) return [['V1', 'built end to end, with ₹0'], ['₹5 cr', 'angel close in progress'], ['12,000+', 'pincodes of care through partners'], ['Jan 2027', 'store launch']];
+  const r = M.rows[st.end];
+  return [[fmtBig(r.mau), 'monthly users'], [fmtBig(r.subs), 'paying families'], ['₹' + fmtCr(r.rev * 12 / 1e7) + ' cr', 'revenue run rate'], [Math.round(r.hcTotal).toString(), 'people on the team']];
+}
+function renderRoadmap() {
+  const M = S.model, A = M.m.A[4], cur = nowStage();
+  if (S.stage == null) S.stage = cur;
+  const sel = S.stage, st = STAGES[sel];
+  // map
+  const step = 7.4; let g = '';
+  const [px1, py1] = rmIso(-1.5, 4.1, 0), [px2, py2] = rmIso(5 * step + 5.6, -5 * step + 4.1 + 7.1, 0);
+  STAGES.forEach((x, i) => {
+    const bx = i * step, by = -i * step, cls = i === sel ? 'on' : i < cur ? 'past' : '';
+    const [tx, ty] = rmIso(bx + 2, by + 2, x.h + 0.4), [nx, ny] = rmIso(bx + 3.8, by + 3.8, 0);
+    const big = x.end < 0 ? 'V1 built' : fmtBig(M.rows[x.end].mau) + ' users';
+    const here = i === cur ? `<rect class="rm-hereb" x="${(tx - 50).toFixed(1)}" y="${(ty - 96).toFixed(1)}" width="100" height="20" rx="10"/><text class="rm-here" x="${tx.toFixed(1)}" y="${(ty - 82.5).toFixed(1)}" text-anchor="middle">WE ARE HERE</text>` : '';
+    g += `<g class="rm-st ${cls}" data-stage="${i}" role="button" tabindex="0" aria-label="Stage ${i + 1}: ${esc(x.name)}, ${esc(x.when)}" aria-pressed="${i === sel}">`
+      + rmPrism(bx, by, 4, 4, 0.4, 0, ['pt', 'pl', 'pr']) + rmPrism(bx + 0.6, by + 0.6, 2.8, 2.8, x.h, 0.4, ['t', 'l', 'r'])
+      + here + `<text class="big" x="${tx.toFixed(1)}" y="${(ty - 52).toFixed(1)}" text-anchor="middle">${big}</text>`
+      + `<text class="nm" x="${tx.toFixed(1)}" y="${(ty - 34).toFixed(1)}" text-anchor="middle">${esc(x.name)}</text><text class="wh" x="${tx.toFixed(1)}" y="${(ty - 19).toFixed(1)}" text-anchor="middle">${esc(x.when)}</text>`
+      + `<circle class="nb" cx="${nx.toFixed(1)}" cy="${(ny + 22).toFixed(1)}" r="11"/><text class="nbt" x="${nx.toFixed(1)}" y="${(ny + 26.2).toFixed(1)}">${i + 1}</text></g>`;
+  });
+  const map = `<svg viewBox="-75 -225 1040 320" role="group" aria-label="The six stages of the plan, from building V1 to profit"><line class="rm-path" x1="-50" y1="${(rmIso(3.8, 3.8, 0)[1] + 22).toFixed(1)}" x2="940" y2="${(rmIso(3.8, 3.8, 0)[1] + 22).toFixed(1)}"/>${g}</svg>`;
+  // selected stage
+  const its = stageItems(sel), done = its.filter(x => x.it.status === 'done').length;
+  const rank = x => (x.it.status === 'done' ? 3 : 0) + ({ P0: 0, P1: 1, P2: 2 }[x.it.priority] ?? 1);
+  const miles = its.filter(x => x.it.kind === 'milestone' || x.it.kind === 'gate').sort((a, b) => PIDX[a.pl.period] - PIDX[b.pl.period] || (a.pl.month ?? 99) - (b.pl.month ?? 99) || (a.it.order ?? 0) - (b.it.order ?? 0));
+  const flag = '<svg viewBox="0 0 24 24"><path d="M5 21V4h11l-2 4 2 4H5"/></svg>', tick = '<svg viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></svg>';
+  const milesHtml = miles.length ? `<div class="rm-miles">${miles.map(x => `<button type="button" class="rm-mile${x.it.status === 'done' ? ' done' : ''}" data-id="${esc(x.it.id)}">${x.it.status === 'done' ? tick : flag}${esc(x.it.title)}</button>`).join('')}</div>` : '';
+  const tracks = TRACKS.map((tr, ti) => {
+    const list = its.filter(x => tr.lanes.includes(x.it.lane) && x.it.kind !== 'milestone' && x.it.kind !== 'gate').sort((a, b) => rank(a) - rank(b) || PIDX[a.pl.period] - PIDX[b.pl.period] || (a.it.order ?? 0) - (b.it.order ?? 0));
+    const key = sel + ':' + ti, open = S.rmMore.has(key), show = open ? list : list.slice(0, 6);
+    const rows = show.map(x => `<button type="button" class="rm-card ${esc(x.it.status || '')}" data-id="${esc(x.it.id)}"><i class="dot ${esc(x.it.status || '')}"></i><span class="ttl">${esc(x.it.title)}</span><span class="who">${x.it.priority === 'P0' && x.it.status !== 'done' ? '<span class="p0">P0</span>' : ''}<span class="av ${esc(x.it.owner || 'none')}">${esc(((OWNERS.find(o => o.id === x.it.owner) || { init: '–' }).init))}</span></span></button>`).join('');
+    const more = list.length > 6 ? `<button type="button" class="rm-more" data-rmmore="${key}">${open ? 'Show fewer' : `Show ${list.length - 6} more`}</button>` : '';
+    return `<div class="rm-track"><h3><i style="background:${tr.color}"></i>${tr.name} <span>${list.length}</span></h3>${rows || '<p class="rm-empty">Nothing planned here in this stage.</p>'}${more}</div>`;
+  }).join('');
+  const kp = rmNumbers(sel).map(([b, l]) => `<div><b>${esc(b)}</b><span>${esc(l)}</span></div>`).join('');
+  const pills = STAGES.map((x, i) => `<button type="button" data-stage="${i}" aria-pressed="${i === sel}"><i>${i + 1}</i>${esc(x.name)}</button>`).join('');
+  return `<div class="view wrap"><div class="rm" style="display:grid;gap:20px">
+    <section class="rm-hero"><div><h1>One health home for India's families. <em>Six stages to get there.</em></h1><p>A sick day brings a family in, care and the family file keep them, and the data we earn becomes India's own health model. Pick a stage to see what we build, who owns it and what done looks like.</p></div>
+      <div class="rm-north"><div><b>${fmtBig(A.mauEnd)}</b><span>monthly users by December 2031</span></div><div><b>₹${fmtCr(A.rev / 1e7)} cr</b><span>revenue in 2031</span></div><div><b>${monthLabel(M.ev.breakeven)}</b><span>profitable for good</span></div></div></section>
+    <section class="rm-map">${map}</section>
+    <div class="rm-steps"><button type="button" class="rm-nav" data-stagestep="-1" aria-label="Previous stage"${sel === 0 ? ' disabled' : ''}>${ic('left')}</button><div class="rm-pills">${pills}</div><button type="button" class="rm-nav" data-stagestep="1" aria-label="Next stage"${sel === STAGES.length - 1 ? ' disabled' : ''}>${ic('right')}</button></div>
+    <section class="rm-stage" aria-live="polite">
+      <div class="rm-head"><div><div class="rm-k">Stage ${sel + 1} of ${STAGES.length} · ${esc(st.when)}${sel === cur ? ' · we are here' : ''}</div><h2>${esc(st.name)}</h2><p>${esc(st.goal)}</p></div>
+        <div class="rm-prog"><span>${done} of ${its.length} cards done</span><div class="bar2"><i style="width:${its.length ? Math.round(done / its.length * 100) : 0}%"></i></div></div></div>
+      <div class="rm-kpis">${kp}</div>
+      ${milesHtml}
+      <div class="rm-tracks">${tracks}</div>
+      <div class="rm-foot"><span><i class="dot" style="background:var(--good);border-color:var(--good)"></i>Done</span><span><i class="dot" style="background:var(--accent);border-color:var(--accent)"></i>In progress</span><span><i class="dot"></i>Planned</span><span><i class="dot" style="background:var(--bad);border-color:var(--bad)"></i>At risk</span><span>Numbers at the end of the stage, from the financial model.</span><span><kbd>←</kbd> <kbd>→</kbd> move between stages · click any card to talk it through</span></div>
+    </section></div></div>`;
+}
+function setStage(i) { S.stage = Math.max(0, Math.min(STAGES.length - 1, i)); renderMainOnly(); }
+document.addEventListener('click', e => {
+  const t = e.target.closest && e.target.closest('[data-stage], [data-stagestep], [data-rmmore]'); if (!t || S.view !== 'roadmap') return;
+  if (t.dataset.stage != null) return setStage(Number(t.dataset.stage));
+  if (t.dataset.stagestep) return setStage((S.stage ?? 0) + Number(t.dataset.stagestep));
+  const k = t.dataset.rmmore; if (S.rmMore.has(k)) S.rmMore.delete(k); else S.rmMore.add(k); renderMainOnly();
+});
+document.addEventListener('keydown', e => {
+  if (S.view !== 'roadmap' || sheetOpen() || S.editing || /INPUT|TEXTAREA|SELECT/.test((e.target.tagName || ''))) return;
+  if (e.key === 'ArrowRight') { e.preventDefault(); setStage((S.stage ?? 0) + 1); }
+  else if (e.key === 'ArrowLeft') { e.preventDefault(); setStage((S.stage ?? 0) - 1); }
+  else if ((e.key === 'Enter' || e.key === ' ') && e.target.dataset && e.target.dataset.stage != null) { e.preventDefault(); setStage(Number(e.target.dataset.stage)); }
+});
+
 // ---------------------------------------------------------------- render --
 function render() {
   $('tabs').querySelectorAll('a').forEach(a => a.setAttribute('aria-current', a.getAttribute('href') === '#' + S.view ? 'page' : 'false'));
@@ -1265,7 +1433,7 @@ function render() {
 function renderMainOnly() {
   const sc = $('boardScroll') || document.querySelector('#main .view'); const sx = sc ? sc.scrollLeft : 0, sy = sc ? sc.scrollTop : 0;
   const v = S.view;
-  $('main').innerHTML = v === 'owners' ? renderOwners() : v === 'trajectory' ? renderTrajectory() : v === 'risks' ? renderRisks() : v === 'moats' ? renderMoats() : v === 'decisions' ? renderDecisions() : renderBoard();
+  $('main').innerHTML = v === 'roadmap' ? renderRoadmap() : v === 'owners' ? renderOwners() : v === 'trajectory' ? renderTrajectory() : v === 'risks' ? renderRisks() : v === 'moats' ? renderMoats() : v === 'decisions' ? renderDecisions() : renderBoard();
   const ns = $('boardScroll') || document.querySelector('#main .view');
   if (ns && sc && renderMainOnly.last === v) { ns.scrollLeft = sx; ns.scrollTop = sy; }
   else if (ns && v === 'board' && S.zoom === 'all') { const now = ns.querySelector('.ph.now'); if (now) ns.scrollLeft = Math.max(0, now.offsetLeft - 24); }
@@ -1569,7 +1737,7 @@ async function saveRisk() {
 function presence(patch) { S.presence = { ...(S.presence || {}), ...patch, view: S.view }; if (S.room) S.room.presence(S.presence).catch(() => {}); }
 
 // ---------------------------------------------------------------- events --
-function route() { const h = (location.hash || '').slice(1); const v = ['board', 'owners', 'trajectory', 'risks', 'moats', 'decisions'].includes(h) ? h : 'board'; const changed = v !== S.view; S.view = v; if (changed) { tjStop(); if (v === 'trajectory') TJ.D = null; } S.openHeader = null; presence({}); render(); if (changed || !route.did) enterView(); route.did = true; }
+function route() { const h = (location.hash || '').slice(1); const v = ['roadmap', 'board', 'owners', 'trajectory', 'risks', 'moats', 'decisions'].includes(h) ? h : 'roadmap'; const changed = v !== S.view; S.view = v; if (changed) { tjStop(); if (v === 'trajectory') TJ.D = null; } S.openHeader = null; presence({}); render(); if (changed || !route.did) enterView(); route.did = true; }
 window.addEventListener('hashchange', () => { if (sheetOpen()) closeSheet(); route(); });
 const toggle = (set, v) => { set.has(v) ? set.delete(v) : set.add(v); };
 function setPressed(t) { t.parentElement.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', b === t)); }

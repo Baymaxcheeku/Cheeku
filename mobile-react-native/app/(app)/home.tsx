@@ -1,4 +1,6 @@
 import { HomeExtensions } from "@/lib/extensions/slots";
+import { AreaCard } from "@/components/longevity/area-card";
+import { useAreas } from "@/lib/longevity/use-areas";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useFocusEffect, useRouter } from "expo-router";
@@ -435,6 +437,7 @@ function TodayBody({
   const router = useRouter();
   const today = todayIso();
   const { plan, ctx } = usePlan(profile.id, serverDue);
+  const areas = useAreas(profile.id);
 
   const names = useMemo(() => new Map(members.map((m) => [m.id, m.isPrimary ? "You" : firstName(m.name)])), [members]);
   const rows = useMemo(() => dueRows({ server: serverDue, loops: ctx?.loops ?? [], activeId: profile.id, names, today }), [serverDue, ctx, profile.id, names, today]);
@@ -483,6 +486,15 @@ function TodayBody({
           />
         </View>
       </StaggerItem>
+
+      {/* The same six areas the chat talks about. Tap one to talk it through. */}
+      {areas.data ? (
+        <StaggerItem index={3}>
+          <View className="mt-4 px-5">
+            <AreaCard view={areas.data} name={profile.isPrimary ? "you" : firstName(profile.name)} />
+          </View>
+        </StaggerItem>
+      ) : null}
 
       {plan ? (
         <StaggerItem index={3}>

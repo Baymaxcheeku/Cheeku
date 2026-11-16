@@ -40,9 +40,9 @@ const BASE = {
   cac: [120, 140, 160, 180, 200],                  // ₹ per new paid-acquired active user
   paidConv: [0.009, 0.0145, 0.0205, 0.0245, 0.0265], // paying share of MAU from the app itself
   famShare: 0.5,
-  priceFamily: 249, priceSolo: 99, pricePass: 29,
+  priceFamily: 249, priceSolo: 99, pricePass: 49,     // Sick Day Pass: 24 h unlimited plus one doctor review (Nov 2026)
   priceIndex: [1, 1, 1.1, 1.2, 1.3],
-  webShare: [0, 0.2, 0.35, 0.45, 0.5],             // subscriptions paid on web/UPI, not app stores
+  webShare: [0, 0, 0, 0, 0],                       // app only, no web app (Nov 2026): every plan pays the store fee
   storeFee: 0.15, webFee: 0.02, gst: 0.18,
   subChurn: 0.06,                                   // monthly paid-subscriber churn, for LTV
   // Chats. Free users get 20 a day; most never come close.
@@ -50,7 +50,7 @@ const BASE = {
   freeChats: [12, 14, 16, 17, 18],                  // chats a month, average free user below the cap
   capHit: [0.02, 0.025, 0.03, 0.03, 0.03],          // share of free users who hit the cap in a month
   capDays: 3,                                       // days a month a cap-hitter spends at the cap
-  capPass: 0.15,                                    // share of cap-hitters who buy a Daily Pass that month
+  capPass: 0.12,                                    // share of cap-hitters who buy a pass that month (lower at ₹49)
   passesPerBuyer: 1.3,
   capUpgrade: 0.12,                                 // cap-hitters who end up on a plan (adds to the paying share)
   paidChats: [40, 45, 50, 52, 55],                  // chats a month per paying account
@@ -100,6 +100,28 @@ const BASE = {
   corpCommission: 0.05,                             // sales commission, share of corporate revenue
   corpServe: 0.05,                                  // account management and onboarding, share of corporate revenue
   giftCost: 0.03,                                   // gift card fulfilment
+  // Cheeku Doctor (playbook, Nov 2026): a ₹49 doctor review for 10 everyday conditions.
+  rxStart: 1,                                       // soft launch mid-Feb 2027
+  rxRate: [0.02, 0.03, 0.04, 0.045, 0.05],          // doctor reviews per active user a month
+  rxMixPass: 0.5, rxMixIncl: 0.4, rxMixExtra: 0.1,  // bought as a pass, included in a plan (2 Solo, 5 Family), extra at ₹39
+  priceRxExtra: 39,
+  // Doctor operations, built up from the playbook staffing table (₹65 a review at 100 a day, ₹49 at 1,000, ₹39 at 5,000, ₹37 at 20,000).
+  rxDocLoaded: 48000,      // ₹ a month, salaried MBBS (₹40k pay, loaded)
+  rxDocCapacity: 2000,     // reviews a month per salaried doctor: 12 an hour, 80% busy
+  rxSalariedFrom: 300,     // reviews a day before any doctor goes on payroll; below it the per-case panel does everything
+  rxSalariedShare: 0.71,   // share of reviews on payroll once salaried; the panel takes peaks
+  rxPanelFee: 25,          // ₹ a review, per-case MBBS panel
+  rxPanelPerDoc: 900,      // reviews a month per panel doctor (headcount only)
+  rxLeadCost: 120000,      // ₹ a month per clinical lead, one per 15 doctors
+  rxPilotLead: 60000,      // ₹ a month, part-time clinical lead during the pilot
+  rxHeadCost: 270000,      // ₹ a month, head of clinical from 1,000 reviews a day
+  rxHeadFrom: 1000,
+  rxOpsCost: 30000,        // ₹ a month per ops and support person, one per 400 reviews a day
+  rxOpsPer: 400,
+  rxVarCost: 5,            // ₹ a review: audits, AI intake, messages, indemnity insurance
+  rxLaunch: 10,            // ₹ lakh one-off at soft launch: legal opinion 4, indemnity and onboarding 2, pilot refunds and promos 4
+  rxAttach: 16, rxAttachCost: 0.2,                  // ₹ medicine and home-test take per review, partner cost on it
+  rxConvLift: 0.07,                                 // extra paying share from the doctor hook (break-even needs about 6%)
   // Pendant
   pendantUnits: [0, 0, 1000, 2500, 6000], pendantStart: 33, pendantPrice: 4999, pendantCogs: 0.8,
   // Serving
@@ -160,6 +182,7 @@ function scenario(name) {
     s.corpEmployerPaid = scale(s.corpEmployerPaid, 0.7); s.hrPartners = scale(s.hrPartners, 0.6); s.hrAttach = scale(s.hrAttach, 0.7);
     s.giftUnits = scale(s.giftUnits, 0.6); s.corpClientChurn = 0.22;
     s.pendantUnits = scale(s.pendantUnits, 0.5); s.webShare = scale(s.webShare, 0.6);
+    s.rxRate = scale(s.rxRate, 0.7); s.rxConvLift = 0;
     s.rounds[0].pre = 90; s.rounds[1].pre = 160; s.rounds[2].pre = 420;
   }
   if (name === 'bull') {
@@ -175,6 +198,7 @@ function scenario(name) {
     s.hrPartners = scale(s.hrPartners, 1.3); s.hrAttach = scale(s.hrAttach, 1.2); s.giftUnits = scale(s.giftUnits, 1.3);
     s.corpClientChurn = 0.12;
     s.pendantUnits = scale(s.pendantUnits, 1.5);
+    s.rxRate = scale(s.rxRate, 1.2); s.rxConvLift = 0.12;
     s.rounds[0].pre = 127; s.rounds[1].pre = 350; s.rounds[2].pre = 1200;
   }
   return s;
@@ -217,7 +241,7 @@ function run(s) {
     m.t = t; m.y = y; m.mauConsumer = mau; m.newPaid = paidNew; m.newOrganic = orgNew;
     // Paying accounts and the free tier. Hitting 20 chats a day sells Daily Passes and upgrades.
     const capHit = Math.min(1, s.capHit[y] * s.chatMult);
-    const subs = mau * (s.paidConv[y] + capHit * s.capUpgrade) * s.convMult;
+    const subs = mau * (s.paidConv[y] + capHit * s.capUpgrade) * s.convMult * (t >= s.rxStart ? 1 + s.rxConvLift : 1);
     const free = Math.max(0, mau - subs);
     m.subs = subs; m.free = free; m.capHitters = free * capHit;
     m.passes = m.capHitters * s.capPass * s.passesPerBuyer;
@@ -289,7 +313,27 @@ function run(s) {
     // Pendant hardware
     m.rHw = t >= s.pendantStart ? s.pendantUnits[y] * s.pendantPrice / (1 + s.gst) : 0;
     m.cHw = m.rHw * s.pendantCogs;
-    m.rev = m.rSub + m.rMkt + m.rFit + m.rAds + m.rIns + m.rCorp + m.rInsurer + m.rState + m.rLlm + m.rHw;
+    // Cheeku Doctor: reviews sold as passes or extras; included ones cost without new revenue.
+    m.rxCases = t >= s.rxStart ? all * s.rxRate[y] : 0;
+    const rxPass = m.rxCases * s.rxMixPass * s.pricePass / (1 + s.gst), rxExtra = m.rxCases * s.rxMixExtra * s.priceRxExtra / (1 + s.gst);
+    m.rRx = rxPass + rxExtra;
+    m.rRxAttach = m.rxCases * s.rxAttach;
+    // Doctor operations: payroll for the base load, the per-case panel for peaks, clinical leads, ops and per-review costs.
+    m.rxPerDay = m.rxCases / 30;
+    const salaried = m.rxPerDay >= s.rxSalariedFrom ? m.rxCases * s.rxSalariedShare : 0;
+    m.rxDocsSal = salaried / s.rxDocCapacity;
+    m.rxDocsPanel = (m.rxCases - salaried) / s.rxPanelPerDoc;
+    const docs = m.rxDocsSal + m.rxDocsPanel;
+    m.rxLeads = m.rxCases > 0 ? (m.rxPerDay < s.rxSalariedFrom ? 0.5 : Math.ceil(docs / 15)) : 0;
+    m.rxOps = m.rxCases > 0 ? Math.max(1, Math.ceil(m.rxPerDay / s.rxOpsPer)) : 0;
+    m.cRxDoc = m.rxDocsSal * s.rxDocLoaded + (m.rxCases - salaried) * s.rxPanelFee;
+    m.cRxClin = m.rxCases > 0 ? (m.rxPerDay < s.rxSalariedFrom ? s.rxPilotLead : m.rxLeads * s.rxLeadCost + (m.rxPerDay >= s.rxHeadFrom ? s.rxHeadCost : 0)) : 0;
+    m.cRxOps = m.rxOps * s.rxOpsCost;
+    m.cRxVar = m.rxCases * s.rxVarCost;
+    m.cRxFees = rxPass * s.storeFee + rxExtra * s.webFee + m.rRxAttach * s.rxAttachCost;
+    m.cRx = m.cRxDoc + m.cRxClin + m.cRxOps + m.cRxVar + m.cRxFees;
+    m.rxCostPer = m.rxCases > 0 ? (m.cRxDoc + m.cRxClin + m.cRxOps + m.cRxVar) / m.rxCases : 0;
+    m.rev = m.rSub + m.rMkt + m.rFit + m.rAds + m.rIns + m.rCorp + m.rInsurer + m.rState + m.rLlm + m.rHw + m.rRx + m.rRxAttach;
     // Serving costs: free users below the cap, days at the cap, paying accounts and corporate seats.
     const cpc = t < s.ownGpuMonth ? s.cpcRented : s.cpcOwn[y];
     m.chatsFree = free * s.freeChats[y] * s.chatMult;
@@ -300,7 +344,7 @@ function run(s) {
     m.cVoice = t >= s.voiceStart ? all * s.voiceMin[y] * s.voiceCost[y] * (1 + (s.gpuMult - 1) * 0.5) : 0;
     m.cOcr = all * s.ocrPages[y] * s.ocrCost[y] * (1 + (s.gpuMult - 1) * 0.5);
     m.cCloud = all * s.cloud[y] + s.cloudFixed;
-    m.cogs = m.cChat + m.cVoice + m.cOcr + m.cCloud + m.cStore + m.cMkt + m.cFit + m.cAds + m.cIns + m.cCorp + m.cB2b + m.cHw;
+    m.cogs = m.cRx + m.cChat + m.cVoice + m.cOcr + m.cCloud + m.cStore + m.cMkt + m.cFit + m.cAds + m.cIns + m.cCorp + m.cB2b + m.cHw;
     m.gp = m.rev - m.cogs;
     // People. The corporate team is hired by corporate year, from the month the vertical goes live.
     let hcTotal = 0, people = 0, seats = 0;
@@ -318,7 +362,8 @@ function run(s) {
     m.oPendant = s.pendantRnd[y] * CR / 12 * (defending ? s.defendPendant : 1);
     m.oOffice = seats * s.seatShare * s.seatCost * Math.pow(1.06, y);
     m.oGa = s.gaFixed[y] * LAKH + m.rev * s.gaPct;
-    m.opex = m.oPeople + m.oMkt + m.oCorpSales + m.oLlm + m.oPendant + m.oOffice + m.oGa;
+    m.oRxLaunch = t === s.rxStart ? s.rxLaunch * LAKH : 0;
+    m.opex = m.oPeople + m.oMkt + m.oCorpSales + m.oLlm + m.oPendant + m.oOffice + m.oGa + m.oRxLaunch;
     m.ebitda = m.gp - m.opex;
     // Below the line
     m.interest = Math.max(0, cash) * s.interest / 12;
@@ -340,7 +385,7 @@ function run(s) {
   return out;
 }
 
-const SUMKEYS = ['rSub', 'rMkt', 'rFit', 'rAds', 'rIns', 'rCorp', 'rCorpDirect', 'rCorpHr', 'rCorpGift', 'rInsurer', 'rState', 'rLlm', 'rHw', 'rev', 'gmv', 'gmvFit',
+const SUMKEYS = ['rSub', 'rMkt', 'rFit', 'rAds', 'rIns', 'rCorp', 'rCorpDirect', 'rCorpHr', 'rCorpGift', 'rInsurer', 'rState', 'rLlm', 'rHw', 'rRx', 'rRxAttach', 'cRx', 'rxCases', 'cRxDoc', 'cRxClin', 'cRxOps', 'cRxVar', 'cRxFees', 'oRxLaunch', 'rev', 'gmv', 'gmvFit',
   'cChat', 'cVoice', 'cOcr', 'cCloud', 'cStore', 'cMkt', 'cFit', 'cAds', 'cIns', 'cCorp', 'cB2b', 'cHw', 'cogs', 'gp',
   'oPeople', 'oMkt', 'oCorpSales', 'oLlm', 'oPendant', 'oOffice', 'oGa', 'opex', 'ebitda', 'interest', 'tax', 'net', 'cfo', 'funding',
   'chats', 'chatsFree', 'chatsCap', 'chatsPaid', 'passes', 'newPaid', 'newOrganic', 'corpNewClients', 'giftBilled', 'fitSessions'];
@@ -355,6 +400,8 @@ function annual(rows) {
     a.subsEnd = last.subs; a.seatsEnd = last.seats; a.corpClientsEnd = last.corpClients; a.hrPartnersEnd = last.hrPartners;
     a.hcEnd = last.hcTotal; a.cashEnd = last.cash; a.deferredEnd = last.deferred;
     a.hc = last.hc; a.arrExit = last.rev * 12;
+    a.rxPerDayEnd = last.rxPerDay; a.rxDocsSalEnd = last.rxDocsSal; a.rxDocsPanelEnd = last.rxDocsPanel; a.rxLeadsEnd = last.rxLeads; a.rxOpsEnd = last.rxOps;
+    a.rxCostPer = a.rxCases > 0 ? (a.cRxDoc + a.cRxClin + a.cRxOps + a.cRxVar) / a.rxCases : 0;
     return a;
   });
 }
@@ -416,6 +463,7 @@ const GROUPS = [
   { key: 'corp', label: 'Corporate and employee benefits', fields: ['corpClients', 'corpEnrolVol', 'corpEmployerPaid', 'hrPartners', 'hrAttach', 'giftUnits', 'corpClientChurn', 'corpLag'] },
   { key: 'b2b', label: 'Insurer, state and LLM deals', fields: ['insurers', 'states', 'llmClients', 'b2bDelay'] },
   { key: 'serve', label: 'Chat and voice usage per user', fields: ['freeChats', 'paidChats', 'capHit', 'voiceMin'] },
+  { key: 'rx', label: 'Cheeku Doctor uptake', fields: ['rxRate', 'rxConvLift'] },
 ];
 const lerp = (a, b, k) => Array.isArray(a) ? a.map((v, i) => v + (b[i] - v) * k) : a + (b - a) * k;
 function blend(bear, base, bull, u, fields) {

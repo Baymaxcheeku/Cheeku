@@ -119,8 +119,8 @@
    "tags": [
     "t-l-model"
    ],
-   "title": "Own GPUs serve chat: ₹0.30 → ₹0.10 an answer",
-   "why": "Chat cost falls by two thirds overnight, which is what makes 20 free chats a day affordable."
+   "title": "Own GPUs serve chat: ₹0.07 → ₹0.06 an answer",
+   "why": "Small hosted models already cost about 7 paise a chat; our own model only takes traffic once it wins our India evals."
   },
   "a-reports": {
    "confidence": 70,
@@ -550,6 +550,8 @@
   "b-pricing": {
    "confidence": 50,
    "deps": [],
+   "endPeriod": null,
+   "gate": null,
    "how": "",
    "kind": "decision",
    "kpi": "",
@@ -559,15 +561,15 @@
    "order": 68,
    "outcome": "",
    "owner": "deepesh",
-   "period": "2027Q1",
-   "priority": "P1",
+   "period": "2027Q4",
+   "priority": "P2",
    "status": "planned",
    "tags": [
     "t-l-b2b",
     "t-decision"
    ],
    "title": "Employer pricing: 30% off for staff, or a flat fee per seat?",
-   "why": "The model assumes 30% off the Family plan, employees paying unless the employer covers everyone."
+   "why": "Figure out the % discount model in sync with the p&l"
   },
   "b-sandbox": {
    "confidence": 30,
@@ -664,6 +666,240 @@
    "title": "First 10 companies",
    "why": ""
   },
+  "d-audit": {
+   "confidence": 60,
+   "deps": [
+    "d-full"
+   ],
+   "how": "Approval-rate band per doctor, minimum review time, weekly audit by the clinical lead.",
+   "kind": "initiative",
+   "kpi": "10% of cases audited every week",
+   "lane": "trust",
+   "moat": "m-trust",
+   "order": 7,
+   "owner": "suraj",
+   "period": "2027Q2",
+   "priority": "P1",
+   "status": "planned",
+   "tags": [
+    "t-risk"
+   ],
+   "title": "Second-doctor audit on 10% of reviews",
+   "why": "Stops rubber-stamping and catches a serious case that looks minor."
+  },
+  "d-build": {
+   "confidence": 60,
+   "deps": [
+    "p-launch",
+    "d-protocols"
+   ],
+   "how": "Protocol engine, case service with overflow timer, doctor console, UPI and automatic refunds, signed prescription PDF, masked calling, ops dashboard.",
+   "kind": "initiative",
+   "kpi": "All seven pieces in the February build",
+   "lane": "product",
+   "moat": "m-ecosystem",
+   "order": 3,
+   "owner": "athar",
+   "period": "2027Q1",
+   "priority": "P0",
+   "status": "planned",
+   "tags": [
+    "t-newprod",
+    "t-l-app"
+   ],
+   "title": "Cheeku Doctor build: case queue, doctor console, payments, prescription",
+   "why": "The seven new pieces behind the ₹49 review. Most of the rest already exists in the app."
+  },
+  "d-cities": {
+   "confidence": 60,
+   "deps": [
+    "d-full"
+   ],
+   "how": "Add panel doctors and a pharmacy partner city by city; ads switch on when wait time holds.",
+   "kind": "initiative",
+   "kpi": "5 cities live",
+   "lane": "growth",
+   "moat": null,
+   "order": 41,
+   "owner": "deepesh",
+   "period": "2027Q2",
+   "priority": "P1",
+   "status": "planned",
+   "tags": [
+    "t-investor"
+   ],
+   "title": "Cheeku Doctor in five cities",
+   "why": "The ₹49 hook only runs where doctors are live, so every new city opens a new market for it."
+  },
+  "d-full": {
+   "confidence": 60,
+   "deps": [
+    "d-pilot"
+   ],
+   "how": "Queue, audits and refunds on the ops dashboard; second-doctor audit on 10% of cases.",
+   "kind": "gate",
+   "kpi": "Median 20 minutes, under 2% refunds",
+   "lane": "product",
+   "moat": "m-habit",
+   "order": 5,
+   "owner": "athar",
+   "period": "2027Q1",
+   "priority": "P0",
+   "status": "planned",
+   "tags": [
+    "t-investor"
+   ],
+   "title": "Cheeku Doctor fully running",
+   "why": "End of March: the front door is open and holds its promise."
+  },
+  "d-head": {
+   "confidence": 60,
+   "deps": [
+    "d-salaried"
+   ],
+   "how": "One clinical lead per 15 doctors reports to them.",
+   "kind": "initiative",
+   "kpi": "Hired before 1,000 reviews a day",
+   "lane": "team",
+   "moat": null,
+   "order": 84,
+   "owner": "suraj",
+   "period": "2028Q2",
+   "priority": "P1",
+   "status": "planned",
+   "tags": [],
+   "title": "Head of clinical joins",
+   "why": "From 1,000 reviews a day the doctor operation needs a full-time owner."
+  },
+  "d-legal": {
+   "confidence": 70,
+   "deps": [],
+   "how": "Telemedicine Practice Guidelines 2020, advertising rules for doctors, store payment rules for consultations.",
+   "kind": "initiative",
+   "kpi": "Signed opinion in hand",
+   "lane": "trust",
+   "moat": null,
+   "order": 5,
+   "owner": "deepesh",
+   "period": "2026Q4",
+   "priority": "P0",
+   "status": "planned",
+   "tags": [
+    "t-regulatory",
+    "t-launch"
+   ],
+   "title": "Legal opinion on the ₹49 doctor review",
+   "why": "A written opinion before any doctor sees a case or any doctor ad runs."
+  },
+  "d-panel": {
+   "confidence": 60,
+   "deps": [
+    "d-legal"
+   ],
+   "how": "Registration checked, indemnity cover, 2 hours on protocols, 20 shadow cases, weekly audit. ₹25 a review.",
+   "kind": "initiative",
+   "kpi": "30 doctors live, peak hour covered",
+   "lane": "supply",
+   "moat": "m-supply",
+   "order": 22,
+   "owner": "deepesh",
+   "period": "2027Q1",
+   "priority": "P0",
+   "status": "planned",
+   "tags": [
+    "t-dependency"
+   ],
+   "title": "Doctor panel: 30 MBBS doctors paid per review",
+   "why": "No idle cost while volumes are small. Doctors pick their shifts."
+  },
+  "d-pilot": {
+   "confidence": 60,
+   "deps": [
+    "d-build",
+    "d-panel",
+    "s-medicines"
+   ],
+   "how": "Mid-February, about 65 reviews a day, refunds automatic past 30 minutes.",
+   "kind": "milestone",
+   "kpi": "Paid to prescription in 25 minutes",
+   "lane": "product",
+   "moat": "m-habit",
+   "order": 4,
+   "owner": "athar",
+   "period": "2027Q1",
+   "priority": "P0",
+   "status": "planned",
+   "tags": [
+    "t-newprod",
+    "t-investor"
+   ],
+   "title": "Cheeku Doctor soft launch in one city",
+   "why": "A licensed doctor for everyday illness: ₹49, about 20 minutes. Prove the promise in one city first."
+  },
+  "d-protocols": {
+   "confidence": 60,
+   "deps": [
+    "t-md",
+    "d-legal"
+   ],
+   "how": "Red flags per condition, medicine lists without antibiotics or controlled drugs, a 3-day limit, check-in rules.",
+   "kind": "initiative",
+   "kpi": "10 protocols signed",
+   "lane": "trust",
+   "moat": "m-trust",
+   "order": 6,
+   "owner": "suraj",
+   "period": "2027Q1",
+   "priority": "P0",
+   "status": "planned",
+   "tags": [
+    "t-regulatory",
+    "t-moat"
+   ],
+   "title": "10 condition protocols, signed by our clinical lead",
+   "why": "The AI only takes the history. A doctor decides, inside protocols a clinician has signed."
+  },
+  "d-salaried": {
+   "confidence": 60,
+   "deps": [
+    "d-cities"
+   ],
+   "how": "₹48k a month loaded, about 2,000 reviews each; the panel keeps the peaks.",
+   "kind": "initiative",
+   "kpi": "4 salaried doctors by December",
+   "lane": "team",
+   "moat": null,
+   "order": 83,
+   "owner": "deepesh",
+   "period": "2027Q4",
+   "priority": "P1",
+   "status": "planned",
+   "tags": [],
+   "title": "First salaried doctors on payroll",
+   "why": "From about 300 reviews a day, payroll is cheaper than the panel for the steady base."
+  },
+  "d-thousand": {
+   "confidence": 60,
+   "deps": [
+    "d-cities",
+    "f-series-a"
+   ],
+   "how": "About 21 salaried and 19 panel doctors, 3 clinical leads, 5 ops.",
+   "kind": "milestone",
+   "kpi": "1,000 reviews a day",
+   "lane": "product",
+   "moat": "m-supply",
+   "order": 6,
+   "owner": "athar",
+   "period": "2028Q2",
+   "priority": "P1",
+   "status": "planned",
+   "tags": [
+    "t-investor"
+   ],
+   "title": "1,000 doctor reviews a day",
+   "why": "The scale at which a review costs about ₹44 and the doctor layer is a real moat."
+  },
   "f-a-proof": {
    "confidence": 50,
    "deps": [
@@ -688,7 +924,26 @@
     "t-investor"
    ],
    "title": "Series A proof points in hand",
-   "why": "What the seed must buy: 5.9 lakh monthly users, 10,000+ payers, 25% D30, care booked weekly."
+   "why": "7 lakh monthly users, 12,000+ paying families, daily doctor reviews, a first insurer pilot."
+  },
+  "f-angel": {
+   "confidence": 65,
+   "deps": [],
+   "how": "Investment memo, deck and model out; first investor meetings in November.",
+   "kind": "milestone",
+   "kpi": "₹5 cr committed",
+   "lane": "funding",
+   "moat": null,
+   "order": 71,
+   "owner": "athar",
+   "period": "2026Q4",
+   "priority": "P0",
+   "status": "in_progress",
+   "tags": [
+    "t-investor"
+   ],
+   "title": "Angel close: ₹5 cr",
+   "why": "Pays for December, the launch and the first months until the institutional money lands."
   },
   "f-bridge": {
    "confidence": 50,
@@ -780,11 +1035,12 @@
    "confidence": 60,
    "deps": [
     "f-incorporate",
-    "f-seed-terms"
+    "f-seed-terms",
+    "f-angel"
    ],
-   "how": "35% people, 33% growth, 18% model, 14% ops.",
+   "how": "36% people, 35% growth, 18% model, 11% ops.",
    "kind": "milestone",
-   "kpi": "₹26 cr in the bank",
+   "kpi": "₹26 cr raised in total",
    "lane": "funding",
    "moat": null,
    "order": 72,
@@ -795,8 +1051,8 @@
    "tags": [
     "t-investor"
    ],
-   "title": "Close the seed: ₹26 cr",
-   "why": "17 months of runway to the Series A."
+   "title": "Institutional close: ₹21 cr",
+   "why": "Second close of the one seed round. About 17 months of runway to the Series A."
   },
   "f-seed-terms": {
    "confidence": 60,
@@ -890,13 +1146,32 @@
    "title": "Monthly investor update on 8 numbers",
    "why": "MAU, D30 retention, paying share, bookings per user, CAC, cost per answer, eval win rate, safety incidents."
   },
+  "g-agency": {
+   "confidence": 60,
+   "deps": [],
+   "how": "Two-week paid test between two agencies in December, ₹5 lakh. 90-day contract, paid on cost per active user.",
+   "kind": "initiative",
+   "kpi": "Agency live with tested creatives on 1 January",
+   "lane": "growth",
+   "moat": null,
+   "order": 30,
+   "owner": "athar",
+   "period": "2026Q4",
+   "priority": "P0",
+   "status": "in_progress",
+   "tags": [
+    "t-launch"
+   ],
+   "title": "Performance agency signed, creatives tested",
+   "why": "Rent the paid engine for the first quarter; own the accounts and the data."
+  },
   "g-cac": {
    "confidence": 60,
    "deps": [],
    "endPeriod": "2031H2",
-   "how": "Monthly CAC review; the runway rule cuts paid spend first.",
+   "how": "Weekly cost per active user by channel; every channel has a cap. See the acquisition plan.",
    "kind": "initiative",
-   "kpi": "Blended CAC ≤ ₹60",
+   "kpi": "Paid CAC ₹120, blended ₹61 in 2027",
    "lane": "growth",
    "moat": null,
    "order": 44,
@@ -905,8 +1180,48 @@
    "priority": "P1",
    "status": "planned",
    "tags": [],
-   "title": "Keep blended cost per new user under ₹60",
+   "title": "Paid cost per active user at ₹120, blended near ₹60",
    "why": "Paid LTV/CAC is only 1.8x by 2031; organic carries the model."
+  },
+  "g-camps": {
+   "confidence": 60,
+   "deps": [],
+   "how": "Through NoBroker and MyGate societies: BP, sugar and BMI checks, a doctor talk, the family file set up on the spot.",
+   "kind": "initiative",
+   "kpi": "65 families a camp at ₹300 each",
+   "lane": "growth",
+   "moat": null,
+   "order": 37,
+   "owner": "deepesh",
+   "period": "2027Q1",
+   "priority": "P1",
+   "status": "planned",
+   "tags": [
+    "t-experiment"
+   ],
+   "title": "Society health camps: 8 a month",
+   "why": "Whole families decide together. Our dearest channel and our best payers."
+  },
+  "g-campus": {
+   "confidence": 60,
+   "deps": [
+    "d-pilot"
+   ],
+   "how": "From March: ₹10k to ₹20k a month each plus ₹10 to ₹20 per paying user on their code. Start with campuses the founders know.",
+   "kind": "initiative",
+   "kpi": "₹100 per active user, 100 users per ambassador",
+   "lane": "growth",
+   "moat": null,
+   "order": 35,
+   "owner": "deepesh",
+   "period": "2027Q1",
+   "priority": "P1",
+   "status": "planned",
+   "tags": [
+    "t-experiment"
+   ],
+   "title": "Campus ambassadors: 10 campuses, 30 ambassadors",
+   "why": "Students away from home are the sick-day user at their most alone."
   },
   "g-cities": {
    "confidence": 65,
@@ -924,6 +1239,27 @@
    "tags": [],
    "title": "Launch in Delhi NCR, Bengaluru, Mumbai, Pune, Hyderabad",
    "why": "Wave one: adults caring for parents, and new parents."
+  },
+  "g-creators": {
+   "confidence": 60,
+   "deps": [
+    "g-agency"
+   ],
+   "how": "Doctor voices on retainer, micro creators per video plus per user, affiliates on codes. Every script cleared by the clinical lead.",
+   "kind": "initiative",
+   "kpi": "A third of paid users at ₹110 or less by June",
+   "lane": "growth",
+   "moat": "m-habit",
+   "order": 33,
+   "owner": "athar",
+   "period": "2027Q1",
+   "priority": "P0",
+   "status": "planned",
+   "tags": [
+    "t-investor"
+   ],
+   "title": "Creator army: 100 by March, 1,300 by December",
+   "why": "Hundreds of small voices beat one big one. Doctors lead, everyday creators carry it."
   },
   "g-crore": {
    "confidence": 50,
@@ -947,6 +1283,46 @@
    ],
    "title": "1 crore monthly users: replace Google for health at home",
    "why": "The point where Cheeku is the default first stop for a health question in Indian homes."
+  },
+  "g-ground": {
+   "confidence": 60,
+   "deps": [
+    "g-campus",
+    "g-stays",
+    "g-camps"
+   ],
+   "how": "39 ambassadors on 13 campuses, 56,000 rooms and beds, 12 camps a month.",
+   "kind": "initiative",
+   "kpi": "30% of paid users, inside the model CAC",
+   "lane": "growth",
+   "moat": null,
+   "order": 42,
+   "owner": "deepesh",
+   "period": "2027Q3",
+   "priority": "P1",
+   "status": "planned",
+   "tags": [],
+   "title": "Ground game brings 30% of paid users",
+   "why": "Offline partners are cheaper than ads once they hold their cost caps."
+  },
+  "g-inhouse": {
+   "confidence": 60,
+   "deps": [
+    "f-series-a"
+   ],
+   "how": "Performance marketer joins; agency hands over accounts and learnings.",
+   "kind": "initiative",
+   "kpi": "Paid run by our own team",
+   "lane": "growth",
+   "moat": null,
+   "order": 47,
+   "owner": "athar",
+   "period": "2028Q2",
+   "priority": "P1",
+   "status": "planned",
+   "tags": [],
+   "title": "Bring paid marketing in-house",
+   "why": "At ₹1.2 cr a month the agency fee costs more than a team."
   },
   "g-lakh": {
    "confidence": 70,
@@ -983,14 +1359,14 @@
    "owner": "athar",
    "period": "2027Q1",
    "priority": "P1",
-   "status": "planned",
+   "status": "dropped",
    "tags": [
     "t-feature",
     "t-l-app",
     "t-quickwin"
    ],
    "title": "Health answer pages that rank",
-   "why": "Organic does the heavy lifting: 49% of new users in 2027, 74% by 2031."
+   "why": "Dropped Nov 2026: no web app. Reach comes from creators, the ground game and store listing work."
   },
   "g-referral": {
    "confidence": 50,
@@ -1016,9 +1392,9 @@
   "g-retention": {
    "confidence": 55,
    "deps": [],
-   "how": "Cohort dashboard, weekly retention review, cut paid if it slips.",
+   "how": "Cohort dashboard, weekly retention review. If it slips, move spend from ads to referral and the hero campaign.",
    "kind": "gate",
-   "kpi": "Day-30 retention 25%+",
+   "kpi": "Day-30 retention 30%+",
    "lane": "growth",
    "moat": null,
    "order": 39,
@@ -1030,8 +1406,53 @@
     "t-investor",
     "t-risk"
    ],
-   "title": "25% day-30 retention before we scale spend",
+   "title": "30% day-30 retention before we scale spend",
    "why": "Gate on the roadmap: no spend scale-up before the habit holds."
+  },
+  "g-seven": {
+   "confidence": 60,
+   "deps": [],
+   "gate": {
+    "metric": "mau",
+    "offset": 0,
+    "type": "reach",
+    "value": 700000
+   },
+   "how": "Paid, creators, ground game and word of mouth together.",
+   "kind": "milestone",
+   "kpi": "7 lakh monthly users",
+   "lane": "growth",
+   "moat": null,
+   "order": 45,
+   "owner": "athar",
+   "priority": "P0",
+   "status": "planned",
+   "tags": [
+    "t-investor"
+   ],
+   "title": "7 lakh monthly users",
+   "why": "The headline Series A milestone."
+  },
+  "g-stays": {
+   "confidence": 60,
+   "deps": [
+    "d-pilot"
+   ],
+   "how": "We pay printing and ₹20 per activated guest; the property earns 10% of the commerce its guests bring.",
+   "kind": "initiative",
+   "kpi": "22,000 rooms and beds by June",
+   "lane": "growth",
+   "moat": null,
+   "order": 36,
+   "owner": "deepesh",
+   "period": "2027Q1",
+   "priority": "P1",
+   "status": "planned",
+   "tags": [
+    "t-experiment"
+   ],
+   "title": "A QR in every room: first hotel, hostel or PG partner",
+   "why": "A traveller who falls ill in a strange city has no doctor. The card by the bed does."
   },
   "g-tenlakh": {
    "confidence": 65,
@@ -1102,13 +1523,15 @@
   "p-billing": {
    "confidence": 70,
    "deps": [],
+   "endPeriod": null,
+   "gate": null,
    "how": "Store billing for Family, Solo and Daily Pass; UPI checkout on web at 2% fees.",
    "kind": "initiative",
    "kpi": "First paid Family plan through the store",
    "lane": "product",
    "moat": null,
    "order": 2,
-   "owner": "athar",
+   "owner": "deepesh",
    "period": "2026Q4",
    "priority": "P0",
    "status": "planned",
@@ -1118,8 +1541,8 @@
     "t-launch",
     "t-dependency"
    ],
-   "title": "Real billing: store subscriptions and UPI on web",
-   "why": "Plans run on a stand-in today. Paying share is the first number investors check."
+   "title": "Real billing in the app: store subscriptions and UPI",
+   "why": "Everything is sold in the app. There is no web app."
   },
   "p-claims": {
    "confidence": 45,
@@ -1526,23 +1949,28 @@
   "p-wearables": {
    "confidence": 55,
    "deps": [],
-   "how": "Health Connect and HealthKit; readings go to the member's memory.",
+   "endPeriod": null,
+   "gate": null,
+   "how": "Health Connect and HealthKit; readings go to the member's memory.\n\n- Apple Health\n- Google Health\n- Strava Health\n- Oura Health- Ring\n- Whop Health\n- Fittr \n- ",
    "kind": "initiative",
    "kpi": "20% of actives connect a device",
    "lane": "product",
    "moat": "m-ecosystem",
    "order": 10,
    "owner": "athar",
-   "period": "2027Q3",
-   "priority": "P2",
-   "status": "planned",
+   "period": "2027Q2",
+   "priority": "P1",
+   "status": "in_progress",
    "tags": [
     "t-addition",
     "t-l-app",
-    "t-l-hw"
+    "t-l-hw",
+    "t-feature",
+    "t-experiment",
+    "t-quickwin"
    ],
-   "title": "Wearables sync",
-   "why": "Steps, sleep and BP flow in without typing."
+   "title": "Wearables: watch and phone data in the family memory",
+   "why": "Steps, sleep, other insights and BP flow in without typing."
   },
   "p-weekly": {
    "confidence": 65,
@@ -1652,6 +2080,26 @@
    ],
    "title": "Labelled ads in non-urgent chats",
    "why": "₹87 cr by 2031; never in red-flag chats."
+  },
+  "r-attach": {
+   "confidence": 60,
+   "deps": [
+    "d-full",
+    "s-medicines"
+   ],
+   "how": "About a third order medicines, some book a home test, through the partner.",
+   "kind": "initiative",
+   "kpi": "₹16 earned per review",
+   "lane": "revenue",
+   "moat": null,
+   "order": 62,
+   "owner": "deepesh",
+   "period": "2027Q2",
+   "priority": "P1",
+   "status": "planned",
+   "tags": [],
+   "title": "Medicines and tests after a review",
+   "why": "The review is thin on its own. What follows pays: about ₹16 a review."
   },
   "r-bookings": {
    "confidence": 60,
@@ -1766,7 +2214,7 @@
    ],
    "how": "Plans, upgrades and Daily Pass at the free limit.",
    "kind": "milestone",
-   "kpi": "1% of users paying by Dec 2027",
+   "kpi": "5,900 paying families by Dec 2027",
    "lane": "revenue",
    "moat": null,
    "order": 45,
@@ -1778,8 +2226,8 @@
     "t-feature",
     "t-l-app"
    ],
-   "title": "Subscriptions live: Family ₹249, Solo ₹99, Daily Pass ₹29",
-   "why": "Paying share grows from 1.1% to 3.0%; many upgrade after hitting 20 chats a day."
+   "title": "Plans live: Sick Day Pass ₹49, Solo ₹99, Family ₹249",
+   "why": "The paying tiers. Sick Day Pass has 1 doctor review, Solo 2 a month, Family 5 shared; extra reviews ₹39."
   },
   "r-web-upi": {
    "confidence": 55,
@@ -1793,14 +2241,14 @@
    "owner": "athar",
    "period": "2028Q1",
    "priority": "P1",
-   "status": "planned",
+   "status": "dropped",
    "tags": [
     "t-feature",
     "t-l-app",
     "t-quickwin"
    ],
    "title": "Move plans to UPI on web: fees 15% → 2%",
-   "why": "Half of plans on web by 2031 saves about 6 points of margin on subscriptions."
+   "why": "Dropped Nov 2026: we are app only, so every plan pays the store fee. Doctor reviews are paid by UPI in the app as a consultation."
   },
   "s-care-cats": {
    "confidence": 55,
@@ -1907,7 +2355,9 @@
   },
   "s-medicines": {
    "confidence": 45,
-   "deps": [],
+   "deps": [
+    "s-lab-live"
+   ],
    "how": "Pharmacy partner, Rx from the ledger, generics suggested.",
    "kind": "initiative",
    "kpi": "20% of chronic patients refill through Cheeku",
@@ -1915,16 +2365,16 @@
    "moat": "m-ecosystem",
    "order": 33,
    "owner": "deepesh",
-   "period": "2027Q4",
-   "priority": "P2",
+   "period": "2027Q1",
+   "priority": "P1",
    "status": "planned",
    "tags": [
     "t-addition",
     "t-l-app",
     "t-regulatory"
    ],
-   "title": "Medicines delivered from chat",
-   "why": "Refills are the most frequent need for families caring for parents."
+   "title": "Medicines delivered after a doctor review",
+   "why": "Cheeku Doctor ends with medicines at the door in about 45 minutes, through the pharmacy partner."
   },
   "s-pincodes": {
    "confidence": 95,
@@ -2056,6 +2506,23 @@
    ],
    "title": "ESOP pool: 10% before seed, 5% top-up before A",
    "why": "Founding hires in 2027 need meaningful equity."
+  },
+  "t-growth": {
+   "confidence": 60,
+   "deps": [],
+   "how": "Growth lead first; creator lead by August; content and community lead by December.",
+   "kind": "initiative",
+   "kpi": "3 people in growth by Dec 2027",
+   "lane": "team",
+   "moat": null,
+   "order": 82,
+   "owner": "athar",
+   "period": "2027Q1",
+   "priority": "P0",
+   "status": "planned",
+   "tags": [],
+   "title": "Growth lead, then a creator lead",
+   "why": "Athar owns growth until the lead joins in the launch quarter."
   },
   "t-hundred": {
    "confidence": 60,
@@ -2347,10 +2814,12 @@
   "r-cac": {
    "impact": 4,
    "items": [
+    "g-cac",
+    "g-creators",
+    "g-ground",
     "g-pages",
     "g-referral",
-    "p-whatsapp",
-    "g-cac"
+    "p-whatsapp"
    ],
    "likelihood": 3,
    "mitigation": "Organic-first channels; the runway rule cuts paid spend first.",
@@ -2374,6 +2843,21 @@
    "signal": "Under 10 companies 6 months after go-live",
    "status": "open",
    "title": "Employer sales take longer than planned"
+  },
+  "r-doctor": {
+   "impact": 5,
+   "items": [
+    "d-protocols",
+    "d-audit",
+    "d-legal"
+   ],
+   "likelihood": 2,
+   "mitigation": "Red flags per condition, 10 conditions only, no antibiotics, second-doctor audit, 24-hour check-in.",
+   "owner": "suraj",
+   "short": "Doctor review misses",
+   "signal": "An audited case where a serious illness was treated as minor",
+   "status": "mitigating",
+   "title": "A serious case looks minor in a doctor review"
   },
   "r-focus": {
    "impact": 3,
@@ -2437,9 +2921,10 @@
   "r-reg": {
    "impact": 4,
    "items": [
+    "d-legal",
+    "tr-cdsco",
     "tr-dpdp",
-    "tr-hosting",
-    "tr-cdsco"
+    "tr-hosting"
    ],
    "likelihood": 2,
    "mitigation": "Consent ledger, no diagnosis claims, companion positioning, counsel from seed.",
@@ -2493,6 +2978,21 @@
    "signal": "Any unsafe flag reaching a family",
    "status": "open",
    "title": "Prescription check is wrong"
+  },
+  "r-wait": {
+   "impact": 4,
+   "items": [
+    "d-panel",
+    "d-salaried",
+    "d-cities"
+   ],
+   "likelihood": 3,
+   "mitigation": "Overflow to a backup panel at 5 minutes and the partner network at 10; ads throttled to doctor capacity; refund past 30 minutes.",
+   "owner": "deepesh",
+   "short": "Doctor wait time",
+   "signal": "Median wait over 20 minutes for a week",
+   "status": "open",
+   "title": "Doctor supply breaks the 20-minute promise"
   }
  },
  "tags": {

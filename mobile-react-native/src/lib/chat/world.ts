@@ -4,6 +4,7 @@ import { goalByKey, goalTitle, readGoalPrefs } from "@/lib/home/goals";
 import { fetchDailyLogs, fetchDailyPrefs } from "@/lib/home/logs";
 import { focusAreas, longevityAreas, recordSignals, type Area, type Signal } from "@/lib/longevity/areas";
 import { longevityDigest } from "@/lib/longevity/digest";
+import { dayLabel } from "./daily";
 
 export { longevityDigest };
 import { buildContext, type MemoryContext } from "@/lib/memory/context";
@@ -45,7 +46,7 @@ function within<T>(p: Promise<T>, fallback: T): Promise<T> {
   return Promise.race([p.catch(() => fallback), new Promise<T>((r) => setTimeout(() => r(fallback), WAIT_MS))]);
 }
 
-function isPregnant(ctx: MemoryContext): boolean {
+export function isPregnant(ctx: MemoryContext): boolean {
   return ctx.clock.relative?.kind === "gestational";
 }
 
@@ -77,16 +78,17 @@ async function care(profileId: string, firstName: string): Promise<WorldDigest["
   ]);
   for (const b of labs.data ?? []) {
     const tests = Array.isArray(b.tests) ? (b.tests as { name?: string; label?: string }[]).map((t) => t.label ?? t.name).filter(Boolean).slice(0, 3).join(", ") : "tests";
-    const line = `Home test (${tests || "tests"}) on ${b.slot_date}, ${String(b.status).replace(/_/g, " ")}`;
+    const line = `Home test (${tests || "tests"}) on ${dayLabel(b.slot_date as string)}, ${String(b.status).replace(/_/g, " ")}`;
     (b.status === "ready" || b.status === "cancelled" ? recent : upcoming).push(line);
   }
   const now = Date.now();
   for (const c of classes.data ?? []) {
     if (c.status === "cancelled") continue;
-    const line = `${c.session_title} at ${c.studio_name}, ${new Date(c.starts_at as string).toDateString()}`;
+    const line = `${c.session_title} at ${c.studio_name}, ${dayLabel(c.starts_at as string)}`;
     (Date.parse(c.starts_at as string) > now ? upcoming : recent).push(line);
   }
-  return { upcoming: upcoming.slice(0, 4), recent: recent.slice(0, 4) };
+  // The same class booked twice reads as one line, and the soonest comes first.
+  return { upcoming: [...new Set(upcoming)].reverse().slice(0, 4), recent: [...new Set(recent)].slice(0, 4) };
 }
 
 /** One line per family member, worst area first. Only from the account holder's own chat. */

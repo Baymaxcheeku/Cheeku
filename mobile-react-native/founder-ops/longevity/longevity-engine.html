@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Longevity Engine Build</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:opsz,wght@14..32,400..750&display=swap">
+<style>
+/* Layout: printed "sheets" stacked on a grey desk, as in the two-pager. Sheet 1 is the product and guardrails,
+   sheet 2 is execution, sheet 3 is pricing and unit economics. Every block leads with a picture, then a few lines. */
+:root {
+  --bg: #EEEEF3; --page: #FFFFFF; --soft: #F5F5F8; --soft-2: #EBEAF5; --lav: #DCD8FB;
+  --ink: #17171C; --ink-2: #3A3A42; --muted: #6E6E78; --line: rgba(20, 20, 40, .1);
+  --accent: #5B4EF0; --accent-2: #3B2BC9; --accent-soft: #EEECFF; --navy: #14136B; --on-navy: #FFFFFF;
+  --safe: #0F7538; --safe-bg: #E7F7EE; --warn: #A63A08; --warn-bg: #FFF0E6; --bad: #C00A1C; --bad-bg: #FEF1F3;
+  --iso-t: #EBEAF5; --iso-l: #D3CEF7; --iso-r: #BDB6F2; --a-t: #8A82F5; --a-l: #5B4EF0; --a-r: #3B2BC9;
+  --n-t: #3B3A8F; --n-l: #14136B; --n-r: #0C0B4A; --w-t: #FFFFFF; --w-l: #E4E2F3; --w-r: #CFCBEA;
+  --c-t: #FFE3CF; --c-l: #F6C7A6; --c-r: #E8A579; --e-t: #FFD5DA; --e-l: #F59AA5; --e-r: #E5606F;
+  --display: 'Instrument Serif', Georgia, 'Times New Roman', serif;
+  --body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+  /* the app's own palette, kept light in both themes because these are phone screens */
+  --app-canvas: #F2F2F4; --app-card: #FFFFFF; --app-ink: #111114; --app-ink-2: #3A3A41; --app-muted: #6D6D78;
+  --app-line: #E6E6EA; --app-violet: #5B4EF0; --app-violet-soft: #EEECFF; --app-safe: #0F7538; --app-safe-bg: #E7F7EE;
+  --app-warn: #8F5400; --app-warn-bg: #FFF4E0; --app-frame: #1B1B22;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #08080B; --page: #141418; --soft: #1C1C22; --soft-2: #22203A; --lav: #2E2A55;
+  --ink: #F4F4F7; --ink-2: #D2D2DA; --muted: #9A9AA4; --line: rgba(255, 255, 255, .1);
+  --accent: #8F87FF; --accent-2: #B3ADFF; --accent-soft: #24213F; --navy: #2C2A85; --on-navy: #FFFFFF;
+  --safe: #3CCF7C; --safe-bg: #11301F; --warn: #FFA061; --warn-bg: #3A2214; --bad: #FF7A7A; --bad-bg: #3A1518;
+  --iso-t: #2A2846; --iso-l: #211F3A; --iso-r: #1A182E; --a-t: #8F87FF; --a-l: #6A61E8; --a-r: #4C43C4;
+  --n-t: #4B49B0; --n-l: #34328A; --n-r: #24226A; --w-t: #3A3A48; --w-l: #2E2E3A; --w-r: #24242E;
+  --c-t: #6B4127; --c-l: #563320; --c-r: #45291A; --e-t: #6E2830; --e-l: #592027; --e-r: #47191F;
+  color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #08080B; --page: #141418; --soft: #1C1C22; --soft-2: #22203A; --lav: #2E2A55;
+  --ink: #F4F4F7; --ink-2: #D2D2DA; --muted: #9A9AA4; --line: rgba(255, 255, 255, .1);
+  --accent: #8F87FF; --accent-2: #B3ADFF; --accent-soft: #24213F; --navy: #2C2A85; --on-navy: #FFFFFF;
+  --safe: #3CCF7C; --safe-bg: #11301F; --warn: #FFA061; --warn-bg: #3A2214; --bad: #FF7A7A; --bad-bg: #3A1518;
+  --iso-t: #2A2846; --iso-l: #211F3A; --iso-r: #1A182E; --a-t: #8F87FF; --a-l: #6A61E8; --a-r: #4C43C4;
+  --n-t: #4B49B0; --n-l: #34328A; --n-r: #24226A; --w-t: #3A3A48; --w-l: #2E2E3A; --w-r: #24242E;
+  --c-t: #6B4127; --c-l: #563320; --c-r: #45291A; --e-t: #6E2830; --e-l: #592027; --e-r: #47191F;
+  color-scheme: dark; }
+
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 400 15px/1.5 var(--body); -webkit-font-smoothing: antialiased;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 8px 40px; }
+h1, h2, h3, h4 { margin: 0; text-wrap: balance; font-weight: 400; }
+p { margin: 0; }
+.num, td, .t-num { font-variant-numeric: tabular-nums; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 6px; }
+svg { display: block; max-width: 100%; height: auto; }
+svg text { font-family: var(--body); }
+
+.sheet { max-width: 1060px; margin: 18px auto; background: var(--page); border-radius: 28px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,.05), 0 12px 40px rgba(20,20,40,.08); }
+.pagehead { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 20px 32px 0; font-size: 11.5px; font-weight: 650; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); flex-wrap: wrap; }
+.logo { font: italic 400 26px/1 var(--display); color: var(--accent); letter-spacing: 0; text-transform: none; }
+.blk { padding: 30px 32px; display: grid; gap: 16px; border-top: 1px solid var(--line); min-width: 0; }
+.k { font-size: 11.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); }
+.blk h2 { font: 400 clamp(28px, 4.4vw, 40px)/1.06 var(--display); letter-spacing: -0.005em; }
+.blk h2 em, .hero h1 em { color: var(--accent); }
+.lede { color: var(--ink-2); max-width: 66ch; }
+.cap { font-size: 12px; color: var(--muted); }
+.grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.box { background: var(--soft); border-radius: 18px; padding: 18px; display: grid; gap: 8px; align-content: start; min-width: 0; }
+.box h3 { font: 650 15px/1.3 var(--body); }
+.box p, .box li { font-size: 13.5px; color: var(--ink-2); line-height: 1.45; }
+.box ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
+.scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+@media (max-width: 760px) { .grid2, .grid3 { grid-template-columns: minmax(0, 1fr); } .blk { padding: 24px 18px; } .pagehead { padding: 16px 18px 0; } }
+
+/* hero */
+.hero { padding: 34px 32px 30px; display: grid; gap: 18px; background: radial-gradient(110% 90% at 100% 0%, var(--soft-2) 0%, var(--page) 62%); }
+.hero h1 { font: 400 clamp(38px, 6.6vw, 64px)/1.0 var(--display); letter-spacing: -0.012em; max-width: 17ch; }
+.hero .lede { font-size: 16.5px; }
+.tags { display: flex; flex-wrap: wrap; gap: 8px; }
+.tag { display: inline-flex; align-items: center; height: 28px; padding: 0 12px; border-radius: 999px; font-size: 12.5px; font-weight: 650; background: var(--soft); color: var(--ink-2); }
+.tag.v { background: var(--accent-soft); color: var(--accent-2); }
+.stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.stat { background: var(--soft); border-radius: 16px; padding: 14px; display: grid; gap: 2px; }
+.stat b { font: 400 34px/1 var(--display); color: var(--ink); }
+.stat span { font-size: 12.5px; color: var(--muted); line-height: 1.35; }
+@media (max-width: 760px) { .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } .hero { padding: 26px 18px; } }
+
+/* price ladder of alternatives */
+.alts { display: grid; gap: 8px; }
+.alt { display: grid; grid-template-columns: 210px minmax(0, 1fr) 110px; gap: 14px; align-items: center; }
+.alt .nm b { display: block; font-size: 14px; }
+.alt .nm span { font-size: 12px; color: var(--muted); }
+.alt .bar { height: 14px; border-radius: 7px; background: var(--soft-2); position: relative; overflow: hidden; }
+.alt .bar i { position: absolute; inset: 0 auto 0 0; border-radius: 7px; background: var(--lav); }
+.alt .bar i.rng { background: repeating-linear-gradient(90deg, var(--lav) 0 6px, transparent 6px 10px); }
+.alt.us .bar i { background: var(--accent); }
+.alt .pr { font-weight: 650; font-size: 14px; text-align: right; }
+.alt .gap { font-size: 12px; color: var(--muted); }
+.alt.us .nm b, .alt.us .pr { color: var(--accent); }
+@media (max-width: 640px) { .alt { grid-template-columns: minmax(0, 1fr) 90px; } .alt .bar { grid-column: 1 / -1; grid-row: 2; } }
+
+/* isometric */
+.isoWrap { background: var(--soft); border-radius: 22px; padding: 12px 8px 4px; }
+.iso { width: 100%; min-width: 600px; max-height: 520px; }
+.p-t { fill: var(--iso-t); } .p-l { fill: var(--iso-l); } .p-r { fill: var(--iso-r); }
+.pc-t { fill: var(--c-t); } .pc-l { fill: var(--c-l); } .pc-r { fill: var(--c-r); }
+.pe-t { fill: var(--e-t); } .pe-l { fill: var(--e-l); } .pe-r { fill: var(--e-r); }
+.a-t { fill: var(--a-t); } .a-l { fill: var(--a-l); } .a-r { fill: var(--a-r); }
+.n-t { fill: var(--n-t); } .n-l { fill: var(--n-l); } .n-r { fill: var(--n-r); }
+.w-t { fill: var(--w-t); } .w-l { fill: var(--w-l); } .w-r { fill: var(--w-r); }
+.s-t, .s-l, .s-r { fill: var(--accent-soft); }
+.c-t { fill: var(--c-t); } .c-l { fill: var(--c-l); } .c-r { fill: var(--c-r); }
+.e-t { fill: var(--e-t); } .e-l { fill: var(--e-l); } .e-r { fill: var(--e-r); }
+.path { stroke: var(--accent); stroke-width: 3; stroke-linecap: round; fill: none; }
+.path.br { stroke: var(--warn); stroke-dasharray: 6 6; }
+.path.em { stroke: var(--bad); stroke-dasharray: 6 6; }
+.path.back { stroke: var(--accent); stroke-dasharray: 2 6; }
+.nb { fill: var(--accent); } .nb-c { fill: #E8590C; } .nb-e { fill: #E10A1E; } .nbt { fill: #FFFFFF; font-size: 13px; font-weight: 700; text-anchor: middle; } .ld { stroke: var(--muted); stroke-width: 1; stroke-dasharray: 2 3; }
+.legend { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px 16px; }
+.legend div { display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: 8px; align-items: start; }
+.legend i { width: 24px; height: 24px; border-radius: 50%; background: var(--accent); color: #FFFFFF; font: 700 12px/24px var(--body); text-align: center; font-style: normal; }
+.legend i.c { background: #E8590C; } .legend i.e { background: #E10A1E; }
+.legend b { display: block; font-size: 13.5px; } .legend span { font-size: 12px; color: var(--muted); line-height: 1.35; }
+@media (max-width: 760px) { .legend { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.lt { fill: var(--ink); font-size: 13px; font-weight: 650; } .lt-c { fill: var(--warn); } .lt-e { fill: var(--bad); }
+.ls { fill: var(--muted); font-size: 11.5px; }
+.tg { fill: var(--muted); font-size: 11px; font-weight: 600; font-style: italic; }
+
+/* doors */
+.doors { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.door { border-radius: 18px; padding: 16px; display: grid; gap: 8px; align-content: start; }
+.door .lv { font-size: 11px; font-weight: 750; letter-spacing: .08em; text-transform: uppercase; }
+.door h3 { font: 400 24px/1.1 var(--display); }
+.door p { font-size: 13.5px; line-height: 1.45; }
+.door.d1 { background: var(--accent-soft); } .door.d1 .lv { color: var(--accent-2); }
+.door.d2 { background: var(--warn-bg); } .door.d2 .lv, .door.d2 h3 { color: var(--warn); }
+.door.d3 { background: var(--bad-bg); } .door.d3 .lv, .door.d3 h3 { color: var(--bad); }
+.door p { color: var(--ink-2); }
+@media (max-width: 760px) { .doors { grid-template-columns: minmax(0, 1fr); } }
+
+/* chips */
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chips span { font-size: 12.5px; padding: 4px 10px; border-radius: 999px; background: var(--page); color: var(--ink-2); border: 1px solid var(--line); }
+.chips.no span { color: var(--bad); border-color: var(--bad-bg); background: var(--bad-bg); }
+
+/* phone screens */
+.phones { display: flex; flex-wrap: wrap; justify-content: center; gap: 22px 18px; padding: 6px 2px 14px; max-width: 740px; margin: 0 auto; }
+.phone { flex: none; width: 232px; display: grid; gap: 10px; }
+.phone figcaption { font-size: 12.5px; color: var(--ink-2); line-height: 1.4; }
+.phone figcaption b { display: block; color: var(--ink); font-size: 13px; }
+figure { margin: 0; }
+.dev { width: 232px; height: 470px; border-radius: 36px; background: var(--app-frame); padding: 8px; box-shadow: 0 18px 40px rgba(20,20,60,.18); }
+.scr { width: 100%; height: 100%; border-radius: 29px; background: var(--app-canvas); overflow: hidden; display: flex; flex-direction: column; font-family: var(--body); color: var(--app-ink); position: relative; }
+.sb { height: 26px; display: flex; justify-content: space-between; align-items: center; padding: 0 18px; font-size: 10px; font-weight: 650; color: var(--app-ink); }
+.isl { width: 64px; height: 16px; border-radius: 10px; background: var(--app-frame); }
+.ah { display: flex; align-items: center; justify-content: space-between; padding: 4px 14px 8px; }
+.ah .br { font: italic 400 20px/1 var(--display); color: var(--app-violet); }
+.ah .mi { font-size: 10px; color: var(--app-muted); font-weight: 600; }
+.ab { flex: 1; padding: 0 12px; display: flex; flex-direction: column; gap: 8px; overflow: hidden; }
+.bub { max-width: 82%; font-size: 10.5px; line-height: 1.4; padding: 7px 10px; border-radius: 14px; }
+.bub.me { align-self: flex-end; background: var(--app-ink); color: #FFFFFF; border-bottom-right-radius: 4px; }
+.bub.ai { align-self: flex-start; background: var(--app-card); color: var(--app-ink); border-bottom-left-radius: 4px; }
+.cd { background: var(--app-card); border-radius: 16px; padding: 10px; display: grid; gap: 6px; }
+.cd .t { font-size: 11px; font-weight: 650; }
+.cd .s { font-size: 9.5px; color: var(--app-muted); line-height: 1.35; }
+.ch { display: flex; flex-wrap: wrap; gap: 5px; }
+.ch span { font-size: 9.5px; padding: 4px 8px; border-radius: 999px; background: var(--app-canvas); color: var(--app-ink-2); font-weight: 600; }
+.ch span.on { background: var(--app-violet); color: #FFFFFF; }
+.mem { font-size: 9.5px; color: var(--app-violet); background: var(--app-violet-soft); padding: 6px 8px; border-radius: 10px; line-height: 1.35; }
+.btn { background: var(--app-ink); color: #FFFFFF; border-radius: 999px; text-align: center; font-size: 11px; font-weight: 650; padding: 9px 10px; }
+.btn.ghost { background: var(--app-card); color: var(--app-ink); border: 1px solid var(--app-line); }
+.row { display: flex; justify-content: space-between; align-items: center; gap: 6px; font-size: 10px; color: var(--app-ink-2); }
+.row b { color: var(--app-ink); }
+.tick { color: var(--app-safe); font-weight: 700; }
+.sheetUp { margin-top: auto; background: var(--app-card); border-radius: 22px 22px 0 0; padding: 12px; display: grid; gap: 7px; box-shadow: 0 -8px 24px rgba(0,0,0,.08); }
+.grab { width: 34px; height: 4px; border-radius: 2px; background: var(--app-line); justify-self: center; }
+.price { font: 650 20px/1 var(--body); }
+.trk { display: grid; gap: 7px; }
+.trk div { display: grid; grid-template-columns: 16px minmax(0, 1fr) auto; gap: 7px; align-items: center; font-size: 10px; color: var(--app-ink-2); }
+.dot { width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--app-line); background: var(--app-card); }
+.dot.ok { background: var(--app-safe); border-color: var(--app-safe); }
+.dot.now { background: var(--app-violet); border-color: var(--app-violet); box-shadow: 0 0 0 3px var(--app-violet-soft); }
+.av { width: 30px; height: 30px; border-radius: 50%; background: var(--app-violet-soft); color: var(--app-violet); font-size: 11px; font-weight: 700; display: grid; place-items: center; flex: none; }
+.rxh { display: flex; gap: 8px; align-items: center; }
+.qr { width: 46px; height: 46px; border-radius: 6px; background:
+  conic-gradient(from 90deg at 30% 30%, var(--app-ink) 25%, transparent 0) 0 0 / 11px 11px, var(--app-card); border: 3px solid var(--app-card); outline: 1px solid var(--app-line); }
+.med { border-top: 1px solid var(--app-line); padding-top: 6px; display: grid; gap: 1px; }
+.med b { font-size: 10.5px; } .med span { font-size: 9.5px; color: var(--app-muted); }
+.safeTag { font-size: 9.5px; font-weight: 650; color: var(--app-safe); background: var(--app-safe-bg); border-radius: 999px; padding: 3px 8px; justify-self: start; }
+.sample { font-size: 11px; color: var(--muted); }
+
+/* doctor console */
+.console { background: var(--app-canvas); border-radius: 18px; border: 8px solid var(--app-frame); overflow: hidden; color: var(--app-ink); min-width: 760px; }
+.cbar { display: flex; align-items: center; gap: 10px; padding: 8px 14px; background: var(--app-card); border-bottom: 1px solid var(--app-line); font-size: 11px; color: var(--app-muted); }
+.cbar .br { font: italic 400 18px/1 var(--display); color: var(--app-violet); }
+.cbar .pill { margin-left: auto; background: var(--app-safe-bg); color: var(--app-safe); font-weight: 650; padding: 3px 9px; border-radius: 999px; }
+.cgrid { display: grid; grid-template-columns: 220px minmax(0, 1fr) 230px; gap: 10px; padding: 10px; }
+.q { background: var(--app-card); border-radius: 12px; padding: 9px; display: grid; gap: 2px; font-size: 10.5px; }
+.q.on { outline: 2px solid var(--app-violet); }
+.q b { font-size: 11px; } .q .w { color: var(--app-warn); font-weight: 650; }
+.pane { background: var(--app-card); border-radius: 12px; padding: 12px; display: grid; gap: 8px; align-content: start; }
+.pane h4 { font: 650 12px/1.3 var(--body); }
+.kv { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 4px 10px; font-size: 10.5px; }
+.kv span:nth-child(odd) { color: var(--app-muted); }
+.flags { display: flex; flex-wrap: wrap; gap: 4px; }
+.flags span { font-size: 9.5px; font-weight: 600; padding: 3px 7px; border-radius: 999px; background: var(--app-safe-bg); color: var(--app-safe); }
+.dx { display: flex; flex-wrap: wrap; gap: 5px; }
+.dx span { font-size: 10px; padding: 5px 9px; border-radius: 999px; border: 1px solid var(--app-line); }
+.dx span.on { background: var(--app-violet); color: #FFFFFF; border-color: var(--app-violet); }
+.acts { display: grid; gap: 6px; }
+
+/* timeline */
+.tl { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 0; position: relative; min-width: 820px; }
+.tl::before { content: ""; position: absolute; left: 4%; right: 4%; top: 34px; height: 3px; background: var(--soft-2); border-radius: 2px; }
+.tl div { display: grid; gap: 6px; justify-items: center; align-content: start; text-align: center; padding: 0 6px; position: relative; }
+.tl time { font: 650 12px/1 var(--body); color: var(--accent-2); font-variant-numeric: tabular-nums; }
+.tl i { width: 18px; height: 18px; border-radius: 50%; background: var(--page); border: 3px solid var(--accent); z-index: 1; }
+.tl div.dk i { background: var(--accent); }
+.tl b { font-size: 12.5px; } .tl span { font-size: 11.5px; color: var(--muted); line-height: 1.35; }
+
+/* state machine */
+.sm { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.sm span { font-size: 12px; font-weight: 650; padding: 6px 10px; border-radius: 10px; background: var(--accent-soft); color: var(--accent-2); }
+.sm span.k2 { background: var(--navy); color: var(--on-navy); }
+.sm em { font-style: normal; color: var(--muted); font-size: 13px; }
+.sm.side span { background: var(--soft); color: var(--ink-2); font-weight: 600; }
+
+/* tables */
+table { border-collapse: collapse; width: 100%; font-size: 13px; }
+th, td { padding: 9px 10px; text-align: right; border-bottom: 1px solid var(--line); white-space: nowrap; }
+thead th { white-space: normal; vertical-align: bottom; line-height: 1.3; }
+th:first-child, td:first-child { text-align: left; }
+thead th { font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
+tr.hl td { background: var(--accent-soft); color: var(--ink); font-weight: 650; }
+td.neg { color: var(--bad); } td.pos { color: var(--safe); }
+
+/* build map */
+.own { display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 650; padding: 2px 8px; border-radius: 999px; background: var(--page); color: var(--ink-2); border: 1px solid var(--line); }
+.bm { display: grid; gap: 6px; }
+.bm div { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: center; font-size: 13px; padding: 8px 10px; border-radius: 12px; background: var(--page); }
+
+/* gantt */
+.gantt { display: grid; grid-template-columns: 170px minmax(0, 1fr); gap: 8px 12px; align-items: center; min-width: 640px; }
+.gantt .lb { font-size: 13px; font-weight: 650; }
+.gantt .lb span { display: block; font-size: 11.5px; color: var(--muted); font-weight: 500; }
+.gtrack { position: relative; height: 26px; background: var(--soft); border-radius: 8px; }
+.gtrack i { position: absolute; top: 0; bottom: 0; border-radius: 8px; background: var(--lav); display: flex; align-items: center; padding: 0 8px; font-size: 11px; font-style: normal; font-weight: 650; color: var(--accent-2); white-space: nowrap; }
+.gtrack i.pl { background: var(--accent); color: #FFFFFF; }
+.gscale { grid-column: 2; display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); }
+
+/* plans */
+.plans { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.plan { border-radius: 22px; padding: 20px; display: grid; gap: 12px; align-content: start; background: var(--soft); }
+.plan.fam { background: var(--navy); color: var(--on-navy); }
+.plan .who { font-size: 11.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); }
+.plan.fam .who { color: #C9C4FA; }
+.plan h3 { font: 400 28px/1.05 var(--display); }
+.plan .pp { font: 650 34px/1 var(--body); letter-spacing: -0.02em; }
+.plan .pp small { font-size: 14px; font-weight: 500; opacity: .7; }
+.plan ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 7px; }
+.plan li { font-size: 13.5px; line-height: 1.4; display: grid; grid-template-columns: 16px minmax(0, 1fr); gap: 8px; }
+.plan li::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); margin-top: 6px; }
+.plan.fam li::before { background: #C9C4FA; }
+.plan li.new { font-weight: 650; }
+.worth { font-size: 12.5px; border-radius: 12px; padding: 10px 12px; background: var(--page); color: var(--ink-2); line-height: 1.4; }
+.plan.fam .worth { background: rgba(255,255,255,.1); color: #E8E6FF; }
+@media (max-width: 860px) { .plans { grid-template-columns: minmax(0, 1fr); } }
+
+/* waterfall */
+.wf { display: grid; gap: 6px; }
+.wfr { display: grid; grid-template-columns: 170px minmax(0, 1fr) 64px; gap: 10px; align-items: center; font-size: 12.5px; }
+.wfr .tr { position: relative; height: 18px; }
+.wfr .tr i { position: absolute; top: 0; height: 18px; border-radius: 4px; }
+.wfr .tr i.tot { background: var(--accent); } .wfr .tr i.minus { background: var(--bad-bg); outline: 1px solid var(--bad); outline-offset: -1px; }
+.wfr .tr i.plus { background: var(--safe-bg); outline: 1px solid var(--safe); outline-offset: -1px; }
+.wfr .tr i.sub { background: var(--lav); }
+.wfr .tr .zero { position: absolute; top: -3px; bottom: -3px; width: 1px; background: var(--muted); }
+.wfr .v { text-align: right; font-weight: 650; font-variant-numeric: tabular-nums; }
+.wfr .v.neg { color: var(--bad); } .wfr .v.pos { color: var(--safe); }
+@media (max-width: 640px) { .wfr { grid-template-columns: 120px minmax(0, 1fr) 54px; } }
+
+/* bars */
+.vb { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; align-items: end; height: 230px; padding-top: 10px; }
+.vb div { display: flex; flex-direction: column; gap: 6px; align-items: center; justify-content: flex-end; height: 100%; }
+.vb i { width: 70%; max-width: 120px; border-radius: 10px 10px 4px 4px; background: var(--lav); display: block; }
+.vb div.hl i { background: var(--accent); }
+.vb b { font-size: 15px; } .vb span { font-size: 11.5px; color: var(--muted); text-align: center; line-height: 1.3; }
+
+/* loop into longevity */
+.loopL { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; }
+.loopL div { background: var(--soft); border-radius: 16px; padding: 14px; display: grid; gap: 6px; align-content: start; position: relative; }
+.loopL div:last-child { background: var(--navy); color: var(--on-navy); }
+.loopL div:last-child span { color: #D9D6FF; }
+.loopL b { font-size: 13.5px; } .loopL span { font-size: 12.5px; color: var(--ink-2); line-height: 1.4; }
+.loopL .ix { font: 400 26px/1 var(--display); color: var(--accent); }
+.loopL div:last-child .ix { color: #C9C4FA; }
+@media (max-width: 860px) { .loopL { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+.callout { background: var(--navy); color: var(--on-navy); border-radius: 20px; padding: 18px 20px; display: grid; gap: 6px; }
+.callout b { font: 400 24px/1.15 var(--display); }
+.callout p { color: #E1DEFF; font-size: 13.5px; }
+.src { font-size: 11.5px; color: var(--muted); line-height: 1.55; }
+.src ol { margin: 0; padding-left: 18px; display: grid; gap: 3px; }
+@media (prefers-reduced-motion: no-preference) { .dot.now { animation: pulse 2s ease-in-out infinite; } @keyframes pulse { 50% { box-shadow: 0 0 0 6px var(--app-violet-soft); } } }
+
+.hero h1 { max-width: 26ch; }
+.legend p { margin: 0; }
+.iso.stack { min-width: 460px; max-height: 440px; }
+.mark { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 650; padding: 3px 9px; border-radius: 999px; }
+.mark.ok { background: var(--safe-bg); color: var(--safe); } .mark.wa { background: var(--warn-bg); color: var(--warn); } .mark.ac { background: var(--bad-bg); color: var(--bad); }
+td.l, th.l { text-align: left; white-space: normal; }
+.areas { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.area { background: var(--soft); border-radius: 18px; padding: 16px; display: grid; gap: 8px; align-content: start; }
+.area h3 { font: 400 22px/1.1 var(--display); } .area .src { font-size: 11.5px; color: var(--muted); font-weight: 650; letter-spacing: .04em; text-transform: uppercase; }
+.area ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; font-size: 13px; color: var(--ink-2); }
+.area .mark { white-space: nowrap; }
+.area li { display: grid; grid-template-columns: 76px minmax(0, 1fr); gap: 8px; align-items: baseline; }
+@media (max-width: 860px) { .areas { grid-template-columns: minmax(0, 1fr); } }
+.flow { display: grid; gap: 8px; }
+.fstep { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; gap: 12px; align-items: center; background: var(--soft); border-radius: 14px; padding: 10px 14px; }
+.fstep > i { width: 28px; height: 28px; border-radius: 50%; background: var(--accent); color: #fff; font: 700 12px/28px var(--body); text-align: center; font-style: normal; }
+.fstep.gate > i { background: var(--bad); } .fstep.model > i { background: var(--navy); }
+.fstep b { display: block; font-size: 14px; } .fstep span { font-size: 12.5px; color: var(--ink-2); line-height: 1.4; }
+.fstep .own { white-space: nowrap; }
+pre.code { margin: 0; background: var(--navy); color: #E9E7FF; border-radius: 16px; padding: 16px 18px; font: 12.5px/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; overflow-x: auto; white-space: pre; }
+pre.code .c { color: #A9A3F5; }
+.react { display: grid; gap: 8px; }
+.rx { display: grid; grid-template-columns: minmax(0, 1fr) 24px minmax(0, 1.3fr); gap: 10px; align-items: center; background: var(--soft); border-radius: 14px; padding: 12px 14px; font-size: 13.5px; }
+.rx .arr { color: var(--accent); font-weight: 700; text-align: center; } .rx b { display: block; font-size: 12px; color: var(--muted); font-weight: 650; text-transform: uppercase; letter-spacing: .05em; margin-bottom: 2px; }
+.rx q { color: var(--ink); font-style: italic; quotes: none; }
+@media (max-width: 760px) { .rx { grid-template-columns: minmax(0, 1fr); } .rx .arr { transform: rotate(90deg); justify-self: start; } }
+.build { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 860px) { .build { grid-template-columns: minmax(0, 1fr); } }
+.state { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; }
+.state.b { background: var(--safe-bg); color: var(--safe); } .state.n { background: var(--accent-soft); color: var(--accent-2); }
+.doors .lt, .doors .ls { paint-order: stroke; stroke: var(--soft); stroke-width: 5px; stroke-linejoin: round; }
+.lenses { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.lens { border-radius: 18px; padding: 16px; display: grid; gap: 10px; align-content: start; background: var(--soft); }
+.lens.l1 { background: var(--accent-soft); } .lens.l3 { background: var(--warn-bg); }
+.lens .lv { font-size: 11px; font-weight: 750; letter-spacing: .08em; text-transform: uppercase; color: var(--accent-2); }
+.lens.l3 .lv { color: var(--warn); }
+.lens h3 { font: 400 26px/1.05 var(--display); }
+.lens ol { margin: 0; padding-left: 18px; display: grid; gap: 5px; font-size: 13px; color: var(--ink-2); line-height: 1.4; }
+.lens .rd { background: var(--page); border-radius: 12px; padding: 10px 12px; font-size: 12.5px; }
+.lens .rd b { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+.lens .rd ul { margin: 4px 0 0; padding-left: 16px; display: grid; gap: 2px; color: var(--ink-2); }
+.nv { font-size: 12.5px; color: var(--bad); line-height: 1.4; } .nv b { color: var(--bad); }
+@media (max-width: 860px) { .lenses { grid-template-columns: minmax(0, 1fr); } }
+.profs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.prof { background: var(--soft); border-radius: 18px; padding: 16px; display: grid; gap: 8px; align-content: start; }
+.prof .lv { font-size: 11px; font-weight: 650; color: var(--muted); }
+.prof h3 { font: 400 22px/1.1 var(--display); }
+.prof dl { margin: 0; display: grid; gap: 6px; } .prof dt { font-size: 10.5px; font-weight: 750; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); } .prof dd { margin: 0; font-size: 12.5px; color: var(--ink-2); line-height: 1.4; }
+.prof .nv { border-top: 1px solid var(--line); padding-top: 8px; }
+@media (max-width: 1000px) { .profs { grid-template-columns: repeat(2, minmax(0, 1fr)); } } @media (max-width: 560px) { .profs { grid-template-columns: minmax(0, 1fr); } }
+.pracs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.prac { background: var(--soft); border-radius: 16px; padding: 14px; display: grid; gap: 6px; align-content: start; }
+.prac b { font: 400 22px/1 var(--display); color: var(--accent); } .prac span { font-size: 13px; color: var(--ink-2); line-height: 1.45; } .prac em { font-style: normal; font-size: 11.5px; color: var(--muted); }
+@media (max-width: 760px) { .pracs { grid-template-columns: minmax(0, 1fr); } }
+.fine { font-size: 11.5px; color: var(--muted); padding: 0 32px 26px; max-width: 100ch; }
+</style>
+</head>
+<body>
+
+<article class="sheet" aria-label="Sheet 1: what the engine is">
+  <div class="pagehead"><span class="logo">Cheeku</span><span>Longevity engine · build document · 1 / 6</span></div>
+  <section class="hero">
+    <h1>The longevity engine. <em>Every number a family has, turned into the next right habit.</em></h1>
+    <p class="lede">It reads what each person eats, takes and puts on their skin, along with every report, reading and watch day. It keeps it on one timeline per person, marks six areas of health, and turns the ones that need attention into a daily plan, a nudge and the next test. The model explains; rules and code decide. This document is how we build it: Suraj owns the AI and retrieval, Archit the app and data layer.</p>
+    <div class="tags"><span class="tag v">Areas, not a score</span><span class="tag">Rules decide, the model explains</span><span class="tag">Partial beats wrong</span><span class="tag">For the team only</span></div>
+    <div class="stats">
+      <div class="stat"><b>6</b><span>areas per person: heart, sugar, weight, sleep, movement, check-ups</span></div>
+      <div class="stat"><b>12</b><span>kinds of input: what is eaten, taken and applied, reports, the watch</span></div>
+      <div class="stat"><b>18 mo</b><span>a signal older than this is dropped, never trusted</span></div>
+      <div class="stat"><b>₹0.07</b><span>a chat with about 4,000 tokens of family context</span></div>
+    </div>
+  </section>
+
+  <section class="blk">
+    <div class="k">The whole engine</div>
+    <h2>Eight stations, <em>one loop that never ends.</em></h2>
+    <div class="isoWrap scroll"><svg class="iso" viewBox="-330 -20 730 420" role="img" aria-label="The longevity engine as eight stations in a loop: inputs, read, family memory, rules, six areas, daily plan, nudge and chat, act; the retest result comes back in as a new input"><line x1="0.0" y1="30.0" x2="129.9" y2="105.0" class="path "/><line x1="129.9" y1="105.0" x2="259.8" y2="180.0" class="path "/><line x1="259.8" y1="180.0" x2="389.7" y2="255.0" class="path "/><line x1="389.7" y1="255.0" x2="259.8" y2="330.0" class="path "/><line x1="259.8" y1="330.0" x2="129.9" y2="255.0" class="path "/><line x1="129.9" y1="255.0" x2="0.0" y2="180.0" class="path "/><line x1="0.0" y1="180.0" x2="-129.9" y2="105.0" class="path "/><line x1="-129.9" y1="105.0" x2="0.0" y2="30.0" class="path back"/><polygon class="p-r" points="52.0,30.0 0.0,60.0 0.0,54.0 52.0,24.0"/><polygon class="p-l" points="-52.0,30.0 0.0,60.0 0.0,54.0 -52.0,24.0"/><polygon class="p-t" points="0.0,-6.0 52.0,24.0 0.0,54.0 -52.0,24.0"/><polygon class="w-r" points="27.3,23.2 -6.5,42.8 -6.5,40.0 27.3,20.5"/><polygon class="w-l" points="-35.1,26.2 -6.5,42.8 -6.5,40.0 -35.1,23.5"/><polygon class="w-t" points="-1.3,4.1 27.3,20.5 -6.5,40.0 -35.1,23.5"/><polygon class="w-r" points="27.3,22.5 -6.5,42.0 -6.5,39.3 27.3,19.8"/><polygon class="w-l" points="-35.1,25.5 -6.5,42.0 -6.5,39.3 -35.1,22.8"/><polygon class="w-t" points="-1.3,3.3 27.3,19.8 -6.5,39.3 -35.1,22.8"/><polygon class="w-r" points="27.3,21.8 -6.5,41.2 -6.5,38.5 27.3,19.1"/><polygon class="w-l" points="-35.1,24.8 -6.5,41.2 -6.5,38.5 -35.1,22.1"/><polygon class="w-t" points="-1.3,2.6 27.3,19.1 -6.5,38.5 -35.1,22.1"/><polygon class="a-r" points="11.7,39.8 6.5,42.8 6.5,23.2 11.7,20.2"/><polygon class="a-l" points="-2.6,37.5 6.5,42.8 6.5,23.2 -2.6,18.0"/><polygon class="a-t" points="2.6,15.0 11.7,20.2 6.5,23.2 -2.6,18.0"/><polygon class="p-r" points="181.9,105.0 129.9,135.0 129.9,129.0 181.9,99.0"/><polygon class="p-l" points="77.9,105.0 129.9,135.0 129.9,129.0 77.9,99.0"/><polygon class="p-t" points="129.9,69.0 181.9,99.0 129.9,129.0 77.9,99.0"/><polygon class="p-r" points="-77.9,105.0 -129.9,135.0 -129.9,129.0 -77.9,99.0"/><polygon class="p-l" points="-181.9,105.0 -129.9,135.0 -129.9,129.0 -181.9,99.0"/><polygon class="p-t" points="-129.9,69.0 -77.9,99.0 -129.9,129.0 -181.9,99.0"/><polygon class="c-r" points="-96.1,99.0 -129.9,118.5 -129.9,97.5 -96.1,78.0"/><polygon class="c-l" points="-163.7,99.0 -129.9,118.5 -129.9,97.5 -163.7,78.0"/><polygon class="c-t" points="-129.9,58.5 -96.1,78.0 -129.9,97.5 -163.7,78.0"/><polygon class="n-r" points="159.8,101.2 133.8,116.2 133.8,101.2 159.8,86.2"/><polygon class="n-l" points="100.0,96.8 133.8,116.2 133.8,101.2 100.0,81.8"/><polygon class="n-t" points="126.0,66.8 159.8,86.2 133.8,101.2 100.0,81.8"/><polygon class="w-r" points="150.7,85.5 132.5,96.0 132.5,95.1 150.7,84.6"/><polygon class="w-l" points="109.1,82.5 132.5,96.0 132.5,95.1 109.1,81.6"/><polygon class="w-t" points="127.3,71.1 150.7,84.6 132.5,95.1 109.1,81.6"/><polygon class="w-r" points="-111.7,73.5 -135.1,87.0 -135.1,85.8 -111.7,72.3"/><polygon class="w-l" points="-145.5,81.0 -135.1,87.0 -135.1,85.8 -145.5,79.8"/><polygon class="w-t" points="-122.1,66.3 -111.7,72.3 -135.1,85.8 -145.5,79.8"/><polygon class="w-r" points="-111.7,81.0 -122.1,87.0 -122.1,85.8 -111.7,79.8"/><polygon class="w-l" points="-145.5,73.5 -122.1,87.0 -122.1,85.8 -145.5,72.3"/><polygon class="w-t" points="-135.1,66.3 -111.7,79.8 -122.1,85.8 -145.5,72.3"/><polygon class="p-r" points="311.8,180.0 259.8,210.0 259.8,204.0 311.8,174.0"/><polygon class="p-l" points="207.8,180.0 259.8,210.0 259.8,204.0 207.8,174.0"/><polygon class="p-t" points="259.8,144.0 311.8,174.0 259.8,204.0 207.8,174.0"/><polygon class="p-r" points="52.0,180.0 0.0,210.0 0.0,204.0 52.0,174.0"/><polygon class="p-l" points="-52.0,180.0 0.0,210.0 0.0,204.0 -52.0,174.0"/><polygon class="p-t" points="0.0,144.0 52.0,174.0 0.0,204.0 -52.0,174.0"/><polygon class="n-r" points="291.0,174.0 259.8,192.0 259.8,184.5 291.0,166.5"/><polygon class="n-l" points="228.6,174.0 259.8,192.0 259.8,184.5 228.6,166.5"/><polygon class="n-t" points="259.8,148.5 291.0,166.5 259.8,184.5 228.6,166.5"/><polygon class="a-r" points="291.0,164.7 259.8,182.7 259.8,175.2 291.0,157.2"/><polygon class="a-l" points="228.6,164.7 259.8,182.7 259.8,175.2 228.6,157.2"/><polygon class="a-t" points="259.8,139.2 291.0,157.2 259.8,175.2 228.6,157.2"/><polygon class="a-r" points="291.0,155.4 259.8,173.4 259.8,165.9 291.0,147.9"/><polygon class="a-l" points="228.6,155.4 259.8,173.4 259.8,165.9 228.6,147.9"/><polygon class="a-t" points="259.8,129.9 291.0,147.9 259.8,165.9 228.6,147.9"/><polygon class="s-r" points="291.0,146.1 259.8,164.1 259.8,156.6 291.0,138.6"/><polygon class="s-l" points="228.6,146.1 259.8,164.1 259.8,156.6 228.6,138.6"/><polygon class="s-t" points="259.8,120.6 291.0,138.6 259.8,156.6 228.6,138.6"/><polygon class="a-r" points="9.1,167.2 4.5,169.9 4.5,133.9 9.1,131.2"/><polygon class="a-l" points="-8.4,162.4 4.5,169.9 4.5,133.9 -8.4,126.4"/><polygon class="a-t" points="-3.9,123.8 9.1,131.2 4.5,133.9 -8.4,126.4"/><polygon class="s-r" points="6.5,163.5 5.8,163.9 5.8,133.9 6.5,133.5"/><polygon class="s-l" points="-3.2,158.6 5.8,163.9 5.8,133.9 -3.2,128.6"/><polygon class="s-t" points="-2.6,128.2 6.5,133.5 5.8,133.9 -3.2,128.6"/><polygon class="w-r" points="24.7,164.2 9.1,173.2 9.1,161.2 24.7,152.2"/><polygon class="w-l" points="-6.5,164.2 9.1,173.2 9.1,161.2 -6.5,152.2"/><polygon class="w-t" points="9.1,143.2 24.7,152.2 9.1,161.2 -6.5,152.2"/><polygon class="p-r" points="441.7,255.0 389.7,285.0 389.7,279.0 441.7,249.0"/><polygon class="p-l" points="337.7,255.0 389.7,285.0 389.7,279.0 337.7,249.0"/><polygon class="p-t" points="389.7,219.0 441.7,249.0 389.7,279.0 337.7,249.0"/><polygon class="p-r" points="181.9,255.0 129.9,285.0 129.9,279.0 181.9,249.0"/><polygon class="p-l" points="77.9,255.0 129.9,285.0 129.9,279.0 77.9,249.0"/><polygon class="p-t" points="129.9,219.0 181.9,249.0 129.9,279.0 77.9,249.0"/><polygon class="w-r" points="163.7,249.0 129.9,268.5 129.9,264.0 163.7,244.5"/><polygon class="w-l" points="96.1,249.0 129.9,268.5 129.9,264.0 96.1,244.5"/><polygon class="w-t" points="129.9,225.0 163.7,244.5 129.9,264.0 96.1,244.5"/><polygon class="n-r" points="394.9,235.5 388.4,239.3 388.4,200.3 394.9,196.5"/><polygon class="n-l" points="381.9,235.5 388.4,239.3 388.4,200.3 381.9,196.5"/><polygon class="n-t" points="388.4,192.8 394.9,196.5 388.4,200.3 381.9,196.5"/><polygon class="a-r" points="418.3,210.0 411.8,213.8 411.8,207.8 418.3,204.0"/><polygon class="a-l" points="381.9,196.5 411.8,213.8 411.8,207.8 381.9,190.5"/><polygon class="a-t" points="388.4,186.8 418.3,204.0 411.8,207.8 381.9,190.5"/><polygon class="a-r" points="155.9,244.5 150.7,247.5 150.7,245.7 155.9,242.7"/><polygon class="a-l" points="124.7,232.5 150.7,247.5 150.7,245.7 124.7,230.7"/><polygon class="a-t" points="129.9,227.7 155.9,242.7 150.7,245.7 124.7,230.7"/><polygon class="s-r" points="146.1,250.1 140.9,253.1 140.9,251.3 146.1,248.3"/><polygon class="s-l" points="115.0,238.1 140.9,253.1 140.9,251.3 115.0,236.3"/><polygon class="s-t" points="120.2,233.3 146.1,248.3 140.9,251.3 115.0,236.3"/><polygon class="n-r" points="418.3,249.0 411.8,252.8 411.8,213.8 418.3,210.0"/><polygon class="n-l" points="405.3,249.0 411.8,252.8 411.8,213.8 405.3,210.0"/><polygon class="n-t" points="411.8,206.2 418.3,210.0 411.8,213.8 405.3,210.0"/><polygon class="s-r" points="136.4,255.8 131.2,258.8 131.2,256.9 136.4,253.9"/><polygon class="s-l" points="105.2,243.8 131.2,258.8 131.2,256.9 105.2,241.9"/><polygon class="s-t" points="110.4,238.9 136.4,253.9 131.2,256.9 105.2,241.9"/><polygon class="p-r" points="311.8,330.0 259.8,360.0 259.8,354.0 311.8,324.0"/><polygon class="p-l" points="207.8,330.0 259.8,360.0 259.8,354.0 207.8,324.0"/><polygon class="p-t" points="259.8,294.0 311.8,324.0 259.8,354.0 207.8,324.0"/><polygon class="a-r" points="266.3,309.8 257.2,315.0 257.2,300.0 266.3,294.8"/><polygon class="a-l" points="248.1,309.8 257.2,315.0 257.2,300.0 248.1,294.8"/><polygon class="a-t" points="257.2,289.5 266.3,294.8 257.2,300.0 248.1,294.8"/><polygon class="a-r" points="279.3,317.3 270.2,322.5 270.2,295.5 279.3,290.3"/><polygon class="a-l" points="261.1,317.2 270.2,322.5 270.2,295.5 261.1,290.2"/><polygon class="a-t" points="270.2,285.0 279.3,290.3 270.2,295.5 261.1,290.2"/><polygon class="a-r" points="248.1,320.2 239.0,325.5 239.0,304.5 248.1,299.2"/><polygon class="a-l" points="229.9,320.2 239.0,325.5 239.0,304.5 229.9,299.2"/><polygon class="a-t" points="239.0,294.0 248.1,299.2 239.0,304.5 229.9,299.2"/><polygon class="c-r" points="292.3,324.8 283.2,330.0 283.2,321.0 292.3,315.8"/><polygon class="c-l" points="274.1,324.8 283.2,330.0 283.2,321.0 274.1,315.8"/><polygon class="c-t" points="283.2,310.5 292.3,315.8 283.2,321.0 274.1,315.8"/><polygon class="n-r" points="261.1,327.8 252.0,333.0 252.0,300.0 261.1,294.8"/><polygon class="n-l" points="242.9,327.8 252.0,333.0 252.0,300.0 242.9,294.8"/><polygon class="n-t" points="252.0,289.5 261.1,294.8 252.0,300.0 242.9,294.8"/><polygon class="c-r" points="274.1,335.3 265.0,340.5 265.0,327.0 274.1,321.8"/><polygon class="c-l" points="255.9,335.2 265.0,340.5 265.0,327.0 255.9,321.8"/><polygon class="c-t" points="265.0,316.5 274.1,321.8 265.0,327.0 255.9,321.8"/><circle cx="0.0" cy="74.0" r="12" class="nb"/><text x="0.0" y="78.5" class="nbt">1</text><circle cx="129.9" cy="149.0" r="12" class="nb"/><text x="129.9" y="153.5" class="nbt">2</text><circle cx="259.8" cy="224.0" r="12" class="nb"/><text x="259.8" y="228.5" class="nbt">3</text><circle cx="389.7" cy="299.0" r="12" class="nb"/><text x="389.7" y="303.5" class="nbt">4</text><circle cx="259.8" cy="374.0" r="12" class="nb"/><text x="259.8" y="378.5" class="nbt">5</text><circle cx="129.9" cy="299.0" r="12" class="nb"/><text x="129.9" y="303.5" class="nbt">6</text><circle cx="0.0" cy="224.0" r="12" class="nb"/><text x="0.0" y="228.5" class="nbt">7</text><circle cx="-129.9" cy="149.0" r="12" class="nb"/><text x="-129.9" y="153.5" class="nbt">8</text><text x="-79.0" y="37.5" class="tg" text-anchor="end">the retest result comes back in</text></svg></div>
+    <div class="legend"><div><i>1</i><p><b>Everything the family shares</b><span>Reports, Rx, chat, voice, watch, logs</span></p></div><div><i>2</i><p><b>Read</b><span>OCR, extraction, units, checks</span></p></div><div><i>3</i><p><b>Family memory</b><span>Series, ledger, loops, facts, clock</span></p></div><div><i>4</i><p><b>Rules</b><span>Signed cut-offs, keyed on the clock</span></p></div><div><i>5</i><p><b>Six areas</b><span>On track, watch or act</span></p></div><div><i>6</i><p><b>Daily plan</b><span>Goals, 2 to 4 tasks a day</span></p></div><div><i>7</i><p><b>Nudge and chat</b><span>The model explains, in their words</span></p></div><div><i>8</i><p><b>Act</b><span>Retest, doctor, care booked</span></p></div></div>
+    <p class="cap">Stations 1 to 4 run whenever something new arrives. Station 5 is the output everything else reads. Stations 6 to 8 are what the family sees. The retest result comes back in at station 1, which is how the loop proves itself.</p>
+  </section>
+
+  <section class="blk">
+    <div class="k">Decided, 11 November 2026</div>
+    <h2>No health age. No single score. <em>Six areas, each with a reason.</em></h2>
+    <div class="areas"><div class="area"><span class="src">Reports · readings · watch</span><h3>Heart and BP</h3><ul><li><span class="mark ac">Act</span><span>BP 140/90 or more; LDL 160 or more</span></li><li><span class="mark wa">Watch</span><span>BP 130/80 or more; LDL 130 or more; resting heart rate up on last week or 90+</span></li><li><span class="mark ok">On track</span><span>Below those lines</span></li></ul></div><div class="area"><span class="src">Reports · readings</span><h3>Sugar</h3><ul><li><span class="mark ac">Act</span><span>HbA1c 6.5% or more; fasting 126 or more</span></li><li><span class="mark wa">Watch</span><span>HbA1c 5.7 to 6.4%; fasting 100 to 125</span></li><li><span class="mark ok">On track</span><span>Below 5.7% or fasting under 100</span></li></ul></div><div class="area"><span class="src">Reports · readings</span><h3>Weight</h3><ul><li><span class="mark ac">Act</span><span>BMI 27.5 or more, or under 17 (Indian cut-offs)</span></li><li><span class="mark wa">Watch</span><span>BMI 23 to 27.4 or under 18.5; weight moved 5% or more</span></li><li><span class="mark ok">On track</span><span>BMI 18.5 to 22.9; weight steady</span></li></ul></div><div class="area"><span class="src">Watch · logs</span><h3>Sleep</h3><ul><li><span class="mark ac">Act</span><span>Under 6 hours a night, week average</span></li><li><span class="mark wa">Watch</span><span>6 to 7 hours</span></li><li><span class="mark ok">On track</span><span>7 hours or more</span></li></ul></div><div class="area"><span class="src">Watch · logs</span><h3>Movement</h3><ul><li><span class="mark ac">Act</span><span>Under 4,000 steps a day, week average</span></li><li><span class="mark wa">Watch</span><span>4,000 to 6,999</span></li><li><span class="mark ok">On track</span><span>7,000 or more</span></li></ul></div><div class="area"><span class="src">Open loops</span><h3>Check-ups</h3><ul><li><span class="mark ac">Act</span><span>A test or follow-up is overdue</span></li><li><span class="mark wa">Watch</span><span>Something is due within a month</span></li><li><span class="mark ok">On track</span><span>Nothing overdue</span></li></ul></div></div>
+    <p class="cap">An area takes its worst fresh signal, so one bad sugar report is not averaged away by good step counts. Cut-offs are the common screening lines a doctor would also use, with Indian BMI cut-offs. Adults only for the numbers; a child's areas come from check-ups and the watch. Built in <code>src/lib/longevity/areas.ts</code> and <code>src/modules/wearables/insights.ts</code>. Any change to a cut-off is signed by our clinical lead.</p>
+  </section>
+</article>
+
+<article class="sheet" aria-label="Sheet 2: what goes into the body">
+  <div class="pagehead"><span class="logo">Cheeku</span><span>Longevity engine · 2 / 6</span></div>
+  <section class="blk" style="border-top:0">
+    <div class="k">The three doors</div>
+    <h2>Eaten, taken, applied. <em>Everything that goes into the body, read for this person.</em></h2>
+    <p class="lede">Reports show where a person is. What they eat, take and put on their skin every day is what moves them. Each is a snap away, read against their own numbers, and turned into one thing to understand, one habit and, when it needs one, a booking.</p>
+    <div class="isoWrap scroll"><svg class="iso doors" viewBox="-260 -90 620 470" role="img" aria-label="Three ways things enter the body, eaten, taken and applied, read against this person, then turned into understanding, a habit and an action"><line x1="26.0" y1="45.0" x2="39.0" y2="157.5" class="path"/><line x1="-77.9" y1="105.0" x2="39.0" y2="157.5" class="path"/><line x1="-181.9" y1="165.0" x2="39.0" y2="157.5" class="path"/><line x1="116.9" y1="202.5" x2="311.8" y2="195.0" class="path back"/><line x1="116.9" y1="202.5" x2="207.8" y2="255.0" class="path back"/><line x1="116.9" y1="202.5" x2="103.9" y2="315.0" class="path back"/><polygon class="p-r" points="52.0,30.0 0.0,60.0 0.0,54.0 52.0,24.0"/><polygon class="p-l" points="-52.0,30.0 0.0,60.0 0.0,54.0 -52.0,24.0"/><polygon class="p-t" points="0.0,-6.0 52.0,24.0 0.0,54.0 -52.0,24.0"/><polygon class="w-r" points="36.4,24.0 0.0,45.0 0.0,42.0 36.4,21.0"/><polygon class="w-l" points="-36.4,24.0 0.0,45.0 0.0,42.0 -36.4,21.0"/><polygon class="w-t" points="0.0,-0.0 36.4,21.0 0.0,42.0 -36.4,21.0"/><polygon class="c-r" points="13.0,13.5 0.0,21.0 0.0,15.8 13.0,8.2"/><polygon class="c-l" points="-13.0,13.5 0.0,21.0 0.0,15.8 -13.0,8.2"/><polygon class="c-t" points="0.0,0.8 13.0,8.2 0.0,15.8 -13.0,8.2"/><polygon class="a-r" points="23.4,22.5 13.0,28.5 13.0,24.0 23.4,18.0"/><polygon class="a-l" points="1.3,21.7 13.0,28.5 13.0,24.0 1.3,17.2"/><polygon class="a-t" points="11.7,11.3 23.4,18.0 13.0,24.0 1.3,17.2"/><polygon class="s-r" points="6.5,27.8 -3.9,33.8 -3.9,30.0 6.5,24.0"/><polygon class="s-l" points="-22.1,23.2 -3.9,33.8 -3.9,30.0 -22.1,19.5"/><polygon class="s-t" points="-11.7,13.5 6.5,24.0 -3.9,30.0 -22.1,19.5"/><polygon class="p-r" points="-52.0,90.0 -103.9,120.0 -103.9,114.0 -52.0,84.0"/><polygon class="p-l" points="-155.9,90.0 -103.9,120.0 -103.9,114.0 -155.9,84.0"/><polygon class="p-t" points="-103.9,54.0 -52.0,84.0 -103.9,114.0 -155.9,84.0"/><polygon class="a-r" points="-85.7,84.0 -103.9,94.5 -103.9,67.5 -85.7,57.0"/><polygon class="a-l" points="-122.1,84.0 -103.9,94.5 -103.9,67.5 -122.1,57.0"/><polygon class="a-t" points="-103.9,46.5 -85.7,57.0 -103.9,67.5 -122.1,57.0"/><polygon class="n-r" points="-88.3,57.0 -103.9,66.0 -103.9,60.0 -88.3,51.0"/><polygon class="n-l" points="-119.5,57.0 -103.9,66.0 -103.9,60.0 -119.5,51.0"/><polygon class="n-t" points="-103.9,42.0 -88.3,51.0 -103.9,60.0 -119.5,51.0"/><polygon class="w-r" points="-89.6,96.8 -96.1,100.5 -96.1,96.8 -89.6,93.0"/><polygon class="w-l" points="-102.6,96.8 -96.1,100.5 -96.1,96.8 -102.6,93.0"/><polygon class="w-t" points="-96.1,89.3 -89.6,93.0 -96.1,96.8 -102.6,93.0"/><polygon class="p-r" points="-155.9,150.0 -207.8,180.0 -207.8,174.0 -155.9,144.0"/><polygon class="p-l" points="-259.8,150.0 -207.8,180.0 -207.8,174.0 -259.8,144.0"/><polygon class="p-t" points="-207.8,114.0 -155.9,144.0 -207.8,174.0 -259.8,144.0"/><polygon class="p-r" points="155.9,180.0 77.9,225.0 77.9,219.0 155.9,174.0"/><polygon class="p-l" points="0.0,180.0 77.9,225.0 77.9,219.0 0.0,174.0"/><polygon class="p-t" points="77.9,129.0 155.9,174.0 77.9,219.0 0.0,174.0"/><polygon class="c-r" points="-185.8,149.2 -197.5,156.0 -197.5,145.5 -185.8,138.8"/><polygon class="c-l" points="-226.0,139.5 -197.5,156.0 -197.5,145.5 -226.0,129.0"/><polygon class="c-t" points="-214.3,122.2 -185.8,138.8 -197.5,145.5 -226.0,129.0"/><polygon class="n-r" points="-181.9,153.0 -188.4,156.8 -188.4,149.2 -181.9,145.5"/><polygon class="n-l" points="-194.9,153.0 -188.4,156.8 -188.4,149.2 -194.9,145.5"/><polygon class="n-t" points="-188.4,141.8 -181.9,145.5 -188.4,149.2 -194.9,145.5"/><polygon class="a-r" points="106.5,174.0 77.9,190.5 77.9,139.5 106.5,123.0"/><polygon class="a-l" points="49.4,174.0 77.9,190.5 77.9,139.5 49.4,123.0"/><polygon class="a-t" points="77.9,106.5 106.5,123.0 77.9,139.5 49.4,123.0"/><polygon class="n-r" points="96.1,123.0 77.9,133.5 77.9,115.5 96.1,105.0"/><polygon class="n-l" points="59.8,123.0 77.9,133.5 77.9,115.5 59.8,105.0"/><polygon class="n-t" points="77.9,94.5 96.1,105.0 77.9,115.5 59.8,105.0"/><polygon class="p-r" points="389.7,210.0 337.7,240.0 337.7,234.0 389.7,204.0"/><polygon class="p-l" points="285.8,210.0 337.7,240.0 337.7,234.0 285.8,204.0"/><polygon class="p-t" points="337.7,174.0 389.7,204.0 337.7,234.0 285.8,204.0"/><polygon class="n-r" points="368.9,204.0 337.7,222.0 337.7,204.0 368.9,186.0"/><polygon class="n-l" points="306.6,204.0 337.7,222.0 337.7,204.0 306.6,186.0"/><polygon class="n-t" points="337.7,168.0 368.9,186.0 337.7,204.0 306.6,186.0"/><polygon class="p-r" points="285.8,270.0 233.8,300.0 233.8,294.0 285.8,264.0"/><polygon class="p-l" points="181.9,270.0 233.8,300.0 233.8,294.0 181.9,264.0"/><polygon class="p-t" points="233.8,234.0 285.8,264.0 233.8,294.0 181.9,264.0"/><polygon class="a-r" points="265.0,264.0 233.8,282.0 233.8,264.0 265.0,246.0"/><polygon class="a-l" points="202.6,264.0 233.8,282.0 233.8,264.0 202.6,246.0"/><polygon class="a-t" points="233.8,228.0 265.0,246.0 233.8,264.0 202.6,246.0"/><polygon class="p-r" points="181.9,330.0 129.9,360.0 129.9,354.0 181.9,324.0"/><polygon class="p-l" points="77.9,330.0 129.9,360.0 129.9,354.0 77.9,324.0"/><polygon class="p-t" points="129.9,294.0 181.9,324.0 129.9,354.0 77.9,324.0"/><polygon class="c-r" points="161.1,324.0 129.9,342.0 129.9,318.0 161.1,300.0"/><polygon class="c-l" points="98.7,324.0 129.9,342.0 129.9,318.0 98.7,300.0"/><polygon class="c-t" points="129.9,282.0 161.1,300.0 129.9,318.0 98.7,300.0"/><text x="0.0" y="-31.0" class="lt" text-anchor="middle">Eaten</text><text x="0.0" y="-17.0" class="ls" text-anchor="middle">Food snaps</text><text x="-103.9" y="29.0" class="lt" text-anchor="middle">Taken</text><text x="-103.9" y="43.0" class="ls" text-anchor="middle">Medicines, supplements, drinks</text><text x="-207.8" y="89.0" class="lt" text-anchor="middle">Applied</text><text x="-207.8" y="103.0" class="ls" text-anchor="middle">Creams, oils, skincare</text><text x="337.7" y="152.0" class="lt" text-anchor="middle">Understand</text><text x="337.7" y="166.0" class="ls" text-anchor="middle">What it means for you</text><text x="233.8" y="212.0" class="lt" text-anchor="middle">Practise</text><text x="233.8" y="226.0" class="ls" text-anchor="middle">One habit, today</text><text x="129.9" y="272.0" class="lt" text-anchor="middle">Act</text><text x="129.9" y="286.0" class="ls" text-anchor="middle">Care, fitness, a test</text><text x="77.9" y="77.0" class="lt" text-anchor="middle">This person</text><text x="77.9" y="91.0" class="ls" text-anchor="middle">clock, areas, medicines, goals</text></svg></div>
+    <div class="lenses"><div class="lens l1"><span class="lv">Food snaps</span><h3>Eaten</h3><ol><li>Snap the plate, or pick it from the diary. Breakfast, lunch, dinner, chai.</li><li>The model names the Indian dishes and suggests tags: roti, dal, rice, fried, sweet, packaged. The person confirms with one tap.</li><li>Portion in hands and katoris, never grams or calories.</li><li>One line on the plate and at most two tips tied to their own numbers.</li><li>Patterns over a week: "rice at dinner 5 of 7 nights", "no protein at breakfast".</li></ol><div class="rd"><b>Reads it against</b><ul><li>Sugar, weight, BP, LDL, liver, kidney, iron marks</li><li>Pregnancy week and trimester</li><li>Diabetes or thyroid medicines, timing</li><li>The goal they picked</li></ul></div><p class="nv"><b>Never:</b> calorie counts, "bad food", diets, fasting advice for pregnancy, children or diabetes on medicines.</p></div><div class="lens l2"><span class="lv">Medicines, supplements, drinks</span><h3>Taken</h3><ol><li>Snap the strip, bottle, sachet or label, or let the Rx fill it in.</li><li>Read the ingredients and the licence: drug, FSSAI food supplement or cosmetic.</li><li>Add to the ledger by ingredient, with dose and how often.</li><li>Check stacking, upper limits for age, clashes with prescribed medicines, pregnancy and breastfeeding.</li><li>Say it plainly, with what to ask the doctor or pharmacist.</li></ol><div class="rd"><b>Reads it against</b><ul><li>Every active medicine, by ingredient</li><li>Age, kidney and liver values</li><li>Pregnancy, breastfeeding</li><li>Allergies on file</li></ul></div><p class="nv"><b>Never:</b> telling anyone to start, stop or change a prescribed medicine; rating a doctor.</p></div><div class="lens l3"><span class="lv">Creams, oils, skincare, hair</span><h3>Applied</h3><ol><li>Snap the tube, jar or bottle; the label and ingredient list are read.</li><li>Flag ingredients that matter for this person: steroids, retinoids, high salicylic acid, hydroquinone, mercury, strong fragrance.</li><li>Check where and on whom: a baby's nappy area, broken skin, the face, pregnancy.</li><li>Keep it in the ledger with the medicines, so a steroid cream counts.</li><li>Route to a dermatologist when a pattern needs one.</li></ol><div class="rd"><b>Reads it against</b><ul><li>Age and stage (newborn, child, pregnant)</li><li>Skin conditions and allergies on file</li><li>Other steroids already in the ledger</li></ul></div><p class="nv"><b>Never:</b> naming a skin disease from a photo of skin; product recommendations paid for by a brand.</p></div></div>
+    <p class="cap">Built on what exists: the plate reader in <code>src/lib/home/meals.ts</code> (photo kept, tags confirmed, one line and two tips, no calories), the product check, and the medicine ledger in <code>src/lib/memory/ledger.ts</code>, which already sorts drug, FSSAI food and cosmetic licences and catches ingredient stacking. New: the model reads the photo to suggest the tags, supplements and applied products join the ledger, and weekly patterns feed the areas.</p>
+  </section>
+  <section class="blk">
+    <div class="k">From what we see to what they do</div>
+    <h2>Understand, practise, act. <em>Care and fitness are one tap away.</em></h2>
+    <div class="scroll"><table><thead><tr><th class="l">What the engine sees</th><th class="l">Practise (free, on the plan)</th><th class="l">Act (booked in the chat)</th></tr></thead><tbody><tr><td class="l">Rice and sweets at most dinners; HbA1c at watch</td><td class="l">A 12-week sugar plan; a walk after dinner on the daily plan</td><td class="l"><b>Dietitian consult (care); HbA1c retest in 3 months (lab)</b></td></tr><tr><td class="l">Low iron on the report; tea with every meal</td><td class="l">Tea an hour away from meals; lemon on dal</td><td class="l"><b>Iron studies retest in 3 months (lab)</b></td></tr><tr><td class="l">Under 4,000 steps a week; weight at watch</td><td class="l">10-minute walk after lunch; stairs task</td><td class="l"><b>Beginner fitness class near home (fitness)</b></td></tr><tr><td class="l">Three vitamin D products at once</td><td class="l">Explain the stack; one question for the doctor</td><td class="l"><b>Cheeku Doctor review, ₹49, or the prescriber</b></td></tr><tr><td class="l">Steroid cream used daily for weeks</td><td class="l">Explain why steroids need a plan</td><td class="l"><b>Dermatologist consult (care)</b></td></tr><tr><td class="l">Packaged snacks and pickle most days; BP at act</td><td class="l">Salt habits on the plan; morning BP readings</td><td class="l"><b>Doctor consult (care); BP monitor via partner</b></td></tr><tr><td class="l">Pregnant, week 20, skipping breakfast</td><td class="l">Gentle breakfast habit; iron and folic acid reminder</td><td class="l"><b>Gynaecologist follow-up (care); no diets</b></td></tr><tr><td class="l">Child, fried snacks after school most days</td><td class="l">Swap ideas the child can pick from</td><td class="l"><b>Paediatric nutritionist only if growth is off (care)</b></td></tr></tbody></table></div>
+    <p class="cap">Every act ends in something the family can book inside the chat: a dietitian, a doctor, a dermatologist, a fitness class, a home test, or Cheeku Doctor for ₹49. A booking is suggested once, with one line of why, and never pushed again that week. The plan and the nudges are free; the booking is where we earn.</p>
+  </section>
+</article>
+
+<article class="sheet" aria-label="Sheet 3: personal by design">
+  <div class="pagehead"><span class="logo">Cheeku</span><span>Longevity engine · 3 / 6</span></div>
+  <section class="blk" style="border-top:0">
+    <div class="k">Personal by design</div>
+    <h2>Same engine, <em>a different engine for every person.</em></h2>
+    <p class="lede">The engine picks its lens from the person's clock (age, pregnancy week, day of life), their journey, the conditions and medicines on file, and their goal. What it watches, how it reads a plate or a label, where it routes, and what it must never say all change with it.</p>
+    <div class="profs"><div class="prof"><span class="lv">journey: expecting · pregnancy clock</span><h3>Expecting</h3><dl><dt>Watches</dt><dd>Iron, sugar in pregnancy, BP, weight gain by week, scans due</dd><dt>Eaten</dt><dd>Iron with vitamin C, no raw papaya or unpasteurised milk, caffeine under 200 mg</dd><dt>Taken and applied</dt><dd>Safe in pregnancy? Retinoids, high salicylic, some herbal supplements flagged</dd><dt>Acts through</dt><dd>Gynaecologist, scans, GTT at 24 to 28 weeks</dd></dl><p class="nv">No weight-loss goals, no BMI marks, pregnancy red flags skip the model</p></div><div class="prof"><span class="lv">journey: new_parent · day of life</span><h3>New parent and baby</h3><dl><dt>Watches</dt><dd>Baby: weight, jaundice by day, feeds, vaccines. Parent: sleep, recovery, mood</dd><dt>Eaten</dt><dd>Breastfeeding diet, what passes into milk</dd><dt>Taken and applied</dt><dd>Baby creams and oils: steroids, fragrance, nappy area</dd><dt>Acts through</dt><dd>Paediatrician, vaccines, postpartum check</dd></dl><p class="nv">Thresholds by day of life; a newborn fever goes straight to a doctor</p></div><div class="prof"><span class="lv">clock: child or teen</span><h3>Child</h3><dl><dt>Watches</dt><dd>Growth, check-ups, vaccines, activity, sleep</dd><dt>Eaten</dt><dd>Lunchbox and after-school snacks, no labels like "bad food"</dd><dt>Taken and applied</dt><dd>Lice shampoos, acne creams for teens</dd><dt>Acts through</dt><dd>Paediatrician, dentist, eye check</dd></dl><p class="nv">Gentle habits only; no weight or sugar goals; parent sees, child is not shamed</p></div><div class="prof"><span class="lv">age 18 to 30 · campus</span><h3>Student or young adult</h3><dl><dt>Watches</dt><dd>Sleep, movement, sick days, mental load</dd><dt>Eaten</dt><dd>Mess and hostel food, protein, late-night eating</dd><dt>Taken and applied</dt><dd>Gym supplements and protein powders, acne products</dd><dt>Acts through</dt><dd>Cheeku Doctor on sick days, fitness classes</dd></dl><p class="nv">No supplement selling; protein claims checked against the label</p></div><div class="prof"><span class="lv">sugar, BP or weight at watch</span><h3>Working adult at watch</h3><dl><dt>Watches</dt><dd>Sugar, BP, LDL, weight, sleep, steps</dd><dt>Eaten</dt><dd>Rice and roti balance, chai sugar, office and outside food</dd><dt>Taken and applied</dt><dd>Painkillers taken often, pre-workout drinks</dd><dt>Acts through</dt><dd>Dietitian, retest in 3 to 6 months, fitness</dd></dl><p class="nv">The plan is habits, not a diet; the doctor decides on medicines</p></div><div class="prof"><span class="lv">journey: fertility · PCOS or thyroid on file</span><h3>Women's health</h3><dl><dt>Watches</dt><dd>Cycles, weight, sugar and insulin markers, thyroid, iron</dd><dt>Eaten</dt><dd>Protein and fibre, timing with thyroid medicine</dd><dt>Taken and applied</dt><dd>Hair and skin products, hormone-related ingredients</dd><dt>Acts through</dt><dd>Gynaecologist, endocrinologist, labs</dd></dl><p class="nv">No fertility promises; cycle data is private by default</p></div><div class="prof"><span class="lv">journey: caregiver · older adult</span><h3>Parent cared for by a child</h3><dl><dt>Watches</dt><dd>BP, sugar, kidney, falls, medicines, check-ups</dd><dt>Eaten</dt><dd>Salt, soft protein, hydration, sugar in sweets at festivals</dd><dt>Taken and applied</dt><dd>Many medicines: stacking, interactions, kidney doses</dd><dt>Acts through</dt><dd>Doctor, home tests, physio, elder care at home</dd></dl><p class="nv">Alerts go to the caregiver with consent; the parent can always see their own file</p></div><div class="prof"><span class="lv">journey: optimiser · all areas on track</span><h3>Health optimiser</h3><dl><dt>Watches</dt><dd>Trends, retests on time, sleep and fitness depth</dd><dt>Eaten</dt><dd>Protein, fibre, eating window, alcohol</dd><dt>Taken and applied</dt><dd>Supplement stacks, skincare actives</dd><dt>Acts through</dt><dd>Full-body panels yearly, fitness, coaching</dd></dl><p class="nv">Evidence only: no anti-ageing claims, no unproven supplements</p></div></div>
+    <p class="cap">A family holds several of these at once: a pregnant mother, a father with BP at watch and a grandparent on six medicines each get their own engine, and the caregiver sees the family view. The journey field is a hint for content, never a clinical fact; the clock and records decide the thresholds.</p>
+  </section>
+  <section class="blk">
+    <div class="k">Good practices</div>
+    <h2>Small habits, <em>chosen by the area that needs them.</em></h2>
+    <div class="pracs"><div class="prac"><b>Move</b><span>10-minute walk after meals · 7,000 steps · two strength sessions a week · stairs over lifts</span><em>Moves: Sugar, weight, heart, movement</em></div><div class="prac"><b>Eat</b><span>Half the plate sabzi · protein at every meal · tea away from meals · less salt, pickle and packaged food · fruit over juice</span><em>Moves: Sugar, BP, LDL, weight, iron</em></div><div class="prac"><b>Sleep</b><span>Same wake time daily · screens off 30 minutes before bed · no chai after 4 pm</span><em>Moves: Sleep, heart, sugar</em></div><div class="prac"><b>Mind</b><span>Two minutes of slow breathing · a walk outside · one call to a friend</span><em>Moves: Sleep, BP</em></div><div class="prac"><b>Check</b><span>Morning BP twice a week · weigh once a week · retests on time · medicines at the same time daily</span><em>Moves: Check-ups, heart, sugar</em></div><div class="prac"><b>Apply</b><span>Sunscreen outdoors · patch-test new products · no steroid creams without a plan</span><em>Moves: Skin, the ledger</em></div></div>
+    <p class="cap">Each practice is a task in the habit catalogue (<code>src/lib/home/catalog.ts</code>), written to the content system's rules. The plan picks two to four a day from the person's focus areas and goal, after anything due. Practices that a stage forbids (weight goals in pregnancy, strength work for a newborn's mother in week one) are never offered.</p>
+  </section>
+</article>
+
+<article class="sheet" aria-label="Sheet 4: inputs and memory">
+  <div class="pagehead"><span class="logo">Cheeku</span><span>Longevity engine · 4 / 6</span></div>
+  <section class="blk" style="border-top:0">
+    <div class="k">What goes in</div>
+    <h2>Twelve inputs. <em>Each one knows where it came from.</em></h2>
+    <div class="scroll"><table><thead><tr><th class="l">Input</th><th class="l">How it arrives</th><th class="l">Where it lands</th><th class="l">What we keep</th><th class="l">Trust</th><th class="l">Owner</th></tr></thead><tbody><tr><td class="l"><b>Food snap</b></td><td class="l">Photo of the plate, then one tap to confirm the tags</td><td class="l"><code>daily_logs (kind meal) + intake_items</code></td><td class="l">Dishes, tags, portion in katoris, time, the photo</td><td class="l">Medium: a photo, confirmed by the person</td><td class="l">Suraj</td></tr><tr><td class="l"><b>Taken product snap</b></td><td class="l">Photo of a strip, bottle, sachet, protein tub or drink label</td><td class="l"><code>intake_items → ledger</code></td><td class="l">Ingredients, dose, licence class, how often</td><td class="l">High for the label, medium for how often</td><td class="l">Suraj</td></tr><tr><td class="l"><b>Applied product snap</b></td><td class="l">Photo of a cream, oil, shampoo or skincare label</td><td class="l"><code>intake_items → ledger</code></td><td class="l">Ingredients, where it is used, how often</td><td class="l">High for the label</td><td class="l">Suraj</td></tr><tr><td class="l"><b>Lab report</b></td><td class="l">Upload, WhatsApp share, or auto-filed from a booked partner test</td><td class="l"><code>documents, entities → series</code></td><td class="l">Values, units, ranges, sample date, lab</td><td class="l">Highest</td><td class="l">Suraj</td></tr><tr><td class="l"><b>Prescription</b></td><td class="l">Photo or PDF; Cheeku Doctor writes its own</td><td class="l"><code>documents → ledger, rx_scorecards</code></td><td class="l">Medicines by ingredient, dose, duration, prescriber, 10 checks</td><td class="l">High</td><td class="l">Suraj</td></tr><tr><td class="l"><b>Chat and voice</b></td><td class="l">What people tell Cheeku in their own words</td><td class="l"><code>memory_facts</code></td><td class="l">Readings, symptoms, corrections, goals</td><td class="l">Medium: said, not measured</td><td class="l">Suraj</td></tr><tr><td class="l"><b>Watch and phone</b></td><td class="l">Apple Health, Health Connect, Google Health, Strava</td><td class="l"><code>wearable_days</code></td><td class="l">Steps, sleep, resting heart rate, HRV, weight, BP cuff</td><td class="l">Medium: averaged over a week</td><td class="l">Archit</td></tr><tr><td class="l"><b>Daily logs</b></td><td class="l">Ticks on today's plan, steps, sleep, meals</td><td class="l"><code>today_actions, daily_logs</code></td><td class="l">Did the habit happen</td><td class="l">Behaviour, not a measurement</td><td class="l">Archit</td></tr><tr><td class="l"><b>Bookings and results</b></td><td class="l">Tests and doctor visits booked in chat</td><td class="l"><code>lab_bookings, open_loops</code></td><td class="l">What was ordered, what came back, what is still open</td><td class="l">High</td><td class="l">Archit</td></tr><tr><td class="l"><b>Profile and family</b></td><td class="l">Sign-up, family members, the health file</td><td class="l"><code>profiles, profile_relations, pregnancies</code></td><td class="l">Age, sex, conditions, allergies, pregnancy, who is related</td><td class="l">High</td><td class="l">Archit</td></tr><tr><td class="l"><b>Family history</b></td><td class="l">Two questions at sign-up, then learned from family members' files</td><td class="l"><code>profile_relations (new fields)</code></td><td class="l">Parent with diabetes, heart disease, early stroke, thyroid</td><td class="l">Medium: said, not a record</td><td class="l">Archit</td></tr><tr><td class="l"><b>Goal answers</b></td><td class="l">Two quick questions when someone picks a goal</td><td class="l"><code>profiles.daily_prefs</code></td><td class="l">Which habits to start, what time to remind</td><td class="l">Preference</td><td class="l">Athar</td></tr></tbody></table></div>
+    <p class="cap">Trust decides which value wins when two disagree: a lab report beats a home reading, a home reading beats a number remembered in chat. The engine never resolves a contradiction silently; it shows both and says which it is using.</p>
+  </section>
+
+  <section class="blk">
+    <div class="k">The longitudinal memory</div>
+    <h2>Six layers, <em>each built on the one below.</em></h2>
+    <div class="grid2" style="align-items:center">
+      <div class="isoWrap scroll"><svg class="iso stack" viewBox="-120 -230 500 360" role="img" aria-label="The longitudinal memory as six layers, from the subject graph at the bottom to area history at the top"><polygon class="w-r" points="90.9,52.5 0.0,105.0 0.0,96.0 90.9,43.5"/><polygon class="w-l" points="-90.9,52.5 0.0,105.0 0.0,96.0 -90.9,43.5"/><polygon class="w-t" points="0.0,-9.0 90.9,43.5 0.0,96.0 -90.9,43.5"/><polygon class="w-r" points="90.9,18.0 0.0,70.5 0.0,61.5 90.9,9.0"/><polygon class="w-l" points="-90.9,18.0 0.0,70.5 0.0,61.5 -90.9,9.0"/><polygon class="w-t" points="0.0,-43.5 90.9,9.0 0.0,61.5 -90.9,9.0"/><polygon class="s-r" points="90.9,-16.5 0.0,36.0 0.0,27.0 90.9,-25.5"/><polygon class="s-l" points="-90.9,-16.5 0.0,36.0 0.0,27.0 -90.9,-25.5"/><polygon class="s-t" points="0.0,-78.0 90.9,-25.5 0.0,27.0 -90.9,-25.5"/><polygon class="a-r" points="90.9,-51.0 0.0,1.5 0.0,-7.5 90.9,-60.0"/><polygon class="a-l" points="-90.9,-51.0 0.0,1.5 0.0,-7.5 -90.9,-60.0"/><polygon class="a-t" points="0.0,-112.5 90.9,-60.0 0.0,-7.5 -90.9,-60.0"/><polygon class="a-r" points="90.9,-85.5 0.0,-33.0 0.0,-42.0 90.9,-94.5"/><polygon class="a-l" points="-90.9,-85.5 0.0,-33.0 0.0,-42.0 -90.9,-94.5"/><polygon class="a-t" points="0.0,-147.0 90.9,-94.5 0.0,-42.0 -90.9,-94.5"/><polygon class="n-r" points="90.9,-120.0 0.0,-67.5 0.0,-76.5 90.9,-129.0"/><polygon class="n-l" points="-90.9,-120.0 0.0,-67.5 0.0,-76.5 -90.9,-129.0"/><polygon class="n-t" points="0.0,-181.5 90.9,-129.0 0.0,-76.5 -90.9,-129.0"/><line x1="94.9" y1="46.5" x2="150" y2="46.5" class="ld"/><text x="158" y="44.5" class="lt">Subject graph</text><text x="158" y="59.5" class="ls">Built in the app</text><line x1="94.9" y1="12.0" x2="150" y2="12.0" class="ld"/><text x="158" y="10.0" class="lt">Clock</text><text x="158" y="25.0" class="ls">Built in the app</text><line x1="94.9" y1="-22.5" x2="150" y2="-22.5" class="ld"/><text x="158" y="-24.5" class="lt">Facts and records</text><text x="158" y="-9.5" class="ls">Built in the app</text><line x1="94.9" y1="-57.0" x2="150" y2="-57.0" class="ld"/><text x="158" y="-59.0" class="lt">Series, ledger, loops</text><text x="158" y="-44.0" class="ls">Built in the app</text><line x1="94.9" y1="-91.5" x2="150" y2="-91.5" class="ld"/><text x="158" y="-93.5" class="lt">Six areas</text><text x="158" y="-78.5" class="ls">Built in the app</text><line x1="94.9" y1="-126.0" x2="150" y2="-126.0" class="ld"/><text x="158" y="-128.0" class="lt">Area history</text><text x="158" y="-113.0" class="ls">New, to build</text></svg></div>
+      <div class="box"><h3>Why it is built this way</h3><ul>
+        <li><b>A clock, not a birthday.</b> The same bilirubin is safe on day 3 and not on day 6. Thresholds are looked up by the person's clock.</li>
+        <li><b>Trends, not snapshots.</b> Every number carries its previous value, delta and rate, so "99/64" is read as a 33-point drop.</li>
+        <li><b>Medicines by ingredient.</b> Three products with vitamin D add up; the ledger catches it.</li>
+        <li><b>Open loops.</b> A bill listing a test with no result means a result is missing.</li>
+        <li><b>Corrections are visible.</b> A fact that changes supersedes the old one, and the answer says what changed.</li>
+        <li><b>Area history is new.</b> Snapshots let us say "your sugar moved from act to watch since March", the moment that keeps people.</li>
+      </ul></div>
+    </div>
+    <p class="cap">Layers 1 to 5 exist in the app today (<code>src/lib/memory</code>, migrations 0002, 0030, 0034, 0042, 0044). Full reasoning in <code>docs/health-memory-layer-spec.md</code>.</p>
+  </section>
+</article>
+
+<article class="sheet" aria-label="Sheet 5: how it works">
+  <div class="pagehead"><span class="logo">Cheeku</span><span>Longevity engine · 5 / 6</span></div>
+  <section class="blk" style="border-top:0">
+    <div class="k">Flow 1 · a new report</div>
+    <h2>From a photo <em>to a changed plan, in under a minute.</em></h2>
+    <div class="flow"><div class="fstep "><i>1</i><div><b>A report arrives</b><span>Upload, WhatsApp forward, or filed by itself when a booked lab test comes back through the partner.</span></div><span class="own"><span class="own">Archit</span></span></div><div class="fstep "><i>2</i><div><b>Parse and extract</b><span>Picture to text, then text to named values with units. Low-confidence fields are flagged, never guessed.</span></div><span class="own"><span class="own">Suraj</span></span></div><div class="fstep "><i>3</i><div><b>Normalise</b><span>Map every test name to one analyte key (hba1c, ldl, tsh), convert units, attach the date the sample was taken.</span></div><span class="own"><span class="own">Suraj</span></span></div><div class="fstep "><i>4</i><div><b>Write to memory</b><span>Series gets the new point with its previous value, delta and rate. A booked test closes its open loop.</span></div><span class="own"><span class="own">Archit</span></span></div><div class="fstep "><i>5</i><div><b>Recompute the areas</b><span>The six areas re-run from fresh signals. If a mark changes, a snapshot is written.</span></div><span class="own"><span class="own">Archit</span></span></div><div class="fstep "><i>6</i><div><b>Say what changed</b><span>A change card: "LDL 162 to 138, down 15% since the plan started". Shown on Home and in the chat.</span></div><span class="own"><span class="own">Athar</span></span></div><div class="fstep "><i>7</i><div><b>Adjust the plan and the next test</b><span>An area moving to act adds its goal tasks; the retest is scheduled from the cadence table.</span></div><span class="own"><span class="own">Athar</span></span></div></div>
+  </section>
+  <section class="blk">
+    <div class="k">Flow 2 · a question in the chat</div>
+    <h2>Structure first, <em>retrieval for the long tail.</em></h2>
+    <div class="flow"><div class="fstep "><i>1</i><div><b>A question, typed or spoken</b><span>"Papa ka sugar kaisa hai?" Voice turns into text first (Sarvam, translate mode).</span></div><span class="own"><span class="own">Athar</span></span></div><div class="fstep "><i>2</i><div><b>Who and what</b><span>Which family member, and whether it is a booking, a log or a question.</span></div><span class="own"><span class="own">Athar</span></span></div><div class="fstep gate"><i>!</i><div><b>Safety gate first</b><span>Hard stops (chest pain, breathlessness, pregnancy red flags) skip the model and go straight to help.</span></div><span class="own"><span class="own">Suraj</span></span></div><div class="fstep "><i>4</i><div><b>Structured context, from code</b><span>The person's clock, areas, latest values with deltas, medicines, open loops, today's plan, watch notes. About 4,000 tokens, exact numbers.</span></div><span class="own"><span class="own">Archit</span></span></div><div class="fstep "><i>5</i><div><b>Retrieval, only for the long tail</b><span>Report and prescription text the structure does not hold ("what did the doctor write about my liver?"). Top 6 chunks, this person only.</span></div><span class="own"><span class="own">Suraj</span></span></div><div class="fstep model"><i>6</i><div><b>The model explains</b><span>Writes in the person's language, cites the record, proposes actions from an allowed list. It never sets a mark.</span></div><span class="own"><span class="own">Suraj</span></span></div><div class="fstep gate"><i>!</i><div><b>The floor holds</b><span>The answer's care tier is the higher of the model's and the rules'. A model can make it more careful, never less.</span></div><span class="own"><span class="own">Suraj</span></span></div><div class="fstep "><i>8</i><div><b>Back into memory</b><span>Numbers said in the chat ("BP 138/88 today") become facts; corrections supersede the old value and the answer says so.</span></div><span class="own"><span class="own">Archit</span></span></div></div>
+    <div class="grid2">
+      <div class="box"><h3>Retrieval, as Suraj's research set it</h3><ul>
+        <li>Switch the embedder to <code>multilingual-e5-small</code> before launch: Hindi and Hinglish, still 384 numbers, so no schema change. Use the <code>query:</code> and <code>passage:</code> prefixes.</li>
+        <li>Chunk on lines and table rows, so "Haemoglobin" and "11.2" stay together. Never cut mid-word.</li>
+        <li>Re-embed everything once; store the model name on every vector and never search across two.</li>
+        <li>Self-hosted, so report text stays on our servers in India.</li>
+      </ul></div>
+      <div class="box"><h3>Why not retrieval for everything</h3><ul>
+        <li>The model must never do arithmetic on health numbers. Values, deltas and marks come from code, exactly.</li>
+        <li>The structured context is small and always complete; retrieval can miss a row.</li>
+        <li>Retrieval answers what structure cannot hold: a doctor's note, a scan impression, advice written on a prescription.</li>
+        <li>Every retrieved chunk is cited back to its document in the answer.</li>
+      </ul></div>
+    </div>
+  </section>
+  <section class="blk">
+    <div class="k">Flow 3 · a food snap</div>
+    <h2>From a photo of lunch <em>to tomorrow's habit.</em></h2>
+    <div class="flow"><div class="fstep "><i>1</i><div><b>Snap the plate</b><span>Camera from the plan, the chat or the + button. Works offline; uploads later.</span></div><span class="own"><span class="own">Athar</span></span></div><div class="fstep "><i>2</i><div><b>The model reads it</b><span>Names Indian dishes and suggests tags and a portion in katoris. Unsure items are asked, not guessed.</span></div><span class="own"><span class="own">Suraj</span></span></div><div class="fstep "><i>3</i><div><b>One tap to confirm</b><span>The person fixes or confirms. Confirmed tags are what the rules run on.</span></div><span class="own"><span class="own">Athar</span></span></div><div class="fstep gate"><i>!</i><div><b>Rules read it against this person</b><span>Sugar, BP, LDL, liver, kidney, iron, pregnancy week, medicines. Code picks the line and tips.</span></div><span class="own"><span class="own">Archit</span></span></div><div class="fstep model"><i>5</i><div><b>The model says it kindly</b><span>One line on the plate, at most two tips, in their language. Never "bad food", never calories.</span></div><span class="own"><span class="own">Suraj</span></span></div><div class="fstep "><i>6</i><div><b>Patterns over a week</b><span>Rice at dinner 5 of 7 nights; no protein at breakfast. Feeds the Sunday review and the areas.</span></div><span class="own"><span class="own">Archit</span></span></div><div class="fstep "><i>7</i><div><b>Practise or act</b><span>A habit on tomorrow's plan, or a dietitian or fitness class booked when the pattern and the numbers both point there.</span></div><span class="own"><span class="own">Athar</span></span></div></div>
+  </section>
+  <section class="blk">
+    <div class="k">How the model reacts</div>
+    <h2>Same engine output, <em>said the way a good doctor would.</em></h2>
+    <div class="react"><div class="rx"><div><b>The engine says</b>Sugar at act, HbA1c 6.8%</div><span class="arr">→</span><div><b>The model says</b><q>"Your HbA1c was 6.8% in October, up from 6.1% in March. That is the range a doctor treats, so it is worth showing Dr Rao. Meanwhile, a 10-minute walk after meals helps most people. Want me to book a doctor or start a sugar plan?"</q></div></div><div class="rx"><div><b>The engine says</b>Sugar at watch, fasting 103</div><span class="arr">→</span><div><b>The model says</b><q>"Fasting sugar 103 is a little high. An HbA1c shows the three-month picture; you are due one in January. One small habit for now: walk after dinner."</q></div></div><div class="rx"><div><b>The engine says</b>Two values disagree</div><span class="arr">→</span><div><b>The model says</b><q>"Your report says 78 kg on 2 Nov; you told me 74 kg yesterday. I am using the report until the next weigh-in. Was 74 from a home scale?"</q></div></div><div class="rx"><div><b>The engine says</b>Signal older than 18 months</div><span class="arr">→</span><div><b>The model says</b><q>"Your last cholesterol test was in 2024. That is too old to go by, so I have not marked your heart area. A lipid test would tell us where you are."</q></div></div><div class="rx"><div><b>The engine says</b>Only the watch says so</div><span class="arr">→</span><div><b>The model says</b><q>"Your watch shows about 5.5 hours of sleep this week." Softer words, no medical claim: a watch estimate is not a sleep study.</q></div></div><div class="rx"><div><b>The engine says</b>A plate with rice, fried snack and sweet; HbA1c 6.1%</div><span class="arr">→</span><div><b>The model says</b><q>"Nice that dal is in. With your sugar in the early-warning band, swapping the sweet for fruit tomorrow helps most. Want to try a walk after dinner too?"</q></div></div><div class="rx"><div><b>The engine says</b>Three vitamin D products in the ledger</div><span class="arr">→</span><div><b>The model says</b><q>"Your multivitamin, the calcium tablet and the D3 sachet all carry vitamin D, about 4,000 IU a day together. Worth checking with your doctor whether you need all three."</q></div></div><div class="rx"><div><b>The engine says</b>Steroid cream on a baby's nappy area</div><span class="arr">→</span><div><b>The model says</b><q>"This cream has a steroid. On a baby's nappy area it needs a doctor's plan for how long. Can I book the paediatrician?"</q></div></div><div class="rx"><div><b>The engine says</b>Pregnant, or a child</div><span class="arr">→</span><div><b>The model says</b><q>No weight or sugar goals, no BMI marks. Only gentle habits for children. Pregnancy questions follow the pregnancy clock and its own red flags.</q></div></div><div class="rx"><div><b>The engine says</b>A hard stop in the message</div><span class="arr">→</span><div><b>The model says</b><q>The model is not called. The answer is the hard-stop card: where to go, what to say, one tap to call.</q></div></div></div>
+    <p class="cap">The model writes; it never diagnoses, never names a disease the person does not already have on record, never tells anyone to start or stop a medicine. It can propose actions only from an allowed list: start a goal, book a test, book a doctor, open a screen.</p>
+  </section>
+  <section class="blk">
+    <div class="k">Flow 4 · every day</div>
+    <h2>Daily, weekly, quarterly. <em>Something is always due.</em></h2>
+    <div class="flow"><div class="fstep "><i>1</i><div><b>Morning nudge</b><span>One line, built from the area most in need: "Walk 10 minutes after lunch today. Your sugar plan, week 3."</span></div><span class="own"><span class="own">Athar</span></span></div><div class="fstep "><i>2</i><div><b>Today's plan</b><span>Two to four tasks from the goal, after anything due (a medicine, a retest).</span></div><span class="own"><span class="own">Athar</span></span></div><div class="fstep "><i>3</i><div><b>Logs come in</b><span>Ticks, steps from the watch, a reading said in chat. Saved to the day.</span></div><span class="own"><span class="own">Archit</span></span></div><div class="fstep "><i>4</i><div><b>Sunday review</b><span>What moved this week, one change for next week, the plan re-set. 60 seconds.</span></div><span class="own"><span class="own">Athar</span></span></div><div class="fstep "><i>5</i><div><b>Quarterly retest</b><span>The test that proves it worked, booked in chat, filed by itself, with a change card.</span></div><span class="own"><span class="own">Athar</span></span></div></div>
+  </section>
+</article>
+
+<article class="sheet" aria-label="Sheet 6: build plan">
+  <div class="pagehead"><span class="logo">Cheeku</span><span>Longevity engine · 6 / 6</span></div>
+  <section class="blk" style="border-top:0">
+    <div class="k">Personal targets</div>
+    <h2>The next test, <em>set by the person's own numbers and family.</em></h2>
+    <div class="scroll"><table><thead><tr><th class="l">Test</th><th class="l">Area at act</th><th class="l">Area at watch</th><th class="l">On track, by age and family history</th></tr></thead><tbody><tr><td class="l"><b>HbA1c</b></td><td class="l">Every 3 months, or as the doctor sets</td><td class="l">Every 6 months</td><td class="l">Yearly from 30 if a parent has diabetes; otherwise every 3 years from 35</td></tr><tr><td class="l"><b>Lipid profile</b></td><td class="l">Every 6 months</td><td class="l">Yearly</td><td class="l">Yearly from 30 if a parent had early heart disease; otherwise every 3 to 5 years</td></tr><tr><td class="l"><b>Home BP</b></td><td class="l">Weekly readings, 2 in the morning</td><td class="l">Fortnightly readings</td><td class="l">Monthly, if the person has a cuff</td></tr><tr><td class="l"><b>Thyroid (TSH)</b></td><td class="l">As the doctor sets</td><td class="l">Every 6 months</td><td class="l">Yearly for women 30+ with a family history</td></tr><tr><td class="l"><b>Vitamin D, B12</b></td><td class="l">3 months after a low result</td><td class="l">6 months after a borderline result</td><td class="l">Not routine</td></tr><tr><td class="l"><b>Kidney (creatinine, urine ACR)</b></td><td class="l">Every 6 months with sugar or BP at act</td><td class="l">Yearly</td><td class="l">With the annual check-up</td></tr></tbody></table></div>
+    <p class="cap">Draft cadences for our clinical lead to sign; each signed version gets a <code>rule_version</code> stored with every target it sets. A target becomes an open loop when it is due, and the retest is offered in the chat with home collection.</p>
+  </section>
+
+  <section class="blk">
+    <div class="k">The contract between the two layers</div>
+    <h2>One shape both sides read. <em>Built by code, explained by the model.</em></h2>
+    <pre class="code"><span class="c">// LongevityState: what the app and the AI layer both read. One per family member, rebuilt on any change.</span>
+{
+  "profileId": "b111…",
+  "asOf": "2027-03-14",
+  "clock": { "stage": "adult", "ageYears": 34, "pregnant": false },
+  "areas": [
+    { "key": "sugar", "status": "watch",
+      "line": "Average sugar (HbA1c) 5.9% is in the early-warning band.",
+      "signals": [ { "source": "report", "date": "2026-10-24", "key": "hba1c", "value": 5.9, "prev": 6.1, "docId": "1b45…" } ] },
+    { "key": "sleep", "status": "unknown", "line": "Nothing to go on yet.", "signals": [] }
+  ],
+  "focus": ["sugar", "heart"],                       <span class="c">// act first, then watch</span>
+  "targets": [ { "test": "hba1c", "cadenceDays": 180, "nextDue": "2027-04-24",
+                 "why": "HbA1c 5.9% and a parent with diabetes", "ruleVersion": "cad-2027.1" } ],
+  "plan": { "goal": "sugar", "week": 3, "tasks": ["walk_after_lunch", "no_sugar_chai"] },
+  "loops": [ { "title": "Lipid profile", "dueBy": "2027-01-10", "overdue": true } ],
+  "intake": {                                         <span class="c">// last 7 days, what went in</span>
+    "meals": 17, "patterns": ["rice_dinner_5_of_7", "no_protein_breakfast"],
+    "ledger": [ { "name": "Vitamin D3 60K", "class": "food_supplement", "ingredients": ["cholecalciferol"], "flags": ["stacking"] },
+                { "name": "Betamethasone cream", "class": "drug", "route": "skin", "flags": ["steroid_long_use"] } ]
+  },
+  "lens": { "journey": "caregiver", "stage": "adult", "never": ["weight_goal_in_pregnancy"] },
+  "changes": [ { "key": "ldl", "from": 162, "to": 138, "date": "2027-03-10",
+                 "line": "LDL 162 to 138, down 15% since the plan started" } ]
+}</pre>
+    <pre class="code"><span class="c">-- Proposals for Archit. Numbers continue after migration 0044.</span>
+create table longevity_snapshots (          <span class="c">-- one row a day per person, only when a mark changes</span>
+  profile_id uuid references profiles not null,
+  day date not null,
+  areas jsonb not null,                     <span class="c">-- [{key, status, line, signalKeys}]</span>
+  inputs_hash text not null,                <span class="c">-- skip the write if nothing changed</span>
+  primary key (profile_id, day)
+);
+create table longevity_targets (            <span class="c">-- the next test, and why</span>
+  profile_id uuid references profiles not null,
+  test text not null,                       <span class="c">-- hba1c, lipid, tsh…</span>
+  cadence_days int not null,
+  next_due date not null,
+  why text not null,
+  rule_version text not null,               <span class="c">-- which signed cadence table set it</span>
+  primary key (profile_id, test)
+);
+create table report_chunks (                <span class="c">-- retrieval, one person at a time</span>
+  id uuid primary key default gen_random_uuid(),
+  profile_id uuid references profiles not null,
+  document_id uuid references documents not null,
+  chunk text not null,                      <span class="c">-- a line or table row, never cut mid-word</span>
+  embedding vector(384) not null,
+  embed_model text not null,                <span class="c">-- never search across two models</span>
+  sample_date date
+);
+create table intake_items (                 <span class="c">-- what is taken and applied, beyond prescriptions</span>
+  id uuid primary key default gen_random_uuid(),
+  profile_id uuid references profiles not null,
+  kind text not null,                       <span class="c">-- taken | applied</span>
+  name text not null,
+  licence_class text,                       <span class="c">-- drug | food_supplement | cosmetic | unknown</span>
+  ingredients jsonb not null,               <span class="c">-- [{key, amount, unit}]</span>
+  route text,                               <span class="c">-- mouth | skin | scalp | eye…</span>
+  frequency text, started_on date, stopped_on date,
+  photo_path text, confidence real
+);
+<span class="c">-- Food stays in daily_logs (kind meal); the model's reading goes in daily_logs.analysis.</span>
+<span class="c">-- RLS on all four: the owner's family only, same rules as documents.</span></pre>
+  </section>
+
+  <section class="blk">
+    <div class="k">Who builds what</div>
+    <div class="build">
+      <div class="box"><h3>Suraj · AI and retrieval</h3><ul>
+        <li>Extraction accuracy on Indian lab formats; low-confidence flags</li>
+        <li>Analyte dictionary: every test name to one key and unit</li>
+        <li>Embedder switch to multilingual e5, row chunking, re-embed</li>
+        <li>Prompt: how the model reads <code>LongevityState</code> and cites</li>
+        <li>Model routing and costs: Haiku, Sarvam or GPT-OSS by evals</li>
+        <li>Longevity eval set: 300 questions in English, Hindi and Hinglish</li>
+        <li>Plate reader: Indian dish recognition to tags, 500 labelled photos first</li>
+        <li>Label reader for strips, supplements and cosmetics, with licence class</li>
+      </ul></div>
+      <div class="box"><h3>Archit · app and data layer</h3><ul>
+        <li>Four new tables with RLS, migrations after 0044</li>
+        <li>Snapshot writer: recompute areas on any new input, write on change</li>
+        <li>Target scheduler: daily job that opens loops when tests fall due</li>
+        <li>Server-side watch sync into <code>wearable_days</code></li>
+        <li>The model request carries <code>LongevityState</code>; metering as today</li>
+        <li>Under 300 ms to rebuild one person's state</li>
+        <li>Intake ledger: supplements and applied products next to prescriptions</li>
+        <li>Weekly food patterns job, written to the state</li>
+      </ul></div>
+      <div class="box"><h3>Athar and clinical lead</h3><ul>
+        <li>Area cards, change cards and the Sunday review on Home</li>
+        <li>Plan tasks and nudges, written to the content system</li>
+        <li>Family history: two questions at sign-up</li>
+        <li>Snap flows for plate, taken and applied, one tap to confirm</li>
+        <li>Profile lenses: what each journey and stage sees and never sees</li>
+        <li><b>Clinical lead</b> signs cut-offs, cadences and every red flag</li>
+        <li>Monthly review of 50 real answers with the clinical lead</li>
+      </ul></div>
+    </div>
+  </section>
+
+  <section class="blk">
+    <div class="k">When</div>
+    <h2>Before launch, then <em>one step a month.</em></h2>
+    <div class="scroll"><div class="gantt">
+      <div class="lb">Multilingual retrieval<span>Suraj</span></div><div class="gtrack"><i class="pl" style="left:0%;width:16%">Nov to Dec '26</i></div>
+      <div class="lb">Area snapshots and change cards<span>Archit, Athar</span></div><div class="gtrack"><i style="left:10%;width:18%">Jan to Feb '27</i></div>
+      <div class="lb">Longevity evals, 300 cases<span>Suraj, clinical lead</span></div><div class="gtrack"><i style="left:10%;width:26%">Jan to Mar '27</i></div>
+      <div class="lb">Target scheduler and retest loop<span>Archit</span></div><div class="gtrack"><i style="left:18%;width:18%">Feb to Mar '27</i></div>
+      <div class="lb">Sunday review<span>Athar</span></div><div class="gtrack"><i style="left:26%;width:16%">Mar to Apr '27</i></div>
+      <div class="lb">Watch signals server-side<span>Archit</span></div><div class="gtrack"><i style="left:34%;width:18%">Q2 '27</i></div>
+      <div class="lb">Family history targets<span>Suraj, Athar</span></div><div class="gtrack"><i style="left:42%;width:26%">Q2 to Q3 '27</i></div>
+      <div class="lb">Plate reader from photos<span>Suraj, Athar</span></div><div class="gtrack"><i style="left:26%;width:26%">Mar to Jun '27</i></div>
+      <div class="lb">Taken and applied ledger<span>Archit, Suraj</span></div><div class="gtrack"><i style="left:34%;width:22%">Apr to Jun '27</i></div>
+      <div class="lb">Profile lenses<span>Athar, clinical lead</span></div><div class="gtrack"><i style="left:18%;width:34%">Feb to Jun '27</i></div>
+      <div class="lb">Adapted model explains<span>Suraj</span></div><div class="gtrack"><i style="left:78%;width:22%">Q1 '28</i></div>
+      <div class="gscale"><span>Nov '26</span><span>Mar '27</span><span>Jul '27</span><span>Nov '27</span><span>Mar '28</span></div>
+    </div></div>
+  </section>
+
+  <section class="blk">
+    <div class="k">How we know it works</div>
+    <div class="grid3">
+      <div class="box"><h3>Correct</h3><ul><li>99% of extracted values match the report</li><li>Every eval answer cites the right number and mark</li><li>Zero answers below the safety floor</li></ul></div>
+      <div class="box"><h3>Useful</h3><ul><li>60% of active users with three or more areas known by day 30</li><li>Half of due retests booked within 7 days</li><li>Areas moving from act to watch, tracked monthly</li><li>3 or more meals snapped a week by 30% of actives</li><li>1 in 10 act suggestions booked</li></ul></div>
+      <div class="box"><h3>Fast and cheap</h3><ul><li>State rebuilt in under 300 ms</li><li>Answer starts in under 2 seconds</li><li>About ₹0.07 a chat, about ₹0 per embedding</li></ul></div>
+    </div>
+  </section>
+  <p class="fine">Built from the app as it stands (src/lib/longevity, src/lib/memory, src/lib/home, src/modules/wearables, supabase/functions/cheeku-chat), docs/health-memory-layer-spec.md and Suraj's notes on model prices and embeddings (7 Nov 2026). Cut-offs and cadences are screening lines, not treatment advice, and are signed by our clinical lead before release. Internal. November 2026.</p>
+</article>
+
+</body>
+</html>

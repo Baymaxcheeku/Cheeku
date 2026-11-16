@@ -1,5 +1,5 @@
 import { useLocalSearchParams } from "expo-router";
-import { Navigation, Star } from "lucide-react-native";
+import { Navigation } from "lucide-react-native";
 import { useMemo, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -84,9 +84,8 @@ export default function StudioScreen() {
                 <View style={{ flexDirection: "row", alignItems: "center", gap: 10, marginTop: 4 }}>
                   {s.rating ? (
                     <View style={{ flexDirection: "row", alignItems: "center", gap: 3 }}>
-                      <Star size={13} color={hue.orange.fg} fill={hue.orange.fg} />
                       <Text style={{ fontFamily: font.semibold, fontSize: 13, color: ink[700] }}>{s.rating.toFixed(1)}</Text>
-                      <Text style={{ fontFamily: font.regular, fontSize: 12, color: ink[500] }}>({s.reviews})</Text>
+                      <Text style={{ fontFamily: font.regular, fontSize: 12, color: ink[500] }}>out of 5 · {s.reviews} reviews</Text>
                     </View>
                   ) : null}
                   {km !== null ? <Text style={{ fontFamily: font.medium, fontSize: 13, color: ink[700] }}>{distanceLabel(km)} away</Text> : null}

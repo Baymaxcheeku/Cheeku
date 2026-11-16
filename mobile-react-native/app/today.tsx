@@ -8,6 +8,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { CardListSkeleton } from "@/components/ui/skeleton";
 import { Tap } from "@/components/ui/tap";
 import { firstName } from "@/components/home/ask-hero";
+import { AreaCard } from "@/components/longevity/area-card";
+import { useAreas } from "@/lib/longevity/use-areas";
 import { BreathingSheet, MealSheet, ReadingSheet, Sheet, StepsSheet } from "@/components/today/sheets";
 import { GoalBanner, GoalPicker, GoalSheet } from "@/components/today/goals";
 import { RemindersPrompt } from "@/components/today/reminders-prompt";
@@ -90,6 +92,7 @@ export default function TodayPlan() {
   const home = useHomeStage();
   const { plan, loading } = usePlan(profile?.id, home.state?.due ?? []);
   const prefs = useDailyPrefs(profile?.id);
+  const areas = useAreas(profile?.id);
 
   const [pillar, setPillar] = useState<Pillar | "all">(isPillar(params.pillar) ? params.pillar : "all");
   const [sheet, setSheet] = useState<{ action: TaskAction; key: string } | null>(null);
@@ -281,6 +284,13 @@ export default function TodayPlan() {
           <>
             <RemindersPrompt meds={Boolean(plan.meds?.slots.length)} />
             {plan.goal ? <GoalBanner goal={plan.goal} onPress={() => setGoalSheet(plan.goal?.key ?? null)} /> : <GoalPicker goals={plan.goals} onPick={setGoalSheet} />}
+
+            {/* The areas today's steps work on: the same six as Home and the chat. */}
+            {areas.data?.known ? (
+              <View className="mt-4 px-5">
+                <AreaCard view={areas.data} name={profile.isPrimary ? "you" : firstName(profile.name)} title="What today works on" compact />
+              </View>
+            ) : null}
 
             <View className="mt-6 px-5">
               <Text style={{ fontFamily: font.semibold, fontSize: 13, letterSpacing: 0.2, color: ink[500], marginBottom: 10 }}>{top.length ? `Now · ${WINDOW_LABEL[plan.now]}` : "Now"}</Text>

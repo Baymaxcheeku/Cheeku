@@ -28,6 +28,9 @@ import { ProductPicker } from "@/components/ai/product-picker";
 import { Paywall } from "@/components/billing/paywall";
 import { AssistantTurn, UserBubble } from "@/components/chat/turn";
 import { MascotBust, MascotFigure } from "@/components/illustrations/sprout";
+import { DailyCard, ShortcutRow } from "@/components/chat/front-door";
+import { dailyNote, shortcuts, type NoteButton, type Shortcut } from "@/lib/chat/daily";
+import { useAreas } from "@/lib/longevity/use-areas";
 import { TypingDots } from "@/components/onboarding/motion";
 import { EmergencyEscalation } from "@/components/safety/emergency-escalation";
 import { Brand } from "@/components/ui/brand";
@@ -105,7 +108,7 @@ export default function Ask() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const qc = useQueryClient();
-  const { q, upload, record } = useLocalSearchParams<{ q?: string; upload?: string; record?: string }>();
+  const { q, t: qAt, upload, record } = useLocalSearchParams<{ q?: string; t?: string; upload?: string; record?: string }>();
 
   const family = useFamily();
   const switchMember = useSwitchMember();
@@ -132,10 +135,13 @@ export default function Ask() {
   const [pickerOpen, setPickerOpen] = useState(false);
   const [focused, setFocused] = useState(false);
   const [aboutId, setAboutId] = useState<string | null>(record ?? null);
+  const [logOpen, setLogOpen] = useState(false);
+  const [hiddenNote, setHiddenNote] = useState<string | null>(null);
+  const areas = useAreas(memberId);
   const input = useRef<TextInputInstance>(null);
   const scroller = useRef<ScrollViewInstance>(null);
   const stickToEnd = useRef(true);
-  const sentInitial = useRef(false);
+  const sentInitial = useRef<string | null>(null);
   /** Set when the chat itself switched member, so the switch doesn't wipe the turn in flight. */
   const chatSwitch = useRef<string | null>(null);
   const [switched, setSwitched] = useState<{ fromId: string; fromName: string; toName: string; because: string } | null>(null);
@@ -311,11 +317,13 @@ export default function Ask() {
 
   // A question carried in from elsewhere: sent once, when the memory is ready.
   useEffect(() => {
-    if (sentInitial.current || !q || !memory.data || !thread.data) return;
-    sentInitial.current = true;
-    void send(q);
+    // Keyed by the question and its tap time, so the same area tapped again on Home asks again.
+    const key = q ? `${q}|${qAt ?? ""}` : null;
+    if (!key || sentInitial.current === key || !memory.data || !thread.data) return;
+    sentInitial.current = key;
+    void send(q!);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [q, memory.data, thread.data]);
+  }, [q, qAt, memory.data, thread.data]);
 
   if (family.isPending || (memberId && (memory.isPending || thread.isPending))) {
     return <AskSkeleton topInset={insets.top} bottomInset={insets.bottom} />;
@@ -339,6 +347,32 @@ export default function Ask() {
     ? fromMemory
     : promptEntriesFor(signals.data?.journey, signals.data?.conditions ?? []).map((p) => ({ key: p.text, text: p.text, detail: null, icon: p.topic }));
   const loops = ctx?.loops.length ?? 0;
+
+  // Cheeku's note for today: shown until something is sent today, or it is hidden.
+  const everyoneHere = family.data?.access.all ?? [];
+  const isSelf = Boolean(member?.isPrimary);
+  const today = todayIso();
+  const talkedToday = messages.some((m) => m.role === "user" && m.createdAt.slice(0, 10) === today);
+  const note = memberId && !talkedToday && !pendingText ? dailyNote({ name, self: isSelf, areas: areas.data, now: new Date() }) : null;
+  const showNote = note && hiddenNote !== `${memberId}:${today}:${note.key}` ? note : null;
+  const chips = shortcuts(isSelf && everyoneHere.length > 1);
+
+  function onNoteButton(b: NoteButton) {
+    if (b.send) void send(b.send);
+    else if (b.route) router.push(b.route as never);
+  }
+  function onShortcut(sc: Shortcut) {
+    if (sc.key === "log") {
+      setLogOpen(true);
+      return;
+    }
+    if (sc.send) void send(sc.send);
+  }
+  function onLog(text: string) {
+    setLogOpen(false);
+    setDraft(text);
+    setTimeout(() => input.current?.focus(), 50);
+  }
 
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
@@ -404,6 +438,12 @@ export default function Ask() {
                   I keep {name}&apos;s health memory: every report, every reading you tell me, everything we talk about. Tell me what&apos;s going on and I&apos;ll read it against {name}&apos;s history.
                 </Text>
               </View>
+
+              {showNote ? (
+                <View className="mt-5 w-full">
+                  <DailyCard note={showNote} onButton={onNoteButton} onClose={() => setHiddenNote(`${memberId}:${today}:${showNote.key}`)} />
+                </View>
+              ) : null}
 
               <View className="mt-5 w-full gap-2">
                 {starters.map((s) => {
@@ -508,6 +548,8 @@ export default function Ask() {
                 );
               })}
 
+              {showNote ? <DailyCard note={showNote} onButton={onNoteButton} onClose={() => setHiddenNote(`${memberId}:${today}:${showNote.key}`)} /> : null}
+
               {pendingText ? (
                 <>
                   {pendingText !== "Checking a product…" ? <UserBubble message={{ id: "pending", conversationId: "", role: "user", content: pendingText, createdAt: "", tier: null, memory: null, citations: [], safety: "clear", attachment: null, assessment: null }} /> : null}
@@ -577,6 +619,7 @@ export default function Ask() {
               </Text>
             </Tap>
           ) : null}
+          {!draft.trim() || logOpen ? <ShortcutRow items={chips} logOpen={logOpen} disabled={Boolean(pendingText)} onShortcut={onShortcut} onLog={onLog} onCloseLog={() => setLogOpen(false)} /> : null}
           <View
             className="flex-row items-end gap-1.5 rounded-xl p-1.5 pl-4"
             style={[glassShadow, { backgroundColor: glass.fillStrong, borderWidth: focused ? 1.5 : 1, borderColor: focused ? brand[300] : glass.rim }]}

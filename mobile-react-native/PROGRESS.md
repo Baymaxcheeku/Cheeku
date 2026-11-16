@@ -4322,3 +4322,36 @@ info callouts. They now reach the model only.
 
 Verified: `tsc`, 603 tests (12 new), web build: five flows driven end to
 end on the story family with sample watch data. Not verified on a phone.
+
+## The chat's front door, and one longevity language · 2026-11-16
+
+From the owner's phone test: the chat worked but was hard to find, and Home
+spoke a different language from it.
+
+- **Shortcuts above the typing box, always**: Weekly check-in, Log, Goals,
+  Book, and Family (account holder only). Log opens Steps, Sleep, BP, Weight,
+  Sugar; each starts the sentence ("I walked ") and the person finishes it.
+  `src/components/chat/front-door.tsx`, `src/lib/chat/daily.ts`.
+- **Cheeku speaks first**: a daily note until something is sent that day.
+  The one area to work on, the weekly check-in on Sundays, or "add a report"
+  when there is nothing to go on. One button asks the question for you.
+- **Six areas on Home and Today's plan**: the same areas, words and colours
+  as the chat (On track, Keep an eye, Needs a step, No data yet). No score.
+  Tapping an area asks Cheeku about it. `src/components/longevity/area-card.tsx`,
+  `src/lib/longevity/use-areas.ts`.
+- **New sparrow answers**: one area ("How is my sugar doing?"), change my
+  goal, book something. Bookings: no repeats, short dates, no "result" line
+  under a class.
+- Tests: `src/lib/chat/front-door.test.ts` (11 new, 614 in all).
+
+## Six areas as a list; no stars or sparkles · 2026-11-16
+
+- The six-areas card (Home) and "What today works on" (Today's plan) were a
+  grid of tinted tiles; the owner called it vibe coded. Now built exactly like
+  "Today's action plan": white card, 36px icon tile, the area, its reason in
+  one line, the status in words. Colour only on the status word (amber for
+  keep an eye, green for on track). Areas worth acting on first; areas with
+  no data fold into one row ("Add a blood report" or "Connect a watch").
+- No star or sparkle icons anywhere: ratings read "4.3 out of 5", the review
+  sheet rates with 1 to 5 number buttons, Daily nudges use a sunrise, dance
+  classes sound lines, sample watch data an eye.

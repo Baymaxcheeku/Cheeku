@@ -1,0 +1,714 @@
+<title>Cheeku Doctor Build Sheet</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:opsz,wght@14..32,400..750&display=swap">
+<style>
+/* Layout: printed "sheets" stacked on a grey desk, as in the two-pager. Sheet 1 is the product and guardrails,
+   sheet 2 is execution, sheet 3 is pricing and unit economics. Every block leads with a picture, then a few lines. */
+:root {
+  --bg: #EEEEF3; --page: #FFFFFF; --soft: #F5F5F8; --soft-2: #EBEAF5; --lav: #DCD8FB;
+  --ink: #17171C; --ink-2: #3A3A42; --muted: #6E6E78; --line: rgba(20, 20, 40, .1);
+  --accent: #5B4EF0; --accent-2: #3B2BC9; --accent-soft: #EEECFF; --navy: #14136B; --on-navy: #FFFFFF;
+  --safe: #0F7538; --safe-bg: #E7F7EE; --warn: #A63A08; --warn-bg: #FFF0E6; --bad: #C00A1C; --bad-bg: #FEF1F3;
+  --iso-t: #EBEAF5; --iso-l: #D3CEF7; --iso-r: #BDB6F2; --a-t: #8A82F5; --a-l: #5B4EF0; --a-r: #3B2BC9;
+  --n-t: #3B3A8F; --n-l: #14136B; --n-r: #0C0B4A; --w-t: #FFFFFF; --w-l: #E4E2F3; --w-r: #CFCBEA;
+  --c-t: #FFE3CF; --c-l: #F6C7A6; --c-r: #E8A579; --e-t: #FFD5DA; --e-l: #F59AA5; --e-r: #E5606F;
+  --display: 'Instrument Serif', Georgia, 'Times New Roman', serif;
+  --body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+  /* the app's own palette, kept light in both themes because these are phone screens */
+  --app-canvas: #F2F2F4; --app-card: #FFFFFF; --app-ink: #111114; --app-ink-2: #3A3A41; --app-muted: #6D6D78;
+  --app-line: #E6E6EA; --app-violet: #5B4EF0; --app-violet-soft: #EEECFF; --app-safe: #0F7538; --app-safe-bg: #E7F7EE;
+  --app-warn: #8F5400; --app-warn-bg: #FFF4E0; --app-frame: #1B1B22;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #08080B; --page: #141418; --soft: #1C1C22; --soft-2: #22203A; --lav: #2E2A55;
+  --ink: #F4F4F7; --ink-2: #D2D2DA; --muted: #9A9AA4; --line: rgba(255, 255, 255, .1);
+  --accent: #8F87FF; --accent-2: #B3ADFF; --accent-soft: #24213F; --navy: #2C2A85; --on-navy: #FFFFFF;
+  --safe: #3CCF7C; --safe-bg: #11301F; --warn: #FFA061; --warn-bg: #3A2214; --bad: #FF7A7A; --bad-bg: #3A1518;
+  --iso-t: #2A2846; --iso-l: #211F3A; --iso-r: #1A182E; --a-t: #8F87FF; --a-l: #6A61E8; --a-r: #4C43C4;
+  --n-t: #4B49B0; --n-l: #34328A; --n-r: #24226A; --w-t: #3A3A48; --w-l: #2E2E3A; --w-r: #24242E;
+  --c-t: #6B4127; --c-l: #563320; --c-r: #45291A; --e-t: #6E2830; --e-l: #592027; --e-r: #47191F;
+  color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #08080B; --page: #141418; --soft: #1C1C22; --soft-2: #22203A; --lav: #2E2A55;
+  --ink: #F4F4F7; --ink-2: #D2D2DA; --muted: #9A9AA4; --line: rgba(255, 255, 255, .1);
+  --accent: #8F87FF; --accent-2: #B3ADFF; --accent-soft: #24213F; --navy: #2C2A85; --on-navy: #FFFFFF;
+  --safe: #3CCF7C; --safe-bg: #11301F; --warn: #FFA061; --warn-bg: #3A2214; --bad: #FF7A7A; --bad-bg: #3A1518;
+  --iso-t: #2A2846; --iso-l: #211F3A; --iso-r: #1A182E; --a-t: #8F87FF; --a-l: #6A61E8; --a-r: #4C43C4;
+  --n-t: #4B49B0; --n-l: #34328A; --n-r: #24226A; --w-t: #3A3A48; --w-l: #2E2E3A; --w-r: #24242E;
+  --c-t: #6B4127; --c-l: #563320; --c-r: #45291A; --e-t: #6E2830; --e-l: #592027; --e-r: #47191F;
+  color-scheme: dark; }
+
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 400 15px/1.5 var(--body); -webkit-font-smoothing: antialiased;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 8px 40px; }
+h1, h2, h3, h4 { margin: 0; text-wrap: balance; font-weight: 400; }
+p { margin: 0; }
+.num, td, .t-num { font-variant-numeric: tabular-nums; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 6px; }
+svg { display: block; max-width: 100%; height: auto; }
+svg text { font-family: var(--body); }
+
+.sheet { max-width: 1060px; margin: 18px auto; background: var(--page); border-radius: 28px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,.05), 0 12px 40px rgba(20,20,40,.08); }
+.pagehead { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 20px 32px 0; font-size: 11.5px; font-weight: 650; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); flex-wrap: wrap; }
+.logo { font: italic 400 26px/1 var(--display); color: var(--accent); letter-spacing: 0; text-transform: none; }
+.blk { padding: 30px 32px; display: grid; gap: 16px; border-top: 1px solid var(--line); min-width: 0; }
+.k { font-size: 11.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); }
+.blk h2 { font: 400 clamp(28px, 4.4vw, 40px)/1.06 var(--display); letter-spacing: -0.005em; }
+.blk h2 em, .hero h1 em { color: var(--accent); }
+.lede { color: var(--ink-2); max-width: 66ch; }
+.cap { font-size: 12px; color: var(--muted); }
+.grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.box { background: var(--soft); border-radius: 18px; padding: 18px; display: grid; gap: 8px; align-content: start; min-width: 0; }
+.box h3 { font: 650 15px/1.3 var(--body); }
+.box p, .box li { font-size: 13.5px; color: var(--ink-2); line-height: 1.45; }
+.box ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
+.scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+@media (max-width: 760px) { .grid2, .grid3 { grid-template-columns: minmax(0, 1fr); } .blk { padding: 24px 18px; } .pagehead { padding: 16px 18px 0; } }
+
+/* hero */
+.hero { padding: 34px 32px 30px; display: grid; gap: 18px; background: radial-gradient(110% 90% at 100% 0%, var(--soft-2) 0%, var(--page) 62%); }
+.hero h1 { font: 400 clamp(38px, 6.6vw, 64px)/1.0 var(--display); letter-spacing: -0.012em; max-width: 17ch; }
+.hero .lede { font-size: 16.5px; }
+.tags { display: flex; flex-wrap: wrap; gap: 8px; }
+.tag { display: inline-flex; align-items: center; height: 28px; padding: 0 12px; border-radius: 999px; font-size: 12.5px; font-weight: 650; background: var(--soft); color: var(--ink-2); }
+.tag.v { background: var(--accent-soft); color: var(--accent-2); }
+.stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.stat { background: var(--soft); border-radius: 16px; padding: 14px; display: grid; gap: 2px; }
+.stat b { font: 400 34px/1 var(--display); color: var(--ink); }
+.stat span { font-size: 12.5px; color: var(--muted); line-height: 1.35; }
+@media (max-width: 760px) { .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } .hero { padding: 26px 18px; } }
+
+/* price ladder of alternatives */
+.alts { display: grid; gap: 8px; }
+.alt { display: grid; grid-template-columns: 210px minmax(0, 1fr) 110px; gap: 14px; align-items: center; }
+.alt .nm b { display: block; font-size: 14px; }
+.alt .nm span { font-size: 12px; color: var(--muted); }
+.alt .bar { height: 14px; border-radius: 7px; background: var(--soft-2); position: relative; overflow: hidden; }
+.alt .bar i { position: absolute; inset: 0 auto 0 0; border-radius: 7px; background: var(--lav); }
+.alt .bar i.rng { background: repeating-linear-gradient(90deg, var(--lav) 0 6px, transparent 6px 10px); }
+.alt.us .bar i { background: var(--accent); }
+.alt .pr { font-weight: 650; font-size: 14px; text-align: right; }
+.alt .gap { font-size: 12px; color: var(--muted); }
+.alt.us .nm b, .alt.us .pr { color: var(--accent); }
+@media (max-width: 640px) { .alt { grid-template-columns: minmax(0, 1fr) 90px; } .alt .bar { grid-column: 1 / -1; grid-row: 2; } }
+
+/* isometric */
+.isoWrap { background: var(--soft); border-radius: 22px; padding: 12px 8px 4px; }
+.iso { width: 100%; min-width: 600px; max-height: 520px; }
+.p-t { fill: var(--iso-t); } .p-l { fill: var(--iso-l); } .p-r { fill: var(--iso-r); }
+.pc-t { fill: var(--c-t); } .pc-l { fill: var(--c-l); } .pc-r { fill: var(--c-r); }
+.pe-t { fill: var(--e-t); } .pe-l { fill: var(--e-l); } .pe-r { fill: var(--e-r); }
+.a-t { fill: var(--a-t); } .a-l { fill: var(--a-l); } .a-r { fill: var(--a-r); }
+.n-t { fill: var(--n-t); } .n-l { fill: var(--n-l); } .n-r { fill: var(--n-r); }
+.w-t { fill: var(--w-t); } .w-l { fill: var(--w-l); } .w-r { fill: var(--w-r); }
+.s-t, .s-l, .s-r { fill: var(--accent-soft); }
+.c-t { fill: var(--c-t); } .c-l { fill: var(--c-l); } .c-r { fill: var(--c-r); }
+.e-t { fill: var(--e-t); } .e-l { fill: var(--e-l); } .e-r { fill: var(--e-r); }
+.path { stroke: var(--accent); stroke-width: 3; stroke-linecap: round; fill: none; }
+.path.br { stroke: var(--warn); stroke-dasharray: 6 6; }
+.path.em { stroke: var(--bad); stroke-dasharray: 6 6; }
+.path.back { stroke: var(--accent); stroke-dasharray: 2 6; }
+.nb { fill: var(--accent); } .nb-c { fill: #E8590C; } .nb-e { fill: #E10A1E; } .nbt { fill: #FFFFFF; font-size: 13px; font-weight: 700; text-anchor: middle; } .ld { stroke: var(--muted); stroke-width: 1; stroke-dasharray: 2 3; }
+.legend { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px 16px; }
+.legend div { display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: 8px; align-items: start; }
+.legend i { width: 24px; height: 24px; border-radius: 50%; background: var(--accent); color: #FFFFFF; font: 700 12px/24px var(--body); text-align: center; font-style: normal; }
+.legend i.c { background: #E8590C; } .legend i.e { background: #E10A1E; }
+.legend b { display: block; font-size: 13.5px; } .legend span { font-size: 12px; color: var(--muted); line-height: 1.35; }
+@media (max-width: 760px) { .legend { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.lt { fill: var(--ink); font-size: 13px; font-weight: 650; } .lt-c { fill: var(--warn); } .lt-e { fill: var(--bad); }
+.ls { fill: var(--muted); font-size: 11.5px; }
+.tg { fill: var(--muted); font-size: 11px; font-weight: 600; font-style: italic; }
+
+/* doors */
+.doors { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.door { border-radius: 18px; padding: 16px; display: grid; gap: 8px; align-content: start; }
+.door .lv { font-size: 11px; font-weight: 750; letter-spacing: .08em; text-transform: uppercase; }
+.door h3 { font: 400 24px/1.1 var(--display); }
+.door p { font-size: 13.5px; line-height: 1.45; }
+.door.d1 { background: var(--accent-soft); } .door.d1 .lv { color: var(--accent-2); }
+.door.d2 { background: var(--warn-bg); } .door.d2 .lv, .door.d2 h3 { color: var(--warn); }
+.door.d3 { background: var(--bad-bg); } .door.d3 .lv, .door.d3 h3 { color: var(--bad); }
+.door p { color: var(--ink-2); }
+@media (max-width: 760px) { .doors { grid-template-columns: minmax(0, 1fr); } }
+
+/* chips */
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chips span { font-size: 12.5px; padding: 4px 10px; border-radius: 999px; background: var(--page); color: var(--ink-2); border: 1px solid var(--line); }
+.chips.no span { color: var(--bad); border-color: var(--bad-bg); background: var(--bad-bg); }
+
+/* phone screens */
+.phones { display: flex; flex-wrap: wrap; justify-content: center; gap: 22px 18px; padding: 6px 2px 14px; max-width: 740px; margin: 0 auto; }
+.phone { flex: none; width: 232px; display: grid; gap: 10px; }
+.phone figcaption { font-size: 12.5px; color: var(--ink-2); line-height: 1.4; }
+.phone figcaption b { display: block; color: var(--ink); font-size: 13px; }
+figure { margin: 0; }
+.dev { width: 232px; height: 470px; border-radius: 36px; background: var(--app-frame); padding: 8px; box-shadow: 0 18px 40px rgba(20,20,60,.18); }
+.scr { width: 100%; height: 100%; border-radius: 29px; background: var(--app-canvas); overflow: hidden; display: flex; flex-direction: column; font-family: var(--body); color: var(--app-ink); position: relative; }
+.sb { height: 26px; display: flex; justify-content: space-between; align-items: center; padding: 0 18px; font-size: 10px; font-weight: 650; color: var(--app-ink); }
+.isl { width: 64px; height: 16px; border-radius: 10px; background: var(--app-frame); }
+.ah { display: flex; align-items: center; justify-content: space-between; padding: 4px 14px 8px; }
+.ah .br { font: italic 400 20px/1 var(--display); color: var(--app-violet); }
+.ah .mi { font-size: 10px; color: var(--app-muted); font-weight: 600; }
+.ab { flex: 1; padding: 0 12px; display: flex; flex-direction: column; gap: 8px; overflow: hidden; }
+.bub { max-width: 82%; font-size: 10.5px; line-height: 1.4; padding: 7px 10px; border-radius: 14px; }
+.bub.me { align-self: flex-end; background: var(--app-ink); color: #FFFFFF; border-bottom-right-radius: 4px; }
+.bub.ai { align-self: flex-start; background: var(--app-card); color: var(--app-ink); border-bottom-left-radius: 4px; }
+.cd { background: var(--app-card); border-radius: 16px; padding: 10px; display: grid; gap: 6px; }
+.cd .t { font-size: 11px; font-weight: 650; }
+.cd .s { font-size: 9.5px; color: var(--app-muted); line-height: 1.35; }
+.ch { display: flex; flex-wrap: wrap; gap: 5px; }
+.ch span { font-size: 9.5px; padding: 4px 8px; border-radius: 999px; background: var(--app-canvas); color: var(--app-ink-2); font-weight: 600; }
+.ch span.on { background: var(--app-violet); color: #FFFFFF; }
+.mem { font-size: 9.5px; color: var(--app-violet); background: var(--app-violet-soft); padding: 6px 8px; border-radius: 10px; line-height: 1.35; }
+.btn { background: var(--app-ink); color: #FFFFFF; border-radius: 999px; text-align: center; font-size: 11px; font-weight: 650; padding: 9px 10px; }
+.btn.ghost { background: var(--app-card); color: var(--app-ink); border: 1px solid var(--app-line); }
+.row { display: flex; justify-content: space-between; align-items: center; gap: 6px; font-size: 10px; color: var(--app-ink-2); }
+.row b { color: var(--app-ink); }
+.tick { color: var(--app-safe); font-weight: 700; }
+.sheetUp { margin-top: auto; background: var(--app-card); border-radius: 22px 22px 0 0; padding: 12px; display: grid; gap: 7px; box-shadow: 0 -8px 24px rgba(0,0,0,.08); }
+.grab { width: 34px; height: 4px; border-radius: 2px; background: var(--app-line); justify-self: center; }
+.price { font: 650 20px/1 var(--body); }
+.trk { display: grid; gap: 7px; }
+.trk div { display: grid; grid-template-columns: 16px minmax(0, 1fr) auto; gap: 7px; align-items: center; font-size: 10px; color: var(--app-ink-2); }
+.dot { width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--app-line); background: var(--app-card); }
+.dot.ok { background: var(--app-safe); border-color: var(--app-safe); }
+.dot.now { background: var(--app-violet); border-color: var(--app-violet); box-shadow: 0 0 0 3px var(--app-violet-soft); }
+.av { width: 30px; height: 30px; border-radius: 50%; background: var(--app-violet-soft); color: var(--app-violet); font-size: 11px; font-weight: 700; display: grid; place-items: center; flex: none; }
+.rxh { display: flex; gap: 8px; align-items: center; }
+.qr { width: 46px; height: 46px; border-radius: 6px; background:
+  conic-gradient(from 90deg at 30% 30%, var(--app-ink) 25%, transparent 0) 0 0 / 11px 11px, var(--app-card); border: 3px solid var(--app-card); outline: 1px solid var(--app-line); }
+.med { border-top: 1px solid var(--app-line); padding-top: 6px; display: grid; gap: 1px; }
+.med b { font-size: 10.5px; } .med span { font-size: 9.5px; color: var(--app-muted); }
+.safeTag { font-size: 9.5px; font-weight: 650; color: var(--app-safe); background: var(--app-safe-bg); border-radius: 999px; padding: 3px 8px; justify-self: start; }
+.sample { font-size: 11px; color: var(--muted); }
+
+/* doctor console */
+.console { background: var(--app-canvas); border-radius: 18px; border: 8px solid var(--app-frame); overflow: hidden; color: var(--app-ink); min-width: 760px; }
+.cbar { display: flex; align-items: center; gap: 10px; padding: 8px 14px; background: var(--app-card); border-bottom: 1px solid var(--app-line); font-size: 11px; color: var(--app-muted); }
+.cbar .br { font: italic 400 18px/1 var(--display); color: var(--app-violet); }
+.cbar .pill { margin-left: auto; background: var(--app-safe-bg); color: var(--app-safe); font-weight: 650; padding: 3px 9px; border-radius: 999px; }
+.cgrid { display: grid; grid-template-columns: 220px minmax(0, 1fr) 230px; gap: 10px; padding: 10px; }
+.q { background: var(--app-card); border-radius: 12px; padding: 9px; display: grid; gap: 2px; font-size: 10.5px; }
+.q.on { outline: 2px solid var(--app-violet); }
+.q b { font-size: 11px; } .q .w { color: var(--app-warn); font-weight: 650; }
+.pane { background: var(--app-card); border-radius: 12px; padding: 12px; display: grid; gap: 8px; align-content: start; }
+.pane h4 { font: 650 12px/1.3 var(--body); }
+.kv { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 4px 10px; font-size: 10.5px; }
+.kv span:nth-child(odd) { color: var(--app-muted); }
+.flags { display: flex; flex-wrap: wrap; gap: 4px; }
+.flags span { font-size: 9.5px; font-weight: 600; padding: 3px 7px; border-radius: 999px; background: var(--app-safe-bg); color: var(--app-safe); }
+.dx { display: flex; flex-wrap: wrap; gap: 5px; }
+.dx span { font-size: 10px; padding: 5px 9px; border-radius: 999px; border: 1px solid var(--app-line); }
+.dx span.on { background: var(--app-violet); color: #FFFFFF; border-color: var(--app-violet); }
+.acts { display: grid; gap: 6px; }
+
+/* timeline */
+.tl { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 0; position: relative; min-width: 820px; }
+.tl::before { content: ""; position: absolute; left: 4%; right: 4%; top: 34px; height: 3px; background: var(--soft-2); border-radius: 2px; }
+.tl div { display: grid; gap: 6px; justify-items: center; align-content: start; text-align: center; padding: 0 6px; position: relative; }
+.tl time { font: 650 12px/1 var(--body); color: var(--accent-2); font-variant-numeric: tabular-nums; }
+.tl i { width: 18px; height: 18px; border-radius: 50%; background: var(--page); border: 3px solid var(--accent); z-index: 1; }
+.tl div.dk i { background: var(--accent); }
+.tl b { font-size: 12.5px; } .tl span { font-size: 11.5px; color: var(--muted); line-height: 1.35; }
+
+/* state machine */
+.sm { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.sm span { font-size: 12px; font-weight: 650; padding: 6px 10px; border-radius: 10px; background: var(--accent-soft); color: var(--accent-2); }
+.sm span.k2 { background: var(--navy); color: var(--on-navy); }
+.sm em { font-style: normal; color: var(--muted); font-size: 13px; }
+.sm.side span { background: var(--soft); color: var(--ink-2); font-weight: 600; }
+
+/* tables */
+table { border-collapse: collapse; width: 100%; font-size: 13px; }
+th, td { padding: 9px 10px; text-align: right; border-bottom: 1px solid var(--line); white-space: nowrap; }
+thead th { white-space: normal; vertical-align: bottom; line-height: 1.3; }
+th:first-child, td:first-child { text-align: left; }
+thead th { font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
+tr.hl td { background: var(--accent-soft); color: var(--ink); font-weight: 650; }
+td.neg { color: var(--bad); } td.pos { color: var(--safe); }
+
+/* build map */
+.own { display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 650; padding: 2px 8px; border-radius: 999px; background: var(--page); color: var(--ink-2); border: 1px solid var(--line); }
+.bm { display: grid; gap: 6px; }
+.bm div { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: center; font-size: 13px; padding: 8px 10px; border-radius: 12px; background: var(--page); }
+
+/* gantt */
+.gantt { display: grid; grid-template-columns: 170px minmax(0, 1fr); gap: 8px 12px; align-items: center; min-width: 640px; }
+.gantt .lb { font-size: 13px; font-weight: 650; }
+.gantt .lb span { display: block; font-size: 11.5px; color: var(--muted); font-weight: 500; }
+.gtrack { position: relative; height: 26px; background: var(--soft); border-radius: 8px; }
+.gtrack i { position: absolute; top: 0; bottom: 0; border-radius: 8px; background: var(--lav); display: flex; align-items: center; padding: 0 8px; font-size: 11px; font-style: normal; font-weight: 650; color: var(--accent-2); white-space: nowrap; }
+.gtrack i.pl { background: var(--accent); color: #FFFFFF; }
+.gscale { grid-column: 2; display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); }
+
+/* plans */
+.plans { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.plan { border-radius: 22px; padding: 20px; display: grid; gap: 12px; align-content: start; background: var(--soft); }
+.plan.fam { background: var(--navy); color: var(--on-navy); }
+.plan .who { font-size: 11.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); }
+.plan.fam .who { color: #C9C4FA; }
+.plan h3 { font: 400 28px/1.05 var(--display); }
+.plan .pp { font: 650 34px/1 var(--body); letter-spacing: -0.02em; }
+.plan .pp small { font-size: 14px; font-weight: 500; opacity: .7; }
+.plan ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 7px; }
+.plan li { font-size: 13.5px; line-height: 1.4; display: grid; grid-template-columns: 16px minmax(0, 1fr); gap: 8px; }
+.plan li::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); margin-top: 6px; }
+.plan.fam li::before { background: #C9C4FA; }
+.plan li.new { font-weight: 650; }
+.worth { font-size: 12.5px; border-radius: 12px; padding: 10px 12px; background: var(--page); color: var(--ink-2); line-height: 1.4; }
+.plan.fam .worth { background: rgba(255,255,255,.1); color: #E8E6FF; }
+@media (max-width: 860px) { .plans { grid-template-columns: minmax(0, 1fr); } }
+
+/* waterfall */
+.wf { display: grid; gap: 6px; }
+.wfr { display: grid; grid-template-columns: 170px minmax(0, 1fr) 64px; gap: 10px; align-items: center; font-size: 12.5px; }
+.wfr .tr { position: relative; height: 18px; }
+.wfr .tr i { position: absolute; top: 0; height: 18px; border-radius: 4px; }
+.wfr .tr i.tot { background: var(--accent); } .wfr .tr i.minus { background: var(--bad-bg); outline: 1px solid var(--bad); outline-offset: -1px; }
+.wfr .tr i.plus { background: var(--safe-bg); outline: 1px solid var(--safe); outline-offset: -1px; }
+.wfr .tr i.sub { background: var(--lav); }
+.wfr .tr .zero { position: absolute; top: -3px; bottom: -3px; width: 1px; background: var(--muted); }
+.wfr .v { text-align: right; font-weight: 650; font-variant-numeric: tabular-nums; }
+.wfr .v.neg { color: var(--bad); } .wfr .v.pos { color: var(--safe); }
+@media (max-width: 640px) { .wfr { grid-template-columns: 120px minmax(0, 1fr) 54px; } }
+
+/* bars */
+.vb { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; align-items: end; height: 230px; padding-top: 10px; }
+.vb div { display: flex; flex-direction: column; gap: 6px; align-items: center; justify-content: flex-end; height: 100%; }
+.vb i { width: 70%; max-width: 120px; border-radius: 10px 10px 4px 4px; background: var(--lav); display: block; }
+.vb div.hl i { background: var(--accent); }
+.vb b { font-size: 15px; } .vb span { font-size: 11.5px; color: var(--muted); text-align: center; line-height: 1.3; }
+
+/* loop into longevity */
+.loopL { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; }
+.loopL div { background: var(--soft); border-radius: 16px; padding: 14px; display: grid; gap: 6px; align-content: start; position: relative; }
+.loopL div:last-child { background: var(--navy); color: var(--on-navy); }
+.loopL div:last-child span { color: #D9D6FF; }
+.loopL b { font-size: 13.5px; } .loopL span { font-size: 12.5px; color: var(--ink-2); line-height: 1.4; }
+.loopL .ix { font: 400 26px/1 var(--display); color: var(--accent); }
+.loopL div:last-child .ix { color: #C9C4FA; }
+@media (max-width: 860px) { .loopL { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+.callout { background: var(--navy); color: var(--on-navy); border-radius: 20px; padding: 18px 20px; display: grid; gap: 6px; }
+.callout b { font: 400 24px/1.15 var(--display); }
+.callout p { color: #E1DEFF; font-size: 13.5px; }
+.src { font-size: 11.5px; color: var(--muted); line-height: 1.55; }
+.src ol { margin: 0; padding-left: 18px; display: grid; gap: 3px; }
+@media (prefers-reduced-motion: no-preference) { .dot.now { animation: pulse 2s ease-in-out infinite; } @keyframes pulse { 50% { box-shadow: 0 0 0 6px var(--app-violet-soft); } } }
+
+code { font: 500 0.88em/1.4 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; background: var(--soft-2); color: var(--accent-2); padding: 1px 5px; border-radius: 5px; }
+pre.code { margin: 0; font: 500 12px/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; background: var(--navy); color: #E8E6FF; padding: 14px 16px; border-radius: 14px; overflow-x: auto; white-space: pre; }
+td.l { text-align: left; white-space: normal; min-width: 220px; }
+td.no { color: var(--bad); }
+table.rls td { white-space: normal; text-align: left; min-width: 120px; }
+/* architecture */
+.arch { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr) minmax(0, 1fr); gap: 14px; }
+.arch .col { display: grid; gap: 10px; align-content: start; min-width: 0; padding: 14px; border-radius: 20px; background: var(--soft); }
+.arch .col.mid { background: var(--accent-soft); }
+.arch .ch { font-size: 11px; font-weight: 750; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.node { background: var(--page); border-radius: 14px; padding: 11px 12px; display: grid; gap: 4px; border: 1px solid var(--line); min-width: 0; }
+.node b { font-size: 13.5px; } .node span { font-size: 12px; color: var(--ink-2); line-height: 1.4; }
+.node.app { border-color: var(--accent); }
+.node.fn { background: var(--navy); border-color: var(--navy); } .node.fn b, .node.fn span { color: #E8E6FF; }
+.node.fn i { font-style: normal; font-size: 10.5px; font-weight: 750; letter-spacing: .06em; text-transform: uppercase; background: var(--accent); color: #FFFFFF; padding: 1px 6px; border-radius: 999px; margin-right: 4px; }
+.node.fn i.re { background: rgba(255,255,255,.18); }
+.node code { justify-self: start; }
+.two-n { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+@media (max-width: 860px) { .arch { grid-template-columns: minmax(0, 1fr); } }
+/* sequence */
+.seqWrap { background: var(--soft); border-radius: 22px; padding: 14px; }
+.seq { min-width: 860px; width: 100%; }
+.seq .lane { stroke: var(--line); stroke-width: 2; stroke-dasharray: 3 5; }
+.seq .lh rect { fill: var(--page); stroke: var(--line); }
+.seq .lh text { fill: var(--ink); font-size: 12.5px; font-weight: 650; text-anchor: middle; }
+.seq .m { stroke: var(--accent); stroke-width: 1.8; fill: none; }
+.seq .m.push { stroke-dasharray: 5 4; stroke: var(--accent-2); }
+.seq .ah { fill: var(--accent); }
+.seq .lbl { fill: var(--ink-2); font-size: 11.5px; }
+.seq .no { fill: var(--muted); font-size: 10.5px; font-weight: 700; }
+.seq .band { fill: var(--accent-soft); }
+/* fsm */
+.fsm { display: grid; gap: 10px; min-width: 760px; }
+.fsm .rowS { display: flex; align-items: center; gap: 6px; flex-wrap: nowrap; }
+.fsm span.s { font-size: 12px; font-weight: 650; padding: 6px 10px; border-radius: 10px; background: var(--accent-soft); color: var(--accent-2); white-space: nowrap; }
+.fsm span.s.who-d { background: var(--navy); color: #FFFFFF; }
+.fsm span.s.x { background: var(--bad-bg); color: var(--bad); }
+.fsm span.s.r { background: var(--warn-bg); color: var(--warn); }
+.fsm em { font-style: normal; color: var(--muted); }
+.fsm .key { display: flex; gap: 14px; font-size: 11.5px; color: var(--muted); flex-wrap: wrap; }
+.fsm .key i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; }
+/* er */
+.er { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.tbl { background: var(--soft); border-radius: 14px; padding: 12px; min-width: 0; }
+.tbl.wide { grid-row: span 2; background: var(--accent-soft); }
+.tbl h4 { font: 650 13px/1.3 ui-monospace, SFMono-Regular, Menlo, monospace; margin-bottom: 6px; display: flex; justify-content: space-between; gap: 6px; }
+.tbl h4 em { font: 600 10.5px/1.6 var(--body); font-style: normal; color: var(--muted); }
+.tbl ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 3px; }
+.tbl li { font: 12px/1.35 ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--ink-2); border-top: 1px solid var(--line); padding-top: 3px; }
+@media (max-width: 860px) { .er { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+/* flows */
+.flowRow { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; }
+.flowRow > div { background: var(--soft); border-radius: 14px; padding: 12px; display: grid; gap: 6px; align-content: start; position: relative; min-width: 0; }
+.flowRow b { font-size: 13px; } .flowRow span { font-size: 12px; color: var(--ink-2); line-height: 1.4; }
+.flowRow code { justify-self: start; font-size: 10.5px; }
+@media (max-width: 860px) { .flowRow { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+ol.steps { margin: 0; padding-left: 18px; display: grid; gap: 5px; font-size: 13.5px; color: var(--ink-2); }
+.warn { font-size: 12.5px; color: var(--warn); background: var(--warn-bg); border-radius: 10px; padding: 8px 10px; }
+/* gantt */
+.tgantt { display: grid; grid-template-columns: 210px minmax(0, 1fr); gap: 7px 12px; align-items: center; min-width: 760px; }
+.tscale { grid-column: 2; display: grid; grid-template-columns: 4fr 5fr 4fr 4fr; font-size: 11.5px; font-weight: 650; color: var(--muted); }
+.tscale span { border-left: 1px solid var(--line); padding-left: 6px; }
+.tg-l { font-size: 12.5px; font-weight: 650; } .tg-l span { display: block; font-size: 11px; color: var(--muted); font-weight: 500; }
+.tg-t { position: relative; height: 22px; background: var(--soft); border-radius: 7px; }
+.tg-t i { position: absolute; top: 0; bottom: 0; border-radius: 7px; background: var(--lav); }
+.tg-t i.k1 { background: var(--accent); } .tg-t i.k2 { background: var(--navy); }
+.tg-t b.mk { position: absolute; top: -4px; bottom: -4px; width: 2px; background: var(--bad); }
+.miles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.miles div { background: var(--soft); border-radius: 16px; padding: 14px; display: grid; gap: 4px; align-content: start; }
+.miles div.on { background: var(--accent); color: #FFFFFF; } .miles div.on span { color: #E8E6FF; } .miles div.on code { background: rgba(255,255,255,.18); color: #FFFFFF; }
+.miles div.dk { background: var(--navy); color: #FFFFFF; } .miles div.dk span { color: #E8E6FF; }
+.miles .mk { font-size: 11px; font-weight: 750; letter-spacing: .06em; text-transform: uppercase; opacity: .8; }
+.miles b { font: 400 21px/1.15 var(--display); } .miles span { font-size: 12.5px; color: var(--ink-2); line-height: 1.4; }
+@media (max-width: 860px) { .miles { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.check { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 18px; }
+.check div { display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 8px; font-size: 13.5px; align-items: start; }
+.sheet table th, .sheet table td { text-align: left; }
+.fsm .key i { border: 1px solid var(--line); }
+.check i { width: 18px; height: 18px; border-radius: 5px; border: 2px solid var(--accent); margin-top: 1px; }
+@media (max-width: 760px) { .check { grid-template-columns: minmax(0, 1fr); } }
+</style>
+<!-- ============================ SHEET 1 ============================ -->
+<article class="sheet">
+  <div class="pagehead"><span class="logo">Cheeku</span><span>Cheeku Doctor · technical execution · internal, tech team only · v1, Nov 2026</span></div>
+  <header class="hero">
+    <div class="tags"><span class="tag v">Archit · Suraj · Athar</span><span class="tag">Soft launch mid-Feb 2027</span><span class="tag">Fully running by 31 Mar 2027</span></div>
+    <h1>Build the ₹49 doctor review <em>on what we already have.</em></h1>
+    <p class="lede">This is the build sheet: what we make, where it lives in the repo, how each piece talks to the next, and in which week it ships. The product and pricing case is in the Cheeku Doctor playbook. Nothing here lets the AI diagnose or prescribe; it collects the history and a registered doctor decides.</p>
+    <div class="stats">
+      <div class="stat"><b>6</b><span>migrations, 0045 to 0050</span></div>
+      <div class="stat"><b>6</b><span>new Edge Functions, plus 3 reused</span></div>
+      <div class="stat"><b>2</b><span>new surfaces: the app flow and a doctor console</span></div>
+      <div class="stat"><b>2</b><span>store builds: the January build carries everything native, switched off</span></div>
+    </div>
+  </header>
+
+  <section class="blk">
+    <div class="k">Architecture</div>
+    <h2>Three surfaces, one Supabase project, <em>four partners.</em></h2>
+    <div class="arch">
+      <div class="col">
+        <span class="ch">Surfaces</span>
+        <div class="node app"><b>Member app</b><span>Expo 58, iOS and Android. Intake inside chat, case card, prescription viewer, check-in</span><code>app/(app)/doctor/*</code></div>
+        <div class="node"><b>Doctor console</b><span>Small web app for doctors only. Queue, case, sign. MFA required</span><code>doctor-console/</code></div>
+        <div class="node"><b>Verify page</b><span>One public page a chemist opens from the QR code. Validity only, no history</span><code>fn rx-verify</code></div>
+      </div>
+      <div class="col mid">
+        <span class="ch">Supabase (existing project)</span>
+        <div class="node db"><b>Postgres + row-level security</b><span>consult_cases, case_events, doctors, payments, e_prescriptions, formulary</span></div>
+        <div class="two-n">
+          <div class="node db"><b>Realtime</b><span>Doctor queue, case card</span></div>
+          <div class="node db"><b>Storage</b><span>Private <code>rx</code> bucket, signed URLs</span></div>
+        </div>
+        <div class="two-n">
+          <div class="node db"><b>pg_cron</b><span>Overflow, refunds, check-ins, every minute</span></div>
+          <div class="node db"><b>Auth roles</b><span>member, doctor, clinical_lead, ops</span></div>
+        </div>
+        <div class="node fn"><b>Edge Functions</b><span><i>new</i> quickrx-intake · quickrx-pay · payments-webhook · rx-issue · rx-verify · quickrx-tick</span><span><i class="re">reused</i> rx-score · push-dispatch · partner-gateway (from the LabStack plan)</span></div>
+      </div>
+      <div class="col">
+        <span class="ch">Partners</span>
+        <div class="node ext"><b>Payments</b><span>Razorpay UPI for a review. Play and App Store billing for plans and the pass</span></div>
+        <div class="node ext"><b>LabStack</b><span>Pharmacy orders, home tests, consult overflow</span></div>
+        <div class="node ext"><b>Telephony</b><span>Masked calls, doctor to patient. Exotel or Knowlarity</span></div>
+        <div class="node ext"><b>Model endpoint</b><span>Existing <code>cheeku-chat</code> for phrasing questions only</span></div>
+      </div>
+    </div>
+    <p class="cap">Rule carried over from the app: the device never calls a partner and never holds a partner key. Every partner call goes through an Edge Function with keys in Supabase secrets.</p>
+  </section>
+
+  <section class="blk">
+    <div class="k">One case, end to end</div>
+    <h2>Who calls whom, <em>in order.</em></h2>
+    <div class="scroll seqWrap"><svg class="seq" viewBox="0 0 960 658" role="img" aria-label="Sequence of one Cheeku Doctor case across the member app, Edge Functions, Postgres, the doctor console and partners."><rect class="band" x="0" y="294" width="960" height="34" rx="6"/><rect class="band" x="0" y="328" width="960" height="34" rx="6"/><rect class="band" x="0" y="362" width="960" height="34" rx="6"/><line class="lane" x1="90" y1="40" x2="90" y2="650"/><g class="lh"><rect x="15" y="6" width="150" height="28" rx="14"/><text x="90" y="25">Member app</text></g><line class="lane" x1="290" y1="40" x2="290" y2="650"/><g class="lh"><rect x="215" y="6" width="150" height="28" rx="14"/><text x="290" y="25">Edge Functions</text></g><line class="lane" x1="490" y1="40" x2="490" y2="650"/><g class="lh"><rect x="415" y="6" width="150" height="28" rx="14"/><text x="490" y="25">Postgres</text></g><line class="lane" x1="690" y1="40" x2="690" y2="650"/><g class="lh"><rect x="615" y="6" width="150" height="28" rx="14"/><text x="690" y="25">Doctor console</text></g><line class="lane" x1="880" y1="40" x2="880" y2="650"/><g class="lh"><rect x="805" y="6" width="150" height="28" rx="14"/><text x="880" y="25">Partners</text></g><text class="no" x="8" y="78">1</text><path class="m" d="M90 66 h40 v12 h-36"/><polygon class="ah" points="92,78 99,74 99,82"/><text class="lbl" x="138" y="77">safety/detect + protocol engine: eligible</text><text class="no" x="8" y="112">2</text><line class="m" x1="90" y1="108" x2="282" y2="108"/><polygon class="ah" points="290,108 281,103 281,113"/><text class="lbl" x="190" y="102" text-anchor="middle">quickrx-intake (answers, member id)</text><text class="no" x="8" y="146">3</text><line class="m" x1="290" y1="142" x2="482" y2="142"/><polygon class="ah" points="490,142 481,137 481,147"/><text class="lbl" x="390" y="136" text-anchor="middle">re-check rules · insert case: eligible</text><text class="no" x="8" y="180">4</text><line class="m" x1="290" y1="176" x2="98" y2="176"/><polygon class="ah" points="90,176 99,171 99,181"/><text class="lbl" x="190" y="170" text-anchor="middle">eligible · ₹49 or "included, 1 of 2"</text><text class="no" x="8" y="214">5</text><line class="m" x1="90" y1="210" x2="872" y2="210"/><polygon class="ah" points="880,210 871,205 871,215"/><text class="lbl" x="485" y="204" text-anchor="middle">Razorpay UPI intent (order = case id)</text><text class="no" x="8" y="248">6</text><line class="m" x1="880" y1="244" x2="298" y2="244"/><polygon class="ah" points="290,244 299,239 299,249"/><text class="lbl" x="585" y="238" text-anchor="middle">payments-webhook, signature verified</text><text class="no" x="8" y="282">7</text><line class="m" x1="290" y1="278" x2="482" y2="278"/><polygon class="ah" points="490,278 481,273 481,283"/><text class="lbl" x="390" y="272" text-anchor="middle">case_transition(paid → queued)</text><text class="no" x="8" y="316">8</text><line class="m push" x1="490" y1="312" x2="682" y2="312"/><polygon class="ah" points="690,312 681,307 681,317"/><text class="lbl" x="590" y="306" text-anchor="middle">Realtime: new case in queue</text><text class="no" x="8" y="350">9</text><line class="m" x1="690" y1="346" x2="498" y2="346"/><polygon class="ah" points="490,346 499,341 499,351"/><text class="lbl" x="590" y="340" text-anchor="middle">claim_case() · SKIP LOCKED</text><text class="no" x="8" y="384">10</text><line class="m" x1="690" y1="380" x2="498" y2="380"/><polygon class="ah" points="490,380 499,375 499,385"/><text class="lbl" x="590" y="374" text-anchor="middle">decide_case(diagnosis, plan, PIN)</text><text class="no" x="8" y="418">11</text><line class="m push" x1="490" y1="414" x2="298" y2="414"/><polygon class="ah" points="290,414 299,409 299,419"/><text class="lbl" x="390" y="408" text-anchor="middle">webhook: approved → rx-issue</text><text class="no" x="8" y="452">12</text><line class="m" x1="290" y1="448" x2="482" y2="448"/><polygon class="ah" points="490,448 481,443 481,453"/><text class="lbl" x="390" y="442" text-anchor="middle">PDF to rx bucket · record · ledger · rx-score</text><text class="no" x="8" y="486">13</text><line class="m push" x1="290" y1="482" x2="98" y2="482"/><polygon class="ah" points="90,482 99,477 99,487"/><text class="lbl" x="190" y="476" text-anchor="middle">push-dispatch: prescription ready</text><text class="no" x="8" y="520">14</text><line class="m" x1="90" y1="516" x2="282" y2="516"/><polygon class="ah" points="290,516 281,511 281,521"/><text class="lbl" x="190" y="510" text-anchor="middle">Order medicines → partner-gateway</text><text class="no" x="8" y="554">15</text><line class="m" x1="290" y1="550" x2="872" y2="550"/><polygon class="ah" points="880,550 871,545 871,555"/><text class="lbl" x="585" y="544" text-anchor="middle">LabStack pharmacy order</text><text class="no" x="8" y="588">16</text><line class="m push" x1="490" y1="584" x2="298" y2="584"/><polygon class="ah" points="290,584 299,579 299,589"/><text class="lbl" x="390" y="578" text-anchor="middle">pg_cron +24 h → quickrx-tick</text><text class="no" x="8" y="622">17</text><line class="m push" x1="290" y1="618" x2="98" y2="618"/><polygon class="ah" points="90,618 99,613 99,623"/><text class="lbl" x="190" y="612" text-anchor="middle">push: how are you feeling?</text></svg></div>
+    <p class="cap">Solid arrows are calls, dashed arrows are pushes or Realtime events. Every status change goes through one database function, <code>case_transition()</code>, which also writes the event log.</p>
+  </section>
+
+  <section class="blk">
+    <div class="k">The case</div>
+    <h2>One state machine, <em>enforced in the database.</em></h2>
+    <div class="scroll"><div class="fsm"><div class="rowS"><span class="s">draft</span><em>→</em><span class="s">eligible</span><em>→</em><span class="s">paid</span><em>→</em><span class="s">queued</span><em>→</em><span class="s who-d">claimed</span><em>⇄</em><span class="s who-d">needs_info</span><em>→</em><span class="s who-d">approved</span><em>→</em><span class="s">rx_issued</span><em>→</em><span class="s">fulfilled</span><em>→</em><span class="s">followup_due</span><em>→</em><span class="s">closed</span></div>
+<div class="rowS"><span style="font-size:12px;color:var(--muted);width:92px">Side exits</span><span class="s r">ineligible</span><span class="s r">referred to care</span><span class="s x">escalated</span><span class="s who-d">declined</span><span class="s who-d">moved_to_video</span><span class="s">expired</span><em>→</em><span class="s">refunded</span></div>
+<div class="key"><span><i style="background:var(--accent-soft)"></i>system or member</span><span><i style="background:var(--navy)"></i>doctor action</span><span><i style="background:var(--warn-bg)"></i>care network door</span><span><i style="background:var(--bad-bg)"></i>emergency door</span></div></div></div>
+    <div class="scroll"><table>
+      <thead><tr><th>Transition</th><th>Who can make it</th><th>Where</th><th>Guard</th></tr></thead>
+      <tbody>
+        <tr><td>draft → eligible / ineligible</td><td>System</td><td><code>quickrx-intake</code></td><td class="l">Server re-runs safety gate and eligibility; never trusts the app's verdict</td></tr>
+        <tr><td>eligible → paid</td><td>System</td><td><code>payments-webhook</code></td><td class="l">Verified gateway signature, or a plan allowance debited in the same transaction</td></tr>
+        <tr><td>paid → queued</td><td>System</td><td>trigger</td><td class="l">Sets <code>sla_claim_at</code> = +10 min, <code>sla_issue_at</code> = +30 min</td></tr>
+        <tr><td>queued → claimed</td><td>Doctor</td><td><code>claim_case()</code> RPC</td><td class="l">On shift, verified, <code>FOR UPDATE SKIP LOCKED</code>, one open case per doctor</td></tr>
+        <tr><td>claimed → needs_info ↔ claimed</td><td>Doctor, member</td><td>RPC</td><td class="l">Message stored in case_messages; claim clock pauses</td></tr>
+        <tr><td>claimed → approved</td><td>Doctor</td><td><code>decide_case()</code> RPC</td><td class="l">Diagnosis chosen, every drug in the formulary for this protocol, review time over 45 s</td></tr>
+        <tr><td>approved → rx_issued</td><td>System</td><td><code>rx-issue</code></td><td class="l">PDF stored, hash and verify code written, record and ledger updated</td></tr>
+        <tr><td>claimed → declined / moved_to_video</td><td>Doctor</td><td>RPC</td><td class="l">Reason code required; refund or credit queued automatically</td></tr>
+        <tr><td>queued → expired → refunded</td><td>System</td><td><code>quickrx-tick</code></td><td class="l">Unclaimed at 30 min; refund through the original rail; allowance restored</td></tr>
+        <tr><td>rx_issued → followup_due → closed</td><td>System, member</td><td>cron + RPC</td><td class="l">"Worse" re-runs the safety gate and opens the care door</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section class="blk">
+    <div class="k">Data model</div>
+    <h2>Six migrations, <em>0045 to 0050.</em></h2>
+    <div class="er">
+      <div class="tbl"><h4>doctors <em>0045</em></h4><ul><li><b>id</b> uuid · auth user</li><li>name, qualification</li><li>reg_no, council</li><li>nmr_verified_at</li><li>indemnity_until</li><li>status: onboarding | live | paused</li><li>pay_model: panel | salaried</li></ul></div>
+      <div class="tbl"><h4>doctor_shifts <em>0045</em></h4><ul><li><b>id</b></li><li>doctor_id → doctors</li><li>starts_at, ends_at</li><li>city</li><li>checked_in_at</li></ul></div>
+      <div class="tbl"><h4>formulary <em>0045</em></h4><ul><li><b>id</b></li><li>generic_name, strength, form</li><li>tpg_list: O | A</li><li>schedule</li><li>protocols text[]</li><li>max_days, max_daily_dose</li></ul></div>
+      <div class="tbl wide"><h4>consult_cases <em>0046</em></h4><ul><li><b>id</b> · short_code A1042</li><li>member_id, account_id</li><li>protocol_id, protocol_version</li><li>status (enum, 16 states)</li><li>entry: pass | included | extra</li><li>answers jsonb · eligibility jsonb</li><li>safety_lexicon_version</li><li>price_paise, payment_id</li><li>doctor_id, claimed_at, decided_at</li><li>diagnosis_code, decline_reason</li><li>sla_claim_at, sla_issue_at</li><li>city, created_at</li></ul></div>
+      <div class="tbl"><h4>case_events <em>0047</em></h4><ul><li><b>id</b></li><li>case_id → consult_cases</li><li>from_status, to_status</li><li>actor_role, actor_id</li><li>at</li><li>data jsonb (no free text)</li></ul></div>
+      <div class="tbl"><h4>case_messages <em>0047</em></h4><ul><li><b>id</b></li><li>case_id</li><li>sender: doctor | member</li><li>body</li><li>at</li></ul></div>
+      <div class="tbl"><h4>e_prescriptions <em>0048</em></h4><ul><li><b>id</b></li><li>case_id, member_id, doctor_id</li><li>items jsonb (formulary ids, dose, days)</li><li>advice</li><li>pdf_path, sha256</li><li>verify_code (10 chars)</li><li>record_id → records</li></ul></div>
+      <div class="tbl"><h4>payments <em>0049</em></h4><ul><li><b>id</b></li><li>case_id or tier</li><li>rail: razorpay | play | appstore</li><li>order_id, payment_id</li><li>amount_paise, status</li><li>refund_id, refunded_at</li></ul></div>
+      <div class="tbl"><h4>review_allowances <em>0049</em></h4><ul><li><b>account_id, month</b></li><li>included: 2 or 5</li><li>used</li><li>per_member jsonb (max 2)</li></ul></div>
+      <div class="tbl"><h4>case_audits <em>0050</em></h4><ul><li><b>id</b></li><li>case_id, auditor_id</li><li>verdict: agree | minor | major</li><li>notes</li></ul></div>
+      <div class="tbl"><h4>followups <em>0050</em></h4><ul><li><b>id</b></li><li>case_id</li><li>due_at, sent_at</li><li>response: better | same | worse</li></ul></div>
+      <div class="tbl"><h4>app_config rows <em>0050</em></h4><ul><li>quickrx_enabled</li><li>quickrx_cities</li><li>quickrx_hours</li><li>quickrx_price_paise</li></ul></div>
+    </div>
+    <p class="cap">Follows the repo's rule: each migration ships with its <code>supabase/manual/*-step-*.sql</code> files and a <code>*-check.sql</code>. Nothing changes in production until those are run in the SQL editor.</p>
+  </section>
+
+  <section class="blk">
+    <div class="k">Who can read what</div>
+    <h2>Row-level security, <em>table by table.</em></h2>
+    <div class="scroll"><table class="rls">
+      <thead><tr><th>Table</th><th>Member</th><th>Doctor</th><th>Clinical lead</th><th>Ops</th></tr></thead>
+      <tbody>
+        <tr><td>consult_cases</td><td>Own and family cases they manage</td><td>Queued cases (summary only) and cases they claimed</td><td>All, read</td><td>Status and SLA fields only</td></tr>
+        <tr><td>answers, current medicines</td><td>Own</td><td>Claimed case only, until closed + 24 h</td><td>Audited cases</td><td class="no">Never</td></tr>
+        <tr><td>e_prescriptions</td><td>Own</td><td>Ones they signed</td><td>All, read</td><td class="no">Never</td></tr>
+        <tr><td>payments</td><td>Own</td><td class="no">Never</td><td class="no">Never</td><td>All, read; refunds through RPC</td></tr>
+        <tr><td>doctors, shifts</td><td>Name, qualification, reg. no. of their doctor</td><td>Own row</td><td>All</td><td>All</td></tr>
+        <tr><td>case_audits</td><td class="no">Never</td><td>Audits of their own cases</td><td>All, write</td><td class="no">Never</td></tr>
+      </tbody>
+    </table></div>
+    <p class="cap">Doctors never see payment status, so approval can't follow the money. Logs carry case ids and rule ids, never symptoms or names, the same rule <code>safety/detect</code> already follows.</p>
+  </section>
+</article>
+
+<!-- ============================ SHEET 2 ============================ -->
+<article class="sheet">
+  <div class="pagehead"><span class="logo">Cheeku</span><span>Sheet 2 of 3 · components</span></div>
+
+  <section class="blk" style="border-top:0">
+    <div class="k">Component 1 · Protocol engine</div>
+    <h2>Ten conditions as data, <em>compiled like the safety lexicon.</em></h2>
+    <div class="grid2">
+      <div class="box">
+        <h3>Where</h3>
+        <pre class="code">src/lib/quickrx/
+  protocols.yaml            ← clinical lead signs this
+  protocols.generated.ts    ← pnpm quickrx:build
+  engine.ts                 ← pure, sync, no network
+  eligibility.ts
+  engine.test.ts
+  fixtures/must-refer.ts    ← frozen red-flag suite
+supabase/functions/_shared/quickrx/  ← same engine, server copy</pre>
+      </div>
+      <div class="box">
+        <h3>One protocol, in YAML</h3>
+        <pre class="code">- id: uri_sore_throat
+  version: 3
+  signed_by: clinical_lead · 2027-01-08
+  ask: [temp_max, days, swallow, breath,
+        rash, pregnancy, chronic, age]
+  refer_if:
+    - days &gt; 3
+    - temp_max &gt;= 103
+    - breath == "short"
+    - swallow == "cannot"
+  diagnoses: [viral_uri, viral_pharyngitis,
+              allergic_rhinitis, needs_exam]
+  formulary: [paracetamol_650, saline_gargle,
+              cetirizine_10, lozenges]</pre>
+      </div>
+    </div>
+    <div class="grid3">
+      <div class="box"><h3>Contract</h3><p>Same shape as <code>safety/detect</code>: pure, synchronous, under 50 ms, no I/O. Returns <code>eligible | refer | escalate</code> with rule ids, never text.</p></div>
+      <div class="box"><h3>Runs twice</h3><p>On the device for instant feedback, then again in <code>quickrx-intake</code>. The server's answer is the one that counts.</p></div>
+      <div class="box"><h3>Frozen suite</h3><p>Every red flag has a must-refer fixture in English, Hindi and Hinglish. CI fails if any one stops firing. Changes need the clinical lead's sign-off in the PR.</p></div>
+    </div>
+  </section>
+
+  <section class="blk">
+    <div class="k">Component 2 · Intake in the app</div>
+    <h2>Chips inside the chat, <em>not a new form.</em></h2>
+    <div class="flowRow">
+      <div><b>Entry</b><span>Safety gate returns clear and the classifier matches one of 10 conditions. A chip appears: "Get a doctor's prescription · ₹49"</span><code>chat/actions</code></div>
+      <div><b>Questions</b><span>One card per question from the protocol. The model may rephrase the wording in Hinglish, never the options</span><code>QuickRxCard.tsx</code></div>
+      <div><b>Prefill</b><span>Age, sex, allergies, current medicines, pregnancy flag from memory and profiles</span><code>memory/digest</code></div>
+      <div><b>Check</b><span>Local engine, then <code>quickrx-intake</code>. Refer shows the care door; escalate shows Go now</span><code>quickrx/engine</code></div>
+      <div><b>Checkout</b><span>Bottom sheet: price or "Included · 1 of 2 left", consent, pay</span><code>DoctorCheckout.tsx</code></div>
+      <div><b>Case card</b><span>Realtime on the case row: claimed, reviewing, ready</span><code>app/(app)/doctor/[id]</code></div>
+    </div>
+    <p class="cap">New routes: <code>app/(app)/doctor/[id].tsx</code> (case) and <code>app/(app)/prescription/[id].tsx</code> (already exists for uploaded prescriptions; extend it for issued ones). Copy follows <code>docs/content-system.md</code>; add the new strings to <code>copy.test.ts</code>.</p>
+  </section>
+
+  <section class="blk">
+    <div class="k">Component 3 · Payments</div>
+    <h2>Two rails, <em>one server truth.</em></h2>
+    <div class="grid2">
+      <div class="box"><h3>A review (pass, extra)</h3><ol class="steps"><li><code>quickrx-pay</code> creates a Razorpay order for the case</li><li>App opens Razorpay's UPI intent sheet (native SDK, in the January build)</li><li><code>payments-webhook</code> verifies the signature and calls <code>case_transition(paid)</code></li><li>The app's own success callback is ignored for state; it only shows a spinner</li></ol><p class="warn">Blocked on: Apple 3.1.3(d) and Google Play confirming a consult can be paid outside store billing. Fallback: a consumable in-app purchase, same webhook shape.</p></div>
+      <div class="box"><h3>Plans and allowances</h3><ol class="steps"><li>Solo and Family stay on store billing; the existing tier logic in <code>billing/</code> decides the allowance (2 or 5)</li><li><code>debit_allowance()</code> runs inside the same transaction as <code>eligible → paid</code></li><li>A decline, refer or expiry restores it in the same transaction</li><li>The demo function <code>activate_tier_demo</code> and its flag are dropped first (see migration 0012 note)</li></ol></div>
+    </div>
+    <div class="grid3">
+      <div class="box"><h3>Idempotency</h3><p>Order id = case id. A repeated webhook is a no-op; a repeated tap reopens the same order.</p></div>
+      <div class="box"><h3>Refunds</h3><p>Only <code>quickrx-tick</code> and the ops RPC can refund, through the original rail, logged in case_events.</p></div>
+      <div class="box"><h3>Money in paise</h3><p>Integers everywhere, as <code>billing/plans.ts</code> already does. ₹49 is 4900.</p></div>
+    </div>
+  </section>
+
+  <section class="blk">
+    <div class="k">Component 4 · Queue and doctor console</div>
+    <h2>Claim, decide, sign. <em>Nothing else on the screen.</em></h2>
+    <div class="grid2">
+      <div class="box"><h3>Queue</h3><ul><li>Realtime subscription on <code>consult_cases where status = 'queued' and city in shift.cities</code></li><li><code>claim_case()</code> picks the oldest with <code>SKIP LOCKED</code>; one open case per doctor</li><li>Sound and browser notification for a new case; oldest wait shown in the header</li><li>Summary only until claimed: age band, sex, condition, wait</li></ul></div>
+      <div class="box"><h3>Decide</h3><ul><li>Diagnosis chips from the protocol; plan stays hidden until one is picked</li><li>Plan prefilled from the formulary for that diagnosis; edits limited to dose, days and advice within <code>max_days</code> and <code>max_daily_dose</code></li><li>Approve needs a 4-digit signing PIN; review timer must pass 45 s</li><li>Call patient (masked), ask a question, move to video, decline with reason</li></ul></div>
+    </div>
+    <div class="grid3">
+      <div class="box"><h3>Stack</h3><p>A separate small web app in <code>doctor-console/</code>: React with Vite, supabase-js, its own Vercel project. Not part of the member app's web export.</p></div>
+      <div class="box"><h3>Auth</h3><p>Supabase Auth, role <code>doctor</code> set by ops only after registration is verified. TOTP MFA required. Session ends at shift end.</p></div>
+      <div class="box"><h3>Never</h3><p>No free-text drug entry. No access to past cases after closure + 24 h. No payment information.</p></div>
+    </div>
+  </section>
+
+  <section class="blk">
+    <div class="k">Component 5 · Issuing the prescription</div>
+    <h2>A signed PDF, <em>a code a chemist can check.</em></h2>
+    <div class="flowRow">
+      <div><b>Trigger</b><span><code>approved</code> fires <code>rx-issue</code> through a database webhook</span></div>
+      <div><b>Render</b><span>PDF with pdf-lib in Deno: doctor name, qualification, reg. no., patient name, age, sex, date, diagnosis, generic names in capitals, dose, days, advice, mode of consult</span></div>
+      <div><b>Seal</b><span>SHA-256 of the PDF stored; 10-character verify code; QR to <code>rx-verify</code></span></div>
+      <div><b>File</b><span>Private <code>rx</code> bucket; a prescription record in <code>records</code>; medicine ledger rows</span></div>
+      <div><b>Check</b><span>Existing <code>rx-score</code> runs the 10 checks against her other medicines; a conflict goes back to the doctor before release</span></div>
+      <div><b>Notify</b><span><code>push-dispatch</code>: "Dr. Mehta has sent your prescription"</span></div>
+    </div>
+    <p class="cap">The verify page shows only: valid or not, doctor name and reg. no., date, medicine names, patient initials. No history, no diagnosis.</p>
+  </section>
+
+  <section class="blk">
+    <div class="k">Component 6 · The clock, <code>quickrx-tick</code></div>
+    <h2>A clock that runs every minute <em>and keeps every promise.</em></h2>
+    <div class="scroll"><table>
+      <thead><tr><th>When</th><th>Condition</th><th>Action</th></tr></thead>
+      <tbody>
+        <tr><td>+5 min</td><td class="l">Queued, unclaimed</td><td class="l">Alert backup panel (push and SMS to on-call doctors)</td></tr>
+        <tr><td>+10 min</td><td class="l">Still unclaimed</td><td class="l">Offer to LabStack consult overflow through <code>partner-gateway</code></td></tr>
+        <tr><td>+30 min</td><td class="l">No prescription</td><td class="l"><code>expired → refunded</code>, allowance restored, apology push</td></tr>
+        <tr><td>Claimed +12 min</td><td class="l">No decision</td><td class="l">Nudge the doctor; at +20 min release the claim back to the queue</td></tr>
+        <tr><td>Issued +24 h</td><td class="l">Follow-up due</td><td class="l">Push "How are you feeling?"; no answer by +48 h closes the case</td></tr>
+        <tr><td>Daily 02:00</td><td class="l">All cases closed yesterday</td><td class="l">Sample 10% into case_audits for the clinical lead</td></tr>
+      </tbody>
+    </table></div>
+    <p class="cap">Scheduled with <code>pg_cron</code> calling the function through <code>pg_net</code>. The function is idempotent; two runs in the same minute change nothing.</p>
+  </section>
+
+  <section class="blk">
+    <div class="k">Component 7 · Fulfilment</div>
+    <h2>Deliver through LabStack, <em>or hand it to any chemist.</em></h2>
+    <div class="grid2">
+      <div class="box"><h3>Delivery</h3><p>"Order medicines" calls <code>partner-gateway</code> (the LabStack plan's P0 task) with the formulary ids mapped to <code>drugMasterId</code> by the brand-to-salt resolver. The partner pharmacist checks the prescription before dispatch. Order lands in <code>partner_orders</code>.</p></div>
+      <div class="box"><h3>Download</h3><p>Signed URL to the PDF, valid 7 days, regenerated on demand. The QR works at any chemist without the app.</p></div>
+    </div>
+  </section>
+</article>
+
+<!-- ============================ SHEET 3 ============================ -->
+<article class="sheet">
+  <div class="pagehead"><span class="logo">Cheeku</span><span>Sheet 3 of 3 · plan, quality, release</span></div>
+
+  <section class="blk" style="border-top:0">
+    <div class="k">When</div>
+    <h2>Seventeen weeks, <em>two store builds.</em></h2>
+    <div class="scroll"><div class="tgantt">
+      <div class="tscale"><span>Dec</span><span>Jan</span><span>Feb</span><span>Mar</span></div>
+      <div class="tg-l">Migrations, RLS, state machine<span>Archit</span></div><div class="tg-t"><i class="" style="left:0.0%;width:17.6%"></i></div><div class="tg-l">Protocol engine and red-flag suite<span>Suraj, clinical lead</span></div><div class="tg-t"><i class="" style="left:5.9%;width:17.6%"></i></div><div class="tg-l">Legal opinion, clinical lead, panel<span>Deepesh</span></div><div class="tg-t"><i class="" style="left:0.0%;width:35.3%"></i></div><div class="tg-l">App flow, in Build 1 (flag off)<span>Athar</span></div><div class="tg-t"><i class="k1" style="left:11.8%;width:23.5%"></i><b class="mk" style="left:35.3%" title="Build 1 in stores"></b></div><div class="tg-l">Payments, webhook, refunds<span>Archit</span></div><div class="tg-t"><i class="" style="left:23.5%;width:17.6%"></i></div><div class="tg-l">Doctor console<span>Archit, Athar</span></div><div class="tg-t"><i class="" style="left:23.5%;width:23.5%"></i></div><div class="tg-l">rx-issue, verify, quickrx-tick<span>Archit, Suraj</span></div><div class="tg-t"><i class="" style="left:41.2%;width:11.8%"></i></div><div class="tg-l">Dry run, 200 synthetic cases<span>Everyone</span></div><div class="tg-t"><i class="" style="left:52.9%;width:8.8%"></i></div><div class="tg-l">Soft launch, one city, invited<span>Everyone</span></div><div class="tg-t"><i class="k1" style="left:61.8%;width:14.7%"></i></div><div class="tg-l">Build 2: Hindi voice, delivery<span>Suraj, Archit</span></div><div class="tg-t"><i class="" style="left:58.8%;width:23.5%"></i></div><div class="tg-l">Open in two cities<span>Everyone</span></div><div class="tg-t"><i class="k2" style="left:82.4%;width:17.6%"></i></div>
+    </div></div>
+    <div class="miles">
+      <div><span class="mk">Build 1 · January store build</span><b>Public launch, Cheeku Doctor off</b><span>Carries everything native: Razorpay SDK, new routes, case card. Hidden behind <code>quickrx_enabled</code>.</span></div>
+      <div class="on"><span class="mk">Mid-Feb · flag on</span><b>Soft launch</b><span>One city, invited beta families, 8 am to midnight, panel doctors. No new store review needed.</span></div>
+      <div><span class="mk">Build 2 · early March</span><b>Hindi voice intake, delivery</b><span>Fixes from the soft launch. Second city switched on by flag.</span></div>
+      <div class="dk"><span class="mk">31 Mar</span><b>Fully running</b><span>Open to every member in two cities; capacity for 1,000 reviews a day; audits and refunds automated.</span></div>
+    </div>
+    <p class="cap"><code>expo-updates</code> is not installed, so anything native or any new screen must be in a store build. That is why the January build carries the whole flow, switched off.</p>
+  </section>
+
+  <section class="blk">
+    <div class="k">Who</div>
+    <h2>Owners, <em>by component.</em></h2>
+    <div class="scroll"><table>
+      <thead><tr><th>Component</th><th>Owner</th><th>With</th><th>Ships</th></tr></thead>
+      <tbody>
+        <tr><td>Migrations 0045–0050, RLS, <code>case_transition()</code></td><td>Archit</td><td>Suraj</td><td>Dec wk 3</td></tr>
+        <tr><td>Protocol engine, YAML, frozen red-flag suite</td><td>Suraj</td><td>Clinical lead</td><td>Dec wk 4</td></tr>
+        <tr><td>Intake cards, checkout sheet, case card, routes</td><td>Athar</td><td>Archit</td><td>Jan wk 2 (in Build 1)</td></tr>
+        <tr><td>Razorpay order, webhook, refunds, allowances</td><td>Archit</td><td>Athar</td><td>Jan wk 3</td></tr>
+        <tr><td>Doctor console: queue, case, decide, sign, MFA</td><td>Archit</td><td>Athar (design)</td><td>Jan wk 4</td></tr>
+        <tr><td><code>rx-issue</code>, PDF, verify page, record and ledger writes</td><td>Archit</td><td>Suraj (rx-score)</td><td>Feb wk 1</td></tr>
+        <tr><td><code>quickrx-tick</code>: overflow, expiry, follow-ups, audit sampling</td><td>Archit</td><td>Suraj</td><td>Feb wk 1</td></tr>
+        <tr><td>Masked calling</td><td>Archit</td><td>Deepesh (vendor)</td><td>Feb wk 2</td></tr>
+        <tr><td>Ops dashboard: queue health, refunds, audits</td><td>Athar</td><td>Archit</td><td>Feb wk 2</td></tr>
+        <tr><td>Hindi voice intake, phrasing evals</td><td>Suraj</td><td></td><td>Mar wk 2 (Build 2)</td></tr>
+        <tr><td>LabStack delivery from a prescription</td><td>Archit</td><td>Suraj (salt matcher)</td><td>Mar wk 2</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section class="blk">
+    <div class="k">How we know it works</div>
+    <h2>Tests before code reaches a doctor, <em>metrics after.</em></h2>
+    <div class="grid2">
+      <div class="box"><h3>Tests</h3><ul><li><b>Unit (vitest):</b> protocol engine, eligibility, allowance maths, price in paise; frozen must-refer suite</li><li><b>Database (tests/db):</b> every RLS row above, every illegal transition refused</li><li><b>Contract:</b> Razorpay webhook fixtures, LabStack fixtures from the sandbox</li><li><b>Copy:</b> new strings added to <code>copy.test.ts</code></li><li><b>Dry run:</b> 200 synthetic cases through real doctors on staging before any real member</li></ul></div>
+      <div class="box"><h3>Live metrics</h3><ul><li>Paid to claimed, p50 and p90 (target p90 under 10 min)</li><li>Paid to prescription, p90 under 25 min</li><li>Doctor approval rate per doctor (alert outside 70% to 92%)</li><li>Refund rate (alert over 5%), webhook failures (alert on any)</li><li>Refer and escalate rate by protocol</li><li>Check-in: better, same, worse at 48 h</li></ul></div>
+    </div>
+    <div class="grid3">
+      <div class="box"><h3>Alerts go to</h3><p>An ops channel and the on-call engineer. Queue over 10 minutes pages the clinical lead too.</p></div>
+      <div class="box"><h3>Logs</h3><p>Case id, rule ids, timings. Never answers, names or medicines, as in the safety gate.</p></div>
+      <div class="box"><h3>Kill switch</h3><p><code>quickrx_enabled = false</code> hides the chip within a minute; open cases still finish.</p></div>
+    </div>
+  </section>
+
+  <section class="blk">
+    <div class="k">Definition of done</div>
+    <h2>Before the flag goes on <em>for one real member.</em></h2>
+    <div class="check">
+      <div><i></i><span>Written legal opinion on the telemedicine rules and CDSCO received</span></div>
+      <div><i></i><span>Ten protocols and the formulary signed by the clinical lead, in the repo</span></div>
+      <div><i></i><span>Must-refer suite at 100% in English, Hindi and Hinglish</span></div>
+      <div><i></i><span>Every RLS rule tested; doctors cannot see payments</span></div>
+      <div><i></i><span>Payment rail confirmed with Apple and Google, or the in-app purchase fallback live</span></div>
+      <div><i></i><span>Refund tested end to end on both rails</span></div>
+      <div><i></i><span>10 panel doctors verified on the National Medical Register, insured, trained, 20 shadow cases each</span></div>
+      <div><i></i><span>200-case dry run: p90 under 25 min, zero missed red flags</span></div>
+      <div><i></i><span>Kill switch tested in production</span></div>
+      <div><i></i><span>Device check on iOS and Android, not just the web preview</span></div>
+    </div>
+  </section>
+
+  <section class="blk">
+    <div class="k">Decisions we still owe</div>
+    <h2>Six calls, <em>each with a date.</em></h2>
+    <div class="scroll"><table>
+      <thead><tr><th>Decision</th><th>Options</th><th>Lean</th><th>By</th></tr></thead>
+      <tbody>
+        <tr><td>Payment rail for a review</td><td class="l">Razorpay UPI outside store billing, or a consumable in-app purchase</td><td class="l">Razorpay, if both stores confirm</td><td>15 Dec</td></tr>
+        <tr><td>Doctor's signature</td><td class="l">Signing PIN plus stored signature image, or Aadhaar eSign per prescription</td><td class="l">PIN and image, eSign later; counsel to confirm</td><td>15 Dec</td></tr>
+        <tr><td>Telephony vendor</td><td class="l">Exotel or Knowlarity, masked numbers, call recording off</td><td class="l">Whichever LabStack already uses</td><td>5 Jan</td></tr>
+        <tr><td>Console hosting</td><td class="l">Separate Vercel project, or under the existing one</td><td class="l">Separate project; never a root vercel.json</td><td>15 Dec</td></tr>
+        <tr><td>Protocols at runtime</td><td class="l">Compiled into the app, or fetched from the database</td><td class="l">Compiled, version pinned per case; server copy is the authority</td><td>10 Dec</td></tr>
+        <tr><td>Data retention for cases</td><td class="l">As long as the member keeps their account, or a fixed period</td><td class="l">Follow counsel's reading of the guidelines and DPDP</td><td>5 Jan</td></tr>
+      </tbody>
+    </table></div>
+    <p class="src">Repo facts as of 13 Nov 2026: Expo 58, React Native 0.88, Supabase with migrations to 0044, <code>safety/detect</code> with a YAML lexicon, <code>cheeku-chat</code>, <code>rx-score</code> and <code>push-dispatch</code> deployed as Edge Functions, demo billing waiting on Razorpay, no <code>expo-updates</code>. Product and pricing decisions: Cheeku Doctor playbook.</p>
+  </section>
+</article>

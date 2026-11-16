@@ -96,8 +96,7 @@ export default function DoctorProfile() {
             {rating ? (
               <View style={{ alignItems: "flex-end" }}>
                 <Text style={{ fontFamily: font.semibold, fontSize: 20, color: ink[900] }}>{rating.rating.toFixed(1)}</Text>
-                <Stars rating={rating.rating} size={12} />
-                <Text style={{ fontFamily: font.regular, fontSize: 12, color: ink[500], marginTop: 2 }}>{rating.reviews} reviews</Text>
+                <Text style={{ fontFamily: font.regular, fontSize: 12, color: ink[500], marginTop: 2 }}>out of 5 · {rating.reviews} reviews</Text>
               </View>
             ) : null}
           </View>
