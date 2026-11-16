@@ -21,10 +21,15 @@ import type { BookingStatus, Catalog, LabOffer, LabPartner, LabTest, SlotWindow 
 export const CATALOG_KEY = ["lab-catalog"] as const;
 export const BOOKINGS_KEY = ["lab-bookings"] as const;
 
+/** Live: only the partner network and the tests it can do. Preview: the sample labs. */
+const LIVE_LABS = process.env.EXPO_PUBLIC_LABSTACK === "live";
+
 export async function fetchCatalog(): Promise<Catalog> {
+  const partners = supabase.from("lab_partners").select("*").order("name");
+  const tests = supabase.from("lab_tests").select("*").order("popular", { ascending: false }).order("name");
   const [p, t, o] = await Promise.all([
-    supabase.from("lab_partners").select("*").order("name"),
-    supabase.from("lab_tests").select("*").order("popular", { ascending: false }).order("name"),
+    LIVE_LABS ? partners.eq("id", "labstack") : partners.neq("id", "labstack"),
+    LIVE_LABS ? tests.not("ls_id", "is", null) : tests,
     supabase.from("lab_offers").select("*"),
   ]);
   const error = p.error ?? t.error ?? o.error;

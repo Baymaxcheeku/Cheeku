@@ -63,7 +63,7 @@ export type TurnMemory = {
  * is coming or a doctor has the note.
  */
 export type BookedEvent = {
-  kind: "lab" | "doctor" | "service" | "fitness";
+  kind: "lab" | "doctor" | "service" | "fitness" | "medicine";
   title: string;
   /** "Tue, 8 Oct · 6-8 am" */
   when: string;

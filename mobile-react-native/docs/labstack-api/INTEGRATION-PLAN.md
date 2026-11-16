@@ -127,6 +127,8 @@ Each error is said in plain words next to the field ("A 10-digit mobile number, 
 
 ## 9. Tonight, in order
 
+Click-by-click version: [GO-LIVE.md](GO-LIVE.md). Built and type-checked: migration 0045, `supabase/functions/labstack` (gateway, every op the app calls plus `admin.syncCatalogue`) and `supabase/functions/labstack-webhook` (verify, note once, pull).
+
 1. Owner sets the four secrets in Supabase (Edge Functions, Secrets). Nobody pastes keys in chat.
 2. Gateway `labstack`: `admin/status`, then Labs `getTests` and `getPackages` to sync the catalogue.
 3. Labs end to end on UAT: serviceability, slots, `placeOrder`, then `triggerOrderLifecycle` to REPORT_DELIVERED, with `testWebhook` to check the receiver. Confirm raw values land in records.

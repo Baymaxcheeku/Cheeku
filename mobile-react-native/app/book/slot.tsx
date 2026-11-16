@@ -1,4 +1,3 @@
-import { useQueryClient } from "@tanstack/react-query";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Building2, ChevronLeft, Clock3, MapPin, MonitorPlay, Ticket } from "lucide-react-native";
 import { useMemo, useState } from "react";
@@ -16,8 +15,6 @@ import { SPECIALTIES, addDays, dayName, doctorById, slotsFor, type Mode, type Sl
 import { useAppointmentList } from "@/lib/booking/appointments";
 import { useBookingDraft } from "@/lib/booking/draft";
 import { doctorFace } from "@/lib/booking/faces";
-import { recordBooking, threadKey } from "@/lib/memory/store";
-import { useFamily } from "@/lib/profiles/family";
 import { brand, ink, lilac } from "@/theme/tokens";
 import { font } from "@/theme/type";
 import { goBack } from "@/lib/nav/go-back";
@@ -45,9 +42,7 @@ export default function SlotScreen() {
   const still = useReducedMotion();
   const { id, reschedule } = useLocalSearchParams<{ id: string; reschedule?: string }>();
   const appointments = useAppointmentList();
-  const { mode, setMode, intake, book } = useBookingDraft();
-  const family = useFamily();
-  const qc = useQueryClient();
+  const { mode, setMode, intake } = useBookingDraft();
   const doctor = doctorById(id);
 
   const days = useMemo(() => Array.from({ length: 7 }, (_, i) => addDays(new Date(), i)), []);
@@ -72,14 +67,6 @@ export default function SlotScreen() {
   const fee = doctor.fee[m] ?? 0;
   const face = doctorFace(doctor);
 
-  // Who it's for, as a family member, so the invoice files under them. "Me"
-  // is the account holder; otherwise the member whose first name was picked.
-  function memberFor(forName: string): string | undefined {
-    const all = family.data?.access.selectable ?? [];
-    if (forName === "Me") return all.find((p) => p.isPrimary)?.id;
-    return all.find((p) => p.name.split(" ")[0]?.toLowerCase() === forName.split(" ")[0]?.toLowerCase())?.id;
-  }
-
   function confirm() {
     if (!slot || !doctor) return;
     // Rescheduling moves the existing appointment rather than adding a second.
@@ -88,32 +75,8 @@ export default function SlotScreen() {
       router.replace(`/appointments/${reschedule}` as never);
       return;
     }
-    const appt = appointments.add({
-      doctorId: doctor.id,
-      mode: m,
-      day: day.toISOString(),
-      slotLabel: slot.label,
-      forName: intake?.forName ?? "Me",
-      concern: intake?.concern ?? "General consultation",
-      profileId: memberFor(intake?.forName ?? "Me"),
-    });
-    book({ doctorId: doctor.id, mode: m, day: day.toISOString(), slotLabel: slot.label, appointmentId: appt.id });
-
-    // Filed in that person's chat thread, with the note the doctor gets.
-    const pid = memberFor(intake?.forName ?? "Me");
-    if (pid) {
-      const when = `${day.toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "short" })} · ${slot.label}`;
-      const where = m === "online" ? "Video call" : `${doctor.clinic.name}, ${doctor.clinic.area}`;
-      const note = intake
-        ? [`About: ${intake.concern}`, intake.details ? `In their words: ${intake.details}` : "", `Since: ${intake.since}`, `Getting in the way: ${intake.impact}`, `Tried: ${intake.tried}`].filter(Boolean)
-        : undefined;
-      void recordBooking(
-        pid,
-        { kind: "doctor", title: `${doctor.name}, ${SPECIALTIES[doctor.specialty].label.toLowerCase()}`, when, where, route: `/appointments/${appt.id}`, note },
-        `Booked ${doctor.name} for ${intake?.forName === "Me" ? "you" : (intake?.forName ?? "you")}: ${when}, ${m === "online" ? "on a video call" : `at ${doctor.clinic.name}`}. The doctor gets the pre-consultation note before you meet.`,
-      ).then(() => qc.invalidateQueries({ queryKey: threadKey(pid) }));
-    }
-    router.replace("/book/confirmed");
+    // New bookings go through Confirm: who it's for, call type, tests, sharing.
+    router.push({ pathname: "/book/confirm", params: { id: doctor.id, mode: m, day: day.toISOString(), slot: slot.label } } as never);
   }
 
   return (

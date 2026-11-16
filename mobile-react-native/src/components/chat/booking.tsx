@@ -6,6 +6,7 @@ import {
   Check,
   ChevronRight,
   Dumbbell,
+  Pill,
   FlaskConical,
   Hourglass,
   LocateFixed,
@@ -283,7 +284,7 @@ function SoonCard({ booking }: { booking: Booking }) {
 
 /** A booking made somewhere in the app, filed in this person's thread. */
 export function BookedCard({ event, onOpen }: { event: BookedEvent; onOpen?: (route: string) => void }) {
-  const Icon = event.kind === "lab" ? FlaskConical : event.kind === "service" ? CalendarCheck2 : event.kind === "fitness" ? Dumbbell : Stethoscope;
+  const Icon = event.kind === "lab" ? FlaskConical : event.kind === "service" ? CalendarCheck2 : event.kind === "fitness" ? Dumbbell : event.kind === "medicine" ? Pill : Stethoscope;
   return (
     <Pressable
       accessibilityRole="button"

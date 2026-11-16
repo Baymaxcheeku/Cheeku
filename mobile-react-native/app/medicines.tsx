@@ -109,7 +109,7 @@ export default function Medicines() {
                 </View>
                 <Tap
                   accessibilityRole="button"
-                  onPress={() => router.push({ pathname: "/services/request", params: { service: "medicines", offering: "refill" } })}
+                  onPress={() => router.push({ pathname: "/pharmacy", params: { q: m.name.split(" ")[0] ?? m.name, who: profile?.id ?? "" } } as never)}
                   className="h-9 items-center justify-center rounded-pill px-3.5"
                   style={{ backgroundColor: ink[900] }}
                 >
@@ -151,6 +151,23 @@ export default function Medicines() {
                   </View>
                 </View>
               ))}
+            </View>
+
+            {/* Order to the door (LabStack pharmacy). */}
+            <View className="mt-6 flex-row items-center gap-3 rounded-xl bg-white p-4" style={[glassShadow, { borderWidth: 1, borderColor: surface.line }]}>
+              <View className="h-10 w-10 items-center justify-center rounded-lg" style={{ backgroundColor: lilac.base }}>
+                <Package size={18} color={hue.indigo.fg} />
+              </View>
+              <View className="min-w-0 flex-1">
+                <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>Order medicines</Text>
+                <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 1 }}>To the door, with the prescription from your records</Text>
+              </View>
+              <Tap accessibilityRole="button" onPress={() => router.push("/pharmacy/orders" as never)} hitSlop={6} style={{ paddingHorizontal: 6 }}>
+                <Text style={{ fontFamily: font.semibold, fontSize: 13, color: brand[600] }}>Orders</Text>
+              </Tap>
+              <Tap accessibilityRole="button" onPress={() => router.push({ pathname: "/pharmacy", params: { who: profile?.id ?? "" } } as never)} className="h-9 items-center justify-center rounded-pill px-3.5" style={{ backgroundColor: ink[900] }}>
+                <Text style={{ fontFamily: font.semibold, fontSize: 13, color: "#fff" }}>Order</Text>
+              </Tap>
             </View>
 
             {/* Reminders */}

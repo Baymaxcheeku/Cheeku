@@ -107,7 +107,7 @@ export default function PrescriptionScorecard() {
             <Tap accessibilityRole="button" accessibilityLabel={`Ask Cheeku about ${card.person}'s prescription`} onPress={() => router.push("/ask")} style={[glassShadow, { width: 56, height: 56, borderRadius: 999, backgroundColor: "#fff", alignItems: "center", justifyContent: "center" }]} scale={0.96}>
               <MessageCircle size={22} color={ink[900]} />
             </Tap>
-            <Tap accessibilityRole="button" onPress={() => router.push({ pathname: "/services/request", params: { service: "medicines", offering: "rx" } })} style={{ flex: 1, height: 56, borderRadius: 999, backgroundColor: ink[900], flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8 }} scale={0.98}>
+            <Tap accessibilityRole="button" onPress={() => router.push("/pharmacy" as never)} style={{ flex: 1, height: 56, borderRadius: 999, backgroundColor: ink[900], flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8 }} scale={0.98}>
               <Truck size={18} color="#fff" />
               <Text style={{ fontFamily: font.semibold, fontSize: 15, color: "#fff" }}>Order with home delivery</Text>
             </Tap>

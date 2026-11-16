@@ -281,7 +281,7 @@ export default function Ask() {
       return;
     }
     if (b.service === "medicine") {
-      router.push("/services/medicines" as never);
+      router.push("/pharmacy" as never);
       return;
     }
     if (b.service === "fitness") {
@@ -575,7 +575,7 @@ export default function Ask() {
                     onSend={last ? (t) => void send(t) : undefined}
                     onOpenRecord={(id) => router.push(`/records/${id}`)}
                     onOpenMemory={() => router.push("/memory")}
-                    onBook={(mode) => router.push({ pathname: "/book/consult", params: { mode, who: name } })}
+                    onBook={(mode) => (mode === "online" ? router.push({ pathname: "/book/instant", params: { who: memberId ?? "" } } as never) : router.push({ pathname: "/book/consult", params: { mode, who: name } }))}
                     onStartBooking={startBooking}
                     onOpenRoute={(route) => router.push(route as never)}
                     onSetGoal={memberId ? (goal) => applyGoal(qc, memberId, goal, todayIso()) : undefined}

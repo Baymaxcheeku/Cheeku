@@ -3,6 +3,8 @@ import {
   Building2,
   CalendarClock,
   ClipboardCheck,
+  FileText,
+  LifeBuoy,
   Clock3,
   Languages,
   MapPin,
@@ -18,6 +20,10 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { BubblePop } from "@/components/onboarding/motion";
 import { ConfirmSheet } from "@/components/ui/confirm-sheet";
+import { ProblemSheet } from "@/components/partner/sheets";
+import { Tap } from "@/components/ui/tap";
+import { labstack, LIVE } from "@/lib/partner/labstack";
+import { PartnerError } from "@/lib/partner/types";
 import { Glass, Gradient } from "@/components/ui/glass";
 import { Backdrop, PillButton, Portrait, ScreenHeader } from "@/components/ui/screen";
 import {
@@ -55,7 +61,24 @@ export default function AppointmentDetail() {
   const appt = items.find((a) => a.id === id);
   const doctor = doctorById(appt?.doctorId);
   const [confirmCancel, setConfirmCancel] = useState(false);
-  const [joinNote, setJoinNote] = useState(false);
+  const [joinNote, setJoinNote] = useState<boolean | string>(false);
+  const [joining, setJoining] = useState(false);
+  const [problemOpen, setProblemOpen] = useState(false);
+
+  /** The call room, from LabStack's authenticated meeting link; opened in the browser. */
+  async function join() {
+    if (!id) return;
+    setJoining(true);
+    try {
+      const m = await labstack().consult.meetingLink(id);
+      if (m.link) await Linking.openURL(m.link);
+      else setJoinNote(true);
+    } catch (e) {
+      setJoinNote(e instanceof PartnerError ? e.message : "Couldn't open the call. Try again in a moment.");
+    } finally {
+      setJoining(false);
+    }
+  }
 
   // Re-render every 30 s so the countdown and the join button stay honest while
   // the screen is open.
@@ -155,7 +178,8 @@ export default function AppointmentDetail() {
                 <PillButton
                   tone="brand"
                   disabled={win !== "open"}
-                  onPress={() => setJoinNote(true)}
+                  loading={joining}
+                  onPress={() => void join()}
                   icon={<Video size={18} color="#fff" />}
                   style={{ marginTop: 14 }}
                 >
@@ -167,7 +191,7 @@ export default function AppointmentDetail() {
               <BubblePop style={{ marginTop: 8 }}>
                 <Glass strong className="rounded-lg px-3.5 py-2.5">
                   <Text accessibilityLiveRegion="polite" style={{ fontFamily: font.medium, fontSize: 13, color: ink[700] }}>
-                    Preview: there&apos;s no real call room yet. In the live app this opens the video call.
+                    {joinNote === true ? "Preview: there's no real call room yet. In the live app this opens the video call." : joinNote}
                   </Text>
                 </Glass>
               </BubblePop>
@@ -205,9 +229,28 @@ export default function AppointmentDetail() {
         >
           Prepare questions with Cheeku
         </PillButton>
-        <Text style={{ fontFamily: font.regular, fontSize: 12, color: ink[300], textAlign: "center", marginTop: 12 }}>
-          Preview booking with a sample doctor.
-        </Text>
+        {/* After the visit: the prescription comes into the records. */}
+        {!cancelled && !upcoming ? (
+          <Glass strong className="mt-4 rounded-xl p-4">
+            <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>After the visit</Text>
+            <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 19, color: ink[700], marginTop: 4 }}>
+              {LIVE ? "The doctor's e-prescription is filed in the records by itself, and I'll check the medicines. Got a paper one too? Add it." : "Add the prescription and I'll read it, check the medicines and keep it with the records."}
+            </Text>
+            <PillButton tone="light" onPress={() => router.push("/scan")} icon={<FileText size={17} color={ink[900]} />} style={{ marginTop: 12 }}>
+              Add the prescription
+            </PillButton>
+          </Glass>
+        ) : null}
+
+        <Tap accessibilityRole="button" onPress={() => setProblemOpen(true)} style={{ flexDirection: "row", alignSelf: "center", alignItems: "center", gap: 6, height: 44, marginTop: 8 }}>
+          <LifeBuoy size={15} color={ink[700]} />
+          <Text style={{ fontFamily: font.semibold, fontSize: 14, color: ink[700] }}>Report a problem</Text>
+        </Tap>
+        {!LIVE ? (
+          <Text style={{ fontFamily: font.regular, fontSize: 12, color: ink[300], textAlign: "center", marginTop: 4 }}>
+            Preview booking with a sample doctor.
+          </Text>
+        ) : null}
       </ScrollView>
 
       {upcoming && !cancelled ? (
@@ -225,6 +268,19 @@ export default function AppointmentDetail() {
         </View>
       ) : null}
 
+      <ProblemSheet
+        open={problemOpen}
+        onClose={() => setProblemOpen(false)}
+        issues={["Doctor didn't join", "Call didn't work", "No prescription yet", "Charged wrongly", "Something else"]}
+        onSend={async (issue, details) => {
+          try {
+            await labstack().consult.escalate(appt.id, issue, details);
+            return null;
+          } catch (e) {
+            return e instanceof PartnerError ? e.message : "That didn't go through. Try again.";
+          }
+        }}
+      />
       <ConfirmSheet
         open={confirmCancel}
         title="Cancel this appointment?"
