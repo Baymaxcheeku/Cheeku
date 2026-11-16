@@ -67,6 +67,8 @@ export type Drug = {
   /** Lowest customer price across pharmacies, and the MRP beside it. */
   price: number | null;
   mrp: number | null;
+  /** Pharmacies that list it (from search), so Delivery can show who has everything. Absent: unknown. */
+  pharmacyIds?: number[];
 };
 
 export type CartLine = { drug: Drug; quantity: number };

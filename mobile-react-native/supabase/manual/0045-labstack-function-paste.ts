@@ -712,12 +712,15 @@ async function escalate(ctx: Ctx, kind: "lab" | "consult", ref: string, lsId: nu
 
 // -------------------------------------------------------------- pharmacy --
 
-type LsDrug = { drugMasterId: string; name: string; saltCompositionName: string | null; prescriptionRequired: boolean; notForSale: boolean; packContainer: string | null; packQty: number | null; packUnit: string | null; pharmacies: { mrp: number | null; customerPrice: number | null }[] | null };
+type LsDrug = { drugMasterId: string; name: string; saltCompositionName: string | null; prescriptionRequired: boolean; notForSale: boolean; packContainer: string | null; packQty: number | null; packUnit: string | null; pharmacies: { lsPharmacyId?: number; mrp: number | null; customerPrice: number | null }[] | null };
 
 const drugOut = (d: LsDrug) => {
   const prices = (d.pharmacies ?? []).filter((p) => p.customerPrice !== null);
   const best = prices.sort((a, b) => (a.customerPrice ?? 0) - (b.customerPrice ?? 0))[0];
-  return { drugMasterId: d.drugMasterId, name: d.name, salt: d.saltCompositionName, pack: packOf(d), prescriptionRequired: d.prescriptionRequired, notForSale: d.notForSale, price: best?.customerPrice ?? null, mrp: best?.mrp ?? null };
+  return {
+    drugMasterId: d.drugMasterId, name: d.name, salt: d.saltCompositionName, pack: packOf(d), prescriptionRequired: d.prescriptionRequired, notForSale: d.notForSale,
+    price: best?.customerPrice ?? null, mrp: best?.mrp ?? null, pharmacyIds: (d.pharmacies ?? []).map((p) => p.lsPharmacyId).filter((x): x is number => typeof x === "number"),
+  };
 };
 
 type LsPharmacy = { lsPharmacyId: number; pharmacyName: string; orderTypes: ("HOME_DELIVERY" | "PICKUP")[]; shipmentSpeeds: string[]; distance: number | null; pickupLocation: Parameters<typeof pickupOut>[0] };

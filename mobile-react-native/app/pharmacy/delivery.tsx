@@ -41,7 +41,10 @@ export default function PharmacyDelivery() {
     queryFn: () => labstack().pharma.pharmacies({ orderType: type, pincode: pin.ok ? pin.value : undefined, latitude: address.value.latitude, longitude: address.value.longitude }),
     enabled: pin.ok || address.value.latitude != null,
   });
-  const chosen = list.data?.find((p) => p.lsPharmacyId === pharmacyId) ?? list.data?.[0] ?? null;
+  // How many of the cart's medicines each pharmacy lists (from search); those with everything come first.
+  const has = (id: number) => cart.lines.filter((l) => !l.drug.pharmacyIds || l.drug.pharmacyIds.includes(id)).length;
+  const sorted = [...(list.data ?? [])].sort((a, b) => has(b.lsPharmacyId) - has(a.lsPharmacyId) || (a.distanceKm ?? 99) - (b.distanceKm ?? 99));
+  const chosen = sorted.find((p) => p.lsPharmacyId === pharmacyId) ?? sorted[0] ?? null;
   useEffect(() => {
     if (chosen && (!speed || !chosen.speeds.includes(speed))) setSpeed(chosen.speeds[0] ?? null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -105,8 +108,10 @@ export default function PharmacyDelivery() {
             <Note tone="caution" text={type === "PICKUP" ? "No partner pharmacy for pickup near this pincode. Try home delivery." : "No partner pharmacy delivers to this pincode yet."} />
           ) : (
             <View style={{ gap: 8 }}>
-              {list.data.map((p) => {
+              {sorted.map((p) => {
                 const on = p.lsPharmacyId === chosen?.lsPharmacyId;
+                const n = has(p.lsPharmacyId);
+                const all = n === cart.lines.length;
                 return (
                   <Tap key={p.lsPharmacyId} accessibilityRole="radio" accessibilityState={{ selected: on }} onPress={() => setPharmacyId(p.lsPharmacyId)} className="rounded-xl bg-white p-4" style={{ borderWidth: 1.5, borderColor: on ? brand[500] : surface.line, gap: 4 }}>
                     <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
@@ -115,6 +120,9 @@ export default function PharmacyDelivery() {
                     </View>
                     <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[500] }}>
                       {[p.distanceKm != null ? `${p.distanceKm.toFixed(1)} km` : null, p.speeds.map((s) => SPEED_LABEL[s]).join(", ")].filter(Boolean).join(" · ")}
+                    </Text>
+                    <Text style={{ fontFamily: font.medium, fontSize: 13, color: all ? "#1a7f37" : "#b45309" }}>
+                      {all ? (cart.lines.length === 1 ? "Has this medicine" : "Has all your medicines") : `Has ${n} of your ${cart.lines.length} medicines`}
                     </Text>
                     {type === "PICKUP" && p.pickup ? <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[700] }}>{p.pickup.address}{p.pickup.opens ? ` · open ${p.pickup.opens} to ${p.pickup.closes}` : ""}</Text> : null}
                   </Tap>

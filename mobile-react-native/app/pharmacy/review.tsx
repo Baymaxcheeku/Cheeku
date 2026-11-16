@@ -97,7 +97,13 @@ export default function PharmacyReview() {
           {est.isPending ? (
             <Text style={{ fontFamily: font.regular, fontSize: 14, color: ink[500] }}>Getting the price from the pharmacy…</Text>
           ) : est.isError ? (
-            <Note tone="danger" text={est.error instanceof PartnerError ? est.error.message : "Couldn't get a price. Go back and try again."} />
+            <>
+              {/* The partner names medicines by code; say them by name. */}
+              <Note tone="danger" text={(est.error instanceof PartnerError ? est.error.message : "Couldn't get a price. Go back and try again.").replace(/unavailable drugMasterId\(s\):\s*/i, "not in stock here: ").replace(/[A-Z]{2,4}\d{3,}/g, (code) => cart.lines.find((l) => l.drug.drugMasterId === code)?.drug.name ?? code)} />
+              <PillButton tone="light" onPress={() => router.back()} style={{ marginTop: 10 }}>
+                Pick another pharmacy
+              </PillButton>
+            </>
           ) : e ? (
             <View className="rounded-xl bg-white p-4" style={{ borderWidth: 1, borderColor: surface.line, gap: 10 }}>
               {e.items.map((i) => (
