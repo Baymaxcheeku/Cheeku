@@ -99,7 +99,7 @@ export default function PharmacyReview() {
           ) : est.isError ? (
             <>
               {/* The partner names medicines by code; say them by name. */}
-              <Note tone="danger" text={(est.error instanceof PartnerError ? est.error.message : "Couldn't get a price. Go back and try again.").replace(/unavailable drugMasterId\(s\):\s*/i, "not in stock here: ").replace(/[A-Z]{2,4}\d{3,}/g, (code) => cart.lines.find((l) => l.drug.drugMasterId === code)?.drug.name ?? code)} />
+              <Note tone="danger" text={(est.error instanceof PartnerError ? est.error.message : "Couldn't get a price. Go back and try again.").replace(/\s*—\s*/g, ". ").replace(/unavailable drugMasterId\(s\):\s*/i, "Not in stock here: ").replace(/[A-Z]{2,4}\d{3,}/g, (code) => cart.lines.find((l) => l.drug.drugMasterId === code)?.drug.name ?? code)} />
               <PillButton tone="light" onPress={() => router.back()} style={{ marginTop: 10 }}>
                 Pick another pharmacy
               </PillButton>
