@@ -18,7 +18,8 @@ import type { BookingStatus, Catalog, LabOffer, LabPartner, LabTest, SlotWindow 
  * database did not compute.
  */
 
-export const CATALOG_KEY = ["lab-catalog"] as const;
+/** Keyed by mode: the phone keeps queries for offline use, and a preview list must never show in live. */
+export const CATALOG_KEY = ["lab-catalog", process.env.EXPO_PUBLIC_LABSTACK === "live" ? "live" : "preview"] as const;
 export const BOOKINGS_KEY = ["lab-bookings"] as const;
 
 /** Live: only the partner network and the tests it can do. Preview: the sample labs. */

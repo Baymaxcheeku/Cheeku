@@ -12,6 +12,7 @@ import {
   Thermometer,
   type LucideIcon,
 } from "lucide-react-native";
+import { LIVE } from "@/lib/partner/labstack";
 import { LogoArt } from "@/components/ui/face-art";
 import { useState } from "react";
 import { Text, TextInput, View } from "react-native";
@@ -109,7 +110,15 @@ export function TestArt({ test, size = 64, radius = 20 }: { test: LabTest; size?
   );
 }
 
+/**
+ * The footer that says which mode this is, so nobody mistakes one for the
+ * other: "Preview · sample labs…" until the partner is switched on, then
+ * "Live · …" in green.
+ */
 export function SampleNote({ text = "Preview · sample labs, prices and reviews. Nothing is charged." }: { text?: string }) {
+  if (LIVE) {
+    return <Text style={{ fontFamily: font.semibold, fontSize: 12, color: "#1a7f37", textAlign: "center" }}>Live · booked with partner labs and doctors</Text>;
+  }
   return <Text style={{ fontFamily: font.regular, fontSize: 12, color: ink[300], textAlign: "center" }}>{text}</Text>;
 }
 
