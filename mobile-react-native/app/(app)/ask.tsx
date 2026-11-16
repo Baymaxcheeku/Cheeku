@@ -19,12 +19,11 @@ import {
 import { AskSkeleton } from "@/components/ui/skeleton";
 import { MemoryIcon, ReadsIcon, type AppIcon } from "@/components/ui/icons";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Image, KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, View, type ScrollViewInstance, type TextInputInstance } from "react-native";
+import { ActionSheetIOS, ActivityIndicator, Alert, Image, KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, View, type ScrollViewInstance, type TextInputInstance } from "react-native";
 import { Pressable } from "@/components/ui/pressable";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ProductAssessmentCard } from "@/components/ai/product-assessment-card";
-import { PhotoSheet } from "@/components/chat/photo-sheet";
 import { Paywall } from "@/components/billing/paywall";
 import { AssistantTurn, UserBubble } from "@/components/chat/turn";
 import { MascotBust, MascotFigure } from "@/components/illustrations/sprout";
@@ -134,7 +133,8 @@ export default function Ask() {
   const [error, setError] = useState<string | null>(null);
   const [escalation, setEscalation] = useState<SafetyResult | null>(null);
   const [paywallFor, setPaywallFor] = useState<string | null>(null);
-  const [pickerOpen, setPickerOpen] = useState(false);
+  /** A photo was chosen and is being made ready (resized, thumbnail). */
+  const [photoBusy, setPhotoBusy] = useState(false);
   /** The photo waiting to go with the next message, shown above the composer. */
   const [photo, setPhoto] = useState<ChatPhoto | null>(null);
   /** The photo in flight, for the pending bubble. */
@@ -280,19 +280,47 @@ export default function Ask() {
     }
   }
 
+  /*
+   * The system picker opens straight from the tap or from the platform's own
+   * action sheet, never from one of our modals: iOS won't present over a
+   * modal that is still animating away, and the picker then never answers
+   * (the chat froze on "choose from photos", 2026-11-17). On web the file
+   * dialog only opens inside the tap itself, so it opens the library at once
+   * (a phone browser offers the camera there too).
+   */
   async function choosePhoto(source: "camera" | "library") {
-    setPickerOpen(false);
-    // Let the sheet close before the system picker opens over it.
-    await new Promise((r) => setTimeout(r, 250));
-    const got = await pickChatPhoto(source);
-    if (typeof got === "string") {
-      setError(got);
+    if (photoBusy || pendingText) return;
+    setError(null);
+    try {
+      const got = await pickChatPhoto(source, () => setPhotoBusy(true));
+      if (typeof got === "string") setError(got);
+      else if (got) setPhoto(got);
+    } finally {
+      setPhotoBusy(false);
+    }
+  }
+
+  function openPhotoMenu() {
+    if (photoBusy || pendingText) return;
+    input.current?.blur();
+    if (Platform.OS === "web") {
+      void choosePhoto("library");
       return;
     }
-    if (!got) return;
-    setError(null);
-    setPhoto(got);
-    setTimeout(() => input.current?.focus(), 50);
+    const title = "Ask about a photo";
+    const message = "A medicine strip, a label, a rash, a report. Cheeku looks at it once and keeps only a small preview.";
+    if (Platform.OS === "ios") {
+      ActionSheetIOS.showActionSheetWithOptions({ title, message, options: ["Take a photo", "Choose from photos", "Cancel"], cancelButtonIndex: 2 }, (i) => {
+        if (i === 0) void choosePhoto("camera");
+        if (i === 1) void choosePhoto("library");
+      });
+      return;
+    }
+    Alert.alert(title, message, [
+      { text: "Cancel", style: "cancel" },
+      { text: "Take a photo", onPress: () => void choosePhoto("camera") },
+      { text: "Choose from photos", onPress: () => void choosePhoto("library") },
+    ]);
   }
 
   /** The booking card's button: the same flows the marketplace uses, filled in. */
@@ -328,7 +356,8 @@ export default function Ask() {
   }
 
   useEffect(() => {
-    if (upload === "1") setPickerOpen(true);
+    // From Home's camera button: the menu opens here (web needs a tap of its own).
+    if (upload === "1" && Platform.OS !== "web") setTimeout(openPhotoMenu, 400);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -675,7 +704,12 @@ export default function Ask() {
               </Text>
             </Tap>
           ) : null}
-          {photo ? (
+          {photoBusy ? (
+            <View accessibilityLiveRegion="polite" style={{ flexDirection: "row", alignItems: "center", gap: 10, alignSelf: "flex-start", paddingHorizontal: 14, paddingVertical: 10, borderRadius: 20, backgroundColor: glass.fillStrong, borderWidth: 1, borderColor: glass.rim }}>
+              <ActivityIndicator size="small" color={brand[500]} />
+              <Text style={{ fontFamily: font.medium, fontSize: 13, color: ink[700] }}>Getting the photo ready…</Text>
+            </View>
+          ) : photo ? (
             <View style={{ flexDirection: "row", alignItems: "center", gap: 12, alignSelf: "flex-start", padding: 6, paddingRight: 8, borderRadius: 20, backgroundColor: glass.fillStrong, borderWidth: 1, borderColor: glass.rim }}>
               <Image source={{ uri: photo.thumb }} accessibilityLabel="Photo to ask about" style={{ width: 56, height: 56, borderRadius: 14 }} resizeMode="cover" />
               <View style={{ maxWidth: 200 }}>
@@ -705,17 +739,17 @@ export default function Ask() {
               className="flex-1 py-2"
               style={{ maxHeight: 120, fontSize: 15, color: ink[900], fontFamily: "Inter_400Regular" }}
             />
-            <Tap scale={0.95} accessibilityRole="button" accessibilityLabel="Ask about a photo" disabled={Boolean(pendingText)} onPress={() => setPickerOpen(true)} className="h-10 w-10 items-center justify-center rounded-pill">
+            <Tap scale={0.95} accessibilityRole="button" accessibilityLabel="Ask about a photo" disabled={Boolean(pendingText) || photoBusy} onPress={openPhotoMenu} className="h-10 w-10 items-center justify-center rounded-pill">
               <Camera size={19} color={ink[900]} />
             </Tap>
             <Tap scale={0.95}
               accessibilityRole="button"
               accessibilityLabel="Send"
-              accessibilityState={{ disabled: Boolean(pendingText) || (!draft.trim() && !photo) }}
-              disabled={Boolean(pendingText) || (!draft.trim() && !photo)}
+              accessibilityState={{ disabled: Boolean(pendingText) || photoBusy || (!draft.trim() && !photo) }}
+              disabled={Boolean(pendingText) || photoBusy || (!draft.trim() && !photo)}
               onPress={() => void send(draft, undefined, photo)}
               className="h-11 w-11 items-center justify-center rounded-pill"
-              style={{ backgroundColor: ink[900], opacity: pendingText || (!draft.trim() && !photo) ? 0.35 : 1 }}
+              style={{ backgroundColor: ink[900], opacity: pendingText || photoBusy || (!draft.trim() && !photo) ? 0.35 : 1 }}
             >
               <ArrowUp size={19} color="#ffffff" />
             </Tap>
@@ -723,7 +757,6 @@ export default function Ask() {
         </View>
       </View>
 
-      <PhotoSheet open={pickerOpen} onClose={() => setPickerOpen(false)} onPick={(source) => void choosePhoto(source)} />
       <EmergencyEscalation result={escalation} onClose={() => setEscalation(null)} />
       <Paywall
         open={paywallFor !== null}

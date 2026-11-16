@@ -4566,3 +4566,19 @@ like "Annual health check-up" no longer starts the big-picture answer.
   "No user found with the given userUniqueId" for a family LabStack hasn't
   registered yet, which is every family before its first booking.
   `consult.providers` now asks again without the id on that error.
+
+## Chat photos: the gallery froze the chat · 2026-11-17
+
+- **What happened**: tapping "Choose from photos" hung the app. The picker was
+  opened from our own bottom sheet while it was still animating away; iOS
+  won't present over a dismissing modal, so the picker never appeared and its
+  promise never settled. It also asked for photo-library permission, which the
+  system picker doesn't need, adding a prompt on top.
+- **Now**: the camera button opens the platform's own menu (ActionSheetIOS on
+  iOS, an Alert on Android) and the picker opens after it is gone; on web it
+  opens the library straight from the tap (a file dialog only opens inside
+  the tap). No library permission prompt. A "Getting the photo ready" chip
+  shows while the photo is resized; the thumbnail is made from the 1280 px
+  copy (one full-size decode, not two); preparing has a 20 s limit and every
+  failure is a sentence. `PhotoSheet` is deleted.
+
