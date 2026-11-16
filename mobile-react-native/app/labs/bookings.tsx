@@ -4,7 +4,7 @@ import { RefreshControl, ScrollView, Text, View } from "react-native";
 import { Pressable } from "@/components/ui/pressable";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { PartnerBadge, rupees } from "@/components/labs/parts";
+import { monogramOf, PartnerBadge, rupees } from "@/components/labs/parts";
 import { Glass, glass, glassShadow } from "@/components/ui/glass";
 import { Backdrop, PageTitle, PillButton, ScreenHeader } from "@/components/ui/screen";
 import { stageIndex, STAGES } from "@/lib/labs/logic";
@@ -37,7 +37,7 @@ export default function LabBookings() {
     const m = family.data?.access.all.find((x) => x.id === b.profileId);
     return (
       <Pressable accessibilityRole="button" onPress={() => router.push({ pathname: "/labs/booking/[id]", params: { id: b.id } })} style={({ pressed }) => [glassShadow, { flexDirection: "row", alignItems: "center", gap: 12, padding: 14, borderRadius: 24, backgroundColor: pressed ? "#fff" : glass.fillStrong, borderWidth: 1, borderColor: glass.rim }]}>
-        {p ? <PartnerBadge partner={p} size={46} /> : null}
+        {p ? <PartnerBadge partner={b.labName ? { monogram: monogramOf(b.labName), color: p.color } : p} logo={b.labLogo} size={46} /> : null}
         <View style={{ flex: 1, minWidth: 0 }}>
           <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>
             {b.status === "cancelled" ? "Cancelled" : STAGES[stageIndex(b.status)]?.label}

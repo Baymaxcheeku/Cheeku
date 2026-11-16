@@ -12,6 +12,7 @@ import {
   Thermometer,
   type LucideIcon,
 } from "lucide-react-native";
+import { LogoArt } from "@/components/ui/face-art";
 import { useState } from "react";
 import { Text, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -60,12 +61,19 @@ export function RatingLine({ rating, dim }: { rating?: Rating; dim?: boolean }) 
   );
 }
 
-export function PartnerBadge({ partner, size = 52 }: { partner: Pick<LabPartner, "monogram" | "color">; size?: number }) {
+/** The lab's logo when the partner sends one; its monogram otherwise. */
+export function PartnerBadge({ partner, size = 52, logo }: { partner: Pick<LabPartner, "monogram" | "color">; size?: number; logo?: string | null }) {
+  const mark = <Text style={{ fontFamily: font.bold, fontSize: size * 0.3, letterSpacing: 0.5, color: ink[900] }}>{partner.monogram}</Text>;
   return (
-    <View style={{ width: size, height: size, borderRadius: size * 0.3, backgroundColor: partner.color, alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: "rgba(15,16,48,0.06)" }}>
-      <Text style={{ fontFamily: font.bold, fontSize: size * 0.3, letterSpacing: 0.5, color: ink[900] }}>{partner.monogram}</Text>
+    <View style={{ width: size, height: size, borderRadius: size * 0.3, backgroundColor: logo ? "#fff" : partner.color, alignItems: "center", justifyContent: "center", overflow: "hidden", borderWidth: 1, borderColor: "rgba(15,16,48,0.06)" }}>
+      <LogoArt uri={logo} fallback={mark} />
     </View>
   );
+}
+
+/** "Dr Lal PathLabs" as "DL", for a partner lab with no logo. */
+export function monogramOf(name: string): string {
+  return name.replace(/[^A-Za-z ]/g, " ").split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]!.toUpperCase()).join("") || "LB";
 }
 
 /*

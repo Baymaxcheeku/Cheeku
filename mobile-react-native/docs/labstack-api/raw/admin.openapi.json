@@ -1,0 +1,224 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Admins API",
+    "version": "1.0.0",
+    "description": "API for managing your account — updating the details on record for a user you have booked. Every call must include a valid `ls-api-key` header.",
+    "contact": {
+      "name": "LabStack Support",
+      "url": "https://console.labstack.in"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://integration.labstack.in"
+    }
+  ],
+  "security": [
+    {
+      "ApiKeyAuth": []
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "ApiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "ls-api-key",
+        "description": "API key issued by LabStack. Pass this in every request header. Your store can hold two active keys at once, so you can move to a new key before the old one is revoked. A key may have an expiry date; a request made with an expired or revoked key is refused as unauthorized."
+      }
+    },
+    "schemas": {
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "failure"
+            ],
+            "example": "failure"
+          },
+          "error": {
+            "type": "string",
+            "example": "Authorisation failed - API Key not present in HTTP Header."
+          }
+        },
+        "required": [
+          "status",
+          "error"
+        ]
+      }
+    },
+    "responses": {
+      "Unauthorized": {
+        "description": "Unauthorized — API key missing, invalid, expired or revoked",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      },
+      "TooManyRequests": {
+        "description": "Too many failed authentication attempts from your address. Every request from that address is refused, whatever key it carries, until the number of seconds in the Retry-After header has passed.",
+        "headers": {
+          "Retry-After": {
+            "description": "Seconds to wait before retrying.",
+            "schema": {
+              "type": "integer",
+              "example": 540
+            }
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      },
+      "BadRequest": {
+        "description": "Bad request — missing or invalid parameters",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/api/admin/v1.0/user/updateUserDetails": {
+      "post": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Update a user's gender and date of birth",
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User details updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "success"
+                    },
+                    "user": {
+                      "type": "object",
+                      "properties": {
+                        "uniqueId": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string",
+                          "description": "The user's name as on record. This call does not change it."
+                        },
+                        "gender": {
+                          "type": "string",
+                          "nullable": true,
+                          "enum": [
+                            "MALE",
+                            "FEMALE",
+                            "OTHERS"
+                          ]
+                        },
+                        "dateOfBirth": {
+                          "type": "string",
+                          "format": "date",
+                          "nullable": true
+                        },
+                        "age": {
+                          "type": "integer",
+                          "nullable": true
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "status": "success",
+                  "user": {
+                    "uniqueId": "CUST-10442",
+                    "name": "Priya Sharma",
+                    "gender": "FEMALE",
+                    "dateOfBirth": "1990-05-01",
+                    "age": 36
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest",
+            "description": "uniqueId is missing, none of gender, dateOfBirth or age is given, or a value given is invalid"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "description": "No user with this uniqueId on your account"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "uniqueId"
+                ],
+                "properties": {
+                  "uniqueId": {
+                    "type": "string",
+                    "description": "The user's unique id, as used when booking."
+                  },
+                  "gender": {
+                    "type": "string",
+                    "enum": [
+                      "MALE",
+                      "FEMALE",
+                      "OTHERS"
+                    ],
+                    "description": "At least one of gender, dateOfBirth or age is required."
+                  },
+                  "dateOfBirth": {
+                    "type": "string",
+                    "format": "date",
+                    "description": "At least one of gender, dateOfBirth or age is required. Cannot be in the future. Used instead of age when both are given."
+                  },
+                  "age": {
+                    "type": "integer",
+                    "description": "At least one of gender, dateOfBirth or age is required. Whole years."
+                  }
+                }
+              },
+              "example": {
+                "uniqueId": "CUST-10442",
+                "gender": "FEMALE",
+                "dateOfBirth": "1990-05-01"
+              }
+            }
+          }
+        },
+        "description": "Updates the gender and/or date of birth on record for an existing user, identified by the uniqueId they were booked with. uniqueId is required, and so is at least one of gender, dateOfBirth or age; when both dateOfBirth and age are given, dateOfBirth is used.\nOnly what you send is changed: a gender or date of birth you leave out stays as it is on record, and other user details are not changed. **Bookings and orders already placed for the user are not updated: one still in progress keeps the gender and date of birth it was placed with.**\nThe response returns the user's name, gender, date of birth and age as now on record; a gender, date of birth or age with nothing on record is null."
+      }
+    }
+  }
+}

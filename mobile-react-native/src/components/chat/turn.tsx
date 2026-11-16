@@ -84,6 +84,7 @@ export function AssistantTurn({
   onOpenMemory,
   onBook,
   onStartBooking,
+  onNowBooking,
   onOpenRoute,
   onSetGoal,
 }: {
@@ -97,6 +98,8 @@ export function AssistantTurn({
   onBook?: (mode: "clinic" | "online") => void;
   /** Starts the booking a card offers: the lab chooser, or the doctor flow. */
   onStartBooking?: (booking: NonNullable<TurnMemory["booking"]>) => void;
+  /** "Talk to a doctor now" on a doctor booking card. */
+  onNowBooking?: (booking: NonNullable<TurnMemory["booking"]>) => void;
   /** Opens a booked lab test or appointment. */
   onOpenRoute?: (route: string) => void;
   /** Makes a goal the person's own (a "Make it my goal" button). Resolves true when saved. */
@@ -145,7 +148,7 @@ export function AssistantTurn({
             ) : null}
           </View>
 
-          {m?.booking ? <BookingCard booking={m.booking} onStart={onStartBooking} /> : null}
+          {m?.booking ? <BookingCard booking={m.booking} onStart={onStartBooking} onNow={onNowBooking} /> : null}
           {m?.event ? <BookedCard event={m.event} onOpen={onOpenRoute} /> : null}
           {onBook && m?.careOffer && !m.booking ? <CareOffer onBook={onBook} /> : null}
           {m?.actions?.length ? <Actions actions={m.actions} onOpenRoute={onOpenRoute} onSetGoal={onSetGoal} /> : null}

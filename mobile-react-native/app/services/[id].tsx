@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { Redirect, useLocalSearchParams, useRouter } from "expo-router";
 import { BellRing, Check, ChevronRight, FileHeart, Lock, Phone, ShieldCheck, Stethoscope, type LucideIcon } from "lucide-react-native";
 import { Linking, Text, View } from "react-native";
 import { Pressable } from "@/components/ui/pressable";
@@ -30,6 +30,8 @@ import { font } from "@/theme/type";
  */
 export default function ServicePage() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  // Medicines are ordered through the pharmacy flow now (LabStack), not as a request.
+  if (id === "medicines") return <Redirect href={"/pharmacy" as never} />;
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const s = serviceById(id);

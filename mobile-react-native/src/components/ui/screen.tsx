@@ -1,8 +1,8 @@
 import { useRouter } from "expo-router";
+import { FaceArt } from "@/components/ui/face-art";
 import { ChevronLeft } from "lucide-react-native";
 import { ActivityIndicator, Text, View, type ViewProps } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { SvgXml } from "react-native-svg";
 
 import { Tap } from "@/components/ui/tap";
 import { brandify } from "@/components/ui/brand";
@@ -152,10 +152,10 @@ export function PillButton({
 }
 
 /** A doctor's illustrated face as a rounded portrait tile. */
-export function Portrait({ face, size = 60, radius = 18 }: { face: { svg: string; background: string }; size?: number; radius?: number }) {
+export function Portrait({ face, size = 60, radius = 18 }: { face: { svg: string; background: string; photo?: string | null }; size?: number; radius?: number }) {
   return (
     <View style={{ width: size, height: size, borderRadius: radius, overflow: "hidden", backgroundColor: face.background }}>
-      <SvgXml xml={face.svg} width={size * 1.08} height={size * 1.08} />
+      <FaceArt face={face} size={size * 1.08} />
     </View>
   );
 }

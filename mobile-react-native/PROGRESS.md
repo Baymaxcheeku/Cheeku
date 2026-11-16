@@ -4406,3 +4406,37 @@ like "Annual health check-up" no longer starts the big-picture answer.
   the top three activities with their reasons, or a plain no ("HIIT isn't one
   I'd pick for Arjun right now: it's hard on BP") with better fits, and the
   doctor's note for heart conditions, pregnancy and over 60.
+
+## Partner network: labs, medicines, doctors · 2026-11-16
+
+- **API read in full**: Labs (34 endpoints), Pharma (9), Provider (32) saved
+  under `docs/labstack-api/` with the raw specs, plus the integration plan.
+- **One door**: screens call `src/lib/partner/labstack.ts`. Preview answers
+  from `preview.ts` with the same shapes; `EXPO_PUBLIC_LABSTACK=live` sends
+  everything to the `labstack` Edge Function, which holds the key, checks the
+  member is on the plan, re-checks every field with the same rules as the app
+  (`validate.ts`, copied; a test keeps them identical) and keeps our own rows.
+- **Labs**: booking rebuilt (who it's for, home or lab, checked address, real
+  slots, fasting mornings, note), tracking with 6 home steps, collector card,
+  change the time, cancel with a reason, report a problem.
+- **Medicines (new)**: search by salt, "what you take" from the medicine list,
+  cart with cheaper same-salt swaps, delivery or pickup, pharmacy and speed,
+  estimate, prescription from records, order tracking and history.
+- **Doctors**: confirm screen (patient, video or audio, due tests suggested,
+  share reports, coupon), join link from the partner, after-visit card, and
+  "Talk to a doctor now" (safety check first, then wait for a doctor).
+- **Server**: migration 0045 (partner columns on lab bookings, pharma orders,
+  consult appointments, instant consults, escalations, webhook log; the
+  preview clock never moves a real order; real reports filed as records with
+  harmonized values, never sample values). Webhook receiver verifies the
+  signature or store key, records each delivery once, then pulls the truth.
+- **Fixes found on screen**: notes and pincode fields were invisible on the
+  page background; sheets spilled past the screen bottom on web; the last time
+  slot stretched full width; order totals hid the delivery charge; due tests
+  read "CBC result, Lipid profile result, Lipid profile".
+- **Checked**: 644 tests pass, app and Edge Functions type-check, migration
+  applied twice on local Postgres, partner status walk tested in SQL, all new
+  screens captured end to end in preview.
+- **Not run**: the Edge Functions against the real sandbox (needs the keys,
+  tonight). Payment model still open (reminder set for 7:30 pm).
+

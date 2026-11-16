@@ -1,4 +1,5 @@
 import { useRouter } from "expo-router";
+import { FaceArt } from "@/components/ui/face-art";
 import { Building2, CalendarCheck2, Check, ClipboardCheck, Clock3, MapPin, MessageCircleHeart, MonitorPlay, Ticket } from "lucide-react-native";
 import { useEffect } from "react";
 import { ScrollView, Text, View } from "react-native";
@@ -9,7 +10,6 @@ import Animated, {
   withSpring,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { SvgXml } from "react-native-svg";
 
 import { MascotBust } from "@/components/illustrations/sprout";
 import { BubblePop } from "@/components/onboarding/motion";
@@ -24,6 +24,7 @@ import { font } from "@/theme/type";
 import { feel } from "@/lib/feel";
 import { Tap } from "@/components/ui/tap";
 import { startFresh } from "@/lib/nav/start-fresh";
+import { LIVE } from "@/lib/partner/labstack";
 
 /*
  * Book a doctor — done.
@@ -106,7 +107,7 @@ export default function Confirmed() {
             You&apos;re booked{intake?.forName && intake.forName !== "Me" ? ` for ${intake.forName}` : ""}!
           </Text>
           <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 4, textAlign: "center" }}>
-            Preview booking. No real appointment was made.
+            {LIVE ? "The doctor's desk has it, with your note." : "Preview booking. No real appointment was made."}
           </Text>
         </View>
 
@@ -114,7 +115,7 @@ export default function Confirmed() {
         <Glass strong className="mt-6 overflow-hidden rounded-2xl">
           <View className="flex-row items-center gap-3.5 p-4">
             <View className="overflow-hidden rounded-lg" style={{ width: 60, height: 60, backgroundColor: face?.background }}>
-              {face ? <SvgXml xml={face.svg} width={64} height={64} /> : null}
+              {face ? <FaceArt face={face} size={64} /> : null}
             </View>
             <View className="min-w-0 flex-1">
               <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>{doctor.name}</Text>
@@ -143,7 +144,7 @@ export default function Confirmed() {
             )}
             <View className="mt-1 flex-row items-center justify-between rounded-lg px-3.5 py-3" style={{ backgroundColor: lilac.mist }}>
               <Text style={{ fontFamily: font.medium, fontSize: 13, color: ink[700] }}>{online ? "Consultation fee" : "Pay at the clinic"}</Text>
-              <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>₹{doctor.fee[booking.mode]}</Text>
+              <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>{doctor.fee[booking.mode] ? `₹${doctor.fee[booking.mode]}` : "On the bill"}</Text>
             </View>
           </View>
         </Glass>

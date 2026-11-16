@@ -1,15 +1,18 @@
 import { useRouter } from "expo-router";
+import { FaceArt } from "@/components/ui/face-art";
 import { Building2, ChevronLeft, ClipboardCheck, Clock3, GraduationCap, Languages, MapPin, MonitorPlay } from "lucide-react-native";
 import { ScrollView, Text, View } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { SvgXml } from "react-native-svg";
 import { Tap } from "@/components/ui/tap";
 import { Glass, GlassCircle, Gradient, glass, glassShadow } from "@/components/ui/glass";
 import { useReducedMotion } from "@/components/ui/motion";
 import { SPECIALTIES, doctorsFor, nextFree, type Doctor, type Mode } from "@/lib/booking/catalog";
 import { useBookingDraft } from "@/lib/booking/draft";
+import { lsIdOf } from "@/lib/booking/partner-doctors";
+import { LIVE } from "@/lib/partner/labstack";
+import { useLiveDoctors } from "@/lib/partner/use-doctors";
 import { doctorFace } from "@/lib/booking/faces";
 import { RatingLine } from "@/components/labs/parts";
 import { useRatings, type Rating } from "@/lib/labs/queries";
@@ -39,7 +42,8 @@ export default function Doctors() {
 
   const sp = SPECIALTIES[specialty ?? "gp"];
   const m: Mode = mode ?? "online";
-  const list = doctorsFor(sp.id, m);
+  const live = useLiveDoctors(sp.id, m);
+  const list = LIVE ? live.doctors : doctorsFor(sp.id, m);
 
   return (
     <View className="flex-1 bg-canvas">
@@ -99,7 +103,7 @@ export default function Doctors() {
           {list.length} {list.length === 1 ? "doctor" : "doctors"} {m === "online" ? "online today" : "near you"}
         </Text>
         <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 3 }}>
-          Preview · sample doctors. Nothing is booked for real yet.
+          {LIVE ? "Doctors from our partner network. Times are live." : "Preview · sample doctors. Nothing is booked for real yet."}
         </Text>
 
         {intake ? (
@@ -108,6 +112,22 @@ export default function Doctors() {
             <Text style={{ flex: 1, fontFamily: font.medium, fontSize: 13, color: ink[700] }}>
               Your pre-consultation note goes to whichever doctor you book.
             </Text>
+          </Glass>
+        ) : null}
+
+        {LIVE && (live.loading || live.error || live.needsPlace) ? (
+          <Glass strong className="mt-4 items-center rounded-xl p-6">
+            <Text style={{ fontFamily: font.semibold, fontSize: 16, color: ink[900], textAlign: "center" }}>
+              {live.needsPlace ? "Where should the clinic be near?" : live.error ? "Couldn't load doctors" : "Finding doctors…"}
+            </Text>
+            <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], textAlign: "center", marginTop: 4 }}>
+              {live.needsPlace ? "Set your location on Home, or pick an online consultation." : live.error ? "Check your connection and try again." : "Checking who's free."}
+            </Text>
+            {live.error ? (
+              <Tap accessibilityRole="button" onPress={live.retry} className="mt-3">
+                <Text style={{ fontFamily: font.semibold, fontSize: 15, color: brand[600] }}>Try again</Text>
+              </Tap>
+            ) : null}
           </Glass>
         ) : null}
 
@@ -124,7 +144,7 @@ export default function Doctors() {
               />
             </Animated.View>
           ))}
-          {list.length === 0 ? (
+          {list.length === 0 && !(LIVE && (live.loading || live.error || live.needsPlace)) ? (
             <Glass strong className="items-center rounded-xl p-6">
               <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900], textAlign: "center" }}>
                 No {sp.plural.toLowerCase()} {m === "online" ? "online" : "with clinic slots"} right now
@@ -150,13 +170,15 @@ function DoctorCard({
 }: {
   doctor: Doctor;
   mode: Mode;
-  face?: { svg: string; background: string };
+  face?: { svg: string; background: string; photo?: string | null };
   rating?: Rating;
   /** The whole top of the card opens the profile; the button books. */
   onOpen: () => void;
   onBook: () => void;
 }) {
-  const next = nextFree(d, mode);
+  // Partner doctors: times come on the next screen, the fee with the booking.
+  const partner = lsIdOf(d.id) !== null;
+  const next = partner ? null : nextFree(d, mode);
   const fee = d.fee[mode];
 
   return (
@@ -166,7 +188,7 @@ function DoctorCard({
           {/* The illustrated face as a portrait tile, full bleed. */}
           {face ? (
             <View className="flex-1 items-center justify-center" style={{ backgroundColor: face.background }}>
-              <SvgXml xml={face.svg} width={108} height={108} />
+              <FaceArt face={face} size={108} />
             </View>
           ) : (
             <Gradient from={lilac.base} to={lilac.deep} />
@@ -182,10 +204,10 @@ function DoctorCard({
           <View style={{ marginTop: 5 }}>
             <RatingLine rating={rating} />
           </View>
-          <Fact icon={<GraduationCap size={13} color={ink[500]} />} text={`${d.years} yrs · ${d.qualifications}`} />
+          <Fact icon={<GraduationCap size={13} color={ink[500]} />} text={d.years ? `${d.years} yrs · ${d.qualifications}` : d.qualifications} />
           <Fact icon={<Languages size={13} color={ink[500]} />} text={d.languages.join(", ")} />
           {mode === "clinic" ? (
-            <Fact icon={<MapPin size={13} color={ink[500]} />} text={`${d.clinic.name}, ${d.clinic.area} · ${d.clinic.km} km`} />
+            <Fact icon={<MapPin size={13} color={ink[500]} />} text={[d.clinic.name === d.clinic.area ? d.clinic.name : `${d.clinic.name}, ${d.clinic.area}`, d.clinic.km ? `${d.clinic.km} km` : ""].filter(Boolean).join(" · ")} />
           ) : null}
         </View>
       </Tap>
@@ -193,9 +215,9 @@ function DoctorCard({
       <View className="mt-3 flex-row items-center gap-2 rounded-lg px-3 py-2.5" style={{ backgroundColor: "rgba(241,240,254,0.8)" }}>
         <Clock3 size={14} color={ink[900]} />
         <Text style={{ flex: 1, fontFamily: font.medium, fontSize: 13, color: ink[700] }}>
-          {next ? `Next: ${next}` : "No slots in the next 3 days"}
+          {partner ? "See open times" : next ? `Next: ${next}` : "No slots in the next 3 days"}
         </Text>
-        <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>₹{fee}</Text>
+        <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{fee ? `₹${fee}` : partner ? "Fee on booking" : "₹0"}</Text>
       </View>
 
       <Tap
