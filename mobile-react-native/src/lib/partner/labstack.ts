@@ -1,6 +1,7 @@
 import { supabase } from "@/lib/supabase/client";
 
 import { preview } from "./preview";
+import type { AddressParts } from "./validate";
 import {
   PartnerError,
   type AppointmentType,
@@ -45,14 +46,15 @@ type Loc = { pincode?: string; latitude?: number | null; longitude?: number | nu
 async function call<T>(op: string, input: unknown): Promise<T> {
   const { data, error } = await supabase.functions.invoke("labstack", { body: { op, input } });
   if (error) {
-    const res = (error as { context?: unknown }).context;
+    // The function's own message ("The pincode isn't served…") is in the response body.
+    // Read it by shape, not `instanceof Response`: on a phone the class can differ.
+    const res = (error as { context?: unknown }).context as { clone?: () => { json: () => Promise<unknown> }; json?: () => Promise<unknown> } | undefined;
     let body: { error?: string; code?: PartnerError["code"] } = {};
-    if (res instanceof Response) {
-      try {
-        body = (await res.clone().json()) as typeof body;
-      } catch {
-        // not JSON
-      }
+    try {
+      const read = res?.clone ? res.clone().json() : res?.json ? res.json() : null;
+      if (read) body = ((await read) ?? {}) as typeof body;
+    } catch {
+      // not JSON
     }
     throw new PartnerError(body.error ?? "That didn't go through. Check your connection and try again.", body.code ?? "failed");
   }
@@ -73,7 +75,7 @@ export type LabStack = {
     search: (query: string) => Promise<Drug[]>;
     alternatives: (drugMasterId: string) => Promise<Drug[]>;
     pharmacies: (q: Loc & { orderType: PharmaOrderType }) => Promise<Pharmacy[]>;
-    estimate: (q: Loc & { orderType: PharmaOrderType; lsPharmacyId: number; speed: ShipmentSpeed | null; lines: CartLine[] }) => Promise<Estimate>;
+    estimate: (q: Loc & { orderType: PharmaOrderType; lsPharmacyId: number; speed: ShipmentSpeed | null; lines: CartLine[]; address?: AddressParts }) => Promise<Estimate>;
     place: (input: PharmaOrderInput) => Promise<{ orderId: string }>;
     order: (orderId: string) => Promise<PharmaOrder>;
     orders: () => Promise<PharmaOrder[]>;

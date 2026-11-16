@@ -208,6 +208,7 @@ async function ls<T>(method: "GET" | "POST", path: string, opts: { query?: Query
   if (res.ok) return { ...(data as T), _status: res.status };
   const said = typeof data.error === "string" ? data.error : typeof data.message === "string" ? data.message : "";
   const clean = said.replace(/labstack/gi, "partner").slice(0, 200);
+  console.error(`[partner] ${method} ${path} -> ${res.status}: ${said.slice(0, 300)}`);
   if (res.status === 401) throw new Fail("Bookings are paused for a moment. We're on it.", "unauthorized", 503);
   if (res.status === 429) throw new Fail("Too many tries. Give it a minute.", "busy", 429);
   if (res.status === 409) throw new Fail(clean || "This is already booked.", "invalid", 409);

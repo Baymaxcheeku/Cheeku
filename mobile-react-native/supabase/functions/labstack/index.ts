@@ -278,6 +278,18 @@ function lines(v: unknown) {
   });
 }
 
+/**
+ * The estimate is checked like a real order, so home delivery needs the
+ * street, city and state too. Sent when the person has filled them; the
+ * partner says what's missing otherwise.
+ */
+function estimateAddress(q: In, orderType: "HOME_DELIVERY" | "PICKUP") {
+  const a = (q.address ?? {}) as Partial<AddressParts>;
+  if (orderType !== "HOME_DELIVERY") return {};
+  const pick = (v: unknown, n: number) => str(v, n) || undefined;
+  return { unitFloorBuilding: pick(a.unitFloorBuilding, 120), address: pick(a.address, 200), locality: pick(a.locality, 120), city: pick(a.city, 80), state: pick(a.state, 80), pincode: pick(a.pincode, 6) ?? loc(q).pincode };
+}
+
 const orderTypeOf = (v: unknown) => (v === "PICKUP" ? "PICKUP" : "HOME_DELIVERY");
 const speedOf = (v: unknown) => (v === "STANDARD" || v === "EXPRESS" || v === "SAME_DAY" || v === "PAN_INDIA" ? v : undefined);
 
@@ -311,9 +323,10 @@ const pharma = {
     if (!lsPharmacyId) throw new Fail("Pick a pharmacy.", "invalid");
     const orderType = orderTypeOf(q.orderType);
     const r = await ls<{ estimate: { lsPharmacyId: number; pharmacyName: string; orderType: "HOME_DELIVERY" | "PICKUP"; shipmentSpeed: string | null; shipmentSpeeds: string[] | null; allItemsAvailable: boolean; prescriptionRequired: boolean; price: { mrpTotal: number; subTotal: number; additionalCharges: number; totalAmount: number; items: Parameters<typeof itemOut>[0][] } } }>(
-      "POST", "/api/pharma/v1.0/order/getEstimate", { body: { orderType, lsPharmacyId, drugs: lines(q.lines), ...loc(q), shipmentSpeed: speedOf(q.speed) } },
+      "POST", "/api/pharma/v1.0/order/getEstimate", { body: { orderType, lsPharmacyId, drugs: lines(q.lines), ...loc(q), ...estimateAddress(q, orderType), shipmentSpeed: speedOf(q.speed) } },
     );
     const e = r.estimate;
+    if (!e?.price) throw new Fail("The pharmacy couldn't price this. Try another pharmacy.", "unavailable", 422);
     return {
       lsPharmacyId: e.lsPharmacyId, pharmacyName: e.pharmacyName, orderType: e.orderType, speed: e.shipmentSpeed, speeds: e.shipmentSpeeds ?? [], allAvailable: e.allItemsAvailable,
       prescriptionRequired: e.prescriptionRequired, mrpTotal: e.price.mrpTotal, subTotal: e.price.subTotal, charges: e.price.additionalCharges, total: e.price.totalAmount,
@@ -684,6 +697,8 @@ Deno.serve(async (req) => {
     const ctx = await context(uid);
     return json(await op(ctx, (body?.input ?? {}) as In));
   } catch (e) {
+    // Logged for the dashboard (Edge Functions > labstack > Logs): the step and the reason, never personal details.
+    console.error(`[labstack] ${String(body?.op)} failed:`, e instanceof Fail ? `${e.status} ${e.message}` : e instanceof Error ? e.message : String(e));
     if (e instanceof Fail) return json({ error: e.message, code: e.code }, e.status);
     return json({ error: "That didn't go through. Try again.", code: "failed" }, 500);
   }

@@ -40,8 +40,8 @@ export default function PharmacyReview() {
   const [error, setError] = useState<string | null>(null);
 
   const est = useQuery({
-    queryKey: ["pharma-estimate", cart.lsPharmacyId, cart.orderType, cart.speed, address.value.pincode, cart.lines.map((l) => `${l.drug.drugMasterId}x${l.quantity}`).join(",")],
-    queryFn: () => labstack().pharma.estimate({ orderType: cart.orderType, lsPharmacyId: cart.lsPharmacyId!, speed: cart.speed, lines: cart.lines, pincode: address.value.pincode || undefined, latitude: address.value.latitude, longitude: address.value.longitude }),
+    queryKey: ["pharma-estimate", cart.lsPharmacyId, cart.orderType, cart.speed, address.value.pincode, address.value.address, address.value.city, cart.lines.map((l) => `${l.drug.drugMasterId}x${l.quantity}`).join(",")],
+    queryFn: () => labstack().pharma.estimate({ orderType: cart.orderType, lsPharmacyId: cart.lsPharmacyId!, speed: cart.speed, lines: cart.lines, pincode: address.value.pincode || undefined, latitude: address.value.latitude, longitude: address.value.longitude, address: address.value }),
     enabled: Boolean(cart.lsPharmacyId && cart.lines.length && (address.value.pincode || address.value.latitude != null)),
   });
 
