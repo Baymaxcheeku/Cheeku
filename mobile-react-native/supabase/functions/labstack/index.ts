@@ -274,7 +274,7 @@ function lines(v: unknown) {
     const x = l as { drugMasterId?: unknown; quantity?: unknown };
     const drugMasterId = str(x.drugMasterId, 60);
     if (!drugMasterId) throw new Fail("A medicine in the cart isn't valid.", "invalid");
-    return { drugMasterId, quantity: must(checkQuantity(Number(x.quantity))) };
+    return { drugMasterId, quantity: Number(must(checkQuantity(Number(x.quantity)))) };
   });
 }
 
