@@ -4551,3 +4551,18 @@ like "Annual health check-up" no longer starts the big-picture answer.
   now use an echo model and check what reached the model (the digest), which
   is what the rules owe Gemini. New tests for the error paths, the floor
   answer, the photo routing and the function's image handling.
+
+## Chat limit 1000 a day; LabStack doctor list for new families · 2026-11-17
+
+- **1000 chats a day** (owner's call): `FREE_CHAT_LIMIT` 20 -> 1000 and
+  `supabase/manual/chat-limits-1000.sql` (free_daily and paid_model_daily
+  to 1000 in `app_config('chat_limits')`). Both must move together: the app
+  pre-checks with the constant, the database enforces with the config.
+  Bursts stay at 6 a minute and 60 an hour.
+- **LabStack is wired in already** (lab tests, doctors, pharmacy through the
+  `labstack` function; keys set as secrets) but the app runs on preview data
+  until `EXPO_PUBLIC_LABSTACK=live`. A read-only check on 2026-11-17: the
+  function reaches LabStack (46 specialities), but the doctor list failed with
+  "No user found with the given userUniqueId" for a family LabStack hasn't
+  registered yet, which is every family before its first booking.
+  `consult.providers` now asks again without the id on that error.

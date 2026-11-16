@@ -862,11 +862,22 @@ const consult = {
   },
 
   async providers(ctx: Ctx, q: In) {
-    const r = await ls<{ providers: { lsId: number; name: string; gender: string | null; specialities: string[]; languagesKnown: string[] | null; yearsExperience: number | null; rating: number | null; totalRatings: number | null; supportedAppointmentTypes: string[]; profileUrl: string | null; locality: string | null; city: string | null; distance: number | null; followUpUntil: string | null }[] }>(
-      "GET", "/api/v1.0/availability/getProviders", {
-        query: { providerType: "Doctor", appointmentType: apptType(q.type), speciality: str(q.speciality, 80) || undefined, ...loc(q), perPage: 30, userUniqueId: ctx.holderId ?? undefined },
-      },
-    );
+    type Providers = { providers: { lsId: number; name: string; gender: string | null; specialities: string[]; languagesKnown: string[] | null; yearsExperience: number | null; rating: number | null; totalRatings: number | null; supportedAppointmentTypes: string[]; profileUrl: string | null; locality: string | null; city: string | null; distance: number | null; followUpUntil: string | null }[] };
+    const query = { providerType: "Doctor", appointmentType: apptType(q.type), speciality: str(q.speciality, 80) || undefined, ...loc(q), perPage: 30 };
+    /*
+     * userUniqueId only adds follow-up windows for someone LabStack already
+     * knows. A family that has never booked isn't registered there yet, and
+     * LabStack refuses the whole list ("No user found with the given
+     * userUniqueId"), so the doctor list was empty for every new family
+     * (found 2026-11-17). Ask again without it: the list is the same.
+     */
+    let r: Providers;
+    try {
+      r = await ls<Providers>("GET", "/api/v1.0/availability/getProviders", { query: { ...query, userUniqueId: ctx.holderId ?? undefined } });
+    } catch (e) {
+      if (!(ctx.holderId && e instanceof Fail && /no user found/i.test(e.message))) throw e;
+      r = await ls<Providers>("GET", "/api/v1.0/availability/getProviders", { query });
+    }
     return (r.providers ?? []).map((p) => ({
       lsId: p.lsId, name: p.name, gender: p.gender, specialities: p.specialities ?? [], languages: p.languagesKnown ?? [], years: p.yearsExperience, rating: p.rating, ratings: p.totalRatings ?? 0,
       types: p.supportedAppointmentTypes ?? [], photo: imageUrl(p.profileUrl), place: [p.locality, p.city].filter(Boolean).join(", ") || null, distanceKm: p.distance ?? null, followUpUntil: p.followUpUntil,
