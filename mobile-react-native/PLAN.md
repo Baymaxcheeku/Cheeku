@@ -483,6 +483,11 @@ haptics has to be seen on a simulator or a device before it counts as done.
   use prompts to improve its products, and every prompt is a health record.
   flash-lite sometimes keeps the bird jokes when the floor is monitor or
   above, against the prompt; watch it in review.
+  **Medicine questions need a clinician's read** (2026-11-16): the prompt now
+  lets Cheeku name the over-the-counter TYPE for an otherwise healthy adult
+  (dextromethorphan for a dry cough, guaifenesin for a chesty one), never a
+  brand or dose, and nothing for under 4s, pregnancy, over 70 or a long-term
+  condition (`prompt.ts`, "When they ask what to take").
 - **Wearables need a native build and one SQL step.** The module is in
   (`src/modules/wearables`, see its README): Apple Health and Health Connect
   run only in an EAS development or store build, not Expo Go. Migration 0044

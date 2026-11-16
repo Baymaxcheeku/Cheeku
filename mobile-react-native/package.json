@@ -79,7 +79,8 @@
     "typecheck": "tsc --noEmit",
     "test:db": "vitest run --dir tests --config tests/vitest.config.ts",
     "lint": "eslint .",
-    "pods": "cd ios && LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 pod install && cd .. && node scripts/patch-pods-path-space.mjs"
+    "pods": "cd ios && LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 pod install && cd .. && node scripts/patch-pods-path-space.mjs",
+    "chat:probe": "vitest run --config scripts/chat-probe/vitest.config.ts"
   },
   "private": true
 }

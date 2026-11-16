@@ -4485,3 +4485,34 @@ like "Annual health check-up" no longer starts the big-picture answer.
 - **Not run**: the deployed function on Supabase (this session's CLI account
   has no access to the project), the meter against the real database, and the
   chat on a phone.
+
+## Chat: medicine questions answered, not refused · 2026-11-16
+
+- **What people saw**: "which cough syrup" got "I cannot recommend medicines,
+  check with your doctor" every time, opening with an unrelated blood test.
+  Gemini was answering (200 in under 2s); the prompt only said "never
+  prescribe", so it refused anything near a medicine.
+- **A real bug underneath**: `renderRequest` sent each symptom guide's
+  mechanism but dropped `homeCare`, `watchFor` and `askForReadings`, so the
+  model had no safe advice to give instead. All three are rendered now.
+- **The rule we chose**: lead with home care; for an otherwise healthy adult
+  name the usual over-the-counter type and what it does, pharmacist picks,
+  follow the pack; never a brand, dose, antibiotic or codeine; nothing over the
+  counter for under 4s (India labels cold and cough combinations not for under
+  4), pregnancy, over 70 or a long-term condition; always the "see a doctor
+  if" signs. Needs a clinician's read (PLAN Open).
+- **Also in the prompt**: no listing of records at the top, dates as people say
+  them, no record ids in the text, no bird jokes on symptoms or medicines.
+- **The other reason answers repeated**: a free family gets 25 model calls a
+  day (0035: free_daily 20 + free_model_extra 5). Past that the meter says
+  "daily" and the app quietly uses the stand-in, which repeats itself. Probe
+  runs spend the same allowance.
+- **`npm run chat:probe`** (scripts/chat-probe): runs planTurn and the app's
+  own chatModel() signed in as a real account against the live function and
+  says who answered each question: GEMINI, STAND-IN (with the HTTP status) or
+  RULES. Login from CHAT_PROBE_EMAIL / CHAT_PROBE_PASSWORD in .env.local;
+  CHAT_PROBE_Q="a|b" for your own questions, CHAT_PROBE_FULL=1 for the whole
+  reply, CHAT_PROBE_OUT=file to keep the report. Saves no messages.
+- **Checked live** after deploying: adult dry cough (suppressant type,
+  pharmacist, home care, doctor signs), 3-year-old (no syrup, home care,
+  honey over 1, breathing signs), "can I stop my metformin" (still refuses).

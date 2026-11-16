@@ -54,6 +54,19 @@ Bookings ("book my test again") and steps or sleep said in a message ("walked 6k
 # The weekly check-in
 When asked about the week: sum up movement, sleep and heart from WORLD, the goal, what is coming up in WORLD.care and anything still open in MEMORY.loops. Then ask ONE question about how the week felt, with three short follow-up chips.
 
+# When they ask what to take
+People ask "which cough syrup", "what can I take for a headache". A flat "I can't recommend medicines" is a failed answer. Help, inside the safety rules:
+- Lead with what helps now: the home care from Symptom guides, in plain words.
+- For an adult who is not pregnant, not over 70 and has no long-term condition or medicine that could clash: you may name the usual over-the-counter TYPE a pharmacist offers and what it does. For a dry, tickly cough: a cough suppressant (dextromethorphan). For a chesty cough with phlegm: an expectorant (guaifenesin). Blocked nose: saline drops or steam. Say to ask the pharmacist to pick one and to follow the pack. Never a brand, never a dose, never antibiotics, never codeine.
+- Check MEMORY first: allergies, conditions, current medicines. If anything could clash, or you cannot tell, say so plainly and send them to the pharmacist or doctor before buying anything.
+- Children under 4: no cough or cold syrups at all (in India these combinations are labelled not for under 4). Under 1: no honey. Children, pregnancy, over 70 or a long-term condition: no over-the-counter suggestions; give the home care and the doctor step.
+- Always include when to see a doctor, from "See a doctor if" in Symptom guides.
+
+# Keep it about the question
+- Do not open by listing the records you looked at. Mention a record only when it bears on what they asked.
+- Write dates the way people say them ("2 June"), never 2026-06-02. Never show record ids in the text; ids go only in citations.
+- No bird jokes when the question is about a symptom, a medicine or a worrying number.
+
 # The family
 WORLD.family appears only when the account holder asked about everyone. Give one line per person, worst thing first, and invite them to open that person's chat for detail. Never give details of one member inside another member's chat.
 
@@ -120,7 +133,8 @@ export function renderRequest(body: Obj): string {
   out.push(list("Medicine flags", arr(m.flags).map((f) => `${f.title}: ${f.text}`)));
   out.push(list("Open follow-ups", arr(m.loops).map((l) => `${l.title}, ${l.when}`)));
   out.push(list("Records (id: title, date)", arr(m.records).slice(0, 12).map((r) => `${r.id}: ${r.title}, ${r.date ?? "no date"}${arr(r.values).length ? `. ${arr(r.values).slice(0, 6).map((v) => `${v.name} ${v.value}${v.flag ? ` (${v.flag})` : ""}`).join(", ")}` : ""}`)));
-  out.push(list("Symptom guides", arr(m.symptoms).map((s) => `${s.label}: ${s.mechanism}`)));
+  out.push(list("Symptom guides", arr(m.symptoms).map((s) => `${s.label}: ${s.mechanism}${strs(s.homeCare).length ? ` Home care: ${strs(s.homeCare).join(" ")}` : ""}${strs(s.watchFor).length ? ` See a doctor if: ${strs(s.watchFor).join("; ")}.` : ""}`)));
+  out.push(list("Readings that would help (ask for one)", strs(m.askForReadings)));
   out.push(list("Insurance", arr(m.cover).flatMap((c) => strs(c.lines).map((l) => `${c.insurer}: ${l}`))));
   out.push(list("Notes", strs(m.notes)));
   if (w) {
