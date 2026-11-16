@@ -1,0 +1,2933 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Pharmacy API",
+    "version": "1.2.0",
+    "description": "API for ordering medicines from your pharmacy network — serviceability, catalogue search and prices, estimates, orders, prescriptions and cancellation. Every call must include a valid `ls-api-key` header, and every change to an order is sent to your pharmacy webhook.",
+    "contact": {
+      "name": "LabStack Support",
+      "url": "https://console.labstack.in"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://integration.labstack.in"
+    }
+  ],
+  "security": [
+    {
+      "ApiKeyAuth": []
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "ApiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "ls-api-key",
+        "description": "API key issued by LabStack. Pass this in every request header. Your store can hold two active keys at once, so you can move to a new key before the old one is revoked. A key may have an expiry date; a request made with an expired or revoked key is refused as unauthorized."
+      }
+    },
+    "schemas": {
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "failure"
+            ],
+            "example": "failure"
+          },
+          "error": {
+            "type": "string",
+            "example": "Authorisation failed - API Key not present in HTTP Header."
+          }
+        },
+        "required": [
+          "status",
+          "error"
+        ]
+      }
+    },
+    "responses": {
+      "Unauthorized": {
+        "description": "Unauthorized — API key missing, invalid, expired or revoked",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      },
+      "TooManyRequests": {
+        "description": "Too many failed authentication attempts from your address. Every request from that address is refused, whatever key it carries, until the number of seconds in the Retry-After header has passed.",
+        "headers": {
+          "Retry-After": {
+            "description": "Seconds to wait before retrying.",
+            "schema": {
+              "type": "integer",
+              "example": 540
+            }
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      },
+      "BadRequest": {
+        "description": "Bad request — missing or invalid parameters",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/api/pharma/v1.0/order/uploadPrescription": {
+      "post": {
+        "tags": [
+          "Orders"
+        ],
+        "summary": "Upload prescription",
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The documents are attached to the order",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "success"
+                      ],
+                      "example": "success"
+                    },
+                    "order": {
+                      "type": "object",
+                      "properties": {
+                        "orderId": {
+                          "type": "integer"
+                        },
+                        "referenceId": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "orderStatus": {
+                          "type": "string"
+                        },
+                        "documents": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "documentId": {
+                                "type": "integer"
+                              }
+                            }
+                          }
+                        },
+                        "forwarding": {
+                          "type": "string",
+                          "enum": [
+                            "WITH_ORDER",
+                            "BY_LABSTACK"
+                          ]
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          },
+                          "description": "Documents that were not stored. Empty when all were."
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "status": "success",
+                  "order": {
+                    "orderId": 1234,
+                    "referenceId": "MY-REF-001",
+                    "orderStatus": "CONFIRMED",
+                    "documents": [
+                      {
+                        "documentId": 89
+                      }
+                    ],
+                    "forwarding": "BY_LABSTACK",
+                    "errors": []
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "description": "No such order among yours",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "status": "failure",
+                  "error": "Order 1234 not found"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The order is closed and takes no more documents",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "status": "failure",
+                  "error": "Order 1234 is CANCELLED and takes no more documents"
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "documents"
+                ],
+                "properties": {
+                  "orderId": {
+                    "type": "integer",
+                    "description": "LabStack order id. Send this or referenceId.",
+                    "example": 1234
+                  },
+                  "referenceId": {
+                    "type": "string",
+                    "description": "Your own order id. Send this or orderId.",
+                    "example": "MY-REF-001"
+                  },
+                  "documents": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 5,
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "content",
+                        "fileName"
+                      ],
+                      "properties": {
+                        "content": {
+                          "type": "string",
+                          "description": "Base64 file content, at most 10 MB. A data-URI prefix is accepted.",
+                          "example": "JVBERi0xLjQK..."
+                        },
+                        "fileName": {
+                          "type": "string",
+                          "description": "With extension: pdf, jpg, jpeg or png",
+                          "example": "prescription.pdf"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "example": {
+                "orderId": 1234,
+                "documents": [
+                  {
+                    "content": "JVBERi0xLjQK...",
+                    "fileName": "prescription.pdf"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "description": "Attaches prescriptions to one of your orders, by `orderId` or `referenceId`. Prefer sending them in Place Order's `documents`, where they reach the pharmacy with the order. `forwarding` says how these reach the pharmacy. WITH_ORDER - the pharmacy has not received the order yet, and the documents go with it. BY_LABSTACK - the pharmacy already has the order, so LabStack forwards the documents to it; allow time for that before the pharmacy acts on them. A CANCELLED, FULL_DELIVERED or PARTIAL_DELIVERED order takes no documents (409). When some documents are stored and others are not, the call succeeds and `errors` names the ones that were not; when none are stored it is a 503 and safe to retry.\n"
+      }
+    },
+    "/api/pharma/v1.0/order/placeOrder": {
+      "post": {
+        "tags": [
+          "Orders"
+        ],
+        "summary": "Place order",
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "LabStack has the order. Check orderStatus for where it is.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "success"
+                      ],
+                      "example": "success"
+                    },
+                    "order": {
+                      "type": "object",
+                      "properties": {
+                        "orderId": {
+                          "type": "integer",
+                          "description": "LabStack order id"
+                        },
+                        "referenceId": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "orderStatus": {
+                          "type": "string",
+                          "enum": [
+                            "PLACED",
+                            "CREATED",
+                            "PENDING"
+                          ]
+                        },
+                        "orderType": {
+                          "type": "string",
+                          "enum": [
+                            "HOME_DELIVERY",
+                            "PICKUP"
+                          ]
+                        },
+                        "lsPharmacyId": {
+                          "type": "integer"
+                        },
+                        "pharmacyName": {
+                          "type": "string"
+                        },
+                        "pickupLocation": {
+                          "type": "object",
+                          "nullable": true,
+                          "description": "PICKUP only: where the customer collects the order. Null for HOME_DELIVERY, and for a pharmacy that chooses the pickup point when the order is placed.",
+                          "properties": {
+                            "address": {
+                              "type": "string",
+                              "nullable": true
+                            },
+                            "locality": {
+                              "type": "string",
+                              "nullable": true
+                            },
+                            "city": {
+                              "type": "string",
+                              "nullable": true
+                            },
+                            "state": {
+                              "type": "string",
+                              "nullable": true
+                            },
+                            "pincode": {
+                              "type": "string",
+                              "nullable": true
+                            },
+                            "latitude": {
+                              "type": "number"
+                            },
+                            "longitude": {
+                              "type": "number"
+                            },
+                            "openingTime": {
+                              "type": "string",
+                              "nullable": true,
+                              "description": "HH:mm, India time, the same every day. Null together with closingTime when the pharmacy is open 24 hours."
+                            },
+                            "closingTime": {
+                              "type": "string",
+                              "nullable": true,
+                              "description": "HH:mm, India time."
+                            }
+                          }
+                        },
+                        "shipmentSpeed": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "pharmaSuperOrderId": {
+                          "type": "integer",
+                          "nullable": true,
+                          "description": "Set when the pharmacy split the order into several fulfilments; Get Order Details lists them. Null otherwise."
+                        },
+                        "isPaymentRequired": {
+                          "type": "boolean",
+                          "description": "True while the order waits for payment"
+                        },
+                        "paymentLink": {
+                          "type": "string",
+                          "nullable": true,
+                          "description": "Only when isPaymentRequired was sent true"
+                        },
+                        "paymentLinkExpiresAt": {
+                          "type": "string",
+                          "format": "date-time",
+                          "nullable": true,
+                          "description": "When an unpaid order is cancelled"
+                        },
+                        "placementError": {
+                          "type": "string",
+                          "nullable": true,
+                          "description": "Set when the pharmacy did not accept the order (orderStatus PENDING, isPaymentRequired false). Null otherwise, including for an order waiting for payment."
+                        },
+                        "documents": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "documentId": {
+                                "type": "integer"
+                              }
+                            }
+                          }
+                        },
+                        "price": {
+                          "type": "object",
+                          "properties": {
+                            "currency": {
+                              "type": "string",
+                              "example": "INR"
+                            },
+                            "mrpTotal": {
+                              "type": "number",
+                              "nullable": true,
+                              "description": "Null when any drug has no MRP on record"
+                            },
+                            "subTotal": {
+                              "type": "number",
+                              "description": "The medicines at the customer price"
+                            },
+                            "additionalCharges": {
+                              "type": "number",
+                              "description": "Delivery and every other fee on top of the medicines"
+                            },
+                            "totalAmount": {
+                              "type": "number",
+                              "description": "What the customer pays: subTotal + additionalCharges"
+                            },
+                            "storeSubTotal": {
+                              "type": "number",
+                              "nullable": true,
+                              "description": "The medicines at your store's price"
+                            },
+                            "storeTotalAmount": {
+                              "type": "number",
+                              "nullable": true,
+                              "description": "What your store owes LabStack: storeSubTotal + additionalCharges"
+                            },
+                            "items": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "drugMasterId": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "packContainer": {
+                                    "type": "string",
+                                    "nullable": true,
+                                    "description": "What the pack is, e.g. strip, bottle, vial"
+                                  },
+                                  "packQty": {
+                                    "type": "number",
+                                    "nullable": true,
+                                    "description": "How much the pack holds, counted in packUnit - or in units of the dosage form (tablets, capsules) when packUnit is null."
+                                  },
+                                  "packUnit": {
+                                    "type": "string",
+                                    "nullable": true,
+                                    "description": "Unit of packQty, e.g. ml, gm. Null when packQty is a count."
+                                  },
+                                  "quantity": {
+                                    "type": "integer"
+                                  },
+                                  "mrp": {
+                                    "type": "number",
+                                    "nullable": true
+                                  },
+                                  "unitPrice": {
+                                    "type": "number",
+                                    "nullable": true,
+                                    "description": "Customer price per pack"
+                                  },
+                                  "linePrice": {
+                                    "type": "number",
+                                    "nullable": true
+                                  },
+                                  "storeUnitPrice": {
+                                    "type": "number",
+                                    "nullable": true,
+                                    "description": "Your store's price per pack, what your store owes LabStack: mrp less your store's own medicine discount"
+                                  },
+                                  "storeLinePrice": {
+                                    "type": "number",
+                                    "nullable": true,
+                                    "description": "storeUnitPrice x quantity"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "status": "success",
+                  "order": {
+                    "orderId": 1234,
+                    "referenceId": "MY-REF-001",
+                    "orderStatus": "PLACED",
+                    "orderType": "HOME_DELIVERY",
+                    "lsPharmacyId": 456,
+                    "pharmacyName": "City Health Pharmacy",
+                    "pickupLocation": null,
+                    "shipmentSpeed": "STANDARD",
+                    "pharmaSuperOrderId": null,
+                    "isPaymentRequired": false,
+                    "paymentLink": null,
+                    "paymentLinkExpiresAt": null,
+                    "placementError": null,
+                    "documents": [
+                      {
+                        "documentId": 88
+                      }
+                    ],
+                    "price": {
+                      "currency": "INR",
+                      "mrpTotal": 290,
+                      "subTotal": 261,
+                      "additionalCharges": 40,
+                      "totalAmount": 301,
+                      "storeSubTotal": 246.5,
+                      "storeTotalAmount": 286.5,
+                      "items": [
+                        {
+                          "drugMasterId": "LSD100001",
+                          "name": "Azithral 500 Tablet",
+                          "packContainer": "strip",
+                          "packQty": 5,
+                          "packUnit": null,
+                          "quantity": 2,
+                          "mrp": 120,
+                          "unitPrice": 108,
+                          "linePrice": 216,
+                          "storeUnitPrice": 102,
+                          "storeLinePrice": 204
+                        },
+                        {
+                          "drugMasterId": "LSD100002",
+                          "name": "Paracetamol 650mg Tablet",
+                          "packContainer": "strip",
+                          "packQty": 15,
+                          "packUnit": null,
+                          "quantity": 1,
+                          "mrp": 50,
+                          "unitPrice": 45,
+                          "linePrice": 45,
+                          "storeUnitPrice": 42.5,
+                          "storeLinePrice": 42.5
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "409": {
+            "description": "An order with this referenceId exists, or an identical request is in progress",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "failure"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "orderId": {
+                      "type": "integer",
+                      "description": "The existing order, when the referenceId is taken"
+                    }
+                  }
+                },
+                "example": {
+                  "status": "failure",
+                  "error": "An order with referenceId 'MY-REF-001' already exists",
+                  "orderId": 1234
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "503": {
+            "description": "The documents could not be stored or payment could not be set up. No order was left behind; safe to retry.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "status": "failure",
+                  "error": "Payment could not be set up for this order, so it was not placed. Please try again."
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "orderType",
+                  "lsPharmacyId",
+                  "drugs",
+                  "name",
+                  "gender",
+                  "mobile"
+                ],
+                "properties": {
+                  "orderType": {
+                    "type": "string",
+                    "enum": [
+                      "HOME_DELIVERY",
+                      "PICKUP"
+                    ],
+                    "example": "HOME_DELIVERY"
+                  },
+                  "lsPharmacyId": {
+                    "type": "integer",
+                    "description": "A pharmacy from Check Serviceability",
+                    "example": 456
+                  },
+                  "drugs": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 50,
+                    "description": "One entry per drug. Repeated drugMasterIds are merged; at most 100 of any one drug.",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "drugMasterId",
+                        "quantity"
+                      ],
+                      "properties": {
+                        "drugMasterId": {
+                          "type": "string",
+                          "description": "Identifies a brand and pack, not a salt",
+                          "example": "LSD100001"
+                        },
+                        "quantity": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 100,
+                          "example": 2
+                        }
+                      }
+                    }
+                  },
+                  "referenceId": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "description": "Optional but recommended. Your own order id. Unique among your orders that are not cancelled; usable with Get Order Details, Cancel Order and Upload Prescription.",
+                    "example": "MY-REF-001"
+                  },
+                  "name": {
+                    "type": "string",
+                    "maxLength": 50,
+                    "description": "Letters, digits and spaces; other characters are removed.",
+                    "example": "Jane Doe"
+                  },
+                  "gender": {
+                    "type": "string",
+                    "enum": [
+                      "MALE",
+                      "FEMALE",
+                      "OTHERS"
+                    ],
+                    "example": "FEMALE"
+                  },
+                  "mobile": {
+                    "type": "string",
+                    "description": "10 digits. A +91 prefix, spaces and dashes are accepted.",
+                    "example": "9876543210"
+                  },
+                  "dateOfBirth": {
+                    "type": "string",
+                    "format": "date",
+                    "description": "YYYY-MM-DD. Required unless age is sent; used over age when both are.",
+                    "example": "1990-04-12"
+                  },
+                  "age": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 120,
+                    "description": "Whole years. Required unless dateOfBirth is sent.",
+                    "example": 36
+                  },
+                  "email": {
+                    "type": "string",
+                    "description": "Optional",
+                    "example": "jane@example.com"
+                  },
+                  "altNumber": {
+                    "type": "string",
+                    "description": "Optional alternate contact, 10 digits",
+                    "example": "9876500000"
+                  },
+                  "uniqueId": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "description": "Optional. Your id for the patient; the same uniqueId is the same patient on every order. Derived from mobile and name when omitted.",
+                    "example": "USR-001"
+                  },
+                  "mainUserUniqueId": {
+                    "type": "string",
+                    "description": "Optional. uniqueId of an existing patient this one is a dependant of.",
+                    "example": "USR-000"
+                  },
+                  "relationship": {
+                    "type": "string",
+                    "description": "Optional. How the patient relates to mainUserUniqueId, which it requires. Defaults to OTHER.",
+                    "example": "SON"
+                  },
+                  "unitFloorBuilding": {
+                    "type": "string",
+                    "example": "Flat 3B"
+                  },
+                  "address": {
+                    "type": "string",
+                    "maxLength": 200,
+                    "description": "Required for HOME_DELIVERY",
+                    "example": "42, MG Road"
+                  },
+                  "locality": {
+                    "type": "string",
+                    "example": "Indiranagar"
+                  },
+                  "city": {
+                    "type": "string",
+                    "description": "Required for HOME_DELIVERY",
+                    "example": "Bangalore"
+                  },
+                  "state": {
+                    "type": "string",
+                    "description": "Required for HOME_DELIVERY",
+                    "example": "Karnataka"
+                  },
+                  "pincode": {
+                    "type": "string",
+                    "description": "Required for HOME_DELIVERY. For PICKUP, required unless latitude and longitude are sent. 6 digits.",
+                    "example": "560001"
+                  },
+                  "latitude": {
+                    "type": "number",
+                    "description": "Optional. The patient's location, when you have it: the delivery point, or where a PICKUP distance is measured from. Send with longitude.",
+                    "example": 12.9716
+                  },
+                  "longitude": {
+                    "type": "number",
+                    "example": 77.5946
+                  },
+                  "range": {
+                    "type": "number",
+                    "description": "Optional, PICKUP only. How far, in km, the pickup point may be from the patient. Greater than 0 and at most 100. Default 10."
+                  },
+                  "shipmentSpeed": {
+                    "type": "string",
+                    "enum": [
+                      "STANDARD",
+                      "EXPRESS",
+                      "SAME_DAY",
+                      "PAN_INDIA"
+                    ],
+                    "description": "Optional. One of the pharmacy's shipmentSpeeds from Check Serviceability. Omit for its default."
+                  },
+                  "notes": {
+                    "type": "string",
+                    "maxLength": 1000,
+                    "description": "Optional note for the pharmacy",
+                    "example": "Leave at reception"
+                  },
+                  "isPaymentRequired": {
+                    "type": "boolean",
+                    "description": "Optional, default false. Hold the order until the returned paymentLink is paid.",
+                    "example": false
+                  },
+                  "documents": {
+                    "type": "array",
+                    "maxItems": 5,
+                    "description": "Prescriptions. Required when any drug needs one.",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "content",
+                        "fileName"
+                      ],
+                      "properties": {
+                        "content": {
+                          "type": "string",
+                          "description": "Base64 file content, at most 10 MB. A data-URI prefix is accepted.",
+                          "example": "JVBERi0xLjQK..."
+                        },
+                        "fileName": {
+                          "type": "string",
+                          "description": "With extension: pdf, jpg, jpeg or png",
+                          "example": "prescription.pdf"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "example": {
+                "orderType": "HOME_DELIVERY",
+                "lsPharmacyId": 456,
+                "referenceId": "MY-REF-001",
+                "drugs": [
+                  {
+                    "drugMasterId": "LSD100001",
+                    "quantity": 2
+                  },
+                  {
+                    "drugMasterId": "LSD100002",
+                    "quantity": 1
+                  }
+                ],
+                "name": "Jane Doe",
+                "gender": "FEMALE",
+                "mobile": "9876543210",
+                "dateOfBirth": "1990-04-12",
+                "email": "jane@example.com",
+                "uniqueId": "USR-001",
+                "address": "42, MG Road",
+                "city": "Bangalore",
+                "state": "Karnataka",
+                "pincode": "560001",
+                "shipmentSpeed": "STANDARD",
+                "documents": [
+                  {
+                    "content": "JVBERi0xLjQK...",
+                    "fileName": "prescription.pdf"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "description": "Creates a pharmacy order for a patient and sends it to the pharmacy. The basket is checked exactly as Get Estimate checks it, and the order is created only when the pharmacy can supply every drug in the quantity asked; otherwise the call is a 400 naming the drugMasterIds, and nothing is created. Only the drugMasterIds you send are ordered - nothing is substituted. A drug marked `notForSale` in the catalogue (Schedule X or habit-forming) cannot be ordered online: a basket containing one is a 400 naming it, whatever prescriptions are sent. Prescriptions go in `documents`. They are required when any drug needs one (Get Estimate's `prescriptionRequired`), and they reach the pharmacy with the order. A document added later with Upload Prescription is forwarded by LabStack instead. If the documents cannot be stored the call is a 503, no order is left behind, and it is safe to retry. Send a `referenceId` - your own order id - to make retries safe: while an order with that referenceId exists and is not cancelled, a second Place Order with it is a 409 that returns the existing `orderId`. A request identical to one still in progress is also a 409. `order.price.totalAmount` is what the customer pays: each drug's MRP less your store's customer medicine discount, which is also what the pharmacy invoices the customer, plus `additionalCharges`. `order.price.storeTotalAmount` is what your store owes LabStack: each drug's MRP less your store's own medicine discount, plus the same `additionalCharges`. Both are fixed when the order is placed and never rise afterwards; they drop only if a drug is dispatched from a batch printed at a lower MRP, which Get Order Details then reports. A 200 means LabStack has the order; `orderStatus` says where it is. PLACED - the pharmacy has it. CREATED - taken by LabStack for a pharmacy it places orders with directly. PENDING - waiting for payment (`isPaymentRequired` is true), or the pharmacy did not accept it automatically, in which case `placementError` says so and LabStack follows it up. Every later change arrives on the Order Status Webhook. Set `isPaymentRequired` to collect payment before the order is sent. The response then carries a `paymentLink`, valid until `paymentLinkExpiresAt` (16 minutes). The order stays PENDING and the pharmacy does not see it until it is paid. Once paid it is sent and moves to PLACED - or CREATED for a pharmacy LabStack places orders with directly, or stays PENDING if the pharmacy does not accept it - and the webhook reports it. If the link lapses unpaid the order is cancelled. Payment needs a live price (Get Estimate's `canCollectPayment`), and when payment cannot be set up the call is a 503 with no order left behind. HOME_DELIVERY needs `address`, `city`, `state` and `pincode`. PICKUP needs the patient's `pincode` or a `latitude`/`longitude` pair, and is accepted only when the pharmacy's pickup point is within `range` km of it (10 unless sent, at most 100) - the rule Check Serviceability and Get Estimate apply. `pickupLocation` in the response is where the customer collects the order. One of `dateOfBirth` or `age` is required.\n"
+      }
+    },
+    "/api/pharma/v1.0/order/getOrderDetails": {
+      "get": {
+        "tags": [
+          "Orders"
+        ],
+        "summary": "Get order details",
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The order",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "success"
+                      ],
+                      "example": "success"
+                    },
+                    "order": {
+                      "type": "object",
+                      "properties": {
+                        "orderId": {
+                          "type": "integer"
+                        },
+                        "referenceId": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "orderStatus": {
+                          "type": "string",
+                          "enum": [
+                            "PENDING",
+                            "CREATED",
+                            "PLACED",
+                            "CONFIRMED",
+                            "SHIPPED",
+                            "PARTIAL_DELIVERED",
+                            "FULL_DELIVERED",
+                            "CANCELLED"
+                          ]
+                        },
+                        "orderType": {
+                          "type": "string",
+                          "enum": [
+                            "HOME_DELIVERY",
+                            "PICKUP"
+                          ]
+                        },
+                        "orderDate": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "lsPharmacyId": {
+                          "type": "integer"
+                        },
+                        "pharmacyName": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "pickupLocation": {
+                          "type": "object",
+                          "nullable": true,
+                          "description": "PICKUP only: where the customer collects the order. Null for HOME_DELIVERY, and for a pharmacy that chooses the pickup point when the order is placed.",
+                          "properties": {
+                            "address": {
+                              "type": "string",
+                              "nullable": true
+                            },
+                            "locality": {
+                              "type": "string",
+                              "nullable": true
+                            },
+                            "city": {
+                              "type": "string",
+                              "nullable": true
+                            },
+                            "state": {
+                              "type": "string",
+                              "nullable": true
+                            },
+                            "pincode": {
+                              "type": "string",
+                              "nullable": true
+                            },
+                            "latitude": {
+                              "type": "number"
+                            },
+                            "longitude": {
+                              "type": "number"
+                            },
+                            "openingTime": {
+                              "type": "string",
+                              "nullable": true,
+                              "description": "HH:mm, India time, the same every day. Null together with closingTime when the pharmacy is open 24 hours."
+                            },
+                            "closingTime": {
+                              "type": "string",
+                              "nullable": true,
+                              "description": "HH:mm, India time."
+                            }
+                          }
+                        },
+                        "shipmentSpeed": {
+                          "type": "string",
+                          "nullable": true,
+                          "enum": [
+                            "STANDARD",
+                            "EXPRESS",
+                            "SAME_DAY",
+                            "PAN_INDIA"
+                          ]
+                        },
+                        "shipmentTrackingId": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "invoiceUrl": {
+                          "type": "string",
+                          "nullable": true,
+                          "description": "The pharmacy's GST invoice, once issued"
+                        },
+                        "notes": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "cancelReason": {
+                          "type": "string",
+                          "nullable": true,
+                          "description": "Set only on a CANCELLED order"
+                        },
+                        "pharmaSuperOrderId": {
+                          "type": "integer",
+                          "nullable": true,
+                          "description": "Set when the order was split into several fulfilments"
+                        },
+                        "relatedOrders": {
+                          "type": "array",
+                          "description": "The other fulfilments of a split order. Empty otherwise.",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "orderId": {
+                                "type": "integer"
+                              },
+                              "orderStatus": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "isPaymentRequired": {
+                          "type": "boolean",
+                          "description": "True while the order waits for payment and has not been sent to the pharmacy"
+                        },
+                        "paymentStatus": {
+                          "type": "string",
+                          "enum": [
+                            "IDLE",
+                            "PENDING",
+                            "COMPLETED",
+                            "CANCELLED"
+                          ]
+                        },
+                        "totalAmount": {
+                          "type": "number",
+                          "nullable": true,
+                          "description": "What the customer pays for the whole order"
+                        },
+                        "storeTotalAmount": {
+                          "type": "number",
+                          "nullable": true,
+                          "description": "What your store owes LabStack for the whole order. Null on an order placed before store prices were recorded."
+                        },
+                        "price": {
+                          "type": "object",
+                          "description": "This fulfilment: its items and the charges it carries",
+                          "properties": {
+                            "currency": {
+                              "type": "string",
+                              "example": "INR"
+                            },
+                            "mrpTotal": {
+                              "type": "number",
+                              "nullable": true
+                            },
+                            "subTotal": {
+                              "type": "number"
+                            },
+                            "additionalCharges": {
+                              "type": "number",
+                              "nullable": true,
+                              "description": "Null only on an order placed before customer prices were recorded, when unknown"
+                            },
+                            "totalAmount": {
+                              "type": "number"
+                            },
+                            "storeSubTotal": {
+                              "type": "number",
+                              "nullable": true,
+                              "description": "The medicines at your store's price"
+                            },
+                            "storeTotalAmount": {
+                              "type": "number",
+                              "nullable": true,
+                              "description": "What your store owes LabStack: storeSubTotal + additionalCharges"
+                            },
+                            "items": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "drugMasterId": {
+                                    "type": "string",
+                                    "nullable": true
+                                  },
+                                  "name": {
+                                    "type": "string",
+                                    "nullable": true
+                                  },
+                                  "packContainer": {
+                                    "type": "string",
+                                    "nullable": true,
+                                    "description": "What the pack is, e.g. strip, bottle, vial"
+                                  },
+                                  "packQty": {
+                                    "type": "number",
+                                    "nullable": true,
+                                    "description": "How much the pack holds, counted in packUnit - or in units of the dosage form (tablets, capsules) when packUnit is null."
+                                  },
+                                  "packUnit": {
+                                    "type": "string",
+                                    "nullable": true,
+                                    "description": "Unit of packQty, e.g. ml, gm. Null when packQty is a count."
+                                  },
+                                  "quantity": {
+                                    "type": "integer"
+                                  },
+                                  "mrp": {
+                                    "type": "number",
+                                    "nullable": true
+                                  },
+                                  "unitPrice": {
+                                    "type": "number",
+                                    "nullable": true,
+                                    "description": "Customer price per pack"
+                                  },
+                                  "linePrice": {
+                                    "type": "number",
+                                    "nullable": true
+                                  },
+                                  "storeUnitPrice": {
+                                    "type": "number",
+                                    "nullable": true,
+                                    "description": "Your store's price per pack, what your store owes LabStack: mrp less your store's own medicine discount"
+                                  },
+                                  "storeLinePrice": {
+                                    "type": "number",
+                                    "nullable": true,
+                                    "description": "storeUnitPrice x quantity"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "documents": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "documentId": {
+                                "type": "integer"
+                              },
+                              "type": {
+                                "type": "string",
+                                "enum": [
+                                  "PRESCRIPTION",
+                                  "PRIOR_PRESCRIPTION",
+                                  "REFERRAL",
+                                  "OTHER"
+                                ]
+                              },
+                              "url": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "patient": {
+                          "type": "object",
+                          "properties": {
+                            "uniqueId": {
+                              "type": "string"
+                            },
+                            "name": {
+                              "type": "string"
+                            },
+                            "dateOfBirth": {
+                              "type": "string",
+                              "nullable": true,
+                              "description": "YYYY-MM-DD"
+                            },
+                            "age": {
+                              "type": "integer",
+                              "nullable": true
+                            },
+                            "gender": {
+                              "type": "string",
+                              "nullable": true,
+                              "enum": [
+                                "MALE",
+                                "FEMALE",
+                                "OTHERS"
+                              ]
+                            },
+                            "mobile": {
+                              "type": "string",
+                              "nullable": true
+                            },
+                            "altNumber": {
+                              "type": "string",
+                              "nullable": true
+                            },
+                            "email": {
+                              "type": "string",
+                              "nullable": true
+                            },
+                            "mainUserUniqueId": {
+                              "type": "string",
+                              "nullable": true
+                            },
+                            "relationship": {
+                              "type": "string",
+                              "nullable": true
+                            }
+                          }
+                        },
+                        "address": {
+                          "type": "object",
+                          "description": "The patient's address as sent to Place Order. For PICKUP, see pickupLocation.",
+                          "properties": {
+                            "unitFloorBuilding": {
+                              "type": "string",
+                              "nullable": true
+                            },
+                            "address": {
+                              "type": "string",
+                              "nullable": true
+                            },
+                            "locality": {
+                              "type": "string",
+                              "nullable": true
+                            },
+                            "city": {
+                              "type": "string",
+                              "nullable": true
+                            },
+                            "state": {
+                              "type": "string",
+                              "nullable": true
+                            },
+                            "pincode": {
+                              "type": "string",
+                              "nullable": true
+                            },
+                            "latitude": {
+                              "type": "number",
+                              "nullable": true
+                            },
+                            "longitude": {
+                              "type": "number",
+                              "nullable": true
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "status": "success",
+                  "order": {
+                    "orderId": 1234,
+                    "referenceId": "MY-REF-001",
+                    "orderStatus": "CONFIRMED",
+                    "orderType": "HOME_DELIVERY",
+                    "orderDate": "2026-09-29T09:00:00.000Z",
+                    "lsPharmacyId": 456,
+                    "pharmacyName": "City Health Pharmacy",
+                    "pickupLocation": null,
+                    "shipmentSpeed": "STANDARD",
+                    "shipmentTrackingId": null,
+                    "invoiceUrl": null,
+                    "notes": "Leave at reception",
+                    "cancelReason": null,
+                    "pharmaSuperOrderId": null,
+                    "relatedOrders": [],
+                    "isPaymentRequired": false,
+                    "paymentStatus": "PENDING",
+                    "totalAmount": 301,
+                    "storeTotalAmount": 286.5,
+                    "price": {
+                      "currency": "INR",
+                      "mrpTotal": 290,
+                      "subTotal": 261,
+                      "additionalCharges": 40,
+                      "totalAmount": 301,
+                      "storeSubTotal": 246.5,
+                      "storeTotalAmount": 286.5,
+                      "items": [
+                        {
+                          "drugMasterId": "LSD100001",
+                          "name": "Azithral 500 Tablet",
+                          "packContainer": "strip",
+                          "packQty": 5,
+                          "packUnit": null,
+                          "quantity": 2,
+                          "mrp": 120,
+                          "unitPrice": 108,
+                          "linePrice": 216,
+                          "storeUnitPrice": 102,
+                          "storeLinePrice": 204
+                        },
+                        {
+                          "drugMasterId": "LSD100002",
+                          "name": "Paracetamol 650mg Tablet",
+                          "packContainer": "strip",
+                          "packQty": 15,
+                          "packUnit": null,
+                          "quantity": 1,
+                          "mrp": 50,
+                          "unitPrice": 45,
+                          "linePrice": 45,
+                          "storeUnitPrice": 42.5,
+                          "storeLinePrice": 42.5
+                        }
+                      ]
+                    },
+                    "documents": [
+                      {
+                        "documentId": 88,
+                        "type": "PRESCRIPTION",
+                        "url": "https://files.example.com/prescription.pdf"
+                      }
+                    ],
+                    "patient": {
+                      "uniqueId": "USR-001",
+                      "name": "Jane Doe",
+                      "dateOfBirth": "1990-04-12",
+                      "age": 36,
+                      "gender": "FEMALE",
+                      "mobile": "9876543210",
+                      "altNumber": null,
+                      "email": "jane@example.com",
+                      "mainUserUniqueId": null,
+                      "relationship": null
+                    },
+                    "address": {
+                      "unitFloorBuilding": null,
+                      "address": "42, MG Road",
+                      "locality": null,
+                      "city": "Bangalore",
+                      "state": "Karnataka",
+                      "pincode": "560001",
+                      "latitude": 12.9716,
+                      "longitude": 77.5946
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "description": "No such order among yours",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "status": "failure",
+                  "error": "Order 1234 not found"
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          }
+        },
+        "description": "The full state of one of your orders, by LabStack `orderId` or by the `referenceId` you placed it with - send exactly one. `items` come back in the shape Place Order accepts - drugMasterId and quantity - with the customer price each was placed at, and the store price beside it. `unitPrice`, `subTotal` and `totalAmount` are what the customer pays: MRP less your store's customer medicine discount at the time of placing. `storeUnitPrice`, `storeSubTotal` and `storeTotalAmount` are what your store owes LabStack: MRP less your store's own medicine discount, plus the same `additionalCharges`. When the order ships, a drug dispatched from a batch printed at a lower MRP is repriced at that MRP with the same discounts, and both sets of totals drop with it; a higher printed MRP never raises a price. An order placed before customer prices were recorded reports the prices it was placed at, with no `mrp`, null store figures and possibly no `additionalCharges`. The pharmacy may split an order into several fulfilments, each with its own orderId and status. Such an order carries a `pharmaSuperOrderId` and lists the other fulfilments in `relatedOrders`. On a split, `totalAmount` and `storeTotalAmount` are for the whole order while `price` covers this fulfilment only; the delivery charge is made once, so it appears on one fulfilment. A referenceId names the fulfilment Place Order returned. A PICKUP order carries `pickupLocation`, where the customer collects it - the pharmacy's current address and opening hours. `address` stays the patient's, as sent to Place Order. Every documented field is always present; a value that does not exist is null. Order Status Webhook: every change to an order is POSTed to your store's pharmacy webhook URL, authenticated like your other LabStack webhooks. It carries `event` (what changed - orderStatus, paymentStatus, shipmentSpeed, pharmacy or drugs), `orderId`, `referenceId`, `orderStatus`, `previousStatus`, `orderType`, `orderDate`, `lsPharmacyId`, `pharmacyName`, `shipmentSpeed`, `paymentStatus`, `isPaymentRequired`, `pharmaSuperOrderId`, `shipmentTrackingId`, `totalAmount`, `cancelReason`, `uniqueId` and `userName`; call this endpoint for everything else.\n",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "orderId",
+            "required": false,
+            "description": "LabStack order id. Send this or referenceId.",
+            "example": "1234",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "referenceId",
+            "required": false,
+            "description": "Your own order id, e.g. MY-REF-001. Send this or orderId.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/api/pharma/v1.0/order/getEstimate": {
+      "post": {
+        "tags": [
+          "Orders"
+        ],
+        "summary": "Get estimate",
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The estimate",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "success"
+                      ],
+                      "example": "success"
+                    },
+                    "estimate": {
+                      "type": "object",
+                      "properties": {
+                        "lsPharmacyId": {
+                          "type": "integer"
+                        },
+                        "pharmacyName": {
+                          "type": "string"
+                        },
+                        "orderType": {
+                          "type": "string",
+                          "enum": [
+                            "HOME_DELIVERY",
+                            "PICKUP"
+                          ]
+                        },
+                        "shipmentSpeed": {
+                          "type": "string",
+                          "nullable": true,
+                          "enum": [
+                            "STANDARD",
+                            "EXPRESS",
+                            "SAME_DAY",
+                            "PAN_INDIA"
+                          ],
+                          "description": "The speed quoted; null for the pharmacy default"
+                        },
+                        "shipmentSpeeds": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          },
+                          "description": "Speeds the pharmacy offers at this location. Empty when it offers no choice."
+                        },
+                        "distance": {
+                          "type": "number",
+                          "nullable": true,
+                          "description": "PICKUP only: km from the patient to the pickup point, to 2 decimal places. Null otherwise."
+                        },
+                        "pickupLocation": {
+                          "type": "object",
+                          "nullable": true,
+                          "description": "PICKUP only: where the customer collects the order. Null exactly when distance is.",
+                          "properties": {
+                            "address": {
+                              "type": "string",
+                              "nullable": true
+                            },
+                            "locality": {
+                              "type": "string",
+                              "nullable": true
+                            },
+                            "city": {
+                              "type": "string",
+                              "nullable": true
+                            },
+                            "state": {
+                              "type": "string",
+                              "nullable": true
+                            },
+                            "pincode": {
+                              "type": "string",
+                              "nullable": true
+                            },
+                            "latitude": {
+                              "type": "number"
+                            },
+                            "longitude": {
+                              "type": "number"
+                            },
+                            "openingTime": {
+                              "type": "string",
+                              "nullable": true,
+                              "description": "HH:mm, India time, the same every day. Null together with closingTime when the pharmacy is open 24 hours."
+                            },
+                            "closingTime": {
+                              "type": "string",
+                              "nullable": true,
+                              "description": "HH:mm, India time."
+                            }
+                          }
+                        },
+                        "isLivePrice": {
+                          "type": "boolean",
+                          "description": "True when the pharmacy priced the basket and confirmed its stock just now"
+                        },
+                        "allItemsAvailable": {
+                          "type": "boolean",
+                          "description": "False when Place Order would refuse the basket for stock"
+                        },
+                        "prescriptionRequired": {
+                          "type": "boolean",
+                          "description": "True when Place Order needs a prescription in documents"
+                        },
+                        "canCollectPayment": {
+                          "type": "boolean",
+                          "description": "True when Place Order accepts isPaymentRequired for this basket"
+                        },
+                        "price": {
+                          "type": "object",
+                          "properties": {
+                            "currency": {
+                              "type": "string",
+                              "example": "INR"
+                            },
+                            "mrpTotal": {
+                              "type": "number",
+                              "nullable": true,
+                              "description": "MRP x quantity over the available items. Null when any of them has no MRP on record."
+                            },
+                            "subTotal": {
+                              "type": "number",
+                              "description": "The available items at the customer price"
+                            },
+                            "additionalCharges": {
+                              "type": "number",
+                              "description": "Delivery and every other fee on top of the medicines"
+                            },
+                            "totalAmount": {
+                              "type": "number",
+                              "description": "subTotal + additionalCharges"
+                            },
+                            "storeSubTotal": {
+                              "type": "number",
+                              "nullable": true,
+                              "description": "The medicines at your store's price"
+                            },
+                            "storeTotalAmount": {
+                              "type": "number",
+                              "nullable": true,
+                              "description": "What your store owes LabStack: storeSubTotal + additionalCharges"
+                            },
+                            "items": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "drugMasterId": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "packContainer": {
+                                    "type": "string",
+                                    "nullable": true,
+                                    "description": "What the pack is, e.g. strip, bottle, vial"
+                                  },
+                                  "packQty": {
+                                    "type": "number",
+                                    "nullable": true,
+                                    "description": "How much the pack holds, counted in packUnit - or in units of the dosage form (tablets, capsules) when packUnit is null."
+                                  },
+                                  "packUnit": {
+                                    "type": "string",
+                                    "nullable": true,
+                                    "description": "Unit of packQty, e.g. ml, gm. Null when packQty is a count."
+                                  },
+                                  "quantity": {
+                                    "type": "integer"
+                                  },
+                                  "mrp": {
+                                    "type": "number",
+                                    "nullable": true,
+                                    "description": "MRP per pack"
+                                  },
+                                  "unitPrice": {
+                                    "type": "number",
+                                    "nullable": true,
+                                    "description": "Customer price per pack"
+                                  },
+                                  "linePrice": {
+                                    "type": "number",
+                                    "nullable": true,
+                                    "description": "unitPrice x quantity"
+                                  },
+                                  "storeUnitPrice": {
+                                    "type": "number",
+                                    "nullable": true,
+                                    "description": "Your store's price per pack, what your store owes LabStack: mrp less your store's own medicine discount"
+                                  },
+                                  "storeLinePrice": {
+                                    "type": "number",
+                                    "nullable": true,
+                                    "description": "storeUnitPrice x quantity"
+                                  },
+                                  "available": {
+                                    "type": "boolean"
+                                  },
+                                  "prescriptionRequired": {
+                                    "type": "boolean"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "status": "success",
+                  "estimate": {
+                    "lsPharmacyId": 456,
+                    "pharmacyName": "City Health Pharmacy",
+                    "orderType": "HOME_DELIVERY",
+                    "shipmentSpeed": "STANDARD",
+                    "shipmentSpeeds": [
+                      "STANDARD",
+                      "EXPRESS"
+                    ],
+                    "distance": null,
+                    "pickupLocation": null,
+                    "isLivePrice": true,
+                    "allItemsAvailable": true,
+                    "prescriptionRequired": true,
+                    "canCollectPayment": true,
+                    "price": {
+                      "currency": "INR",
+                      "mrpTotal": 290,
+                      "subTotal": 261,
+                      "additionalCharges": 40,
+                      "totalAmount": 301,
+                      "storeSubTotal": 246.5,
+                      "storeTotalAmount": 286.5,
+                      "items": [
+                        {
+                          "drugMasterId": "LSD100001",
+                          "name": "Azithral 500 Tablet",
+                          "packContainer": "strip",
+                          "packQty": 5,
+                          "packUnit": null,
+                          "quantity": 2,
+                          "mrp": 120,
+                          "unitPrice": 108,
+                          "linePrice": 216,
+                          "storeUnitPrice": 102,
+                          "storeLinePrice": 204,
+                          "available": true,
+                          "prescriptionRequired": true
+                        },
+                        {
+                          "drugMasterId": "LSD100002",
+                          "name": "Paracetamol 650mg Tablet",
+                          "packContainer": "strip",
+                          "packQty": 15,
+                          "packUnit": null,
+                          "quantity": 1,
+                          "mrp": 50,
+                          "unitPrice": 45,
+                          "linePrice": 45,
+                          "storeUnitPrice": 42.5,
+                          "storeLinePrice": 42.5,
+                          "available": true,
+                          "prescriptionRequired": false
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "503": {
+            "description": "The pharmacy could not be reached or could not price the basket. Safe to retry.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "status": "failure",
+                  "error": "The pharmacy could not price this basket right now. Please try again shortly."
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "orderType",
+                  "lsPharmacyId",
+                  "drugs"
+                ],
+                "properties": {
+                  "orderType": {
+                    "type": "string",
+                    "enum": [
+                      "HOME_DELIVERY",
+                      "PICKUP"
+                    ],
+                    "example": "HOME_DELIVERY"
+                  },
+                  "lsPharmacyId": {
+                    "type": "integer",
+                    "description": "A pharmacy from Check Serviceability",
+                    "example": 456
+                  },
+                  "drugs": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 50,
+                    "description": "One entry per drug. Repeated drugMasterIds are merged; at most 100 of any one drug.",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "drugMasterId",
+                        "quantity"
+                      ],
+                      "properties": {
+                        "drugMasterId": {
+                          "type": "string",
+                          "example": "LSD100001"
+                        },
+                        "quantity": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 100,
+                          "example": 2
+                        }
+                      }
+                    }
+                  },
+                  "pincode": {
+                    "type": "string",
+                    "description": "The patient's pincode - the delivery pincode for HOME_DELIVERY. Required unless latitude and longitude are sent.",
+                    "example": "560001"
+                  },
+                  "latitude": {
+                    "type": "number",
+                    "description": "Optional. Send with longitude. The patient's location when sent: the delivery point, or where a PICKUP distance is measured from.",
+                    "example": 12.9716
+                  },
+                  "longitude": {
+                    "type": "number",
+                    "example": 77.5946
+                  },
+                  "range": {
+                    "type": "number",
+                    "description": "Optional, PICKUP only. How far, in km, the pickup point may be from the patient. Greater than 0 and at most 100. Default 10."
+                  },
+                  "unitFloorBuilding": {
+                    "type": "string",
+                    "description": "Optional. Refines the location. Requires pincode."
+                  },
+                  "address": {
+                    "type": "string",
+                    "description": "Optional. Refines the location. Requires pincode.",
+                    "example": "42, MG Road"
+                  },
+                  "locality": {
+                    "type": "string",
+                    "description": "Optional. Requires pincode.",
+                    "example": "Indiranagar"
+                  },
+                  "city": {
+                    "type": "string",
+                    "description": "Optional. Requires pincode.",
+                    "example": "Bangalore"
+                  },
+                  "state": {
+                    "type": "string",
+                    "description": "Optional. Requires pincode.",
+                    "example": "Karnataka"
+                  },
+                  "shipmentSpeed": {
+                    "type": "string",
+                    "enum": [
+                      "STANDARD",
+                      "EXPRESS",
+                      "SAME_DAY",
+                      "PAN_INDIA"
+                    ],
+                    "description": "Optional. One of the pharmacy's shipmentSpeeds from Check Serviceability. Omit for its default."
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "Optional patient name. Send with mobile; some pharmacies quote more precisely with both.",
+                    "example": "Jane Doe"
+                  },
+                  "mobile": {
+                    "type": "string",
+                    "description": "Optional patient mobile. Send with name.",
+                    "example": "9876543210"
+                  }
+                }
+              },
+              "example": {
+                "orderType": "HOME_DELIVERY",
+                "lsPharmacyId": 456,
+                "drugs": [
+                  {
+                    "drugMasterId": "LSD100001",
+                    "quantity": 2
+                  },
+                  {
+                    "drugMasterId": "LSD100002",
+                    "quantity": 1
+                  }
+                ],
+                "pincode": "560001",
+                "address": "42, MG Road",
+                "city": "Bangalore",
+                "state": "Karnataka",
+                "shipmentSpeed": "STANDARD"
+              }
+            }
+          }
+        },
+        "description": "Prices a basket at a pharmacy before any order exists, for partners that show a total or collect payment on their own platform. The basket is checked exactly as Place Order checks it - your network, the order type, the drugs the pharmacy lists, drugs that are not for sale, the location and the shipment speed - so a basket accepted here is accepted there unless stock or prices change in between. A basket containing a drug marked `notForSale` (Schedule X or habit-forming) is rejected with a 400 naming it. `unitPrice`, `subTotal` and `totalAmount` are what the customer pays: each drug's MRP less your store's customer medicine discount, plus `additionalCharges` - delivery and every other fee - on top. `storeUnitPrice`, `storeSubTotal` and `storeTotalAmount` are what your store owes LabStack: each drug's MRP less your store's own medicine discount, plus the same `additionalCharges`. Both totals are the figures Place Order fixes for the order if nothing changes; re-read them from Place Order's response. `allItemsAvailable` is false when the pharmacy cannot supply a drug, or not in the quantity asked; Place Order refuses that basket, and the item's `available` says which. Unavailable items are priced but left out of `subTotal` and `totalAmount`. `prescriptionRequired` is true when Place Order will need a prescription in `documents`. `canCollectPayment` is true when Place Order will accept `isPaymentRequired` for this basket. `isLivePrice` is false for a pharmacy that prices from its catalogue, whose stock is confirmed only once it receives the order. Location: send the patient's `pincode` or a `latitude`/`longitude` pair, for either order type. PICKUP is accepted on the rules Check Serviceability applies: the pharmacy's pickup point must be within `range` km of that location (10 unless sent, at most 100), or the call is a 400 giving the distance. `distance` and `pickupLocation` then say how far away the pickup point is and where the customer collects the order; both are null for HOME_DELIVERY, and for a pharmacy that chooses the pickup point when the order is placed.\n"
+      }
+    },
+    "/api/pharma/v1.0/order/cancelOrder": {
+      "post": {
+        "tags": [
+          "Orders"
+        ],
+        "summary": "Cancel order",
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The order is cancelled",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "success"
+                      ],
+                      "example": "success"
+                    },
+                    "order": {
+                      "type": "object",
+                      "properties": {
+                        "orderId": {
+                          "type": "integer"
+                        },
+                        "referenceId": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "orderStatus": {
+                          "type": "string",
+                          "example": "CANCELLED"
+                        },
+                        "cancelReason": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "pharmaSuperOrderId": {
+                          "type": "integer",
+                          "nullable": true
+                        },
+                        "relatedOrders": {
+                          "type": "array",
+                          "description": "The other fulfilments of a split order, with their status after the cancellation. Empty otherwise.",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "orderId": {
+                                "type": "integer"
+                              },
+                              "orderStatus": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "status": "success",
+                  "order": {
+                    "orderId": 1234,
+                    "referenceId": "MY-REF-001",
+                    "orderStatus": "CANCELLED",
+                    "cancelReason": "Patient no longer needs the medication",
+                    "pharmaSuperOrderId": null,
+                    "relatedOrders": []
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "description": "No such order among yours",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "status": "failure",
+                  "error": "Order 1234 not found"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The order is delivered, is already being cancelled, or the pharmacy refused the cancellation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "status": "failure",
+                  "error": "The pharmacy could not cancel this order at its current stage. LabStack has been alerted and will follow it up with the pharmacy."
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "orderId": {
+                    "type": "integer",
+                    "description": "LabStack order id. Send this or referenceId.",
+                    "example": 1234
+                  },
+                  "referenceId": {
+                    "type": "string",
+                    "description": "Your own order id. Send this or orderId.",
+                    "example": "MY-REF-001"
+                  },
+                  "reason": {
+                    "type": "string",
+                    "maxLength": 500,
+                    "description": "Optional. Recorded as the cancelReason.",
+                    "example": "Patient no longer needs the medication"
+                  }
+                }
+              },
+              "example": {
+                "orderId": 1234,
+                "reason": "Patient no longer needs the medication"
+              }
+            }
+          }
+        },
+        "description": "Cancels one of your orders, by `orderId` or `referenceId`. An order the pharmacy has not received yet - waiting for payment, or not accepted automatically - is cancelled at once. Otherwise the pharmacy is asked, and may refuse once it has started on the order; a refusal is a 409, the order keeps its status, and LabStack follows it up with the pharmacy. Cancelling an order that is already CANCELLED succeeds and changes nothing, so a retry is safe. A FULL_DELIVERED or PARTIAL_DELIVERED order cannot be cancelled (409). For an order the pharmacy split into several fulfilments, cancelling any one cancels the whole order; `relatedOrders` reports where each of the others ended up, since a fulfilment the pharmacy had already accepted is left with it. A cancelled order's referenceId can be used again with Place Order. Money already paid through the order's payment link is owed back, and LabStack arranges the refund.\n"
+      }
+    },
+    "/api/pharma/v1.0/network/checkServiceability": {
+      "get": {
+        "tags": [
+          "Serviceability"
+        ],
+        "summary": "Check serviceability",
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Pharmacies that can fulfil an order at the location",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "success"
+                      ],
+                      "example": "success"
+                    },
+                    "pincode": {
+                      "type": "string",
+                      "nullable": true,
+                      "description": "The pincode the location resolved to. Null only when latitude and longitude alone were sent and your network has no pharmacies."
+                    },
+                    "latitude": {
+                      "type": "number",
+                      "nullable": true,
+                      "description": "The point distances are measured from. Null only when a pincode alone was sent and no answer depended on a more precise location; PICKUP is then offered only by pharmacies that choose the pickup point when the order is placed."
+                    },
+                    "longitude": {
+                      "type": "number",
+                      "nullable": true
+                    },
+                    "pharmacies": {
+                      "type": "array",
+                      "description": "In the order described above. Empty when no network pharmacy serves the location.",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "lsPharmacyId": {
+                            "type": "integer",
+                            "description": "Pass as lsPharmacyId to Get Estimate and Place Order"
+                          },
+                          "pharmacyName": {
+                            "type": "string"
+                          },
+                          "orderTypes": {
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "enum": [
+                                "HOME_DELIVERY",
+                                "PICKUP"
+                              ]
+                            },
+                            "description": "The order types this pharmacy takes at the location"
+                          },
+                          "shipmentSpeeds": {
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "enum": [
+                                "STANDARD",
+                                "EXPRESS",
+                                "SAME_DAY",
+                                "PAN_INDIA"
+                              ]
+                            },
+                            "description": "Speeds you may request. Empty when the pharmacy offers no choice."
+                          },
+                          "distance": {
+                            "type": "number",
+                            "nullable": true,
+                            "description": "Km from the location to the pickup point, to 2 decimal places. Null unless orderTypes includes PICKUP and the pickup point is known."
+                          },
+                          "pickupLocation": {
+                            "type": "object",
+                            "nullable": true,
+                            "description": "Where the customer collects a PICKUP order. Null exactly when distance is.",
+                            "properties": {
+                              "address": {
+                                "type": "string",
+                                "nullable": true
+                              },
+                              "locality": {
+                                "type": "string",
+                                "nullable": true
+                              },
+                              "city": {
+                                "type": "string",
+                                "nullable": true
+                              },
+                              "state": {
+                                "type": "string",
+                                "nullable": true
+                              },
+                              "pincode": {
+                                "type": "string",
+                                "nullable": true
+                              },
+                              "latitude": {
+                                "type": "number"
+                              },
+                              "longitude": {
+                                "type": "number"
+                              },
+                              "openingTime": {
+                                "type": "string",
+                                "nullable": true,
+                                "description": "HH:mm, India time, the same every day. Null together with closingTime when the pharmacy is open 24 hours."
+                              },
+                              "closingTime": {
+                                "type": "string",
+                                "nullable": true,
+                                "description": "HH:mm, India time."
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "status": "success",
+                  "pincode": "560038",
+                  "latitude": 12.9784,
+                  "longitude": 77.6408,
+                  "pharmacies": [
+                    {
+                      "lsPharmacyId": 456,
+                      "pharmacyName": "City Health Pharmacy",
+                      "orderTypes": [
+                        "HOME_DELIVERY",
+                        "PICKUP"
+                      ],
+                      "shipmentSpeeds": [],
+                      "distance": 0.74,
+                      "pickupLocation": {
+                        "address": "612, 100 Feet Road, HAL 2nd Stage",
+                        "locality": "Indiranagar",
+                        "city": "Bangalore",
+                        "state": "Karnataka",
+                        "pincode": "560038",
+                        "latitude": 12.9719,
+                        "longitude": 77.6412,
+                        "openingTime": "08:00",
+                        "closingTime": "22:00"
+                      }
+                    },
+                    {
+                      "lsPharmacyId": 458,
+                      "pharmacyName": "Koramangala Medicals",
+                      "orderTypes": [
+                        "PICKUP"
+                      ],
+                      "shipmentSpeeds": [],
+                      "distance": 5.83,
+                      "pickupLocation": {
+                        "address": "14, 80 Feet Road, 4th Block",
+                        "locality": "Koramangala",
+                        "city": "Bangalore",
+                        "state": "Karnataka",
+                        "pincode": "560034",
+                        "latitude": 12.9279,
+                        "longitude": 77.6271,
+                        "openingTime": null,
+                        "closingTime": null
+                      }
+                    },
+                    {
+                      "lsPharmacyId": 457,
+                      "pharmacyName": "MG Road Chemist",
+                      "orderTypes": [
+                        "HOME_DELIVERY"
+                      ],
+                      "shipmentSpeeds": [
+                        "STANDARD",
+                        "EXPRESS"
+                      ],
+                      "distance": null,
+                      "pickupLocation": null
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          }
+        },
+        "description": "Lists the pharmacies in your network that can fulfil an order at a location, with the order types and shipment speeds each offers there. Send `pincode`, a `latitude`/`longitude` pair, or both. The optional address fields refine a pincode into a more precise location and require it. HOME_DELIVERY is offered where the pharmacy delivers to the location. PICKUP is offered when the pharmacy's pickup point is within `range` km of the location - 10 km unless you send `range`, at most 100. `distance` says how far away it is, and `pickupLocation` where the customer collects the order and when the pharmacy is open. A few pharmacies choose the pickup point nearest the customer only when the order is placed; they are listed for PICKUP with a null `distance` and `pickupLocation`, and `range` does not apply to them. Order: with `orderType=PICKUP`, the nearest pickup point comes first. Otherwise pharmacies come in your network's order of preference, the nearest first among those you prefer equally. A pharmacy with no `distance` follows those with one. Use a returned `lsPharmacyId` with Search Drugs, Get Estimate and Place Order, and send Get Estimate and Place Order the same location and `range`: they apply the same rules. A `shipmentSpeed` you send to them must be one of that pharmacy's `shipmentSpeeds`; an empty list means the pharmacy offers no choice of speed, so omit it.\n",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "pincode",
+            "required": false,
+            "description": "Required unless latitude and longitude are sent. 6 digits.",
+            "example": "560001",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "latitude",
+            "required": false,
+            "description": "Required unless pincode is sent. -90 to 90. Send with longitude.",
+            "example": "12.9716",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "longitude",
+            "required": false,
+            "description": "Required unless pincode is sent. -180 to 180. Send with latitude.",
+            "example": "77.5946",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "orderType",
+            "required": false,
+            "description": "Optional. Only pharmacies taking this order type. PICKUP also lists the nearest pickup point first.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "HOME_DELIVERY",
+                "PICKUP"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "range",
+            "required": false,
+            "description": "Optional. How far, in km, a pickup point may be from the location for PICKUP to be offered. Greater than 0 and at most 100; may be fractional. Default 10.",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shipmentSpeed",
+            "required": false,
+            "description": "Optional. Only pharmacies offering this speed at the location.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "STANDARD",
+                "EXPRESS",
+                "SAME_DAY",
+                "PAN_INDIA"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "unitFloorBuilding",
+            "required": false,
+            "description": "Optional. Refines the location. Requires pincode.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "address",
+            "required": false,
+            "description": "Optional. Refines the location. Requires pincode.",
+            "example": "42, MG Road",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "locality",
+            "required": false,
+            "description": "Optional. Refines the location. Requires pincode.",
+            "example": "Indiranagar",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "city",
+            "required": false,
+            "description": "Optional. Refines the location. Requires pincode.",
+            "example": "Bangalore",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "state",
+            "required": false,
+            "description": "Optional. Refines the location. Requires pincode.",
+            "example": "Karnataka",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/api/pharma/v1.0/catalog/searchDrugs": {
+      "get": {
+        "tags": [
+          "Catalog"
+        ],
+        "summary": "Search drugs",
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A page of drugs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "success"
+                      ],
+                      "example": "success"
+                    },
+                    "count": {
+                      "type": "integer",
+                      "description": "Drugs matching, across all pages"
+                    },
+                    "page": {
+                      "type": "integer"
+                    },
+                    "pageSize": {
+                      "type": "integer"
+                    },
+                    "totalPages": {
+                      "type": "integer"
+                    },
+                    "drugs": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "drugMasterId": {
+                            "type": "string",
+                            "description": "LabStack drug id. Identifies a brand and pack, not a salt.",
+                            "example": "LSD100001"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "saltCompositionId": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "saltCompositionName": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "prescriptionRequired": {
+                            "type": "boolean",
+                            "description": "True when a prescription must be sent with the order, or when that is unconfirmed. Always true when notForSale is."
+                          },
+                          "notForSale": {
+                            "type": "boolean",
+                            "description": "True for a Schedule X or habit-forming drug, which cannot be ordered online. Get Estimate and Place Order reject it."
+                          },
+                          "packContainer": {
+                            "type": "string",
+                            "nullable": true,
+                            "description": "What the pack is, e.g. strip, bottle, vial"
+                          },
+                          "packQty": {
+                            "type": "number",
+                            "nullable": true,
+                            "description": "How much the pack holds, counted in packUnit - or in units of the dosage form (tablets, capsules) when packUnit is null."
+                          },
+                          "packUnit": {
+                            "type": "string",
+                            "nullable": true,
+                            "description": "Unit of packQty, e.g. ml, gm. Null when packQty is a count."
+                          },
+                          "pharmacies": {
+                            "type": "array",
+                            "description": "Network pharmacies listing the drug, cheapest to the customer first",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "lsPharmacyId": {
+                                  "type": "integer"
+                                },
+                                "pharmacyName": {
+                                  "type": "string"
+                                },
+                                "mrp": {
+                                  "type": "number",
+                                  "nullable": true,
+                                  "description": "MRP per pack. Null when none is on record."
+                                },
+                                "customerPrice": {
+                                  "type": "number",
+                                  "nullable": true,
+                                  "description": "Customer price per pack: mrp less your store's customer medicine discount"
+                                },
+                                "storePrice": {
+                                  "type": "number",
+                                  "nullable": true,
+                                  "description": "Your store's price per pack, what your store owes LabStack: mrp less your store's own medicine discount"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "status": "success",
+                  "count": 2,
+                  "page": 1,
+                  "pageSize": 20,
+                  "totalPages": 1,
+                  "drugs": [
+                    {
+                      "drugMasterId": "LSD100001",
+                      "name": "Paracetamol 500mg Tablet",
+                      "saltCompositionId": "SALT00045",
+                      "saltCompositionName": "Paracetamol 500mg",
+                      "prescriptionRequired": false,
+                      "notForSale": false,
+                      "packContainer": "strip",
+                      "packQty": 10,
+                      "packUnit": null,
+                      "pharmacies": [
+                        {
+                          "lsPharmacyId": 456,
+                          "pharmacyName": "City Health Pharmacy",
+                          "mrp": 30,
+                          "customerPrice": 27,
+                          "storePrice": 25.5
+                        },
+                        {
+                          "lsPharmacyId": 457,
+                          "pharmacyName": "MG Road Chemist",
+                          "mrp": 32,
+                          "customerPrice": 28.8,
+                          "storePrice": 27.2
+                        }
+                      ]
+                    },
+                    {
+                      "drugMasterId": "LSD100002",
+                      "name": "Paracetamol 650mg Tablet",
+                      "saltCompositionId": "SALT00046",
+                      "saltCompositionName": "Paracetamol 650mg",
+                      "prescriptionRequired": false,
+                      "notForSale": false,
+                      "packContainer": "strip",
+                      "packQty": 15,
+                      "packUnit": null,
+                      "pharmacies": [
+                        {
+                          "lsPharmacyId": 456,
+                          "pharmacyName": "City Health Pharmacy",
+                          "mrp": 34,
+                          "customerPrice": 30.6,
+                          "storePrice": 28.9
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          }
+        },
+        "description": "Pages through the drugs your pharmacy network lists, by name. Send `query` to search by brand or salt name; omit it to page through the whole catalogue. Send `lsPharmacyId` to list one pharmacy's drugs only. Each drug is one row with its pack - `packContainer`, `packQty` and `packUnit`, which are the drug's own and the same at every pharmacy - and `pharmacies`: every network pharmacy that lists it, with its MRP there, `customerPrice` - what the customer pays, the MRP less your store's customer medicine discount - and `storePrice` - what your store owes LabStack, the MRP less your store's own medicine discount. `count` and `totalPages` count drugs, not pharmacy listings. Prices here are from the catalogue; Get Estimate gives the live price and stock for a basket. `prescriptionRequired` is true when a prescription must be sent with an order containing the drug, and also when that is not confirmed either way - treat true as \"collect a prescription\". Drugs that cannot be sold online - Schedule X and habit-forming drugs - are listed so their details can be shown, with `notForSale: true` and `prescriptionRequired: true`. Get Estimate and Place Order reject a basket that contains one.\n",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "query",
+            "required": false,
+            "description": "Optional. Brand or salt name to search for. At least 3 characters when sent.",
+            "example": "paracetamol",
+            "schema": {
+              "type": "string",
+              "minLength": 3
+            }
+          },
+          {
+            "in": "query",
+            "name": "lsPharmacyId",
+            "required": false,
+            "description": "Optional. Only drugs this network pharmacy lists.",
+            "example": "456",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "description": "Optional. 1-based. Default 1. A page past totalPages is a 400.",
+            "example": "1",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "required": false,
+            "description": "Optional. Drugs per page. Default 20, at most 100.",
+            "example": "20",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          }
+        ]
+      }
+    },
+    "/api/pharma/v1.0/catalog/getDrugDetails": {
+      "get": {
+        "tags": [
+          "Catalog"
+        ],
+        "summary": "Get drug details",
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The drug and its listings in your network",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "success"
+                      ],
+                      "example": "success"
+                    },
+                    "drug": {
+                      "type": "object",
+                      "properties": {
+                        "drugMasterId": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "saltCompositionId": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "saltCompositionName": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "prescriptionRequired": {
+                          "type": "boolean",
+                          "description": "True when a prescription must be sent with the order, or when that is unconfirmed. Always true when notForSale is."
+                        },
+                        "notForSale": {
+                          "type": "boolean",
+                          "description": "True for a Schedule X or habit-forming drug, which cannot be ordered online. Get Estimate and Place Order reject it."
+                        },
+                        "packContainer": {
+                          "type": "string",
+                          "nullable": true,
+                          "description": "What the pack is, e.g. strip, bottle, vial. The same at every pharmacy."
+                        },
+                        "packQty": {
+                          "type": "number",
+                          "nullable": true,
+                          "description": "How much the pack holds, counted in packUnit - or in units of the dosage form (tablets, capsules) when packUnit is null."
+                        },
+                        "packUnit": {
+                          "type": "string",
+                          "nullable": true,
+                          "description": "Unit of packQty, e.g. ml, gm. Null when packQty is a count."
+                        },
+                        "pharmacies": {
+                          "type": "array",
+                          "description": "Cheapest to the customer first",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "lsPharmacyId": {
+                                "type": "integer"
+                              },
+                              "pharmacyName": {
+                                "type": "string"
+                              },
+                              "mrp": {
+                                "type": "number",
+                                "nullable": true
+                              },
+                              "customerPrice": {
+                                "type": "number",
+                                "nullable": true,
+                                "description": "mrp less your store's customer medicine discount"
+                              },
+                              "storePrice": {
+                                "type": "number",
+                                "nullable": true,
+                                "description": "What your store owes LabStack per pack: mrp less your store's own medicine discount"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "status": "success",
+                  "drug": {
+                    "drugMasterId": "LSD100001",
+                    "name": "Azithral 500 Tablet",
+                    "saltCompositionId": "SALT00112",
+                    "saltCompositionName": "Azithromycin 500mg",
+                    "prescriptionRequired": true,
+                    "notForSale": false,
+                    "packContainer": "strip",
+                    "packQty": 5,
+                    "packUnit": null,
+                    "pharmacies": [
+                      {
+                        "lsPharmacyId": 456,
+                        "pharmacyName": "City Health Pharmacy",
+                        "mrp": 120,
+                        "customerPrice": 108,
+                        "storePrice": 102
+                      },
+                      {
+                        "lsPharmacyId": 457,
+                        "pharmacyName": "MG Road Chemist",
+                        "mrp": 125,
+                        "customerPrice": 112.5,
+                        "storePrice": 106.25
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "description": "No such drug in the catalogue",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "status": "failure",
+                  "error": "Drug LSD100001 not found"
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          }
+        },
+        "description": "One drug, in the same shape Search Drugs returns: its salt composition, whether a prescription is required, its pack, and each network pharmacy that lists it with the MRP, customer price and your store's price there, cheapest to the customer first. Send `lsPharmacyId` for one pharmacy's listing only. A drug your network does not list comes back with an empty `pharmacies`. Prices are from the catalogue and listing is not live stock; Get Estimate gives the live price and stock for a basket. A drug that cannot be sold online - a Schedule X or habit-forming drug - is returned with `notForSale: true` and `prescriptionRequired: true`, so its details can be shown; Get Estimate and Place Order reject a basket that contains it.\n",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "drugMasterId",
+            "required": true,
+            "description": "LabStack drug id",
+            "example": "LSD100001",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "lsPharmacyId",
+            "required": false,
+            "description": "Optional. Only this network pharmacy's listing.",
+            "example": "456",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ]
+      }
+    },
+    "/api/pharma/v1.0/catalog/getAlternatives": {
+      "get": {
+        "tags": [
+          "Catalog"
+        ],
+        "summary": "Get alternatives",
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The drug and a page of its alternatives",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "success"
+                      ],
+                      "example": "success"
+                    },
+                    "drug": {
+                      "type": "object",
+                      "description": "The drug asked about, in the Search Drugs shape"
+                    },
+                    "count": {
+                      "type": "integer",
+                      "description": "Alternatives across all pages"
+                    },
+                    "page": {
+                      "type": "integer"
+                    },
+                    "pageSize": {
+                      "type": "integer"
+                    },
+                    "totalPages": {
+                      "type": "integer"
+                    },
+                    "alternatives": {
+                      "type": "array",
+                      "description": "Drugs in the Search Drugs shape",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "status": "success",
+                  "drug": {
+                    "drugMasterId": "LSD100001",
+                    "name": "Crocin 500 Tablet",
+                    "saltCompositionId": "SALT00045",
+                    "saltCompositionName": "Paracetamol 500mg",
+                    "prescriptionRequired": false,
+                    "notForSale": false,
+                    "packContainer": "strip",
+                    "packQty": 15,
+                    "packUnit": null,
+                    "pharmacies": [
+                      {
+                        "lsPharmacyId": 456,
+                        "pharmacyName": "City Health Pharmacy",
+                        "mrp": 32,
+                        "customerPrice": 28.8,
+                        "storePrice": 27.2
+                      }
+                    ]
+                  },
+                  "count": 1,
+                  "page": 1,
+                  "pageSize": 20,
+                  "totalPages": 1,
+                  "alternatives": [
+                    {
+                      "drugMasterId": "LSD100045",
+                      "name": "Dolo 500 Tablet",
+                      "saltCompositionId": "SALT00045",
+                      "saltCompositionName": "Paracetamol 500mg",
+                      "prescriptionRequired": false,
+                      "notForSale": false,
+                      "packContainer": "strip",
+                      "packQty": 10,
+                      "packUnit": null,
+                      "pharmacies": [
+                        {
+                          "lsPharmacyId": 456,
+                          "pharmacyName": "City Health Pharmacy",
+                          "mrp": 30,
+                          "customerPrice": 27,
+                          "storePrice": 25.5
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "description": "No such drug in the catalogue",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "status": "failure",
+                  "error": "Drug LSD100001 not found"
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          }
+        },
+        "description": "Other drugs with the same salt composition as `drugMasterId` - other brands and packs of the same medicine - that your pharmacy network lists, by name, in the same shape as Search Drugs. Send `lsPharmacyId` to find alternatives one pharmacy stocks, for example to replace a drug Get Estimate reports unavailable there. `drug` is the drug you asked about, with its own listings. An order is never substituted automatically: only the drugMasterIds you send to Place Order are ordered, so an alternative has to be ordered explicitly. A drug with no salt composition on record has no alternatives. An alternative with `notForSale: true` - a Schedule X or habit-forming drug - cannot be ordered online either.\n",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "drugMasterId",
+            "required": true,
+            "description": "The drug to find alternatives for",
+            "example": "LSD100001",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "lsPharmacyId",
+            "required": false,
+            "description": "Optional. Only alternatives this network pharmacy lists.",
+            "example": "456",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "description": "Optional. 1-based. Default 1. A page past totalPages is a 400.",
+            "example": "1",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "required": false,
+            "description": "Optional. Default 20, at most 100.",
+            "example": "20",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          }
+        ]
+      }
+    }
+  }
+}
