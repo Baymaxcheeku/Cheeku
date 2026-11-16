@@ -4516,3 +4516,94 @@ like "Annual health check-up" no longer starts the big-picture answer.
 - **Checked live** after deploying: adult dry cough (suppressant type,
   pharmacist, home care, doctor signs), 3-year-old (no syrup, home care,
   honey over 1, breathing signs), "can I stop my metformin" (still refuses).
+
+## Chat: photos go to Gemini, the stand-in is gone · 2026-11-17
+
+- **The ask**: "add camera to add images and ask via Gemini, delete the
+  hard-coded mock data; rule-based routing is fine."
+- **No stand-in.** `lib/memory/mock-model.ts` (canned paragraphs), the canned
+  answer engine (`lib/ai/mock/answer.ts`, `knowledge.ts`) and the fixed
+  product picker (`ProductPicker`, `scenarios.ts`, `askAboutProduct`) are
+  deleted. `chatModel()` always calls `cheeku-chat`; `EXPO_PUBLIC_CHAT_MODEL`
+  no longer exists. A turn the model can't answer throws: `ModelBusy` (pace),
+  `ModelUnavailable("quota")` (allowance or daily ceiling: plans sheet) or
+  `ModelUnavailable("down")` ("couldn't answer, try again"; words and photo
+  stay in the composer). Nothing is saved for a refused turn, so the thread
+  never fills with repeats again.
+- **Why one rules answer survives**: if the floor is contact-today or go-now
+  and the model fails, an error would leave a worried person with nothing.
+  They get `floorReply`: "talk to a doctor today" (or go now) with the rules'
+  reasons, `modelId` `rules:floor`. Emergencies, hard-stops, bookings,
+  insurance-only questions and logging stay with the rules, as before.
+- **Photos**: the camera button opens a sheet (take or choose). The picture is
+  re-drawn as a 1280 px JPEG (drops EXIF, so no GPS), sent once as
+  `ModelRequest.image`, forwarded by the function as an `inlineData` part
+  (JPEG/PNG/WebP, at most 4M base64 chars, else 400 before the meter), and
+  never stored. A 256 px thumbnail is kept on the person's message
+  (`attachment: {kind: "photo", thumb}`) so the thread shows it; `readAttachment`
+  only accepts a JPEG/PNG data URI there. A photo always goes to the model,
+  even when the words alone would be a booking or an insurance question.
+- **The prompt** got "# When they send a photo": say what is visible first;
+  read medicine packs and labels against allergies, conditions and medicines;
+  never name a condition from a body photo, lean to a doctor for children;
+  ask for a clearer shot instead of guessing; never comment on faces.
+- **Tests**: pipeline tests used the stand-in's prose as their oracle. They
+  now use an echo model and check what reached the model (the digest), which
+  is what the rules owe Gemini. New tests for the error paths, the floor
+  answer, the photo routing and the function's image handling.
+
+## Chat limit 1000 a day; LabStack doctor list for new families · 2026-11-17
+
+- **1000 chats a day** (owner's call): `FREE_CHAT_LIMIT` 20 -> 1000 and
+  `supabase/manual/chat-limits-1000.sql` (free_daily and paid_model_daily
+  to 1000 in `app_config('chat_limits')`). Both must move together: the app
+  pre-checks with the constant, the database enforces with the config.
+  Bursts stay at 6 a minute and 60 an hour.
+- **LabStack is wired in already** (lab tests, doctors, pharmacy through the
+  `labstack` function; keys set as secrets) but the app runs on preview data
+  until `EXPO_PUBLIC_LABSTACK=live`. A read-only check on 2026-11-17: the
+  function reaches LabStack (46 specialities), but the doctor list failed with
+  "No user found with the given userUniqueId" for a family LabStack hasn't
+  registered yet, which is every family before its first booking.
+  `consult.providers` now asks again without the id on that error.
+
+## Chat photos: the gallery froze the chat · 2026-11-17
+
+- **What happened**: tapping "Choose from photos" hung the app. The picker was
+  opened from our own bottom sheet while it was still animating away; iOS
+  won't present over a dismissing modal, so the picker never appeared and its
+  promise never settled. It also asked for photo-library permission, which the
+  system picker doesn't need, adding a prompt on top.
+- **Now**: the camera button opens the platform's own menu (ActionSheetIOS on
+  iOS, an Alert on Android) and the picker opens after it is gone; on web it
+  opens the library straight from the tap (a file dialog only opens inside
+  the tap). No library permission prompt. A "Getting the photo ready" chip
+  shows while the photo is resized; the thumbnail is made from the 1280 px
+  copy (one full-size decode, not two); preparing has a 20 s limit and every
+  failure is a sentence. `PhotoSheet` is deleted.
+
+
+## Chat photos: a summary is the memory, the photo is optional · 2026-11-17
+
+- **The ask**: "load the image locally, store its summary in the db as memory,
+  remove the image, and give an option to save it as it is in the bucket."
+- **Default**: the photo stays on the phone (shown in the thread for this
+  visit only). Gemini returns `photoSummary` (one or two sentences of what it
+  shows, no advice) and that alone is saved, on the person's message
+  (`attachment: {kind: "photo", summary, path: null}`). After the app closes
+  the bubble reads "Photo not kept" with the summary. The thumbnail the first
+  version kept is gone.
+- **Memory**: `photosFor()` reads the last 8 summaries for the member, they
+  ride in `MemoryDigest.photos`, and the prompt lists them as "Photos shown
+  before", so "the tablets I showed you" works days later. No migration:
+  messages.attachment is jsonb already.
+- **Keep photo** (a switch on the preview, off each time): a copy re-drawn at
+  2048 px (no EXIF) goes to the private documents bucket at
+  `<user>/<profile>/chat-<uuid>.jpg` (0005's folder policy), uploaded only
+  after the answer exists, removed again if the message fails to save, and
+  shown through an hour-long signed URL. `readAttachment` only accepts that
+  path shape.
+- **"Image fails to send"** on 2026-11-17 was the meter: the account had made
+  25 model calls in 24 h (free_daily 20 + free_model_extra 5), so every turn
+  was refused before Gemini. `chat-limits-1000.sql` is the fix; it has not
+  been run yet.

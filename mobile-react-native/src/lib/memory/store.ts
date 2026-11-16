@@ -10,8 +10,9 @@ import { supabase } from "@/lib/supabase/client";
 
 import { todayIso } from "./clock";
 import type { MemoryBundle } from "./context";
-import { mockModel } from "./mock-model";
-import { chatModel, ModelBusy } from "./models";
+import type { ChatPhoto } from "@/lib/chat/photo";
+import { dropKeptPhoto, keepPhoto, photosFor, rememberSessionPhoto } from "@/lib/chat/photo-store";
+import { chatModel, ModelBusy, ModelUnavailable, noModel } from "./models";
 import { planTurn, type TurnPlan } from "./pipeline";
 import { BOOKING_REPLY, eventMemory, factUsage, readThreadRow, replyText, SITTING_GAP_MS, sittingFor, toTurnMemory, type BookedEvent, type ThreadMessage } from "./thread";
 import type { Fact, Tier } from "./types";
@@ -41,8 +42,8 @@ export const threadKey = (profileId: string | undefined) => ["thread", profileId
 const missing = (message: string | undefined) => Boolean(message && /could not find the function|function .* does not exist|column .* does not exist|could not find the .* column/i.test(message));
 
 export async function fetchMemory(profileId: string): Promise<MemoryBundle | null> {
-  const [bundle, policies] = await Promise.all([readBundle(profileId), policiesFor(profileId)]);
-  return bundle ? { ...bundle, policies } : null;
+  const [bundle, policies, photos] = await Promise.all([readBundle(profileId), policiesFor(profileId), photosFor(profileId)]);
+  return bundle ? { ...bundle, policies, photos } : null;
 }
 
 async function readBundle(profileId: string): Promise<MemoryBundle | null> {
@@ -102,12 +103,16 @@ export function useThread(profileId: string | undefined) {
 }
 
 export type SendResult =
-  | { ok: true; plan: TurnPlan; user: ThreadMessage; assistant: ThreadMessage | null }
+  /** `photoNotKept`: they asked to keep the photo and the upload failed; the answer and what it showed are saved. */
+  | { ok: true; plan: TurnPlan; user: ThreadMessage; assistant: ThreadMessage | null; photoNotKept?: boolean }
   | { ok: false; quota: true; message: string }
   | { ok: false; quota?: false; message: string };
 
 const QUOTA_SPENT = "You've used today's free chats. They reset tomorrow.";
 const BUSY = "That's a lot of messages in a short time. Give it a minute, then send it again.";
+const DOWN = "Cheeku couldn't answer just now. Nothing was sent. Try again in a moment.";
+/** Sent as the words when only a photo is sent. */
+export const PHOTO_QUESTION = "What can you tell me from this photo?";
 
 export async function sendTurn(args: {
   text: string;
@@ -118,9 +123,13 @@ export async function sendTurn(args: {
   about?: { id: string; title: string; date: string | null } | null;
   /** The account holder's own profile: only there can Cheeku give a family round-up. */
   isPrimary?: boolean;
+  /** A photo to ask about (lib/chat/photo). Goes to the model once; what it showed is saved, not the photo. */
+  photo?: ChatPhoto | null;
+  /** "Keep photo": also save a copy in the private documents bucket. */
+  keepPhoto?: boolean;
   qc?: QueryClient;
 }): Promise<SendResult> {
-  const text = args.text.trim();
+  const text = args.text.trim() || (args.photo ? PHOTO_QUESTION : "");
   if (!text) return { ok: false, message: "Type something first." };
   if (text.length > 1000) return { ok: false, message: "That's a lot for one message. Try splitting it in two." };
 
@@ -137,8 +146,8 @@ export async function sendTurn(args: {
   /*
    * The allowance is read BEFORE planning. With it spent, the turn is still
    * planned (that is where an emergency is recognised, and an emergency is
-   * never refused) but on the on-device stand-in, so a refused question costs
-   * no model call. The server meter refuses it as well; this just avoids asking.
+   * never refused) but with no model, so a refused question costs no model
+   * call. The server meter refuses it as well; this just avoids asking.
    */
   // Steps or sleep said in the message go straight into the day's logs, so
   // the plan and the longevity areas see them, and the answer can say so.
@@ -155,13 +164,15 @@ export async function sendTurn(args: {
       today: todayIso(),
       history: args.thread.slice(-12).map((m) => ({ role: m.role, content: m.content })),
       usage: factUsage(args.thread),
-      model: spent ? mockModel : chatModel(),
+      model: spent ? noModel : chatModel(),
+      image: args.photo?.image,
       newId: randomUUID,
       extraNotes: await extensionChatNotes(args.profileId),
       world: (ctx) => gatherWorld({ profileId: args.profileId, ctx, question: text, isPrimary: Boolean(args.isPrimary), day: todayIso(), justLogged }),
     });
   } catch (e) {
     if (e instanceof ModelBusy) return { ok: false, message: BUSY };
+    if (e instanceof ModelUnavailable) return e.reason === "quota" ? { ok: false, quota: true, message: QUOTA_SPENT } : { ok: false, message: DOWN };
     throw e;
   }
   const emergency = plan.status !== "answered";
@@ -176,8 +187,19 @@ export async function sendTurn(args: {
   }
 
   const safety = emergency ? "escalated" : plan.gate.status === "tier2" ? "tier2" : "clear";
+  // Kept only when asked, and only once the answer exists: a refused turn uploads nothing.
+  const keptPath = args.photo && args.keepPhoto ? await keepPhoto(userId, args.profileId, args.photo) : null;
   const now = new Date().toISOString();
-  const userRow = { id: randomUUID(), conversation_id: conversationId, user_id: userId, role: "user", content: text, citations: [], safety_status: safety };
+  const userRow = {
+    id: randomUUID(),
+    conversation_id: conversationId,
+    user_id: userId,
+    role: "user",
+    content: text,
+    citations: [],
+    safety_status: safety,
+    attachment: args.photo ? { kind: "photo", summary: plan.reply?.photoSummary ?? null, path: keptPath } : null,
+  };
   const memory = toTurnMemory(plan);
   const assistantRow =
     plan.status === "escalate"
@@ -188,6 +210,7 @@ export async function sendTurn(args: {
           user_id: userId,
           role: "assistant",
           content: replyText(plan),
+          attachment: null,
           citations: [
             ...(about ? [{ documentId: about.id, label: about.title }] : []),
             ...(plan.reply?.citations ?? []).filter((c) => c.documentId !== about?.id),
@@ -209,6 +232,7 @@ export async function sendTurn(args: {
     const plain = withMemory.map(({ tier: _t, memory: _m, model_id: _id, ...rest }) => rest);
     ({ error } = await supabase.from("messages").insert(plain));
   }
+  if (error && keptPath) await dropKeptPhoto(keptPath);
   if (error?.message?.includes("free chat allowance exhausted")) return { ok: false, quota: true, message: QUOTA_SPENT };
   if (reportIfConsentRefused(error)) return { ok: false, message: CONSENT_PAUSED };
   if (error) return { ok: false, message: "Couldn't save that. Check your connection and try again." };
@@ -239,7 +263,8 @@ export async function sendTurn(args: {
 
   const asMessage = (row: typeof userRow | NonNullable<typeof assistantRow>): ThreadMessage =>
     readThreadRow({ ...row, created_at: now, memory: "memory" in row ? row.memory : null, tier: "tier" in row ? row.tier : null });
-  return { ok: true, plan, user: asMessage(userRow), assistant: assistantRow ? asMessage(assistantRow) : null };
+  if (args.photo) rememberSessionPhoto(userRow.id, args.photo.uri);
+  return { ok: true, plan, user: asMessage(userRow), assistant: assistantRow ? asMessage(assistantRow) : null, ...(args.photo && args.keepPhoto && !keptPath ? { photoNotKept: true } : {}) };
 }
 
 /**

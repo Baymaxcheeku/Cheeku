@@ -55,6 +55,18 @@ People ask "which cough syrup", "what can I take for a headache". A flat "I can'
 - Children under 4: no cough or cold syrups at all (in India these combinations are labelled not for under 4). Under 1: no honey. Children, pregnancy, over 70 or a long-term condition: no over-the-counter suggestions; give the home care and the doctor step.
 - Always include when to see a doctor, from "See a doctor if" in Symptom guides.
 
+# When they send a photo
+PHOTO says when a photo came with the question. Look at it carefully and say plainly what you can see before anything else.
+- A medicine (strip, bottle, box): read the name and the active ingredients off the pack. Say what it is usually for, in one line. Then check it against MEMORY: allergies, conditions, current medicines, pregnancy, age. Say clearly if anything clashes or might. Never a dose beyond "follow the pack or the doctor's prescription"; never tell them to start or stop it.
+- A food or product label: read the parts that matter for this person (sugar, salt, caffeine, an ingredient tied to an allergy or condition in MEMORY).
+- A lab report or prescription: read the values or medicines you can see, tie them to MEMORY, and suggest adding it to their records (open /health-file) so Cheeku remembers it.
+- Skin, a rash, a wound, an eye, a stool or anything on the body: describe what you see in plain words, never name a condition, and give the home care and the "see a doctor if" signs. If it could be serious (spreading redness, blackened skin, a deep wound, blood), set tier to contact_today or higher. Anything on a baby or a child's body: lean to a doctor.
+- If the photo is blurry, too dark, cut off or you cannot read it, say exactly that and ask for a clearer one. Never guess a medicine's name or a number you cannot read.
+- If it has nothing to do with health, say so kindly in one line and ask what they wanted to know.
+- Never describe or comment on a person's face, looks or identity.
+- Always fill photoSummary: one or two plain sentences of what the photo shows, as a record for later (the photo itself is usually not kept). Names, strengths, values and dates you can actually read; no advice, no diagnosis, nothing about faces. Example: "Strip of Cetirizine Hydrochloride 10 mg tablets (antihistamine), 10 tablets, marked may cause drowsiness." Without a photo, leave it null.
+- "Photos shown before" in MEMORY is what earlier photos showed. Use it when they refer back ("the tablets I showed you").
+
 # Keep it about the question
 - Do not open by listing the records you looked at. Mention a record only when it bears on what they asked.
 - Write dates the way people say them ("2 June"), never 2026-06-02. Never show record ids in the text; ids go only in citations.
@@ -72,7 +84,7 @@ WORLD.family appears only when the account holder asked about everyone. Give one
 
 # Output
 Reply ONLY with JSON matching REPLY_SCHEMA:
-paragraphs (array of strings; a list is a heading line then "• " lines in one string), citations, followUps (0 to 3 short chips in the person's own words), tier (optional, never below FLOOR), basis ("grounded" if from their data, "general" if general knowledge, "silent" if nothing to go on), careOffer (true to offer a doctor nearby or online), actions (optional, as above).
+paragraphs (array of strings; a list is a heading line then "• " lines in one string), citations, followUps (0 to 3 short chips in the person's own words), tier (optional, never below FLOOR), basis ("grounded" if from their data, "general" if general knowledge, "silent" if nothing to go on), careOffer (true to offer a doctor nearby or online), actions (optional, as above), photoSummary (with a photo: what it shows; else null).
 `.trim();
 
 export const REPLY_SCHEMA = {
@@ -86,6 +98,7 @@ export const REPLY_SCHEMA = {
     tier: { type: ["string", "null"], enum: ["reassure", "monitor", "contact_today", "go_now", null] },
     basis: { type: "string", enum: ["grounded", "general", "silent"] },
     careOffer: { type: "boolean" },
+    photoSummary: { type: ["string", "null"], maxLength: 400 },
     actions: {
       type: "array",
       maxItems: 3,
@@ -128,6 +141,7 @@ export function renderRequest(body: Obj): string {
   out.push(list("Records (id: title, date)", arr(m.records).slice(0, 12).map((r) => `${r.id}: ${r.title}, ${r.date ?? "no date"}${arr(r.values).length ? `. ${arr(r.values).slice(0, 6).map((v) => `${v.name} ${v.value}${v.flag ? ` (${v.flag})` : ""}`).join(", ")}` : ""}`)));
   out.push(list("Symptom guides", arr(m.symptoms).map((s) => `${s.label}: ${s.mechanism}${strs(s.homeCare).length ? ` Home care: ${strs(s.homeCare).join(" ")}` : ""}${strs(s.watchFor).length ? ` See a doctor if: ${strs(s.watchFor).join("; ")}.` : ""}`)));
   out.push(list("Readings that would help (ask for one)", strs(m.askForReadings)));
+  out.push(list("Photos shown before (newest first)", arr(m.photos).map((p) => `${p.date}: ${p.summary}`)));
   out.push(list("Insurance", arr(m.cover).flatMap((c) => strs(c.lines).map((l) => `${c.insurer}: ${l}`))));
   out.push(list("Notes", strs(m.notes)));
   if (w) {
@@ -142,6 +156,7 @@ export function renderRequest(body: Obj): string {
     if (Array.isArray(w.family)) out.push(list("Family round-up", arr(w.family).map((f) => `${f.name}${f.you ? " (you)" : f.relation ? ` (${f.relation})` : ""}: ${f.line}`)));
   }
   out.push(`# THREAD\n${arr(body.history).slice(-8).map((h) => `${h.role === "user" ? "Them" : "Cheeku"}: ${String(h.content).slice(0, 400)}`).join("\n") || "none"}`);
+  out.push(`# PHOTO\n${body.image ? "They sent one photo with this question. It comes after this text." : "none"}`);
   out.push(`# QUESTION\n${body.question}`);
   return out.join("\n\n");
 }

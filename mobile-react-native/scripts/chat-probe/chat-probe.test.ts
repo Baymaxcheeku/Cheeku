@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { writeFileSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
 
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { beforeAll, expect, it, vi } from "vitest";
@@ -8,7 +8,8 @@ import { beforeAll, expect, it, vi } from "vitest";
  * WHO ANSWERED? Runs the app's real chat layer (planTurn + chatModel(), the
  * same code store.ts uses) for a handful of questions, signed in as a real
  * account against the live project, and reports for each one whether the
- * rules, Gemini (through cheeku-chat) or the hard-coded stand-in answered.
+ * rules or Gemini (through cheeku-chat) answered, or nobody did. There is no
+ * hard-coded stand-in any more: a turn the model can't answer is refused.
  *
  * The person is a made-up adult with one lab report, so no real member's
  * records are sent anywhere. Each model turn spends one chat from the probe
@@ -34,7 +35,7 @@ vi.mock("@/lib/supabase/client", () => {
 });
 
 const { planTurn } = await import("@/lib/memory/pipeline");
-const { chatModel } = await import("@/lib/memory/models");
+const { chatModel, FLOOR_REPLY, ModelBusy, ModelUnavailable } = await import("@/lib/memory/models");
 const { BOOKING_REPLY } = await import("@/lib/memory/thread");
 import type { MemoryBundle } from "@/lib/memory/context";
 
@@ -61,6 +62,9 @@ const QUESTIONS = process.env.CHAT_PROBE_Q ? process.env.CHAT_PROBE_Q.split("|")
   "my husband has crushing chest pain",
 ];
 
+// CHAT_PROBE_IMAGE=path/to/photo.jpg sends that photo with every question, as the camera button does.
+const IMAGE = process.env.CHAT_PROBE_IMAGE ? { mimeType: "image/jpeg" as const, data: readFileSync(process.env.CHAT_PROBE_IMAGE).toString("base64") } : undefined;
+
 beforeAll(async () => {
   const email = process.env.CHAT_PROBE_EMAIL;
   const password = process.env.CHAT_PROBE_PASSWORD;
@@ -77,10 +81,15 @@ it("reports who answered each question", async () => {
     const t = Date.now();
     let plan: Awaited<ReturnType<typeof planTurn>>;
     try {
-      plan = await planTurn({ text: q, bundle: riya, today, history: [], usage: [], model: chatModel(), newId: randomUUID });
+      plan = await planTurn({ text: q, bundle: riya, today, history: [], usage: [], model: chatModel(), newId: randomUUID, image: IMAGE });
     } catch (e) {
-      // ModelBusy: the meter refused for pace (6 a minute). The app says "give it a minute".
-      rows.push(`\nQ: ${q}\n   -> REFUSED by the meter (${(e as Error).message}); wait a minute and run again`);
+      const fn = calls[0];
+      const why =
+        e instanceof ModelBusy ? "the meter refused for pace (6 a minute); wait a minute and run again"
+        : e instanceof ModelUnavailable && e.reason === "quota" ? "the allowance or the daily ceiling is spent; the app opens the plans sheet"
+        : e instanceof ModelUnavailable ? `cheeku-chat failed${fn ? ` (HTTP ${fn.status})` : ""}; the app says "couldn't answer, try again"`
+        : (e as Error).message;
+      rows.push(`\nQ: ${q}\n   -> NOT ANSWERED: ${why}`);
       continue;
     }
     const ms = Date.now() - t;
@@ -90,13 +99,13 @@ it("reports who answered each question", async () => {
       plan.status !== "answered" ? `RULES (safety: ${plan.status})`
       : id === BOOKING_REPLY ? "RULES (booking)"
       : id.startsWith("gemini:") ? `GEMINI (${id.slice(7)})`
-      : id === "cheeku-mock-1" ? `STAND-IN, hard-coded${fn ? ` (cheeku-chat answered HTTP ${fn.status})` : " (function not called)"}`
+      : id === FLOOR_REPLY ? `RULES (model failed${fn ? `, HTTP ${fn.status}` : ""}; the floor says a doctor today)`
       : !fn ? "RULES (answered without a model)"
       : `OTHER (${id})`;
     const full = process.env.CHAT_PROBE_FULL === "1";
     const first = full ? (plan.reply?.paragraphs ?? []).join("\n   ") || "(safety script, no model)" : plan.reply?.paragraphs?.[0] ?? "(safety script, no model)";
     const shown = full ? first : `${first.slice(0, 150)}${first.length > 150 ? "..." : ""}`;
-    rows.push(`\nQ: ${q}\n   -> ${who}  [${ms} ms${fn ? `, function ${fn.status} in ${fn.ms} ms` : ""}]\n   "${shown}"${full && plan.reply?.followUps?.length ? `\n   chips: ${plan.reply.followUps.join(" / ")}` : ""}`);
+    rows.push(`\nQ: ${q}\n   -> ${who}  [${ms} ms${fn ? `, function ${fn.status} in ${fn.ms} ms` : ""}]\n   "${shown}"${full && plan.reply?.followUps?.length ? `\n   chips: ${plan.reply.followUps.join(" / ")}` : ""}${IMAGE ? `\n   saved as memory: ${plan.reply?.photoSummary ?? "(no photoSummary)"}` : ""}`);
   }
   const report = `\n===== WHO ANSWERED (${today}) =====${rows.join("\n")}\n`;
   console.log(report);

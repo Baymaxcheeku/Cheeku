@@ -52,7 +52,7 @@ export type Plan = {
   highlight?: string;
 };
 
-export const FREE_CHAT_LIMIT = 20;
+export const FREE_CHAT_LIMIT = 1000;
 
 /** From here down, the chat shows a gentle "N left today" line. */
 export const FREE_CHAT_SOFT_LINE = 5;

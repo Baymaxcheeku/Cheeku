@@ -1,38 +1,51 @@
 import { supabase } from "@/lib/supabase/client";
 
 import type { ChatModel, ModelReply, ModelRequest } from "./model";
-import { mockModel } from "./mock-model";
 import { TIER_RANK, type Tier } from "./types";
 
 /*
  * WHICH MODEL ANSWERS.
  *
- * `EXPO_PUBLIC_CHAT_MODEL=edge` sends each turn's ModelRequest to the
- * `cheeku-chat` Edge Function, which forwards it to the fine-tuned model
- * (see supabase/functions/cheeku-chat). Anything else, or the edge call
- * failing, uses the stand-in, so the chat never breaks because a model
- * endpoint is down. The reply records which one actually answered.
+ * Every turn the rules don't answer goes to the `cheeku-chat` Edge Function,
+ * which asks Gemini (or the fine-tuned model once it has a URL). The model's
+ * keys live in Edge Function secrets, never in the app.
  *
- * The model's keys and URL live in Edge Function secrets, never in the app.
+ * THERE IS NO STAND-IN (2026-11-17). The app used to answer from a hard-coded
+ * on-device model whenever the function failed or the allowance ran out, and
+ * people read the same canned paragraphs again and again as if Cheeku had
+ * thought about them. Now a turn the model can't answer is NOT answered, and
+ * the chat says why, plainly:
  *
- * A 429 from the function is a refusal by the meter (migration 0035), not an
- * outage, and is handled by its reason:
- *   - "per_minute" / "per_hour": the person is sending faster than the limit.
- *     The turn stops with ModelBusy so the chat can say "give it a minute",
- *     UNLESS the floor already says contact a doctor today or go now: then the
- *     stand-in answers, because a careful answer now beats a lecture on pace.
- *   - "quota" / "daily" and anything else: the stand-in answers. For a spent
- *     free allowance the send is refused right after by the same check the
- *     database makes, so nothing extra is given away.
+ *   - ModelBusy: the meter refused for pace ("per_minute" / "per_hour").
+ *     The chat says "give it a minute".
+ *   - ModelUnavailable("quota"): the free allowance or the daily ceiling is
+ *     spent. The chat opens the plans sheet.
+ *   - ModelUnavailable("down"): the function, the model or the network
+ *     failed. The chat says so and keeps their message in the box to resend.
+ *
+ * Nothing is saved for a refused turn.
+ *
+ * THE ONE EXCEPTION IS SAFETY. When the rules' floor already says call a
+ * doctor today or go now, a failure does not leave them with an error: they
+ * get a short rules answer that says exactly that, with the reasons the rules
+ * found (modelId "rules:floor"). Emergencies themselves never get this far;
+ * the rules answer them before any model is asked.
  */
 
-const MODE = process.env.EXPO_PUBLIC_CHAT_MODEL ?? "mock";
 const TIERS = Object.keys(TIER_RANK) as Tier[];
+export const FLOOR_REPLY = "rules:floor";
 
 /** The meter refused this turn for pace; the chat should ask them to wait. */
 export class ModelBusy extends Error {
   constructor(readonly retryAfter: number) {
     super("model_busy");
+  }
+}
+
+/** The model can't answer this turn: the allowance is spent, or something is down. */
+export class ModelUnavailable extends Error {
+  constructor(readonly reason: "quota" | "down") {
+    super(`model_unavailable:${reason}`);
   }
 }
 
@@ -48,10 +61,27 @@ async function refusalOf(error: unknown): Promise<{ reason: string; retryAfter: 
   }
 }
 
-/** Pace refusals stop the turn, except when the floor already asks for a doctor today or sooner. */
-export function stopsTurn(reason: string, floor: Tier | null): boolean {
-  if (reason !== "per_minute" && reason !== "per_hour") return false;
-  return !floor || TIER_RANK[floor] < TIER_RANK.contact_today;
+/** A floor of contact-today or above: a failure still gets the rules' answer. */
+export function floorAnswers(floor: Tier | null): boolean {
+  return Boolean(floor && TIER_RANK[floor] >= TIER_RANK.contact_today);
+}
+
+/** What the rules say when the model can't, and the floor says a doctor today or sooner. */
+export function floorReply(req: ModelRequest): ModelReply {
+  const who = req.memory.person.firstName || "them";
+  const now = req.floor.tier === "go_now";
+  return {
+    paragraphs: [
+      now ? `From what you've told me, ${who} needs to be seen now. Go to the nearest emergency department or call 112.` : `From what you've told me, ${who} should talk to a doctor today.`,
+      ...(req.floor.reasons.length ? [`Why:\n${req.floor.reasons.map((r) => `• ${r}`).join("\n")}`] : []),
+      "I couldn't read the rest in full just now. Ask me again in a minute and I'll go through it properly.",
+    ],
+    citations: [],
+    followUps: [],
+    tier: req.floor.tier,
+    basis: "grounded",
+    careOffer: true,
+  };
 }
 
 function readReply(v: unknown): (ModelReply & { modelId?: string }) | null {
@@ -70,37 +100,48 @@ function readReply(v: unknown): (ModelReply & { modelId?: string }) | null {
     basis: o.basis === "grounded" || o.basis === "silent" ? o.basis : "general",
     careOffer: o.careOffer === true,
     actions: Array.isArray(o.actions) ? (o.actions as ModelReply["actions"]) : undefined,
+    photoSummary: typeof o.photoSummary === "string" && o.photoSummary.trim() ? o.photoSummary.trim().slice(0, 400) : null,
     modelId: typeof o.modelId === "string" ? o.modelId : undefined,
   };
 }
 
-/** The fine-tuned model, through the Edge Function. Falls back to the stand-in. */
-function edgeModel(): ChatModel {
+/** Gemini (or the fine-tuned model) through the Edge Function. */
+export function chatModel(): ChatModel {
   let lastId = "cheeku-edge";
   return {
     get id() {
       return lastId;
     },
     async respond(req: ModelRequest) {
+      let failure: ModelBusy | ModelUnavailable;
       try {
         const { data, error } = await supabase.functions.invoke("cheeku-chat", { body: req });
         const refusal = error ? await refusalOf(error) : null;
-        if (refusal && stopsTurn(refusal.reason, req.floor.tier)) throw new ModelBusy(refusal.retryAfter);
         const reply = error ? null : readReply(data);
         if (reply) {
           lastId = reply.modelId ?? "cheeku-edge";
           return reply;
         }
-      } catch (e) {
-        if (e instanceof ModelBusy) throw e;
-        // Anything else falls through to the stand-in.
+        failure =
+          refusal && (refusal.reason === "per_minute" || refusal.reason === "per_hour") ? new ModelBusy(refusal.retryAfter)
+          : refusal ? new ModelUnavailable("quota")
+          : new ModelUnavailable("down");
+      } catch {
+        failure = new ModelUnavailable("down");
       }
-      lastId = mockModel.id;
-      return mockModel.respond(req);
+      if (floorAnswers(req.floor.tier)) {
+        lastId = FLOOR_REPLY;
+        return floorReply(req);
+      }
+      throw failure;
     },
   };
 }
 
-export function chatModel(): ChatModel {
-  return MODE === "edge" ? edgeModel() : mockModel;
-}
+/** For a spent allowance: the turn is still planned (emergencies are never refused), but no model is asked. */
+export const noModel: ChatModel = {
+  id: "none",
+  async respond() {
+    throw new ModelUnavailable("quota");
+  },
+};

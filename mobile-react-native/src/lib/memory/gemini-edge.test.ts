@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { askGemini, geminiBody, readGemini } from "../../../supabase/functions/cheeku-chat/gemini";
+import { askGemini, geminiBody, MAX_IMAGE_CHARS, readGemini, readImage } from "../../../supabase/functions/cheeku-chat/gemini";
+import { renderRequest } from "../../../supabase/functions/cheeku-chat/prompt";
 import { REPLY_SCHEMA } from "../../../supabase/functions/cheeku-chat/prompt";
 
 // The Gemini path of the cheeku-chat Edge Function: the request it builds, how
@@ -102,5 +103,49 @@ describe("askGemini", () => {
     const calls = stub([status(500), status(500)]);
     await askGemini({ key: "k", models: ["a", " ", "a", "b"] }, "s", "u", {});
     expect(calls.map((c) => c.url.split("/").pop())).toEqual(["a:generateContent", "b:generateContent"]);
+  });
+});
+
+describe("a photo with the question", () => {
+  afterEach(() => vi.unstubAllGlobals());
+  const image = { mimeType: "image/jpeg", data: "aGVsbG8=" };
+
+  it("goes after the text, in the same single user turn", () => {
+    const b = geminiBody("S", "U", {}, "low", image) as { contents: { parts: Record<string, unknown>[] }[] };
+    expect(b.contents).toHaveLength(1);
+    expect(b.contents[0]!.parts).toEqual([{ text: "U" }, { inlineData: image }]);
+    expect((geminiBody("S", "U", {}) as typeof b).contents[0]!.parts).toEqual([{ text: "U" }]);
+  });
+
+  it("is only forwarded as a JPEG, PNG or WebP of sane size, in plain base64", () => {
+    expect(readImage(image)).toEqual(image);
+    expect(readImage({ mimeType: "image/png", data: "AAAA" })).not.toBeNull();
+    expect(readImage({ mimeType: "application/pdf", data: "AAAA" })).toBeNull();
+    expect(readImage({ mimeType: "image/jpeg", data: "" })).toBeNull();
+    expect(readImage({ mimeType: "image/jpeg", data: "not base64!" })).toBeNull();
+    expect(readImage({ mimeType: "image/jpeg", data: "A".repeat(MAX_IMAGE_CHARS + 4) })).toBeNull();
+    expect(readImage(null)).toBeNull();
+  });
+
+  it("reaches the model in the request askGemini sends", async () => {
+    let sent: Record<string, unknown> = {};
+    vi.stubGlobal("fetch", vi.fn(async (_url: string, init: RequestInit) => {
+      sent = JSON.parse(String(init.body));
+      return new Response(JSON.stringify(response(reply)));
+    }));
+    await askGemini({ key: "k", models: ["a"] }, "s", "u", {}, 24_000, image);
+    expect(JSON.stringify(sent)).toContain('"inlineData":{"mimeType":"image/jpeg","data":"aGVsbG8="}');
+  });
+
+  it("hands earlier photos' descriptions to the model as memory", () => {
+    const text = renderRequest({ question: "are those tablets ok?", history: [], memory: { photos: [{ date: "2026-11-17", summary: "Strip of cetirizine 10 mg." }] }, floor: {} });
+    expect(text).toContain("## Photos shown before (newest first)\n- 2026-11-17: Strip of cetirizine 10 mg.");
+    expect(REPLY_SCHEMA.properties.photoSummary).toBeTruthy();
+  });
+
+  it("is announced in the rendered request, so the model knows to look", () => {
+    const base = { question: "what is this?", history: [], memory: {}, floor: {} };
+    expect(renderRequest({ ...base, image })).toContain("# PHOTO\nThey sent one photo");
+    expect(renderRequest(base)).toContain("# PHOTO\nnone");
   });
 });

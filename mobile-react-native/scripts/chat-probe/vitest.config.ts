@@ -3,7 +3,7 @@ import path from "node:path";
 import { defineConfig } from "vitest/config";
 
 /*
- * Live chat probe: who answers each question, Gemini or the rules/stand-in.
+ * Live chat probe: who answers each question, Gemini or the rules.
  * Not part of `npx vitest run`. Run with:
  *
  *   npm run chat:probe
@@ -37,7 +37,7 @@ export default defineConfig({
       ...(process.env.CHAT_PROBE_Q ? { CHAT_PROBE_Q: process.env.CHAT_PROBE_Q } : {}),
       ...(process.env.CHAT_PROBE_OUT ? { CHAT_PROBE_OUT: process.env.CHAT_PROBE_OUT } : {}),
       ...(process.env.CHAT_PROBE_FULL ? { CHAT_PROBE_FULL: process.env.CHAT_PROBE_FULL } : {}),
-      EXPO_PUBLIC_CHAT_MODEL: "edge",
+      ...(process.env.CHAT_PROBE_IMAGE ? { CHAT_PROBE_IMAGE: process.env.CHAT_PROBE_IMAGE } : {}),
     },
   },
 });

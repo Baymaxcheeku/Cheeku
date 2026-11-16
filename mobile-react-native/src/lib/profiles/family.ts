@@ -243,9 +243,18 @@ export async function removeMember(id: string): Promise<MemberResult> {
 
   // Their photo too, which lives beside their reports in the same folder.
   const { data: me } = await supabase.from("profiles").select("avatar_url").eq("id", id).maybeSingle();
+  // And everything else in their folder: chat photos kept from the chat
+  // (lib/chat/photo-store), meal photos, anything no row points at any more.
+  const { data: session } = await supabase.auth.getSession();
+  const uid = session.session?.user.id;
+  const folder = uid ? `${uid}/${id}` : null;
+  const { data: loose } = folder ? await supabase.storage.from("documents").list(folder, { limit: 1000 }) : { data: null };
   const paths = [
-    ...(docs ?? []).map((d) => d.storage_path as string),
-    (me?.avatar_url as string | null | undefined) ?? "",
+    ...new Set([
+      ...(docs ?? []).map((d) => d.storage_path as string),
+      (me?.avatar_url as string | null | undefined) ?? "",
+      ...(loose ?? []).filter((f) => f.id).map((f) => `${folder}/${f.name}`),
+    ]),
   ].filter(Boolean);
   if (paths.length > 0) {
     const { error } = await supabase.storage.from("documents").remove(paths);

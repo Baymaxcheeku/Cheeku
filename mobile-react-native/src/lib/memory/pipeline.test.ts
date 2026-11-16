@@ -4,8 +4,7 @@ import { buildContext, type MemoryBundle } from "./context";
 import { isCorrection, parseFacts } from "./facts";
 import { buildLedger, ledgerFlags, parseStrength } from "./ledger";
 import { deriveLoops, openLoops, relevantLoops } from "./loops";
-import type { ChatModel, ModelReply } from "./model";
-import { mockModel } from "./mock-model";
+import type { ChatModel, ModelReply, ModelRequest } from "./model";
 import { planTurn } from "./pipeline";
 import { readPolicy, type Policy } from "@/lib/insurance/policy";
 import { resolveClock } from "./clock";
@@ -91,7 +90,19 @@ export const nisha = (over: Partial<MemoryBundle> = {}): MemoryBundle => ({
 
 let n = 0;
 const newId = () => `f${++n}`;
-const run = (text: string, bundle: MemoryBundle, today: string, model: ChatModel = mockModel, usage: { messageId: string; factIds: string[] }[] = []) =>
+/*
+ * THE MODEL IN THESE TESTS ECHOES WHAT IT WAS GIVEN. The app has no canned
+ * stand-in any more (2026-11-17): the words come from Gemini. What the rules
+ * owe the model is the right facts, so "the reply mentions X" here means "X
+ * reached the model": the echo's one paragraph is the request as JSON.
+ */
+const echo: ChatModel = {
+  id: "echo",
+  respond: async (req) => ({ paragraphs: [JSON.stringify(req)], citations: [], followUps: [], basis: "general" }),
+};
+const sent = (plan: { reply: { paragraphs: string[] } | null }) => JSON.parse(plan.reply?.paragraphs[0] ?? "{}") as ModelRequest;
+
+const run = (text: string, bundle: MemoryBundle, today: string, model: ChatModel = echo, usage: { messageId: string; factIds: string[] }[] = []) =>
   planTurn({ text, bundle, today, history: [], usage, model, newId });
 
 const noModel: ChatModel = {
@@ -190,7 +201,7 @@ describe("open loops", () => {
 describe("self-correction", () => {
   it("replaces a misread weight and names the answers that leaned on it", async () => {
     const bundle = imaad({ facts: [{ id: "w1", key: "weight", label: "Weight", value: 3.7, unit: "kg", observed_on: "2026-09-07", source: "chat" }] });
-    const plan = await run("sorry, I meant his weight is down to 3.3 kg, not up", bundle, "2026-09-07", mockModel, [{ messageId: "a1", factIds: ["w1"] }]);
+    const plan = await run("sorry, I meant his weight is down to 3.3 kg, not up", bundle, "2026-09-07", echo, [{ messageId: "a1", factIds: ["w1"] }]);
     expect(plan.revisions).toHaveLength(1);
     expect(plan.revisions[0]?.before).toBe("3.7 kg");
     expect(plan.revisions[0]?.after).toBe("3.3 kg");
@@ -245,7 +256,10 @@ describe("memory spans the household, narrowly", () => {
 
   it("answers the admin questions off the same clock", async () => {
     const plan = await run("when can my maternity leave start?", nisha(), "2026-09-01");
-    expect(plan.reply?.paragraphs.join(" ")).toMatch(/8 weeks before the due date, so from/);
+    const req = sent(plan);
+    // The model gets the due date by the dating that won, and the scan-vs-LMP note.
+    expect(req.memory.person.edd).toBeTruthy();
+    expect(req.memory.notes.join(" ")).toMatch(/growth scan puts it at 30w/);
   });
 });
 
@@ -273,7 +287,7 @@ describe("readings in context", () => {
     const plan = await run("my bp is 142/94 today", adult(), "2026-10-01");
     expect(plan.facts.map((f) => f.key)).toEqual(["bp_systolic", "bp_diastolic"]);
     expect(plan.decision.tier).toBe("monitor");
-    expect(plan.reply?.paragraphs[0]).toBe("Noted: Blood pressure 142/94 mmHg, today. I've kept it with Athar's readings.");
+    expect(sent(plan).memory.logged).toEqual(["Blood pressure 142/94 mmHg, today"]);
     expect(plan.reply?.paragraphs.join(" ")).toMatch(/140 or more counting as high for adults: over/);
   });
 
@@ -293,20 +307,17 @@ describe("readings in context", () => {
 describe("the answer shape for everyday baby worries", () => {
   const day22 = (): MemoryBundle => imaad({ profile: { ...(imaad().profile as Record<string, unknown>), dob: "2026-09-09" } });
 
-  it("explains, lists what helps, suggests a paediatrician, invites a record, and offers a doctor", async () => {
+  it("gives the model the age, the guide's home care and the signs to watch", async () => {
     const plan = await run("He is feeling bit sleepy today and farting a lot recently", day22(), "2026-10-01");
     expect(plan.status).toBe("answered");
     expect(plan.decision.tier).toBe("monitor");
-    const [first, ...rest] = plan.reply?.paragraphs ?? [];
-    expect(first).toMatch(/^At 22 days old, gas is one of the most common things/);
-    const tips = rest.find((p) => p.startsWith("Things that usually help:"));
-    expect(tips).toMatch(/• Bicycle legs: with him on his back/);
-    expect(tips).toMatch(/• Tummy massage/);
-    const tail = rest.slice(-3);
-    expect(tail[0]).toMatch(/better to have a paediatrician take a proper look/);
-    expect(tail[1]).toMatch(/record or a reading you'd like to add/);
-    expect(tail[2]).toBe("Shall I connect you with a paediatrician nearby, or set up an online consultation?");
-    expect(plan.reply?.careOffer).toBe(true);
+    // The model gets the age in words, the symptom guide with its home care and doctor signs.
+    const req = sent(plan);
+    expect(req.memory.person.age).toBe("22 days old");
+    const guide = JSON.stringify(req.memory.symptoms);
+    expect(guide).toMatch(/Bicycle legs/);
+    expect(guide).toMatch(/Tummy massage/);
+    expect(req.floor.tier).toBe("monitor");
     expect(plan.decision.watchFor[0]).toMatch(/Hard to wake/);
   });
 
@@ -321,10 +332,11 @@ describe("the answer shape for everyday baby worries", () => {
     expect(plan.reply?.paragraphs.join(" ")).toMatch(/Burp them during/);
   });
 
-  it("keeps an unfamiliar description general, and still offers a doctor", async () => {
+  it("sends an unfamiliar description to the model with no guide attached", async () => {
     const plan = await run("he keeps hiccupping since yesterday", day22(), "2026-10-01");
-    expect(plan.reply?.paragraphs[0]).toMatch(/^I don't have a specific guide for that yet/);
-    expect(plan.reply?.careOffer).toBe(true);
+    // No guide matches: the model answers from general knowledge, with no symptom guide to lean on.
+    expect(plan.status).toBe("answered");
+    expect(sent(plan).memory.symptoms).toEqual([]);
   });
 });
 
@@ -339,9 +351,16 @@ describe("booking from the chat", () => {
   });
 
   it("a booking with a symptom still gets the model's answer, with the card under it", async () => {
-    const plan = await run("Book a doctor, he has a cough", imaad(), "2027-06-01", mockModel);
+    const plan = await run("Book a doctor, he has a cough", imaad(), "2027-06-01", echo);
     expect(plan.booking?.service).toBe("doctor");
     expect(plan.modelId).not.toBe("rules:booking");
+  });
+
+  it("sends a photo to the model even when the words alone would be a booking", async () => {
+    const image = { mimeType: "image/jpeg" as const, data: "abc" };
+    const plan = await planTurn({ text: "book test again", bundle: imaad(), today: "2027-06-01", history: [], usage: [], model: echo, newId, image });
+    expect(plan.modelId).toBe("echo");
+    expect(sent(plan).image).toEqual(image);
   });
 
   it("an emergency is never turned into a booking", async () => {

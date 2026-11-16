@@ -135,6 +135,31 @@ export type DeleteResult =
   | { ok: false; message: string };
 
 /**
+ * Every file in the person's own folder of the documents bucket
+ * (<user>/<profile>/<file>; the bucket's policies, 0005, allow only that
+ * folder). Best effort: [] if listing fails, and the named paths still go.
+ */
+async function filesUnder(userId: string): Promise<string[]> {
+  try {
+    const bucket = supabase.storage.from("documents");
+    const { data: folders } = await bucket.list(userId, { limit: 1000 });
+    const out: string[] = [];
+    for (const f of folders ?? []) {
+      // A folder has no id; a file directly under <user>/ has one.
+      if (f.id) {
+        out.push(`${userId}/${f.name}`);
+        continue;
+      }
+      const { data: files } = await bucket.list(`${userId}/${f.name}`, { limit: 1000 });
+      for (const file of files ?? []) if (file.id) out.push(`${userId}/${f.name}/${file.name}`);
+    }
+    return out;
+  } catch {
+    return [];
+  }
+}
+
+/**
  * Erasure. Files first, then rows.
  *
  * The order matters: storage objects are not reachable once the rows naming
@@ -171,10 +196,22 @@ export async function deleteAccountData(confirmation: string): Promise<DeleteRes
   // Meal photos and step screenshots (0034); absent before it, which is fine.
   const { data: daily } = await supabase.from("daily_logs").select("photo_path").not("photo_path", "is", null);
 
+  // Chat photos they chose to keep (lib/chat/photo-store), named on their own messages.
+  const { data: kept, error: keptError } = await supabase.from("messages").select("attachment").eq("role", "user").not("attachment->>path", "is", null);
+  if (keptError) {
+    return { ok: false, message: "Could not read your chats. Nothing was deleted." };
+  }
+
   const paths = [
-    ...(docs ?? []).map((d) => d.storage_path as string),
-    ...(daily ?? []).map((d) => d.photo_path as string | null).filter((x): x is string => Boolean(x)),
-    ...(faces ?? []).map((f) => f.avatar_url as string | null).filter((x): x is string => Boolean(x)),
+    ...new Set([
+      ...(docs ?? []).map((d) => d.storage_path as string),
+      ...(daily ?? []).map((d) => d.photo_path as string | null).filter((x): x is string => Boolean(x)),
+      ...(faces ?? []).map((f) => f.avatar_url as string | null).filter((x): x is string => Boolean(x)),
+      ...(kept ?? []).map((m) => (m.attachment as { path?: unknown } | null)?.path).filter((x): x is string => typeof x === "string" && x.length > 0),
+      // Anything else left in their own folder: a kept chat photo whose
+      // message never saved, a file a row no longer points at.
+      ...(await filesUnder(user.id)),
+    ]),
   ].filter(Boolean);
 
   if (paths.length > 0) {

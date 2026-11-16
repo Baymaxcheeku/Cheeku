@@ -419,8 +419,8 @@ haptics has to be seen on a simulator or a device before it counts as done.
   `app_flags.demo_billing`). Drop it before real billing.
 - Real OCR and model — separate track, contract in `REACT_NATIVE_BUILD.md`.
   The chat model contract is `src/lib/memory/model.ts` (ModelRequest in,
-  ModelReply out); turn it on with `EXPO_PUBLIC_CHAT_MODEL=edge` and the
-  `cheeku-chat` Edge Function secrets. Until then the stand-in answers.
+  ModelReply out); every model turn goes to the `cheeku-chat` Edge Function.
+  There is no stand-in (removed 2026-11-17).
 - **Clinical sign-off for the memory layer.** The clock-keyed limits in
   `src/lib/memory/thresholds.ts` (newborn bilirubin rows are examples from
   the reference thread, not a guideline), the hard-stop rules in
@@ -471,14 +471,18 @@ haptics has to be seen on a simulator or a device before it counts as done.
 - **Meal photos are not read by a model yet.** The plate is read from the
   taps (`src/lib/home/meals.ts`); `daily_logs.analysis` is reserved for the
   server's reading of the photo and the app cannot write it.
-- **Chat model: Gemini is wired in, not yet deployed** (2026-11-16).
+- **Chat model: Gemini answers, no stand-in** (deployed 2026-11-16; stand-in
+  removed 2026-11-17).
   `cheeku-chat` answers with Gemini when the `GEMINI_API_KEY` secret is set
   (`gemini-3.5-flash-lite`, then `gemini-3.5-flash`; `GEMINI_MODEL` and
   `GEMINI_FALLBACK_MODEL` override), until `CHEEKU_MODEL_URL` points at the
-  fine-tuned model, which then wins. In order: 0035 applied (else 503 and the
-  stand-in answers), deploy `cheeku-chat` (CLI, or paste
-  `supabase/manual/cheeku-chat-function-paste.ts`), set the secret, then
-  `EXPO_PUBLIC_CHAT_MODEL=edge` in the app's env (local and Vercel). **The key
+  fine-tuned model, which then wins. In order: 0035 applied (else 503), deploy
+  `cheeku-chat` (CLI, or paste `supabase/manual/cheeku-chat-function-paste.ts`),
+  set the secret. Nothing to set in the app: `EXPO_PUBLIC_CHAT_MODEL` is gone.
+  A turn the model can't answer is refused with a plain line (busy, allowance
+  spent, or "couldn't answer, try again") and nothing is saved; only a
+  contact-today or go-now floor still gets the rules' "call the doctor" answer
+  (`rules:floor`). **The key
   must be on a billed Google Cloud project**: on Gemini's free tier Google may
   use prompts to improve its products, and every prompt is a health record.
   flash-lite sometimes keeps the bird jokes when the floor is monitor or
@@ -488,6 +492,15 @@ haptics has to be seen on a simulator or a device before it counts as done.
   (dextromethorphan for a dry cough, guaifenesin for a chesty one), never a
   brand or dose, and nothing for under 4s, pregnancy, over 70 or a long-term
   condition (`prompt.ts`, "When they ask what to take").
+  **Photos in chat** (2026-11-17): the composer's camera takes or picks a
+  photo; a re-drawn 1280 px JPEG (EXIF gone) goes to Gemini once with the
+  question and is never stored; a 256 px thumbnail is kept on the person's
+  message (`messages.attachment`, kind `photo`). The prompt reads medicine
+  packs and labels against allergies, conditions and medicines, never names a
+  condition from a body photo, and asks for a clearer shot rather than guess.
+  Needs a clinician's read with the medicine rules. Not checked on a device
+  yet. The old fixed-product picker and its canned verdicts are gone; old
+  product answers still render.
 - **Wearables need a native build and one SQL step.** The module is in
   (`src/modules/wearables`, see its README): Apple Health and Health Connect
   run only in an EAS development or store build, not Expo Go. Migration 0044
