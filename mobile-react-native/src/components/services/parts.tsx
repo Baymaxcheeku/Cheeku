@@ -32,6 +32,9 @@ import type { SpecialtyId } from "@/lib/booking/catalog";
 import type { Service } from "@/lib/services/catalog";
 import { brand, ink, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
+import { MascotBust } from "@/components/illustrations/sprout";
+import { PILLAR_TONE, glassCard } from "@/components/today/palette";
+import { Icon3D, type Icon3DName } from "@/components/ui/icon3d";
 
 /*
  * THE PIECES OF "BOOK SERVICES".
@@ -62,6 +65,26 @@ export const SERVICE_ICON: Record<string, AppIcon> = {
   Ambulance,
   Dumbbell,
 };
+
+/** Services as Cheeku's 3D objects; the two with no object yet (dental, eyes) keep a line icon. */
+export const SERVICE_3D: Partial<Record<string, Icon3DName>> = {
+  Stethoscope: "doctor",
+  FlaskConical: "test-tube",
+  Pill: "capsule",
+  Dumbbell: "dumbbell",
+  WellbeingIcon: "lotus",
+  Activity: "heart",
+  HeartHandshake: "family",
+  Ambulance: "ambulance",
+  ShieldCheck: "shield",
+};
+
+export function Service3D({ icon, size }: { icon: string; size: number }) {
+  const art = SERVICE_3D[icon];
+  if (art) return <Icon3D name={art} size={size} />;
+  const Icon = SERVICE_ICON[icon] ?? Stethoscope;
+  return <Icon size={Math.round(size * 0.6)} color={brand[600]} strokeWidth={1.8} />;
+}
 
 export const SPECIALTY_ICON: Record<SpecialtyId, AppIcon> = {
   gp: Stethoscope,
@@ -136,18 +159,17 @@ export function StatusPill({ status }: { status: Service["status"] }) {
 
 /** The big two-up tile: title, line, arrow, art in the corner. */
 export function ServiceTile({ service: s, onPress, tall = true }: { service: Service; onPress: () => void; tall?: boolean }) {
-  const Icon = SERVICE_ICON[s.icon] ?? Stethoscope;
   return (
     <Tap
       accessibilityRole="button"
       accessibilityLabel={`${s.title}. ${s.line}${s.status === "live" ? "" : s.status === "soon" ? ". Coming soon" : ". Locked"}`}
       onPress={onPress}
-      style={{ flex: 1, minHeight: tall ? 148 : 136, borderRadius: 24, backgroundColor: "#fff" }}
+      style={[glassCard("#ffffff", "#0f1030"), { flex: 1, minHeight: tall ? 160 : 144, borderRadius: 24, shadowOpacity: 0.05 }]}
     >
       <View style={{ padding: 16, flex: 1 }}>
         <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
-          <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: surface.tint, alignItems: "center", justifyContent: "center" }}>
-            <Icon size={20} color={ink[900]} strokeWidth={1.8} />
+          <View style={{ width: 52, height: 52, borderRadius: 16, backgroundColor: surface.tint, alignItems: "center", justifyContent: "center" }}>
+            <Service3D icon={s.icon} size={36} />
           </View>
           {s.status !== "live" ? <StatusPill status={s.status} /> : <ChevronRight size={18} color={ink[300]} />}
         </View>
@@ -160,17 +182,15 @@ export function ServiceTile({ service: s, onPress, tall = true }: { service: Ser
 
 /** A small card for the "more care" row. */
 export function CompactTile({ service: s, onPress }: { service: Service; onPress: () => void }) {
-  const Icon = SERVICE_ICON[s.icon] ?? Stethoscope;
   return (
     <Tap
       accessibilityRole="button"
       accessibilityLabel={`${s.title}. ${s.line}`}
       onPress={onPress}
-      style={[glassShadow, { width: 136, height: 132, borderRadius: 24, overflow: "hidden", backgroundColor: "#fff", borderWidth: 1, borderColor: glass.rim, padding: 12 }]}
+      style={[glassCard("#ffffff", "#0f1030"), { width: 140, height: 140, borderRadius: 24, overflow: "hidden", padding: 12, shadowOpacity: 0.05 }]}
     >
-      <Gradient from={s.tint.from} to="#ffffff" angle="vertical" />
-      <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: "#fff", alignItems: "center", justifyContent: "center" }}>
-        <Icon size={20} color={s.tint.fg} strokeWidth={1.8} />
+      <View style={{ width: 48, height: 48, borderRadius: 16, backgroundColor: surface.tint, alignItems: "center", justifyContent: "center" }}>
+        <Service3D icon={s.icon} size={32} />
       </View>
       <View style={{ flex: 1 }} />
       <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
@@ -182,29 +202,24 @@ export function CompactTile({ service: s, onPress }: { service: Service; onPress
   );
 }
 
-/** The dark prompt card on top: book anything in a sentence, through Cheeku. */
+/** The prompt card on top: book anything in a sentence, through Cheeku. Light lilac, Cheeku peeking in. */
 export function AskToBook({ onPress, line }: { onPress: () => void; line?: string }) {
   return (
-    <Tap
-      accessibilityRole="button"
-      accessibilityLabel="Tell Cheeku what you need"
-      onPress={onPress}
-      style={[glassShadow, { borderRadius: 32, overflow: "hidden", minHeight: 124 }]} scale={0.98}
-    >
-      <Gradient from={ink[900]} to={ink[900]} />
-      <View style={{ flexDirection: "row", alignItems: "center", padding: 18 }}>
-        <View style={{ flex: 1 }}>
-          <Text style={{ fontFamily: font.semibold, fontSize: 20, lineHeight: 25, letterSpacing: -0.4, color: "#fff" }}>
-            Just tell <Brand onDark size={21} /> what you need
-          </Text>
-          <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: "rgba(255,255,255,0.78)", marginTop: 6 }}>
-            {line ?? "“Book HbA1c again” or “a dentist on Saturday”. It books, and files it."}
-          </Text>
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginTop: 12 }}>
-            <Text style={{ fontFamily: font.semibold, fontSize: 13, color: "#fff" }}>Start a chat</Text>
-            <ArrowRight size={15} color="#fff" />
-          </View>
+    <Tap accessibilityRole="button" accessibilityLabel="Tell Cheeku what you need" onPress={onPress} scale={0.98} style={[glassCard(PILLAR_TONE.sleep.glass), { borderRadius: 28, overflow: "hidden", padding: 18, flexDirection: "row", alignItems: "center", gap: 12 }]}>
+      <View style={{ flex: 1 }}>
+        <Text style={{ fontFamily: font.semibold, fontSize: 20, lineHeight: 25, letterSpacing: -0.4, color: ink[900] }}>
+          Just tell <Brand size={21} /> what you need
+        </Text>
+        <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[700], marginTop: 6 }}>
+          {line ?? "“Book HbA1c again” or “a dentist on Saturday”. It books, and files it."}
+        </Text>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginTop: 12, alignSelf: "flex-start", height: 36, paddingHorizontal: 14, borderRadius: 999, backgroundColor: brand[600] }}>
+          <Text style={{ fontFamily: font.semibold, fontSize: 13, color: "#fff" }}>Start a chat</Text>
+          <ArrowRight size={15} color="#fff" />
         </View>
+      </View>
+      <View style={{ marginBottom: -24 }}>
+        <MascotBust size={84} mood="happy" />
       </View>
     </Tap>
   );

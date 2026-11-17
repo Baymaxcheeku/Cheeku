@@ -19,6 +19,9 @@ import { checkQuery } from "@/lib/partner/validate";
 import { useFamily } from "@/lib/profiles/family";
 import { brand, ink, semantic, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
+import { SkyWash } from "@/components/home/front";
+import { PILLAR_TONE, glassCard } from "@/components/today/palette";
+import { Icon3D } from "@/components/ui/icon3d";
 
 /*
  * ORDER MEDICINES, STEP 1: WHAT.
@@ -70,13 +73,15 @@ export default function PharmacyCart() {
 
   return (
     <KeyboardAvoidingView className="flex-1 bg-canvas" behavior={Platform.OS === "ios" ? "padding" : undefined}>
-      <Backdrop />
-      <ScreenHeader title="Order medicines" fallback="/medicines" />
+      <SkyWash top={0} />
+      <ScreenHeader fallback="/medicines" />
       <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 24 }} showsVerticalScrollIndicator={false}>
+        <Text accessibilityRole="header" style={{ fontFamily: font.semibold, fontSize: 30, lineHeight: 36, letterSpacing: -0.9, color: ink[900], marginTop: 2 }}>Medicines, delivered</Text>
+        <Text style={{ fontFamily: font.regular, fontSize: 15, lineHeight: 21, color: ink[500], marginTop: 4, marginBottom: 16 }}>Pick who it&apos;s for, then search or tap a regular.</Text>
         <MemberChips members={members} selected={member?.id ?? null} onPick={(id) => cart.forMember(id)} />
 
         {/* Search. */}
-        <View style={{ marginTop: 16, flexDirection: "row", alignItems: "center", gap: 10, height: 52, paddingHorizontal: 16, borderRadius: 999, backgroundColor: "#fff", borderWidth: 1, borderColor: surface.line }}>
+        <View style={[glassCard("#ffffff", "#0f1030"), { marginTop: 16, flexDirection: "row", alignItems: "center", gap: 10, height: 54, paddingHorizontal: 16, borderRadius: 18, shadowOpacity: 0.05 }]}>
           <Search size={18} color={ink[500]} />
           <TextInput value={query} onChangeText={setQuery} placeholder="Medicine or salt, like metformin" placeholderTextColor={ink[300]} autoCorrect={false} accessibilityLabel="Search medicines" style={{ flex: 1, fontFamily: font.regular, fontSize: 15, color: ink[900] }} />
         </View>
@@ -96,7 +101,8 @@ export default function PharmacyCart() {
           <Section title={`What ${first === "you" ? "you take" : `${first} takes`}`}>
             <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
               {taking.map((e) => (
-                <Tap key={e.key} accessibilityRole="button" accessibilityLabel={`Find ${e.name}`} onPress={() => setQuery(e.ingredients[0]?.name ?? e.name)} style={{ height: 40, paddingHorizontal: 14, borderRadius: 999, justifyContent: "center", backgroundColor: "#fff", borderWidth: 1, borderColor: surface.line }}>
+                <Tap key={e.key} accessibilityRole="button" accessibilityLabel={`Find ${e.name}`} onPress={() => setQuery(e.ingredients[0]?.name ?? e.name)} style={{ height: 44, paddingLeft: 8, paddingRight: 14, borderRadius: 999, flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: "#fff", borderWidth: 1, borderColor: surface.line }}>
+                  <Icon3D name="blister" size={26} />
                   <Text style={{ fontFamily: font.semibold, fontSize: 14, color: ink[900] }}>{e.name}{e.strength && !e.name.toLowerCase().includes(e.strength.toLowerCase()) ? ` ${e.strength}` : ""}</Text>
                 </Tap>
               ))}
@@ -107,17 +113,20 @@ export default function PharmacyCart() {
         {/* Cart. */}
         {cart.lines.length ? (
           <Section title="In the order">
-            <View className="rounded-xl bg-white" style={{ borderWidth: 1, borderColor: surface.line, paddingHorizontal: 16 }}>
+            <View style={[glassCard("#ffffff", "#0f1030"), { borderRadius: 24, paddingHorizontal: 16, shadowOpacity: 0.05 }]}>
               {cart.lines.map((l, i) => (
                 <View key={l.drug.drugMasterId} style={{ paddingVertical: 14, borderTopWidth: i ? 1 : 0, borderTopColor: surface.line, gap: 8 }}>
-                  <View style={{ flexDirection: "row", gap: 10 }}>
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+                    <View style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: PILLAR_TONE.move.bg, alignItems: "center", justifyContent: "center" }}>
+                      <Icon3D name="capsule" size={30} />
+                    </View>
                     <View style={{ flex: 1 }}>
                       <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{l.drug.name}</Text>
                       <Text style={{ fontFamily: font.regular, fontSize: 12, color: ink[500], marginTop: 1 }}>{l.drug.pack}{l.drug.prescriptionRequired ? " · needs a prescription" : ""}</Text>
                     </View>
                     <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{l.drug.price != null ? rupees(l.drug.price * l.quantity) : "-"}</Text>
                   </View>
-                  <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: 10, paddingLeft: 56 }}>
                     <Stepper value={l.quantity} onChange={(n) => cart.setQty(l.drug.drugMasterId, n)} />
                     <Tap accessibilityRole="button" onPress={() => setAltFor(l.drug)} hitSlop={6}>
                       <Text style={{ fontFamily: font.semibold, fontSize: 13, color: brand[600] }}>Same salt, cheaper?</Text>
@@ -133,7 +142,12 @@ export default function PharmacyCart() {
             {needsPrescription(cart.lines) ? <Note tone="info" text="Some of these need a prescription. You'll attach it from your records before placing the order." /> : null}
           </Section>
         ) : (
-          <Text style={{ fontFamily: font.regular, fontSize: 14, lineHeight: 20, color: ink[500], marginTop: 22, textAlign: "center" }}>Search for a medicine, or tap one {first === "you" ? "you take" : `${first} takes`} to start.</Text>
+          <View style={{ alignItems: "center", marginTop: 28, gap: 10 }}>
+            <View style={{ width: 96, height: 96, borderRadius: 30, backgroundColor: PILLAR_TONE.move.bg, alignItems: "center", justifyContent: "center" }}>
+              <Icon3D name="blister" size={68} />
+            </View>
+            <Text style={{ fontFamily: font.regular, fontSize: 14, lineHeight: 20, color: ink[500], textAlign: "center", maxWidth: 260 }}>Search for a medicine, or tap one {first === "you" ? "you take" : `${first} takes`} to start.</Text>
+          </View>
         )}
 
         {!LIVE ? <Note tone="info" text="Preview: sample medicines and prices. Nothing is ordered or charged." /> : null}
@@ -152,7 +166,10 @@ export default function PharmacyCart() {
 
 function DrugRow({ d, inCart, onAdd }: { d: Drug; inCart: boolean; onAdd: () => void }) {
   return (
-    <View className="flex-row items-center gap-3 rounded-xl bg-white p-3.5" style={{ borderWidth: 1, borderColor: surface.line, opacity: d.notForSale ? 0.6 : 1 }}>
+    <View style={[glassCard("#ffffff", "#0f1030"), { flexDirection: "row", alignItems: "center", gap: 12, borderRadius: 22, padding: 12, shadowOpacity: 0.05, opacity: d.notForSale ? 0.6 : 1 }]}>
+      <View style={{ width: 48, height: 48, borderRadius: 16, backgroundColor: PILLAR_TONE.move.bg, alignItems: "center", justifyContent: "center" }}>
+        <Icon3D name={d.prescriptionRequired ? "blister" : "capsule"} size={34} />
+      </View>
       <View style={{ flex: 1 }}>
         <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{d.name}</Text>
         <Text style={{ fontFamily: font.regular, fontSize: 12, color: ink[500], marginTop: 1 }}>{[d.pack, d.salt].filter(Boolean).join(" · ")}</Text>
@@ -172,7 +189,7 @@ function DrugRow({ d, inCart, onAdd }: { d: Drug; inCart: boolean; onAdd: () => 
             {d.mrp && d.mrp > d.price ? <Text style={{ fontFamily: font.regular, fontSize: 12, color: ink[300], textDecorationLine: "line-through" }}> {rupees(d.mrp)}</Text> : null}
           </Text>
         ) : null}
-        <Tap accessibilityRole="button" accessibilityLabel={`Add ${d.name}`} disabled={d.notForSale} onPress={onAdd} style={{ height: 34, paddingHorizontal: 14, borderRadius: 999, justifyContent: "center", backgroundColor: inCart ? brand[50] : ink[900] }}>
+        <Tap accessibilityRole="button" accessibilityLabel={`Add ${d.name}`} disabled={d.notForSale} onPress={onAdd} style={{ height: 34, paddingHorizontal: 14, borderRadius: 999, justifyContent: "center", backgroundColor: inCart ? brand[50] : brand[600] }}>
           <Text style={{ fontFamily: font.semibold, fontSize: 13, color: inCart ? brand[700] : "#fff" }}>{inCart ? "Add one more" : "Add"}</Text>
         </Tap>
       </View>

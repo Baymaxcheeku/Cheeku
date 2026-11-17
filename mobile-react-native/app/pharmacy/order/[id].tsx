@@ -73,7 +73,7 @@ export default function PharmaOrderScreen() {
       <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: insets.bottom + 30 }} refreshControl={<RefreshControl refreshing={order.isRefetching} onRefresh={() => void order.refetch()} tintColor={brand[600]} />}>
         {fresh && !cancelled ? (
           <View style={{ alignItems: "center", marginBottom: 18 }}>
-            <Enter kind="pop" style={[glassShadow, { width: 76, height: 76, borderRadius: 999, backgroundColor: ink[900], alignItems: "center", justifyContent: "center" }]}>
+            <Enter kind="pop" style={[glassShadow, { width: 76, height: 76, borderRadius: 999, backgroundColor: brand[600], alignItems: "center", justifyContent: "center" }]}>
               <Check size={36} color="#fff" strokeWidth={3} />
             </Enter>
             <Text style={{ fontFamily: font.semibold, fontSize: 24, letterSpacing: -0.7, color: ink[900], marginTop: 14 }}>Order placed</Text>

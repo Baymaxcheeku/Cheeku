@@ -107,7 +107,7 @@ export default function DoctorProfile() {
               const on = m === mode;
               const next = nextFree(d, m);
               return (
-                <Tap scale={0.98} key={m} accessibilityRole="radio" accessibilityState={{ selected: on }} onPress={() => setMode(m)} style={[on ? null : glassShadow, { flex: 1, padding: 14, borderRadius: 24, backgroundColor: on ? ink[900] : glass.fillStrong, borderWidth: on ? 0 : 1, borderColor: glass.rim }]}>
+                <Tap scale={0.98} key={m} accessibilityRole="radio" accessibilityState={{ selected: on }} onPress={() => setMode(m)} style={[on ? null : glassShadow, { flex: 1, padding: 14, borderRadius: 24, backgroundColor: on ? brand[600] : glass.fillStrong, borderWidth: on ? 0 : 1, borderColor: glass.rim }]}>
                   <View className="flex-row items-center gap-1.5">
                     {m === "online" ? <MonitorPlay size={15} color={on ? "#fff" : brand[600]} /> : <Building2 size={15} color={on ? "#fff" : hue.orange.fg} />}
                     <Text style={{ fontFamily: font.medium, fontSize: 13, color: on ? "rgba(255,255,255,0.8)" : ink[500] }}>{m === "online" ? "Video call" : "Clinic visit"}</Text>
@@ -169,7 +169,7 @@ export default function DoctorProfile() {
         <View style={[glassShadow, { height: 58, paddingHorizontal: 22, borderRadius: 999, backgroundColor: "#fff", justifyContent: "center" }]}>
           <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>{d.fee[mode] ? `₹${d.fee[mode]}` : "Fee on booking"}</Text>
         </View>
-        <Tap accessibilityRole="button" onPress={book} style={[glassShadow, { flex: 1, height: 58, borderRadius: 999, backgroundColor: ink[900], alignItems: "center", justifyContent: "center" }]} scale={0.98}>
+        <Tap accessibilityRole="button" onPress={book} style={[glassShadow, { flex: 1, height: 58, borderRadius: 999, backgroundColor: brand[600], alignItems: "center", justifyContent: "center" }]} scale={0.98}>
           <Text style={{ fontFamily: font.semibold, fontSize: 17, color: "#fff" }}>{mode === "online" ? "Book a video slot" : "Book a clinic visit"}</Text>
         </Tap>
       </View>

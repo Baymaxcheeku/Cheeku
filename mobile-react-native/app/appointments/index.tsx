@@ -13,7 +13,7 @@ import { useReducedMotion } from "@/components/ui/motion";
 import { Backdrop, PageTitle, PillButton, ScreenHeader } from "@/components/ui/screen";
 import { isUpcoming, startsAt, useAppointmentList } from "@/lib/booking/appointments";
 import { useLabBookings } from "@/lib/labs/queries";
-import { hue, ink } from "@/theme/tokens";
+import { brand, hue, ink } from "@/theme/tokens";
 import { font } from "@/theme/type";
 import { Tap } from "@/components/ui/tap";
 import { CardListSkeleton } from "@/components/ui/skeleton";
@@ -92,7 +92,7 @@ export default function Appointments() {
                     paddingHorizontal: 18,
                     borderRadius: 999,
                     justifyContent: "center",
-                    backgroundColor: on ? ink[900] : glass.fillStrong,
+                    backgroundColor: on ? brand[600] : glass.fillStrong,
                     borderWidth: on ? 0 : 1,
                     borderColor: glass.rim,
                   },

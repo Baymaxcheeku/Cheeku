@@ -123,7 +123,7 @@ export default function LabBooking() {
       >
         {fresh && !cancelled ? (
           <View style={{ alignItems: "center", marginTop: 4, marginBottom: 18 }}>
-            <Enter kind="pop" style={[glassShadow, { width: 76, height: 76, borderRadius: 999, backgroundColor: ink[900], alignItems: "center", justifyContent: "center" }]}>
+            <Enter kind="pop" style={[glassShadow, { width: 76, height: 76, borderRadius: 999, backgroundColor: brand[600], alignItems: "center", justifyContent: "center" }]}>
               <Check size={36} color="#fff" strokeWidth={3} />
             </Enter>
             <Text style={{ fontFamily: font.semibold, fontSize: 24, letterSpacing: -0.7, color: ink[900], marginTop: 14 }}>Collection booked!</Text>
@@ -179,7 +179,7 @@ export default function LabBooking() {
                   <Text style={{ fontFamily: font.semibold, fontSize: 16, color: ink[900], marginTop: 1 }}>{o.phlebo.name}</Text>
                 </View>
                 {o.phlebo.phone ? (
-                  <Tap accessibilityRole="button" accessibilityLabel={`Call ${o.phlebo.name}`} onPress={() => void Linking.openURL(`tel:${o.phlebo!.phone}`)} style={{ height: 44, paddingHorizontal: 16, borderRadius: 999, flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: ink[900] }}>
+                  <Tap accessibilityRole="button" accessibilityLabel={`Call ${o.phlebo.name}`} onPress={() => void Linking.openURL(`tel:${o.phlebo!.phone}`)} style={{ height: 44, paddingHorizontal: 16, borderRadius: 999, flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: brand[600] }}>
                     <Phone size={15} color="#fff" />
                     <Text style={{ fontFamily: font.semibold, fontSize: 14, color: "#fff" }}>Call</Text>
                   </Tap>

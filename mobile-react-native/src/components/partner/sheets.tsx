@@ -87,7 +87,7 @@ export function RescheduleSheet({ open, onClose, title, times, onPick }: { open:
         {days.map((d, i) => {
           const on = i === dayIdx;
           return (
-            <Tap key={i} accessibilityRole="radio" accessibilityState={{ selected: on }} onPress={() => { setDayIdx(i); setTime(null); }} style={{ width: 58, height: 64, borderRadius: 20, alignItems: "center", justifyContent: "center", backgroundColor: on ? ink[900] : "#fff", borderWidth: 1, borderColor: on ? ink[900] : surface.line }}>
+            <Tap key={i} accessibilityRole="radio" accessibilityState={{ selected: on }} onPress={() => { setDayIdx(i); setTime(null); }} style={{ width: 58, height: 64, borderRadius: 20, alignItems: "center", justifyContent: "center", backgroundColor: on ? brand[600] : "#fff", borderWidth: 1, borderColor: on ? brand[600] : surface.line }}>
               <Text style={{ fontFamily: font.medium, fontSize: 12, color: on ? "rgba(255,255,255,0.75)" : ink[500] }}>{i === 0 ? "Today" : i === 1 ? "Tmrw" : d.toLocaleDateString("en-IN", { weekday: "short" })}</Text>
               <Text style={{ fontFamily: font.semibold, fontSize: 18, color: on ? "#fff" : ink[900] }}>{d.getDate()}</Text>
             </Tap>
@@ -219,7 +219,7 @@ export function ProblemSheet({ open, onClose, issues, onSend }: { open: boolean;
             {issues.map((r) => {
               const on = r === issue;
               return (
-                <Tap key={r} accessibilityRole="radio" accessibilityState={{ selected: on }} onPress={() => setIssue(r)} style={{ height: 40, paddingHorizontal: 14, borderRadius: 999, justifyContent: "center", backgroundColor: on ? ink[900] : "#fff", borderWidth: 1, borderColor: on ? ink[900] : surface.line }}>
+                <Tap key={r} accessibilityRole="radio" accessibilityState={{ selected: on }} onPress={() => setIssue(r)} style={{ height: 40, paddingHorizontal: 14, borderRadius: 999, justifyContent: "center", backgroundColor: on ? brand[600] : "#fff", borderWidth: 1, borderColor: on ? brand[600] : surface.line }}>
                   <Text style={{ fontFamily: font.semibold, fontSize: 14, color: on ? "#fff" : ink[900] }}>{r}</Text>
                 </Tap>
               );

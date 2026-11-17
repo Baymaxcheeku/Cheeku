@@ -26,6 +26,8 @@ import type { LabPartner, LabTest } from "@/lib/labs/logic";
 import type { Rating, Review } from "@/lib/labs/queries";
 import { brand, hue, ink, lilac, semantic, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
+import { PILLAR_TONE } from "@/components/today/palette";
+import { Icon3D, type Icon3DName } from "@/components/ui/icon3d";
 
 /*
  * The pieces every provider screen shares: stars, lab badges, test art, the
@@ -82,30 +84,29 @@ export function monogramOf(name: string): string {
  * Photos of needles and blood are exactly what a nervous parent does not want
  * to scroll past, so it is soft colour and one clear icon.
  */
-const ART: { match: (t: LabTest) => boolean; Icon: LucideIcon; from: string; to: string; fg: string }[] = [
-  { match: (t) => t.kind === "package" && t.categories.includes("senior"), Icon: Leaf, from: hue.teal.bg, to: hue.teal.bg, fg: "#3a3a41" },
-  { match: (t) => t.kind === "package" && t.categories.includes("women"), Icon: Flower2, from: "#ffdcee", to: hue.rose.bg, fg: hue.rose.fg },
-  { match: (t) => t.kind === "package", Icon: Package, from: lilac.base, to: lilac.mist, fg: brand[600] },
-  { match: (t) => t.categories.includes("diabetes"), Icon: Activity, from: hue.blue.bg, to: hue.blue.wash, fg: hue.blue.fg },
-  { match: (t) => t.categories.includes("heart"), Icon: HeartPulse, from: hue.rose.bg, to: hue.rose.bg, fg: "#3a3a41" },
-  { match: (t) => t.categories.includes("vitamins"), Icon: Sun, from: "#f5f5f7", to: hue.orange.wash, fg: "#3a3a41" },
-  { match: (t) => t.categories.includes("women"), Icon: Baby, from: "#ffdcee", to: hue.rose.bg, fg: hue.rose.fg },
-  { match: (t) => t.categories.includes("fever"), Icon: Thermometer, from: hue.orange.bg, to: hue.orange.wash, fg: hue.orange.fg },
-  { match: (t) => t.sample.startsWith("Blood"), Icon: Droplet, from: lilac.violet, to: lilac.mist, fg: "#3a3a41" },
+const T = PILLAR_TONE;
+const ART: { match: (t: LabTest) => boolean; art: Icon3DName; bg: string }[] = [
+  { match: (t) => t.kind === "package" && t.categories.includes("senior"), art: "family", bg: T.move.bg },
+  { match: (t) => t.kind === "package" && t.categories.includes("women"), art: "lotus", bg: T.mind.bg },
+  { match: (t) => t.kind === "package", art: "clipboard", bg: T.sleep.bg },
+  { match: (t) => t.categories.includes("diabetes"), art: "glucose", bg: T.check.bg },
+  { match: (t) => t.categories.includes("heart"), art: "heart", bg: T.eat.bg },
+  { match: (t) => t.categories.includes("vitamins"), art: "capsule", bg: T.move.bg },
+  { match: (t) => t.categories.includes("women"), art: "lotus", bg: T.mind.bg },
+  { match: (t) => t.categories.includes("fever"), art: "syringe", bg: T.eat.bg },
+  { match: (t) => t.sample.startsWith("Blood"), art: "blood", bg: T.eat.bg },
 ];
 
 export function artFor(t: LabTest) {
-  return ART.find((a) => a.match(t)) ?? { Icon: FlaskConical, from: lilac.base, to: surface.tint, fg: "#3a3a41" };
+  return ART.find((a) => a.match(t)) ?? { art: "test-tube" as Icon3DName, bg: T.check.bg };
 }
 
+/** A soft flat tile with one of Cheeku's 3D objects. No needles, no gradients. */
 export function TestArt({ test, size = 64, radius = 20 }: { test: LabTest; size?: number; radius?: number }) {
   const a = artFor(test);
   return (
-    <View style={{ width: size, height: size, borderRadius: radius, overflow: "hidden", alignItems: "center", justifyContent: "center" }}>
-      <Gradient from={a.from} to={a.to} glow="#ffffff" />
-      <View style={{ width: size * 0.62, height: size * 0.62, borderRadius: size, backgroundColor: "rgba(255,255,255,0.8)", alignItems: "center", justifyContent: "center" }}>
-        <a.Icon size={size * 0.34} color={a.fg} strokeWidth={1.8} />
-      </View>
+    <View style={{ width: size, height: size, borderRadius: radius, backgroundColor: a.bg, alignItems: "center", justifyContent: "center" }}>
+      <Icon3D name={a.art} size={Math.round(size * 0.68)} />
     </View>
   );
 }

@@ -4,7 +4,7 @@ import { ScrollView, Text, View } from "react-native";
 import { Avatar } from "@/components/ui/avatar";
 import { Tap } from "@/components/ui/tap";
 import type { ActiveProfile } from "@/lib/profiles/context";
-import { ink, semantic, surface } from "@/theme/tokens";
+import { brand, ink, semantic, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
 
 /** Who this order is for: one chip per family member. */
@@ -15,7 +15,7 @@ export function MemberChips({ members, selected, onPick }: { members: ActiveProf
       {members.map((m) => {
         const on = m.id === selected;
         return (
-          <Tap key={m.id} accessibilityRole="radio" accessibilityState={{ selected: on }} onPress={() => onPick(m.id)} style={{ flexDirection: "row", alignItems: "center", gap: 8, paddingLeft: 4, paddingRight: 14, height: 44, borderRadius: 999, backgroundColor: on ? ink[900] : "#fff", borderWidth: on ? 0 : 1, borderColor: surface.line }}>
+          <Tap key={m.id} accessibilityRole="radio" accessibilityState={{ selected: on }} onPress={() => onPick(m.id)} style={{ flexDirection: "row", alignItems: "center", gap: 8, paddingLeft: 4, paddingRight: 14, height: 44, borderRadius: 999, backgroundColor: on ? brand[600] : "#fff", borderWidth: on ? 0 : 1, borderColor: surface.line }}>
             <Avatar svg={m.avatar} photo={m.photo} image={m.avatarImage} background={m.avatarBackground} size={34} />
             <Text style={{ fontFamily: on ? font.semibold : font.medium, fontSize: 15, color: on ? "#fff" : ink[900] }}>{m.isPrimary ? "Me" : m.name.split(" ")[0]}</Text>
           </Tap>

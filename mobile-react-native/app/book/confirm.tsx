@@ -168,7 +168,7 @@ export default function ConfirmConsult() {
               {([["VIDEO", "Video", MonitorPlay], ["AUDIO_ONLY", "Audio only", Phone]] as const).map(([v, label, Icon]) => {
                 const on = meeting === v;
                 return (
-                  <Tap key={v} accessibilityRole="radio" accessibilityState={{ selected: on }} onPress={() => setMeeting(v)} style={{ flex: 1, height: 50, borderRadius: 16, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, backgroundColor: on ? ink[900] : "#fff", borderWidth: 1, borderColor: on ? ink[900] : surface.line }}>
+                  <Tap key={v} accessibilityRole="radio" accessibilityState={{ selected: on }} onPress={() => setMeeting(v)} style={{ flex: 1, height: 50, borderRadius: 16, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, backgroundColor: on ? brand[600] : "#fff", borderWidth: 1, borderColor: on ? brand[600] : surface.line }}>
                     <Icon size={17} color={on ? "#fff" : ink[900]} />
                     <Text style={{ fontFamily: font.semibold, fontSize: 15, color: on ? "#fff" : ink[900] }}>{label}</Text>
                   </Tap>

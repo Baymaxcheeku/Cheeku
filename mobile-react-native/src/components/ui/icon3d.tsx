@@ -46,6 +46,7 @@ const ART = {
   syringe: require("../../../assets/icon3d/syringe.png"),
   hospital: require("../../../assets/icon3d/hospital.png"),
   monitor: require("../../../assets/icon3d/monitor.png"),
+  ambulance: require("../../../assets/icon3d/ambulance.png"),
 } as const;
 /* eslint-enable @typescript-eslint/no-require-imports */
 

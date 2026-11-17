@@ -108,7 +108,7 @@ export function PatientCard({ p, showErrors }: { p: ReturnType<typeof usePatient
             {GENDERS.map(([v, label]) => {
               const on = g === v;
               return (
-                <Tap key={v} accessibilityRole="radio" accessibilityState={{ selected: on }} onPress={() => p.set("gender", v)} style={{ height: 40, paddingHorizontal: 16, borderRadius: 999, justifyContent: "center", backgroundColor: on ? ink[900] : "#fff", borderWidth: 1, borderColor: on ? ink[900] : surface.line }}>
+                <Tap key={v} accessibilityRole="radio" accessibilityState={{ selected: on }} onPress={() => p.set("gender", v)} style={{ height: 40, paddingHorizontal: 16, borderRadius: 999, justifyContent: "center", backgroundColor: on ? brand[600] : "#fff", borderWidth: 1, borderColor: on ? brand[600] : surface.line }}>
                   <Text style={{ fontFamily: font.semibold, fontSize: 14, color: on ? "#fff" : ink[900] }}>{label}</Text>
                 </Tap>
               );

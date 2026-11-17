@@ -133,7 +133,7 @@ export default function LabPartner() {
             cart.setPartner(p.id);
             router.push(cart.tests.length ? "/labs/book" : "/labs");
           }}
-          style={[glassShadow, { height: 58, borderRadius: 999, backgroundColor: ink[900], alignItems: "center", justifyContent: "center" }]} scale={0.98}
+          style={[glassShadow, { height: 58, borderRadius: 999, backgroundColor: brand[600], alignItems: "center", justifyContent: "center" }]} scale={0.98}
         >
           <Text style={{ fontFamily: font.semibold, fontSize: 17, color: "#fff" }}>
             {cart.tests.length ? `Book home collection · ${cart.tests.length} ${cart.tests.length === 1 ? "test" : "tests"}` : "Pick tests to book"}

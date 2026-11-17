@@ -11,6 +11,8 @@ import { SPECIALTIES, doctorById } from "@/lib/booking/catalog";
 import { doctorFace } from "@/lib/booking/faces";
 import { brand, hue, ink, lilac } from "@/theme/tokens";
 import { font } from "@/theme/type";
+import { PILLAR_TONE, glassCard } from "@/components/today/palette";
+import { Icon3D } from "@/components/ui/icon3d";
 
 /**
  * One appointment, as a tappable card.
@@ -35,8 +37,8 @@ export function AppointmentCard({ appt, hero }: { appt: Appointment; hero?: bool
       <Portrait face={face} size={hero ? 58 : 52} radius={hero ? 18 : 16} />
       <View className="min-w-0 flex-1">
         <View className="flex-row items-center gap-1.5">
-          {online ? <MonitorPlay size={13} color={ink[900]} /> : <Building2 size={13} color={hue.orange.fg} />}
-          <Text style={{ fontFamily: font.semibold, fontSize: 12, color: online ? brand[700] : "#3a3a41" }}>
+          <Icon3D name={online ? "video" : "hospital"} size={16} />
+          <Text style={{ fontFamily: font.semibold, fontSize: 12, color: online ? PILLAR_TONE.sleep.deep : PILLAR_TONE.eat.deep }}>
             {online ? "Video call" : "Clinic visit"}
             {cancelled ? " · Cancelled" : ""}
           </Text>
@@ -55,45 +57,46 @@ export function AppointmentCard({ appt, hero }: { appt: Appointment; hero?: bool
   if (!hero) {
     return (
       <Tap accessibilityRole="button" onPress={go} style={{ opacity: cancelled ? 0.6 : 1 }} scale={0.98}>
-        <Glass strong className="rounded-xl p-3 pr-4">
+        <View style={[glassCard("#ffffff", "#0f1030"), { borderRadius: 22, padding: 12, paddingRight: 16, shadowOpacity: 0.05 }]}>
           {body}
-        </Glass>
+        </View>
       </Tap>
     );
   }
 
+  const tone = online ? PILLAR_TONE.sleep : PILLAR_TONE.eat;
   return (
-    <Tap accessibilityRole="button" accessibilityLabel={`Upcoming appointment with ${doctor.name}, ${whenLabel(appt)}`} onPress={go} scale={0.98}>
-      <View className="overflow-hidden rounded-2xl p-3.5" style={glassShadow}>
-        <Gradient from={online ? lilac.violet : hue.orange.bg} to={online ? lilac.mist : hue.orange.wash} glow="#ffffff" />
+    <View style={[glassCard(tone.glass), { borderRadius: 26, padding: 14 }]}>
+      <Tap accessibilityRole="button" accessibilityLabel={`Upcoming appointment with ${doctor.name}, ${whenLabel(appt)}`} onPress={go} scale={0.98}>
         <View className="mb-3 flex-row items-center justify-between">
-          <Text style={{ fontFamily: font.semibold, fontSize: 13, color: ink[700] }}>Upcoming</Text>
-          <Glass className="rounded-pill px-2.5 py-1">
+          <Text style={{ fontFamily: font.semibold, fontSize: 13, color: tone.deep }}>Upcoming</Text>
+          <View style={{ height: 26, paddingHorizontal: 10, borderRadius: 999, backgroundColor: "rgba(255,255,255,0.9)", justifyContent: "center" }}>
             <Text style={{ fontFamily: font.semibold, fontSize: 12, color: ink[900] }}>Starts {countdown(appt)}</Text>
-          </Glass>
+          </View>
         </View>
         {body}
-        {open ? (
-          <Pressable
-            accessibilityRole="button"
-            onPress={go}
-            style={({ pressed }) => ({
-              marginTop: 12,
-              height: 48,
-              borderRadius: 999,
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 8,
-              backgroundColor: brand[600],
-              transform: [{ scale: pressed ? 0.98 : 1 }],
-            })}
-          >
-            <Video size={18} color="#fff" />
-            <Text style={{ fontFamily: font.semibold, fontSize: 15, color: "#fff" }}>Join video call</Text>
-          </Pressable>
-        ) : null}
-      </View>
-    </Tap>
+      </Tap>
+      {open ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`Join video call with ${doctor.name}`}
+          onPress={go}
+          style={({ pressed }) => ({
+            marginTop: 12,
+            height: 48,
+            borderRadius: 999,
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 8,
+            backgroundColor: brand[600],
+            transform: [{ scale: pressed ? 0.98 : 1 }],
+          })}
+        >
+          <Video size={18} color="#fff" />
+          <Text style={{ fontFamily: font.semibold, fontSize: 15, color: "#fff" }}>Join video call</Text>
+        </Pressable>
+      ) : null}
+    </View>
   );
 }

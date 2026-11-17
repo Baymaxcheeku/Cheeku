@@ -1,9 +1,9 @@
-import { ClipboardList } from "lucide-react-native";
 import { Text, View } from "react-native";
 
-import { Gradient, glassShadow } from "@/components/ui/glass";
+import { PILLAR_TONE, glassCard } from "@/components/today/palette";
+import { Icon3D } from "@/components/ui/icon3d";
 import type { Intake } from "@/lib/booking/draft";
-import { brand, ink } from "@/theme/tokens";
+import { ink, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
 
 /** The pre-consultation note, as the doctor will see it. */
@@ -20,20 +20,22 @@ export function NoteCard({ intake, compact }: { intake: Intake; compact?: boolea
   const shown = compact ? rows.filter(([k]) => k === "About" || k === "Since" || k === "Reports") : rows;
 
   return (
-    <View className="overflow-hidden rounded-xl" style={glassShadow}>
-      <Gradient from="#ffffff" to={brand[50]} angle="vertical" />
-      <View className="p-4">
-        <View className="flex-row items-center gap-2">
-          <View className="h-8 w-8 items-center justify-center rounded-md" style={{ backgroundColor: brand[50] }}>
-            <ClipboardList size={16} color={ink[900]} />
+    <View style={[glassCard("#ffffff", "#0f1030"), { borderRadius: 24, shadowOpacity: 0.05 }]}>
+      <View style={{ padding: 16 }}>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+          <View style={{ width: 48, height: 48, borderRadius: 16, backgroundColor: PILLAR_TONE.check.bg, alignItems: "center", justifyContent: "center" }}>
+            <Icon3D name="clipboard" size={34} />
           </View>
-          <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>Pre-consultation note</Text>
+          <View style={{ flex: 1 }}>
+            <Text style={{ fontFamily: font.semibold, fontSize: 17, letterSpacing: -0.3, color: ink[900] }}>Pre-consultation note</Text>
+            <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 1 }}>What the doctor reads before saying hello</Text>
+          </View>
         </View>
-        <View className="mt-3 gap-2.5">
-          {shown.map(([k, v]) => (
-            <View key={k} className="flex-row gap-3">
-              <Text style={{ width: 118, fontFamily: font.regular, fontSize: 13, color: ink[500] }}>{k}</Text>
-              <Text style={{ flex: 1, fontFamily: font.medium, fontSize: 13, color: ink[900] }}>{v}</Text>
+        <View style={{ marginTop: 14 }}>
+          {shown.map(([k, v], i) => (
+            <View key={k} style={{ flexDirection: "row", gap: 12, paddingVertical: 10, borderTopWidth: i ? 1 : 0, borderTopColor: surface.line }}>
+              <Text style={{ width: 112, fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[500] }}>{k}</Text>
+              <Text style={{ flex: 1, fontFamily: font.medium, fontSize: 14, lineHeight: 19, color: ink[900] }}>{v}</Text>
             </View>
           ))}
         </View>

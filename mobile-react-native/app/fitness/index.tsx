@@ -23,6 +23,9 @@ import { useNearbyPlace } from "@/lib/location/live";
 import { useFamily } from "@/lib/profiles/family";
 import { brand, ink, lilac, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
+import { SkyWash } from "@/components/home/front";
+import { PILLAR_TONE, glassCard } from "@/components/today/palette";
+import { Icon3D } from "@/components/ui/icon3d";
 
 /*
  * FITNESS: FIND, MATCH, BOOK (loop-fitness).
@@ -77,9 +80,9 @@ export default function Fitness() {
 
   return (
     <View className="flex-1 bg-canvas">
-      <Backdrop />
+      <SkyWash top={0} />
       <ScreenHeader
-        title="Fitness"
+        title=""
         fallback="/home"
         right={
           <GlassCircle label="Your classes" onPress={() => router.push("/fitness/bookings")}>
@@ -89,11 +92,14 @@ export default function Fitness() {
       />
       <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: insets.bottom + 40, gap: 18 }} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
         <StaggerItem index={0}>
-          <View className="mt-2 overflow-hidden rounded-2xl p-5" style={glassShadow}>
-            <Gradient from={lilac.base} to={lilac.deep} glow="#ffffff" />
-            <Text style={{ fontFamily: font.medium, fontSize: 12, color: ink[500] }}>Gyms and studios, one class at a time</Text>
-            <Text style={{ fontFamily: font.semibold, fontSize: 28, lineHeight: 33, letterSpacing: -0.8, color: ink[900], marginTop: 6 }}>Classes for {first}</Text>
-            <Text style={{ fontFamily: font.regular, fontSize: 15, lineHeight: 21, color: ink[700], marginTop: 4 }}>
+          <View style={{ marginTop: 2 }}>
+            <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 12 }}>
+              <Text accessibilityRole="header" style={{ flex: 1, fontFamily: font.semibold, fontSize: 30, lineHeight: 35, letterSpacing: -0.9, color: ink[900] }}>Classes for {first}</Text>
+              <View style={{ width: 64, height: 64, borderRadius: 22, backgroundColor: PILLAR_TONE.move.bg, alignItems: "center", justifyContent: "center", marginTop: -4 }}>
+                <Icon3D name="dumbbell" size={46} />
+              </View>
+            </View>
+            <Text style={{ fontFamily: font.regular, fontSize: 15, lineHeight: 21, color: ink[500], marginTop: 4, maxWidth: 300 }}>
               {lead ? `Picked from ${first === "you" ? "your" : `${first}'s`} health profile, with ${NEED_PHRASE[lead]} first. One class at a time, no membership.` : "Yoga, gym, swimming, dance and more. One class at a time, no membership."}
             </Text>
             {where ? (
@@ -113,7 +119,7 @@ export default function Fitness() {
         {where ? (
           <>
             <StaggerItem index={1}>
-              <View style={[glassShadow, { height: 50, borderRadius: 999, backgroundColor: "#fff", borderWidth: 1, borderColor: surface.line, flexDirection: "row", alignItems: "center", gap: 10, paddingHorizontal: 16 }]}>
+              <View style={[glassCard("#ffffff", "#0f1030"), { height: 54, borderRadius: 18, shadowOpacity: 0.05, flexDirection: "row", alignItems: "center", gap: 10, paddingHorizontal: 16 }]}>
                 <Search size={18} color={ink[500]} />
                 <TextInput
                   value={query}
@@ -146,8 +152,8 @@ export default function Fitness() {
             </ScrollView>
 
             {fit.doctorNote ? (
-              <View style={{ flexDirection: "row", gap: 10, borderRadius: 16, padding: 14, backgroundColor: lilac.mist }}>
-                <Stethoscope size={16} color={ink[900]} style={{ marginTop: 1 }} />
+              <View style={[glassCard(PILLAR_TONE.check.glass), { flexDirection: "row", alignItems: "center", gap: 12, borderRadius: 20, padding: 14 }]}>
+                <Icon3D name="stethoscope" size={32} />
                 <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[700] }}>
                   {fit.needs[0] === "prenatal" ? "Only prenatal classes are shown. " : "Gentler classes are shown first. "}
                   Check with {first === "you" ? "your" : `${first}'s`} doctor before starting, and tell the trainer.
@@ -160,16 +166,16 @@ export default function Fitness() {
                 accessibilityRole="button"
                 accessibilityLabel={`Next class: ${next.title}, ${dayLabel(next.startsAt)} ${timeLabel(next.startsAt)}`}
                 onPress={() => router.push({ pathname: "/fitness/booking/[id]", params: { id: next.id } })}
-                style={[glassShadow, { borderRadius: 24, backgroundColor: ink[900], padding: 14, flexDirection: "row", alignItems: "center", gap: 12 }]}
+                style={[glassCard(PILLAR_TONE.move.glass), { borderRadius: 24, padding: 14, flexDirection: "row", alignItems: "center", gap: 12 }]}
                 scale={0.98}
               >
                 <ActivityArt id={next.activity} size={44} radius={14} />
                 <View style={{ flex: 1, minWidth: 0 }}>
-                  <Text style={{ fontFamily: font.medium, fontSize: 12, color: brand[200] }}>Next class</Text>
-                  <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 15, color: "#fff" }}>{next.title}</Text>
-                  <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 12, color: brand[100] }}>{dayLabel(next.startsAt)}, {timeLabel(next.startsAt)} · {next.studioName}</Text>
+                  <Text style={{ fontFamily: font.semibold, fontSize: 12, color: PILLAR_TONE.move.deep }}>Next class</Text>
+                  <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 16, color: ink[900] }}>{next.title}</Text>
+                  <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 12, color: ink[500] }}>{dayLabel(next.startsAt)}, {timeLabel(next.startsAt)} · {next.studioName}</Text>
                 </View>
-                <ChevronRight size={18} color="#fff" />
+                <ChevronRight size={18} color={ink[500]} />
               </Tap>
             ) : null}
 

@@ -102,7 +102,7 @@ export default function SlotScreen() {
       {/* The doctor, as the hero: a pastel panel with the portrait, like the
           reference's detail screens. */}
       <View className="overflow-hidden" style={{ borderBottomLeftRadius: 32, borderBottomRightRadius: 32 }}>
-        <Gradient from={lilac.violet} to={lilac.mist} angle="vertical" glow="#ffffff" />
+        <View style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "#ecebff" }} />
         <View className="flex-row items-center justify-between px-4" style={{ paddingTop: insets.top + 6 }}>
           <GlassCircle label="Go back" onPress={() => goBack(router, "/book/doctors")}>
             <ChevronLeft size={21} color={ink[900]} />
@@ -183,16 +183,15 @@ export default function SlotScreen() {
                   setSlot(null);
                 }}
                 style={[
-                  on ? null : glassShadow,
                   {
-                    width: 58,
-                    height: 72,
-                    borderRadius: 24,
+                    width: 60,
+                    height: 76,
+                    borderRadius: 22,
                     alignItems: "center",
                     justifyContent: "center",
-                    backgroundColor: on ? ink[900] : glass.fillStrong,
-                    borderWidth: on ? 0 : 1,
-                    borderColor: glass.rim,
+                    backgroundColor: on ? brand[600] : "#fff",
+                    borderWidth: 1,
+                    borderColor: on ? brand[600] : "rgba(15,16,48,0.08)",
                   },
                 ]}
               >
@@ -292,7 +291,7 @@ export default function SlotScreen() {
             borderRadius: 999,
             alignItems: "center",
             justifyContent: "center",
-            backgroundColor: slot ? ink[900] : "rgba(17,17,20,0.3)",
+            backgroundColor: slot ? brand[600] : "rgba(17,17,20,0.3)",
           }}
           scale={0.98}
         >

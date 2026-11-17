@@ -99,7 +99,7 @@ export default function Confirmed() {
       <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingTop: insets.top + 28, paddingBottom: 20 }} showsVerticalScrollIndicator={false}>
         <View className="items-center">
           <Animated.View style={tick}>
-            <View className="h-20 w-20 items-center justify-center rounded-pill" style={[glassShadow, { backgroundColor: ink[900] }]}>
+            <View className="h-20 w-20 items-center justify-center rounded-pill" style={[glassShadow, { backgroundColor: brand[600] }]}>
               <Check size={38} color="#fff" strokeWidth={3} />
             </View>
           </Animated.View>

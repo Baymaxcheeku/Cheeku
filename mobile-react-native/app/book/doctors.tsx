@@ -1,6 +1,6 @@
 import { useRouter } from "expo-router";
 import { FaceArt } from "@/components/ui/face-art";
-import { Building2, ChevronLeft, ClipboardCheck, Clock3, GraduationCap, Languages, MapPin, MonitorPlay } from "lucide-react-native";
+import { ChevronLeft, Clock3 } from "lucide-react-native";
 import { ScrollView, Text, View } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -14,9 +14,11 @@ import { lsIdOf } from "@/lib/booking/partner-doctors";
 import { LIVE } from "@/lib/partner/labstack";
 import { useLiveDoctors } from "@/lib/partner/use-doctors";
 import { doctorFace } from "@/lib/booking/faces";
-import { RatingLine } from "@/components/labs/parts";
 import { useRatings, type Rating } from "@/lib/labs/queries";
 import { brand, ink, lilac, surface } from "@/theme/tokens";
+import { SkyWash } from "@/components/home/front";
+import { PILLAR_TONE, glassCard } from "@/components/today/palette";
+import { Icon3D } from "@/components/ui/icon3d";
 import { font } from "@/theme/type";
 import { goBack } from "@/lib/nav/go-back";
 
@@ -47,22 +49,20 @@ export default function Doctors() {
 
   return (
     <View className="flex-1 bg-canvas">
-      <View pointerEvents="none" style={{ position: "absolute", top: 0, left: 0, right: 0, height: 380 }}>
-        <Gradient from={lilac.base} to={surface.canvas} angle="vertical" />
-      </View>
+      <SkyWash top={0} />
 
       <View className="flex-row items-center gap-3 px-4 pb-2" style={{ paddingTop: insets.top + 6 }}>
         <GlassCircle label="Go back" onPress={() => goBack(router, "/book/consult")}>
           <ChevronLeft size={21} color={ink[900]} />
         </GlassCircle>
-        <Text numberOfLines={1} style={{ flex: 1, textAlign: "center", fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>
-          {sp.plural}
-        </Text>
-        <View style={{ width: 48 }} />
+        <View style={{ flex: 1 }} />
       </View>
 
       <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: insets.bottom + 24 }} showsVerticalScrollIndicator={false}>
-        <View className="mt-3 flex-row gap-2">
+        <Text style={{ fontFamily: font.semibold, fontSize: 30, lineHeight: 35, letterSpacing: -0.9, color: ink[900], marginTop: 4 }}>{sp.plural}</Text>
+        <Text style={{ fontFamily: font.regular, fontSize: 15, lineHeight: 21, color: ink[500], marginTop: 4 }}>{sp.line}</Text>
+
+        <View className="mt-5 flex-row gap-2">
           {(["online", "clinic"] as const).map((k) => {
             const on = m === k;
             return (
@@ -71,26 +71,20 @@ export default function Doctors() {
                 accessibilityRole="tab"
                 accessibilityState={{ selected: on }}
                 onPress={() => setMode(k)}
-                style={[
-                  on ? null : glassShadow,
-                  {
-                    height: 44,
-                    flexDirection: "row",
-                    alignItems: "center",
-                    gap: 6,
-                    paddingHorizontal: 16,
-                    borderRadius: 999,
-                    backgroundColor: on ? ink[900] : glass.fillStrong,
-                    borderWidth: on ? 0 : 1,
-                    borderColor: glass.rim,
-                  },
-                ]}
+                style={{
+                  flex: 1,
+                  height: 52,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 8,
+                  borderRadius: 18,
+                  backgroundColor: on ? brand[600] : "#fff",
+                  borderWidth: 1,
+                  borderColor: on ? brand[600] : surface.line,
+                }}
               >
-                {k === "online" ? (
-                  <MonitorPlay size={16} color={on ? "#fff" : ink[700]} strokeWidth={1.8} />
-                ) : (
-                  <Building2 size={16} color={on ? "#fff" : ink[700]} strokeWidth={1.8} />
-                )}
+                <Icon3D name={k === "online" ? "video" : "hospital"} size={26} />
                 <Text style={{ fontFamily: on ? font.semibold : font.medium, fontSize: 15, color: on ? "#fff" : ink[700] }}>
                   {k === "online" ? "Online" : "Clinic visit"}
                 </Text>
@@ -99,20 +93,20 @@ export default function Doctors() {
           })}
         </View>
 
-        <Text style={{ fontFamily: font.semibold, fontSize: 24, letterSpacing: -0.6, color: ink[900], marginTop: 20 }}>
+        <Text style={{ fontFamily: font.semibold, fontSize: 20, letterSpacing: -0.4, color: ink[900], marginTop: 26 }}>
           {list.length} {list.length === 1 ? "doctor" : "doctors"} {m === "online" ? "online today" : "near you"}
         </Text>
-        <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 3 }}>
+        <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 2 }}>
           {LIVE ? "Doctors from our partner network. Times are live." : "Preview · sample doctors. Nothing is booked for real yet."}
         </Text>
 
         {intake ? (
-          <Glass className="mt-4 flex-row items-center gap-2.5 rounded-lg px-3.5 py-3">
-            <ClipboardCheck size={18} color={ink[900]} strokeWidth={1.8} />
-            <Text style={{ flex: 1, fontFamily: font.medium, fontSize: 13, color: ink[700] }}>
-              Your pre-consultation note goes to whichever doctor you book.
+          <View style={[glassCard(PILLAR_TONE.check.glass), { marginTop: 16, flexDirection: "row", alignItems: "center", gap: 12, borderRadius: 20, padding: 14 }]}>
+            <Icon3D name="clipboard" size={34} />
+            <Text style={{ flex: 1, fontFamily: font.medium, fontSize: 14, lineHeight: 19, color: ink[900] }}>
+              Your note is ready. It goes to whichever doctor you book.
             </Text>
-          </Glass>
+          </View>
         ) : null}
 
         {LIVE && (live.loading || live.error || live.needsPlace) ? (
@@ -181,74 +175,61 @@ function DoctorCard({
   const next = partner ? null : nextFree(d, mode);
   const fee = d.fee[mode];
 
+  const where = mode === "clinic" ? [d.clinic.area, d.clinic.km ? `${d.clinic.km} km` : ""].filter(Boolean).join(" · ") : d.languages.slice(0, 2).join(", ");
+
   return (
-    <Glass strong className="overflow-hidden rounded-2xl p-3">
-      <Tap accessibilityRole="button" accessibilityLabel={`${d.name}. Open profile and reviews`} onPress={onOpen} className="flex-row gap-3.5">
-        <View className="overflow-hidden rounded-xl" style={{ width: 92, height: 104 }}>
-          {/* The illustrated face as a portrait tile, full bleed. */}
+    <View style={[glassCard("#ffffff", "#0f1030"), { borderRadius: 26, padding: 12, shadowOpacity: 0.05 }]}>
+      <Tap accessibilityRole="button" accessibilityLabel={`${d.name}. Open profile and reviews`} onPress={onOpen} style={{ flexDirection: "row", gap: 14 }}>
+        <View style={{ width: 96, height: 112, borderRadius: 20, overflow: "hidden" }}>
           {face ? (
-            <View className="flex-1 items-center justify-center" style={{ backgroundColor: face.background }}>
-              <FaceArt face={face} size={108} />
+            <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: face.background }}>
+              <FaceArt face={face} size={112} />
             </View>
           ) : (
-            <Gradient from={lilac.base} to={lilac.deep} />
+            <View style={{ flex: 1, backgroundColor: lilac.base }} />
           )}
-        </View>
-        <View className="min-w-0 flex-1 py-0.5">
-          <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 17, letterSpacing: -0.2, color: ink[900] }}>
-            {d.name}
-          </Text>
-          <Text style={{ fontFamily: font.medium, fontSize: 13, color: brand[600], marginTop: 1 }}>
-            {SPECIALTIES[d.specialty].label}
-          </Text>
-          <View style={{ marginTop: 5 }}>
-            <RatingLine rating={rating} />
-          </View>
-          <Fact icon={<GraduationCap size={13} color={ink[500]} />} text={d.years ? `${d.years} yrs · ${d.qualifications}` : d.qualifications} />
-          <Fact icon={<Languages size={13} color={ink[500]} />} text={d.languages.join(", ")} />
-          {mode === "clinic" ? (
-            <Fact icon={<MapPin size={13} color={ink[500]} />} text={[d.clinic.name === d.clinic.area ? d.clinic.name : `${d.clinic.name}, ${d.clinic.area}`, d.clinic.km ? `${d.clinic.km} km` : ""].filter(Boolean).join(" · ")} />
+          {rating ? (
+            <View style={{ position: "absolute", left: 6, bottom: 6, flexDirection: "row", alignItems: "center", gap: 3, height: 24, paddingHorizontal: 8, borderRadius: 999, backgroundColor: "rgba(255,255,255,0.94)" }}>
+              <Text style={{ fontFamily: font.semibold, fontSize: 12, color: ink[900] }}>{rating.rating.toFixed(1)}</Text>
+              <Text style={{ fontFamily: font.regular, fontSize: 11, color: ink[500] }}>of 5</Text>
+            </View>
           ) : null}
         </View>
+        <View style={{ flex: 1, minWidth: 0, paddingTop: 4 }}>
+          <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 17, letterSpacing: -0.3, color: ink[900] }}>
+            {d.name}
+          </Text>
+          <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 14, color: ink[500], marginTop: 2 }}>
+            {SPECIALTIES[d.specialty].label}{d.years ? ` · ${d.years} yrs` : ""}
+          </Text>
+          <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 2 }}>
+            {where}
+          </Text>
+          <View style={{ flex: 1 }} />
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 6, alignSelf: "flex-start", height: 28, paddingHorizontal: 10, borderRadius: 999, backgroundColor: PILLAR_TONE.move.bg, marginTop: 8 }}>
+            <Clock3 size={13} color={PILLAR_TONE.move.deep} />
+            <Text numberOfLines={1} style={{ fontFamily: font.medium, fontSize: 12, color: PILLAR_TONE.move.deep }}>
+              {partner ? "See open times" : next ? `Next ${next}` : "Full for 3 days"}
+            </Text>
+          </View>
+        </View>
       </Tap>
 
-      <View className="mt-3 flex-row items-center gap-2 rounded-lg px-3 py-2.5" style={{ backgroundColor: "rgba(241,240,254,0.8)" }}>
-        <Clock3 size={14} color={ink[900]} />
-        <Text style={{ flex: 1, fontFamily: font.medium, fontSize: 13, color: ink[700] }}>
-          {partner ? "See open times" : next ? `Next: ${next}` : "No slots in the next 3 days"}
-        </Text>
-        <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{fee ? `₹${fee}` : partner ? "Fee on booking" : "₹0"}</Text>
+      <View style={{ flexDirection: "row", alignItems: "center", marginTop: 12, paddingTop: 12, paddingHorizontal: 4, borderTopWidth: 1, borderTopColor: surface.line }}>
+        <View style={{ flex: 1 }}>
+          <Text style={{ fontFamily: font.regular, fontSize: 12, color: ink[500] }}>{mode === "online" ? "Video consult" : "Clinic visit"}</Text>
+          <Text style={{ fontFamily: font.semibold, fontSize: 18, letterSpacing: -0.3, color: ink[900] }}>{fee ? `₹${fee}` : partner ? "Fee on booking" : "Free"}</Text>
+        </View>
+        <Tap
+          accessibilityRole="button"
+          accessibilityLabel={`Book ${d.name}`}
+          onPress={onBook}
+          scale={0.97}
+          style={{ height: 46, paddingHorizontal: 22, borderRadius: 999, alignItems: "center", justifyContent: "center", backgroundColor: brand[600] }}
+        >
+          <Text style={{ fontFamily: font.semibold, fontSize: 15, color: "#fff" }}>Book now</Text>
+        </Tap>
       </View>
-
-      <Tap
-        accessibilityRole="button"
-        accessibilityLabel={`Choose a time with ${d.name}`}
-        onPress={onBook}
-        style={{
-          marginTop: 10,
-          height: 48,
-          borderRadius: 999,
-          alignItems: "center",
-          justifyContent: "center",
-          backgroundColor: ink[900],
-        }}
-        scale={0.98}
-      >
-        <Text style={{ fontFamily: font.semibold, fontSize: 15, color: "#fff" }}>
-          {mode === "online" ? "Choose a video slot" : "Choose a visit time"}
-        </Text>
-      </Tap>
-    </Glass>
-  );
-}
-
-function Fact({ icon, text }: { icon: React.ReactNode; text: string }) {
-  return (
-    <View className="mt-1.5 flex-row items-center gap-1.5">
-      {icon}
-      <Text numberOfLines={1} style={{ flex: 1, fontFamily: font.regular, fontSize: 13, color: ink[500] }}>
-        {text}
-      </Text>
     </View>
   );
 }

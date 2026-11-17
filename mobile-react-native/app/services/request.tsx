@@ -171,7 +171,7 @@ export default function ServiceRequestScreen() {
             {members.map((m) => {
               const on = m.id === who?.id;
               return (
-                <Tap key={m.id} accessibilityRole="radio" accessibilityState={{ selected: on }} onPress={() => setMemberId(m.id)} style={[on ? null : glassShadow, { flexDirection: "row", alignItems: "center", gap: 8, paddingLeft: 4, paddingRight: 14, height: 46, borderRadius: 999, backgroundColor: on ? ink[900] : glass.fillStrong, borderWidth: on ? 0 : 1, borderColor: glass.rim }]}>
+                <Tap key={m.id} accessibilityRole="radio" accessibilityState={{ selected: on }} onPress={() => setMemberId(m.id)} style={[on ? null : glassShadow, { flexDirection: "row", alignItems: "center", gap: 8, paddingLeft: 4, paddingRight: 14, height: 46, borderRadius: 999, backgroundColor: on ? brand[600] : glass.fillStrong, borderWidth: on ? 0 : 1, borderColor: glass.rim }]}>
                   <Avatar svg={m.avatar} photo={m.photo} image={m.avatarImage} background={m.avatarBackground} size={36} />
                   <Text style={{ fontFamily: on ? font.semibold : font.medium, fontSize: 15, color: on ? "#fff" : ink[900] }}>{m.isPrimary ? "Me" : m.name.split(" ")[0]}</Text>
                 </Tap>
@@ -187,7 +187,7 @@ export default function ServiceRequestScreen() {
                 const on = m === mode;
                 const Icon = MODE_ICON[m];
                 return (
-                  <Tap scale={0.98} key={m} accessibilityRole="radio" accessibilityState={{ selected: on }} onPress={() => setMode(m)} style={[on ? null : glassShadow, { flex: 1, height: 64, borderRadius: 24, alignItems: "center", justifyContent: "center", gap: 4, backgroundColor: on ? ink[900] : glass.fillStrong, borderWidth: on ? 0 : 1, borderColor: glass.rim }]}>
+                  <Tap scale={0.98} key={m} accessibilityRole="radio" accessibilityState={{ selected: on }} onPress={() => setMode(m)} style={[on ? null : glassShadow, { flex: 1, height: 64, borderRadius: 24, alignItems: "center", justifyContent: "center", gap: 4, backgroundColor: on ? brand[600] : glass.fillStrong, borderWidth: on ? 0 : 1, borderColor: glass.rim }]}>
                     <Icon size={18} color={on ? "#fff" : brand[600]} />
                     <Text style={{ fontFamily: font.semibold, fontSize: 13, color: on ? "#fff" : ink[900] }}>{MODE_LABEL[m]}</Text>
                   </Tap>
@@ -202,7 +202,7 @@ export default function ServiceRequestScreen() {
             {days.map((d, i) => {
               const on = i === dayIdx;
               return (
-                <Tap scale={0.98} key={i} accessibilityRole="radio" accessibilityState={{ selected: on }} onPress={() => setDayIdx(i)} style={[on ? null : glassShadow, { width: 74, height: 70, borderRadius: 24, alignItems: "center", justifyContent: "center", backgroundColor: on ? ink[900] : glass.fillStrong, borderWidth: on ? 0 : 1, borderColor: glass.rim }]}>
+                <Tap scale={0.98} key={i} accessibilityRole="radio" accessibilityState={{ selected: on }} onPress={() => setDayIdx(i)} style={[on ? null : glassShadow, { width: 74, height: 70, borderRadius: 24, alignItems: "center", justifyContent: "center", backgroundColor: on ? brand[600] : glass.fillStrong, borderWidth: on ? 0 : 1, borderColor: glass.rim }]}>
                   <Text style={{ fontFamily: font.medium, fontSize: 12, color: on ? "rgba(255,255,255,0.75)" : ink[500] }}>{dayLabel(d, i)}</Text>
                   <Text style={{ fontFamily: font.semibold, fontSize: 17, color: on ? "#fff" : ink[900], marginTop: 2 }}>{d.getDate()}</Text>
                 </Tap>

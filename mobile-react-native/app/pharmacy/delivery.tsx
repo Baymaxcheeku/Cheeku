@@ -79,7 +79,7 @@ export default function PharmacyDelivery() {
           {([["HOME_DELIVERY", "Deliver home", HomeIcon], ["PICKUP", "Pick up", Store]] as const).map(([v, label, Icon]) => {
             const on = type === v;
             return (
-              <Tap key={v} accessibilityRole="radio" accessibilityState={{ selected: on }} onPress={() => { setType(v); setPharmacyId(null); }} style={{ flex: 1, height: 52, borderRadius: 16, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, backgroundColor: on ? ink[900] : "#fff", borderWidth: 1, borderColor: on ? ink[900] : surface.line }}>
+              <Tap key={v} accessibilityRole="radio" accessibilityState={{ selected: on }} onPress={() => { setType(v); setPharmacyId(null); }} style={{ flex: 1, height: 52, borderRadius: 16, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, backgroundColor: on ? brand[600] : "#fff", borderWidth: 1, borderColor: on ? brand[600] : surface.line }}>
                 <Icon size={17} color={on ? "#fff" : ink[900]} />
                 <Text style={{ fontFamily: font.semibold, fontSize: 15, color: on ? "#fff" : ink[900] }}>{label}</Text>
               </Tap>
@@ -138,7 +138,7 @@ export default function PharmacyDelivery() {
               {chosen.speeds.map((s) => {
                 const on = s === speed;
                 return (
-                  <Tap key={s} accessibilityRole="radio" accessibilityState={{ selected: on }} onPress={() => setSpeed(s)} style={{ height: 40, paddingHorizontal: 16, borderRadius: 999, justifyContent: "center", backgroundColor: on ? ink[900] : "#fff", borderWidth: 1, borderColor: on ? ink[900] : surface.line }}>
+                  <Tap key={s} accessibilityRole="radio" accessibilityState={{ selected: on }} onPress={() => setSpeed(s)} style={{ height: 40, paddingHorizontal: 16, borderRadius: 999, justifyContent: "center", backgroundColor: on ? brand[600] : "#fff", borderWidth: 1, borderColor: on ? brand[600] : surface.line }}>
                     <Text style={{ fontFamily: font.semibold, fontSize: 14, color: on ? "#fff" : ink[900] }}>{SPEED_LABEL[s]}</Text>
                   </Tap>
                 );

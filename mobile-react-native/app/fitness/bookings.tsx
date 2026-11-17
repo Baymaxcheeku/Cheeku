@@ -13,6 +13,7 @@ import { upcoming, useFitnessBookings, type FitnessBooking } from "@/lib/fitness
 import { useFamily } from "@/lib/profiles/family";
 import { brand, ink, lilac } from "@/theme/tokens";
 import { font } from "@/theme/type";
+import { glassCard } from "@/components/today/palette";
 
 /** Every class the family has booked: what's coming, then what's been. */
 export default function FitnessBookings() {
@@ -43,7 +44,7 @@ export default function FitnessBookings() {
       <Tap
         accessibilityRole="button"
         onPress={() => router.push({ pathname: "/fitness/booking/[id]", params: { id: b.id } })}
-        style={[glassShadow, { borderRadius: 24, backgroundColor: "#fff", borderWidth: 1, borderColor: glass.rim, padding: 12, flexDirection: "row", alignItems: "center", gap: 12, opacity: b.status === "cancelled" ? 0.6 : 1 }]}
+        style={[glassCard("#ffffff", "#0f1030"), { borderRadius: 24, shadowOpacity: 0.05, padding: 12, flexDirection: "row", alignItems: "center", gap: 12, opacity: b.status === "cancelled" ? 0.6 : 1 }]}
         scale={0.98}
       >
         <ActivityArt id={b.activity} size={44} radius={14} />

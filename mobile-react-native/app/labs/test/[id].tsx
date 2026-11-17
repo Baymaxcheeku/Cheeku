@@ -13,6 +13,7 @@ import { quote } from "@/lib/labs/logic";
 import { useCatalog, useLabCart, useRatings } from "@/lib/labs/queries";
 import { brand, hue, ink, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
+import { Icon3D } from "@/components/ui/icon3d";
 import { DetailSkeleton, ScreenSkeleton } from "@/components/ui/skeleton";
 
 /*
@@ -67,10 +68,8 @@ export default function LabTestDetail() {
       <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + 110 }} showsVerticalScrollIndicator={false}>
         {/* Hero. */}
         <View style={{ height: insets.top + 150, marginHorizontal: 10, marginTop: 6, paddingTop: insets.top, borderRadius: 32, overflow: "hidden", alignItems: "center", justifyContent: "center" }}>
-          <Gradient from={art.from} to={art.to} glow="#ffffff" />
-          <View style={{ width: 72, height: 72, borderRadius: 24, backgroundColor: surface.tint, alignItems: "center", justifyContent: "center" }}>
-            <art.Icon size={34} color={ink[900]} strokeWidth={1.6} />
-          </View>
+          <View style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: art.bg }} />
+          <Icon3D name={art.art} size={96} />
           <View style={{ position: "absolute", top: 0, left: 0, right: 0 }}>
             <ScreenHeader fallback="/labs" />
           </View>
@@ -184,7 +183,7 @@ export default function LabTestDetail() {
         <Tap
           accessibilityRole="button"
           onPress={() => (added ? router.push("/labs/choose") : cart.toggle(test.id))}
-          style={[glassShadow, { flex: 1, height: 58, borderRadius: 999, backgroundColor: ink[900], flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8 }]} scale={0.98}
+          style={[glassShadow, { flex: 1, height: 58, borderRadius: 999, backgroundColor: brand[600], flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8 }]} scale={0.98}
         >
           {added ? <Check size={18} color="#fff" strokeWidth={2.6} /> : <Plus size={18} color="#fff" strokeWidth={2.6} />}
           <Text style={{ fontFamily: font.semibold, fontSize: 17, color: "#fff" }}>{added ? `In cart · Choose lab` : "Add to cart"}</Text>

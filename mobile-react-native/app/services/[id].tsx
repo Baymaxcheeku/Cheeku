@@ -6,7 +6,7 @@ import { Pressable } from "@/components/ui/pressable";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Tap } from "@/components/ui/tap";
-import { SERVICE_ICON, ServiceArt } from "@/components/services/parts";
+import { SERVICE_ICON, Service3D } from "@/components/services/parts";
 import { Brand } from "@/components/ui/brand";
 import { Gradient, glass, glassShadow } from "@/components/ui/glass";
 import { Reveal, RevealScroll } from "@/components/ui/reveal";
@@ -17,6 +17,7 @@ import { MODE_LABEL, serviceById, type Offering } from "@/lib/services/catalog";
 import { marketplace } from "@/lib/services/provider";
 import { brand, ink, semantic, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
+import { glassCard } from "@/components/today/palette";
 
 /*
  * One service: what it is, what you can book inside it, how it works, and
@@ -85,11 +86,10 @@ export default function ServicePage() {
           </Reveal>
         ))}
 
-        <Reveal style={[glassShadow, { marginHorizontal: 20, marginTop: 6, borderRadius: 32, overflow: "hidden", padding: 20 }]}>
-          <Gradient from={s.tint.from} to="#ffffff" glow="#ffffff" />
+        <Reveal style={[glassCard("#ffffff", "#0f1030"), { marginHorizontal: 20, marginTop: 6, borderRadius: 28, overflow: "hidden", padding: 20, shadowOpacity: 0.05 }]}>
           <View style={{ flexDirection: "row", alignItems: "flex-start" }}>
             <View style={{ flex: 1 }}>
-              <View style={{ flexDirection: "row", alignItems: "center", gap: 6, alignSelf: "flex-start", paddingHorizontal: 10, height: 24, borderRadius: 999, backgroundColor: "rgba(255,255,255,0.85)" }}>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 6, alignSelf: "flex-start", paddingHorizontal: 10, height: 24, borderRadius: 999, backgroundColor: surface.tint }}>
                 {live ? <ShieldCheck size={12} color={s.tint.fg} /> : <Lock size={11} color={ink[700]} />}
                 <Text style={{ fontFamily: font.semibold, fontSize: 11, color: live ? s.tint.fg : ink[700] }}>
                   {live ? (marketplace().preview ? "Partner network · preview" : "Partner network") : s.status === "locked" ? "Locked" : "Coming soon"}
@@ -97,7 +97,9 @@ export default function ServicePage() {
               </View>
               <Text style={{ fontFamily: font.semibold, fontSize: 28, lineHeight: 32, letterSpacing: -0.8, color: ink[900], marginTop: 10 }}>{s.title}</Text>
             </View>
-            <ServiceArt icon={Icon} fg={s.tint.fg} size={96} />
+            <View style={{ width: 88, height: 88, borderRadius: 26, backgroundColor: surface.tint, alignItems: "center", justifyContent: "center" }}>
+              <Service3D icon={s.icon} size={64} />
+            </View>
           </View>
           <Text style={{ fontFamily: font.regular, fontSize: 15, lineHeight: 21, color: ink[700], marginTop: 8 }}>{s.promise}</Text>
         </Reveal>

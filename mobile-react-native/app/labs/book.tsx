@@ -174,7 +174,7 @@ export default function BookLab() {
             {members.map((m) => {
               const on = m.id === who?.id;
               return (
-                <Tap key={m.id} accessibilityRole="radio" accessibilityState={{ selected: on }} onPress={() => setMemberId(m.id)} style={[on ? null : glassShadow, { flexDirection: "row", alignItems: "center", gap: 8, paddingLeft: 4, paddingRight: 14, height: 46, borderRadius: 999, backgroundColor: on ? ink[900] : glass.fillStrong, borderWidth: on ? 0 : 1, borderColor: glass.rim }]}>
+                <Tap key={m.id} accessibilityRole="radio" accessibilityState={{ selected: on }} onPress={() => setMemberId(m.id)} style={[on ? null : glassShadow, { flexDirection: "row", alignItems: "center", gap: 8, paddingLeft: 4, paddingRight: 14, height: 46, borderRadius: 999, backgroundColor: on ? brand[600] : glass.fillStrong, borderWidth: on ? 0 : 1, borderColor: glass.rim }]}>
                   <Avatar svg={m.avatar} photo={m.photo} image={m.avatarImage} background={m.avatarBackground} size={36} />
                   <Text style={{ fontFamily: on ? font.semibold : font.medium, fontSize: 15, color: on ? "#fff" : ink[900] }}>{m.isPrimary ? "Me" : m.name.split(" ")[0]}</Text>
                 </Tap>
@@ -195,7 +195,7 @@ export default function BookLab() {
             {([["HOME_SAMPLE", "Home collection", HomeIcon], ["CENTER_VISIT", "Visit the lab", Building2]] as const).map(([v, label, Icon]) => {
               const on = service === v;
               return (
-                <Tap key={v} accessibilityRole="radio" accessibilityState={{ selected: on }} onPress={() => setService(v)} style={{ flex: 1, height: 52, borderRadius: 16, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, backgroundColor: on ? ink[900] : "#fff", borderWidth: 1, borderColor: on ? ink[900] : surface.line }}>
+                <Tap key={v} accessibilityRole="radio" accessibilityState={{ selected: on }} onPress={() => setService(v)} style={{ flex: 1, height: 52, borderRadius: 16, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, backgroundColor: on ? brand[600] : "#fff", borderWidth: 1, borderColor: on ? brand[600] : surface.line }}>
                   <Icon size={17} color={on ? "#fff" : ink[900]} />
                   <Text style={{ fontFamily: font.semibold, fontSize: 15, color: on ? "#fff" : ink[900] }}>{label}</Text>
                 </Tap>
@@ -221,7 +221,7 @@ export default function BookLab() {
             {days.map((d, i) => {
               const on = i === dayIdx;
               return (
-                <Tap scale={0.98} key={i} accessibilityRole="radio" accessibilityState={{ selected: on }} onPress={() => setDayIdx(i)} style={[on ? null : glassShadow, { width: 64, height: 72, borderRadius: 24, alignItems: "center", justifyContent: "center", backgroundColor: on ? ink[900] : glass.fillStrong, borderWidth: on ? 0 : 1, borderColor: glass.rim }]}>
+                <Tap scale={0.98} key={i} accessibilityRole="radio" accessibilityState={{ selected: on }} onPress={() => setDayIdx(i)} style={[on ? null : glassShadow, { width: 64, height: 72, borderRadius: 24, alignItems: "center", justifyContent: "center", backgroundColor: on ? brand[600] : glass.fillStrong, borderWidth: on ? 0 : 1, borderColor: glass.rim }]}>
                   <Text style={{ fontFamily: font.medium, fontSize: 12, color: on ? "rgba(255,255,255,0.75)" : ink[500] }}>{dayLabel(d, i)}</Text>
                   <Text style={{ fontFamily: font.semibold, fontSize: 20, color: on ? "#fff" : ink[900], marginTop: 2 }}>{d.getDate()}</Text>
                 </Tap>

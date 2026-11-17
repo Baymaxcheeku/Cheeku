@@ -30,6 +30,8 @@ import { activityById, priceFor, rupees, type ActivityId } from "@/lib/fitness/c
 import { distanceLabel, type Session, type Studio } from "@/lib/fitness/provider";
 import { brand, hue, ink, lilac, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
+import { Icon3D, type Icon3DName } from "@/components/ui/icon3d";
+import { glassCard } from "@/components/today/palette";
 
 /*
  * The fitness pieces every screen shares: an activity's art, chips, a class
@@ -57,14 +59,30 @@ export const ACTIVITY_ART: Record<ActivityId, Art> = {
   aqua: { icon: Droplets, fg: hue.ocean.fg, bg: hue.ocean.bg },
 };
 
+/** Cheeku's 3D object for each kind of class. */
+export const ACTIVITY_3D: Record<ActivityId, Icon3DName> = {
+  gym: "dumbbell",
+  yoga: "lotus",
+  zumba: "shoe",
+  swimming: "water",
+  dance: "shoe",
+  pilates: "lotus",
+  functional: "dumbbell",
+  hiit: "heart",
+  aerobics: "shoe",
+  kickboxing: "dumbbell",
+  prenatal_yoga: "lotus",
+  meditation: "lotus",
+  aqua: "water",
+};
+
 export const artFor = (id: ActivityId): Art => ACTIVITY_ART[id] ?? { icon: Bike, fg: brand[600], bg: brand[50] };
 
 export function ActivityArt({ id, size = 48, radius = 16 }: { id: ActivityId; size?: number; radius?: number }) {
   const a = artFor(id);
-  const Icon = a.icon;
   return (
     <View style={{ width: size, height: size, borderRadius: radius, backgroundColor: a.bg, alignItems: "center", justifyContent: "center" }}>
-      <Icon size={Math.round(size * 0.44)} color={a.fg} />
+      <Icon3D name={ACTIVITY_3D[id] ?? "dumbbell"} size={Math.round(size * 0.7)} />
     </View>
   );
 }
@@ -77,8 +95,7 @@ export function ActivityChip({ id, label, on, onPress }: { id: ActivityId | "all
     p.set(still ? (on ? 1 : 0) : withSpring(on ? 1 : 0, { damping: 18, stiffness: 320 }));
   }, [on, still, p]);
   const fill = useAnimatedStyle(() => ({ opacity: p.get(), transform: [{ scale: interpolate(p.get(), [0, 1], [0.85, 1]) }] }));
-  const art = id === "all" ? null : artFor(id);
-  const Icon = art?.icon;
+  const art3d: Icon3DName = id === "all" ? "star" : (ACTIVITY_3D[id] ?? "dumbbell");
   return (
     <Tap
       accessibilityRole="button"
@@ -88,11 +105,11 @@ export function ActivityChip({ id, label, on, onPress }: { id: ActivityId | "all
         feel.tick();
         onPress();
       }}
-      style={{ height: 40, borderRadius: 999, paddingHorizontal: 14, flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: "#fff", borderWidth: 1, borderColor: on ? brand[600] : surface.line, overflow: "hidden" }}
+      style={{ height: 44, borderRadius: 999, paddingLeft: 8, paddingRight: 14, flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: "#fff", borderWidth: 1, borderColor: on ? brand[600] : surface.line, overflow: "hidden" }}
       scale={0.95}
     >
       <Animated.View pointerEvents="none" style={[{ position: "absolute", left: 0, right: 0, top: 0, bottom: 0, borderRadius: 999, backgroundColor: brand[600] }, fill]} />
-      {Icon ? <Icon size={15} color={on ? "#fff" : art.fg} /> : null}
+      <Icon3D name={art3d} size={26} />
       <Text style={{ fontFamily: font.semibold, fontSize: 13, color: on ? "#fff" : ink[700] }}>{label}</Text>
     </Tap>
   );
@@ -131,7 +148,7 @@ export function SessionRow({ session, studio, km, reason, showDay, onPress }: { 
       accessibilityRole="button"
       accessibilityLabel={`${session.title}, ${dayLabel(session.startsAt)} ${timeLabel(session.startsAt)}${studio ? `, ${studio.name}` : ""}, ${rupees(price)}`}
       onPress={onPress}
-      style={[glassShadow, { borderRadius: 24, backgroundColor: "#fff", borderWidth: 1, borderColor: glass.rim, padding: 12, flexDirection: "row", alignItems: "center", gap: 12 }]}
+      style={[glassCard("#ffffff", "#0f1030"), { borderRadius: 24, shadowOpacity: 0.05, padding: 12, flexDirection: "row", alignItems: "center", gap: 12 }]}
       scale={0.98}
     >
       <View style={{ width: 60, height: 60, borderRadius: 16, backgroundColor: art.bg, alignItems: "center", justifyContent: "center" }}>
@@ -163,7 +180,7 @@ export function StudioCard({ studio, km, reason, onPress }: { studio: Studio; km
       accessibilityRole="button"
       accessibilityLabel={`${studio.name}, ${distanceLabel(km)} away`}
       onPress={onPress}
-      style={[glassShadow, { borderRadius: 24, backgroundColor: "#fff", borderWidth: 1, borderColor: glass.rim, padding: 14, gap: 10 }]}
+      style={[glassCard("#ffffff", "#0f1030"), { borderRadius: 24, shadowOpacity: 0.05, padding: 14, gap: 10 }]}
       scale={0.98}
     >
       <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
@@ -204,7 +221,7 @@ export function StudioCard({ studio, km, reason, onPress }: { studio: Studio; km
 /** Asking for location on our own terms first, with a calm pulse while it works. */
 export function LocateCard({ locating, denied, onLocate, onPickCity }: { locating: boolean; denied: boolean; onLocate: () => void; onPickCity: () => void }) {
   return (
-    <View style={[glassShadow, { borderRadius: 32, backgroundColor: "#fff", borderWidth: 1, borderColor: glass.rim, padding: 20, alignItems: "center", gap: 14 }]}>
+    <View style={[glassCard("#ffffff", "#0f1030"), { borderRadius: 32, shadowOpacity: 0.05, padding: 20, alignItems: "center", gap: 14 }]}>
       <View style={{ width: 84, height: 84, alignItems: "center", justifyContent: "center" }}>
         {locating ? <PulseRing size={72} /> : null}
         <View style={{ width: 72, height: 72, borderRadius: 999, backgroundColor: lilac.base, alignItems: "center", justifyContent: "center" }}>
