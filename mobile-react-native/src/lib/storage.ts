@@ -25,7 +25,7 @@ export const kv = {
     web ? AsyncStorage.getItem(key) : SecureStore.getItemAsync(key),
 
   set: (key: string, value: string): Promise<void> =>
-    web ? AsyncStorage.setItem(key, value) : SecureStore.setItemAsync(key, value),
+    web ? AsyncStorage.setItem(key, value) : SecureStore.setItemAsync(key, value, { keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK_THIS_DEVICE_ONLY }),
 
   remove: (key: string): Promise<void> =>
     web ? AsyncStorage.removeItem(key) : SecureStore.deleteItemAsync(key),

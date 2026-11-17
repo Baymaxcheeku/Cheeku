@@ -3,7 +3,7 @@ import "react-native-url-polyfill/auto";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as SecureStore from "expo-secure-store";
 import { createClient } from "@supabase/supabase-js";
-import { Platform } from "react-native";
+import { AppState, Platform } from "react-native";
 
 /*
  * The Supabase client, and the one place session tokens are stored.
@@ -23,6 +23,18 @@ import { Platform } from "react-native";
  */
 
 const CHUNK = 1800;
+
+/*
+ * Readable once the phone has been unlocked once since it started, not only
+ * while it is unlocked. The default (while unlocked) made a token refresh that
+ * ran with the screen locked fail with "User interaction is not allowed".
+ * Still device-only: never synced to iCloud, never in a backup.
+ *
+ * Passed on writes only. A read that names an accessibility can miss an item
+ * saved under the old one, which would sign the person out; every refresh
+ * rewrites the session, so old items move over on their own.
+ */
+const WRITE = { keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK_THIS_DEVICE_ONLY };
 
 const secureAdapter = {
   async getItem(key: string): Promise<string | null> {
@@ -44,9 +56,9 @@ const secureAdapter = {
 
   async setItem(key: string, value: string): Promise<void> {
     const parts = Math.ceil(value.length / CHUNK);
-    await SecureStore.setItemAsync(`${key}.n`, String(parts));
+    await SecureStore.setItemAsync(`${key}.n`, String(parts), WRITE);
     for (let i = 0; i < parts; i += 1) {
-      await SecureStore.setItemAsync(`${key}.${i}`, value.slice(i * CHUNK, (i + 1) * CHUNK));
+      await SecureStore.setItemAsync(`${key}.${i}`, value.slice(i * CHUNK, (i + 1) * CHUNK), WRITE);
     }
   },
 
@@ -78,3 +90,15 @@ export const supabase = createClient(url, anonKey, {
 });
 
 export const hasSupabaseConfig = Boolean(url && anonKey);
+
+/*
+ * Refresh the session only while the app is on screen. In the background the
+ * phone may be locked, the keychain closed, and a refresh would fail and log a
+ * red error. The client refreshes straight away when the app comes back.
+ */
+if (Platform.OS !== "web") {
+  AppState.addEventListener("change", (state) => {
+    if (state === "active") void supabase.auth.startAutoRefresh();
+    else void supabase.auth.stopAutoRefresh();
+  });
+}
