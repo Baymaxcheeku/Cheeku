@@ -37,6 +37,11 @@ const ART = {
   family: require("../../../assets/icon3d/family.png"),
   trophy: require("../../../assets/icon3d/trophy.png"),
   lock: require("../../../assets/icon3d/lock.png"),
+  headset: require("../../../assets/icon3d/headset.png"),
+  gift: require("../../../assets/icon3d/gift.png"),
+  shield: require("../../../assets/icon3d/shield.png"),
+  star: require("../../../assets/icon3d/star.png"),
+  chat: require("../../../assets/icon3d/chat.png"),
 } as const;
 /* eslint-enable @typescript-eslint/no-require-imports */
 

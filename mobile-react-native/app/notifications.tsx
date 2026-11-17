@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
-import { CheckCheck, ChevronDown, Settings2, Trash2, Undo2 } from "lucide-react-native";
+import { Settings2, Trash2, Undo2 } from "lucide-react-native";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Linking, RefreshControl, ScrollView, Text, View } from "react-native";
 import { Pressable } from "@/components/ui/pressable";
@@ -15,27 +15,33 @@ import {
   NotificationRow,
   PushBlocked,
   PushPrimer,
-  ReadMark,
   RowMenu,
   type Member,
 } from "@/components/notifications/parts";
-import { Glass, GlassCircle, glass, glassShadow } from "@/components/ui/glass";
+import { Glass, GlassCircle } from "@/components/ui/glass";
 import { useReducedMotion } from "@/components/ui/motion";
 import { Backdrop, PillButton, ScreenHeader } from "@/components/ui/screen";
 import { isUpcoming, startsAt, useAppointmentList } from "@/lib/booking/appointments";
-import { applyFilter, groupByDay, splitByRead, unreadCount } from "@/lib/notifications/inbox";
+import { applyFilter, groupByDay, unreadCount } from "@/lib/notifications/inbox";
 import { enablePush, pushPermission } from "@/lib/notifications/push";
 import { CATEGORY_LABEL, type InboxFilter, type InboxItem, type NotificationCategory } from "@/lib/notifications/types";
 import { useInbox, useInboxActions, useOpenNotification } from "@/lib/notifications/use-inbox";
 import type { ActiveProfile } from "@/lib/profiles/context";
 import { updateNotificationPrefs } from "@/lib/settings/actions";
 import { kv } from "@/lib/storage";
-import { brand, ink, lilac, semantic, surface } from "@/theme/tokens";
+import { brand, ink, semantic } from "@/theme/tokens";
 import { font } from "@/theme/type";
-import { Tap } from "@/components/ui/tap";
 
 /*
  * Notifications, the whole screen.
+ *
+ * REDESIGN, 17 Nov 2026 (owner: "no UI/UX familiarity"). Now shaped like the
+ * inboxes people know: a big title with how many are new, one segmented
+ * filter, then every notification as its own card, grouped by day, new ones
+ * marked with a violet dot and an action button. The status tiles, the black
+ * chips, the "caught up" card and the folded Read panel are gone; clearing
+ * read ones is one quiet link at the end. The notes below still describe the
+ * swipe, undo and speed behaviour.
  *
  * Was a bottom sheet listing flagged records. It is now a proper inbox, the
  * way people already know from every app on their phone:
@@ -74,7 +80,6 @@ export default function Notifications() {
   const appointments = useAppointmentList();
   const [filter, setFilter] = useState<InboxFilter>("all");
   const [menu, setMenu] = useState<InboxItem | null>(null);
-  const [showRead, setShowRead] = useState(false);
   const [undo, setUndo] = useState<{ items: InboxItem[]; label: string } | null>(null);
   const undoTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -91,7 +96,6 @@ export default function Notifications() {
 
   function clearRead() {
     const removed = actions.clearRead();
-    setShowRead(false);
     offerUndo(removed, removed.length === 1 ? "1 read notification cleared" : `${removed.length} read notifications cleared`);
   }
 
@@ -142,8 +146,7 @@ export default function Notifications() {
   const items = useMemo(() => inbox.data ?? [], [inbox.data]);
   const unread = unreadCount(items);
   const visible = useMemo(() => applyFilter(items, filter), [items, filter]);
-  const split = useMemo(() => splitByRead(visible), [visible]);
-  const sections = useMemo(() => groupByDay(split.fresh, now), [split.fresh, now]);
+  const sections = useMemo(() => groupByDay(visible, now), [visible, now]);
   const readTotal = items.length - unread;
 
   const categories = useMemo(() => {
@@ -198,84 +201,41 @@ export default function Notifications() {
         {/* Title row. */}
         <View className="mt-2 flex-row items-end justify-between gap-3">
           <View className="flex-1">
-            <Text accessibilityRole="header" style={{ fontFamily: font.semibold, fontSize: 28, lineHeight: 33, letterSpacing: -0.8, color: ink[900] }}>
+            <Text accessibilityRole="header" style={{ fontFamily: font.semibold, fontSize: 34, lineHeight: 40, letterSpacing: -1, color: ink[900] }}>
               Notifications
             </Text>
-            <Text style={{ fontFamily: font.regular, fontSize: 15, color: ink[500], marginTop: 3 }}>
-              {inbox.isPending
-                ? "Checking for news"
-                : unread > 0
-                  ? `${unread} new for you`
-                  : items.length > 0
-                    ? "Nothing new since you last looked"
-                    : "Reports, bookings and reminders, all in one place"}
+            <Text style={{ fontFamily: font.regular, fontSize: 15, color: ink[500], marginTop: 2 }}>
+              {inbox.isPending ? "Checking for news" : unread > 0 ? (unread === 1 ? "1 new for you" : `${unread} new for you`) : items.length > 0 ? "You're all caught up" : "Reports, bookings and reminders land here"}
             </Text>
           </View>
           {unread > 0 ? (
-            <Pressable
-              accessibilityRole="button"
-              onPress={() => void actions.markAllRead()}
-              hitSlop={8}
-              style={({ pressed }) => ({
-                flexDirection: "row",
-                alignItems: "center",
-                gap: 6,
-                height: 38,
-                paddingHorizontal: 13,
-                borderRadius: 999,
-                backgroundColor: pressed ? lilac.violet : brand[50],
-              })}
-            >
-              <CheckCheck size={16} color={brand[700]} />
-              <Text style={{ fontFamily: font.semibold, fontSize: 13, color: brand[700] }}>Mark all read</Text>
+            <Pressable accessibilityRole="button" onPress={() => void actions.markAllRead()} hitSlop={10} style={({ pressed }) => ({ height: 36, justifyContent: "center", opacity: pressed ? 0.6 : 1 })}>
+              <Text style={{ fontFamily: font.semibold, fontSize: 15, color: brand[600] }}>Mark all read</Text>
             </Pressable>
           ) : null}
         </View>
 
-        {items.length > 0 ? (
-          <View style={{ flexDirection: "row", gap: 10, marginTop: 16 }}>
-            <StatusTile
-              read={false}
-              count={unread}
-              label="new"
-              note={unread ? "Waiting for a look" : "Nothing waiting"}
-              on={filter === "unread"}
-              onPress={() => setFilter(filter === "unread" ? "all" : "unread")}
-            />
-            <StatusTile
-              read
-              count={readTotal}
-              label="read"
-              note={readTotal ? (showRead ? "Showing below" : "Folded away") : "None yet"}
-              on={showRead && filter !== "unread"}
-              onPress={() => {
-                if (filter === "unread") setFilter("all");
-                setShowRead((v) => !v);
-              }}
-              action={readTotal ? { label: "Clear", run: clearRead } : undefined}
-            />
-          </View>
-        ) : null}
-
         {showPrimer ? <PushPrimer busy={enabling} onEnable={() => void turnOn()} onLater={() => void later()} /> : null}
         {permission.data === "denied" ? <PushBlocked onOpenSettings={() => void Linking.openSettings()} /> : null}
 
-        {soon ? (
-          <Animated.View entering={still ? undefined : FadeIn.duration(220)} style={{ marginTop: 20 }}>
-            <Text style={{ fontFamily: font.semibold, fontSize: 13, color: ink[500], marginBottom: 8, marginLeft: 4 }}>Coming up</Text>
-            <AppointmentCard appt={soon} hero />
-          </Animated.View>
+        {/* One segmented filter: All, New, then only the kinds that have something. */}
+        {items.length > 0 ? (
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 20, marginHorizontal: -20 }} contentContainerStyle={{ paddingHorizontal: 20 }}>
+            <View accessibilityRole="tablist" style={{ flexDirection: "row", padding: 4, borderRadius: 999, backgroundColor: "#e9e8f3" }}>
+              <Segment label="All" on={filter === "all"} onPress={() => setFilter("all")} />
+              <Segment label="New" count={unread} on={filter === "unread"} onPress={() => setFilter("unread")} />
+              {categories.map((c) => (
+                <Segment key={c} label={CATEGORY_LABEL[c]} on={filter === c} onPress={() => setFilter(c)} />
+              ))}
+            </View>
+          </ScrollView>
         ) : null}
 
-        {/* Filters. Only categories that have something in them. */}
-        {items.length > 0 ? (
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 18, marginHorizontal: -20 }} contentContainerStyle={{ paddingHorizontal: 20, gap: 8 }}>
-            <Chip label="All" on={filter === "all"} onPress={() => setFilter("all")} />
-            <Chip label={unread ? `New · ${unread}` : "New"} on={filter === "unread"} onPress={() => setFilter("unread")} />
-            {categories.map((c) => (
-              <Chip key={c} label={CATEGORY_LABEL[c]} on={filter === c} onPress={() => setFilter(c)} />
-            ))}
-          </ScrollView>
+        {soon ? (
+          <Animated.View entering={still ? undefined : FadeIn.duration(220)} style={{ marginTop: 22 }}>
+            <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900], marginBottom: 10 }}>Coming up</Text>
+            <AppointmentCard appt={soon} hero />
+          </Animated.View>
         ) : null}
 
         {inbox.isPending ? (
@@ -294,105 +254,46 @@ export default function Notifications() {
           <InboxEmpty filterLabel={filter === "all" ? null : filter === "unread" ? "New" : CATEGORY_LABEL[filter]} />
         ) : (
           <>
-            {sections.length === 0 ? (
-              <Animated.View entering={still ? undefined : FadeIn.duration(220)} style={{ marginTop: 20 }}>
-                <Glass strong className="flex-row items-center gap-3 rounded-xl px-4 py-3.5">
-                  <ReadMark read size={11} />
-                  <View style={{ flex: 1 }}>
-                    <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>You&apos;re all caught up</Text>
-                    <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 1 }}>Nothing new. Older ones are in Read below.</Text>
-                  </View>
-                </Glass>
+            {sections.map((section, si) => (
+              <Animated.View
+                key={section.title}
+                layout={still ? undefined : LinearTransition.duration(180)}
+                entering={still ? undefined : FadeInDown.delay(Math.min(si, 3) * 40).duration(240)}
+                style={{ marginTop: 24 }}
+              >
+                <Text accessibilityRole="header" style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900], marginBottom: 10 }}>{section.title}</Text>
+                <View style={{ gap: 10 }}>
+                  {section.items.map((item) => (
+                    <Animated.View key={item.id} layout={still ? undefined : LinearTransition.duration(180)}>
+                      <SwipeToClear onClear={() => clearOne(item)}>
+                        <NotificationRow
+                          item={item}
+                          member={item.profileId ? members.get(item.profileId) : undefined}
+                          now={now}
+                          onPress={() => onRow(item)}
+                          onLongPress={() => setMenu(item)}
+                        />
+                      </SwipeToClear>
+                    </Animated.View>
+                  ))}
+                </View>
               </Animated.View>
-            ) : (
-              sections.map((section, si) => (
-                <Animated.View
-                  key={section.title}
-                  layout={still ? undefined : LinearTransition.duration(180)}
-                  entering={still ? undefined : FadeInDown.delay(si * 40).duration(240)}
-                  style={{ marginTop: 20 }}
-                >
-                  <Text style={{ fontFamily: font.semibold, fontSize: 13, color: ink[500], marginBottom: 8, marginLeft: 4 }}>{section.title}</Text>
-                  <Glass strong className="overflow-hidden rounded-xl">
-                    {section.items.map((item, i) => (
-                      <Animated.View key={item.id} layout={still ? undefined : LinearTransition.duration(180)}>
-                        <SwipeToClear onClear={() => clearOne(item)}>
-                          <NotificationRow
-                            item={item}
-                            member={item.profileId ? members.get(item.profileId) : undefined}
-                            first={i === 0}
-                            now={now}
-                            onPress={() => onRow(item)}
-                            onLongPress={() => setMenu(item)}
-                          />
-                        </SwipeToClear>
-                      </Animated.View>
-                    ))}
-                  </Glass>
-                </Animated.View>
-              ))
-            )}
+            ))}
 
-            {/* Read ones, folded. One tap opens them, one tap clears them. */}
-            {split.seen.length > 0 ? (
-              <Animated.View layout={still ? undefined : LinearTransition.duration(200)} style={{ marginTop: 22 }}>
-                <Glass strong className="overflow-hidden rounded-xl">
-                  <View style={{ flexDirection: "row", alignItems: "center", gap: 10, paddingLeft: 14, paddingRight: 8, height: 56 }}>
-                    <Tap
-                      accessibilityRole="button"
-                      accessibilityState={{ expanded: showRead }}
-                      accessibilityLabel={`${split.seen.length} read. ${showRead ? "Hide" : "Show"}`}
-                      onPress={() => setShowRead((v) => !v)}
-                      style={{ flex: 1, flexDirection: "row", alignItems: "center", gap: 10, height: 56 }}
-                    >
-                      <ReadMark read size={10} />
-                      <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>Read</Text>
-                      <Text style={{ fontFamily: font.medium, fontSize: 13, color: ink[500] }}>{split.seen.length}</Text>
-                      <View style={{ flex: 1 }} />
-                      <Text style={{ fontFamily: font.medium, fontSize: 13, color: ink[500] }}>{showRead ? "Hide" : "Show"}</Text>
-                      <View style={{ transform: [{ rotate: showRead ? "180deg" : "0deg" }] }}>
-                        <ChevronDown size={17} color={ink[500]} />
-                      </View>
-                    </Tap>
-                    <Pressable
-                      accessibilityRole="button"
-                      accessibilityLabel="Clear all read notifications"
-                      onPress={clearRead}
-                      hitSlop={6}
-                      style={({ pressed }) => ({ flexDirection: "row", alignItems: "center", gap: 5, height: 34, paddingHorizontal: 12, borderRadius: 999, backgroundColor: pressed ? lilac.violet : brand[50] })}
-                    >
-                      <Trash2 size={14} color={brand[700]} />
-                      <Text style={{ fontFamily: font.semibold, fontSize: 13, color: brand[700] }}>Clear</Text>
-                    </Pressable>
-                  </View>
-                  {showRead
-                    ? split.seen.map((item) => (
-                        <Animated.View key={item.id} entering={still ? undefined : FadeIn.duration(160)} layout={still ? undefined : LinearTransition.duration(180)}>
-                          <SwipeToClear onClear={() => clearOne(item)}>
-                            <NotificationRow
-                              item={item}
-                              compact
-                              member={item.profileId ? members.get(item.profileId) : undefined}
-                              first={false}
-                              now={now}
-                              onPress={() => onRow(item)}
-                              onLongPress={() => setMenu(item)}
-                            />
-                          </SwipeToClear>
-                        </Animated.View>
-                      ))
-                    : null}
-                </Glass>
-              </Animated.View>
+            {readTotal > 0 && filter !== "unread" ? (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={`Clear ${readTotal} read notifications`}
+                onPress={clearRead}
+                hitSlop={8}
+                style={({ pressed }) => ({ alignSelf: "center", flexDirection: "row", alignItems: "center", gap: 6, marginTop: 24, height: 40, paddingHorizontal: 16, opacity: pressed ? 0.6 : 1 })}
+              >
+                <Trash2 size={15} color={ink[500]} />
+                <Text style={{ fontFamily: font.medium, fontSize: 14, color: ink[500] }}>Clear read notifications</Text>
+              </Pressable>
             ) : null}
           </>
         )}
-
-        {items.length > 0 ? (
-          <Text style={{ fontFamily: font.regular, fontSize: 12, color: ink[300], textAlign: "center", marginTop: 18 }}>
-            Swipe left to clear one. Long press for more options.
-          </Text>
-        ) : null}
       </ScrollView>
 
       <RowMenu
@@ -412,7 +313,7 @@ export default function Notifications() {
           exiting={still ? undefined : FadeOutDown.duration(160)}
           style={{ position: "absolute", left: 16, right: 16, bottom: insets.bottom + 16 }}
         >
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 10, paddingLeft: 16, paddingRight: 6, height: 52, borderRadius: 999, backgroundColor: ink[900] }}>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 10, paddingLeft: 16, paddingRight: 6, height: 52, borderRadius: 999, backgroundColor: brand[700] }}>
             <Text style={{ flex: 1, fontFamily: font.medium, fontSize: 15, color: "#fff" }}>{undo.label}</Text>
             <Pressable
               accessibilityRole="button"
@@ -432,59 +333,6 @@ export default function Notifications() {
   );
 }
 
-/** One of the two status tiles: yellow for new, green for read. */
-function StatusTile({
-  read,
-  count,
-  label,
-  note,
-  on,
-  onPress,
-  action,
-}: {
-  read: boolean;
-  count: number;
-  label: string;
-  note: string;
-  on: boolean;
-  onPress: () => void;
-  action?: { label: string; run: () => void };
-}) {
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityState={{ selected: on }}
-      accessibilityLabel={`${count} ${label}. ${note}`}
-      onPress={onPress}
-      style={({ pressed }) => [
-        glassShadow,
-        {
-          flex: 1,
-          padding: 14,
-          borderRadius: 24,
-          backgroundColor: pressed ? "#fff" : glass.fillStrong,
-          borderWidth: on ? 2 : 1,
-          borderColor: on ? (read ? semantic.safe : semantic.caution) : glass.rim,
-          transform: [{ scale: pressed ? 0.98 : 1 }],
-        },
-      ]}
-    >
-      <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
-        <ReadMark read={read} size={10} />
-        {action ? (
-          <Tap accessibilityRole="button" accessibilityLabel={`${action.label} read notifications`} onPress={action.run} hitSlop={10}>
-            <Text style={{ fontFamily: font.semibold, fontSize: 13, color: brand[700] }}>{action.label}</Text>
-          </Tap>
-        ) : null}
-      </View>
-      <Text style={{ fontFamily: font.semibold, fontSize: 24, letterSpacing: -0.6, color: ink[900], marginTop: 8 }}>
-        {count} <Text style={{ fontFamily: font.medium, fontSize: 15, letterSpacing: 0, color: ink[700] }}>{label}</Text>
-      </Text>
-      <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 1 }}>{note}</Text>
-    </Pressable>
-  );
-}
-
 /** Swipe a row left to clear it. Undo is offered by the screen. */
 function SwipeToClear({ children, onClear }: { children: React.ReactNode; onClear: () => void }) {
   return (
@@ -492,15 +340,17 @@ function SwipeToClear({ children, onClear }: { children: React.ReactNode; onClea
       friction={1.6}
       rightThreshold={70}
       overshootRight={false}
-      // Solid, so the Clear panel behind stays hidden until the row moves.
-      childrenContainerStyle={{ backgroundColor: surface.canvas }}
+      containerStyle={{ overflow: "visible" }}
       onSwipeableOpen={(direction) => {
         if (direction === "left") onClear();
       }}
       renderRightActions={() => (
-        <View style={{ width: 96, alignItems: "center", justifyContent: "center", backgroundColor: ink[900] }}>
-          <Trash2 size={18} color="#fff" />
-          <Text style={{ fontFamily: font.semibold, fontSize: 13, color: "#fff", marginTop: 4 }}>Clear</Text>
+        // A round button clear of the card, so nothing red shows at the card's rounded edge.
+        <View style={{ width: 88, alignItems: "center", justifyContent: "center" }}>
+          <View style={{ width: 48, height: 48, borderRadius: 999, backgroundColor: semantic.dangerText, alignItems: "center", justifyContent: "center" }}>
+            <Trash2 size={19} color="#fff" />
+          </View>
+          <Text style={{ fontFamily: font.semibold, fontSize: 12, color: semantic.dangerText, marginTop: 5 }}>Clear</Text>
         </View>
       )}
     >
@@ -509,27 +359,36 @@ function SwipeToClear({ children, onClear }: { children: React.ReactNode; onClea
   );
 }
 
-function Chip({ label, on, onPress }: { label: string; on: boolean; onPress: () => void }) {
+/** One option in the segmented filter: the chosen one is a white pill on the grey track. */
+function Segment({ label, count, on, onPress }: { label: string; count?: number; on: boolean; onPress: () => void }) {
   return (
     <Pressable
       accessibilityRole="tab"
       accessibilityState={{ selected: on }}
+      accessibilityLabel={count ? `${label}, ${count}` : label}
       onPress={onPress}
-      style={({ pressed }) => [
-        on ? null : glassShadow,
-        {
-          height: 40,
-          paddingHorizontal: 16,
-          borderRadius: 999,
-          justifyContent: "center",
-          backgroundColor: on ? ink[900] : pressed ? "#ffffff" : glass.fillStrong,
-          borderWidth: on ? 0 : 1,
-          borderColor: glass.rim,
-          transform: [{ scale: pressed ? 0.96 : 1 }],
-        },
-      ]}
+      style={({ pressed }) => ({
+        height: 36,
+        paddingHorizontal: 16,
+        borderRadius: 999,
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 6,
+        backgroundColor: on ? "#fff" : "transparent",
+        shadowColor: "#0f1030",
+        shadowOpacity: on ? 0.08 : 0,
+        shadowRadius: 6,
+        shadowOffset: { width: 0, height: 2 },
+        elevation: on ? 1 : 0,
+        opacity: pressed && !on ? 0.6 : 1,
+      })}
     >
-      <Text style={{ fontFamily: on ? font.semibold : font.medium, fontSize: 13, color: on ? "#fff" : ink[700] }}>{label}</Text>
+      <Text style={{ fontFamily: on ? font.semibold : font.medium, fontSize: 14, color: on ? ink[900] : ink[500] }}>{label}</Text>
+      {count ? (
+        <View style={{ minWidth: 20, height: 20, paddingHorizontal: 6, borderRadius: 999, backgroundColor: brand[600], alignItems: "center", justifyContent: "center" }}>
+          <Text style={{ fontFamily: font.semibold, fontSize: 11, color: "#fff" }}>{count > 99 ? "99+" : count}</Text>
+        </View>
+      ) : null}
     </Pressable>
   );
 }
