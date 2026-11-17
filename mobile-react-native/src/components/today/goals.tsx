@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 
 import { Sheet } from "@/components/today/sheets";
-import { PILLAR_TONE } from "@/components/today/palette";
+import { PILLAR_TONE, glassCard } from "@/components/today/palette";
 import { Icon3D, type Icon3DName } from "@/components/ui/icon3d";
 import { SpringSwitch } from "@/components/ui/motion";
 import { PillButton } from "@/components/ui/screen";
@@ -27,12 +27,12 @@ import { font } from "@/theme/type";
  */
 
 // Flat pastels from Today's palette, and Cheeku's 3D object for each goal.
-export const LOOK: Record<GoalKey, { icon: LucideIcon; art: Icon3DName; fg: string; bg: string }> = {
-  sleep: { icon: Moon, art: "moon", fg: PILLAR_TONE.sleep.deep, bg: PILLAR_TONE.sleep.bg },
-  weight: { icon: Weight, art: "scale", fg: PILLAR_TONE.eat.deep, bg: PILLAR_TONE.eat.bg },
-  sugar: { icon: Droplet, art: "glucose", fg: PILLAR_TONE.mind.deep, bg: PILLAR_TONE.mind.bg },
-  legs: { icon: Footprints, art: "shoe", fg: PILLAR_TONE.move.deep, bg: PILLAR_TONE.move.bg },
-  calm: { icon: Leaf, art: "lotus", fg: PILLAR_TONE.check.deep, bg: PILLAR_TONE.check.bg },
+export const LOOK: Record<GoalKey, { icon: LucideIcon; art: Icon3DName; fg: string; bg: string; glass: string }> = {
+  sleep: { icon: Moon, art: "moon", fg: PILLAR_TONE.sleep.deep, bg: PILLAR_TONE.sleep.bg, glass: PILLAR_TONE.sleep.glass },
+  weight: { icon: Weight, art: "scale", fg: PILLAR_TONE.eat.deep, bg: PILLAR_TONE.eat.bg, glass: PILLAR_TONE.eat.glass },
+  sugar: { icon: Droplet, art: "glucose", fg: PILLAR_TONE.mind.deep, bg: PILLAR_TONE.mind.bg, glass: PILLAR_TONE.mind.glass },
+  legs: { icon: Footprints, art: "shoe", fg: PILLAR_TONE.move.deep, bg: PILLAR_TONE.move.bg, glass: PILLAR_TONE.move.glass },
+  calm: { icon: Leaf, art: "lotus", fg: PILLAR_TONE.check.deep, bg: PILLAR_TONE.check.bg, glass: PILLAR_TONE.check.glass },
 };
 
 const CARD_W = 160;
@@ -68,7 +68,7 @@ export function GoalPicker({ goals, onPick }: { goals: readonly Goal[]; onPick: 
                 onPick(g.key);
               }}
               scale={0.98}
-              style={{ width: CARD_W, height: 188, borderRadius: 24, overflow: "hidden", padding: 14, backgroundColor: look.bg }}
+              style={[glassCard(look.glass), { width: CARD_W, height: 188, borderRadius: 24, padding: 14 }]}
             >
               <View className="h-10 w-10 items-center justify-center rounded-pill" style={{ backgroundColor: "#ffffff" }}>
                 <Icon3D name={look.art} size={26} />
@@ -101,7 +101,7 @@ export function GoalBanner({ goal, onPress }: { goal: GoalView; onPress: () => v
       accessibilityLabel={`Your goal, ${goal.title}, day ${goal.day}. ${goal.doneToday} of ${goal.totalToday} check-ins done today. Change goal`}
       onPress={onPress}
       scale={0.98}
-      style={{ marginHorizontal: 20, marginTop: 20, borderRadius: 24, overflow: "hidden", padding: 14, backgroundColor: look.bg }}
+      style={[glassCard(look.glass), { marginHorizontal: 20, marginTop: 20, borderRadius: 24, padding: 14 }]}
     >
       <View className="flex-row items-center gap-3">
         <View className="h-11 w-11 items-center justify-center rounded-pill" style={{ backgroundColor: "#ffffff" }}>

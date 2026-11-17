@@ -12,7 +12,7 @@ import { BreathingSheet, MealSheet, ReadingSheet, Sheet, StepsSheet } from "@/co
 import { GoalPicker, GoalSheet } from "@/components/today/goals";
 import { RemindersPrompt } from "@/components/today/reminders-prompt";
 import { TaskCard, TaskRow, type TaskAction } from "@/components/today/task-card";
-import { PILLAR_3D, PILLAR_TONE } from "@/components/today/palette";
+import { GLASS_SHEEN, PILLAR_3D, PILLAR_TONE, glassCard } from "@/components/today/palette";
 import { Icon3D, type Icon3DName } from "@/components/ui/icon3d";
 import { GlassCircle } from "@/components/ui/glass";
 import { Enter, Fold, StaggerItem } from "@/components/ui/motion";
@@ -231,7 +231,7 @@ export default function TodayPlan() {
                 accessibilityLabel={`Your goal, ${plan.goal.title}, day ${plan.goal.day}. ${plan.goal.doneToday} of ${plan.goal.totalToday} check-ins today. Change goal`}
                 onPress={() => setGoalSheet(plan.goal?.key ?? null)}
                 scale={0.97}
-                style={{ flex: 1, borderRadius: 26, padding: 16, backgroundColor: PILLAR_TONE.move.bg }}
+                style={[glassCard(PILLAR_TONE.move.glass, PILLAR_TONE.move.accent), { flex: 1, borderRadius: 26, padding: 16 }]}
               >
                 <View style={{ width: 40, height: 40, borderRadius: 999, backgroundColor: "#fff", alignItems: "center", justifyContent: "center" }}>
                   <Icon3D name={GOAL_3D[plan.goal.key] ?? "star"} size={26} />
@@ -253,7 +253,7 @@ export default function TodayPlan() {
                 accessibilityLabel={`Suggested goal: ${plan.goals[0].title}. Start`}
                 onPress={() => setGoalSheet(plan.goals[0]?.key ?? null)}
                 scale={0.97}
-                style={{ flex: 1, borderRadius: 26, padding: 16, backgroundColor: PILLAR_TONE.move.bg }}
+                style={[glassCard(PILLAR_TONE.move.glass, PILLAR_TONE.move.accent), { flex: 1, borderRadius: 26, padding: 16 }]}
               >
                 <View style={{ width: 40, height: 40, borderRadius: 999, backgroundColor: "#fff", alignItems: "center", justifyContent: "center" }}>
                   <Icon3D name={GOAL_3D[plan.goals[0].key] ?? "star"} size={26} />
@@ -309,7 +309,7 @@ export default function TodayPlan() {
 
         <Text style={{ fontFamily: font.regular, fontSize: 14, lineHeight: 19, color: ink[500], marginTop: 14, marginHorizontal: 20 }}>{INTRO[pillar]}</Text>
         {plate ? (
-          <View className="mx-5 mt-3 flex-row items-center gap-3" style={{ borderRadius: 22, padding: 14, backgroundColor: PILLAR_TONE.eat.bg }}>
+          <View className="mx-5 mt-3 flex-row items-center gap-3" style={[glassCard(PILLAR_TONE.eat.glass, PILLAR_TONE.eat.accent), { borderRadius: 22, padding: 14 }]}>
             <View style={{ width: 44, height: 44, borderRadius: 999, backgroundColor: "#fff", alignItems: "center", justifyContent: "center" }}>
               <Icon3D name="food" size={28} />
             </View>
@@ -420,7 +420,7 @@ function DayHero({ done, total, label, line, progress }: { done: number; total: 
   const left = total - done;
   const word = total > 0 && left === 0 ? "All done today" : done === 0 ? "A fresh start" : "Keep going";
   return (
-    <View className="mx-5 mt-3" style={{ borderRadius: 28, padding: 20, backgroundColor: "#ecebff" }} accessible accessibilityLabel={`${label}. ${done} of ${total} done. ${word}.`}>
+    <View className="mx-5 mt-3" style={[glassCard(PILLAR_TONE.sleep.glass), { borderRadius: 28, padding: 20 }]} accessible accessibilityLabel={`${label}. ${done} of ${total} done. ${word}.`}>
       <View style={{ flexDirection: "row", alignItems: "flex-end", gap: 12 }}>
         <View style={{ flex: 1 }}>
           <Text style={{ fontFamily: font.semibold, fontSize: 14, color: "#3b2bc9" }}>{label}</Text>
@@ -456,9 +456,9 @@ function DayHero({ done, total, label, line, progress }: { done: number; total: 
 function StreakTile({ count, week }: { count: number; week: { iso: string; letter: string; done: boolean; today: boolean }[] }) {
   const tone = PILLAR_TONE.eat;
   return (
-    <View style={{ flex: 1, borderRadius: 26, padding: 16, backgroundColor: tone.bg }} accessible accessibilityLabel={`${count}-day streak. ${week.filter((d) => d.done).length} days this week.`}>
+    <View style={[glassCard(tone.glass, tone.accent), { flex: 1, borderRadius: 26, padding: 16 }]} accessible accessibilityLabel={`${count}-day streak. ${week.filter((d) => d.done).length} days this week.`}>
       <View style={{ width: 40, height: 40, borderRadius: 999, backgroundColor: "#fff", alignItems: "center", justifyContent: "center" }}>
-        <Flame size={20} color="#e8590c" strokeWidth={2.2} />
+        <Flame size={20} color={tone.accent} strokeWidth={2.2} />
       </View>
       <Text style={{ fontFamily: font.semibold, fontSize: 30, letterSpacing: -1, color: ink[900], marginTop: 12 }}>
         {count}
@@ -481,7 +481,7 @@ function StreakTile({ count, week }: { count: number; week: { iso: string; lette
 function FoldSection({ title, count, open, onToggle, children }: { title: string; count: number; open: boolean; onToggle: () => void; children: React.ReactNode }) {
   if (!count) return null;
   return (
-    <View className="mx-5 mt-4 bg-white px-4" style={{ borderRadius: 24 }}>
+    <View className="mx-5 mt-4 px-4" style={[glassCard("rgba(255,255,255,0.8)"), { borderRadius: 24 }]}>
       <Tap
         accessibilityRole="button"
         accessibilityState={{ expanded: open }}

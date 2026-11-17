@@ -23,7 +23,7 @@ import { Image, Text, View } from "react-native";
 import { Tap } from "@/components/ui/tap";
 import { MealReadCard } from "@/components/today/sheets";
 import { Icon3D } from "@/components/ui/icon3d";
-import { PILLAR_TONE, taskIcon3d, type Tone } from "@/components/today/palette";
+import { GLASS_SHEEN, PILLAR_TONE, glassCard, taskIcon3d, type Tone } from "@/components/today/palette";
 import { BreathIcon, MindIcon, type AppIcon } from "@/components/ui/icons";
 import { WINDOW_LABEL } from "@/lib/home/catalog";
 import type { Area, Pillar } from "@/lib/home/content";
@@ -114,7 +114,8 @@ export function TaskCard({
 
   return (
     <ToneCtx.Provider value={tone}>
-    <View style={{ borderRadius: 26, padding: 18, backgroundColor: done ? "#fff" : tone.bg }}>
+    <View style={[glassCard(done ? "rgba(255,255,255,0.78)" : tone.glass, tone.accent), { borderRadius: 26, padding: 18 }]}>
+      <View pointerEvents="none" style={GLASS_SHEEN} />
       <View className="flex-row items-center gap-3">
         <View style={{ width: 54, height: 54, borderRadius: 999, backgroundColor: "#fff", alignItems: "center", justifyContent: "center" }}>
           {done ? (
@@ -133,8 +134,8 @@ export function TaskCard({
         </View>
         {/* A tag only when it says something: due, a goal, or for you. */}
         {!done && (task.due || task.personal) ? (
-          <View style={{ alignSelf: "flex-start", paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999, backgroundColor: task.due ? (overdue ? semantic.dangerBg : "#fff") : "#fff" }}>
-            <Text style={{ fontFamily: font.semibold, fontSize: 12, color: task.due ? (overdue ? semantic.dangerText : semantic.cautionText) : tone.deep }}>
+          <View style={{ alignSelf: "flex-start", paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999, backgroundColor: task.due && overdue ? semantic.dangerBg : "rgba(255,255,255,0.85)" }}>
+            <Text style={{ fontFamily: font.semibold, fontSize: 12, color: task.due && overdue ? semantic.dangerText : tone.deep }}>
               {task.due ? task.dueLabel : task.goal ? "Your goal" : "For you"}
             </Text>
           </View>
