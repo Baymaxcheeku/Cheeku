@@ -1,5 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { Camera, Check, ImagePlus, Watch, X } from "lucide-react-native";
+import { Camera, Check, ImagePlus, X } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
 import { Image, ScrollView, Text, TextInput, View } from "react-native";
 import Animated, { cancelAnimation, Easing, useAnimatedStyle, useSharedValue, withRepeat, withSequence, withTiming } from "react-native-reanimated";
@@ -7,7 +7,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Sheet as BaseSheet, useSheetMax } from "@/components/ui/sheet";
 import { MascotFigure } from "@/components/illustrations/sprout";
-import { Glass, Gradient } from "@/components/ui/glass";
+import { PILLAR_TONE, glassCard, type Tone } from "@/components/today/palette";
+import { Icon3D, type Icon3DName } from "@/components/ui/icon3d";
 import { useReducedMotion } from "@/components/ui/motion";
 import { PillButton } from "@/components/ui/screen";
 import type { Area } from "@/lib/home/content";
@@ -24,18 +25,23 @@ import { Tap } from "@/components/ui/tap";
  * a reading, and two minutes of guided breathing.
  */
 
-export function Sheet({ open, title, line, onClose, children }: { open: boolean; title: string; line?: string; onClose: () => void; children: React.ReactNode }) {
+export function Sheet({ open, title, line, onClose, children, art, tone }: { open: boolean; title: string; line?: string; onClose: () => void; children: React.ReactNode; /** The 3D object in the header. */ art?: Icon3DName; /** The pillar's colours, for the object's plate. */ tone?: Tone }) {
   const insets = useSafeAreaInsets();
   const sheetMax88 = useSheetMax(0.88);
   return (
     <BaseSheet open={open} onClose={onClose} label="Close">
         <View className="rounded-t-sheet bg-canvas" style={{ maxHeight: sheetMax88, paddingBottom: insets.bottom + 14 }}>
-          <View className="flex-row items-start gap-3 px-5 pb-2 pt-5">
+          <View className="flex-row items-center gap-3 px-5 pb-3 pt-5">
+            {art ? (
+              <View style={{ width: 52, height: 52, borderRadius: 18, backgroundColor: tone?.bg ?? surface.tint, alignItems: "center", justifyContent: "center" }}>
+                <Icon3D name={art} size={36} />
+              </View>
+            ) : null}
             <View className="min-w-0 flex-1">
-              <Text accessibilityRole="header" style={{ fontFamily: font.semibold, fontSize: 20, letterSpacing: -0.4, color: ink[900] }}>
+              <Text accessibilityRole="header" style={{ fontFamily: font.semibold, fontSize: 22, letterSpacing: -0.5, color: ink[900] }}>
                 {title}
               </Text>
-              {line ? <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[500], marginTop: 3 }}>{line}</Text> : null}
+              {line ? <Text style={{ fontFamily: font.regular, fontSize: 14, lineHeight: 19, color: ink[500], marginTop: 3 }}>{line}</Text> : null}
             </View>
             <Tap scale={0.95} accessibilityRole="button" accessibilityLabel="Close" onPress={onClose} hitSlop={8} className="h-9 w-9 items-center justify-center rounded-pill" style={{ backgroundColor: surface.tint }}>
               <X size={17} color={ink[700]} />
@@ -55,34 +61,42 @@ function ErrorLine({ text }: { text: string | null }) {
   return <Text style={{ fontFamily: font.medium, fontSize: 13, color: semantic.dangerText, marginTop: 10 }}>{text}</Text>;
 }
 
-/** Camera or library, with the picked photo shown. */
-function PhotoPicker({ uri, onPick, label, hint }: { uri: string | null; onPick: (uri: string | null) => void; label: string; hint: string }) {
+/** Camera or library, with the picked photo shown. Two big buttons in the pillar's colour, no dashed box. */
+function PhotoPicker({ uri, onPick, label, hint, tone = PILLAR_TONE.sleep, art = "folder" }: { uri: string | null; onPick: (uri: string | null) => void; label: string; hint: string; tone?: Tone; art?: Icon3DName }) {
   async function pick(source: "camera" | "library") {
     const picked = await pickDailyPhoto(source);
     if (picked) onPick(picked);
   }
   if (uri) {
     return (
-      <View className="overflow-hidden rounded-xl" style={{ height: 180, backgroundColor: surface.tint }}>
+      <View style={{ height: 200, borderRadius: 24, overflow: "hidden", backgroundColor: surface.tint }}>
         <Image source={{ uri }} style={{ width: "100%", height: "100%" }} resizeMode="cover" alt="The photo you picked" accessibilityLabel="The photo you picked" />
-        <Tap scale={0.95} accessibilityRole="button" accessibilityLabel="Remove photo" onPress={() => onPick(null)} className="absolute right-2 top-2 h-8 w-8 items-center justify-center rounded-pill" style={{ backgroundColor: "rgba(15,16,48,0.6)" }}>
-          <X size={15} color="#fff" />
+        <Tap scale={0.95} accessibilityRole="button" accessibilityLabel="Remove photo" onPress={() => onPick(null)} style={{ position: "absolute", right: 10, top: 10, height: 34, paddingHorizontal: 12, borderRadius: 999, flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: "rgba(255,255,255,0.92)" }}>
+          <X size={14} color={ink[900]} />
+          <Text style={{ fontFamily: font.semibold, fontSize: 13, color: ink[900] }}>Remove</Text>
         </Tap>
       </View>
     );
   }
   return (
-    <View className="rounded-xl p-4" style={{ borderWidth: 1.5, borderStyle: "dashed", borderColor: brand[200], backgroundColor: brand[50] }}>
-      <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{label}</Text>
-      <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 17, color: ink[500], marginTop: 2 }}>{hint}</Text>
-      <View className="mt-3 flex-row gap-2">
-        <Tap accessibilityRole="button" onPress={() => void pick("camera")} className="h-11 flex-1 flex-row items-center justify-center gap-2 rounded-pill" style={{ backgroundColor: brand[600] }}>
-          <Camera size={16} color="#fff" />
+    <View style={[glassCard(tone.glass, tone.accent), { borderRadius: 24, padding: 16 }]}>
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+        <View style={{ width: 48, height: 48, borderRadius: 999, backgroundColor: "#fff", alignItems: "center", justifyContent: "center" }}>
+          <Icon3D name={art} size={32} />
+        </View>
+        <View style={{ flex: 1 }}>
+          <Text style={{ fontFamily: font.semibold, fontSize: 16, color: ink[900] }}>{label}</Text>
+          <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[700], marginTop: 2 }}>{hint}</Text>
+        </View>
+      </View>
+      <View style={{ flexDirection: "row", gap: 8, marginTop: 14 }}>
+        <Tap accessibilityRole="button" onPress={() => void pick("camera")} scale={0.97} style={{ flex: 1, height: 48, borderRadius: 999, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, backgroundColor: tone.deep }}>
+          <Camera size={17} color="#fff" />
           <Text style={{ fontFamily: font.semibold, fontSize: 15, color: "#fff" }}>Take photo</Text>
         </Tap>
-        <Tap accessibilityRole="button" onPress={() => void pick("library")} className="h-11 flex-1 flex-row items-center justify-center gap-2 rounded-pill bg-white" style={{ borderWidth: 1, borderColor: surface.line }}>
-          <ImagePlus size={16} color={ink[900]} />
-          <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>From gallery</Text>
+        <Tap accessibilityRole="button" onPress={() => void pick("library")} scale={0.97} style={{ flex: 1, height: 48, borderRadius: 999, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, backgroundColor: "#fff" }}>
+          <ImagePlus size={17} color={tone.deep} />
+          <Text style={{ fontFamily: font.semibold, fontSize: 15, color: tone.deep }}>Gallery</Text>
         </Tap>
       </View>
     </View>
@@ -118,25 +132,38 @@ export function StepsSheet({ open, profileId, task, target, onClose }: { open: b
   }
 
   return (
-    <Sheet open={open} title="Log your steps" line={target?.line} onClose={onClose}>
-      <Glass strong style={{ flexDirection: "row", alignItems: "center", gap: 12, borderRadius: 24, paddingHorizontal: 16, paddingVertical: 12 }}>
-        <Watch size={20} color={ink[900]} />
-        <TextInput
-          value={count}
-          onChangeText={setCount}
-          keyboardType="number-pad"
-          placeholder={goal ? goal.toLocaleString("en-IN") : "8,000"}
-          placeholderTextColor={ink[300]}
-          accessibilityLabel="Steps today"
-          style={{ flex: 1, minWidth: 0, fontFamily: font.semibold, fontSize: 24, color: ink[900], paddingVertical: 4 }}
-        />
-        <Text style={{ fontFamily: font.medium, fontSize: 15, color: ink[500] }}>steps</Text>
-      </Glass>
+    <Sheet open={open} title="Log your steps" line={target?.line} onClose={onClose} art="shoe" tone={PILLAR_TONE.move}>
+      {/* The count, big, and how far it is to the goal. */}
+      <View style={[glassCard("#ffffff", "#0f1030"), { borderRadius: 24, padding: 18, shadowOpacity: 0.05 }]}>
+        <View style={{ flexDirection: "row", alignItems: "baseline", gap: 8 }}>
+          <TextInput
+            value={count}
+            onChangeText={setCount}
+            keyboardType="number-pad"
+            placeholder={goal ? goal.toLocaleString("en-IN") : "8,000"}
+            placeholderTextColor={ink[300]}
+            accessibilityLabel="Steps today"
+            style={{ flex: 1, minWidth: 0, fontFamily: font.semibold, fontSize: 44, letterSpacing: -1.5, color: ink[900], paddingVertical: 2 }}
+          />
+          <Text style={{ fontFamily: font.medium, fontSize: 16, color: ink[500] }}>steps</Text>
+        </View>
+        {goal ? (
+          <>
+            <View style={{ height: 10, borderRadius: 999, backgroundColor: PILLAR_TONE.move.track, marginTop: 12, overflow: "hidden" }}>
+              <View style={{ height: 10, borderRadius: 999, width: `${Math.max(3, Math.min(100, ((value || task.progress?.value || 0) / goal) * 100))}%`, backgroundColor: PILLAR_TONE.move.accent }} />
+            </View>
+            <Text style={{ fontFamily: font.medium, fontSize: 13, color: PILLAR_TONE.move.deep, marginTop: 8 }}>
+              {value >= goal ? "Goal reached" : `Goal ${goal.toLocaleString("en-IN")}`}
+              {task.progress && task.progress.value > 0 ? ` · so far ${task.progress.value.toLocaleString("en-IN")}` : ""}
+            </Text>
+          </>
+        ) : null}
+      </View>
       {task.progress && task.progress.value > 0 ? (
-        <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 8 }}>So far today: {task.progress.value.toLocaleString("en-IN")}. Log the latest count; the highest one counts.</Text>
+        <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 8 }}>Log the latest count; the highest one counts.</Text>
       ) : null}
       <View className="mt-4">
-        <PhotoPicker uri={photo} onPick={setPhoto} label="Add a screenshot as proof" hint="A screenshot from your watch, band or phone's health app." />
+        <PhotoPicker uri={photo} onPick={setPhoto} label="Add a screenshot as proof" hint="From your watch, band or phone's health app." tone={PILLAR_TONE.move} art="watch" />
       </View>
       <ErrorLine text={error} />
       <PillButton style={{ marginTop: 16 }} loading={busy} onPress={() => void save()}>
@@ -155,18 +182,19 @@ const GROUPS: { key: (typeof PLATE_TAGS)[number]["group"]; label: string }[] = [
   { key: "extras", label: "Anything else" },
 ];
 
+// Flat pastels from Today's palette: mint, lavender, coral. No yellow.
 const TONE = {
-  great: { bg: semantic.safeBg, fg: semantic.safeText, label: "Balanced plate" },
-  good: { bg: brand[50], fg: brand[700], label: "Good plate" },
-  watch: { bg: semantic.cautionBg, fg: semantic.cautionText, label: "Worth a rethink" },
+  great: { bg: PILLAR_TONE.move.bg, fg: PILLAR_TONE.move.deep, label: "Balanced plate" },
+  good: { bg: PILLAR_TONE.sleep.bg, fg: PILLAR_TONE.sleep.deep, label: "Good plate" },
+  watch: { bg: PILLAR_TONE.eat.bg, fg: PILLAR_TONE.eat.deep, label: "Worth a rethink" },
 } as const;
 
 export function MealReadCard({ read }: { read: MealRead }) {
   const t = TONE[read.tone];
   return (
-    <View className="rounded-lg p-3.5" style={{ backgroundColor: t.bg }}>
-      <Text style={{ fontFamily: font.medium, fontSize: 12, color: t.fg }}>{t.label}</Text>
-      <Text style={{ fontFamily: font.semibold, fontSize: 15, lineHeight: 19, color: ink[900], marginTop: 3 }}>{read.line}</Text>
+    <View style={{ borderRadius: 22, padding: 16, backgroundColor: t.bg }}>
+      <Text style={{ fontFamily: font.semibold, fontSize: 13, color: t.fg }}>{t.label}</Text>
+      <Text style={{ fontFamily: font.semibold, fontSize: 17, lineHeight: 23, color: ink[900], marginTop: 4 }}>{read.line}</Text>
       {read.tips.map((tip) => (
         <Text key={tip} style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[700], marginTop: 6 }}>
           {tip}
@@ -205,7 +233,7 @@ export function MealSheet({ open, profileId, task, areas, veg, onClose }: { open
 
   if (read) {
     return (
-      <Sheet open={open} title={`${task.title}, logged`} onClose={onClose}>
+      <Sheet open={open} title={`${task.title}, logged`} onClose={onClose} art="food" tone={PILLAR_TONE.eat}>
         <View className="items-center">
           <MascotFigure size={120} moment={read.tone === "watch" ? "think" : "joy"} />
         </View>
@@ -218,11 +246,11 @@ export function MealSheet({ open, profileId, task, areas, veg, onClose }: { open
   }
 
   return (
-    <Sheet open={open} title={task.title} line="Snap the plate, tap what's on it." onClose={onClose}>
-      <PhotoPicker uri={photo} onPick={setPhoto} label="Photo of the plate" hint="Everything you're eating or drinking. One photo is enough." />
+    <Sheet open={open} title={task.title} line="Snap the plate, tap what's on it." onClose={onClose} art="food" tone={PILLAR_TONE.eat}>
+      <PhotoPicker uri={photo} onPick={setPhoto} label="Photo of the plate" hint="Everything on it, drinks too. One photo is enough." tone={PILLAR_TONE.eat} art="food" />
       {GROUPS.map((g) => (
-        <View key={g.key} className="mt-4">
-          <Text style={{ fontFamily: font.semibold, fontSize: 13, color: ink[500], marginBottom: 8 }}>{g.label}</Text>
+        <View key={g.key} style={{ marginTop: 20 }}>
+          <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900], marginBottom: 10 }}>{g.label}</Text>
           <View className="flex-row flex-wrap gap-2" style={{ alignItems: "flex-start" }}>
             {PLATE_TAGS.filter((t) => t.group === g.key && !(veg && (t.key === "egg" || t.key === "chicken_fish"))).map((t) => {
               const on = tags.includes(t.key);
@@ -232,11 +260,11 @@ export function MealSheet({ open, profileId, task, areas, veg, onClose }: { open
                   accessibilityRole="checkbox"
                   accessibilityState={{ checked: on }}
                   onPress={() => toggle(t.key)}
-                  className="h-9 flex-row items-center gap-1.5 rounded-pill px-3.5"
-                  style={{ backgroundColor: on ? ink[900] : "#fff", borderWidth: 1, borderColor: on ? ink[900] : surface.line }}
+                  scale={0.96}
+                  style={{ height: 42, flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 16, borderRadius: 999, backgroundColor: on ? PILLAR_TONE.eat.bg : "#fff", borderWidth: 1.5, borderColor: on ? PILLAR_TONE.eat.accent : "transparent" }}
                 >
-                  {on ? <Check size={13} color="#fff" strokeWidth={3} /> : null}
-                  <Text style={{ fontFamily: font.medium, fontSize: 13, color: on ? "#fff" : ink[900] }}>{t.label}</Text>
+                  {on ? <Check size={14} color={PILLAR_TONE.eat.deep} strokeWidth={3} /> : null}
+                  <Text style={{ fontFamily: on ? font.semibold : font.medium, fontSize: 14, color: on ? PILLAR_TONE.eat.deep : ink[900] }}>{t.label}</Text>
                 </Tap>
               );
             })}
@@ -244,8 +272,8 @@ export function MealSheet({ open, profileId, task, areas, veg, onClose }: { open
         </View>
       ))}
       <ErrorLine text={error} />
-      <PillButton style={{ marginTop: 18 }} loading={busy} onPress={() => void save()}>
-        Save meal
+      <PillButton style={{ marginTop: 22 }} loading={busy} onPress={() => void save()}>
+        {tags.length ? `Save meal · ${tags.length} item${tags.length === 1 ? "" : "s"}` : "Save meal"}
       </PillButton>
     </Sheet>
   );
@@ -275,11 +303,11 @@ export function ReadingSheet({ open, profileId, task, onClose }: { open: boolean
   }
 
   return (
-    <Sheet open={open} title={task.title} line={task.why} onClose={onClose}>
+    <Sheet open={open} title={task.title} line={task.why} onClose={onClose} art={/sugar|glucose/i.test(task.title) ? "glucose" : /weight/i.test(task.title) ? "scale" : "heart"} tone={PILLAR_TONE.check}>
       <View className="flex-row gap-3">
         {(task.fields ?? []).map((f) => (
-          <Glass key={f.key} strong className="flex-1 rounded-xl px-4 py-3">
-            <Text style={{ fontFamily: font.medium, fontSize: 12, color: ink[500] }}>{f.label}</Text>
+          <View key={f.key} style={[glassCard("#ffffff", "#0f1030"), { flex: 1, borderRadius: 22, paddingHorizontal: 16, paddingVertical: 14, shadowOpacity: 0.05 }]}>
+            <Text style={{ fontFamily: font.medium, fontSize: 13, color: ink[500] }}>{f.label}</Text>
             <View className="flex-row items-baseline gap-1.5">
               <TextInput
                 value={values[f.key] ?? ""}
@@ -288,11 +316,11 @@ export function ReadingSheet({ open, profileId, task, onClose }: { open: boolean
                 placeholder={f.placeholder}
                 placeholderTextColor={ink[300]}
                 accessibilityLabel={`${f.label} in ${f.unit}`}
-                style={{ flex: 1, minWidth: 0, fontFamily: font.semibold, fontSize: 24, color: ink[900], paddingVertical: 4 }}
+                style={{ flex: 1, minWidth: 0, fontFamily: font.semibold, fontSize: 36, letterSpacing: -1, color: ink[900], paddingVertical: 4 }}
               />
-              <Text style={{ fontFamily: font.medium, fontSize: 13, color: ink[500] }}>{f.unit}</Text>
+              <Text style={{ fontFamily: font.medium, fontSize: 14, color: ink[500] }}>{f.unit}</Text>
             </View>
-          </Glass>
+          </View>
         ))}
       </View>
       <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 17, color: ink[500], marginTop: 10 }}>
@@ -366,19 +394,19 @@ export function BreathingSheet({ open, profileId, task, onClose }: { open: boole
   const ss = String(left % 60).padStart(2, "0");
 
   return (
-    <Sheet open={open} title={task.title} line="In through the nose for four, out slowly for six. Shoulders down." onClose={onClose}>
+    <Sheet open={open} title={task.title} line="In through the nose for four, out slowly for six. Shoulders down." onClose={onClose} art="lotus" tone={PILLAR_TONE.mind}>
       <View className="items-center py-4">
         <View style={{ width: 230, height: 230, alignItems: "center", justifyContent: "center" }}>
-          <Animated.View style={[{ position: "absolute", width: 230, height: 230, borderRadius: 999, overflow: "hidden" }, circle]}>
-            <Gradient from={lilac.deep} to={brand[400]} angle="vertical" />
-          </Animated.View>
+          {/* Flat circles: a pale track, and the breath growing inside it. */}
+          <View style={{ position: "absolute", width: 230, height: 230, borderRadius: 999, backgroundColor: PILLAR_TONE.mind.bg }} />
+          <Animated.View style={[{ position: "absolute", width: 230, height: 230, borderRadius: 999, backgroundColor: PILLAR_TONE.mind.track }, circle]} />
           <View className="items-center">
             {finished ? (
               <MascotFigure size={120} moment="joy" />
             ) : (
               <>
-                <Text style={{ fontFamily: font.semibold, fontSize: 20, color: ink[900] }}>{running ? (phase === "in" ? "Breathe in" : "Breathe out") : "Ready"}</Text>
-                <Text style={{ fontFamily: font.medium, fontSize: 15, color: ink[700], marginTop: 4 }}>
+                <Text style={{ fontFamily: font.semibold, fontSize: 24, letterSpacing: -0.5, color: PILLAR_TONE.mind.deep }}>{running ? (phase === "in" ? "Breathe in" : "Breathe out") : "Ready"}</Text>
+                <Text style={{ fontFamily: font.medium, fontSize: 17, color: ink[700], marginTop: 4, fontVariant: ["tabular-nums"] }}>
                   {mm}:{ss}
                 </Text>
               </>

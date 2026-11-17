@@ -181,11 +181,11 @@ export function GoalSheet({ goalKey, profileId, onClose }: { goalKey: GoalKey | 
   }
 
   return (
-    <Sheet open={Boolean(goalKey)} title={goalTitle(goal, answers)} line={goal.line} onClose={onClose}>
+    <Sheet open={Boolean(goalKey)} title={goalTitle(goal, answers)} line={goal.line} onClose={onClose} art={look.art} tone={{ ...PILLAR_TONE.sleep, bg: look.bg }}>
       {goal.questions.map((q) => (
         <View key={q.key} style={{ marginBottom: 18 }}>
-          <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{q.ask}</Text>
-          <View className="mt-2 flex-row flex-wrap gap-2" style={{ alignItems: "flex-start" }}>
+          <Text style={{ fontFamily: font.semibold, fontSize: 16, color: ink[900] }}>{q.ask}</Text>
+          <View className="mt-3 flex-row flex-wrap gap-2" style={{ alignItems: "flex-start" }}>
             {q.options.map((o) => {
               const on = answers[q.key] === o.value;
               return (
@@ -197,10 +197,10 @@ export function GoalSheet({ goalKey, profileId, onClose }: { goalKey: GoalKey | 
                     feel.tick();
                     setAnswers((a) => ({ ...a, [q.key]: o.value }));
                   }}
-                  className="h-10 items-center justify-center rounded-pill px-4"
-                  style={{ backgroundColor: on ? ink[900] : "#fff", borderWidth: 1, borderColor: on ? ink[900] : surface.line }}
+                  scale={0.96}
+                  style={{ height: 44, alignItems: "center", justifyContent: "center", paddingHorizontal: 16, borderRadius: 999, backgroundColor: on ? look.bg : "#fff", borderWidth: 1.5, borderColor: on ? look.fg : "transparent" }}
                 >
-                  <Text style={{ fontFamily: font.semibold, fontSize: 13, color: on ? "#fff" : ink[900] }}>{o.label}</Text>
+                  <Text style={{ fontFamily: font.semibold, fontSize: 14, color: on ? look.fg : ink[900] }}>{o.label}</Text>
                 </Tap>
               );
             })}
@@ -208,7 +208,8 @@ export function GoalSheet({ goalKey, profileId, onClose }: { goalKey: GoalKey | 
         </View>
       ))}
 
-      <View className="flex-row items-center gap-3 rounded-lg p-3.5" style={{ backgroundColor: look.bg }}>
+      <View style={[glassCard("#ffffff", "#0f1030"), { flexDirection: "row", alignItems: "center", gap: 12, padding: 16, borderRadius: 22, shadowOpacity: 0.05 }]}>
+        <Icon3D name="bell" size={30} />
         <View className="min-w-0 flex-1">
           <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>Remind me each day</Text>
           <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[700], marginTop: 1 }}>{`Around ${hourLabel(reminderHour(goal, answers))}, on this phone`}</Text>

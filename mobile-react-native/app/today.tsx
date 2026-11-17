@@ -515,14 +515,14 @@ function PrefsSheet({ open, profileId, onClose }: { open: boolean; profileId: st
   const current = prefs.data ?? {};
   const set = (next: typeof current) => void saveDailyPrefs(qc, profileId, next);
   return (
-    <Sheet open={open} title="Tune your plan" line="Cheeku picks the tasks. These are yours to set." onClose={onClose}>
+    <Sheet open={open} title="Tune your plan" line="Cheeku picks the tasks. These are yours to set." onClose={onClose} art="star">
       <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>Daily step goal</Text>
       <View className="mt-2 flex-row flex-wrap gap-2" style={{ alignItems: "flex-start" }}>
         {[undefined, ...GOALS].map((g) => {
           const on = current.steps_goal === g;
           return (
-            <Tap key={g ?? "auto"} accessibilityRole="radio" accessibilityState={{ checked: on }} onPress={() => set({ ...current, steps_goal: g })} className="h-10 items-center justify-center rounded-pill px-4" style={{ backgroundColor: on ? brand[600] : "#fff", borderWidth: 1, borderColor: on ? brand[600] : surface.line }}>
-              <Text style={{ fontFamily: font.semibold, fontSize: 13, color: on ? "#fff" : ink[900] }}>{g ? g.toLocaleString("en-IN") : "Pick for me"}</Text>
+            <Tap key={g ?? "auto"} accessibilityRole="radio" accessibilityState={{ checked: on }} onPress={() => set({ ...current, steps_goal: g })} className="h-10 items-center justify-center rounded-pill px-4" style={{ backgroundColor: on ? brand[50] : "#fff", borderWidth: 1.5, borderColor: on ? brand[500] : "transparent" }}>
+              <Text style={{ fontFamily: font.semibold, fontSize: 13, color: on ? brand[700] : ink[900] }}>{g ? g.toLocaleString("en-IN") : "Pick for me"}</Text>
             </Tap>
           );
         })}
@@ -539,8 +539,8 @@ function PrefsSheet({ open, profileId, onClose }: { open: boolean; profileId: st
         ].map((o) => {
           const on = Boolean(current.veg) === o.v;
           return (
-            <Tap key={o.label} accessibilityRole="radio" accessibilityState={{ checked: on }} onPress={() => set({ ...current, veg: o.v })} className="h-10 flex-1 items-center justify-center rounded-pill" style={{ backgroundColor: on ? brand[600] : "#fff", borderWidth: 1, borderColor: on ? brand[600] : surface.line }}>
-              <Text style={{ fontFamily: font.semibold, fontSize: 13, color: on ? "#fff" : ink[900] }}>{o.label}</Text>
+            <Tap key={o.label} accessibilityRole="radio" accessibilityState={{ checked: on }} onPress={() => set({ ...current, veg: o.v })} className="h-10 flex-1 items-center justify-center rounded-pill" style={{ backgroundColor: on ? brand[50] : "#fff", borderWidth: 1.5, borderColor: on ? brand[500] : "transparent" }}>
+              <Text style={{ fontFamily: font.semibold, fontSize: 13, color: on ? brand[700] : ink[900] }}>{o.label}</Text>
             </Tap>
           );
         })}
