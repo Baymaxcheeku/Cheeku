@@ -120,7 +120,7 @@ export function FilterBar({
               onChange({ profileId: undefined, docType: undefined, period: undefined, sort: filters.sort })
             }
             className="h-9 flex-row items-center gap-1.5 rounded-pill px-3.5"
-            style={{ backgroundColor: ink[900] }}
+            style={{ backgroundColor: brand[600] }}
           >
             <X size={13} color="#ffffff" />
             <Text className="text-xs font-semibold text-white">Clear {activeCount}</Text>

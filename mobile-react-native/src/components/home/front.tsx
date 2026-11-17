@@ -1,17 +1,22 @@
 import { useRouter } from "expo-router";
-import { Image } from "expo-image";
-import { ArrowUp, BellRing, CalendarClock, Camera, Check, ChevronDown, FileUp, Footprints, Lock, Mic, Plus } from "lucide-react-native";
+import { ArrowUp, Camera, Check, ChevronDown, ChevronRight, Flame, Lock, Mic, Plus } from "lucide-react-native";
 import { useState } from "react";
 import { ScrollView, Text, TextInput, View } from "react-native";
 import Svg, { Defs, LinearGradient, RadialGradient, Rect, Stop } from "react-native-svg";
 
 import { MascotBust } from "@/components/illustrations/sprout";
 import { Avatar } from "@/components/ui/avatar";
+import { Icon3D, type Icon3DName } from "@/components/ui/icon3d";
 import { Tap } from "@/components/ui/tap";
-import { unlockRows } from "@/lib/home/content";
+import { WINDOW_LABEL } from "@/lib/home/catalog";
+import { PILLARS, unlockRows } from "@/lib/home/content";
+import type { Plan, PlanTask } from "@/lib/home/plan";
+import type { Streak } from "@/lib/home/today";
+import type { AreaKey } from "@/lib/longevity/areas";
+import { areaQuestion, type AreasView } from "@/lib/longevity/use-areas";
 import type { HomeSignals } from "@/lib/home/rules";
 import type { ActiveProfile } from "@/lib/profiles/context";
-import { brand, ink, surface } from "@/theme/tokens";
+import { brand, ink, semantic, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
 
 /*
@@ -29,11 +34,9 @@ import { font } from "@/theme/type";
  * first report opens, and the health file. Nothing black and heavy; the
  * one strong colour is the violet send button.
  *
- * 3D icons: Microsoft Fluent 3D emoji, MIT licence (assets/care3d/LICENSE-fluentui-emoji.txt).
+ * 3D icons: Cheeku's own set (components/ui/icon3d.tsx).
  */
 
-const SKY_TOP = "#d9d6ff";
-const SKY_MID = "#ecebff";
 const PLATE = "#f4f3ff";
 const SOFT_SHADOW = { shadowColor: "#3b2bc9", shadowOpacity: 0.1, shadowRadius: 24, shadowOffset: { width: 0, height: 10 }, elevation: 4 } as const;
 
@@ -177,17 +180,15 @@ export function AskHero({ name, isSelf }: { name: string; isSelf: boolean }) {
 
 // --------------------------------------------------------- book, by chat --
 
-/* eslint-disable @typescript-eslint/no-require-imports */
-const CARE = [
-  { label: "Doctor", ask: "Book a doctor", art: require("../../../assets/care3d/stethoscope.png") },
-  { label: "Lab test", ask: "Book a lab test at home", art: require("../../../assets/care3d/test_tube.png") },
-  { label: "Medicines", ask: "Order my medicines", art: require("../../../assets/care3d/pill.png") },
-  { label: "Fitness", ask: "Find a fitness class near me", art: require("../../../assets/care3d/running_shoe.png") },
-  { label: "Dental", ask: "Book a dentist", art: require("../../../assets/care3d/tooth.png") },
-  { label: "Eye care", ask: "Book an eye check-up", art: require("../../../assets/care3d/eye.png") },
-  { label: "Mind", ask: "Book a therapist", art: require("../../../assets/care3d/brain.png") },
-] as const;
-/* eslint-enable @typescript-eslint/no-require-imports */
+const CARE: readonly { label: string; ask: string; icon: Icon3DName }[] = [
+  { label: "Doctor", ask: "Book a doctor", icon: "doctor" },
+  { label: "Lab test", ask: "Book a lab test at home", icon: "test-tube" },
+  { label: "Medicines", ask: "Order my medicines", icon: "capsule" },
+  { label: "Online", ask: "Talk to a doctor online", icon: "video" },
+  { label: "Fitness", ask: "Find a fitness class near me", icon: "shoe" },
+  { label: "Diet", ask: "Find a dietitian", icon: "food" },
+  { label: "Mind", ask: "Book a therapist", icon: "lotus" },
+];
 
 /** Booking is a conversation: each object opens the chat with the request already said. */
 export function CareShelf() {
@@ -204,7 +205,7 @@ export function CareShelf() {
         {CARE.map((c) => (
           <Tap key={c.label} accessibilityRole="button" accessibilityLabel={c.label} onPress={() => router.push(`/ask?q=${encodeURIComponent(c.ask)}` as never)} scale={0.94} style={{ alignItems: "center", width: 76 }}>
             <View style={[SOFT_SHADOW, { width: 76, height: 76, borderRadius: 24, backgroundColor: "#fff", alignItems: "center", justifyContent: "center", shadowOpacity: 0.07 }]}>
-              <Image source={c.art} style={{ width: 50, height: 50 }} contentFit="contain" accessibilityIgnoresInvertColors />
+              <Icon3D name={c.icon} size={52} />
             </View>
             <Text numberOfLines={1} style={{ marginTop: 8, fontFamily: font.medium, fontSize: 12, color: ink[700] }}>{c.label}</Text>
           </Tap>
@@ -239,7 +240,7 @@ export function SetupCard({ signals, name, isSelf }: { signals: HomeSignals; nam
 
       <Tap accessibilityRole="button" accessibilityLabel={`${next.title}. ${next.unlocks}`} onPress={() => router.push(next.route as never)} scale={0.98} style={{ marginTop: 16, flexDirection: "row", alignItems: "center", gap: 14 }}>
         <View style={{ width: 48, height: 48, borderRadius: 16, backgroundColor: PLATE, alignItems: "center", justifyContent: "center" }}>
-          <FileUp size={22} color={brand[600]} strokeWidth={1.9} />
+          <Icon3D name="report" size={34} />
         </View>
         <View style={{ flex: 1 }}>
           <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{next.title}</Text>
@@ -274,39 +275,143 @@ export function SetupCard({ signals, name, isSelf }: { signals: HomeSignals; nam
 
 // ------------------------------------------------ what the first record opens --
 
-const FAN = [
-  { icon: Footprints, title: "Daily step", tilt: "-10deg", y: 12, x: 0 },
-  { icon: CalendarClock, title: "What's due", tilt: "0deg", y: 0, x: 48 },
-  { icon: BellRing, title: "Alerts", tilt: "10deg", y: 12, x: 96 },
-] as const;
+const UNLOCKS: readonly { icon: Icon3DName; label: string }[] = [
+  { icon: "calendar-check", label: "Daily plan" },
+  { icon: "bell", label: "What's due" },
+  { icon: "family", label: "Family alerts" },
+];
 
-/** One picture of what a first report opens: three cards fanned like a hand, still locked. */
-export function UnlocksFan() {
+/**
+ * The promise of the first report, as three objects behind a small lock.
+ * One line of words; the pictures say the rest.
+ */
+export function FirstReportCard() {
   return (
-    <View style={{ borderRadius: 24, overflow: "hidden", padding: 18, flexDirection: "row", alignItems: "center", gap: 12, minHeight: 140, backgroundColor: "#efedff" }}>
-      <View style={{ flex: 1 }}>
-        <Text style={{ fontFamily: font.semibold, fontSize: 17, lineHeight: 21, color: ink[900] }}>Your first report opens</Text>
-        <Text style={{ marginTop: 4, fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[700] }}>A daily step, what&apos;s due for everyone, and alerts when a parent&apos;s test slips.</Text>
+    <View style={{ borderRadius: 24, backgroundColor: "#efedff", paddingHorizontal: 18, paddingTop: 18, paddingBottom: 20 }} accessible accessibilityLabel="Your first report unlocks a daily plan, what's due, and family alerts">
+      <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>Your first report unlocks</Text>
+      <View style={{ marginTop: 16, flexDirection: "row", justifyContent: "space-between" }}>
+        {UNLOCKS.map((u) => (
+          <View key={u.label} style={{ alignItems: "center", flex: 1 }}>
+            <View style={[SOFT_SHADOW, { width: 72, height: 72, borderRadius: 22, backgroundColor: "#fff", alignItems: "center", justifyContent: "center", shadowOpacity: 0.08 }]}>
+              <Icon3D name={u.icon} size={44} />
+              <View style={{ position: "absolute", right: -4, bottom: -4, width: 24, height: 24, borderRadius: 999, backgroundColor: brand[600], alignItems: "center", justifyContent: "center", borderWidth: 2, borderColor: "#efedff" }}>
+                <Lock size={11} color="#fff" strokeWidth={2.6} />
+              </View>
+            </View>
+            <Text numberOfLines={1} style={{ marginTop: 10, fontFamily: font.medium, fontSize: 13, color: ink[700] }}>{u.label}</Text>
+          </View>
+        ))}
       </View>
-      <View style={{ width: 160, height: 112 }} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
-        {FAN.map((f, i) => {
-          const Icon = f.icon;
+    </View>
+  );
+}
+
+// ------------------------------------------------------- today, in brief --
+
+const PILLAR_3D: Record<PlanTask["pillar"], Icon3DName> = { move: "shoe", eat: "food", sleep: "moon", mind: "lotus", check: "stethoscope" };
+const KIND_3D: Partial<Record<PlanTask["kind"], Icon3DName>> = { steps: "shoe", meal: "food", reading: "heart", rating: "moon", dose: "blister" };
+
+function taskIcon(t: PlanTask): Icon3DName {
+  if (t.due) return /follow|doctor|dr\./i.test(t.title) ? "doctor" : "test-tube";
+  return KIND_3D[t.kind] ?? PILLAR_3D[t.pillar];
+}
+
+function taskRoute(t: PlanTask): string {
+  return t.kind === "dose" ? "/medicines" : t.kind === "habit" ? `/today?pillar=${t.pillar}` : `/today?task=${encodeURIComponent(t.key)}`;
+}
+
+/** Today's plan and the streak in one card: how far along, and the next three things. */
+export function TodayPlanCard({ plan, streak, skip }: { plan: Plan; streak: Streak; skip: string | null }) {
+  const router = useRouter();
+  // Three different kinds of thing (one per pillar first), so the card isn't three meals in a row.
+  const open = plan.tasks.filter((t) => t.status === "open" && t.key !== skip);
+  const seen = new Set<string>();
+  const varied = open.filter((t) => (seen.has(t.pillar) ? false : (seen.add(t.pillar), true)));
+  const nextUp = [...varied, ...open.filter((t) => !varied.includes(t))].slice(0, 3);
+  const pct = plan.total ? plan.done / plan.total : 0;
+  return (
+    <View style={[SOFT_SHADOW, { borderRadius: 24, backgroundColor: "#fff", padding: 18, paddingBottom: 8, shadowOpacity: 0.06 }]}>
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+        <View style={{ flex: 1 }}>
+          <Text accessibilityRole="header" style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>Today&apos;s plan</Text>
+          <Text style={{ marginTop: 2, fontFamily: font.regular, fontSize: 13, color: ink[500] }}>{plan.done} of {plan.total} done</Text>
+        </View>
+        {streak.count > 0 ? (
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 5, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 999, backgroundColor: "#fff4e5" }}>
+            <Flame size={14} color="#e8590c" strokeWidth={2.2} />
+            <Text style={{ fontFamily: font.semibold, fontSize: 13, color: "#b14a08" }}>{streak.count}-day streak</Text>
+          </View>
+        ) : null}
+      </View>
+      <View style={{ marginTop: 12, height: 6, borderRadius: 999, backgroundColor: "#ecebff", overflow: "hidden" }}>
+        <View style={{ width: `${Math.max(4, pct * 100)}%`, height: 6, borderRadius: 999, backgroundColor: brand[500] }} />
+      </View>
+      <View style={{ marginTop: 6 }}>
+        {nextUp.map((t) => (
+          <Tap key={t.key} accessibilityRole="button" accessibilityLabel={t.title} onPress={() => router.push(taskRoute(t) as never)} scale={0.99} style={{ flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 10 }}>
+            <View style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: PLATE, alignItems: "center", justifyContent: "center" }}>
+              <Icon3D name={taskIcon(t)} size={30} />
+            </View>
+            <View style={{ flex: 1, minWidth: 0 }}>
+              <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{t.title}</Text>
+              <Text numberOfLines={1} style={{ marginTop: 1, fontFamily: font.regular, fontSize: 12, color: ink[500] }}>
+                {[t.due ? t.dueLabel : null, PILLARS.find((p) => p.key === t.pillar)?.label, t.window !== "anytime" ? WINDOW_LABEL[t.window] : null].filter(Boolean).join(" · ")}
+              </Text>
+            </View>
+            <ChevronRight size={16} color={ink[300]} />
+          </Tap>
+        ))}
+      </View>
+      <Tap accessibilityRole="button" onPress={() => router.push("/today" as never)} style={{ paddingVertical: 12, alignItems: "center", borderTopWidth: 1, borderTopColor: surface.line, marginTop: 2 }}>
+        <Text style={{ fontFamily: font.semibold, fontSize: 14, color: brand[600] }}>See the whole day</Text>
+      </Tap>
+    </View>
+  );
+}
+
+// ------------------------------------------------------- health, at a glance --
+
+const AREA_3D: Record<AreaKey, Icon3DName> = { heart: "heart", sugar: "glucose", sleep: "moon", movement: "shoe", weight: "scale", checkups: "clipboard" };
+const AREA_SHORT: Record<AreaKey, string> = { heart: "Heart", sugar: "Sugar", sleep: "Sleep", movement: "Movement", weight: "Weight", checkups: "Check-ups" };
+const AREA_STATUS = {
+  act: { word: "Needs a step", color: semantic.attentionText, dot: "#f08c00" },
+  watch: { word: "Keep an eye", color: semantic.cautionText, dot: "#f2c94c" },
+  on_track: { word: "On track", color: semantic.safeText, dot: "#2f9e44" },
+  unknown: { word: "Add data", color: ink[300], dot: "#d9d9e3" },
+} as const;
+
+/**
+ * The six areas as six objects, two rows of three. The status is one word
+ * and a dot; tapping an area talks it through with Cheeku (or, with no data,
+ * goes to where the data comes from).
+ */
+export function HealthGrid({ view, title }: { view: AreasView; title: string }) {
+  const router = useRouter();
+  return (
+    <View style={[SOFT_SHADOW, { borderRadius: 24, backgroundColor: "#fff", padding: 18, shadowOpacity: 0.06 }]}>
+      <Text accessibilityRole="header" style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>{title}</Text>
+      <View style={{ marginTop: 12, flexDirection: "row", flexWrap: "wrap", rowGap: 10 }}>
+        {view.areas.map((a) => {
+          const st = AREA_STATUS[a.status];
+          const go = () =>
+            a.status === "unknown"
+              ? router.push((a.key === "sleep" || a.key === "movement" ? "/wearables/connect" : "/scan") as never)
+              : router.push({ pathname: "/ask", params: { q: areaQuestion(a), t: String(Date.now()) } });
           return (
-            <View
-              key={f.title}
-              style={[
-                SOFT_SHADOW,
-                { position: "absolute", left: f.x, top: f.y, width: 64, height: 88, borderRadius: 16, backgroundColor: "#fff", padding: 9, justifyContent: "space-between", transform: [{ rotate: f.tilt }], shadowOpacity: 0.14, zIndex: i + 1 },
-              ]}
-            >
-              <Icon size={18} color={brand[600]} strokeWidth={1.9} />
-              <Text numberOfLines={2} style={{ fontFamily: font.semibold, fontSize: 11, lineHeight: 13, color: ink[900] }}>{f.title}</Text>
+            <View key={a.key} style={{ width: "33.33%", paddingHorizontal: 4 }}>
+              <Tap accessibilityRole="button" accessibilityLabel={`${AREA_SHORT[a.key]}, ${st.word}`} onPress={go} scale={0.96} style={{ alignItems: "center", paddingVertical: 10, borderRadius: 18, backgroundColor: PLATE }}>
+                <View style={{ opacity: a.status === "unknown" ? 0.45 : 1 }}>
+                  <Icon3D name={AREA_3D[a.key]} size={36} />
+                </View>
+                <Text numberOfLines={1} style={{ marginTop: 6, fontFamily: font.semibold, fontSize: 13, color: ink[900] }}>{AREA_SHORT[a.key]}</Text>
+                <View style={{ marginTop: 3, flexDirection: "row", alignItems: "center", gap: 4 }}>
+                  <View style={{ width: 6, height: 6, borderRadius: 999, backgroundColor: st.dot }} />
+                  <Text numberOfLines={1} style={{ fontFamily: font.medium, fontSize: 11, color: st.color }}>{st.word}</Text>
+                </View>
+              </Tap>
             </View>
           );
         })}
-        <View style={{ position: "absolute", right: 0, bottom: 0, zIndex: 3, width: 26, height: 26, borderRadius: 999, backgroundColor: brand[600], alignItems: "center", justifyContent: "center", borderWidth: 2, borderColor: "#fff" }}>
-          <Lock size={12} color="#fff" strokeWidth={2.6} />
-        </View>
       </View>
     </View>
   );

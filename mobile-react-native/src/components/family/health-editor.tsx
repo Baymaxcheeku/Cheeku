@@ -199,7 +199,7 @@ function ChipSet({
       {adding ? (
         <View style={{ flexDirection: "row", gap: 8, marginTop: 10 }}>
           <Input value={draft} onChangeText={setDraft} placeholder={placeholder} autoFocus onSubmitEditing={commit} returnKeyType="done" style={{ flex: 1 }} />
-          <Tap scale={0.95} accessibilityRole="button" accessibilityLabel="Add" onPress={commit} style={{ width: 46, height: 46, borderRadius: 16, backgroundColor: ink[900], alignItems: "center", justifyContent: "center" }}>
+          <Tap scale={0.95} accessibilityRole="button" accessibilityLabel="Add" onPress={commit} style={{ width: 46, height: 46, borderRadius: 16, backgroundColor: brand[600], alignItems: "center", justifyContent: "center" }}>
             <Check size={18} color="#fff" />
           </Tap>
         </View>

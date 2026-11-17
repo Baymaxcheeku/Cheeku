@@ -185,7 +185,7 @@ function Cta({ label, onPress, disabled }: { label: string; onPress?: () => void
       accessibilityRole="button"
       disabled={disabled || !onPress}
       onPress={onPress}
-      style={{ height: 48, borderRadius: 999, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, backgroundColor: ink[900], opacity: disabled || !onPress ? 0.45 : 1 }} scale={0.98}
+      style={{ height: 48, borderRadius: 999, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, backgroundColor: brand[600], opacity: disabled || !onPress ? 0.45 : 1 }} scale={0.98}
     >
       <Text style={{ fontFamily: font.semibold, fontSize: 15, color: "#fff" }}>{label}</Text>
       <ArrowRight size={16} color="#fff" />
@@ -302,7 +302,7 @@ export function BookedCard({ event, onOpen }: { event: BookedEvent; onOpen?: (ro
       style={({ pressed }) => [glassShadow, { borderRadius: 24, backgroundColor: pressed ? brand[50] : "#fff", borderWidth: 1, borderColor: glass.rim, padding: 14, gap: 10 }]}
     >
       <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
-        <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: ink[900], alignItems: "center", justifyContent: "center" }}>
+        <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: brand[600], alignItems: "center", justifyContent: "center" }}>
           <Icon size={18} color="#fff" />
         </View>
         <View style={{ flex: 1, minWidth: 0 }}>

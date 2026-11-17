@@ -179,7 +179,7 @@ export function MemberCareCard({ member, phone }: { member: ActiveProfile; phone
                   void Linking.openURL(`tel:${phone.replace(/[^0-9+]/g, "")}`);
                 }}
                 className="h-10 flex-row items-center gap-1.5 rounded-pill px-4"
-                style={{ backgroundColor: ink[900] }}
+                style={{ backgroundColor: brand[600] }}
               >
                 <Phone size={15} color="#fff" />
                 <Text style={{ fontFamily: font.semibold, fontSize: 13, color: "#fff" }}>{`Call ${name}`}</Text>

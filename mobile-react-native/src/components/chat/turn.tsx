@@ -65,7 +65,7 @@ export function UserBubble({ message }: { message: ThreadMessage }) {
           <Text style={{ fontFamily: font.medium, fontSize: 12, color: ink[700] }}>{message.attachment.title}</Text>
         </View>
       ) : null}
-      <View style={{ backgroundColor: ink[900], borderRadius: 24, borderBottomRightRadius: 6, paddingHorizontal: 16, paddingVertical: 12 }}>
+      <View style={{ backgroundColor: brand[600], borderRadius: 24, borderBottomRightRadius: 6, paddingHorizontal: 16, paddingVertical: 12 }}>
         <Text style={{ fontFamily: font.regular, fontSize: 15, lineHeight: 21, color: "#fff" }}>{message.content}</Text>
       </View>
     </View>
@@ -282,7 +282,7 @@ function CareOffer({ onBook }: { onBook: (mode: "clinic" | "online") => void }) 
       <Tap
         accessibilityRole="button"
         onPress={() => onBook("clinic")}
-        style={{ flex: 1, height: 46, borderRadius: 999, backgroundColor: ink[900], flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6 }} scale={0.98}
+        style={{ flex: 1, height: 46, borderRadius: 999, backgroundColor: brand[600], flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6 }} scale={0.98}
       >
         <MapPin size={15} color="#fff" />
         <Text style={{ fontFamily: font.semibold, fontSize: 13, color: "#fff" }}>Doctors nearby</Text>
@@ -407,7 +407,7 @@ export function ScriptCard({ script, urgent }: { script: NonNullable<TurnMemory[
           ))}
           <View style={{ flexDirection: "row", gap: 8, marginTop: 4 }}>
             {script.phone ? (
-              <Tap accessibilityRole="button" accessibilityLabel={`Call ${script.to ?? "the doctor"}`} onPress={() => script.phone && tel(script.phone)} style={{ flex: 1, height: 42, borderRadius: 999, backgroundColor: ink[900], flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6 }}>
+              <Tap accessibilityRole="button" accessibilityLabel={`Call ${script.to ?? "the doctor"}`} onPress={() => script.phone && tel(script.phone)} style={{ flex: 1, height: 42, borderRadius: 999, backgroundColor: brand[600], flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6 }}>
                 <Phone size={15} color="#fff" />
                 <Text style={{ fontFamily: font.semibold, fontSize: 13, color: "#fff" }}>Call</Text>
               </Tap>

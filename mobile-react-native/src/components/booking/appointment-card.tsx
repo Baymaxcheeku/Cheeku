@@ -85,7 +85,7 @@ export function AppointmentCard({ appt, hero }: { appt: Appointment; hero?: bool
               alignItems: "center",
               justifyContent: "center",
               gap: 8,
-              backgroundColor: ink[900],
+              backgroundColor: brand[600],
               transform: [{ scale: pressed ? 0.98 : 1 }],
             })}
           >

@@ -207,7 +207,7 @@ export function AppLockGate({ children }: { children: React.ReactNode }) {
                 disabled={prompting}
                 onPress={() => void unlock()}
                 className="mt-6 h-12 flex-row items-center justify-center gap-2 rounded-pill px-7"
-                style={{ backgroundColor: ink[900], opacity: prompting ? 0.6 : 1 }}
+                style={{ backgroundColor: brand[600], opacity: prompting ? 0.6 : 1 }}
               >
                 <Fingerprint size={18} color="#fff" />
                 <Text className="text-base font-bold text-white">Unlock</Text>

@@ -76,7 +76,7 @@ function PhotoPicker({ uri, onPick, label, hint }: { uri: string | null; onPick:
       <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{label}</Text>
       <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 17, color: ink[500], marginTop: 2 }}>{hint}</Text>
       <View className="mt-3 flex-row gap-2">
-        <Tap accessibilityRole="button" onPress={() => void pick("camera")} className="h-11 flex-1 flex-row items-center justify-center gap-2 rounded-pill" style={{ backgroundColor: ink[900] }}>
+        <Tap accessibilityRole="button" onPress={() => void pick("camera")} className="h-11 flex-1 flex-row items-center justify-center gap-2 rounded-pill" style={{ backgroundColor: brand[600] }}>
           <Camera size={16} color="#fff" />
           <Text style={{ fontFamily: font.semibold, fontSize: 15, color: "#fff" }}>Take photo</Text>
         </Tap>

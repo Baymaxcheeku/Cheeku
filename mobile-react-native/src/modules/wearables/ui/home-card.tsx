@@ -6,7 +6,7 @@ import { Text, View } from "react-native";
 import { Tap } from "@/components/ui/tap";
 import type { HomeCardProps } from "@/lib/extensions";
 import { useDailyPrefs } from "@/lib/home/logs";
-import { ink, surface } from "@/theme/tokens";
+import { brand, ink, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
 
 import { DEFAULT_STEPS_GOAL, WEARABLES_ENABLED } from "../config";
@@ -53,7 +53,7 @@ export function WearablesHomeCard({ profileId, isPrimary }: HomeCardProps) {
             </View>
           </View>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginTop: 14 }}>
-            <Tap accessibilityRole="button" onPress={() => router.push("/wearables/connect" as never)} style={{ height: 40, paddingHorizontal: 18, borderRadius: 999, backgroundColor: ink[900], alignItems: "center", justifyContent: "center" }} scale={0.98}>
+            <Tap accessibilityRole="button" onPress={() => router.push("/wearables/connect" as never)} style={{ height: 40, paddingHorizontal: 18, borderRadius: 999, backgroundColor: brand[600], alignItems: "center", justifyContent: "center" }} scale={0.98}>
               <Text style={{ fontFamily: font.semibold, fontSize: 13, color: "#fff" }}>Connect</Text>
             </Tap>
             <Tap accessibilityRole="button" onPress={() => void dismissPrompt(qc)} hitSlop={8} style={{ height: 40, paddingHorizontal: 12, justifyContent: "center" }}>

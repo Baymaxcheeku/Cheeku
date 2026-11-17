@@ -48,7 +48,7 @@ export function RemindersPrompt({ meds }: { meds: boolean }) {
           void enablePush().then(() => qc.invalidateQueries({ queryKey: ["push-permission"] }));
         }}
         className="h-9 items-center justify-center rounded-pill px-3.5"
-        style={{ backgroundColor: ink[900] }}
+        style={{ backgroundColor: brand[600] }}
       >
         <Text style={{ fontFamily: font.semibold, fontSize: 13, color: "#fff" }}>Turn on</Text>
       </Tap>

@@ -34,7 +34,7 @@ export function DailyCard({ note, onButton, onClose }: { note: DailyNote; onButt
           </Tap>
         </View>
         <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
-          <Tap scale={0.97} accessibilityRole="button" onPress={() => onButton(note.primary)} style={{ height: 36, paddingHorizontal: 14, borderRadius: 999, justifyContent: "center", backgroundColor: ink[900] }}>
+          <Tap scale={0.97} accessibilityRole="button" onPress={() => onButton(note.primary)} style={{ height: 36, paddingHorizontal: 14, borderRadius: 999, justifyContent: "center", backgroundColor: brand[600] }}>
             <Text style={{ fontFamily: font.semibold, fontSize: 13, color: "#fff" }}>{note.primary.label}</Text>
           </Tap>
           {note.secondary ? (

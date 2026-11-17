@@ -227,7 +227,7 @@ export function LocateCard({ locating, denied, onLocate, onPickCity }: { locatin
             feel.tap();
             onLocate();
           }}
-          style={{ alignSelf: "stretch", height: 52, borderRadius: 999, backgroundColor: ink[900], flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8 }}
+          style={{ alignSelf: "stretch", height: 52, borderRadius: 999, backgroundColor: brand[600], flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8 }}
           scale={0.98}
         >
           {locating ? <ActivityIndicator color="#fff" /> : <LocateFixed size={17} color="#fff" />}

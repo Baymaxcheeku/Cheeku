@@ -1,5 +1,4 @@
 import { HomeExtensions } from "@/lib/extensions/slots";
-import { AreaCard } from "@/components/longevity/area-card";
 import { useAreas } from "@/lib/longevity/use-areas";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -15,11 +14,11 @@ import { OfflineBanner } from "@/components/app/offline-banner";
 import { CheekuCard, firstName } from "@/components/home/ask-hero";
 import { LocationPrimer } from "@/components/location/primer";
 import { FamilyCareCard } from "@/components/care/family-care";
-import { AskRow, DueThisWeek, FamilyAlertCard, PlanPreview, ProgressStrip, StepCard, TodayHeadline, UnlockMoment } from "@/components/home/today";
+import { FamilyAlertCard, StepCard, UnlockMoment } from "@/components/home/today";
 import { AppointmentCard } from "@/components/booking/appointment-card";
 import { isUpcoming, startsAt, useAppointmentList } from "@/lib/booking/appointments";
 import { FileCard } from "@/components/home/strips";
-import { AskHero, CareShelf, FamilyRow, SetupCard, SkyWash, UnlocksFan } from "@/components/home/front";
+import { AskHero, CareShelf, FamilyRow, FirstReportCard, HealthGrid, SetupCard, SkyWash, TodayPlanCard } from "@/components/home/front";
 import { MascotFigure } from "@/components/illustrations/sprout";
 import { NotificationsBell } from "@/components/app/notifications-bell";
 import { Button } from "@/components/ui/button";
@@ -31,7 +30,7 @@ import { listProfileRecords, statsFrom } from "@/lib/records/queries";
 import { milestoneFor } from "@/lib/home/content";
 import { logStep, markUnlockSeen, recheckHomeStage, unlogStep, useHomeStage, useTodayLog } from "@/lib/home/stage";
 import type { PlanTask } from "@/lib/home/plan";
-import { dueRows, familyAlerts, pillarsThisWeek, routeFor, streakOf, weekOf, type DueRow } from "@/lib/home/today";
+import { dueRows, familyAlerts, routeFor, streakOf, type DueRow } from "@/lib/home/today";
 import { usePlan } from "@/lib/home/use-plan";
 import { todayIso } from "@/lib/memory/clock";
 import type { DueItem } from "@/lib/home/rules";
@@ -225,6 +224,13 @@ export default function Home() {
       <SwitchPulse />
       <OfflineBanner updatedAt={context.dataUpdatedAt} />
 
+      {/* Ask Cheeku is the core, so it sits right under the family on every Home. */}
+      <StaggerItem index={1}>
+        <View className="mt-2 px-5">
+          <AskHero name={firstName(profile.name)} isSelf={profile.isPrimary} />
+        </View>
+      </StaggerItem>
+
       {onToday ? (
         <TodayBody
           profile={profile}
@@ -243,11 +249,6 @@ export default function Home() {
         />
       ) : (
         <>
-          <StaggerItem index={1}>
-            <View className="mt-2 px-5">
-              <AskHero name={firstName(profile.name)} isSelf={profile.isPrimary} />
-            </View>
-          </StaggerItem>
 
           {/*
            * An upcoming appointment outranks everything below the ask bar: on the
@@ -290,7 +291,7 @@ export default function Home() {
           {stage === "starter" || stage === "building" ? (
             <StaggerItem index={4}>
               <View className="mt-6 px-5">
-                <UnlocksFan />
+                <FirstReportCard />
               </View>
             </StaggerItem>
           ) : null}
@@ -298,7 +299,7 @@ export default function Home() {
       )}
 
       {/* Optional layers (lib/extensions). Empty unless one is registered. */}
-      {stage === "starter" || stage === "building" ? null : (
+      {stage === "starter" || stage === "building" || onToday ? null : (
         <HomeExtensions profileId={profile.id} isPrimary={profile.isPrimary} firstName={firstName(profile.name)} />
       )}
 
@@ -442,8 +443,6 @@ function TodayBody({
 
   const doneDays = useMemo(() => new Set([...serverDone, ...log.filter((a) => a.status === "done").map((a) => a.day)]), [serverDone, log]);
   const streak = streakOf(doneDays, today);
-  const week = weekOf(doneDays, today);
-  const pillars = pillarsThisWeek(log, today);
 
   const alerts = familyAlerts(rows);
   const byId = new Map(members.map((m) => [m.id, m]));
@@ -456,14 +455,9 @@ function TodayBody({
 
   return (
     <>
-      <StaggerItem index={1}>
-        <View className="mt-6 px-5">
-          <TodayHeadline name={firstName(profile.name)} isSelf={profile.isPrimary} />
-        </View>
-      </StaggerItem>
-
+      {/* One thing to do now. */}
       <StaggerItem index={2}>
-        <View className="mt-5 px-5">
+        <View className="mt-4 px-5">
           <StepCard
             step={step}
             doneStep={celebrating}
@@ -484,29 +478,22 @@ function TodayBody({
         </View>
       </StaggerItem>
 
-      {/* The same six areas the chat talks about. Tap one to talk it through. */}
-      {areas.data ? (
+      {next ? (
         <StaggerItem index={3}>
-          <View className="mt-4 px-5">
-            <AreaCard view={areas.data} name={profile.isPrimary ? "you" : firstName(profile.name)} />
-          </View>
+          <View className="mt-4 px-5">{next}</View>
         </StaggerItem>
       ) : null}
 
+      {/* The rest of today, with the streak, in one card. */}
       {plan ? (
         <StaggerItem index={3}>
           <View className="mt-4 px-5">
-            <PlanPreview plan={plan} skip={step?.key ?? null} onOpen={(href) => router.push(href as never)} />
+            <TodayPlanCard plan={plan} streak={streak} skip={step?.key ?? null} />
           </View>
         </StaggerItem>
       ) : null}
 
-      <StaggerItem index={3}>
-        <View className="mt-4 px-5">
-          <ProgressStrip streak={streak} week={week} pillars={pillars} onPillar={(p) => router.push(`/today?pillar=${p}` as never)} />
-        </View>
-      </StaggerItem>
-
+      {/* Someone else's test slipped: worth a card of its own. */}
       {alerts.length ? (
         <StaggerItem index={4}>
           <View className="mt-4 gap-3 px-5">
@@ -526,20 +513,14 @@ function TodayBody({
         </StaggerItem>
       ) : null}
 
-      {next ? (
-        <StaggerItem index={4}>
-          <View className="mt-4 px-5">{next}</View>
+      {/* The six areas, at a glance. Tap one to talk it through. */}
+      {areas.data ? (
+        <StaggerItem index={5}>
+          <View className="mt-4 px-5">
+            <HealthGrid view={areas.data} title={profile.isPrimary ? "Your health" : `${firstName(profile.name)}'s health`} />
+          </View>
         </StaggerItem>
       ) : null}
-
-      <StaggerItem index={5}>
-        <View className="mt-6 px-5">
-          <DueThisWeek rows={rows} onPress={onOpenRow} />
-        </View>
-        <View className="mt-4 px-5">
-          <AskRow />
-        </View>
-      </StaggerItem>
     </>
   );
 }

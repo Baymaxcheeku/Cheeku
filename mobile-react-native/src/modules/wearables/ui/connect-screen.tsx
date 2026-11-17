@@ -9,7 +9,7 @@ import { PageTitle, PillButton, ScreenHeader, SectionTitle } from "@/components/
 import { Sheet } from "@/components/ui/sheet";
 import { Tap } from "@/components/ui/tap";
 import { useFamily } from "@/lib/profiles/family";
-import { ink, semantic, surface } from "@/theme/tokens";
+import { brand, ink, semantic, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
 
 import { connectSource, disconnectSource, useWearables } from "../queries";
@@ -169,7 +169,7 @@ export function WearablesConnectScreen() {
               {(guide ?? open.brings).map((line, i) => (
                 <View key={line} style={{ flexDirection: "row", gap: 10 }}>
                   {guide ? (
-                    <View style={{ width: 20, height: 20, borderRadius: 999, backgroundColor: ink[900], alignItems: "center", justifyContent: "center", marginTop: 1 }}>
+                    <View style={{ width: 20, height: 20, borderRadius: 999, backgroundColor: brand[600], alignItems: "center", justifyContent: "center", marginTop: 1 }}>
                       <Text style={{ fontFamily: font.semibold, fontSize: 11, color: "#fff" }}>{i + 1}</Text>
                     </View>
                   ) : (
@@ -236,7 +236,7 @@ function Row({ info, first, status, onPress }: { info: SourceInfo; first: boolea
       </View>
       {status.label ? (
         status.tone === "action" ? (
-          <View style={{ height: 32, paddingHorizontal: 14, borderRadius: 999, backgroundColor: ink[900], alignItems: "center", justifyContent: "center" }}>
+          <View style={{ height: 32, paddingHorizontal: 14, borderRadius: 999, backgroundColor: brand[600], alignItems: "center", justifyContent: "center" }}>
             <Text style={{ fontFamily: font.semibold, fontSize: 12, color: "#fff" }}>{status.label}</Text>
           </View>
         ) : status.tone === "on" ? (

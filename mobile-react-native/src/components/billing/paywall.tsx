@@ -343,7 +343,7 @@ function PlanChooser({
           accessibilityLabel={`Continue with ${selected.name}, ${formatPrice(selected.priceInPaise)} per ${selected.period}`}
           onPress={() => onSelect(selected)}
           className="h-[54px] items-center justify-center rounded-pill"
-          style={{ backgroundColor: ink[900] }}
+          style={{ backgroundColor: brand[600] }}
         >
           <Text className="text-lg font-bold text-white">Continue</Text>
         </Tap>
@@ -665,7 +665,7 @@ function Checkout({
           disabled={pending}
           onPress={onPay}
           className="mt-3 h-14 flex-row items-center justify-center gap-2 rounded-pill"
-          style={{ backgroundColor: ink[900], opacity: pending ? 0.6 : 1 }}
+          style={{ backgroundColor: brand[600], opacity: pending ? 0.6 : 1 }}
         >
           {pending ? (
             <ActivityIndicator color="#fff" />
@@ -742,7 +742,7 @@ function Success({
         accessibilityRole="button"
         onPress={onDone}
         className="mt-5 h-14 items-center justify-center rounded-pill"
-        style={{ backgroundColor: ink[900] }}
+        style={{ backgroundColor: brand[600] }}
       >
         <Text className="text-lg font-semibold text-white">
           {pendingQuestion ? "Send my question" : "Start a chat"}

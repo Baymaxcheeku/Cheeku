@@ -171,7 +171,7 @@ function ViewToggle({ view, onChange }: { view: View_; onChange: (next: View_) =
               bottom: 3,
               left: 3,
               borderRadius: 999,
-              backgroundColor: ink[900],
+              backgroundColor: brand[600],
             },
             pill,
           ]}
