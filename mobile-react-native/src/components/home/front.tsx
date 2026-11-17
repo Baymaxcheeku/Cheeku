@@ -80,12 +80,15 @@ export function FamilyRow({
   locked,
   onSelect,
   onAdd,
+  hideAdd = false,
 }: {
   members: readonly ActiveProfile[];
   activeId: string;
   locked: boolean;
   onSelect: (id: string) => void;
   onAdd: () => void;
+  /** Screens that only switch person (Records) leave the add bubble out. */
+  hideAdd?: boolean;
 }) {
   return (
     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 20, gap: 14, paddingVertical: 4 }}>
@@ -106,12 +109,12 @@ export function FamilyRow({
           </Tap>
         );
       })}
-      <Tap accessibilityRole="button" accessibilityLabel={locked ? "Add your family with the Family plan" : "Add a family member"} onPress={onAdd} style={{ alignItems: "center", width: 72 }} scale={0.95}>
+      {hideAdd ? null : <Tap accessibilityRole="button" accessibilityLabel={locked ? "Add your family with the Family plan" : "Add a family member"} onPress={onAdd} style={{ alignItems: "center", width: 72 }} scale={0.95}>
         <View style={{ margin: 3, width: 64, height: 64, borderRadius: 999, borderWidth: 1.5, borderStyle: "dashed", borderColor: brand[400], backgroundColor: "rgba(255,255,255,0.6)", alignItems: "center", justifyContent: "center" }}>
           <Plus size={22} color={brand[600]} strokeWidth={2.4} />
         </View>
         <Text style={{ marginTop: 8, fontFamily: font.medium, fontSize: 12, color: brand[700] }}>{members.length > 1 ? "Add" : "Family"}</Text>
-      </Tap>
+      </Tap>}
     </ScrollView>
   );
 }
