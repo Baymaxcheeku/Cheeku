@@ -5,7 +5,8 @@
 // (mobile-react-native/src/lib/memory). What it sends here is one
 // ModelRequest (see src/lib/memory/model.ts):
 //
-//   { question, history[], memory: MemoryDigest, floor: { tier, reasons[] } }
+//   { question, history[], memory: MemoryDigest, floor: { tier, reasons[] },
+//     image?: { mimeType, data } }   (one photo they asked about, base64; never stored)
 //
 // and what it expects back is one ModelReply:
 //
@@ -22,19 +23,32 @@
 // and the floor, so a model can make an answer more careful and never less.
 // Hard-stops and emergencies never reach this function at all.
 //
-// Until CHEEKU_MODEL_URL is set this answers 503 and the app uses its built-in
-// stand-in, so turning the model on is a secrets change, not a release.
+// WHICH MODEL ANSWERS, by secrets alone (no release needed to switch):
+//   1. CHEEKU_MODEL_URL set: the fine-tuned model server gets the ModelRequest.
+//   2. else GEMINI_API_KEY set: Gemini answers (gemini.ts), with SYSTEM_PROMPT
+//      and renderRequest() from prompt.ts. GEMINI_MODEL (default
+//      gemini-3.5-flash-lite) first, then GEMINI_FALLBACK_MODEL (default
+//      gemini-3.5-flash).
+//   3. neither: 503, and the app says Cheeku couldn't answer (it has no stand-in).
 //
 // EVERY CALL IS CLAIMED FIRST. claim_model_call() (migration 0035) runs as the
 // caller, through their own JWT, and refuses a spent free allowance, bursts
 // (6 a minute, 60 an hour) and the daily ceiling. A refusal is a 429 with the
 // reason; nothing reaches the model. If the meter can't be reached the answer
-// is 503, never an unmetered call: the app falls back to its stand-in.
+// is 503, never an unmetered call: the app says it couldn't answer.
 //
 // Deploy:  supabase functions deploy cheeku-chat
 //          (JWT verification stays ON: only a signed-in member can call it)
-// Secrets: supabase secrets set CHEEKU_MODEL_URL=https://...  CHEEKU_MODEL_KEY=...
-// App:     EXPO_PUBLIC_CHAT_MODEL=edge
+// Secrets: supabase secrets set GEMINI_API_KEY=...   (the Gemini path)
+//          optional: GEMINI_MODEL, GEMINI_FALLBACK_MODEL, GEMINI_THINKING (low)
+//          later:    CHEEKU_MODEL_URL=https://...  CHEEKU_MODEL_KEY=...
+//          The key must be on a billed Google Cloud project: on the free tier
+//          Google may use prompts to improve its products, and these prompts
+//          are health records.
+// App:     nothing to set; every model turn comes here (2026-11-17).
+
+import { askGemini, MAX_IMAGE_CHARS, readImage } from "./gemini.ts";
+import { REPLY_SCHEMA, renderRequest, SYSTEM_PROMPT } from "./prompt.ts";
 
 const TIERS = ["reassure", "monitor", "contact_today", "go_now"];
 
@@ -64,12 +78,32 @@ async function claim(authorization: string): Promise<Claim | null> {
   }
 }
 
+/** One model's reply as the ModelReply the app reads; 502 when it has nothing to say. */
+function shape(out: Record<string, unknown>, modelId: string): Response {
+  const paragraphs = Array.isArray(out.paragraphs) ? out.paragraphs.filter((p) => typeof p === "string" && p.trim()) : [];
+  if (!paragraphs.length) return json({ error: "model_empty" }, 502);
+  return json({
+    paragraphs,
+    citations: Array.isArray(out.citations) ? out.citations : [],
+    followUps: Array.isArray(out.followUps) ? out.followUps : [],
+    tier: TIERS.includes(out.tier as string) ? out.tier : null,
+    basis: out.basis ?? "general",
+    careOffer: out.careOffer === true,
+    // Buttons the model proposes; the app keeps only known goals and allowed screens.
+    actions: Array.isArray(out.actions) ? out.actions.slice(0, 3) : [],
+    // What a photo showed: saved as memory in place of the photo.
+    photoSummary: typeof out.photoSummary === "string" && out.photoSummary.trim() ? out.photoSummary.trim().slice(0, 400) : null,
+    modelId,
+  });
+}
+
 Deno.serve(async (req) => {
   if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405);
 
   const url = Deno.env.get("CHEEKU_MODEL_URL");
   const key = Deno.env.get("CHEEKU_MODEL_KEY");
-  if (!url) return json({ error: "model_not_configured" }, 503);
+  const geminiKey = Deno.env.get("GEMINI_API_KEY");
+  if (!url && !geminiKey) return json({ error: "model_not_configured" }, 503);
 
   let body: Record<string, unknown>;
   try {
@@ -79,6 +113,9 @@ Deno.serve(async (req) => {
   }
   if (typeof body.question !== "string" || !body.memory || typeof body.memory !== "object") return json({ error: "bad_request" }, 400);
   if ((body.question as string).length > 2000) return json({ error: "too_long" }, 413);
+  // A photo that is not one we forward is refused before the meter, so it costs no chat.
+  const image = body.image === undefined || body.image === null ? null : readImage(body.image);
+  if (body.image != null && !image) return json({ error: "bad_image", maxChars: MAX_IMAGE_CHARS }, 400);
 
   const authorization = req.headers.get("authorization");
   if (!authorization) return json({ error: "signed_out" }, 401);
@@ -90,6 +127,23 @@ Deno.serve(async (req) => {
   }
 
   // Nothing about the request is logged: it is one person's health memory.
+  if (!url) {
+    const got = await askGemini(
+      {
+        key: geminiKey!,
+        models: [Deno.env.get("GEMINI_MODEL") || "gemini-3.5-flash-lite", Deno.env.get("GEMINI_FALLBACK_MODEL") || "gemini-3.5-flash"],
+        thinking: Deno.env.get("GEMINI_THINKING") || "low",
+      },
+      SYSTEM_PROMPT,
+      renderRequest(body),
+      REPLY_SCHEMA,
+      24_000,
+      image,
+    );
+    if (!got.ok) return json({ error: got.error, ...(got.status ? { status: got.status } : {}) }, got.error === "model_unreachable" ? 504 : 502);
+    return shape(got.reply, `gemini:${got.model}`);
+  }
+
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 25_000);
   try {
@@ -101,19 +155,7 @@ Deno.serve(async (req) => {
     });
     if (!res.ok) return json({ error: "model_error", status: res.status }, 502);
     const out = (await res.json()) as Record<string, unknown>;
-    const paragraphs = Array.isArray(out.paragraphs) ? out.paragraphs.filter((p) => typeof p === "string") : [];
-    if (!paragraphs.length) return json({ error: "model_empty" }, 502);
-    return json({
-      paragraphs,
-      citations: Array.isArray(out.citations) ? out.citations : [],
-      followUps: Array.isArray(out.followUps) ? out.followUps : [],
-      tier: TIERS.includes(out.tier as string) ? out.tier : null,
-      basis: out.basis ?? "general",
-      careOffer: out.careOffer === true,
-      // Buttons the model proposes; the app keeps only known goals and allowed screens.
-      actions: Array.isArray(out.actions) ? out.actions.slice(0, 3) : [],
-      modelId: typeof out.modelId === "string" ? out.modelId : "cheeku-ft",
-    });
+    return shape(out, typeof out.modelId === "string" ? out.modelId : "cheeku-ft");
   } catch {
     return json({ error: "model_unreachable" }, 504);
   } finally {

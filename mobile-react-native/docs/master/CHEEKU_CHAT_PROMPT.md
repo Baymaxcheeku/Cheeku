@@ -19,16 +19,19 @@ person types
   ├─ FLOOR           (lib/memory/ladder.ts)              urgency the rules already reached
   │
   ├─ model.respond(ModelRequest) → ModelReply
-  │     today: the stand-in (lib/memory/mock-model.ts + sparrow.ts)
-  │     later: cheeku-chat Edge Function → your model
+  │     cheeku-chat Edge Function → Gemini today, your model once it has a URL
+  │     (a photo, when sent, rides along as ModelRequest.image)
   │
   └─ app takes max(model tier, floor), shows paragraphs, citations,
      follow-up chips, care offer and action buttons (checked by lib/chat/safe-actions.ts)
 ```
 
-Switch the app to the real model with `EXPO_PUBLIC_CHAT_MODEL=edge` and the
-Edge Function secrets `CHEEKU_MODEL_URL` (and `CHEEKU_MODEL_KEY`). If the
-model is down, slow or refuses, the stand-in answers, so the chat never breaks.
+Every model turn goes to the Edge Function; nothing to switch in the app. The
+secrets pick the model: `GEMINI_API_KEY` for Gemini, or `CHEEKU_MODEL_URL` (and
+`CHEEKU_MODEL_KEY`) for the fine-tuned model. There is no stand-in (removed
+2026-11-17): if the model is down or the allowance is spent, the chat says so
+and nothing is saved. The one exception is a floor of contact-today or above,
+where the rules still say "call the doctor today" with their reasons.
 
 ## 2. The personality
 

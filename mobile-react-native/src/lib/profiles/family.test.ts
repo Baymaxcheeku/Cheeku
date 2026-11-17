@@ -33,7 +33,7 @@ describe("planChange", () => {
   });
 
   it("says what free means for chats", () => {
-    expect(planChange(FAMILY, "solo", "free").chatLine).toMatch(/20 chats a day/);
+    expect(planChange(FAMILY, "solo", "free").chatLine).toMatch(/1000 chats a day/);
   });
 });
 

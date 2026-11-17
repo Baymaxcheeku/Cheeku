@@ -82,6 +82,11 @@ export type MemoryDigest = {
    */
   cover: { insurer: string; lines: string[] }[];
   /**
+   * What earlier photos showed, newest first (the photo itself is usually
+   * gone; this is what Cheeku saw). Optional: absent before any photo.
+   */
+  photos?: { date: string; summary: string }[];
+  /**
    * Everything around the person (lib/chat/world.ts): the longevity areas,
    * today's goal and logs, bookings coming up and just done, the watch's
    * lines, and, when asked from the account holder's chat, a family round-up.
@@ -107,6 +112,8 @@ export type ModelRequest = {
   history: { role: "user" | "assistant"; content: string }[];
   memory: MemoryDigest;
   floor: { tier: Tier | null; reasons: string[] };
+  /** One photo they asked about (lib/chat/photo): a re-drawn JPEG, base64, sent once and never stored. */
+  image?: { mimeType: "image/jpeg"; data: string };
 };
 
 export type ModelReply = {
@@ -120,6 +127,11 @@ export type ModelReply = {
   careOffer?: boolean;
   /** Buttons under the answer (see ChatAction). At most three are shown. */
   actions?: ChatAction[];
+  /**
+   * With a photo: one or two plain sentences on what it shows (names, values,
+   * dates that are legible), no advice. Saved as memory in place of the photo.
+   */
+  photoSummary?: string | null;
 };
 
 export interface ChatModel {

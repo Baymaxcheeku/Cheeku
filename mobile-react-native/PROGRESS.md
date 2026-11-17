@@ -4440,3 +4440,170 @@ like "Annual health check-up" no longer starts the big-picture answer.
 - **Not run**: the Edge Functions against the real sandbox (needs the keys,
   tonight). Payment model still open (reminder set for 7:30 pm).
 
+
+## Chat model: Gemini behind cheeku-chat · 2026-11-16
+
+- **Why Gemini now**: the fine-tuned model has no URL yet, and the chat has run
+  on the stand-in since the contract was written. The function already did the
+  hard parts (JWT, metering through `claim_model_call`, reply shaping), and
+  `prompt.ts` already held the system prompt, the reply schema and the
+  renderer, so Gemini is a second branch in `index.ts`, not a new function.
+  The app needs no change: it still sends one ModelRequest to `cheeku-chat`.
+- **Order of preference, by secrets only**: `CHEEKU_MODEL_URL` (fine-tuned)
+  wins, else `GEMINI_API_KEY`, else 503 and the stand-in. Switching to the
+  fine-tuned model later is a secrets change, not a release.
+- **Why on the server and not the phone**: an `EXPO_PUBLIC_*` value is built
+  into the app bundle, so a Gemini key in the app is a key anyone can lift and
+  spend, and a direct call would skip the meter (rule: every model call is
+  claimed first). The key lives only in Edge Function secrets.
+- **Models**: `gemini-3.5-flash-lite` first (about 2.2 to 2.7s per turn through
+  the function with a realistic digest), `gemini-3.5-flash` behind it (about
+  2 to 3s with `thinkingLevel: "low"`, 5s+ without). `gemini-2.5-*` answers
+  404 for new keys ("no longer available to new users"), which is why the
+  fallback also moves on from a 404.
+- **When it falls back**: timeout, 404, 408, 429, 5xx, a block, a cut-off or a
+  reply that is not the JSON object we asked for. Not on 400/401/403: a bad key
+  fails the same way twice and only doubles the wait. The first model gets two
+  thirds of the 24s budget.
+- **Structured output**: Gemini accepts `REPLY_SCHEMA` as written (`oneOf`,
+  `const`, nullable `tier`) through `responseJsonSchema`, checked against both
+  models before relying on it. The app still re-reads every field.
+- **Nothing is logged** but a model name and an HTTP status. The key goes in
+  the `x-goog-api-key` header, never the URL.
+- **Data**: the digest leaves for Google. On the free tier Google may use
+  prompts to improve its products, so the key must be on a billed project
+  before any real person's chat goes through it; this belongs in the privacy
+  policy's processor list when a lawyer next reads it.
+- **Seen in testing**: flash-lite sometimes keeps the sparrow's jokes ("hopped
+  through your numbers") when the floor is monitor, which the prompt forbids.
+  Tier never went below the floor in our runs, and the app enforces that anyway.
+- **Checked**: 665 tests (15 new in `src/lib/memory/gemini-edge.test.ts`),
+  typecheck; `index.ts` and the paste file run end to end under Node with a
+  Deno shim against the real Gemini API (meter stubbed): grounded reply with
+  the right citation, fallback from a retired model, bad key fails fast in
+  180ms, meter refusal never reaches the model, signed-out 401, bad body 400.
+- **Not run**: the deployed function on Supabase (this session's CLI account
+  has no access to the project), the meter against the real database, and the
+  chat on a phone.
+
+## Chat: medicine questions answered, not refused · 2026-11-16
+
+- **What people saw**: "which cough syrup" got "I cannot recommend medicines,
+  check with your doctor" every time, opening with an unrelated blood test.
+  Gemini was answering (200 in under 2s); the prompt only said "never
+  prescribe", so it refused anything near a medicine.
+- **A real bug underneath**: `renderRequest` sent each symptom guide's
+  mechanism but dropped `homeCare`, `watchFor` and `askForReadings`, so the
+  model had no safe advice to give instead. All three are rendered now.
+- **The rule we chose**: lead with home care; for an otherwise healthy adult
+  name the usual over-the-counter type and what it does, pharmacist picks,
+  follow the pack; never a brand, dose, antibiotic or codeine; nothing over the
+  counter for under 4s (India labels cold and cough combinations not for under
+  4), pregnancy, over 70 or a long-term condition; always the "see a doctor
+  if" signs. Needs a clinician's read (PLAN Open).
+- **Also in the prompt**: no listing of records at the top, dates as people say
+  them, no record ids in the text, no bird jokes on symptoms or medicines.
+- **The other reason answers repeated**: a free family gets 25 model calls a
+  day (0035: free_daily 20 + free_model_extra 5). Past that the meter says
+  "daily" and the app quietly uses the stand-in, which repeats itself. Probe
+  runs spend the same allowance.
+- **`npm run chat:probe`** (scripts/chat-probe): runs planTurn and the app's
+  own chatModel() signed in as a real account against the live function and
+  says who answered each question: GEMINI, STAND-IN (with the HTTP status) or
+  RULES. Login from CHAT_PROBE_EMAIL / CHAT_PROBE_PASSWORD in .env.local;
+  CHAT_PROBE_Q="a|b" for your own questions, CHAT_PROBE_FULL=1 for the whole
+  reply, CHAT_PROBE_OUT=file to keep the report. Saves no messages.
+- **Checked live** after deploying: adult dry cough (suppressant type,
+  pharmacist, home care, doctor signs), 3-year-old (no syrup, home care,
+  honey over 1, breathing signs), "can I stop my metformin" (still refuses).
+
+## Chat: photos go to Gemini, the stand-in is gone · 2026-11-17
+
+- **The ask**: "add camera to add images and ask via Gemini, delete the
+  hard-coded mock data; rule-based routing is fine."
+- **No stand-in.** `lib/memory/mock-model.ts` (canned paragraphs), the canned
+  answer engine (`lib/ai/mock/answer.ts`, `knowledge.ts`) and the fixed
+  product picker (`ProductPicker`, `scenarios.ts`, `askAboutProduct`) are
+  deleted. `chatModel()` always calls `cheeku-chat`; `EXPO_PUBLIC_CHAT_MODEL`
+  no longer exists. A turn the model can't answer throws: `ModelBusy` (pace),
+  `ModelUnavailable("quota")` (allowance or daily ceiling: plans sheet) or
+  `ModelUnavailable("down")` ("couldn't answer, try again"; words and photo
+  stay in the composer). Nothing is saved for a refused turn, so the thread
+  never fills with repeats again.
+- **Why one rules answer survives**: if the floor is contact-today or go-now
+  and the model fails, an error would leave a worried person with nothing.
+  They get `floorReply`: "talk to a doctor today" (or go now) with the rules'
+  reasons, `modelId` `rules:floor`. Emergencies, hard-stops, bookings,
+  insurance-only questions and logging stay with the rules, as before.
+- **Photos**: the camera button opens a sheet (take or choose). The picture is
+  re-drawn as a 1280 px JPEG (drops EXIF, so no GPS), sent once as
+  `ModelRequest.image`, forwarded by the function as an `inlineData` part
+  (JPEG/PNG/WebP, at most 4M base64 chars, else 400 before the meter), and
+  never stored. A 256 px thumbnail is kept on the person's message
+  (`attachment: {kind: "photo", thumb}`) so the thread shows it; `readAttachment`
+  only accepts a JPEG/PNG data URI there. A photo always goes to the model,
+  even when the words alone would be a booking or an insurance question.
+- **The prompt** got "# When they send a photo": say what is visible first;
+  read medicine packs and labels against allergies, conditions and medicines;
+  never name a condition from a body photo, lean to a doctor for children;
+  ask for a clearer shot instead of guessing; never comment on faces.
+- **Tests**: pipeline tests used the stand-in's prose as their oracle. They
+  now use an echo model and check what reached the model (the digest), which
+  is what the rules owe Gemini. New tests for the error paths, the floor
+  answer, the photo routing and the function's image handling.
+
+## Chat limit 1000 a day; LabStack doctor list for new families · 2026-11-17
+
+- **1000 chats a day** (owner's call): `FREE_CHAT_LIMIT` 20 -> 1000 and
+  `supabase/manual/chat-limits-1000.sql` (free_daily and paid_model_daily
+  to 1000 in `app_config('chat_limits')`). Both must move together: the app
+  pre-checks with the constant, the database enforces with the config.
+  Bursts stay at 6 a minute and 60 an hour.
+- **LabStack is wired in already** (lab tests, doctors, pharmacy through the
+  `labstack` function; keys set as secrets) but the app runs on preview data
+  until `EXPO_PUBLIC_LABSTACK=live`. A read-only check on 2026-11-17: the
+  function reaches LabStack (46 specialities), but the doctor list failed with
+  "No user found with the given userUniqueId" for a family LabStack hasn't
+  registered yet, which is every family before its first booking.
+  `consult.providers` now asks again without the id on that error.
+
+## Chat photos: the gallery froze the chat · 2026-11-17
+
+- **What happened**: tapping "Choose from photos" hung the app. The picker was
+  opened from our own bottom sheet while it was still animating away; iOS
+  won't present over a dismissing modal, so the picker never appeared and its
+  promise never settled. It also asked for photo-library permission, which the
+  system picker doesn't need, adding a prompt on top.
+- **Now**: the camera button opens the platform's own menu (ActionSheetIOS on
+  iOS, an Alert on Android) and the picker opens after it is gone; on web it
+  opens the library straight from the tap (a file dialog only opens inside
+  the tap). No library permission prompt. A "Getting the photo ready" chip
+  shows while the photo is resized; the thumbnail is made from the 1280 px
+  copy (one full-size decode, not two); preparing has a 20 s limit and every
+  failure is a sentence. `PhotoSheet` is deleted.
+
+
+## Chat photos: a summary is the memory, the photo is optional · 2026-11-17
+
+- **The ask**: "load the image locally, store its summary in the db as memory,
+  remove the image, and give an option to save it as it is in the bucket."
+- **Default**: the photo stays on the phone (shown in the thread for this
+  visit only). Gemini returns `photoSummary` (one or two sentences of what it
+  shows, no advice) and that alone is saved, on the person's message
+  (`attachment: {kind: "photo", summary, path: null}`). After the app closes
+  the bubble reads "Photo not kept" with the summary. The thumbnail the first
+  version kept is gone.
+- **Memory**: `photosFor()` reads the last 8 summaries for the member, they
+  ride in `MemoryDigest.photos`, and the prompt lists them as "Photos shown
+  before", so "the tablets I showed you" works days later. No migration:
+  messages.attachment is jsonb already.
+- **Keep photo** (a switch on the preview, off each time): a copy re-drawn at
+  2048 px (no EXIF) goes to the private documents bucket at
+  `<user>/<profile>/chat-<uuid>.jpg` (0005's folder policy), uploaded only
+  after the answer exists, removed again if the message fails to save, and
+  shown through an hour-long signed URL. `readAttachment` only accepts that
+  path shape.
+- **"Image fails to send"** on 2026-11-17 was the meter: the account had made
+  25 model calls in 24 h (free_daily 20 + free_model_extra 5), so every turn
+  was refused before Gemini. `chat-limits-1000.sql` is the fix; it has not
+  been run yet.

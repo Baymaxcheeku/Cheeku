@@ -36,6 +36,8 @@ export type MemoryBundle = {
   stats: { records?: number; messages?: number; conversations?: number; first_message_at?: string | null } | null;
   /** The family's insurance policies that cover this person (migration 0043). Read separately; absent before it. */
   policies?: Policy[];
+  /** What photos asked about in chat showed, newest first (lib/chat/photo-store). Read separately. */
+  photos?: { date: string; summary: string }[];
 };
 
 export type MemoryNote = { kind: "dating" | "blood_group"; text: string };

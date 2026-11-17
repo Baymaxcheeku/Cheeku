@@ -9,7 +9,7 @@ import { bookingIntent, withoutTestNames, type BookingIntent } from "./intent";
 import { decideTier, hardStopFor, type TierDecision } from "./ladder";
 import type { LedgerFlag } from "./ledger";
 import { relevantLoops, type LoopView } from "./loops";
-import { digest, type ChatModel, type ModelReply, type WorldDigest } from "./model";
+import { digest, type ChatModel, type ModelReply, type ModelRequest, type WorldDigest } from "./model";
 import { serviceById } from "@/lib/services/catalog";
 
 import { BOOKING_REPLY } from "./thread";
@@ -127,6 +127,8 @@ export async function planTurn(args: {
   extraNotes?: readonly string[];
   /** Everything around the person (lib/chat/world.ts), or a builder for it given this turn's context. */
   world?: (ctx: MemoryContext) => Promise<WorldDigest | undefined>;
+  /** A photo asked about (lib/chat/photo). Always goes to the model: rules can't look at it. */
+  image?: ModelRequest["image"];
 }): Promise<TurnPlan> {
   const text = args.text.trim();
   const gate = detect(text);
@@ -255,7 +257,7 @@ export async function planTurn(args: {
    * a doctor, Imaad has a fever"), the model answers the symptom as usual and
    * the booking card rides under the answer.
    */
-  const bookingOnly = booking !== null && parsed.length === 0 && symptoms.length === 0;
+  const bookingOnly = !args.image && booking !== null && parsed.length === 0 && symptoms.length === 0;
   /*
    * An insurance question with nothing medical in it ("is room rent
    * capped?") is answered from their own saved policy by rules, like a
@@ -263,7 +265,7 @@ export async function planTurn(args: {
    * room to guess. With a symptom alongside, the model answers and sees the
    * cover in the digest.
    */
-  const coverOnly = !bookingOnly && booking === null && parsed.length === 0 && symptoms.length === 0 && isCoverQuestion(text);
+  const coverOnly = !args.image && !bookingOnly && booking === null && parsed.length === 0 && symptoms.length === 0 && isCoverQuestion(text);
   const reply = bookingOnly ? bookingReply(booking, ctx) : coverOnly ? coverModelReply(text, ctx) : await args.model.respond({
     question: text,
     history: args.history.slice(-12),
@@ -277,8 +279,9 @@ export async function planTurn(args: {
       logged,
       changes: [...changes.map((c) => c.text), ...labFlags.map((r) => r.text)],
       askForReadings: missingReadings,
-    }), world: args.world ? await args.world(ctx).catch(() => undefined) : undefined },
+    }), ...(args.bundle.photos?.length ? { photos: args.bundle.photos.slice(0, 8) } : {}), world: args.world ? await args.world(ctx).catch(() => undefined) : undefined },
     floor: { tier: floor.tier, reasons: floor.reasons.map((r) => r.text) },
+    ...(args.image ? { image: args.image } : {}),
   });
   const decision = decideTier({ gate, hardStop: null, symptoms, reads, changes, flags, clock: ctx.clock, modelTier: reply.tier ?? null, extra: labFlags });
 

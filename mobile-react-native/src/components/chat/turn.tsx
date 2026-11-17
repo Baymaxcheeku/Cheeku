@@ -8,6 +8,7 @@ import {
   CornerDownRight,
   FileText,
   History,
+  ImageOff,
   Info,
   ListChecks,
   MapPin,
@@ -18,13 +19,14 @@ import {
   Video,
 } from "lucide-react-native";
 import { useState } from "react";
-import { Linking, ScrollView, Share, Text, View } from "react-native";
+import { Image, Linking, ScrollView, Share, Text, View } from "react-native";
 import { SvgXml } from "react-native-svg";
 
 import { Tap } from "@/components/ui/tap";
 import { MascotBust } from "@/components/illustrations/sprout";
 import { glass, glassShadow } from "@/components/ui/glass";
-import type { ThreadMessage, TurnMemory } from "@/lib/memory/thread";
+import { sessionPhoto, useKeptPhoto } from "@/lib/chat/photo-store";
+import type { PhotoAttachment, ThreadMessage, TurnMemory } from "@/lib/memory/thread";
 import { shortDate } from "@/lib/records/details";
 import { brand, ink, semantic, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
@@ -55,7 +57,9 @@ const tel = (n: string) => void Linking.openURL(`tel:${n.replace(/[^\d+]/g, "")}
 export function UserBubble({ message }: { message: ThreadMessage }) {
   return (
     <View style={{ maxWidth: "85%", alignSelf: "flex-end", alignItems: "flex-end", gap: 6 }}>
-      {message.attachment ? (
+      {message.attachment?.kind === "photo" ? (
+        <PhotoInThread messageId={message.id} photo={message.attachment} />
+      ) : message.attachment?.kind === "product" ? (
         <View style={[glassShadow, { flexDirection: "row", alignItems: "center", gap: 8, borderRadius: 16, backgroundColor: "#fff", paddingHorizontal: 10, paddingVertical: 8 }]}>
           <SvgXml xml={message.attachment.thumbnail} width={28} height={28} />
           <Text style={{ fontFamily: font.medium, fontSize: 12, color: ink[700] }}>{message.attachment.title}</Text>
@@ -63,6 +67,38 @@ export function UserBubble({ message }: { message: ThreadMessage }) {
       ) : null}
       <View style={{ backgroundColor: ink[900], borderRadius: 24, borderBottomRightRadius: 6, paddingHorizontal: 16, paddingVertical: 12 }}>
         <Text style={{ fontFamily: font.regular, fontSize: 15, lineHeight: 21, color: "#fff" }}>{message.content}</Text>
+      </View>
+    </View>
+  );
+}
+
+/**
+ * A photo they asked about. This visit: the phone's copy. Kept: the stored
+ * copy. Otherwise only what Cheeku saw, said plainly, because the picture
+ * itself was never saved (lib/chat/photo-store).
+ */
+function PhotoInThread({ messageId, photo }: { messageId: string; photo: PhotoAttachment }) {
+  const onPhone = sessionPhoto(messageId) ?? photo.thumb;
+  const kept = useKeptPhoto(onPhone ? null : photo.path);
+  const uri = onPhone ?? kept.data ?? null;
+  if (uri || (photo.path && kept.isPending)) {
+    return (
+      <View style={{ alignItems: "flex-end", gap: 4 }}>
+        {uri ? (
+          <Image source={{ uri }} accessibilityLabel={photo.summary ? `Photo: ${photo.summary}` : "Photo you asked about"} style={[glassShadow, { width: 168, height: 168, borderRadius: 18, borderBottomRightRadius: 6, backgroundColor: surface.tint }]} resizeMode="cover" />
+        ) : (
+          <View style={{ width: 168, height: 168, borderRadius: 18, borderBottomRightRadius: 6, backgroundColor: surface.tint }} />
+        )}
+        <Text style={{ fontFamily: font.regular, fontSize: 11, color: ink[500] }}>{photo.path ? "Kept in your private storage" : "Not kept: Cheeku remembers what it showed"}</Text>
+      </View>
+    );
+  }
+  return (
+    <View style={[glassShadow, { maxWidth: 260, flexDirection: "row", gap: 10, borderRadius: 16, borderBottomRightRadius: 6, backgroundColor: glass.fillStrong, borderWidth: 1, borderColor: glass.rim, padding: 12 }]}>
+      <ImageOff size={16} color={ink[500]} style={{ marginTop: 1 }} />
+      <View style={{ flex: 1 }}>
+        <Text style={{ fontFamily: font.semibold, fontSize: 12, color: ink[700] }}>Photo not kept</Text>
+        <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[700], marginTop: 2 }}>{photo.summary ?? "Cheeku looked at it once."}</Text>
       </View>
     </View>
   );
