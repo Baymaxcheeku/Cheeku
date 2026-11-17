@@ -1,0 +1,888 @@
+<!doctype html>
+<!--
+  Cheeku Platform API: business overview (source of Cheeku-Platform-API-Business-Overview.pdf).
+  A visual companion to PLAN.md in this folder, written for the business team. It names no vendor,
+  model or internal system, and must stay that way. Self-contained: open it in Chromium and print to
+  PDF (A4 landscape, background graphics on), or render it with Playwright's page.pdf().
+  Icons: Lucide (lucide.dev), ISC licence, inlined.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Cheeku Platform API: business overview</title>
+<style>
+@page { size: A4 landscape; margin: 0; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --ink: #111114; --ink7: #3a3a41; --ink5: #6d6d78; --ink3: #a1a1ab; --line: #e6e6ea; --tint: #f5f5f7; --canvas: #f2f2f4;
+  --b4: #8a82f5; --b6: #4a2ade; --b7: #3b2bc9; --b8: #2a1eba; --b9: #14136b; --wash: #efedfd; --wash2: #e2defb;
+  --safe: #23af5f; --safeBg: #e7f7ee; --safeT: #0f7538; --caution: #ffaf23; --cautionBg: #fff4e0; --cautionT: #8f5400;
+  --att: #e8590c; --attBg: #fff0e6; --attT: #a63a08; --danger: #ea2a36; --dangerBg: #fef1f3; --dangerT: #c00a1c;
+}
+html, body { font-family: Inter, "DejaVu Sans", sans-serif; color: var(--ink); -webkit-print-color-adjust: exact; print-color-adjust: exact; font-feature-settings: "tnum" 1, "cv11" 1; }
+.page { width: 297mm; height: 210mm; padding: 38px 56px 0; position: relative; overflow: hidden; page-break-after: always; display: flex; flex-direction: column; background: #fff; }
+.page:last-child { page-break-after: auto; }
+.kicker { font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--b6); }
+h1 { font-size: 26px; font-weight: 600; letter-spacing: -0.012em; margin-top: 8px; line-height: 1.2; }
+.sub { font-size: 13.5px; color: var(--ink5); margin-top: 6px; max-width: 860px; line-height: 1.45; }
+.body { flex: 1; margin-top: 22px; margin-bottom: 54px; position: relative; min-height: 0; }
+.footer { position: absolute; left: 56px; right: 56px; bottom: 20px; display: flex; justify-content: space-between; font-size: 9.5px; color: var(--ink3); border-top: 1px solid var(--line); padding-top: 8px; }
+.footer b { color: var(--ink5); font-weight: 600; }
+.ic { width: 20px; height: 20px; stroke-width: 1.75; flex: none; }
+.chip { width: 36px; height: 36px; border-radius: 10px; background: var(--wash); color: var(--b6); display: flex; align-items: center; justify-content: center; flex: none; }
+.chip.sm { width: 30px; height: 30px; border-radius: 8px; }
+.chip.sm .ic { width: 17px; height: 17px; }
+.card { border: 1px solid var(--line); border-radius: 14px; background: #fff; padding: 16px; }
+.card.tint { background: var(--tint); border-color: var(--tint); }
+.card.accent { border: 1.5px solid var(--b6); background: var(--wash); }
+.t { font-size: 14px; font-weight: 600; line-height: 1.3; }
+.d { font-size: 12px; color: var(--ink5); line-height: 1.45; margin-top: 4px; }
+.small { font-size: 11px; color: var(--ink5); line-height: 1.4; }
+.row { display: flex; align-items: stretch; }
+.arr { width: 26px; flex: none; display: flex; align-items: center; justify-content: center; color: var(--ink3); }
+.arr svg { width: 22px; height: 12px; }
+.darr { height: 26px; display: flex; justify-content: center; color: var(--ink3); }
+.darr svg { width: 12px; height: 26px; }
+.mono { font-family: "JetBrains Mono", monospace; }
+.tag { display: inline-block; font-size: 10px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; padding: 3px 8px; border-radius: 99px; background: var(--wash); color: var(--b7); }
+.strip { display: flex; gap: 12px; }
+.strip > div { flex: 1; }
+.num { font-size: 11px; font-weight: 600; width: 22px; height: 22px; border-radius: 99px; background: var(--b6); color: #fff; display: inline-flex; align-items: center; justify-content: center; flex: none; }
+
+.body.center { display: flex; flex-direction: column; justify-content: center; }
+.go { margin-top: auto; padding-top: 14px; font-size: 11.5px; font-weight: 600; color: var(--b6); }
+.same { display: flex; gap: 10px; margin-top: 16px; align-items: center; }
+.same .lbl { font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--ink5); flex: none; margin-right: 4px; }
+.same span.c { flex: 1; display: flex; gap: 8px; align-items: center; font-size: 12px; font-weight: 600; color: var(--ink7); background: var(--wash); border-radius: 10px; padding: 10px 12px; }
+.same span.c .ic { width: 16px; height: 16px; color: var(--b6); }
+.rec { display: flex; align-items: center; gap: 10px; background: var(--tint); border-radius: 10px; padding: 9px 12px; font-size: 12px; color: var(--ink7); }
+.rec .src { margin-left: auto; font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 99px; background: #fff; color: var(--ink5); border: 1px solid var(--line); white-space: nowrap; }
+.rec .src.p { color: var(--b7); border-color: var(--b4); }
+.rec .ic { width: 16px; height: 16px; color: var(--ink5); }
+.secgrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.secgrid .capcol { gap: 10px; }
+.secgrid .cap { padding: 15px; }
+.secgrid .cap .t { font-size: 14.5px; }
+.secgrid .cap .d { font-size: 12.5px; }
+/* cover */
+.cover { background: var(--b9); color: #fff; padding: 56px 64px; flex-direction: row; gap: 40px; }
+.cover .left { flex: 1; display: flex; flex-direction: column; }
+.cover .kicker { color: var(--b4); }
+.cover h1 { font-size: 50px; margin-top: 18px; letter-spacing: -0.02em; line-height: 1.05; }
+.cover .lede { font-size: 18px; line-height: 1.45; color: #cfcbfa; margin-top: 20px; max-width: 470px; }
+.cover .pills { display: flex; gap: 8px; margin-top: 28px; flex-wrap: wrap; }
+.cover .pills span { font-size: 12px; font-weight: 600; padding: 7px 12px; border-radius: 99px; border: 1px solid rgba(255,255,255,.28); color: #fff; }
+.cover .meta { margin-top: auto; font-size: 12px; color: #a9a4f3; line-height: 1.6; }
+.cover .right { width: 540px; display: flex; align-items: center; }
+
+/* page 2 tiles */
+.six { display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: 1fr 1fr; gap: 16px; height: 100%; }
+.six .card { padding: 22px; display: flex; flex-direction: column; }
+.six .n { font-size: 30px; font-weight: 600; color: var(--b6); letter-spacing: -0.02em; }
+.six .top { display: flex; justify-content: space-between; align-items: flex-start; }
+.six .t { font-size: 19px; margin-top: 18px; }
+.six .d { font-size: 14px; margin-top: 10px; line-height: 1.5; }
+
+/* page 3 capability columns */
+.caps { display: grid; grid-template-columns: 1fr 1.25fr 1.25fr 1fr; gap: 14px; height: 100%; }
+.capcol { background: var(--tint); border-radius: 16px; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+.capcol h2 { font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--ink5); padding: 2px 4px 2px; }
+.capcol h2 b { color: var(--b6); font-weight: 600; }
+.cap { background: #fff; border-radius: 12px; padding: 12px 13px; display: flex; gap: 11px; }
+.cap .t { font-size: 13.5px; }
+.cap .d { font-size: 11.5px; margin-top: 3px; }
+.note { border-radius: 12px; padding: 12px 13px; background: #fff; border: 1px dashed var(--b4); font-size: 11.5px; color: var(--ink7); line-height: 1.45; }
+
+/* page 4 connect */
+.ptypes { display: flex; gap: 10px; }
+.ptype { flex: 1; display: flex; align-items: center; gap: 10px; background: var(--tint); border-radius: 12px; padding: 10px 12px; font-size: 13px; font-weight: 600; }
+.lane { border: 1px solid var(--line); border-radius: 16px; padding: 16px 18px; margin-top: 14px; }
+.lane .head { display: flex; align-items: baseline; gap: 12px; margin-bottom: 12px; }
+.lane .head .t { font-size: 17px; }
+.lane .head .small { font-size: 12px; }
+.steps { display: flex; align-items: stretch; }
+.step { flex: 1; border-radius: 12px; background: var(--tint); padding: 12px; font-size: 12.5px; line-height: 1.4; color: var(--ink7); display: flex; flex-direction: column; gap: 8px; }
+.step.hl { background: var(--wash); color: var(--ink); }
+.step .num { margin-bottom: 2px; }
+
+/* page 5 architecture */
+.arch { display: grid; grid-template-columns: 1fr 250px; column-gap: 26px; row-gap: 20px; }
+.layer { border: 1px solid var(--ink3); border-radius: 14px; padding: 12px 16px; position: relative; background: #fff; }
+.layer:not(.last)::after { content: ""; position: absolute; left: 50%; bottom: -20px; width: 1.5px; height: 14px; background: var(--ink3); }
+.layer:not(.last)::before { content: ""; position: absolute; left: calc(50% - 4.25px); bottom: -21px; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 7px solid var(--ink3); }
+.layer .t { font-size: 14.5px; }
+.layer .d { margin-top: 2px; }
+.layer.data { border: 2px solid var(--b6); background: var(--wash); }
+.inner { display: grid; gap: 10px; margin-top: 10px; }
+.inner > div { border: 1px solid var(--line); border-radius: 10px; padding: 9px 11px; background: #fff; }
+.inner .t { font-size: 12.5px; }
+.inner .d { font-size: 11px; margin-top: 2px; }
+.callout { display: flex; align-items: center; gap: 10px; font-size: 12px; line-height: 1.4; color: var(--ink7); }
+.callout::before { content: ""; width: 18px; height: 1.5px; background: var(--b4); flex: none; }
+
+/* page 6 swimlane */
+.swim { display: grid; grid-template-columns: 112px repeat(8, 1fr); grid-template-rows: 30px repeat(4, 1fr); column-gap: 8px; height: 100%; position: relative; }
+.lanebg { grid-column: 1 / -1; border-radius: 12px; }
+.lanelab { display: flex; flex-direction: column; justify-content: center; gap: 6px; padding-left: 12px; font-size: 12.5px; font-weight: 600; z-index: 1; }
+.lanelab .small { font-weight: 400; font-size: 10.5px; }
+.sn { display: flex; align-items: center; justify-content: center; position: relative; z-index: 1; }
+.sn::before { content: ""; position: absolute; left: -4px; right: -4px; top: 50%; height: 1.5px; background: var(--b4); z-index: -1; }
+.sn.first::before { left: 50%; }
+.sn.last::before { right: 50%; }
+.sc { z-index: 1; align-self: center; border-radius: 10px; background: #fff; border: 1px solid var(--line); padding: 9px 10px; font-size: 11.5px; line-height: 1.4; color: var(--ink7); }
+.sc.ck { border: 1.5px solid var(--b6); background: #fff; }
+.sc b { display: block; color: var(--ink); font-weight: 600; margin-bottom: 3px; font-size: 11px; }
+.ev { display: inline-block; margin-top: 5px; font-size: 9.5px; font-weight: 600; color: var(--b7); background: var(--wash); border-radius: 99px; padding: 2px 7px; }
+
+/* page 7 consent */
+.consent { display: flex; align-items: center; gap: 0; height: 100%; }
+.cstage { width: 200px; }
+.phone { width: 252px; height: 470px; border: 9px solid var(--ink); border-radius: 36px; padding: 18px 16px; display: flex; flex-direction: column; background: #fff; flex: none; }
+.phone .bar { width: 70px; height: 5px; border-radius: 9px; background: var(--ink); margin: -8px auto 14px; }
+.phone .ph-t { font-size: 15px; font-weight: 600; line-height: 1.3; }
+.phone .ph-d { font-size: 11px; color: var(--ink5); margin-top: 4px; line-height: 1.4; }
+.phone .lbl { font-size: 10px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--ink5); margin-top: 14px; }
+.who { display: flex; gap: 6px; margin-top: 7px; }
+.who span { font-size: 11px; font-weight: 600; padding: 5px 9px; border-radius: 99px; background: var(--ink); color: #fff; }
+.who span.off { background: var(--tint); color: var(--ink5); }
+.perm { display: flex; gap: 8px; margin-top: 9px; font-size: 11.5px; line-height: 1.35; }
+.box { width: 15px; height: 15px; border-radius: 4px; background: var(--b6); flex: none; margin-top: 1px; display: flex; align-items: center; justify-content: center; color: #fff; }
+.box .ic { width: 11px; height: 11px; stroke-width: 3; }
+.box.off { background: #fff; border: 1.5px solid var(--ink3); }
+.perm .small { font-size: 10px; margin-top: 2px; }
+.btns { margin-top: auto; display: flex; flex-direction: column; gap: 7px; }
+.btns div { text-align: center; font-size: 12.5px; font-weight: 600; padding: 10px; border-radius: 12px; }
+.btns .p { background: var(--b6); color: #fff; }
+.btns .s { color: var(--ink7); }
+.kv { margin-top: 10px; display: grid; gap: 7px; }
+.kv div { font-size: 12px; display: flex; gap: 8px; align-items: center; color: var(--ink7); }
+.kv .ic { width: 15px; height: 15px; color: var(--b6); }
+
+/* page 8 isolation */
+.nest { border-radius: 18px; padding: 16px 18px 18px; display: flex; flex-direction: column; }
+.nest > .nest { flex: 1; }
+.nest .lvl { display: flex; align-items: baseline; gap: 10px; margin-bottom: 12px; }
+.nest .lvl .t { font-size: 14px; }
+.nest .lvl .d { margin-top: 0; font-size: 11.5px; }
+.n1 { background: var(--tint); }
+.n2 { background: var(--wash); }
+.n3 { background: var(--wash2); }
+.n4 { background: #fff; border: 2px solid var(--b6); }
+.pid { display: grid; grid-template-columns: 120px 30px 1fr; align-items: center; row-gap: 12px; }
+
+/* page 10 tracks */
+.track { position: relative; display: flex; }
+.track::before { content: ""; position: absolute; left: 6%; right: 6%; top: 11px; height: 2px; background: var(--line); }
+.tnode { flex: 1; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; position: relative; }
+.dot { width: 24px; height: 24px; border-radius: 99px; background: #fff; border: 2px solid var(--b4); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 600; color: var(--b7); }
+.dot.end { background: var(--b6); border-color: var(--b6); color: #fff; }
+.tnode .lab { font-size: 11.5px; line-height: 1.3; color: var(--ink7); }
+.tnode .code { font-family: "JetBrains Mono", monospace; font-size: 9.5px; color: var(--ink3); }
+.side { display: flex; gap: 6px; flex-wrap: wrap; }
+.side span { font-size: 10.5px; font-family: "JetBrains Mono", monospace; padding: 4px 8px; border-radius: 99px; background: var(--tint); color: var(--ink5); }
+.mini { display: flex; align-items: center; gap: 6px; flex-wrap: nowrap; }
+.mini span { font-size: 11px; padding: 5px 9px; border-radius: 8px; background: var(--tint); color: var(--ink7); white-space: nowrap; }
+.mini span.end { background: var(--wash); color: var(--b8); font-weight: 600; }
+.mini i { color: var(--ink3); font-style: normal; font-size: 11px; }
+
+/* page 11 payments */
+.pay .steps .step { font-size: 12px; }
+.pay .step .t { font-size: 13px; color: var(--ink); }
+
+/* page 13 security */
+.sec { display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(3, 1fr); gap: 12px; height: 100%; }
+.sec .card { padding: 14px 15px; display: flex; gap: 12px; }
+.sec .t { font-size: 13.5px; }
+.sec .d { font-size: 11.5px; }
+
+/* page 14 infra */
+.infra { display: flex; flex-direction: column; }
+.ibox { border: 1px solid var(--ink3); border-radius: 12px; padding: 11px 14px; background: #fff; display: flex; align-items: center; gap: 10px; font-size: 12.5px; }
+.ibox .t { font-size: 13px; }
+.region { border: 1.5px dashed var(--b4); border-radius: 16px; padding: 28px 16px 16px; position: relative; display: grid; gap: 12px; }
+.region .rl { position: absolute; top: -9px; left: 14px; background: #fff; padding: 0 8px; font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--b6); }
+.zones { display: grid; grid-template-columns: 1fr 44px 1fr; align-items: center; }
+.ztag { font-size: 9.5px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--ink5); background: var(--tint); padding: 2px 6px; border-radius: 6px; margin-left: auto; }
+.wl { display: flex; gap: 6px; }
+.wl span { flex: 1; text-align: center; font-size: 11px; font-weight: 600; padding: 7px 4px; border-radius: 8px; background: var(--wash); color: var(--b8); }
+.kpis { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.kpi { background: var(--tint); border-radius: 12px; padding: 12px 14px; }
+.kpi .v { font-size: 22px; font-weight: 600; letter-spacing: -0.02em; color: var(--ink); }
+.kpi .v small { font-size: 13px; font-weight: 600; color: var(--ink5); }
+.kpi .k { font-size: 11px; color: var(--ink5); margin-top: 2px; line-height: 1.35; }
+.kpi.hl { background: var(--wash); }
+.kpi.hl .v { color: var(--b7); }
+
+/* page 15 rollout */
+.phases { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; }
+.phase { border: 1px solid var(--line); border-radius: 14px; padding: 16px; height: 330px; }
+.phase .pn { display: flex; align-items: center; gap: 8px; }
+.phase .t { font-size: 14px; white-space: nowrap; }
+.phase .wk { font-size: 11.5px; color: var(--ink5); margin-top: 6px; }
+.phase .bar { height: 6px; border-radius: 9px; background: var(--wash2); margin-top: 10px; position: relative; }
+.phase .bar i { position: absolute; top: 0; bottom: 0; border-radius: 9px; background: var(--b6); }
+.phase ul { list-style: none; margin-top: 16px; border-top: 1px solid var(--line); padding-top: 14px; display: grid; gap: 11px; }
+.phase li { font-size: 13.5px; display: flex; gap: 8px; align-items: center; color: var(--ink7); }
+.phase li .ic { width: 14px; height: 14px; color: var(--b6); stroke-width: 2.25; }
+.axis { position: relative; height: 70px; margin-top: 18px; }
+.axis .line { position: absolute; left: 0; right: 0; top: 14px; height: 2px; background: var(--ink3); }
+.gate { position: absolute; top: 4px; display: flex; flex-direction: column; align-items: center; transform: translateX(-50%); }
+.gate .dm { width: 20px; height: 20px; transform: rotate(45deg); background: var(--ink3); border-radius: 3px; }
+.gate.hl .dm { background: var(--b6); }
+.gate .gt { margin-top: 12px; font-size: 12.5px; font-weight: 600; white-space: nowrap; }
+.gate .gd { font-size: 11px; color: var(--ink5); white-space: nowrap; margin-top: 2px; }
+
+/* page 16 onboarding */
+.chev { display: flex; gap: 6px; }
+.chev > div { flex: 1; background: var(--tint); padding: 18px 14px 18px 24px; clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%, 14px 50%); font-size: 13px; line-height: 1.45; color: var(--ink7); min-height: 170px; }
+.chev > div:first-child { clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%); padding-left: 14px; }
+.chev > div.hl { background: var(--wash); }
+.chev .num { margin-bottom: 8px; }
+.list { display: grid; gap: 9px; margin-top: 12px; }
+.list div { display: flex; gap: 10px; align-items: flex-start; font-size: 13.5px; line-height: 1.4; color: var(--ink7); }
+.list .ic { width: 16px; height: 16px; margin-top: 1px; }
+.list.ok .ic { color: var(--b6); stroke-width: 2.25; }
+.list.no .ic { color: var(--ink3); stroke-width: 2.25; }
+</style>
+</head>
+<body>
+
+<!-- 1 COVER -->
+<section class="page cover">
+  <div class="left">
+    <div class="kicker">Business overview · November 2026</div>
+    <h1>Cheeku<br>Platform API</h1>
+    <p class="lede">How partners plug into Cheeku's conversations, care bookings and health data: one API, with the person in control.</p>
+    <div class="pills"><span>One API</span><span>Consent first</span><span>Isolated by design</span><span>Safe payments</span><span>Built to scale</span></div>
+    <div class="meta">Version 1 plan · for the business team<br>A visual companion to the Platform API overview</div>
+  </div>
+  <div class="right">
+    <svg viewBox="0 0 540 520" width="540" height="520" font-family="Inter, sans-serif">
+      <g stroke="rgba(255,255,255,.22)" stroke-width="1.25">
+        <line x1="150" y1="110" x2="270" y2="260"/><line x1="150" y1="185" x2="270" y2="260"/><line x1="150" y1="260" x2="270" y2="260"/><line x1="150" y1="335" x2="270" y2="260"/><line x1="150" y1="410" x2="270" y2="260"/>
+        <line x1="390" y1="64" x2="270" y2="260"/><line x1="390" y1="120" x2="270" y2="260"/><line x1="390" y1="176" x2="270" y2="260"/><line x1="390" y1="232" x2="270" y2="260"/><line x1="390" y1="288" x2="270" y2="260"/><line x1="390" y1="344" x2="270" y2="260"/><line x1="390" y1="400" x2="270" y2="260"/><line x1="390" y1="456" x2="270" y2="260"/>
+      </g>
+      <text x="75" y="76" text-anchor="middle" font-size="11" font-weight="600" letter-spacing="1" fill="#a9a4f3">PARTNERS</text>
+      <text x="465" y="26" text-anchor="middle" font-size="11" font-weight="600" letter-spacing="1" fill="#a9a4f3">WHAT THEY GET</text>
+      <g fill="#1f1d7d" stroke="rgba(255,255,255,.3)" stroke-width="1">
+        <rect x="0" y="92" width="150" height="36" rx="18"/><rect x="0" y="167" width="150" height="36" rx="18"/><rect x="0" y="242" width="150" height="36" rx="18"/><rect x="0" y="317" width="150" height="36" rx="18"/><rect x="0" y="392" width="150" height="36" rx="18"/>
+      </g>
+      <g fill="#ffffff" font-size="12.5" font-weight="600" text-anchor="middle">
+        <text x="75" y="114">Insurers</text><text x="75" y="189">Employers</text><text x="75" y="264">Hospitals</text><text x="75" y="339">Clinics</text><text x="75" y="414">Fitness &amp; wellness</text>
+      </g>
+      <g fill="#2a1eba" stroke="#8a82f5" stroke-width="1">
+        <rect x="390" y="46" width="150" height="36" rx="18"/><rect x="390" y="102" width="150" height="36" rx="18"/><rect x="390" y="158" width="150" height="36" rx="18"/><rect x="390" y="214" width="150" height="36" rx="18"/><rect x="390" y="270" width="150" height="36" rx="18"/><rect x="390" y="326" width="150" height="36" rx="18"/><rect x="390" y="382" width="150" height="36" rx="18"/><rect x="390" y="438" width="150" height="36" rx="18"/>
+      </g>
+      <g fill="#ffffff" font-size="12.5" font-weight="600" text-anchor="middle">
+        <text x="465" y="68">Conversations</text><text x="465" y="124">Lab tests</text><text x="465" y="180">Consultations</text><text x="465" y="236">Medicines</text><text x="465" y="292">Health records</text><text x="465" y="348">Health areas</text><text x="465" y="404">Wearables</text><text x="465" y="460">Payments &amp; events</text>
+      </g>
+      <circle cx="270" cy="260" r="80" fill="#4a2ade"/>
+      <circle cx="270" cy="260" r="96" fill="none" stroke="rgba(138,130,245,.45)" stroke-width="1"/>
+      <text x="270" y="254" text-anchor="middle" font-size="24" font-weight="600" fill="#fff">Cheeku</text>
+      <text x="270" y="280" text-anchor="middle" font-size="14" fill="#dcd9fc">Platform API</text>
+    </svg>
+  </div>
+</section>
+
+<!-- 2 IN ONE PAGE -->
+<section class="page">
+  <div class="kicker">01 · In one page</div>
+  <h1>One API that lets partners offer Cheeku, with the person in control</h1>
+  <p class="sub">Six ideas carry the whole plan. Each one gets its own diagram on the pages that follow.</p>
+  <div class="body">
+    <div class="six">
+      <div class="card"><div class="top"><span class="n">01</span><span class="chip"><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z" /> <path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65" /> <path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65" /> </svg></span></div><div class="t">One API</div><div class="d">One versioned API at <span class="mono">api.cheeku.ai/v1</span> for conversations, care bookings, records, health areas, wearables and the daily care plan.</div><div class="go">See Pages 3 and 5 →</div></div>
+      <div class="card"><div class="top"><span class="n">02</span><span class="chip"><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <rect width="14" height="20" x="5" y="2" rx="2" ry="2" /> <path d="M12 18h.01" /> </svg></span></div><div class="t">The same core as Cheeku's own app</div><div class="d">Partner calls run through the same services, safety rules and data rules as the Cheeku app. Partners never get a weaker version.</div><div class="go">See Page 5 →</div></div>
+      <div class="card"><div class="top"><span class="n">03</span><span class="chip"><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M12 10a2 2 0 0 0-2 2c0 1.02-.1 2.51-.26 4" /> <path d="M14 13.12c0 2.38 0 6.38-1 8.88" /> <path d="M17.29 21.02c.12-.6.43-2.3.5-3.02" /> <path d="M2 12a10 10 0 0 1 18-6" /> <path d="M2 16h.01" /> <path d="M21.8 16c.2-2 .131-5.354 0-6" /> <path d="M5 19.5C5.5 18 6 15 6 12a6 6 0 0 1 .34-2" /> <path d="M8.65 22c.21-.66.45-1.32.57-2" /> <path d="M9 6.8a6 6 0 0 1 9 5.2v2" /> </svg></span></div><div class="t">The person stays in control</div><div class="d">Access is granted per partner, per family member and per kind of data, on a Cheeku screen. Revoked in one tap, it stops within a minute.</div><div class="go">See Page 7 →</div></div>
+      <div class="card"><div class="top"><span class="n">04</span><span class="chip"><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <rect width="18" height="11" x="3" y="11" rx="2" ry="2" /> <path d="M7 11V7a5 5 0 0 1 10 0v4" /> </svg></span></div><div class="t">Isolation in the data layer itself</div><div class="d">Checked where the data lives, at four levels: partner, family, family member and each record. Anything not opened stays closed.</div><div class="go">See Page 8 →</div></div>
+      <div class="card"><div class="top"><span class="n">05</span><span class="chip"><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <rect width="20" height="14" x="2" y="5" rx="2" /> <line x1="2" x2="22" y1="10" y2="10" /> </svg></span></div><div class="t">Safe payments</div><div class="d">Hosted PCI-DSS checkout or partner billing. Cheeku sets every price and verifies every payment on its side.</div><div class="go">See Page 11 →</div></div>
+      <div class="card"><div class="top"><span class="n">06</span><span class="chip"><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="m12 14 4-4" /> <path d="M3.34 19a10 10 0 1 1 17.32 0" /> </svg></span></div><div class="t">Built to scale</div><div class="d">Stateless services across zones in India, a highly available database, durable queues and a protective edge network.</div><div class="go">See Page 14 →</div></div>
+    </div>
+  </div>
+  <div class="footer"><span><b>Cheeku Platform API</b> · Business overview</span><span>2 / 16</span></div>
+</section>
+
+<!-- 3 CAPABILITIES -->
+<section class="page">
+  <div class="kicker">02 · What partners can build</div>
+  <h1>Eleven capabilities, all on the same core as Cheeku's own app</h1>
+  <p class="sub">Grouped by what a partner's users do with them: talk to Cheeku, book care, understand their health, and the plumbing that runs it.</p>
+  <div class="body">
+    <div class="caps" style="height:auto">
+      <div class="capcol">
+        <h2><b>Talk</b> · 1</h2>
+        <div class="cap"><span class="chip sm"><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z" /> </svg></span><div><div class="t">Conversations</div><div class="d">Ask about a family member's health. Answers come from that person's own records, with one of four urgency levels.</div></div></div>
+        <div class="note">Cheeku never diagnoses, prescribes or gives doses. Every answer carries a safety block the partner shows as given.</div>
+      </div>
+      <div class="capcol">
+        <h2><b>Book</b> · 4</h2>
+        <div class="cap"><span class="chip sm"><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M10 2v7.527a2 2 0 0 1-.211.896L4.72 20.55a1 1 0 0 0 .9 1.45h12.76a1 1 0 0 0 .9-1.45l-5.069-10.127A2 2 0 0 1 14 9.527V2" /> <path d="M8.5 2h7" /> <path d="M7 16h10" /> </svg></span><div><div class="t">Lab tests</div><div class="d">Home collection or a centre visit, real slots by pincode, tracked to the report.</div></div></div>
+        <div class="cap"><span class="chip sm"><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M11 2v2" /> <path d="M5 2v2" /> <path d="M5 3H4a2 2 0 0 0-2 2v4a6 6 0 0 0 12 0V5a2 2 0 0 0-2-2h-1" /> <path d="M8 15a6 6 0 0 0 12 0v-3" /> <circle cx="20" cy="10" r="2" /> </svg></span><div><div class="t">Doctor consultations</div><div class="d">Online or in person, or a doctor now. Join the call; the e-prescription follows.</div></div></div>
+        <div class="cap"><span class="chip sm"><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z" /> <path d="m8.5 8.5 7 7" /> </svg></span><div><div class="t">Medicines</div><div class="d">Delivery or pickup, same-salt alternatives shown, a prescription when one is needed.</div></div></div>
+        <div class="cap"><span class="chip sm"><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M8 2v4" /> <path d="M16 2v4" /> <rect width="18" height="18" x="3" y="4" rx="2" /> <path d="M3 10h18" /> <path d="M8 14h.01" /> <path d="M12 14h.01" /> <path d="M16 14h.01" /> <path d="M8 18h.01" /> <path d="M12 18h.01" /> <path d="M16 18h.01" /> </svg></span><div><div class="t">Appointments</div><div class="d">One timeline of lab visits and consultations for each family member.</div></div></div>
+      </div>
+      <div class="capcol">
+        <h2><b>Know</b> · 4</h2>
+        <div class="cap"><span class="chip sm"><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" /> <path d="M14 2v4a2 2 0 0 0 2 2h4" /> <path d="M10 9H8" /> <path d="M16 13H8" /> <path d="M16 17H8" /> </svg></span><div><div class="t">Health records</div><div class="d">Reports and prescriptions with their values. A report a partner sends waits for the person's check.</div></div></div>
+        <div class="cap"><span class="chip sm"><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" /> <path d="M3.22 12H9.5l.5-1 2 4.5 2-7 1.5 3.5h5.27" /> </svg></span><div><div class="t">Health areas</div><div class="d">Heart, sugar, sleep, movement, weight, check-ups: on track, watch or act. No single score.</div></div></div>
+        <div class="cap"><span class="chip sm"><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <circle cx="12" cy="12" r="6" /> <polyline points="12 10 12 12 13 13" /> <path d="m16.13 7.66-.81-4.05a2 2 0 0 0-2-1.61h-2.68a2 2 0 0 0-2 1.61l-.78 4.05" /> <path d="m7.88 16.36.8 4a2 2 0 0 0 2 1.61h2.72a2 2 0 0 0 2-1.61l.81-4.05" /> </svg></span><div><div class="t">Activity and wearables</div><div class="d">Daily steps, sleep, heart rate, blood pressure, glucose, weight and workouts.</div></div></div>
+        <div class="cap"><span class="chip sm"><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="m3 17 2 2 4-4" /> <path d="m3 7 2 2 4-4" /> <path d="M13 6h8" /> <path d="M13 12h8" /> <path d="M13 18h8" /> </svg></span><div><div class="t">Daily care plan</div><div class="d">Today's habits, reminders and follow-ups for a family member.</div></div></div>
+      </div>
+      <div class="capcol">
+        <h2><b>Run</b> · 2</h2>
+        <div class="cap"><span class="chip sm"><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <rect width="20" height="14" x="2" y="5" rx="2" /> <line x1="2" x2="22" y1="10" y2="10" /> </svg></span><div><div class="t">Payments</div><div class="d">A checkout for the person, or billing to the partner.</div></div></div>
+        <div class="cap"><span class="chip sm"><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" /> <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" /> </svg></span><div><div class="t">Events</div><div class="d">Real-time notice when a booking, payment or access changes.</div></div></div>
+      </div>
+    </div>
+    <div class="same"><span class="lbl">Shared by all eleven</span><span class="c"><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M12 10a2 2 0 0 0-2 2c0 1.02-.1 2.51-.26 4" /> <path d="M14 13.12c0 2.38 0 6.38-1 8.88" /> <path d="M17.29 21.02c.12-.6.43-2.3.5-3.02" /> <path d="M2 12a10 10 0 0 1 18-6" /> <path d="M2 16h.01" /> <path d="M21.8 16c.2-2 .131-5.354 0-6" /> <path d="M5 19.5C5.5 18 6 15 6 12a6 6 0 0 1 .34-2" /> <path d="M8.65 22c.21-.66.45-1.32.57-2" /> <path d="M9 6.8a6 6 0 0 1 9 5.2v2" /> </svg>Consent per person</span><span class="c"><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <rect width="18" height="11" x="3" y="11" rx="2" ry="2" /> <path d="M7 11V7a5 5 0 0 1 10 0v4" /> </svg>Four-level isolation</span><span class="c"><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" /> <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" /> </svg>Same statuses and events</span><span class="c"><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <circle cx="12" cy="12" r="10" /> <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" /> <path d="M2 12h20" /> </svg>Data kept in India</span></div>
+  </div>
+  <div class="footer"><span><b>Cheeku Platform API</b> · Business overview</span><span>3 / 16</span></div>
+</section>
+
+<!-- 4 WHO CONNECTS -->
+<section class="page">
+  <div class="kicker">03 · Who connects, and how</div>
+  <h1>Two ways to connect, one set of rules</h1>
+  <p class="sub">Embed and Connect use the same sign-in, consent and access rules, so a partner can start with one and add the other without rebuilding.</p>
+  <div class="body">
+    <div class="ptypes">
+      <div class="ptype"><span class="chip sm"><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" /> <path d="m9 12 2 2 4-4" /> </svg></span>Insurers</div>
+      <div class="ptype"><span class="chip sm"><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" /> <rect width="20" height="14" x="2" y="6" rx="2" /> </svg></span>Employers</div>
+      <div class="ptype"><span class="chip sm"><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M12 6v4" /> <path d="M14 14h-4" /> <path d="M14 18h-4" /> <path d="M14 8h-4" /> <path d="M18 12h2a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2h2" /> <path d="M18 22V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v18" /> </svg></span>Hospitals</div>
+      <div class="ptype"><span class="chip sm"><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M11 2v2" /> <path d="M5 2v2" /> <path d="M5 3H4a2 2 0 0 0-2 2v4a6 6 0 0 0 12 0V5a2 2 0 0 0-2-2h-1" /> <path d="M8 15a6 6 0 0 0 12 0v-3" /> <circle cx="20" cy="10" r="2" /> </svg></span>Clinics</div>
+      <div class="ptype"><span class="chip sm"><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M14.4 14.4 9.6 9.6" /> <path d="M18.657 21.485a2 2 0 1 1-2.829-2.828l-1.767 1.768a2 2 0 1 1-2.829-2.829l6.364-6.364a2 2 0 1 1 2.829 2.829l-1.768 1.767a2 2 0 1 1 2.828 2.829z" /> <path d="m21.5 21.5-1.4-1.4" /> <path d="M3.9 3.9 2.5 2.5" /> <path d="M6.404 12.768a2 2 0 1 1-2.829-2.829l1.768-1.767a2 2 0 1 1-2.828-2.829l2.828-2.828a2 2 0 1 1 2.829 2.828l1.767-1.768a2 2 0 1 1 2.829 2.829z" /> </svg></span>Fitness and wellness apps</div>
+    </div>
+    <div class="lane">
+      <div class="head"><span class="tag">Embed</span><span class="t">Cheeku inside the partner's own app</span><span class="small">For example, an insurer or employer offering Cheeku conversations and bookings to its members</span></div>
+      <div class="steps">
+        <div class="step"><span class="num">1</span>The partner invites its members</div>
+        <div class="arr"><svg viewBox="0 0 24 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M1 6H22M17 1.5L22 6L17 10.5"/></svg></div>
+        <div class="step"><span class="num">2</span>Each member signs in to Cheeku once, with a phone OTP</div>
+        <div class="arr"><svg viewBox="0 0 24 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M1 6H22M17 1.5L22 6L17 10.5"/></svg></div>
+        <div class="step hl"><span class="num">3</span>The member grants access on a Cheeku screen</div>
+        <div class="arr"><svg viewBox="0 0 24 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M1 6H22M17 1.5L22 6L17 10.5"/></svg></div>
+        <div class="step"><span class="num">4</span>The partner calls the API on the member's behalf</div>
+        <div class="arr"><svg viewBox="0 0 24 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M1 6H22M17 1.5L22 6L17 10.5"/></svg></div>
+        <div class="step"><span class="num">5</span>Bookings can be billed to the partner</div>
+      </div>
+    </div>
+    <div class="lane">
+      <div class="head"><span class="tag">Connect</span><span class="t">"Connect with Cheeku"</span><span class="small">For example, a fitness app reading activity data, or a clinic booking a test for a Cheeku user</span></div>
+      <div class="steps">
+        <div class="step"><span class="num">1</span>A Cheeku user taps Connect with Cheeku in the partner app</div>
+        <div class="arr"><svg viewBox="0 0 24 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M1 6H22M17 1.5L22 6L17 10.5"/></svg></div>
+        <div class="step"><span class="num">2</span>They sign in to Cheeku; the partner never sees their credentials</div>
+        <div class="arr"><svg viewBox="0 0 24 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M1 6H22M17 1.5L22 6L17 10.5"/></svg></div>
+        <div class="step hl"><span class="num">3</span>They grant exactly the access the partner asked for</div>
+        <div class="arr"><svg viewBox="0 0 24 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M1 6H22M17 1.5L22 6L17 10.5"/></svg></div>
+        <div class="step"><span class="num">4</span>The partner reads data or books care within that grant</div>
+      </div>
+    </div>
+    <div class="same"><span class="lbl">Same for both</span><span class="c"><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <rect width="14" height="20" x="5" y="2" rx="2" ry="2" /> <path d="M12 18h.01" /> </svg>Sign-in on Cheeku</span><span class="c"><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /> <circle cx="9" cy="7" r="4" /> <path d="M22 21v-2a4 4 0 0 0-3-3.87" /> <path d="M16 3.13a4 4 0 0 1 0 7.75" /> </svg>Consent per member and kind of data</span><span class="c"><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49" /> <path d="M14.084 14.158a3 3 0 0 1-4.242-4.242" /> <path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143" /> <path d="m2 2 20 20" /> </svg>Revoke in one tap</span><span class="c"><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" /> <path d="M21 3v5h-5" /> <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" /> <path d="M8 16H3v5" /> </svg>Add the other later, no rebuild</span></div>
+  </div>
+  <div class="footer"><span><b>Cheeku Platform API</b> · Business overview</span><span>4 / 16</span></div>
+</section>
+
+<!-- 5 ARCHITECTURE -->
+<section class="page">
+  <div class="kicker">04 · How it fits together</div>
+  <h1>Every call is checked at the API, and again where the data lives</h1>
+  <p class="sub">Five layers between a partner's app and a person's data. The right-hand column says what each layer means for the business.</p>
+  <div class="body">
+    <div class="arch">
+      <div class="layer" style="width:440px;margin:0 auto;"><div class="t">Partner app or platform</div><div class="d">Calls over HTTPS with a short-lived OAuth 2.1 access token</div></div>
+      <div class="callout">Partners only ever hold a 15-minute token tied to one person's grant</div>
+
+      <div class="layer"><div class="t">Cheeku edge</div><div class="d">TLS · firewall · DDoS protection · per-partner rate limits · only the public catalogue is cached</div></div>
+      <div class="callout">Attacks and floods are stopped before they reach Cheeku</div>
+
+      <div class="layer"><div class="t">Cheeku API: three checks on every call</div>
+        <div class="inner" style="grid-template-columns:repeat(3,1fr)">
+          <div><div class="t">1 · Who is asking</div><div class="d">The token and the person's grant</div></div>
+          <div><div class="t">2 · Is it valid</div><div class="d">Every field against the published schema</div></div>
+          <div><div class="t">3 · Record and limit</div><div class="d">Idempotency, usage limits, audit (no content)</div></div>
+        </div>
+      </div>
+      <div class="callout">Bad or unknown input is refused; every call is recorded without its content</div>
+
+      <div class="layer"><div class="t">Core services, the same ones Cheeku's own app uses</div>
+        <div class="inner" style="grid-template-columns:repeat(5,1fr)">
+          <div><div class="t">Conversations</div><div class="d">Safety first, grounded in own records</div></div>
+          <div><div class="t">Care bookings</div><div class="d">Labs, doctors, medicines, end to end</div></div>
+          <div><div class="t">Health data</div><div class="d">Records, results, areas, wearables</div></div>
+          <div><div class="t">Payments</div><div class="d">Checkout, partner billing, refunds</div></div>
+          <div><div class="t">Events</div><div class="d">Signed, retried, no health details</div></div>
+        </div>
+      </div>
+      <div class="callout">Partners get the same safety and data rules as Cheeku's own app</div>
+
+      <div class="layer data last"><div class="t">Secure data layer in India</div><div class="d" style="color:var(--ink7)">Access is checked on every read and write: partner, grant, family member and record · encrypted files behind links that expire in minutes · an audit trail without content</div></div>
+      <div class="callout"><span>Even a bug in application code can't read past what the person granted</span></div>
+    </div>
+  </div>
+  <div class="footer"><span><b>Cheeku Platform API</b> · Business overview</span><span>5 / 16</span></div>
+</section>
+
+<!-- 6 JOURNEY -->
+<section class="page">
+  <div class="kicker">05 · One journey, end to end</div>
+  <h1>A home blood test, booked from an employer's wellness app</h1>
+  <p class="sub">Eight steps across four parties. The person consents once; the employer's app never handles passwords, prices or health history it wasn't granted.</p>
+  <div class="body">
+    <div class="swim">
+      <div class="lanebg" style="grid-row:2;grid-column:1/-1;background:var(--tint)"></div>
+      <div class="lanebg" style="grid-row:3;grid-column:1/-1;background:#fff;border:1px solid var(--line)"></div>
+      <div class="lanebg" style="grid-row:4;grid-column:1/-1;background:var(--wash)"></div>
+      <div class="lanebg" style="grid-row:5;grid-column:1/-1;background:var(--tint)"></div>
+
+      <div style="grid-row:1;grid-column:1"></div>
+      <div class="sn first" style="grid-row:1;grid-column:2"><span class="num">1</span></div>
+      <div class="sn" style="grid-row:1;grid-column:3"><span class="num">2</span></div>
+      <div class="sn" style="grid-row:1;grid-column:4"><span class="num">3</span></div>
+      <div class="sn" style="grid-row:1;grid-column:5"><span class="num">4</span></div>
+      <div class="sn" style="grid-row:1;grid-column:6"><span class="num">5</span></div>
+      <div class="sn" style="grid-row:1;grid-column:7"><span class="num">6</span></div>
+      <div class="sn" style="grid-row:1;grid-column:8"><span class="num">7</span></div>
+      <div class="sn last" style="grid-row:1;grid-column:9"><span class="num">8</span></div>
+
+      <div class="lanelab" style="grid-row:2;grid-column:1">Employee<span class="small">the person</span></div>
+      <div class="lanelab" style="grid-row:3;grid-column:1">Employer app<span class="small">the partner</span></div>
+      <div class="lanelab" style="grid-row:4;grid-column:1;color:var(--b7)">Cheeku<span class="small">Platform API</span></div>
+      <div class="lanelab" style="grid-row:5;grid-column:1">Care network<span class="small">run by Cheeku</span></div>
+
+      <div class="sc" style="grid-row:2;grid-column:2"><b>Asks</b>about last month's sugar report</div>
+      <div class="sc ck" style="grid-row:4;grid-column:3"><b>Answers</b>safety check first, then from their own records; suggests an HbA1c test</div>
+      <div class="sc" style="grid-row:3;grid-column:4"><b>Offers booking</b>real slots for their pincode</div>
+      <div class="sc" style="grid-row:2;grid-column:5"><b>Picks a slot</b>Saturday 8 am, home collection</div>
+      <div class="sc ck" style="grid-row:4;grid-column:6"><b>Books it</b>bills the employer, confirms<br><span class="ev">event: booked</span></div>
+      <div class="sc" style="grid-row:5;grid-column:7"><b>Collects</b>collector assigned, sample collected<br><span class="ev">events sent</span></div>
+      <div class="sc ck" style="grid-row:4;grid-column:8"><b>Files the report</b>results readable, health areas update</div>
+      <div class="sc" style="grid-row:3;grid-column:9"><b>Shows the result</b>fetched with access checked again<br><span class="ev">event: report ready</span></div>
+    </div>
+  </div>
+  <div class="footer"><span><b>Cheeku Platform API</b> · Business overview</span><span>6 / 16</span></div>
+</section>
+
+<!-- 7 CONSENT -->
+<section class="page">
+  <div class="kicker">06 · Consent</div>
+  <h1>The person grants access on a Cheeku screen, and can take it back in one tap</h1>
+  <p class="sub">Access is per partner, per family member and per kind of data. Each kind is shown in plain words, and a partner sees only what it created unless the person ticks history.</p>
+  <div class="body">
+    <div class="consent">
+      <div class="cstage card">
+        <span class="num">1</span>
+        <div class="t" style="margin-top:10px">The partner asks</div>
+        <div class="d">The partner app sends the person to Cheeku, naming the access it needs and why.</div>
+      </div>
+      <div class="arr" style="width:34px"><svg viewBox="0 0 24 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M1 6H22M17 1.5L22 6L17 10.5"/></svg></div>
+      <div class="phone">
+        <div class="bar"></div>
+        <div class="ph-t">Partner app would like to use your Cheeku</div>
+        <div class="ph-d">You choose who and what. You can change this any time in Connected apps.</div>
+        <div class="lbl">For</div>
+        <div class="who"><span>Me</span><span>Papa</span><span class="off">Riya</span></div>
+        <div class="lbl">Allow it to</div>
+        <div class="perm"><span class="box"><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M20 6 9 17l-5-5" /> </svg></span><div>Ask Cheeku questions<div class="small">Cheeku reads your records to answer; Partner app sees the answers.</div></div></div>
+        <div class="perm"><span class="box"><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M20 6 9 17l-5-5" /> </svg></span><div>Book tests, doctors and medicines for you</div></div>
+        <div class="perm"><span class="box"><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M20 6 9 17l-5-5" /> </svg></span><div>See your health areas (on track, watch, act)</div></div>
+        <div class="perm"><span class="box off"></span><div>See your past chats with Cheeku</div></div>
+        <div class="btns"><div class="p">Allow</div><div class="s">Not now</div></div>
+      </div>
+      <div class="arr" style="width:34px"><svg viewBox="0 0 24 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M1 6H22M17 1.5L22 6L17 10.5"/></svg></div>
+      <div class="cstage card accent" style="width:220px">
+        <span class="num">3</span>
+        <div class="t" style="margin-top:10px">A grant is created</div>
+        <div class="kv">
+          <div><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z" /> <path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2" /> <path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2" /> <path d="M10 6h4" /> <path d="M10 10h4" /> <path d="M10 14h4" /> <path d="M10 18h4" /> </svg> The partner</div>
+          <div><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /> <circle cx="9" cy="7" r="4" /> <path d="M22 21v-2a4 4 0 0 0-3-3.87" /> <path d="M16 3.13a4 4 0 0 1 0 7.75" /> </svg> The family members covered</div>
+          <div><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="m3 17 2 2 4-4" /> <path d="m3 7 2 2 4-4" /> <path d="M13 6h8" /> <path d="M13 12h8" /> <path d="M13 18h8" /> </svg> The kinds of data</div>
+          <div><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" /> <path d="M14 2v4a2 2 0 0 0 2 2h4" /> <path d="M10 9H8" /> <path d="M16 13H8" /> <path d="M16 17H8" /> </svg> The purpose shown</div>
+          <div><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M8 2v4" /> <path d="M16 2v4" /> <rect width="18" height="18" x="3" y="4" rx="2" /> <path d="M3 10h18" /> <path d="M8 14h.01" /> <path d="M12 14h.01" /> <path d="M16 14h.01" /> <path d="M8 18h.01" /> <path d="M12 18h.01" /> <path d="M16 18h.01" /> </svg> 12-month expiry, renewable</div>
+        </div>
+      </div>
+      <div class="arr" style="width:34px"><svg viewBox="0 0 24 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M1 6H22M17 1.5L22 6L17 10.5"/></svg></div>
+      <div class="cstage card" style="width:220px">
+        <span class="num">4</span>
+        <div class="t" style="margin-top:10px">Revoke any time</div>
+        <div class="d">From Connected apps in Cheeku, or by the partner. Access stops within a minute; the partner is told and deletes what it holds.</div>
+        <div class="d" style="margin-top:10px">Withdrawing consent or deleting the Cheeku account revokes every grant.</div>
+        <div class="d" style="margin-top:10px">Under 18s are granted only by the parent or guardian on the account.</div>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><span><b>Cheeku Platform API</b> · Business overview</span><span>7 / 16</span></div>
+</section>
+
+<!-- 8 ISOLATION -->
+<section class="page">
+  <div class="kicker">07 · Data isolation</div>
+  <h1>Four walls around every piece of data</h1>
+  <p class="sub">The checks run where the data lives, on every read and every write, with a default of deny. A read permission can never delete anything, and partners can't delete a person's records at all.</p>
+  <div class="body" style="display:grid;grid-template-columns:1.45fr 1fr;gap:22px;align-items:start">
+    <div class="nest n1" style="height:100%;min-height:470px">
+      <div class="lvl"><span class="t">Partner</span><span class="d">One partner never sees another partner's data, users or traffic. Sandbox and production are separate.</span></div>
+      <div class="nest n2">
+        <div class="lvl"><span class="t">Family</span><span class="d">A grant is bound to one account and never reaches another family.</span></div>
+        <div class="nest n3">
+          <div class="lvl"><span class="t">Family member</span><span class="d">Only the members on the grant, even within the same family.</span></div>
+          <div class="nest n4">
+            <div class="lvl" style="margin-bottom:6px"><span class="t">Record</span><span class="d">Every record carries its source</span></div>
+            <div style="display:grid;gap:8px;margin-top:6px">
+              <div class="rec"><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" /> <path d="M14 2v4a2 2 0 0 0 2 2h4" /> <path d="M10 9H8" /> <path d="M16 13H8" /> <path d="M16 17H8" /> </svg>HbA1c from a lab report<span class="src">source: lab report</span></div>
+              <div class="rec"><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" /> <path d="M3.22 12H9.5l.5-1 2 4.5 2-7 1.5 3.5h5.27" /> </svg>Blood pressure entered by the person<span class="src">source: the person</span></div>
+              <div class="rec"><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <circle cx="12" cy="12" r="6" /> <polyline points="12 10 12 12 13 13" /> <path d="m16.13 7.66-.81-4.05a2 2 0 0 0-2-1.61h-2.68a2 2 0 0 0-2 1.61l-.78 4.05" /> <path d="m7.88 16.36.8 4a2 2 0 0 0 2 1.61h2.72a2 2 0 0 0 2-1.61l.81-4.05" /> </svg>Steps sent by Partner B<span class="src p">source: Partner B</span></div>
+            </div>
+            <div class="d" style="margin-top:12px;color:var(--ink7)">A partner reads only what it created unless the person ticks history. Partner-sent reports wait for the person's check and never replace their own data.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div class="card">
+        <div class="t">Partners can't link people across partners</div>
+        <div class="d">Each partner sees a family member under an id made only for that partner.</div>
+        <div class="pid" style="margin-top:14px">
+          <div class="card tint" style="padding:10px;grid-row:1/3;text-align:center"><div class="chip" style="margin:0 auto"><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /> <circle cx="12" cy="7" r="4" /> </svg></div><div class="small" style="margin-top:6px;color:var(--ink)">Same person</div></div>
+          <div class="arr" style="width:30px"><svg viewBox="0 0 24 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M1 6H22M17 1.5L22 6L17 10.5"/></svg></div>
+          <div class="card" style="padding:9px 12px"><div class="small">Partner A sees</div><div class="mono" style="font-size:12px;margin-top:2px">mem_7QX2…</div></div>
+          <div class="arr" style="width:30px"><svg viewBox="0 0 24 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M1 6H22M17 1.5L22 6L17 10.5"/></svg></div>
+          <div class="card" style="padding:9px 12px"><div class="small">Partner B sees</div><div class="mono" style="font-size:12px;margin-top:2px">mem_K9PL…</div></div>
+        </div>
+        <div class="d" style="margin-top:12px">The two ids can't be matched, and no partner sees Cheeku's internal ids.</div>
+      </div>
+      <div class="card tint">
+        <div class="t">Deny by default</div>
+        <div class="d">Anything not explicitly opened to partners stays closed. Insurance policies, locations, notifications and consent records are not offered in version 1.</div>
+      </div>
+      <div class="card tint">
+        <div class="t">Permissions can't escalate</div>
+        <div class="d">A read permission can never delete anything, and partners can't delete a person's records at all.</div>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><span><b>Cheeku Platform API</b> · Business overview</span><span>8 / 16</span></div>
+</section>
+
+<!-- 9 CONVERSATIONS -->
+<section class="page">
+  <div class="kicker">08 · Conversations</div>
+  <h1>Safety comes first on every answer</h1>
+  <p class="sub">Cheeku checks for anything urgent before any answer is written. Emergencies get fixed, tested guidance; everything else is answered from the person's own records.</p>
+  <div class="body center">
+    <svg viewBox="0 0 1010 330" width="100%" font-family="Inter, sans-serif">
+      <defs><marker id="a9" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#a1a1ab"/></marker></defs>
+      <g stroke="#a1a1ab" stroke-width="1.5" fill="none">
+        <path d="M140 90H166" marker-end="url(#a9)"/>
+        <path d="M366 90H390" marker-end="url(#a9)"/>
+        <path d="M540 90H572" marker-end="url(#a9)"/>
+        <path d="M772 90H798" marker-end="url(#a9)"/>
+        <path d="M466 140V194" marker-end="url(#a9)"/>
+        <path d="M906 122V194" marker-end="url(#a9)"/>
+      </g>
+      <rect x="0" y="58" width="140" height="64" rx="12" fill="#fff" stroke="#e6e6ea"/>
+      <text x="16" y="84" font-size="14" font-weight="600" fill="#111114">A question</text>
+      <text x="16" y="104" font-size="12" fill="#6d6d78">from the partner app</text>
+      <rect x="170" y="58" width="196" height="64" rx="12" fill="#fff" stroke="#e6e6ea"/>
+      <text x="186" y="84" font-size="14" font-weight="600" fill="#111114">Safety check first</text>
+      <text x="186" y="104" font-size="12" fill="#6d6d78">question and their history</text>
+      <polygon points="392,90 466,40 540,90 466,140" fill="#fff" stroke="#3a3a41" stroke-width="1.25"/>
+      <text x="466" y="86" text-anchor="middle" font-size="13" font-weight="600" fill="#111114">Urgent or a</text>
+      <text x="466" y="103" text-anchor="middle" font-size="13" font-weight="600" fill="#111114">hard stop?</text>
+      <text x="556" y="80" text-anchor="middle" font-size="11.5" fill="#6d6d78">no</text>
+      <text x="478" y="172" font-size="11.5" fill="#6d6d78">yes</text>
+      <rect x="576" y="58" width="196" height="64" rx="12" fill="#fff" stroke="#e6e6ea"/>
+      <text x="592" y="84" font-size="14" font-weight="600" fill="#111114">Grounded answer</text>
+      <text x="592" y="104" font-size="12" fill="#6d6d78">from their own records</text>
+      <text x="576" y="150" font-size="11.5" fill="#6d6d78">Not covered by the records?</text>
+      <text x="576" y="166" font-size="11.5" fill="#6d6d78">Cheeku says so instead of guessing.</text>
+      <rect x="802" y="58" width="208" height="64" rx="12" fill="#efedfd" stroke="#4a2ade" stroke-width="1.5"/>
+      <text x="818" y="84" font-size="14" font-weight="600" fill="#111114">Safety block</text>
+      <text x="818" y="104" font-size="12" fill="#3a3a41">urgency + emergency numbers</text>
+      <text x="914" y="160" font-size="11.5" fill="#6d6d78">shown as given</text>
+      <rect x="366" y="198" width="200" height="64" rx="12" fill="#fef1f3" stroke="#ea2a36" stroke-width="1.25"/>
+      <text x="382" y="224" font-size="14" font-weight="600" fill="#111114">Fixed, tested guidance</text>
+      <text x="382" y="244" font-size="12" fill="#c00a1c">112 · 108 · Tele-MANAS</text>
+      <rect x="802" y="198" width="208" height="64" rx="12" fill="#fff" stroke="#e6e6ea"/>
+      <text x="818" y="224" font-size="14" font-weight="600" fill="#111114">A next step</text>
+      <text x="818" y="244" font-size="12" fill="#6d6d78">e.g. book an HbA1c test</text>
+      <text x="0" y="301" font-size="11" font-weight="600" letter-spacing="0.8" fill="#6d6d78">FOUR URGENCY LEVELS</text>
+      <rect x="166" y="282" width="196" height="30" rx="15" fill="#e7f7ee"/><circle cx="184" cy="297" r="5" fill="#23af5f"/><text x="196" y="301" font-size="12" font-weight="600" fill="#0f7538">Reassure</text>
+      <rect x="378" y="282" width="196" height="30" rx="15" fill="#fff4e0"/><circle cx="396" cy="297" r="5" fill="#ffaf23"/><text x="408" y="301" font-size="12" font-weight="600" fill="#8f5400">Monitor</text>
+      <rect x="590" y="282" width="208" height="30" rx="15" fill="#fff0e6"/><circle cx="608" cy="297" r="5" fill="#e8590c"/><text x="620" y="301" font-size="12" font-weight="600" fill="#a63a08">Contact a doctor today</text>
+      <rect x="814" y="282" width="196" height="30" rx="15" fill="#fef1f3"/><circle cx="832" cy="297" r="5" fill="#ea2a36"/><text x="844" y="301" font-size="12" font-weight="600" fill="#c00a1c">Go now</text>
+    </svg>
+    <div class="strip" style="margin-top:20px">
+      <div class="card tint"><div class="t">Never a clinical decision</div><div class="d">No diagnosis, no prescription, no dose changes.</div></div>
+      <div class="card tint"><div class="t">Partners send questions, not context</div><div class="d">Cheeku builds the context from what the person granted. Supplied history, urgency or instructions are refused.</div></div>
+      <div class="card tint"><div class="t">The person sees it too</div><div class="d">Chats held through a partner appear in their Cheeku app under the partner's name. Answers can stream as they are written.</div></div>
+    </div>
+  </div>
+  <div class="footer"><span><b>Cheeku Platform API</b> · Business overview</span><span>9 / 16</span></div>
+</section>
+
+<!-- 10 CARE BOOKINGS -->
+<section class="page">
+  <div class="kicker">09 · Care bookings</div>
+  <h1>Cheeku runs every booking end to end; partners see one set of statuses</h1>
+  <p class="sub">Catalogue and prices, serviceability, real slots, confirmation, reports, prescriptions, rescheduling, cancellation, support and refunds are all managed by Cheeku, whichever lab, doctor or pharmacy serves the order.</p>
+  <div class="body center">
+    <div class="card">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px"><span class="chip sm"><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M10 2v7.527a2 2 0 0 1-.211.896L4.72 20.55a1 1 0 0 0 .9 1.45h12.76a1 1 0 0 0 .9-1.45l-5.069-10.127A2 2 0 0 1 14 9.527V2" /> <path d="M8.5 2h7" /> <path d="M7 16h10" /> </svg></span><span class="t">A lab test, from request to report</span></div>
+      <div class="track">
+        <div class="tnode"><span class="dot">1</span><span class="lab">Requested</span><span class="code">pending</span></div>
+        <div class="tnode"><span class="dot">2</span><span class="lab">Booked</span><span class="code">booked</span></div>
+        <div class="tnode"><span class="dot">3</span><span class="lab">Collector assigned</span><span class="code">collector_assigned</span></div>
+        <div class="tnode"><span class="dot">4</span><span class="lab">On the way</span><span class="code">collector_on_the_way</span></div>
+        <div class="tnode"><span class="dot">5</span><span class="lab">Sample collected</span><span class="code">sample_collected</span></div>
+        <div class="tnode"><span class="dot">6</span><span class="lab">Processing</span><span class="code">processing</span></div>
+        <div class="tnode"><span class="dot end">7</span><span class="lab" style="font-weight:600;color:var(--ink)">Report ready</span><span class="code">report_ready</span></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;margin-top:16px"><span class="small">Side states</span><div class="side"><span>rescheduled</span><span>cancelled</span><span>missed</span><span>sample_rejected</span><span>partly_ready</span></div></div>
+    </div>
+    <div class="strip" style="margin-top:14px">
+      <div class="card"><div style="display:flex;gap:8px;align-items:center"><span class="chip sm"><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M11 2v2" /> <path d="M5 2v2" /> <path d="M5 3H4a2 2 0 0 0-2 2v4a6 6 0 0 0 12 0V5a2 2 0 0 0-2-2h-1" /> <path d="M8 15a6 6 0 0 0 12 0v-3" /> <circle cx="20" cy="10" r="2" /> </svg></span><span class="t">Consultation</span></div><div class="mini" style="margin-top:12px"><span>booked</span><i>→</i><span>confirmed</span><i>→</i><span>in progress</span><i>→</i><span class="end">completed</span></div></div>
+      <div class="card"><div style="display:flex;gap:8px;align-items:center"><span class="chip sm"><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z" /> </svg></span><span class="t">Doctor now</span></div><div class="mini" style="margin-top:12px"><span>finding doctor</span><i>→</i><span class="end">doctor assigned</span></div></div>
+      <div class="card"><div style="display:flex;gap:8px;align-items:center"><span class="chip sm"><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z" /> <path d="m8.5 8.5 7 7" /> </svg></span><span class="t">Medicine order</span></div><div class="mini" style="margin-top:12px"><span>placed</span><i>→</i><span>confirmed</span><i>→</i><span>shipped</span><i>→</i><span class="end">delivered</span></div></div>
+    </div>
+    <div class="strip" style="margin-top:14px">
+      <div class="card tint"><div class="t">Safe to retry</div><div class="d">Every booking takes an idempotency key, so a timeout never creates a double booking.</div></div>
+      <div class="card tint"><div class="t">Answer in 2 seconds</div><div class="d">If confirmation takes longer, the booking comes back pending and an event follows.</div></div>
+      <div class="card tint"><div class="t">Reports filed automatically</div><div class="d">Lab values become readable results, and health areas update.</div></div>
+      <div class="card tint"><div class="t">Medicine rules</div><div class="d">A prescription when one is required; restricted medicines can't be ordered.</div></div>
+    </div>
+  </div>
+  <div class="footer"><span><b>Cheeku Platform API</b> · Business overview</span><span>10 / 16</span></div>
+</section>
+
+<!-- 11 PAYMENTS -->
+<section class="page pay">
+  <div class="kicker">10 · Payments</div>
+  <h1>Cheeku sets every price and verifies every payment</h1>
+  <p class="sub">Two ways to pay for care, plus sponsored plans. No card data ever touches Cheeku or the partner, and no health detail ever appears in a payment.</p>
+  <div class="body">
+    <div class="lane" style="margin-top:0">
+      <div class="head"><span class="tag">checkout</span><span class="t">The person pays</span><span class="small">for a test, a consultation or medicines</span></div>
+      <div class="steps">
+        <div class="step"><div class="t">Booking requested</div>A request never names a price</div>
+        <div class="arr"><svg viewBox="0 0 24 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M1 6H22M17 1.5L22 6L17 10.5"/></svg></div>
+        <div class="step"><div class="t">Cheeku prices it</div>From its catalogue and the partner's agreed rates</div>
+        <div class="arr"><svg viewBox="0 0 24 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M1 6H22M17 1.5L22 6L17 10.5"/></svg></div>
+        <div class="step"><div class="t">Hosted checkout link</div>UPI, cards, net banking, wallets · valid 15 minutes</div>
+        <div class="arr"><svg viewBox="0 0 24 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M1 6H22M17 1.5L22 6L17 10.5"/></svg></div>
+        <div class="step hl"><div class="t">Cheeku verifies</div>with the payment provider; a device's "success" is never enough</div>
+        <div class="arr"><svg viewBox="0 0 24 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M1 6H22M17 1.5L22 6L17 10.5"/></svg></div>
+        <div class="step"><div class="t">Booking confirmed</div>Can't be confirmed? Automatic refund</div>
+      </div>
+    </div>
+    <div class="lane">
+      <div class="head"><span class="tag">partner_billed</span><span class="t">The partner pays</span><span class="small">for example, an employer or insurer covering its members</span></div>
+      <div class="steps">
+        <div class="step"><div class="t">Booking requested</div>On the member's behalf</div>
+        <div class="arr"><svg viewBox="0 0 24 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M1 6H22M17 1.5L22 6L17 10.5"/></svg></div>
+        <div class="step"><div class="t">Charged to the partner</div>Prepaid balance or credit line, when the booking is placed</div>
+        <div class="arr"><svg viewBox="0 0 24 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M1 6H22M17 1.5L22 6L17 10.5"/></svg></div>
+        <div class="step"><div class="t">Booking confirmed</div>Same statuses and events as any booking</div>
+        <div class="arr"><svg viewBox="0 0 24 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M1 6H22M17 1.5L22 6L17 10.5"/></svg></div>
+        <div class="step"><div class="t">Monthly invoice</div>With GST</div>
+        <div class="arr" style="visibility:hidden"><svg viewBox="0 0 24 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M1 6H22M17 1.5L22 6L17 10.5"/></svg></div>
+        <div class="step" style="background:#fff;border:1px dashed var(--b4)"><div class="t">Sponsored plans</div>A partner can pay for its members' Cheeku plans; seats assigned through the partner account</div>
+      </div>
+    </div>
+    <div class="strip" style="margin-top:14px">
+      <div class="card tint"><div class="t">No card data</div><div class="d">Hosted by an RBI-licensed payment aggregator, inside its PCI-DSS scope.</div></div>
+      <div class="card tint"><div class="t">No health details</div><div class="d">Payments read like <span class="mono">Cheeku order LAB-7F3K</span>, never a test or medicine.</div></div>
+      <div class="card tint"><div class="t">Clear refunds</div><div class="d">Published rules, for example a full refund before a collector is assigned.</div></div>
+      <div class="card tint"><div class="t">Every rupee accounted for</div><div class="d">Whole paise, append-only double-entry ledger, reconciled daily.</div></div>
+    </div>
+  </div>
+  <div class="footer"><span><b>Cheeku Platform API</b> · Business overview</span><span>11 / 16</span></div>
+</section>
+
+<!-- 12 EVENTS -->
+<section class="page">
+  <div class="kicker">11 · Events</div>
+  <h1>Events say what changed, never the health details</h1>
+  <p class="sub">The partner fetches details with its own access, which Cheeku checks again at that moment. A revoked grant gets nothing, even from a late event.</p>
+  <div class="body" style="display:grid;grid-template-columns:1.3fr 1fr;gap:26px">
+    <div class="card" style="padding:22px 26px;display:flex;align-items:center">
+      <svg viewBox="0 0 500 400" width="100%" font-family="Inter, sans-serif">
+        <defs><marker id="a12" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#3a3a41"/></marker></defs>
+        <rect x="10" y="0" width="160" height="46" rx="12" fill="#efedfd" stroke="#4a2ade" stroke-width="1.5"/>
+        <text x="90" y="28" text-anchor="middle" font-size="15" font-weight="600" fill="#111114">Cheeku</text>
+        <rect x="330" y="0" width="160" height="46" rx="12" fill="#fff" stroke="#a1a1ab"/>
+        <text x="410" y="28" text-anchor="middle" font-size="15" font-weight="600" fill="#111114">Partner</text>
+        <g stroke="#a1a1ab" stroke-width="1.25" stroke-dasharray="4 4"><line x1="90" y1="46" x2="90" y2="396"/><line x1="410" y1="46" x2="410" y2="396"/></g>
+        <g stroke="#3a3a41" stroke-width="1.5" fill="none">
+          <path d="M90 104H408" marker-end="url(#a12)"/>
+          <path d="M410 244H92" marker-end="url(#a12)"/>
+          <path d="M90 372H408" marker-end="url(#a12)"/>
+        </g>
+        <text x="250" y="93" text-anchor="middle" font-size="13" font-weight="600" fill="#111114">1 · Signed event: what changed</text>
+        <text x="250" y="124" text-anchor="middle" font-size="12" fill="#6d6d78">ids and status only, no health details</text>
+        <rect x="320" y="150" width="180" height="42" rx="10" fill="#fff" stroke="#e6e6ea"/>
+        <text x="410" y="176" text-anchor="middle" font-size="12.5" fill="#111114">2 · Verifies the signature</text>
+        <text x="250" y="233" text-anchor="middle" font-size="13" font-weight="600" fill="#111114">3 · Fetches details with its token</text>
+        <rect x="0" y="282" width="180" height="42" rx="10" fill="#efedfd" stroke="#4a2ade" stroke-width="1.25"/>
+        <text x="90" y="308" text-anchor="middle" font-size="12.5" font-weight="600" fill="#111114">4 · Checks the grant again</text>
+        <text x="250" y="361" text-anchor="middle" font-size="13" font-weight="600" fill="#111114">5 · Details, or nothing if revoked</text>
+      </svg>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div class="card">
+        <div class="t">If the partner doesn't answer, Cheeku retries</div>
+        <div class="track" style="margin-top:16px">
+          <div class="tnode"><span class="dot" style="width:14px;height:14px;margin-top:5px"></span><span class="lab">1 min</span></div>
+          <div class="tnode"><span class="dot" style="width:14px;height:14px;margin-top:5px"></span><span class="lab">5 min</span></div>
+          <div class="tnode"><span class="dot" style="width:14px;height:14px;margin-top:5px"></span><span class="lab">30 min</span></div>
+          <div class="tnode"><span class="dot" style="width:14px;height:14px;margin-top:5px"></span><span class="lab">2 h</span></div>
+          <div class="tnode"><span class="dot" style="width:14px;height:14px;margin-top:5px"></span><span class="lab">6 h</span></div>
+          <div class="tnode"><span class="dot" style="width:14px;height:14px;margin-top:5px"></span><span class="lab">12 h</span></div>
+          <div class="tnode"><span class="dot end" style="width:14px;height:14px;margin-top:5px"></span><span class="lab" style="font-weight:600;color:var(--ink)">24 h</span></div>
+        </div>
+        <div class="d" style="margin-top:10px">After 24 hours the endpoint is paused and the partner is told. Any event can be redelivered on request.</div>
+      </div>
+      <div class="card tint">
+        <div class="small" style="font-weight:600;color:var(--ink7);margin-bottom:6px">What an event looks like</div>
+        <div class="mono" style="font-size:10.5px;line-height:1.55;color:var(--ink7)">{ "type": "lab_order.status_changed",<br>&nbsp;&nbsp;"data": { "member_id": "mem_…",<br>&nbsp;&nbsp;&nbsp;&nbsp;"lab_order_id": "lab_…",<br>&nbsp;&nbsp;&nbsp;&nbsp;"status": "sample_collected" } }</div>
+      </div>
+      <div class="card">
+        <div class="t">Signed and safe</div>
+        <div class="d">HMAC-SHA256 signature valid for 5 minutes, two secrets during rotation, event ids so repeats can be ignored. Sent only to public HTTPS addresses.</div>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><span><b>Cheeku Platform API</b> · Business overview</span><span>12 / 16</span></div>
+</section>
+
+<!-- 13 SECURITY -->
+<section class="page">
+  <div class="kicker">12 · Security and compliance</div>
+  <h1>Deny by default, checked on every request, recorded without content</h1>
+  <p class="sub">Open standards for access, encryption everywhere, data kept in India, and an agreement with every partner.</p>
+  <div class="body center">
+    <div class="secgrid"><div class="capcol"><h2><b>Access</b></h2><div class="cap"><span class="chip sm"><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z" /> <circle cx="16.5" cy="7.5" r=".5" fill="currentColor" /> </svg></span><div><div class="t">OAuth 2.1 with PKCE</div><div class="d">Standard sign-in; partners never see Cheeku credentials.</div></div></div><div class="cap"><span class="chip sm"><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M12 10a2 2 0 0 0-2 2c0 1.02-.1 2.51-.26 4" /> <path d="M14 13.12c0 2.38 0 6.38-1 8.88" /> <path d="M17.29 21.02c.12-.6.43-2.3.5-3.02" /> <path d="M2 12a10 10 0 0 1 18-6" /> <path d="M2 16h.01" /> <path d="M21.8 16c.2-2 .131-5.354 0-6" /> <path d="M5 19.5C5.5 18 6 15 6 12a6 6 0 0 1 .34-2" /> <path d="M8.65 22c.21-.66.45-1.32.57-2" /> <path d="M9 6.8a6 6 0 0 1 9 5.2v2" /> </svg></span><div><div class="t">Signed app identity</div><div class="d">Apps sign with a private key; no shared secrets. Mutual TLS available.</div></div></div><div class="cap"><span class="chip sm"><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <circle cx="12" cy="12" r="10" /> <polyline points="12 6 12 12 16 14" /> </svg></span><div><div class="t">Short-lived tokens</div><div class="d">15-minute access, checked against the grant on every request.</div></div></div><div class="cap"><span class="chip sm"><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <rect width="18" height="11" x="3" y="11" rx="2" ry="2" /> <path d="M7 11V7a5 5 0 0 1 10 0v4" /> </svg></span><div><div class="t">Deny by default</div><div class="d">Scope and family-member checks on every read and write.</div></div></div></div><div class="capcol"><h2><b>Protection</b></h2><div class="cap"><span class="chip sm"><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="m3 17 2 2 4-4" /> <path d="m3 7 2 2 4-4" /> <path d="M13 6h8" /> <path d="M13 12h8" /> <path d="M13 18h8" /> </svg></span><div><div class="t">Strict validation</div><div class="d">Published schema, unknown fields refused, 256 KB request cap.</div></div></div><div class="cap"><span class="chip sm"><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" /> <rect width="8" height="6" x="8" y="12" rx="1" /> <path d="M10 12v-2a2 2 0 1 1 4 0v2" /> </svg></span><div><div class="t">Encryption</div><div class="d">TLS 1.2+ in transit, AES-256 at rest, secrets in a managed vault.</div></div></div><div class="cap"><span class="chip sm"><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /> <path d="M3 3v5h5" /> <path d="M12 7v5l4 2" /> </svg></span><div><div class="t">Audit without content</div><div class="d">Who, which grant, which endpoint, result and timing. People can see it.</div></div></div><div class="cap"><span class="chip sm"><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" /> <path d="m9 12 2 2 4-4" /> </svg></span><div><div class="t">Abuse protection</div><div class="d">Rate limits; a sudden bulk read suspends the grant and alerts on-call.</div></div></div></div><div class="capcol"><h2><b>Assurance</b></h2><div class="cap"><span class="chip sm"><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2" /> </svg></span><div><div class="t">Independent testing</div><div class="d">Penetration test before the first live partner, then yearly.</div></div></div><div class="cap"><span class="chip sm"><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <circle cx="12" cy="12" r="10" /> <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" /> <path d="M2 12h20" /> </svg></span><div><div class="t">Data in India</div><div class="d">Personal and health data is stored and processed in India.</div></div></div><div class="cap"><span class="chip sm"><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z" /> <path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z" /> <path d="M7 21h10" /> <path d="M12 3v18" /> <path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2" /> </svg></span><div><div class="t">Law and regulation</div><div class="d">DPDP Act 2023 · CERT-In 6-hour reporting · RBI payment rules · prescription rules.</div></div></div><div class="cap"><span class="chip sm"><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" /> <path d="M14 2v4a2 2 0 0 0 2 2h4" /> <path d="M10 9H8" /> <path d="M16 13H8" /> <path d="M16 17H8" /> </svg></span><div><div class="t">Partner agreements</div><div class="d">Purpose, retention, delete on revoke, no sale, no re-identification, no training.</div></div></div></div></div>
+  </div>
+  <div class="footer"><span><b>Cheeku Platform API</b> · Business overview</span><span>13 / 16</span></div>
+</section>
+
+<!-- 14 CLOUD AND SCALE -->
+<section class="page">
+  <div class="kicker">13 · Cloud infrastructure and scale</div>
+  <h1>Built to grow by adding capacity, not by redesign</h1>
+  <p class="sub">Every layer can scale out on its own, nothing depends on a single zone, and data is backed up continuously within India.</p>
+  <div class="body" style="display:grid;grid-template-columns:1.55fr 1fr;gap:26px">
+    <div class="infra">
+      <div class="ibox" style="width:300px;margin:0 auto"><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /> <circle cx="9" cy="7" r="4" /> <path d="M22 21v-2a4 4 0 0 0-3-3.87" /> <path d="M16 3.13a4 4 0 0 1 0 7.75" /> </svg><span class="t">Partners and people</span><span class="small">over HTTPS</span></div>
+      <div class="darr"><svg viewBox="0 0 12 22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 1V20M1.5 15L6 20L10.5 15"/></svg></div>
+      <div class="ibox"><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <circle cx="12" cy="12" r="10" /> <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" /> <path d="M2 12h20" /> </svg><div><div class="t">Global edge network</div><div class="small">TLS close to the user · firewall · DDoS protection · per-partner rate limits</div></div></div>
+      <div class="darr"><svg viewBox="0 0 12 22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 1V20M1.5 15L6 20L10.5 15"/></svg></div>
+      <div class="region">
+        <span class="rl">India region</span>
+        <div class="zones">
+          <div class="ibox"><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <rect width="20" height="8" x="2" y="2" rx="2" ry="2" /> <rect width="20" height="8" x="2" y="14" rx="2" ry="2" /> <line x1="6" x2="6.01" y1="6" y2="6" /> <line x1="6" x2="6.01" y1="18" y2="18" /> </svg><div><div class="t">API services</div><div class="small">scale out on load</div></div><span class="ztag">Zone A</span></div>
+          <div style="text-align:center;color:var(--ink3);font-size:16px">⇄</div>
+          <div class="ibox"><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <rect width="20" height="8" x="2" y="2" rx="2" ry="2" /> <rect width="20" height="8" x="2" y="14" rx="2" ry="2" /> <line x1="6" x2="6.01" y1="6" y2="6" /> <line x1="6" x2="6.01" y1="18" y2="18" /> </svg><div><div class="t">API services</div><div class="small">scale out on load</div></div><span class="ztag">Zone B</span></div>
+        </div>
+        <div class="wl"><span>Conversations</span><span>Care</span><span>Health data</span><span>Payments</span><span>Events</span></div>
+        <div class="zones">
+          <div class="ibox" style="border-color:var(--b6);background:var(--wash)"><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <ellipse cx="12" cy="5" rx="9" ry="3" /> <path d="M3 5V19A9 3 0 0 0 21 19V5" /> <path d="M3 12A9 3 0 0 0 21 12" /> </svg><div><div class="t">Database</div><div class="small">primary</div></div><span class="ztag">Zone A</span></div>
+          <div style="text-align:center;color:var(--ink3);font-size:10px;line-height:1.2">auto<br>failover</div>
+          <div class="ibox"><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <ellipse cx="12" cy="5" rx="9" ry="3" /> <path d="M3 5V19A9 3 0 0 0 21 19V5" /> <path d="M3 12A9 3 0 0 0 21 12" /> </svg><div><div class="t">Database</div><div class="small">standby</div></div><span class="ztag">Zone B</span></div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+          <div class="ibox" style="padding:8px 10px"><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z" /> <path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65" /> <path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65" /> </svg><div><div class="t">Read replicas</div><div class="small">heavy reads</div></div></div>
+          <div class="ibox" style="padding:8px 10px"><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" /> <path d="M21 3v5h-5" /> <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" /> <path d="M8 16H3v5" /> </svg><div><div class="t">Durable queues</div><div class="small">retries, no loss</div></div></div>
+          <div class="ibox" style="padding:8px 10px"><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" /> <rect width="8" height="6" x="8" y="12" rx="1" /> <path d="M10 12v-2a2 2 0 1 1 4 0v2" /> </svg><div><div class="t">File storage</div><div class="small">encrypted</div></div></div>
+        </div>
+      </div>
+      <div class="darr"><svg viewBox="0 0 12 22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 1V20M1.5 15L6 20L10.5 15"/></svg></div>
+      <div class="ibox" style="border-style:dashed"><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /> <path d="M3 3v5h5" /> <path d="M12 7v5l4 2" /> </svg><div><div class="t">Continuous encrypted backups</div><div class="small">a second copy in another Indian region · restore drills every quarter</div></div></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div class="small" style="font-weight:600;letter-spacing:.06em;text-transform:uppercase">Service targets, version 1</div>
+      <div class="kpis">
+        <div class="kpi hl"><div class="v">99.9<small>%</small></div><div class="k">Monthly availability</div></div>
+        <div class="kpi"><div class="v">&lt;300<small> ms</small></div><div class="k">Reads, p95</div></div>
+        <div class="kpi"><div class="v">&lt;2<small> s</small></div><div class="k">Booking requests, p95</div></div>
+        <div class="kpi"><div class="v">&lt;2<small> s</small></div><div class="k">First words of an answer</div></div>
+        <div class="kpi"><div class="v">&lt;30<small> s</small></div><div class="k">Event delivery, p95</div></div>
+        <div class="kpi"><div class="v">5<small> min</small> · 4<small> h</small></div><div class="k">Recovery point · recovery time</div></div>
+      </div>
+      <div class="kpi hl" style="margin-top:2px"><div class="v">10,000 → 100,000<small> families</small></div><div class="k">Load tested before launch, then scaled out with more instances, replicas and queue workers</div></div>
+      <div class="card tint" style="padding:12px 14px"><div class="small" style="color:var(--ink7)"><b>Default limits</b>, raised by agreement: 50 requests a second per app · 600 a minute per person · daily conversation and booking limits per person.</div></div>
+    </div>
+  </div>
+  <div class="footer"><span><b>Cheeku Platform API</b> · Business overview</span><span>14 / 16</span></div>
+</section>
+
+<!-- 15 ROLLOUT -->
+<section class="page">
+  <div class="kicker">14 · Rollout</div>
+  <h1>Partners build in the sandbox from week 6 and go live by about week 19</h1>
+  <p class="sub">Five phases, each ending with something partners can use. Phases 3 and 4 can run alongside phase 2, which brings the total closer to 17 weeks.</p>
+  <div class="body center">
+    <div class="phases">
+      <div class="phase"><div class="pn"><span class="num">1</span><span class="t">Foundation</span></div><div class="wk">Weeks 1–5</div><div class="bar"><i style="left:0;width:26%"></i></div>
+        <ul><li><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M20 6 9 17l-5-5" /> </svg>Sandbox</li><li><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M20 6 9 17l-5-5" /> </svg>OpenAPI and SDK</li><li><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M20 6 9 17l-5-5" /> </svg>Sign-in and consent</li><li><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M20 6 9 17l-5-5" /> </svg>Members</li><li><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M20 6 9 17l-5-5" /> </svg>Connected apps</li></ul></div>
+      <div class="phase"><div class="pn"><span class="num">2</span><span class="t">Care and payments</span></div><div class="wk">Weeks 6–9</div><div class="bar"><i style="left:26%;width:21%"></i></div>
+        <ul><li><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M20 6 9 17l-5-5" /> </svg>Catalogue and slots</li><li><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M20 6 9 17l-5-5" /> </svg>Lab tests</li><li><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M20 6 9 17l-5-5" /> </svg>Consultations</li><li><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M20 6 9 17l-5-5" /> </svg>Medicines</li><li><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M20 6 9 17l-5-5" /> </svg>Checkout and billing</li><li><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M20 6 9 17l-5-5" /> </svg>Events</li></ul></div>
+      <div class="phase"><div class="pn"><span class="num">3</span><span class="t">Conversations</span></div><div class="wk">Weeks 10–13</div><div class="bar"><i style="left:47%;width:21%"></i></div>
+        <ul><li><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M20 6 9 17l-5-5" /> </svg>Ask on their behalf</li><li><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M20 6 9 17l-5-5" /> </svg>Streaming answers</li><li><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M20 6 9 17l-5-5" /> </svg>Safety block</li></ul></div>
+      <div class="phase"><div class="pn"><span class="num">4</span><span class="t">Health data</span></div><div class="wk">Weeks 14–16</div><div class="bar"><i style="left:68%;width:16%"></i></div>
+        <ul><li><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M20 6 9 17l-5-5" /> </svg>Records</li><li><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M20 6 9 17l-5-5" /> </svg>Results</li><li><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M20 6 9 17l-5-5" /> </svg>Medicines list</li><li><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M20 6 9 17l-5-5" /> </svg>Health areas</li><li><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M20 6 9 17l-5-5" /> </svg>Care plan</li><li><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M20 6 9 17l-5-5" /> </svg>Wearables</li></ul></div>
+      <div class="phase"><div class="pn"><span class="num">5</span><span class="t">Pilot and launch</span></div><div class="wk">Weeks 17–19</div><div class="bar"><i style="left:84%;width:16%"></i></div>
+        <ul><li><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M20 6 9 17l-5-5" /> </svg>Load test</li><li><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M20 6 9 17l-5-5" /> </svg>Penetration test</li><li><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M20 6 9 17l-5-5" /> </svg>First pilot partner</li><li><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M20 6 9 17l-5-5" /> </svg>General availability</li></ul></div>
+    </div>
+    <div class="axis">
+      <div class="line"></div>
+      <div class="gate hl" style="left:calc((100% - 56px) / 5 + 7px)"><span class="dm"></span><span class="gt">Sandbox opens</span><span class="gd">partners start building</span></div>
+      <div class="gate" style="left:auto;right:0;transform:none;align-items:flex-end"><span class="dm" style="margin-right:2px"></span><span class="gt">Live for all partners</span><span class="gd">about 4 to 5 months in</span></div>
+    </div>
+  </div>
+  <div class="footer"><span><b>Cheeku Platform API</b> · Business overview</span><span>15 / 16</span></div>
+</section>
+
+<!-- 16 ONBOARDING -->
+<section class="page">
+  <div class="kicker">15 · Partner onboarding</div>
+  <h1>From agreement to live members in seven steps</h1>
+  <p class="sub">Real data never enters the sandbox. A partner goes live only after passing certification and a go-live review.</p>
+  <div class="body center">
+    <div class="chev">
+      <div><span class="num">1</span><br>Sign the partner agreement and the data processing agreement</div>
+      <div><span class="num">2</span><br>Complete the security questionnaire</div>
+      <div><span class="num">3</span><br>Register the app: redirects, public key, scopes, event address</div>
+      <div class="hl"><span class="num">4</span><br>Build in the sandbox against synthetic families</div>
+      <div class="hl"><span class="num">5</span><br>Pass certification: consent, safety block, signatures, idempotency, revoke</div>
+      <div><span class="num">6</span><br>Go-live review, then production keys</div>
+      <div><span class="num">7</span><br>A pilot group of members, then the full programme</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:24px">
+      <div class="card">
+        <div class="t">What partners agree to</div>
+        <div class="list ok">
+          <div><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M20 6 9 17l-5-5" /> </svg>Show the safety block unchanged</div>
+          <div><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M20 6 9 17l-5-5" /> </svg>Use data only for the purpose the person agreed to, and delete it when access is revoked</div>
+          <div><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M20 6 9 17l-5-5" /> </svg>Never re-identify, sell or train on it</div>
+          <div><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M20 6 9 17l-5-5" /> </svg>Verify every event signature</div>
+          <div><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M20 6 9 17l-5-5" /> </svg>Keep keys secure and rotate them</div>
+        </div>
+      </div>
+      <div class="card tint">
+        <div class="t">Not in version 1</div>
+        <div class="list no">
+          <div><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M18 6 6 18" /> <path d="m6 6 12 12" /> </svg>Partners writing medicines, doses, conditions or any clinical decision</div>
+          <div><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M18 6 6 18" /> <path d="m6 6 12 12" /> </svg>Bulk or population-level data exports</div>
+          <div><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M18 6 6 18" /> <path d="m6 6 12 12" /> </svg>National health ID (ABHA) linking; the data shapes prepare for it</div>
+          <div><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M18 6 6 18" /> <path d="m6 6 12 12" /> </svg>Insurance policies, locations, notifications and consent records</div>
+          <div><svg class="ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M18 6 6 18" /> <path d="m6 6 12 12" /> </svg>Doctor-facing or provider-facing APIs</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><span><b>Cheeku Platform API</b> · Business overview</span><span>16 / 16</span></div>
+</section>
+
+</body>
+</html>
