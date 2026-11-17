@@ -17,12 +17,13 @@ import {
   Utensils,
   type LucideIcon,
 } from "lucide-react-native";
-import { useState } from "react";
+import { createContext, useContext, useState } from "react";
 import { Image, Text, View } from "react-native";
 
 import { Tap } from "@/components/ui/tap";
 import { MealReadCard } from "@/components/today/sheets";
-import { glassShadow } from "@/components/ui/glass";
+import { Icon3D } from "@/components/ui/icon3d";
+import { PILLAR_TONE, taskIcon3d, type Tone } from "@/components/today/palette";
 import { BreathIcon, MindIcon, type AppIcon } from "@/components/ui/icons";
 import { WINDOW_LABEL } from "@/lib/home/catalog";
 import type { Area, Pillar } from "@/lib/home/content";
@@ -52,26 +53,28 @@ function Thumb({ log }: { log: DailyLog }) {
   );
 }
 
+/** The card's colours, so its buttons and widgets match without passing them down. */
+const ToneCtx = createContext<Tone>(PILLAR_TONE.sleep);
+
 function SmallButton({ label, onPress, dark, icon: Icon }: { label: string; onPress: () => void; dark?: boolean; icon?: LucideIcon }) {
+  const tone = useContext(ToneCtx);
   return (
     <Tap
       accessibilityRole="button"
       accessibilityLabel={label}
       onPress={onPress}
       style={{
-        height: 40,
-        paddingHorizontal: 14,
+        height: 42,
+        paddingHorizontal: 16,
         borderRadius: 999,
         flexDirection: "row",
         alignItems: "center",
         gap: 6,
-        backgroundColor: dark ? ink[900] : "#fff",
-        borderWidth: dark ? 0 : 1,
-        borderColor: surface.line,
+        backgroundColor: dark ? tone.deep : "#fff",
       }}
     >
-      {Icon ? <Icon size={15} color={dark ? "#fff" : ink[900]} strokeWidth={2.4} /> : null}
-      <Text style={{ fontFamily: font.semibold, fontSize: 13, color: dark ? "#fff" : ink[900] }}>{label}</Text>
+      {Icon ? <Icon size={15} color={dark ? "#fff" : tone.deep} strokeWidth={2.4} /> : null}
+      <Text style={{ fontFamily: font.semibold, fontSize: 14, color: dark ? "#fff" : tone.deep }}>{label}</Text>
     </Tap>
   );
 }
@@ -102,46 +105,50 @@ export function TaskCard({
   const qc = useQueryClient();
   const [showMore, setShowMore] = useState(false);
   const done = task.status === "done";
-  const Icon = task.due ? CalendarClock : (KIND_ICON[task.kind] ?? PILLAR_ICON[task.pillar]);
+  const tone = PILLAR_TONE[task.pillar];
+  const overdue = task.dueLabel === "Overdue";
   const proof = task.logs.some((l) => l.photoPath);
   const lastMeal = task.kind === "meal" ? task.logs[task.logs.length - 1] : undefined;
   const rating = task.kind === "rating" ? task.logs[task.logs.length - 1]?.value : undefined;
   const reading = task.kind === "reading" ? task.logs[task.logs.length - 1] : undefined;
 
   return (
-    <View className="rounded-xl bg-white p-4" style={[glassShadow, { borderWidth: 1, borderColor: done ? brand[100] : surface.line }]}>
-      <View className="flex-row items-start gap-3">
-        <View className="h-11 w-11 items-center justify-center rounded-lg" style={{ backgroundColor: done ? brand[600] : task.due ? (task.dueLabel === "Overdue" ? semantic.dangerBg : semantic.cautionBg) : brand[50] }}>
-          {done ? <Check size={20} color="#fff" strokeWidth={3} /> : <Icon size={20} color={task.due ? (task.dueLabel === "Overdue" ? semantic.dangerText : semantic.cautionText) : brand[600]} strokeWidth={1.9} />}
+    <ToneCtx.Provider value={tone}>
+    <View style={{ borderRadius: 26, padding: 18, backgroundColor: done ? "#fff" : tone.bg }}>
+      <View className="flex-row items-center gap-3">
+        <View style={{ width: 54, height: 54, borderRadius: 999, backgroundColor: "#fff", alignItems: "center", justifyContent: "center" }}>
+          {done ? (
+            <View style={{ width: 54, height: 54, borderRadius: 999, backgroundColor: tone.accent, alignItems: "center", justifyContent: "center" }}>
+              <Check size={24} color="#fff" strokeWidth={3} />
+            </View>
+          ) : (
+            <Icon3D name={taskIcon3d(task)} size={34} />
+          )}
         </View>
         <View className="min-w-0 flex-1">
-          <Text style={{ fontFamily: font.semibold, fontSize: 15, lineHeight: 20, color: done ? ink[500] : ink[900] }}>{task.title}</Text>
-          <View className="mt-1 flex-row items-center gap-1.5">
-            {/* A pill only when it says something: due, a goal, or for you. "Healthy living" on every general card was noise (UI audit). */}
-            {task.due || task.personal ? (
-              <View className="rounded-pill px-2 py-0.5" style={{ backgroundColor: task.due ? (task.dueLabel === "Overdue" ? semantic.dangerBg : semantic.cautionBg) : brand[600] }}>
-                <Text style={{ fontFamily: font.semibold, fontSize: 11, color: task.due ? (task.dueLabel === "Overdue" ? semantic.dangerText : semantic.cautionText) : "#fff" }}>
-                  {task.due ? task.dueLabel : task.goal ? "Your goal" : "For you"}
-                </Text>
-              </View>
-            ) : null}
-            <Text numberOfLines={1} style={{ flexShrink: 1, fontFamily: font.medium, fontSize: 12, color: ink[500] }}>
-              {task.chip}
-              {task.minutes ? ` · ${task.minutes} min` : ""}
-              {task.window !== "anytime" ? ` · ${WINDOW_LABEL[task.window]}` : ""}
+          <Text style={{ fontFamily: font.semibold, fontSize: 17, lineHeight: 22, letterSpacing: -0.3, color: done ? ink[500] : ink[900] }}>{task.title}</Text>
+          <Text numberOfLines={1} style={{ fontFamily: font.medium, fontSize: 13, color: done ? ink[500] : tone.deep, marginTop: 2 }}>
+            {[task.chip, task.minutes ? `${task.minutes} min` : null, task.window !== "anytime" ? WINDOW_LABEL[task.window] : null].filter(Boolean).join(" · ")}
+          </Text>
+        </View>
+        {/* A tag only when it says something: due, a goal, or for you. */}
+        {!done && (task.due || task.personal) ? (
+          <View style={{ alignSelf: "flex-start", paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999, backgroundColor: task.due ? (overdue ? semantic.dangerBg : "#fff") : "#fff" }}>
+            <Text style={{ fontFamily: font.semibold, fontSize: 12, color: task.due ? (overdue ? semantic.dangerText : semantic.cautionText) : tone.deep }}>
+              {task.due ? task.dueLabel : task.goal ? "Your goal" : "For you"}
             </Text>
           </View>
-        </View>
+        ) : null}
       </View>
 
       {task.reason ? (
-        <Text style={{ fontFamily: font.medium, fontSize: 13, color: brand[600], marginTop: 12 }}>{task.reason}</Text>
+        <Text style={{ fontFamily: font.semibold, fontSize: 14, lineHeight: 19, color: tone.deep, marginTop: 14 }}>{task.reason}</Text>
       ) : null}
       {!done || task.kind === "meal" ? (
-        <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 18.5, color: ink[700], marginTop: task.reason ? 4 : 8 }}>
+        <Text style={{ fontFamily: font.regular, fontSize: 14, lineHeight: 20, color: ink[700], marginTop: task.reason ? 4 : 12 }}>
           {task.why}
           {task.more ? (
-            <Text accessibilityRole="button" onPress={() => setShowMore((v) => !v)} style={{ fontFamily: font.semibold, color: brand[600] }}>
+            <Text accessibilityRole="button" onPress={() => setShowMore((v) => !v)} style={{ fontFamily: font.semibold, color: tone.deep }}>
               {showMore ? "  Less" : "  Why this?"}
             </Text>
           ) : null}
@@ -155,19 +162,19 @@ export function TaskCard({
       {task.kind === "steps" && task.progress ? (
         <View className="mt-3">
           <View className="flex-row items-baseline justify-between">
-            <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>
+            <Text style={{ fontFamily: font.semibold, fontSize: 28, letterSpacing: -0.8, color: ink[900] }}>
               {task.progress.value.toLocaleString("en-IN")}
-              <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[500] }}> of {task.progress.target.toLocaleString("en-IN")}</Text>
+              <Text style={{ fontFamily: font.regular, fontSize: 14, letterSpacing: 0, color: ink[500] }}> of {task.progress.target.toLocaleString("en-IN")} steps</Text>
             </Text>
             {proof ? (
               <View className="flex-row items-center gap-1">
                 <BadgeCheck size={13} color={ink[900]} />
-                <Text style={{ fontFamily: font.semibold, fontSize: 12, color: brand[700] }}>Screenshot added</Text>
+                <Text style={{ fontFamily: font.semibold, fontSize: 12, color: tone.deep }}>Screenshot added</Text>
               </View>
             ) : null}
           </View>
-          <View style={{ height: 8, borderRadius: 999, backgroundColor: brand[50], marginTop: 6, overflow: "hidden" }}>
-            <View style={{ height: 8, borderRadius: 999, width: `${Math.min(100, (task.progress.value / Math.max(1, task.progress.target)) * 100)}%`, backgroundColor: done ? brand[600] : brand[400] }} />
+          <View style={{ height: 10, borderRadius: 999, backgroundColor: "#fff", marginTop: 8, overflow: "hidden" }}>
+            <View style={{ height: 10, borderRadius: 999, width: `${Math.max(3, Math.min(100, (task.progress.value / Math.max(1, task.progress.target)) * 100))}%`, backgroundColor: tone.accent }} />
           </View>
         </View>
       ) : null}
@@ -205,9 +212,9 @@ export function TaskCard({
                 accessibilityState={{ checked: on }}
                 onPress={() => void addDailyLog(qc, { profileId, task, value: i + 1, valueText: label, complete: true })}
                 className="h-10 flex-1 items-center justify-center rounded-pill"
-                style={{ backgroundColor: on ? brand[600] : brand[50] }}
+                style={{ backgroundColor: on ? tone.deep : "#fff" }}
               >
-                <Text style={{ fontFamily: font.semibold, fontSize: 12, color: on ? "#fff" : brand[700] }}>{label}</Text>
+                <Text style={{ fontFamily: font.semibold, fontSize: 12, color: on ? "#fff" : tone.deep }}>{label}</Text>
               </Tap>
             );
           })}
@@ -215,7 +222,7 @@ export function TaskCard({
       ) : null}
 
       {/* the actions */}
-      <View className="mt-3 flex-row flex-wrap items-center gap-2" style={{ alignItems: "flex-start" }}>
+      <View className="mt-4 flex-row flex-wrap items-center gap-2" style={{ alignItems: "flex-start" }}>
         {task.due && task.cta && !done ? <SmallButton dark label={task.cta.label} onPress={() => router.push(task.cta?.route as never)} /> : null}
         {task.kind === "steps" ? <SmallButton dark={!done} label={task.progress?.value ? "Update steps" : "Log steps"} icon={Plus} onPress={() => onOpen("steps")} /> : null}
         {task.kind === "meal" ? <SmallButton dark={!done} label={task.logs.length ? "Add more" : "Add photo"} icon={Plus} onPress={() => onOpen("meal")} /> : null}
@@ -230,6 +237,7 @@ export function TaskCard({
         {done && task.kind === "habit" ? <SmallButton label="Undo" icon={Undo2} onPress={onUndo} /> : null}
       </View>
     </View>
+    </ToneCtx.Provider>
   );
 }
 
@@ -240,6 +248,7 @@ export function TaskCard({
  */
 export function DoseList({ profileId, doses }: { profileId: string; doses: readonly DoseView[] }) {
   const qc = useQueryClient();
+  const tone = useContext(ToneCtx);
   return (
     <View className="mt-3 gap-2">
       {doses.map((d) => {
@@ -256,7 +265,7 @@ export function DoseList({ profileId, doses }: { profileId: string; doses: reado
             }}
             scale={0.98}
             className="flex-row items-center gap-3 rounded-lg px-3 py-2.5"
-            style={{ backgroundColor: d.taken ? brand[50] : surface.tint }}
+            style={{ backgroundColor: d.taken ? "rgba(255,255,255,0.6)" : "#fff" }}
           >
             <View className="min-w-0 flex-1">
               <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 15, color: d.taken ? ink[500] : ink[900] }}>
@@ -264,7 +273,7 @@ export function DoseList({ profileId, doses }: { profileId: string; doses: reado
               </Text>
               {how ? <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 12, color: ink[500], marginTop: 1 }}>{how}</Text> : null}
             </View>
-            <View className="h-8 w-8 items-center justify-center rounded-pill" style={d.taken ? { backgroundColor: brand[600] } : { borderWidth: 1.5, borderColor: brand[200], backgroundColor: "#fff" }}>
+            <View className="h-8 w-8 items-center justify-center rounded-pill" style={d.taken ? { backgroundColor: tone.accent } : { borderWidth: 1.5, borderColor: tone.track, backgroundColor: "#fff" }}>
               {d.taken ? <Check size={15} color="#fff" strokeWidth={3} /> : null}
             </View>
           </Tap>
@@ -280,14 +289,14 @@ export function DoseList({ profileId, doses }: { profileId: string; doses: reado
  */
 export function TaskRow({ task, onExpand, onDone }: { task: PlanTask; onExpand: () => void; onDone: () => void }) {
   const done = task.status === "done";
-  const Icon = task.due ? CalendarClock : (KIND_ICON[task.kind] ?? PILLAR_ICON[task.pillar]);
+  const tone = PILLAR_TONE[task.pillar];
   const quick = (task.kind === "habit" || task.kind === "dose") && !task.due && !done;
   const meta = [task.status === "later" ? "Later" : null, task.goal ? "Your goal" : task.personal ? "For you" : null, task.chip, task.window !== "anytime" ? WINDOW_LABEL[task.window] : null].filter(Boolean).join(" · ");
   return (
     <View className="flex-row items-center gap-3 py-2.5">
       <Tap accessibilityRole="button" accessibilityLabel={`${task.title}. Show details`} onPress={onExpand} scale={0.98} className="min-w-0 flex-1 flex-row items-center gap-3">
-        <View className="h-9 w-9 items-center justify-center rounded-md" style={{ backgroundColor: done ? brand[600] : brand[50] }}>
-          {done ? <Check size={16} color="#fff" strokeWidth={3} /> : <Icon size={17} color={ink[900]} strokeWidth={1.9} />}
+        <View style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: done ? tone.accent : tone.bg, alignItems: "center", justifyContent: "center" }}>
+          {done ? <Check size={18} color="#fff" strokeWidth={3} /> : <Icon3D name={taskIcon3d(task)} size={28} />}
         </View>
         <View className="min-w-0 flex-1">
           <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 15, color: done ? ink[500] : ink[900] }}>
@@ -299,8 +308,8 @@ export function TaskRow({ task, onExpand, onDone }: { task: PlanTask; onExpand: 
         </View>
       </Tap>
       {quick ? (
-        <Tap accessibilityRole="button" accessibilityLabel={`Done: ${task.title}`} onPress={onDone} scale={0.95} hitSlop={6} className="h-9 w-9 items-center justify-center rounded-pill" style={{ borderWidth: 1.5, borderColor: brand[200] }}>
-          <Check size={16} color={ink[900]} strokeWidth={2.6} />
+        <Tap accessibilityRole="button" accessibilityLabel={`Done: ${task.title}`} onPress={onDone} scale={0.95} hitSlop={6} className="h-9 w-9 items-center justify-center rounded-pill" style={{ borderWidth: 1.5, borderColor: tone.accent }}>
+          <Check size={16} color={tone.deep} strokeWidth={2.6} />
         </Tap>
       ) : null}
     </View>

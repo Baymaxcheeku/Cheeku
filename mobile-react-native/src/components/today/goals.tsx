@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 
 import { Sheet } from "@/components/today/sheets";
-import { Gradient, glassShadow } from "@/components/ui/glass";
+import { PILLAR_TONE } from "@/components/today/palette";
+import { Icon3D, type Icon3DName } from "@/components/ui/icon3d";
 import { SpringSwitch } from "@/components/ui/motion";
 import { PillButton } from "@/components/ui/screen";
 import { Tap } from "@/components/ui/tap";
@@ -25,12 +26,13 @@ import { font } from "@/theme/type";
  * reminder, or stop. The plan itself does the rest (goals.ts, plan.ts).
  */
 
-const LOOK: Record<GoalKey, { icon: LucideIcon; fg: string; bg: string }> = {
-  sleep: { icon: Moon, fg: hue.indigo.fg, bg: lilac.base },
-  weight: { icon: Weight, fg: hue.orange.fg, bg: hue.orange.bg },
-  sugar: { icon: Droplet, fg: hue.rose.fg, bg: hue.rose.bg },
-  legs: { icon: Footprints, fg: hue.teal.fg, bg: hue.teal.bg },
-  calm: { icon: Leaf, fg: hue.blue.fg, bg: hue.blue.bg },
+// Flat pastels from Today's palette, and Cheeku's 3D object for each goal.
+export const LOOK: Record<GoalKey, { icon: LucideIcon; art: Icon3DName; fg: string; bg: string }> = {
+  sleep: { icon: Moon, art: "moon", fg: PILLAR_TONE.sleep.deep, bg: PILLAR_TONE.sleep.bg },
+  weight: { icon: Weight, art: "scale", fg: PILLAR_TONE.eat.deep, bg: PILLAR_TONE.eat.bg },
+  sugar: { icon: Droplet, art: "glucose", fg: PILLAR_TONE.mind.deep, bg: PILLAR_TONE.mind.bg },
+  legs: { icon: Footprints, art: "shoe", fg: PILLAR_TONE.move.deep, bg: PILLAR_TONE.move.bg },
+  calm: { icon: Leaf, art: "lotus", fg: PILLAR_TONE.check.deep, bg: PILLAR_TONE.check.bg },
 };
 
 const CARD_W = 160;
@@ -42,7 +44,7 @@ export function GoalPicker({ goals, onPick }: { goals: readonly Goal[]; onPick: 
     <View className="mt-6">
       <View className="px-5">
         <Text accessibilityRole="header" style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>
-          Pick one goal
+          Or choose another goal
         </Text>
         <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[500], marginTop: 2 }}>Cheeku turns it into a few small check-ins a day.</Text>
       </View>
@@ -66,11 +68,10 @@ export function GoalPicker({ goals, onPick }: { goals: readonly Goal[]; onPick: 
                 onPick(g.key);
               }}
               scale={0.98}
-              style={[glassShadow, { width: CARD_W, height: 188, borderRadius: 24, overflow: "hidden", padding: 14 }]}
+              style={{ width: CARD_W, height: 188, borderRadius: 24, overflow: "hidden", padding: 14, backgroundColor: look.bg }}
             >
-              <Gradient from={look.bg} to="#ffffff" angle="vertical" />
               <View className="h-10 w-10 items-center justify-center rounded-pill" style={{ backgroundColor: "#ffffff" }}>
-                <Icon size={19} color={look.fg} strokeWidth={2} />
+                <Icon3D name={look.art} size={26} />
               </View>
               <Text style={{ fontFamily: font.semibold, fontSize: 17, letterSpacing: -0.3, color: ink[900], marginTop: 12 }}>{g.title}</Text>
               <Text numberOfLines={3} style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 17, color: ink[700], marginTop: 3 }}>
@@ -100,15 +101,14 @@ export function GoalBanner({ goal, onPress }: { goal: GoalView; onPress: () => v
       accessibilityLabel={`Your goal, ${goal.title}, day ${goal.day}. ${goal.doneToday} of ${goal.totalToday} check-ins done today. Change goal`}
       onPress={onPress}
       scale={0.98}
-      style={[glassShadow, { marginHorizontal: 20, marginTop: 20, borderRadius: 24, overflow: "hidden", padding: 14 }]}
+      style={{ marginHorizontal: 20, marginTop: 20, borderRadius: 24, overflow: "hidden", padding: 14, backgroundColor: look.bg }}
     >
-      <Gradient from={look.bg} to="#ffffff" angle="diagonal" />
       <View className="flex-row items-center gap-3">
         <View className="h-11 w-11 items-center justify-center rounded-pill" style={{ backgroundColor: "#ffffff" }}>
-          <Icon size={20} color={look.fg} strokeWidth={2} />
+          <Icon3D name={look.art} size={28} />
         </View>
         <View className="min-w-0 flex-1">
-          <Text style={{ fontFamily: font.bold, fontSize: 11, letterSpacing: 1, color: look.fg }}>{`YOUR GOAL · DAY ${goal.day}`}</Text>
+          <Text style={{ fontFamily: font.semibold, fontSize: 13, color: look.fg }}>{`Your goal · day ${goal.day}`}</Text>
           <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 17, letterSpacing: -0.3, color: ink[900], marginTop: 1 }}>
             {goal.title}
           </Text>
