@@ -99,6 +99,15 @@ export const STORAGE_REGISTRY: readonly StoredItem[] = [
     lasts: "Until you sign out",
   },
   {
+    key: "cheeku.firstSeen",
+    label: "When you first opened the app",
+    why: "Keeps permission prompts off your first day.",
+    where: "keychain",
+    contains: "preference",
+    scope: "account",
+    lasts: "Until you sign out",
+  },
+  {
     key: "cheeku.partnerDoctors",
     label: "Doctors you looked at",
     why: "Names and departments of partner doctors, so your appointments show who they are with.",

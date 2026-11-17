@@ -83,31 +83,42 @@ export function Sheet({
     if (open) setMounted(true);
   }, [open]);
 
-  // Enter once the sheet has been measured; leave whenever `open` drops.
+  /*
+   * Enter once the sheet has been measured; leave whenever `open` drops.
+   *
+   * NEVER STUCK. A mounted sheet is a full-screen Modal: if it stayed mounted
+   * after closing, or never slid in, it would sit invisible over the app and
+   * swallow every tap (seen on a phone, 17 Nov: "nothing is clickable"). So
+   * neither step trusts the animation alone:
+   *  - leaving unmounts on a plain timer, not on the animation's "finished"
+   *    callback (which can be skipped or interrupted);
+   *  - entering doesn't wait for a measurement forever: after a beat it
+   *    slides in from the screen's height instead.
+   */
   useEffect(() => {
     if (!mounted) return;
     if (open) {
-      if (!height) return;
-      shown.set(withTiming(1, { duration: 200, easing: EASE_OUT }));
-      if (still) {
-        y.set(0);
-      } else {
-        y.set(height);
-        y.set(withSpring(0, { duration: 300, dampingRatio: 0.9 }));
+      const enter = (from: number) => {
+        shown.set(withTiming(1, { duration: 200, easing: EASE_OUT }));
+        if (still) {
+          y.set(0);
+        } else {
+          y.set(from);
+          y.set(withSpring(0, { duration: 300, dampingRatio: 0.9 }));
+        }
+      };
+      if (height) {
+        enter(height);
+        return;
       }
-      return;
+      const t = setTimeout(() => enter(screen), 160);
+      return () => clearTimeout(t);
     }
     shown.set(withTiming(0, { duration: 180, easing: EASE_OUT }));
-    const done = () => setMounted(false);
-    if (still) {
-      y.set(withTiming(0, { duration: 180 }, (finished) => {
-        if (finished) scheduleOnRN(done);
-      }));
-    } else {
-      y.set(withTiming(height || screen, { duration: 220, easing: EASE_SHEET }, (finished) => {
-        if (finished) scheduleOnRN(done);
-      }));
-    }
+    if (still) y.set(withTiming(0, { duration: 180 }));
+    else y.set(withTiming(height || screen, { duration: 220, easing: EASE_SHEET }));
+    const t = setTimeout(() => setMounted(false), still ? 200 : 240);
+    return () => clearTimeout(t);
   }, [open, mounted, height, still, screen, shown, y]);
 
   const pan = usePanGesture({
@@ -127,8 +138,9 @@ export function Sheet({
       const h = height || screen;
       const projected = y.get() + project(e.velocityY);
       if (dismissible && projected > h * 0.4) {
-        y.set(withSpring(h, { duration: 300, dampingRatio: 1, velocity: e.velocityY, overshootClamping: true }));
-        shown.set(withTiming(0, { duration: 180, easing: EASE_OUT }));
+        // Hand over to the normal close (which slides out from right here and
+        // unmounts on a timer). Hiding the sheet in this worklet first would
+        // leave an invisible, tap-swallowing sheet if the hand-over were lost.
         scheduleOnRN(feel.tap);
         scheduleOnRN(onClose);
       } else {

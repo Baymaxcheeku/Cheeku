@@ -130,19 +130,25 @@ export default function Records() {
 
       <OfflineBanner updatedAt={records.dataUpdatedAt} />
 
-      <FilterBar
-        profiles={allowed}
-        defaultProfileId={activeId}
-        allowAllMembers={canSeeEveryone}
-        filters={filters}
-        onChange={setFilters}
-      />
+      {/* An empty file shows only the welcome card: filters and three zeros
+          are noise before the first record. */}
+      {records.isSuccess && list.length === 0 && !filtered && severity === null ? null : (
+        <>
+          <FilterBar
+            profiles={allowed}
+            defaultProfileId={activeId}
+            allowAllMembers={canSeeEveryone}
+            filters={filters}
+            onChange={setFilters}
+          />
 
-      <PulseBar
-        stats={statsFrom(list)}
-        active={severity}
-        onToggle={setSeverity}
-      />
+          <PulseBar
+            stats={statsFrom(list)}
+            active={severity}
+            onToggle={setSeverity}
+          />
+        </>
+      )}
 
       {records.isPending ? (
         <View className="px-5">

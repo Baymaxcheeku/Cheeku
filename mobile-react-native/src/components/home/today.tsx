@@ -161,7 +161,7 @@ function UnlockRowView({ row, index, last, onPress }: { row: UnlockRow; index: n
       </View>
       {key && !row.done ? (
         <View className="rounded-pill px-2 py-1" style={{ backgroundColor: LIVE.bg }}>
-          <Text style={{ fontFamily: font.bold, fontSize: 11, color: LIVE.fg }}>Opens Today</Text>
+          <Text style={{ fontFamily: font.bold, fontSize: 11, color: LIVE.fg }}>Start here</Text>
         </View>
       ) : (
         <ChevronRight size={16} color={ink[300]} />

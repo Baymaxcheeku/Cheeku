@@ -26,6 +26,13 @@ import { PlaceSheet } from "./place-sheet";
 
 const KEY = "cheeku.locationPrimer";
 const WAIT_MS = 7 * 86_400_000;
+/**
+ * Not on the first day. A new person lands on Home to a welcome and three
+ * steps; a permission sheet over that is the wrong first impression, and the
+ * booking screens ask for location themselves when it's actually needed.
+ */
+const FIRST_SEEN = "cheeku.firstSeen";
+const FIRST_DAY_MS = 86_400_000;
 
 export function LocationPrimer() {
   const insets = useSafeAreaInsets();
@@ -38,8 +45,13 @@ export function LocationPrimer() {
     if (!hydrated || !near.loaded || near.place) return;
     let live = true;
     const t = setTimeout(() => {
-      void Promise.all([readPermission(), kv.get(KEY).catch(() => null)]).then(([perm, last]) => {
+      void Promise.all([readPermission(), kv.get(KEY).catch(() => null), kv.get(FIRST_SEEN).catch(() => null)]).then(([perm, last, first]) => {
         if (!live || perm !== "undetermined") return;
+        if (!first) {
+          void kv.set(FIRST_SEEN, String(Date.now())).catch(() => undefined);
+          return;
+        }
+        if (Date.now() - Number(first) < FIRST_DAY_MS) return;
         if (last && Date.now() - Number(last) < WAIT_MS) return;
         setOpen(true);
       });

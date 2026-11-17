@@ -13,7 +13,6 @@ import Animated, {
   withTiming,
   type SharedValue,
 } from "react-native-reanimated";
-import { scheduleOnRN } from "react-native-worklets";
 import { useState } from "react";
 
 import { EASE_SETTLE, brand, ink, semantic, surface } from "@/theme/tokens";
@@ -486,11 +485,11 @@ export function Fold({ gone, onGone, children }: { gone: boolean; onGone: () => 
 
   useEffect(() => {
     if (!gone) return;
-    const done = () => onGone();
+    // Called once, on a timer: an animation's "finished" callback can be skipped on a phone.
     o.value = withTiming(0, { duration: still ? 120 : 180, easing: EASE_OUT });
-    h.value = withTiming(0, { duration: still ? 120 : 220, easing: EASE_OUT }, (finished) => {
-      if (finished) scheduleOnRN(done);
-    });
+    h.value = withTiming(0, { duration: still ? 120 : 220, easing: EASE_OUT });
+    const t = setTimeout(() => onGone(), still ? 140 : 240);
+    return () => clearTimeout(t);
   }, [gone, still, h, o, onGone]);
 
   const animated = useAnimatedStyle(() => {
