@@ -36,7 +36,7 @@ export function Sparkline({ values, refRange, flag, width = 76, height = 30 }: {
   const band = range && range.low !== null && range.high !== null ? { top: y(range.high), bottom: y(range.low) } : null;
 
   return (
-    <Svg width={width} height={height} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+    <Svg width={width} height={height} aria-hidden>
       {band ? <Rect x={0} y={band.top} width={width} height={Math.max(2, band.bottom - band.top)} rx={4} fill="rgba(35,175,95,0.12)" /> : null}
       <Polyline points={pts} fill="none" stroke={brand[400]} strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />
       <Circle cx={x(values.length - 1)} cy={y(last)} r={3.5} fill={flag ? FLAG_DOT[flag] : brand[600]} stroke="#fff" strokeWidth={1.5} />
@@ -46,9 +46,9 @@ export function Sparkline({ values, refRange, flag, width = 76, height = 30 }: {
 
 export function SectionHead({ title, right, note }: { title: string; right?: React.ReactNode; note?: string }) {
   return (
-    <View style={{ marginTop: 26, marginBottom: 10 }}>
+    <View style={{ marginTop: 32, marginBottom: 12 }}>
       <View style={{ flexDirection: "row", alignItems: "baseline", justifyContent: "space-between" }}>
-        <Text accessibilityRole="header" style={{ fontFamily: font.semibold, fontSize: 17, letterSpacing: -0.3, color: ink[900] }}>
+        <Text accessibilityRole="header" style={{ fontFamily: font.semibold, fontSize: 20, letterSpacing: -0.4, color: ink[900] }}>
           {title}
         </Text>
         {right}

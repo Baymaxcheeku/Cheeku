@@ -42,6 +42,10 @@ const ART = {
   shield: require("../../../assets/icon3d/shield.png"),
   star: require("../../../assets/icon3d/star.png"),
   chat: require("../../../assets/icon3d/chat.png"),
+  blood: require("../../../assets/icon3d/blood.png"),
+  syringe: require("../../../assets/icon3d/syringe.png"),
+  hospital: require("../../../assets/icon3d/hospital.png"),
+  monitor: require("../../../assets/icon3d/monitor.png"),
 } as const;
 /* eslint-enable @typescript-eslint/no-require-imports */
 

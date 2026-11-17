@@ -200,7 +200,7 @@ function Ruler({ x, item, count, width, still }: { x: SharedValue<number>; item:
   const gap = MAJOR / MINOR_PER_MAJOR;
   const move = useAnimatedStyle(() => ({ transform: [{ translateX: width / 2 - (x.value / item) * MAJOR }] }));
   return (
-    <View style={{ height: 26, marginTop: 6, overflow: "hidden" }} pointerEvents="none" accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+    <View style={{ height: 26, marginTop: 6, overflow: "hidden" }} pointerEvents="none" aria-hidden>
       <Animated.View style={[{ position: "absolute", left: 0, top: 4, flexDirection: "row", alignItems: "flex-start" }, move]}>
         {Array.from({ length: ticks }, (_, n) => {
           const major = n % MINOR_PER_MAJOR === 0;

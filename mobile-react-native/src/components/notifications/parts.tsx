@@ -141,7 +141,7 @@ export function NotificationRow({
             {brandify(item.title)}
           </Text>
           <Text style={{ fontFamily: font.regular, fontSize: 12, color: ink[300] }}>{relativeTime(item.createdAt, now)}</Text>
-          {unread ? <View accessibilityElementsHidden style={{ width: 8, height: 8, borderRadius: 999, backgroundColor: brand[500] }} /> : null}
+          {unread ? <View aria-hidden style={{ width: 8, height: 8, borderRadius: 999, backgroundColor: brand[500] }} /> : null}
         </View>
         <Text numberOfLines={2} style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[500], marginTop: 3 }}>
           {brandify(item.body)}
