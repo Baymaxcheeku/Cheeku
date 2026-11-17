@@ -4,7 +4,8 @@ import { ScrollView, Text, TextInput, View } from "react-native";
 import Animated, { FadeIn, LinearTransition } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { TYPE_STYLE } from "@/components/records/record-card";
+import { TYPE_3D } from "@/components/records/type-3d";
+import { Icon3D } from "@/components/ui/icon3d";
 import { Avatar } from "@/components/ui/avatar";
 import { glass, glassShadow } from "@/components/ui/glass";
 import { StaggerItem, useReducedMotion } from "@/components/ui/motion";
@@ -53,8 +54,6 @@ export function ScanConfirm({
   const doubtful = items.filter((i) => i.low);
   const clear = items.filter((i) => !i.low);
   const left = unresolved(extraction, review).length;
-  const style = TYPE_STYLE[extraction.docType] ?? TYPE_STYLE.other;
-  const Icon = style.icon;
   const first = member?.isPrimary ? "your" : `${member?.name.split(" ")[0] ?? "their"}'s`;
 
   const confirm = (id: string, on: boolean) => {
@@ -76,7 +75,7 @@ export function ScanConfirm({
       <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: insets.bottom + 140, gap: 14 }} showsVerticalScrollIndicator={false}>
         <View style={{ flexDirection: "row", alignItems: "flex-end", gap: 8 }}>
           <View style={{ flex: 1 }}>
-            <Text accessibilityRole="header" style={{ fontFamily: font.medium, fontSize: 28, lineHeight: 34, letterSpacing: -1, color: ink[900] }}>
+            <Text accessibilityRole="header" style={{ fontFamily: font.semibold, fontSize: 28, lineHeight: 34, letterSpacing: -0.9, color: ink[900] }}>
               {doubtful.length ? "Did I read\n" : "All read\n"}
               <Text style={{ color: ink[300] }}>{doubtful.length ? "this right?" : "clearly."}</Text>
             </Text>
@@ -91,11 +90,11 @@ export function ScanConfirm({
         {/* What it is and whose. */}
         <StaggerItem index={0}>
           <View style={[glassShadow, { borderRadius: 24, backgroundColor: "#fff", borderWidth: 1, borderColor: glass.rim, padding: 14, flexDirection: "row", alignItems: "center", gap: 12 }]}>
-            <View style={{ width: 52, height: 52, borderRadius: 16, backgroundColor: style.wash, alignItems: "center", justifyContent: "center" }}>
-              <Icon size={24} color={style.tint} />
+            <View style={{ width: 56, height: 56, borderRadius: 18, backgroundColor: surface.tint, alignItems: "center", justifyContent: "center" }}>
+              <Icon3D name={TYPE_3D[extraction.docType] ?? "folder"} size={38} />
             </View>
             <View style={{ flex: 1, minWidth: 0 }}>
-              <Text style={{ fontFamily: font.medium, fontSize: 12, color: style.tint }}>{DOC_TYPE_LABEL[extraction.docType]}</Text>
+              <Text style={{ fontFamily: font.medium, fontSize: 12, color: ink[500] }}>{DOC_TYPE_LABEL[extraction.docType]}</Text>
               <Text numberOfLines={2} style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>{extraction.title}</Text>
             </View>
             {member ? (

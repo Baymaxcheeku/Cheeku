@@ -1,5 +1,6 @@
 import { ImageManipulator, SaveFormat } from "expo-image-manipulator";
 import * as ImagePicker from "expo-image-picker";
+import { ensureMediaAccess } from "@/lib/upload/media-access";
 
 /*
  * A PHOTO ASKED ABOUT IN CHAT (a medicine strip, a rash, a food label, a report).
@@ -52,10 +53,8 @@ const PREPARE_MS = 20_000;
 export async function pickChatPhoto(source: "camera" | "library", onPicked?: () => void): Promise<ChatPhoto | null | string> {
   let asset: ImagePicker.ImagePickerAsset | undefined;
   try {
-    if (source === "camera") {
-      const permission = await ImagePicker.requestCameraPermissionsAsync();
-      if (!permission.granted) return "Cheeku needs the camera for this. Allow it in Settings, or choose a photo instead.";
-    }
+    // Cheeku's own sheet first, the system dialog only after "Allow" (lib/upload/media-access).
+    if (!(await ensureMediaAccess(source === "camera" ? "camera" : "photos"))) return null;
     const options: ImagePicker.ImagePickerOptions = { mediaTypes: ["images"], allowsEditing: false, allowsMultipleSelection: false, quality: 1, exif: false };
     const result = source === "camera" ? await ImagePicker.launchCameraAsync(options) : await ImagePicker.launchImageLibraryAsync(options);
     if (result.canceled) return null;

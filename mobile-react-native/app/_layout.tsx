@@ -24,6 +24,7 @@ import { AppLock } from "@/components/app/app-lock-gate";
 import { ConsentGate } from "@/components/legal/consent-gate";
 import { ShareIntake } from "@/components/scan/share-intake";
 import { ToastHost } from "@/components/notifications/toast";
+import { MediaAccessHost } from "@/components/upload/media-access-host";
 import { SaveBar } from "@/components/ui/save-bar";
 import { persistOptions } from "@/lib/offline/cache";
 /*
@@ -162,6 +163,7 @@ export default function RootLayout() {
           <ConsentGate />
           <ShareIntake />
           <ToastHost />
+          <MediaAccessHost />
           <SaveBar />
           </AppLock>
           </DeviceFrame>

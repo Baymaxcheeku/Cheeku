@@ -14,6 +14,7 @@ import type { CatalogTask } from "./catalog";
 import type { Pillar } from "./content";
 import type { DailyLog, DailyPrefs } from "./plan";
 import { logStep } from "./stage";
+import { ensureMediaAccess } from "@/lib/upload/media-access";
 
 /*
  * THE DAY'S LOGS, READ AND WRITTEN.
@@ -103,8 +104,8 @@ export async function saveDailyPrefs(qc: QueryClient, profileId: string, prefs: 
 
 /** Camera or library; null when cancelled or not allowed. */
 export async function pickDailyPhoto(source: "camera" | "library"): Promise<string | null> {
-  const permission = source === "camera" ? await ImagePicker.requestCameraPermissionsAsync() : await ImagePicker.requestMediaLibraryPermissionsAsync();
-  if (!permission.granted) return null;
+  // Cheeku's own sheet first, the system dialog only after "Allow" (lib/upload/media-access).
+  if (!(await ensureMediaAccess(source === "camera" ? "camera" : "photos"))) return null;
   const options: ImagePicker.ImagePickerOptions = { mediaTypes: ["images"], quality: 1, exif: false };
   const result = source === "camera" ? await ImagePicker.launchCameraAsync(options) : await ImagePicker.launchImageLibraryAsync(options);
   if (result.canceled) return null;

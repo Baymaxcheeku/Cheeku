@@ -29,7 +29,11 @@ import { Tap } from "@/components/ui/tap";
 import { MascotFigure } from "@/components/illustrations/sprout";
 import { Avatar } from "@/components/ui/avatar";
 import { Glass, Gradient, glass, glassShadow } from "@/components/ui/glass";
-import { Backdrop, PillButton, ScreenHeader } from "@/components/ui/screen";
+import { PillButton, ScreenHeader } from "@/components/ui/screen";
+import { FamilyRow, SkyWash } from "@/components/home/front";
+import { TYPE_3D } from "@/components/records/type-3d";
+import { glassCard } from "@/components/today/palette";
+import { Icon3D } from "@/components/ui/icon3d";
 import { font } from "@/theme/type";
 import { activeProfile, selectableProfiles } from "@/lib/profiles/context";
 import { TYPE_STYLE } from "@/components/records/record-card";
@@ -40,10 +44,11 @@ import { clearShared, useSharedFile } from "@/lib/scan/shared";
 import { DOC_TYPE_LABEL, DOC_TYPES, type DocType } from "@/lib/records/types";
 import type { SharedFile } from "@/lib/scan/shared";
 import { stripImageMetadata } from "@/lib/upload/strip-exif";
-import { brand, hue, ink, lilac, semantic } from "@/theme/tokens";
+import { brand, hue, ink, semantic, surface } from "@/theme/tokens";
 import { useFamily } from "@/lib/profiles/family";
 import { feel } from "@/lib/feel";
 import { LinesSkeleton, ListSkeleton, ScreenSkeleton } from "@/components/ui/skeleton";
+import { ensureMediaAccess } from "@/lib/upload/media-access";
 
 type Phase = "pick" | "working" | "confirm" | "error";
 
@@ -64,6 +69,19 @@ const MAIN: readonly { type: DocType; title: string; line: string; Icon: LucideI
   { type: "prescription", title: "Prescription", line: "From a doctor's visit", Icon: Pill },
 ];
 const OTHER = DOC_TYPES.filter((t) => t !== "other" && t !== "lab_report" && t !== "prescription");
+
+const CARD = [glassCard("#ffffff", "#0f1030"), { shadowOpacity: 0.05 }] as const;
+
+/** Short names for the kind chips. */
+const SHORT: Partial<Record<DocType, string>> = {
+  lab_report: "Lab report",
+  prescription: "Prescription",
+  consultation_invoice: "Consult invoice",
+  booking_invoice: "Booking invoice",
+  discharge: "Discharge",
+  vaccination: "Vaccine",
+  medication: "Medicine",
+};
 
 const STEPS: readonly { key: string; icon: LucideIcon; title: string; body: string }[] = [
   {
@@ -263,14 +281,8 @@ export default function Scan() {
   }
 
   async function pickFromLibrary() {
-    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permission.granted) {
-      Alert.alert(
-        "Photo access is off",
-        "Cheeku needs access to your photos to add a document from your library. You can turn it on in Settings.",
-      );
-      return;
-    }
+    // Cheeku's own sheet first; it offers Settings itself when access was refused before.
+    if (!(await ensureMediaAccess("photos"))) return;
 
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ["images"],
@@ -291,14 +303,7 @@ export default function Scan() {
   }
 
   async function takePhoto() {
-    const permission = await ImagePicker.requestCameraPermissionsAsync();
-    if (!permission.granted) {
-      Alert.alert(
-        "Camera access is off",
-        "Cheeku needs the camera to photograph a document. You can turn it on in Settings.",
-      );
-      return;
-    }
+    if (!(await ensureMediaAccess("camera"))) return;
 
     const result = await ImagePicker.launchCameraAsync({ quality: 1, exif: false });
     if (result.canceled) return;
@@ -328,64 +333,41 @@ export default function Scan() {
 
   if (phase === "working") {
     return (
-      <View
-        className="flex-1 bg-canvas px-5"
-        style={{ paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24 }}
-      >
-        <Backdrop />
+      <View className="flex-1 bg-canvas px-5" style={{ paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24 }}>
+        <SkyWash top={-40} />
         <View className="items-center">
           <MascotFigure size={132} moment="working" move="float" hop />
         </View>
-        <Text style={{ fontFamily: font.semibold, fontSize: 24, letterSpacing: -0.7, color: ink[900], textAlign: "center", marginTop: 6 }}>
-          Reading it now
-        </Text>
-        <Text style={{ fontFamily: font.regular, fontSize: 15, lineHeight: 20, color: ink[500], textAlign: "center", marginTop: 4 }}>
+        <Text style={{ fontFamily: font.semibold, fontSize: 28, letterSpacing: -0.8, color: ink[900], textAlign: "center", marginTop: 6 }}>Reading it now</Text>
+        <Text style={{ fontFamily: font.regular, fontSize: 15, lineHeight: 21, color: ink[500], textAlign: "center", marginTop: 6, paddingHorizontal: 12 }}>
           {STEP_NARRATIVE[Math.min(stepIndex, STEP_NARRATIVE.length - 1)]}
         </Text>
 
-        <View className="mt-6 gap-3">
-          {STEPS.map((step, i) => {
-            const done = i < stepIndex;
-            const current = i === stepIndex;
-            const Icon = step.icon;
-            return (
-              <View
-                key={step.key}
-                className="flex-row items-center gap-3 rounded-xl p-3.5"
-                style={[glassShadow, { backgroundColor: glass.fillStrong, borderWidth: 1, borderColor: glass.rim, opacity: done || current ? 1 : 0.45 }]}
-              >
-                <View
-                  className="h-10 w-10 items-center justify-center rounded-pill"
-                  // Brand, not green: a finished upload step is not a health result.
-                  style={{ backgroundColor: done ? brand[600] : brand[50] }}
-                >
-                  {done ? (
-                    <Check size={18} color="#ffffff" strokeWidth={3} />
-                  ) : current ? (
-                    <ActivityIndicator size="small" color={ink[900]} />
-                  ) : (
-                    <Icon size={18} color={ink[900]} />
-                  )}
+        {/* One calm card: a bar for how far, and the steps as quiet rows. */}
+        <View style={[...CARD, { marginTop: 24, padding: 18 }]}>
+          <View style={{ height: 8, borderRadius: 999, backgroundColor: surface.tint, overflow: "hidden" }}>
+            <View style={{ height: 8, borderRadius: 999, width: `${Math.max(6, (Math.min(stepIndex, STEPS.length) / STEPS.length) * 100)}%`, backgroundColor: brand[500] }} />
+          </View>
+          <View style={{ marginTop: 10 }}>
+            {STEPS.map((step, i) => {
+              const done = i < stepIndex;
+              const current = i === stepIndex;
+              return (
+                <View key={step.key} style={{ flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 9, opacity: done || current ? 1 : 0.4 }}>
+                  <View style={{ width: 26, height: 26, borderRadius: 999, alignItems: "center", justifyContent: "center", backgroundColor: done ? brand[600] : surface.tint }}>
+                    {done ? <Check size={14} color="#fff" strokeWidth={3} /> : current ? <ActivityIndicator size="small" color={brand[600]} /> : null}
+                  </View>
+                  <Text style={{ flex: 1, fontFamily: current ? font.semibold : font.medium, fontSize: 15, color: ink[900] }}>{step.title}</Text>
                 </View>
-                <View className="min-w-0 flex-1">
-                  <Text className="text-base font-semibold text-ink-900">{step.title}</Text>
-                  <Text className="text-xs text-ink-500">{step.body}</Text>
-                </View>
-              </View>
-            );
-          })}
+              );
+            })}
+          </View>
         </View>
 
         {stripFailed ? (
-          /*
-           * Said out loud rather than swallowed. The strip is a promise this
-           * screen makes two paragraphs earlier, and quietly uploading a photo
-           * with its GPS intact after promising otherwise is worse than the
-           * metadata itself.
-           */
-          <Text className="mt-5 text-xs leading-[17px] text-caution-text">
-            This photo could not be re-encoded, so its location data was left in place. The file is
-            still private to your family.
+          // Said out loud rather than swallowed: the screen before promised the strip.
+          <Text style={{ fontFamily: font.regular, fontSize: 12, lineHeight: 17, color: ink[700], marginTop: 16 }}>
+            This photo could not be re-encoded, so its location data was left in place. The file is still private to your family.
           </Text>
         ) : null}
       </View>
@@ -395,92 +377,45 @@ export default function Scan() {
   const profiles = context.data?.allowed ?? [];
 
   /*
-   * REDESIGNED 2026-09-29. Three sources as three pastel cards, the same shape
-   * as the Book care list on Home: one tap each, no dashed drop zone (nothing
-   * is ever dragged on a phone). Camera and library stay separate because they
-   * are two permissions natively, and asking for the camera from someone who
-   * only wanted a photo they already have is the request most often denied.
+   * REDESIGNED 17 Nov 2026 in Home's language. Whose (faces), what (optional
+   * chips with 3D objects, "let Cheeku tell" by default), then three big
+   * source tiles. Camera and library stay separate: they are two permissions
+   * natively, and both now go through Cheeku's own sheet first
+   * (lib/upload/media-access).
    */
   const sources = [
-    { key: "camera", title: "Take a photo", line: "Snap a report or prescription, page by page", Icon: CameraIcon, from: lilac.base, fg: brand[600], onPress: takePhoto },
-    { key: "library", title: "Choose from photos", line: "Screenshots and pictures you already have", Icon: Images, from: hue.blue.bg, fg: hue.blue.fg, onPress: pickFromLibrary },
-    { key: "file", title: "Upload a PDF or file", line: "A full lab report, a discharge summary", Icon: FileUp, from: hue.orange.bg, fg: hue.orange.fg, onPress: pickFile },
+    { key: "camera", title: "Camera", line: "Snap it now", Icon: CameraIcon, onPress: takePhoto },
+    { key: "library", title: "Photos", line: "From your gallery", Icon: Images, onPress: pickFromLibrary },
+    { key: "file", title: "PDF or file", line: "Lab portals, emails", Icon: FileUp, onPress: pickFile },
   ] as const;
+  const kinds: (DocType | null)[] = [null, ...MAIN.map((m) => m.type), ...OTHER];
 
   return (
     <View className="flex-1 bg-canvas">
-      <Backdrop />
+      <SkyWash top={-40} />
       <ScreenHeader title="Add a record" />
-    <ScrollView
-      className="flex-1"
-      contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 8, paddingBottom: insets.bottom + 24 }}
-      showsVerticalScrollIndicator={false}
-    >
-      <Text accessibilityRole="header" style={{ fontFamily: font.semibold, fontSize: 28, lineHeight: 33, letterSpacing: -0.8, color: ink[900] }}>
-        What are we filing today?
-      </Text>
-      <Text style={{ fontFamily: font.regular, fontSize: 15, lineHeight: 20, color: ink[500], marginTop: 8 }}>
-        I&apos;ll read it and pull out the key details. You check everything before it&apos;s saved.
-      </Text>
+      <ScrollView className="flex-1" contentContainerStyle={{ paddingTop: 4, paddingBottom: insets.bottom + 24 }} showsVerticalScrollIndicator={false}>
+        <View style={{ paddingHorizontal: 20 }}>
+          <Text accessibilityRole="header" style={{ fontFamily: font.semibold, fontSize: 30, lineHeight: 36, letterSpacing: -0.9, color: ink[900] }}>
+            Snap it. Cheeku files it.
+          </Text>
+          <Text style={{ fontFamily: font.regular, fontSize: 15, lineHeight: 21, color: ink[500], marginTop: 6 }}>
+            Reports, prescriptions, bills. You check what I read before it&apos;s saved.
+          </Text>
+          {shared ? <SharedCard file={shared} onDrop={() => clearShared()} /> : null}
+        </View>
 
-      {/*
-       * What kind of record: the two everyone has, as big cards, and the rest
-       * behind "Something else". Optional: unpicked, the reader decides from
-       * the page, and it can be changed on the record later.
-       */}
-      {shared ? <SharedCard file={shared} onDrop={() => clearShared()} /> : null}
+        {/* Whose is it: the family as faces, like Home. */}
+        <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900], marginTop: 24, marginHorizontal: 20 }}>Whose is it?</Text>
+        <View style={{ marginTop: 10 }}>
+          <FamilyRow members={profiles as never} activeId={profileId} locked={false} onSelect={(id) => setProfileId(id)} onAdd={() => undefined} hideAdd />
+        </View>
 
-      <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[700], marginTop: 22 }}>What is it?</Text>
-      <View style={{ flexDirection: "row", gap: 10, marginTop: 10 }}>
-        {MAIN.map((m) => {
-          const on = docType === m.type;
-          const st = TYPE_STYLE[m.type];
-          return (
-            <Tap
-              key={m.type}
-              accessibilityRole="radio"
-              accessibilityState={{ checked: on }}
-              accessibilityLabel={`${m.title}. ${m.line}`}
-              onPress={() => {
-                feel.tick();
-                setDocType(on ? null : m.type);
-              }}
-              style={[glassShadow, { flex: 1, borderRadius: 24, padding: 14, gap: 10, backgroundColor: on ? st.wash : "#fff", borderWidth: 2, borderColor: on ? st.tint : glass.rim }]}
-              scale={0.97}
-            >
-              <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start" }}>
-                <View style={{ width: 48, height: 48, borderRadius: 16, backgroundColor: on ? "#fff" : st.wash, alignItems: "center", justifyContent: "center" }}>
-                  <m.Icon size={24} color={st.tint} />
-                </View>
-                <View style={{ width: 24, height: 24, borderRadius: 999, borderWidth: 2, borderColor: on ? st.tint : ink[300], backgroundColor: on ? st.tint : "transparent", alignItems: "center", justifyContent: "center" }}>
-                  {on ? <Check size={14} color="#fff" strokeWidth={3} /> : null}
-                </View>
-              </View>
-              <View>
-                <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>{m.title}</Text>
-                <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[500], marginTop: 2 }}>{m.line}</Text>
-              </View>
-            </Tap>
-          );
-        })}
-      </View>
-      <Tap
-        accessibilityRole="button"
-        accessibilityState={{ expanded: moreTypes }}
-        onPress={() => setMoreTypes((v) => !v)}
-        style={{ flexDirection: "row", alignItems: "center", gap: 6, alignSelf: "flex-start", height: 40, marginTop: 6 }}
-      >
-        <Text style={{ fontFamily: font.semibold, fontSize: 13, color: brand[600] }}>
-          {docType && !MAIN.some((m) => m.type === docType) ? `Something else: ${DOC_TYPE_LABEL[docType]}` : "Something else"}
-        </Text>
-        <ChevronDown size={15} color={ink[900]} style={{ transform: [{ rotate: moreTypes ? "180deg" : "0deg" }] }} />
-      </Tap>
-      {moreTypes ? (
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingBottom: 4 }}>
-          {([null, ...OTHER] as (DocType | null)[]).map((t) => {
+        {/* What is it: optional. Unpicked, Cheeku decides from the page. */}
+        <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900], marginTop: 20, marginHorizontal: 20 }}>What is it?</Text>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingHorizontal: 20, paddingTop: 10, paddingBottom: 4 }}>
+          {kinds.map((t) => {
             const on = t === docType;
-            const st = t ? TYPE_STYLE[t] : null;
-            const Icon = st?.icon ?? ScanSearch;
             return (
               <Tap
                 key={t ?? "auto"}
@@ -490,114 +425,65 @@ export default function Scan() {
                   feel.tick();
                   setDocType(t);
                 }}
-                style={[
-                  on ? null : glassShadow,
-                  { flexDirection: "row", alignItems: "center", gap: 7, height: 40, paddingLeft: 12, paddingRight: 14, borderRadius: 999, backgroundColor: on ? ink[900] : glass.fillStrong, borderWidth: on ? 0 : 1, borderColor: glass.rim },
-                ]}
+                scale={0.96}
+                style={[...CARD, { flexDirection: "row", alignItems: "center", gap: 8, height: 46, paddingLeft: 8, paddingRight: 16, borderRadius: 999, borderWidth: 1.5, borderColor: on ? brand[500] : "rgba(255,255,255,0.9)" }]}
               >
-                <Icon size={15} color={on ? "#fff" : (st?.tint ?? brand[600])} />
-                <Text style={{ fontFamily: font.semibold, fontSize: 13, color: on ? "#fff" : ink[900] }}>{t ? DOC_TYPE_LABEL[t] : "Not sure, let Cheeku tell"}</Text>
+                <Icon3D name={t ? TYPE_3D[t] : "star"} size={26} />
+                <Text style={{ fontFamily: font.semibold, fontSize: 14, color: on ? brand[700] : ink[900] }}>{t ? (SHORT[t] ?? DOC_TYPE_LABEL[t]) : "Let Cheeku tell"}</Text>
               </Tap>
             );
           })}
         </ScrollView>
-      ) : null}
 
-      <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[700], marginTop: 16 }}>Whose is it?</Text>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingTop: 10, paddingBottom: 4 }}>
-        {profiles.map((p) => {
-          const active = p.id === profileId;
-          return (
-            <Tap
-              key={p.id}
-              accessibilityRole="radio"
-              accessibilityState={{ selected: active }}
-              aria-checked={active}
-              onPress={() => setProfileId(p.id)}
-              style={[
-                active ? null : glassShadow,
-                {
-                  flexDirection: "row",
-                  alignItems: "center",
-                  gap: 8,
-                  height: 48,
-                  paddingLeft: 5,
-                  paddingRight: 16,
-                  borderRadius: 999,
-                  backgroundColor: active ? ink[900] : glass.fillStrong,
-                  borderWidth: active ? 0 : 1,
-                  borderColor: glass.rim,
-                },
-              ]}
-            >
-              <Avatar svg={p.avatar} photo={p.photo} image={p.avatarImage} background={p.avatarBackground ?? undefined} size={38} />
-              <Text style={{ fontFamily: font.semibold, fontSize: 15, color: active ? "#ffffff" : ink[900] }}>{p.name.split(" ")[0]}</Text>
-            </Tap>
-          );
-        })}
+        <View style={{ paddingHorizontal: 20 }}>
+          {shared ? (
+            <PillButton style={{ marginTop: 24 }} disabled={!profileId || !shared.accepted} icon={<ScanSearch size={18} color="#fff" />} onPress={() => void handle({ uri: shared.uri, mimeType: shared.mimeType, name: shared.name })}>
+              Read it
+            </PillButton>
+          ) : (
+            <>
+              {/* Where it comes from: three big tiles. Camera leads, filled violet. */}
+              <View style={{ flexDirection: "row", gap: 10, marginTop: 24 }}>
+                {sources.map((src, i) => {
+                  const lead = i === 0;
+                  return (
+                    <Tap
+                      key={src.key}
+                      accessibilityRole="button"
+                      accessibilityLabel={`${src.title}. ${src.line}`}
+                      accessibilityState={{ disabled: !profileId }}
+                      disabled={!profileId}
+                      onPress={() => void src.onPress()}
+                      scale={0.96}
+                      style={[...CARD, { flex: 1, padding: 14, borderRadius: 24, opacity: profileId ? 1 : 0.5 }, lead ? { backgroundColor: brand[600], borderColor: brand[600], shadowColor: brand[600], shadowOpacity: 0.25 } : null]}
+                    >
+                      <View style={{ width: 48, height: 48, borderRadius: 999, backgroundColor: lead ? "rgba(255,255,255,0.18)" : surface.tint, alignItems: "center", justifyContent: "center" }}>
+                        <src.Icon size={22} color={lead ? "#fff" : brand[600]} strokeWidth={2} />
+                      </View>
+                      <Text style={{ fontFamily: font.semibold, fontSize: 16, color: lead ? "#fff" : ink[900], marginTop: 14 }}>{src.title}</Text>
+                      <Text numberOfLines={2} style={{ fontFamily: font.regular, fontSize: 12, lineHeight: 16, color: lead ? "rgba(255,255,255,0.8)" : ink[500], marginTop: 2 }}>{src.line}</Text>
+                    </Tap>
+                  );
+                })}
+              </View>
+              <Text style={{ fontFamily: font.regular, fontSize: 12, color: ink[300], textAlign: "center", marginTop: 10 }}>PDF, JPG, PNG or HEIC, up to 10MB</Text>
+            </>
+          )}
+
+          {message ? (
+            <Text accessibilityRole="alert" style={{ fontFamily: font.medium, fontSize: 13, color: semantic.dangerText, marginTop: 12 }}>
+              {message}
+            </Text>
+          ) : null}
+
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 12, marginTop: 24, padding: 14, borderRadius: 20, backgroundColor: "rgba(255,255,255,0.7)" }}>
+            <Icon3D name="shield" size={28} />
+            <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[700] }}>
+              Location data comes off photos on your phone, before upload. Files stay private to your family.
+            </Text>
+          </View>
+        </View>
       </ScrollView>
-
-      {shared ? (
-        <PillButton
-          style={{ marginTop: 20 }}
-          disabled={!profileId || !shared.accepted}
-          icon={<ScanSearch size={18} color="#fff" />}
-          onPress={() => void handle({ uri: shared.uri, mimeType: shared.mimeType, name: shared.name })}
-        >
-          Read it
-        </PillButton>
-      ) : (
-      <View className="mt-5 gap-2.5">
-        {sources.map((src) => (
-          <Tap
-            key={src.key}
-            accessibilityRole="button"
-            accessibilityLabel={`${src.title}. ${src.line}`}
-            accessibilityState={{ disabled: !profileId }}
-            disabled={!profileId}
-            onPress={() => void src.onPress()}
-            style={{ opacity: profileId ? 1 : 0.5 }} scale={0.98}
-          >
-            <View className="flex-row items-center gap-3.5 overflow-hidden rounded-xl p-2.5 pr-3" style={glassShadow}>
-              <Gradient from={src.from} to="#ffffff" />
-              <View
-                className="h-[68px] w-[68px] items-center justify-center rounded-xl"
-                style={{ backgroundColor: "rgba(255,255,255,0.9)", borderWidth: 1, borderColor: glass.rim }}
-              >
-                <src.Icon size={26} color={src.fg} strokeWidth={1.7} />
-              </View>
-              <View className="min-w-0 flex-1">
-                <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>{src.title}</Text>
-                <Text numberOfLines={2} style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[500], marginTop: 2 }}>
-                  {src.line}
-                </Text>
-              </View>
-              <View className="h-10 w-10 items-center justify-center rounded-pill" style={{ backgroundColor: "rgba(255,255,255,0.75)", borderWidth: 1, borderColor: glass.rim }}>
-                <ChevronRight size={18} color={ink[700]} />
-              </View>
-            </View>
-          </Tap>
-        ))}
-      </View>
-      )}
-      <Text style={{ fontFamily: font.regular, fontSize: 12, color: ink[300], textAlign: "center", marginTop: 10 }}>
-        PDF, JPG, PNG or HEIC, up to 10MB
-      </Text>
-
-      {message ? (
-        <Text accessibilityRole="alert" style={{ fontFamily: font.medium, fontSize: 13, color: semantic.dangerText, marginTop: 12 }}>
-          {message}
-        </Text>
-      ) : null}
-
-      <Glass className="mt-5 flex-row items-start gap-2.5 rounded-xl px-4 py-3">
-        <ShieldCheck size={15} color={brand[500]} style={{ marginTop: 1 }} />
-        <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[700] }}>
-          Photos lose their location data on your phone before upload. Files stay private to you and
-          your family.
-        </Text>
-      </Glass>
-    </ScrollView>
     </View>
   );
 }

@@ -4,6 +4,7 @@ import * as ImagePicker from "expo-image-picker";
 import { stripImageMetadata } from "@/lib/upload/strip-exif";
 
 import { uploadDocument, type PickedFile } from "./upload";
+import { ensureMediaAccess } from "@/lib/upload/media-access";
 
 /*
  * Several past reports at once, filed under one member.
@@ -43,8 +44,7 @@ export async function pickFiles(): Promise<QueueItem[]> {
 }
 
 export async function pickPhotos(): Promise<QueueItem[]> {
-  const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-  if (!permission.granted) return [];
+  if (!(await ensureMediaAccess("photos"))) return [];
   const result = await ImagePicker.launchImageLibraryAsync({
     mediaTypes: ["images"],
     allowsMultipleSelection: true,
@@ -57,8 +57,7 @@ export async function pickPhotos(): Promise<QueueItem[]> {
 }
 
 export async function snapPhoto(): Promise<QueueItem[]> {
-  const permission = await ImagePicker.requestCameraPermissionsAsync();
-  if (!permission.granted) return [];
+  if (!(await ensureMediaAccess("camera"))) return [];
   const result = await ImagePicker.launchCameraAsync({ quality: 1, exif: false });
   if (result.canceled) return [];
   const a = result.assets[0];

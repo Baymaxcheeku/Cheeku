@@ -8,6 +8,8 @@ vi.mock("expo-image-picker", () => ({
   requestCameraPermissionsAsync: vi.fn(async () => ({ granted: false })),
   requestMediaLibraryPermissionsAsync: (...a: unknown[]) => requestMediaLibraryPermissionsAsync(...a),
 }));
+// The permission sheet is UI; here the person has already said yes.
+vi.mock("@/lib/upload/media-access", () => ({ ensureMediaAccess: async () => true }));
 // Each render "saves" a JPEG whose size is whatever it was resized to.
 vi.mock("expo-image-manipulator", () => ({
   SaveFormat: { JPEG: "jpeg" },
@@ -60,7 +62,7 @@ describe("chat photos", () => {
   it("turns a picker failure into a sentence instead of hanging", async () => {
     launchImageLibraryAsync.mockRejectedValue(new Error("presentation failed"));
     expect(await pickChatPhoto("library")).toMatch(/Couldn't open your photos/);
-    expect(await pickChatPhoto("camera")).toMatch(/needs the camera/);
+    expect(await pickChatPhoto("camera")).toMatch(/Couldn't open the camera/);
   });
 
   it("gives up on work that never finishes", async () => {

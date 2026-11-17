@@ -5,6 +5,7 @@ import * as ImagePicker from "expo-image-picker";
 import { Platform } from "react-native";
 
 import { supabase } from "@/lib/supabase/client";
+import { ensureMediaAccess } from "@/lib/upload/media-access";
 
 /*
  * A real photo as someone's profile picture.
@@ -34,11 +35,8 @@ const EDGE = 512;
 
 /** Opens the camera or the library with a square crop. Null if cancelled or refused. */
 export async function pickPhoto(source: "camera" | "library"): Promise<string | null> {
-  const permission =
-    source === "camera"
-      ? await ImagePicker.requestCameraPermissionsAsync()
-      : await ImagePicker.requestMediaLibraryPermissionsAsync();
-  if (!permission.granted) return null;
+  // Cheeku's own sheet first, the system dialog only after "Allow" (lib/upload/media-access).
+  if (!(await ensureMediaAccess(source === "camera" ? "camera" : "photos"))) return null;
 
   const options: ImagePicker.ImagePickerOptions = {
     mediaTypes: ["images"],
