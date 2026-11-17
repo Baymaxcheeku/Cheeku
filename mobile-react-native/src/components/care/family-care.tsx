@@ -89,7 +89,7 @@ export function MemberCareCard({ member, phone }: { member: ActiveProfile; phone
   const weekPct = summary?.week && summary.week.due ? Math.round((summary.week.taken / summary.week.due) * 100) : null;
 
   return (
-    <View style={[glassCard("rgba(255,255,255,0.82)"), { borderRadius: 28, padding: 18 }]}>
+    <View style={[glassCard("#ffffff", "#0f1030"), { borderRadius: 28, padding: 18, shadowOpacity: 0.05 }]}>
       <View pointerEvents="none" style={GLASS_SHEEN} />
       {/* Who, and how they are, in one line of colour */}
       <View className="flex-row items-center gap-3">
@@ -109,10 +109,10 @@ export function MemberCareCard({ member, phone }: { member: ActiveProfile; phone
           accessibilityLabel={`Alerts about ${name}`}
           onPress={toggleAlerts}
           scale={0.95}
-          style={{ flexDirection: "row", alignItems: "center", gap: 6, height: 34, paddingHorizontal: 12, borderRadius: 999, backgroundColor: alerts ? brand[50] : surface.tint }}
+          style={{ flexDirection: "row", alignItems: "center", gap: 6, height: 34, paddingHorizontal: 12, borderRadius: 999, backgroundColor: surface.tint }}
         >
-          {alerts ? <Bell size={14} color={brand[700]} /> : <BellOff size={14} color={ink[500]} />}
-          <Text style={{ fontFamily: font.semibold, fontSize: 12, color: alerts ? brand[700] : ink[500] }}>{alerts ? "Alerts on" : "Alerts off"}</Text>
+          {alerts ? <Bell size={14} color={ink[700]} /> : <BellOff size={14} color={ink[300]} />}
+          <Text style={{ fontFamily: font.semibold, fontSize: 12, color: alerts ? ink[700] : ink[300] }}>{alerts ? "Alerts on" : "Alerts off"}</Text>
         </Tap>
       </View>
 
@@ -126,18 +126,18 @@ export function MemberCareCard({ member, phone }: { member: ActiveProfile; phone
               <Text style={{ fontFamily: font.semibold, fontSize: 13, color: ink[500], marginBottom: 8 }}>Today&apos;s doses</Text>
               <View className="flex-row gap-2">
                 {summary.slots.map((s) => {
-                  const tone = s.done ? GOOD : s.late ? NEEDS : PILLAR_TONE.sleep;
+                  // Grey by default; colour only says done (a mint tick) or late (a coral number).
                   return (
-                    <View key={s.slot} style={[glassCard(tone.glass, tone.accent), { flex: 1, borderRadius: 20, padding: 12 }]}>
+                    <View key={s.slot} style={{ flex: 1, borderRadius: 20, padding: 12, backgroundColor: surface.tint }}>
                       <View className="flex-row items-center justify-between">
-                        <Text style={{ fontFamily: font.medium, fontSize: 12, color: tone.deep }}>{SLOT_LABEL[s.slot]}</Text>
+                        <Text style={{ fontFamily: font.medium, fontSize: 12, color: s.late ? NEEDS.deep : ink[500] }}>{SLOT_LABEL[s.slot]}</Text>
                         {s.done ? (
-                          <View style={{ width: 20, height: 20, borderRadius: 999, backgroundColor: tone.accent, alignItems: "center", justifyContent: "center" }}>
+                          <View style={{ width: 20, height: 20, borderRadius: 999, backgroundColor: GOOD.accent, alignItems: "center", justifyContent: "center" }}>
                             <Check size={11} color="#fff" strokeWidth={3.2} />
                           </View>
                         ) : null}
                       </View>
-                      <Text style={{ fontFamily: font.semibold, fontSize: 24, letterSpacing: -0.6, color: ink[900], marginTop: 6 }}>
+                      <Text style={{ fontFamily: font.semibold, fontSize: 24, letterSpacing: -0.6, color: s.late ? NEEDS.deep : ink[900], marginTop: 6 }}>
                         {s.taken}
                         <Text style={{ fontFamily: font.medium, fontSize: 14, letterSpacing: 0, color: ink[500] }}>{` / ${s.total}`}</Text>
                       </Text>
@@ -147,14 +147,14 @@ export function MemberCareCard({ member, phone }: { member: ActiveProfile; phone
               </View>
             </View>
           ) : (
-            <Tap accessibilityRole="button" onPress={() => open("/medicines")} scale={0.98} className="mt-5 flex-row items-center gap-3" style={{ borderRadius: 20, padding: 12, backgroundColor: PILLAR_TONE.check.glass }}>
+            <Tap accessibilityRole="button" onPress={() => open("/medicines")} scale={0.98} className="mt-5 flex-row items-center gap-3" style={{ borderRadius: 20, padding: 12, backgroundColor: surface.tint }}>
               <View style={{ width: 40, height: 40, borderRadius: 999, backgroundColor: "#fff", alignItems: "center", justifyContent: "center" }}>
                 <Icon3D name="blister" size={26} />
               </View>
-              <Text style={{ flex: 1, fontFamily: font.medium, fontSize: 14, lineHeight: 19, color: PILLAR_TONE.check.deep }}>
+              <Text style={{ flex: 1, fontFamily: font.medium, fontSize: 14, lineHeight: 19, color: ink[700] }}>
                 {meds?.unscheduled.length ? `Set when ${name} takes their medicines` : `No medicines on a schedule for ${name}`}
               </Text>
-              <ChevronRight size={16} color={PILLAR_TONE.check.deep} />
+              <ChevronRight size={16} color={ink[300]} />
             </Tap>
           )}
 
@@ -175,12 +175,12 @@ export function MemberCareCard({ member, phone }: { member: ActiveProfile; phone
                 </View>
               ) : null}
               {summary.readings.map((r) => (
-                <View key={r.key} style={{ flexGrow: 1, flexBasis: "45%", borderRadius: 20, padding: 14, backgroundColor: r.flagged ? NEEDS.glass : surface.tint }}>
+                <View key={r.key} style={{ flexGrow: 1, flexBasis: "45%", borderRadius: 20, padding: 14, backgroundColor: surface.tint }}>
                   <View className="flex-row items-center justify-between">
                     <Text style={{ fontFamily: font.medium, fontSize: 12, color: r.flagged ? NEEDS.deep : ink[500] }}>{r.label}</Text>
                     <Icon3D name={READING_3D[r.key]} size={22} />
                   </View>
-                  <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 26, letterSpacing: -0.8, color: ink[900], marginTop: 4 }}>
+                  <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 26, letterSpacing: -0.8, color: r.flagged ? NEEDS.deep : ink[900], marginTop: 4 }}>
                     {r.value}
                     {r.key !== "bp" ? <Text style={{ fontFamily: font.medium, fontSize: 14, letterSpacing: 0, color: ink[500] }}>{` ${r.unit}`}</Text> : null}
                   </Text>
@@ -195,7 +195,7 @@ export function MemberCareCard({ member, phone }: { member: ActiveProfile; phone
             <View className="mt-3 gap-2">
               {summary.attention.slice(0, 3).map((a) => {
                 const soft = a.kind === "due_soon";
-                const tone = soft ? PILLAR_TONE.check : NEEDS;
+                const tone = soft ? { glass: surface.tint, deep: ink[700] } : NEEDS;
                 const body = (
                   <View className="flex-row items-center gap-3" style={{ borderRadius: 18, paddingVertical: 10, paddingHorizontal: 12, backgroundColor: tone.glass }}>
                     <View style={{ width: 34, height: 34, borderRadius: 999, backgroundColor: "#fff", alignItems: "center", justifyContent: "center" }}>
@@ -237,10 +237,10 @@ export function MemberCareCard({ member, phone }: { member: ActiveProfile; phone
                   void Linking.openURL(`tel:${phone.replace(/[^0-9+]/g, "")}`);
                 }}
                 scale={0.97}
-                style={{ height: 48, paddingHorizontal: 18, borderRadius: 999, flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: GOOD.glass }}
+                style={{ height: 48, paddingHorizontal: 18, borderRadius: 999, flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: "#fff", borderWidth: 1, borderColor: surface.line }}
               >
-                <Phone size={16} color={GOOD.deep} />
-                <Text style={{ fontFamily: font.semibold, fontSize: 15, color: GOOD.deep }}>Call</Text>
+                <Phone size={16} color={ink[900]} />
+                <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>Call</Text>
               </Tap>
             ) : null}
           </View>
@@ -277,7 +277,7 @@ export function FamilyCareCard({ members, onOpen }: { members: readonly ActivePr
     <Tap accessibilityRole="button" accessibilityLabel="Family care. See how everyone is doing" onPress={onOpen} scale={0.98}>
       <View className="px-4 pb-1.5 pt-3.5" style={[glassCard("rgba(255,255,255,0.85)"), { borderRadius: 24 }]}>
         <View className="mb-1 flex-row items-center gap-2.5">
-          <View style={{ width: 34, height: 34, borderRadius: 12, backgroundColor: PILLAR_TONE.mind.bg, alignItems: "center", justifyContent: "center" }}>
+          <View style={{ width: 34, height: 34, borderRadius: 12, backgroundColor: surface.tint, alignItems: "center", justifyContent: "center" }}>
             <Icon3D name="family" size={24} />
           </View>
           <Text style={{ flex: 1, fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>Family care</Text>

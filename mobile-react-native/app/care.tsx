@@ -6,7 +6,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { MemberCareCard } from "@/components/care/family-care";
 import { Avatar } from "@/components/ui/avatar";
-import { GLASS_SHEEN, PILLAR_TONE, glassCard } from "@/components/today/palette";
+import { GLASS_SHEEN, glassCard } from "@/components/today/palette";
 import { Icon3D } from "@/components/ui/icon3d";
 import { Tap } from "@/components/ui/tap";
 import { StaggerItem } from "@/components/ui/motion";
@@ -14,7 +14,7 @@ import { Backdrop, PillButton, ScreenHeader } from "@/components/ui/screen";
 import { ListSkeleton, ScreenSkeleton } from "@/components/ui/skeleton";
 import { useFamily } from "@/lib/profiles/family";
 import { supabase } from "@/lib/supabase/client";
-import { brand, ink } from "@/theme/tokens";
+import { brand, ink, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
 
 /*
@@ -64,11 +64,11 @@ export default function FamilyCare() {
       <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: insets.bottom + 40 }} showsVerticalScrollIndicator={false}>
         {/* The family at a glance: who you look after, as faces and one big number. Flat glass, no gradient. */}
         <StaggerItem index={0}>
-          <View className="mt-3" style={[glassCard(PILLAR_TONE.sleep.glass), { borderRadius: 28, padding: 20 }]}>
+          <View className="mt-3" style={[glassCard("#ffffff", "#0f1030"), { borderRadius: 28, padding: 20, shadowOpacity: 0.05 }]}>
             <View pointerEvents="none" style={GLASS_SHEEN} />
             <View className="flex-row items-start justify-between">
               <View style={{ flex: 1 }}>
-                <Text style={{ fontFamily: font.semibold, fontSize: 14, color: PILLAR_TONE.sleep.deep }}>{others.length ? "You look after" : "Look after your family"}</Text>
+                <Text style={{ fontFamily: font.medium, fontSize: 14, color: ink[500] }}>{others.length ? "You look after" : "Look after your family"}</Text>
                 {others.length ? (
                   <Text style={{ marginTop: 4 }}>
                     <Text style={{ fontFamily: font.semibold, fontSize: 52, lineHeight: 58, letterSpacing: -2, color: ink[900] }}>{others.length}</Text>
@@ -78,7 +78,7 @@ export default function FamilyCare() {
                   <Text style={{ fontFamily: font.semibold, fontSize: 22, lineHeight: 28, letterSpacing: -0.5, color: ink[900], marginTop: 6 }}>Their doses, numbers and tests, in one place</Text>
                 )}
               </View>
-              <View style={{ width: 56, height: 56, borderRadius: 999, backgroundColor: "#fff", alignItems: "center", justifyContent: "center" }}>
+              <View style={{ width: 56, height: 56, borderRadius: 999, backgroundColor: surface.tint, alignItems: "center", justifyContent: "center" }}>
                 <Icon3D name="family" size={38} />
               </View>
             </View>
