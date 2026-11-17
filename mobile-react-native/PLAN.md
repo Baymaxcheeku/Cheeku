@@ -18,6 +18,8 @@ Read alongside:
 - `SHIPPING.md` — store submission constraints, including two blockers
 - `REACT_NATIVE_BUILD.md` — the full brief this plan executes
 - `TOOLCHAIN.md` — install hazards specific to this package
+- `docs/platform-api/PLAN.md` — the partner API plan (chat, care bookings,
+  health data, payments over one versioned API); nothing in it is built yet
 
 ---
 
