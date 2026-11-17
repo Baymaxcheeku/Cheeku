@@ -12,17 +12,15 @@ import { FamilyTray, FamilyUpsellSheet } from "@/components/family/tray";
 import { SwitchPulse } from "@/components/family/switch-pulse";
 import { Paywall } from "@/components/billing/paywall";
 import { OfflineBanner } from "@/components/app/offline-banner";
-import { AskBar, CheekuCard, HomeHeadline, ProfileChip, firstName } from "@/components/home/ask-hero";
-import { CareSection } from "@/components/home/care";
+import { CheekuCard, firstName } from "@/components/home/ask-hero";
 import { LocationPrimer } from "@/components/location/primer";
 import { FamilyCareCard } from "@/components/care/family-care";
-import { AskRow, DueThisWeek, FamilyAlertCard, LockedPreview, PlanPreview, ProgressStrip, StepCard, TodayHeadline, UnlockCard, UnlockMoment } from "@/components/home/today";
+import { AskRow, DueThisWeek, FamilyAlertCard, PlanPreview, ProgressStrip, StepCard, TodayHeadline, UnlockMoment } from "@/components/home/today";
 import { AppointmentCard } from "@/components/booking/appointment-card";
 import { isUpcoming, startsAt, useAppointmentList } from "@/lib/booking/appointments";
-import { FileCard, ReadsStrip } from "@/components/home/strips";
+import { FileCard } from "@/components/home/strips";
+import { AskHero, CareShelf, FamilyRow, SetupCard, SkyWash, UnlocksFan } from "@/components/home/front";
 import { MascotFigure } from "@/components/illustrations/sprout";
-import { Gradient } from "@/components/ui/glass";
-import { knowledgeFeed } from "@/lib/knowledge/queries";
 import { NotificationsBell } from "@/components/app/notifications-bell";
 import { Button } from "@/components/ui/button";
 import { StaggerItem } from "@/components/ui/motion";
@@ -39,7 +37,8 @@ import { todayIso } from "@/lib/memory/clock";
 import type { DueItem } from "@/lib/home/rules";
 import type { TodayAction } from "@/lib/home/today";
 import type { ActiveProfile } from "@/lib/profiles/context";
-import { brand, lilac, surface } from "@/theme/tokens";
+import { brand, ink } from "@/theme/tokens";
+import { font } from "@/theme/type";
 import { Brand } from "@/components/ui/brand";
 import { feel } from "@/lib/feel";
 
@@ -105,7 +104,6 @@ export default function Home() {
 
   // Both follow the member: "for you" depends on whose profile is in view,
   // and the file is theirs.
-  const knowledge = useQuery({ queryKey: ["knowledge-feed", profileId], queryFn: () => knowledgeFeed(profileId, 8), enabled: Boolean(profileId), placeholderData: (prev) => prev });
   const file = useHealthFile(profileId);
 
   const records = useQuery({
@@ -170,6 +168,8 @@ export default function Home() {
   const needsReview = stats.borderline + stats.highRisk;
   const access = data.access;
   const mode = familyMode(data.entitlement.tier);
+  // The greeting is always to the account holder, whoever is being viewed.
+  const primary = access.selectable.find((p) => p.isPrimary);
 
   return (
     <ScrollView
@@ -187,11 +187,7 @@ export default function Home() {
         />
       }
     >
-      {/* A soft violet wash behind the top of the screen, so the glass has
-          something to sit on. Scrolls with the content. */}
-      <View pointerEvents="none" style={{ position: "absolute", top: -insets.top - 40, left: 0, right: 0, height: 520 }}>
-        <Gradient from={lilac.base} to={surface.canvas} angle="vertical" />
-      </View>
+      <SkyWash top={-insets.top - 40} />
 
       {/*
        * ┌─ THE LAYOUT, REDESIGNED AGAIN 2026-09-29 ────────────────────────────┐
@@ -209,16 +205,20 @@ export default function Home() {
        * └─────────────────────────────────────────────────────────────────────┘
        */}
       <StaggerItem index={0}>
-        <View className="flex-row items-center gap-3 px-5">
-          <ProfileChip
-            active={profile}
-            others={access.selectable.filter((p) => p.id !== profile.id)}
-            greeting={greeting()}
-            locked={mode !== "family"}
-            onPress={openFamily}
-          />
-          <View className="flex-1" />
+        <View className="flex-row items-center px-5">
+          <Text style={{ flex: 1, fontFamily: font.semibold, fontSize: 28, letterSpacing: -0.8, color: ink[900] }} numberOfLines={1}>
+            {greeting()}, {firstName(primary?.name ?? profile.name)}
+          </Text>
           <NotificationsBell />
+        </View>
+        <View style={{ marginTop: 14, marginHorizontal: -0 }}>
+          <FamilyRow
+            members={access.selectable}
+            activeId={profile.id}
+            locked={mode !== "family"}
+            onSelect={(id) => (id === profile.id ? undefined : mode === "family" ? void switchMember(id) : openFamily())}
+            onAdd={() => (mode === "family" ? router.push("/family/add") : openFamily())}
+          />
         </View>
       </StaggerItem>
 
@@ -244,14 +244,8 @@ export default function Home() {
       ) : (
         <>
           <StaggerItem index={1}>
-            <View className="mt-6 px-5">
-              <HomeHeadline name={firstName(profile.name)} isSelf={profile.isPrimary} />
-            </View>
-          </StaggerItem>
-
-          <StaggerItem index={2}>
-            <View className="mt-5 px-5">
-              <AskBar />
+            <View className="mt-2 px-5">
+              <AskHero name={firstName(profile.name)} isSelf={profile.isPrimary} />
             </View>
           </StaggerItem>
 
@@ -277,7 +271,7 @@ export default function Home() {
           <StaggerItem index={3}>
             <View className="mt-4 px-5">
               {stage === "starter" || stage === "building" ? (
-                <UnlockCard stage={stage} signals={home.state?.signals ?? {}} />
+                <SetupCard signals={home.state?.signals ?? {}} name={firstName(profile.name)} isSelf={profile.isPrimary} />
               ) : (
                 <CheekuCard
                   name={firstName(profile.name)}
@@ -296,7 +290,7 @@ export default function Home() {
           {stage === "starter" || stage === "building" ? (
             <StaggerItem index={4}>
               <View className="mt-6 px-5">
-                <LockedPreview />
+                <UnlocksFan />
               </View>
             </StaggerItem>
           ) : null}
@@ -304,14 +298,17 @@ export default function Home() {
       )}
 
       {/* Optional layers (lib/extensions). Empty unless one is registered. */}
-      <HomeExtensions profileId={profile.id} isPrimary={profile.isPrimary} firstName={firstName(profile.name)} />
+      {stage === "starter" || stage === "building" ? null : (
+        <HomeExtensions profileId={profile.id} isPrimary={profile.isPrimary} firstName={firstName(profile.name)} />
+      )}
 
       <StaggerItem index={onToday ? 6 : 5}>
-        <CareSection />
+        <View className="mt-8">
+          <CareShelf />
+        </View>
       </StaggerItem>
 
       <StaggerItem index={onToday ? 7 : 6}>
-        <ReadsStrip articles={knowledge.data ?? []} />
         <FileCard file={file.data} member={profile} loading={file.isPending} />
       </StaggerItem>
 

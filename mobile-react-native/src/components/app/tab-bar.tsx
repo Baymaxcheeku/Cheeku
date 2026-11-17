@@ -128,7 +128,7 @@ export function TabBar({ state, emitter, navigateToTab }: BottomTabBarProps) {
   );
 }
 
-/* The main write action: a dark disc in the middle of the pill. */
+/* The main write action: a violet disc in the middle of the pill (softened from black, 17 Nov). */
 function Fab({ onPress }: { onPress: () => void }) {
   return (
     <View style={{ width: 64, alignItems: "center" }}>
@@ -144,7 +144,7 @@ function Fab({ onPress }: { onPress: () => void }) {
             borderRadius: 999,
             alignItems: "center",
             justifyContent: "center",
-            backgroundColor: ink[900],
+            backgroundColor: brand[600],
           },
         ]}
         scale={0.95}

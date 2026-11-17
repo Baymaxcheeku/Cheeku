@@ -355,7 +355,7 @@ export function CheekuCard({
             alignItems: "center",
           }}
         >
-          <View className="z-10 h-[52px] w-[52px] items-center justify-center rounded-pill" style={{ backgroundColor: ink[900] }}>
+          <View className="z-10 h-[52px] w-[52px] items-center justify-center rounded-pill" style={{ backgroundColor: brand[600] }}>
             <MessageCircleHeart size={21} color="#ffffff" strokeWidth={1.9} />
           </View>
           <Glass

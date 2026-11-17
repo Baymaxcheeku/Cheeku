@@ -7,7 +7,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Tap } from "@/components/ui/tap";
 import { brandify } from "@/components/ui/brand";
 import { GlassCircle } from "@/components/ui/glass";
-import { ink, semantic, surface } from "@/theme/tokens";
+import { brand, ink, semantic, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
 import { goBack } from "@/lib/nav/go-back";
 
@@ -121,7 +121,7 @@ export function PillButton({
   icon?: React.ReactNode;
   style?: ViewProps["style"];
 }) {
-  const bg = { brand: ink[900], light: "#ffffff", danger: semantic.dangerBg }[tone];
+  const bg = { brand: brand[600], light: "#ffffff", danger: semantic.dangerBg }[tone];
   const fg = { brand: "#ffffff", light: ink[900], danger: semantic.dangerText }[tone];
   return (
     <Tap

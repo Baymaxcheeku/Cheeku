@@ -108,7 +108,7 @@ export function UnlockCard({ stage, signals }: { stage: "starter" | "building"; 
           onPress={() => router.push("/scan")}
           style={{ marginTop: 18, flexDirection: "row", alignItems: "center", alignSelf: "flex-start" }}
         >
-          <View className="z-10 h-[52px] w-[52px] items-center justify-center rounded-pill" style={{ backgroundColor: ink[900] }}>
+          <View className="z-10 h-[52px] w-[52px] items-center justify-center rounded-pill" style={{ backgroundColor: brand[600] }}>
             <FileUp size={21} color="#ffffff" strokeWidth={1.9} />
           </View>
           <Glass strong className="-ml-4 h-[46px] justify-center pl-7 pr-5" style={{ borderTopRightRadius: 999, borderBottomRightRadius: 999 }}>
@@ -368,7 +368,7 @@ export function StepCard({
           <View className="mt-auto flex-row items-center gap-2 pt-5">
             {onMore ? (
               <Tap accessibilityRole="button" onPress={onMore}>
-                <View className="h-[44px] flex-row items-center gap-1.5 rounded-pill px-4" style={{ backgroundColor: ink[900] }}>
+                <View className="h-[44px] flex-row items-center gap-1.5 rounded-pill px-4" style={{ backgroundColor: brand[600] }}>
                   <Text style={{ fontFamily: font.semibold, fontSize: 15, color: "#fff" }}>One more?</Text>
                   <ArrowRight size={15} color="#fff" />
                 </View>
@@ -420,13 +420,13 @@ export function StepCard({
         <View className="mt-auto flex-row items-center gap-2 pt-5">
           {action ? (
             <Tap accessibilityRole="button" onPress={() => router.push(action.route as never)}>
-              <View className="h-[46px] flex-row items-center gap-1.5 rounded-pill px-4" style={{ backgroundColor: ink[900] }}>
+              <View className="h-[46px] flex-row items-center gap-1.5 rounded-pill px-4" style={{ backgroundColor: brand[600] }}>
                 <Text style={{ fontFamily: font.semibold, fontSize: 15, color: "#fff" }}>{action.label}</Text>
               </View>
             </Tap>
           ) : (
             <Tap accessibilityRole="button" accessibilityLabel={`Done: ${step.title}`} onPress={() => onDone(step)}>
-              <View className="h-[46px] flex-row items-center gap-2 rounded-pill pl-1.5 pr-5" style={{ backgroundColor: ink[900] }}>
+              <View className="h-[46px] flex-row items-center gap-2 rounded-pill pl-1.5 pr-5" style={{ backgroundColor: brand[600] }}>
                 <View className="h-[34px] w-[34px] items-center justify-center rounded-pill" style={{ backgroundColor: "rgba(255,255,255,0.22)" }}>
                   <Check size={17} color="#fff" strokeWidth={3} />
                 </View>
@@ -613,7 +613,7 @@ export function AskRow({ title = "Ask about food, a symptom or a reading", sub =
       scale={0.98}
     >
       <Glass strong className="flex-row items-center gap-3 rounded-xl p-3.5">
-        <View className="h-10 w-10 items-center justify-center rounded-pill" style={{ backgroundColor: ink[900] }}>
+        <View className="h-10 w-10 items-center justify-center rounded-pill" style={{ backgroundColor: brand[600] }}>
           <MessageCircle size={18} color="#fff" strokeWidth={1.9} />
         </View>
         <View className="min-w-0 flex-1">
@@ -670,7 +670,7 @@ export function UnlockMoment({ open, via, onClose }: { open: boolean; via: Unloc
             <Tap
               accessibilityRole="button"
               onPress={onClose}
-              style={{ marginTop: 18, alignSelf: "stretch", height: 52, borderRadius: 999, backgroundColor: ink[900], alignItems: "center", justifyContent: "center" }} scale={0.98}
+              style={{ marginTop: 18, alignSelf: "stretch", height: 52, borderRadius: 999, backgroundColor: brand[600], alignItems: "center", justifyContent: "center" }} scale={0.98}
             >
               <Text style={{ fontFamily: font.semibold, fontSize: 17, color: "#fff" }}>See today</Text>
             </Tap>
