@@ -33,6 +33,8 @@ import { font } from "@/theme/type";
 
 import { BookedCard, BookingCard } from "./booking";
 import { TIER_STYLE, TierBadge } from "./tier";
+import { glassCard } from "@/components/today/palette";
+import { Icon3D } from "@/components/ui/icon3d";
 
 /*
  * ONE TURN OF THE CONVERSATION.
@@ -65,8 +67,8 @@ export function UserBubble({ message }: { message: ThreadMessage }) {
           <Text style={{ fontFamily: font.medium, fontSize: 12, color: ink[700] }}>{message.attachment.title}</Text>
         </View>
       ) : null}
-      <View style={{ backgroundColor: brand[600], borderRadius: 24, borderBottomRightRadius: 6, paddingHorizontal: 16, paddingVertical: 12 }}>
-        <Text style={{ fontFamily: font.regular, fontSize: 15, lineHeight: 21, color: "#fff" }}>{message.content}</Text>
+      <View style={{ backgroundColor: brand[600], borderRadius: 22, borderBottomRightRadius: 6, paddingHorizontal: 16, paddingVertical: 12 }}>
+        <Text style={{ fontFamily: font.regular, fontSize: 16, lineHeight: 23, color: "#fff" }}>{message.content}</Text>
       </View>
     </View>
   );
@@ -160,12 +162,13 @@ export function AssistantTurn({
             </View>
           ) : null}
 
-          <View style={[glassShadow, { backgroundColor: glass.fillStrong, borderWidth: 1, borderColor: glass.rim, borderRadius: 24, borderTopLeftRadius: 6, paddingHorizontal: 16, paddingVertical: 14, gap: 10 }]}>
+          {/* The answer: a white card, roomy type, sources at the foot. */}
+          <View style={[glassCard("#ffffff", "#0f1030"), { borderRadius: 22, borderTopLeftRadius: 6, paddingHorizontal: 16, paddingVertical: 15, gap: 12, shadowOpacity: 0.05 }]}>
             {paragraphs.map((p, i) => (
               <Paragraph key={i} text={p} />
             ))}
-            {m?.notes.map((n) => (
-              <Callout key={n} icon={Info} text={n} />
+            {m?.notes.map((n, i) => (
+              <Callout key={`${i}-${n}`} icon={Info} text={n} />
             ))}
             {m?.contradictions.map((c) => (
               <Callout key={c.text} icon={CircleAlert} title="Two values disagree" text={c.text} />
@@ -174,7 +177,7 @@ export function AssistantTurn({
               <View style={{ borderTopWidth: 1, borderTopColor: surface.line, paddingTop: 10, gap: 8 }}>
                 {message.citations.map((c) => (
                   <Tap key={c.documentId} accessibilityRole="button" accessibilityLabel={`Open ${c.label}`} onPress={() => onOpenRecord(c.documentId)} style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-                    <FileText size={13} color={ink[900]} />
+                    <Icon3D name="report" size={18} />
                     <Text numberOfLines={1} style={{ flex: 1, fontFamily: font.medium, fontSize: 13, color: brand[700] }}>
                       {c.label}
                     </Text>
@@ -194,7 +197,8 @@ export function AssistantTurn({
           {m?.alerts.map((a) => (
             <AlertCard key={a.title} title={a.title} text={a.text} onPress={onOpenMemory} />
           ))}
-          {m?.loops.map((l) => (
+          {/* The same open item can arrive twice (from the loop and a note): show it once. */}
+          {m?.loops.filter((l, i, all) => all.findIndex((x) => x.title === l.title) === i).map((l) => (
             <LoopNudge key={l.key} title={l.title} when={l.when} because={l.because} onPress={onOpenMemory} />
           ))}
 
@@ -204,9 +208,9 @@ export function AssistantTurn({
           {onSend && m?.followUps.length ? (
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingRight: 8 }}>
               {m.followUps.map((f) => (
-                <Tap key={f} accessibilityRole="button" onPress={() => onSend(f)} style={[glassShadow, { flexDirection: "row", alignItems: "center", gap: 5, height: 36, paddingHorizontal: 13, borderRadius: 999, backgroundColor: glass.fillStrong, borderWidth: 1, borderColor: glass.rim }]}>
-                  <CornerDownRight size={12} color={ink[900]} />
-                  <Text style={{ fontFamily: font.medium, fontSize: 13, color: ink[900] }}>{f}</Text>
+                <Tap key={f} accessibilityRole="button" onPress={() => onSend(f)} style={{ flexDirection: "row", alignItems: "center", gap: 5, height: 38, paddingHorizontal: 14, borderRadius: 999, backgroundColor: "#fff", borderWidth: 1, borderColor: brand[100] }}>
+                  <CornerDownRight size={13} color={brand[600]} />
+                  <Text style={{ fontFamily: font.medium, fontSize: 14, color: brand[700] }}>{f}</Text>
                 </Tap>
               ))}
             </ScrollView>
@@ -240,7 +244,7 @@ function Actions({ actions, onOpenRoute, onSetGoal }: { actions: NonNullable<Tur
               if (a.type === "open") onOpenRoute?.(a.route);
               else if (onSetGoal && (await onSetGoal(a.goal))) setDone(a.goal);
             }}
-            style={{ height: 40, paddingHorizontal: 16, borderRadius: 999, flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: primary && !set ? ink[900] : "#fff", borderWidth: primary && !set ? 0 : 1, borderColor: surface.line }}
+            style={{ height: 40, paddingHorizontal: 16, borderRadius: 999, flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: primary && !set ? brand[600] : "#fff", borderWidth: primary && !set ? 0 : 1, borderColor: surface.line }}
           >
             {set ? <Check size={14} color={ink[900]} strokeWidth={2.4} /> : null}
             <Text style={{ fontFamily: font.semibold, fontSize: 13, color: primary && !set ? "#fff" : ink[900] }}>{set ? "Goal set" : a.label}</Text>
@@ -259,7 +263,7 @@ function Actions({ actions, onOpenRoute, onSetGoal }: { actions: NonNullable<Tur
 function Paragraph({ text }: { text: string }) {
   const lines = text.split("\n");
   const items = lines.filter((l) => l.startsWith("• "));
-  if (!items.length) return <Text style={{ fontFamily: font.regular, fontSize: 15, lineHeight: 22, color: ink[900] }}>{text}</Text>;
+  if (!items.length) return <Text style={{ fontFamily: font.regular, fontSize: 16, lineHeight: 24, color: ink[900] }}>{text}</Text>;
   const head = lines.filter((l) => !l.startsWith("• ")).join(" ").trim();
   return (
     <View style={{ gap: 8, borderRadius: 16, backgroundColor: surface.tint, padding: 12 }}>
@@ -269,7 +273,7 @@ function Paragraph({ text }: { text: string }) {
           <View style={{ width: 20, height: 20, borderRadius: 999, backgroundColor: "#fff", alignItems: "center", justifyContent: "center", marginTop: 1 }}>
             <Text style={{ fontFamily: font.semibold, fontSize: 11, color: brand[600] }}>{i + 1}</Text>
           </View>
-          <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 15, lineHeight: 21, color: ink[700] }}>{l.slice(2)}</Text>
+          <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 15, lineHeight: 22, color: ink[700] }}>{l.slice(2)}</Text>
         </View>
       ))}
     </View>
@@ -394,14 +398,15 @@ export function ScriptCard({ script, urgent }: { script: NonNullable<TurnMemory[
       {open ? (
         <View style={{ padding: 14, gap: 8 }}>
           <Text style={{ fontFamily: font.semibold, fontSize: 13, lineHeight: 20, color: ink[900] }}>{script.opener}</Text>
-          {script.lines.map((l) => (
-            <View key={l} style={{ flexDirection: "row", gap: 8 }}>
+          {/* Older answers were saved before lines were de-duplicated: show each once. */}
+          {[...new Set(script.lines)].map((l, i) => (
+            <View key={`${i}-${l}`} style={{ flexDirection: "row", gap: 8 }}>
               <View style={{ width: 5, height: 5, borderRadius: 3, backgroundColor: brand[400], marginTop: 8 }} />
               <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 13, lineHeight: 20, color: ink[700] }}>{l}</Text>
             </View>
           ))}
-          {script.asks.map((a) => (
-            <Text key={a} style={{ fontFamily: font.semibold, fontSize: 13, lineHeight: 20, color: brand[700] }}>
+          {script.asks.map((a, i) => (
+            <Text key={`${i}-${a}`} style={{ fontFamily: font.semibold, fontSize: 13, lineHeight: 20, color: brand[700] }}>
               Ask: {a}
             </Text>
           ))}
@@ -434,8 +439,8 @@ function WatchFor({ items, tierIsLow }: { items: string[]; tierIsLow: boolean })
         <ListChecks size={15} color={tierIsLow ? ink[700] : semantic.cautionText} />
         <Text style={{ fontFamily: font.semibold, fontSize: 13, color: tierIsLow ? ink[900] : semantic.cautionText }}>Call the doctor if you see</Text>
       </View>
-      {items.map((w) => (
-        <View key={w} style={{ flexDirection: "row", gap: 8 }}>
+      {items.map((w, i) => (
+        <View key={`${i}-${w}`} style={{ flexDirection: "row", gap: 8 }}>
           <View style={{ width: 5, height: 5, borderRadius: 3, backgroundColor: tierIsLow ? ink[300] : semantic.caution, marginTop: 7 }} />
           <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 13, lineHeight: 19, color: ink[700] }}>{w}</Text>
         </View>
@@ -459,8 +464,8 @@ function AlertCard({ title, text, onPress }: { title: string; text: string; onPr
 function LoopNudge({ title, when, because, onPress }: { title: string; when: string; because: string; onPress: () => void }) {
   return (
     <Tap scale={0.98} accessibilityRole="button" onPress={onPress} style={[glassShadow, { flexDirection: "row", gap: 10, borderRadius: 24, backgroundColor: "#fff", borderWidth: 1, borderColor: surface.line, padding: 14 }]}>
-      <View style={{ width: 34, height: 34, borderRadius: 12, backgroundColor: brand[50], alignItems: "center", justifyContent: "center" }}>
-        <BookOpenText size={16} color={ink[900]} />
+      <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: surface.tint, alignItems: "center", justifyContent: "center" }}>
+        <Icon3D name="calendar" size={26} />
       </View>
       <View style={{ flex: 1, gap: 2 }}>
         <Text style={{ fontFamily: font.medium, fontSize: 12, color: ink[500] }}>Still open · {when}</Text>

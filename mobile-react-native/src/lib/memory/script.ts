@@ -102,6 +102,10 @@ export function buildScript(input: {
   const asks = [...new Set(input.symptoms.flatMap((s) => s.askDoctor))].slice(0, 2);
   if (!asks.length) asks.push("Does this need to be seen today?");
 
+  // A loop and a note can say the same thing; the doctor reads it once.
+  const unique = [...new Set(lines)];
+  lines.length = 0;
+  lines.push(...unique);
   const to = input.doctor?.name ?? null;
   const text = [to ? `For ${to}:` : null, opener, ...lines, ...asks.map((a) => `Question: ${a}`)].filter(Boolean).join("\n");
   return { to, phone: input.doctor?.phone ?? null, opener, lines, asks, text };

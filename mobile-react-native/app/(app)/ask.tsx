@@ -37,7 +37,9 @@ import { TypingDots } from "@/components/onboarding/motion";
 import { EmergencyEscalation } from "@/components/safety/emergency-escalation";
 import { Brand } from "@/components/ui/brand";
 import { Glass, GlassCircle, glass, glassShadow } from "@/components/ui/glass";
-import { Backdrop } from "@/components/ui/screen";
+import { SkyWash } from "@/components/home/front";
+import { glassCard } from "@/components/today/palette";
+import { Icon3D, type Icon3DName } from "@/components/ui/icon3d";
 import { chatQuota } from "@/lib/ai/chat";
 import { pickChatPhoto, type ChatPhoto } from "@/lib/chat/photo";
 import { FREE_CHAT_SOFT_LINE } from "@/lib/billing/plans";
@@ -94,6 +96,19 @@ import { Tap } from "@/components/ui/tap";
  * health models, cuts the noise, says how urgent it looks and why, and makes
  * the conversation with the doctor better.
  */
+
+const STARTER_3D: Record<string, Icon3DName> = {
+  loop: "calendar",
+  trend: "heart",
+  clock: "calendar",
+  meds: "blister",
+  symptom: "doctor",
+  file: "report",
+  "last-report": "test-tube",
+  jargon: "chat",
+  appointment: "calendar-check",
+};
+const WHITE = [glassCard("#ffffff", "#0f1030"), { shadowOpacity: 0.05 }] as const;
 
 const STARTER_ICON: Record<Starter["icon"] | string, LucideIcon> = {
   loop: CalendarClock,
@@ -463,22 +478,23 @@ export default function Ask() {
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
       <View className="flex-1 bg-canvas" style={{ paddingTop: insets.top }}>
-        <Backdrop height={360} />
+        <SkyWash top={-insets.top - 40} />
 
-        <View className="flex-row items-center gap-3 px-4 pb-1 pt-2">
-          <Glass strong className="h-12 w-12 items-center justify-center overflow-hidden rounded-pill">
-            <View style={{ marginTop: 8 }}>
-              <MascotBust size={40} mood="calm" motion="breathe" />
+        {/* Who you're talking to, and whose memory: one calm line, no chip row. */}
+        <View className="flex-row items-center gap-3 px-4 pb-2 pt-2">
+          <View style={{ width: 52, height: 52, borderRadius: 999, backgroundColor: "#fff", overflow: "hidden", alignItems: "center", justifyContent: "center" }}>
+            <View style={{ marginTop: 10 }}>
+              <MascotBust size={44} mood="calm" motion="breathe" />
             </View>
-          </Glass>
-          <View className="flex-1">
-            <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>
+          </View>
+          <Tap accessibilityRole="button" accessibilityLabel={`What Cheeku remembers about ${name}`} onPress={() => router.push("/memory")} className="flex-1" scale={0.98}>
+            <Text style={{ fontFamily: font.semibold, fontSize: 20, letterSpacing: -0.4, color: ink[900] }}>
               <Brand />
             </Text>
-            <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 13, color: ink[500] }}>
-              {name}&apos;s health memory
+            <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 1 }}>
+              {ctx ? `${name}'s memory · ${memoryLine(ctx).replace(/^Remembers /, "")}` : `${name}'s health memory`}
             </Text>
-          </View>
+          </Tap>
           <GlassCircle label="Past conversations" onPress={() => router.push("/chats")}>
             <History size={19} color={ink[900]} />
           </GlassCircle>
@@ -486,16 +502,6 @@ export default function Ask() {
             <MemoryIcon size={20} color={ink[900]} />
           </GlassCircle>
         </View>
-
-        {/* What is remembered, at a glance. One row, scrolls rather than wraps. */}
-        {ctx ? (
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flexGrow: 0 }} contentContainerStyle={{ gap: 8, paddingHorizontal: 16, paddingVertical: 8 }}>
-            <MemoryChip label={ctx.clock.label} strong onPress={() => router.push("/memory")} />
-            <MemoryChip label={memoryLine(ctx)} onPress={() => router.push("/memory")} />
-            {loops ? <MemoryChip label={`${loops} open item${loops === 1 ? "" : "s"}`} onPress={() => router.push("/memory")} /> : null}
-            {quota.data?.remaining !== null && quota.data?.remaining !== undefined ? <MemoryChip label={`${quota.data.remaining} chats left today`} /> : null}
-          </ScrollView>
-        ) : null}
 
         <ScrollView
           ref={scroller}
@@ -535,17 +541,15 @@ export default function Ask() {
 
               <View className="mt-5 w-full gap-2">
                 {starters.map((s) => {
-                  const Icon = STARTER_ICON[s.icon] ?? FileText;
                   return (
                     <Tap scale={0.98}
                       key={s.key}
                       accessibilityRole="button"
                       onPress={() => void send(s.text)}
-                      className="flex-row items-center gap-3 rounded-xl px-3 py-3"
-                      style={[glassShadow, { backgroundColor: glass.fillStrong, borderWidth: 1, borderColor: glass.rim }]}
+                      style={[...WHITE, { flexDirection: "row", alignItems: "center", gap: 12, padding: 12, borderRadius: 20 }]}
                     >
-                      <View className="h-10 w-10 items-center justify-center rounded-md bg-brand-50">
-                        <Icon size={17} color={ink[900]} />
+                      <View style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: surface.tint, alignItems: "center", justifyContent: "center" }}>
+                        <Icon3D name={STARTER_3D[s.icon] ?? "chat"} size={28} />
                       </View>
                       <View style={{ flex: 1 }}>
                         <Text style={{ fontFamily: font.medium, fontSize: 15, lineHeight: 19, color: ink[900] }}>{s.text}</Text>
@@ -562,11 +566,10 @@ export default function Ask() {
                 <Tap scale={0.98}
                   accessibilityRole="button"
                   onPress={() => input.current?.focus()}
-                  className="flex-row items-center gap-3 rounded-xl px-3 py-3"
-                  style={{ borderWidth: 1, borderStyle: "dashed", borderColor: brand[200] }}
+                  style={{ flexDirection: "row", alignItems: "center", gap: 12, padding: 12, borderRadius: 20, borderWidth: 1.5, borderStyle: "dashed", borderColor: brand[200] }}
                 >
-                  <View className="h-10 w-10 items-center justify-center rounded-md bg-white">
-                    <Stethoscope size={17} color={ink[900]} />
+                  <View style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: "#fff", alignItems: "center", justifyContent: "center" }}>
+                    <Icon3D name="doctor" size={28} />
                   </View>
                   <Text style={{ flex: 1, fontFamily: font.medium, fontSize: 15, color: ink[900] }}>Something&apos;s not right with {name}</Text>
                 </Tap>
@@ -650,9 +653,9 @@ export default function Ask() {
                   <UserBubble message={{ id: "pending", conversationId: "", role: "user", content: pendingText, createdAt: "", tier: null, memory: null, citations: [], safety: "clear", attachment: pendingPhoto ? { kind: "photo", summary: null, path: null, thumb: pendingPhoto.uri } : null, assessment: null }} />
                   <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
                     <MascotBust size={28} mood="thinking" motion="idle" />
-                    <Glass strong className="rounded-xl px-4 py-3.5" style={{ borderTopLeftRadius: 6 }}>
+                    <View style={[...WHITE, { borderRadius: 22, borderTopLeftRadius: 6, paddingHorizontal: 16, paddingVertical: 14 }]}>
                       <TypingDots color={brand[400]} />
-                    </Glass>
+                    </View>
                     <Text style={{ fontFamily: font.regular, fontSize: 12, color: ink[500] }}>Reading {name}&apos;s history…</Text>
                   </View>
                 </>
@@ -669,7 +672,7 @@ export default function Ask() {
 
         <View className="px-4 pt-2" style={{ paddingBottom: 6, gap: 6 }}>
           {switched && switched.toName === name ? (
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 8, paddingLeft: 12, paddingRight: 4, paddingVertical: 4, borderRadius: 999, backgroundColor: ink[900], alignSelf: "flex-start" }}>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 8, paddingLeft: 12, paddingRight: 4, paddingVertical: 4, borderRadius: 999, backgroundColor: brand[700], alignSelf: "flex-start" }}>
               <ArrowLeftRight size={13} color="#fff" />
               <Text numberOfLines={1} style={{ maxWidth: 200, fontFamily: font.medium, fontSize: 13, color: "#fff" }}>
                 Now in {switched.toName}&apos;s memory
@@ -744,9 +747,9 @@ export default function Ask() {
             </View>
           ) : null}
           {(!draft.trim() && !photo) || logOpen ? <ShortcutRow items={chips} logOpen={logOpen} disabled={Boolean(pendingText)} onShortcut={onShortcut} onLog={onLog} onCloseLog={() => setLogOpen(false)} /> : null}
+          {/* The same ask box as Home: white, roomy, violet send. */}
           <View
-            className="flex-row items-end gap-1.5 rounded-xl p-1.5 pl-4"
-            style={[glassShadow, { backgroundColor: glass.fillStrong, borderWidth: focused ? 1.5 : 1, borderColor: focused ? brand[300] : glass.rim }]}
+            style={[...WHITE, { flexDirection: "row", alignItems: "flex-end", gap: 4, padding: 6, paddingLeft: 16, borderRadius: 28, borderWidth: 1.5, borderColor: focused ? brand[300] : "rgba(255,255,255,0.9)" }]}
           >
             <TextInput
               ref={input}
@@ -759,10 +762,10 @@ export default function Ask() {
               accessibilityLabel="Message Cheeku"
               multiline
               className="flex-1 py-2"
-              style={{ maxHeight: 120, fontSize: 15, color: ink[900], fontFamily: "Inter_400Regular" }}
+              style={{ maxHeight: 120, minWidth: 0, fontSize: 16, lineHeight: 21, paddingVertical: 12, color: ink[900], fontFamily: "Inter_400Regular" }}
             />
-            <Tap scale={0.95} accessibilityRole="button" accessibilityLabel="Ask about a photo" disabled={Boolean(pendingText) || photoBusy} onPress={openPhotoMenu} className="h-10 w-10 items-center justify-center rounded-pill">
-              <Camera size={19} color={ink[900]} />
+            <Tap scale={0.95} accessibilityRole="button" accessibilityLabel="Ask about a photo" disabled={Boolean(pendingText) || photoBusy} onPress={openPhotoMenu} className="h-11 w-10 items-center justify-center rounded-pill">
+              <Camera size={21} color={ink[500]} strokeWidth={1.8} />
             </Tap>
             <Tap scale={0.95}
               accessibilityRole="button"
@@ -771,9 +774,9 @@ export default function Ask() {
               disabled={Boolean(pendingText) || photoBusy || (!draft.trim() && !photo)}
               onPress={() => void send(draft, undefined, photo)}
               className="h-11 w-11 items-center justify-center rounded-pill"
-              style={{ backgroundColor: ink[900], opacity: pendingText || photoBusy || (!draft.trim() && !photo) ? 0.35 : 1 }}
+              style={{ backgroundColor: pendingText || photoBusy || (!draft.trim() && !photo) ? brand[200] : brand[600] }}
             >
-              <ArrowUp size={19} color="#ffffff" />
+              <ArrowUp size={20} color="#ffffff" strokeWidth={2.4} />
             </Tap>
           </View>
         </View>

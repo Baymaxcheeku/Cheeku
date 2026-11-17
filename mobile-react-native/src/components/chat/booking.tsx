@@ -39,6 +39,8 @@ import { useNearbyPlace } from "@/lib/location/live";
 import { serviceById } from "@/lib/services/catalog";
 import { brand, ink, semantic, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
+import { glassCard } from "@/components/today/palette";
+import { Icon3D, type Icon3DName } from "@/components/ui/icon3d";
 
 /*
  * BOOKING, INSIDE THE CONVERSATION.
@@ -143,12 +145,16 @@ function FitnessCard({ booking, onStart }: { booking: Booking; onStart?: (b: Boo
   );
 }
 
+/** The booking card's 3D object, by what is being booked. */
+const SHELL_3D: Record<string, Icon3DName> = { Fitness: "dumbbell", "Coming soon": "dumbbell", "Repeat test": "test-tube", "Lab test at home": "test-tube", "Pre-consultation": "doctor", "Book a service": "calendar-check" };
+
 function Shell({ icon: Icon, eyebrow, title, sub, children }: { icon: AppIcon; eyebrow: string; title: string; sub: string; children: React.ReactNode }) {
+  const art = SHELL_3D[eyebrow];
   return (
-    <View style={[glassShadow, { borderRadius: 24, backgroundColor: "#fff", borderWidth: 1, borderColor: glass.rim, overflow: "hidden" }]}>
-      <View style={{ flexDirection: "row", alignItems: "center", gap: 12, padding: 14, backgroundColor: brand[50] }}>
-        <View style={{ width: 42, height: 42, borderRadius: 16, backgroundColor: "#fff", alignItems: "center", justifyContent: "center" }}>
-          <Icon size={20} color={ink[900]} />
+    <View style={[glassCard("#ffffff", "#0f1030"), { borderRadius: 24, overflow: "hidden", shadowOpacity: 0.05 }]}>
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 12, padding: 14, borderBottomWidth: 1, borderBottomColor: "rgba(15,16,48,0.06)" }}>
+        <View style={{ width: 48, height: 48, borderRadius: 16, backgroundColor: "rgba(15,16,48,0.04)", alignItems: "center", justifyContent: "center" }}>
+          {art ? <Icon3D name={art} size={32} /> : <Icon size={20} color={ink[900]} />}
         </View>
         <View style={{ flex: 1, minWidth: 0 }}>
           <Text style={{ fontFamily: font.medium, fontSize: 12, color: ink[500] }}>{eyebrow}</Text>
@@ -318,8 +324,8 @@ export function BookedCard({ event, onOpen }: { event: BookedEvent; onOpen?: (ro
       {event.note?.length ? (
         <View style={{ borderRadius: 16, backgroundColor: surface.tint, padding: 10, gap: 4 }}>
           <Text style={{ fontFamily: font.semibold, fontSize: 12, color: ink[900] }}>Note sent to the doctor</Text>
-          {event.note.map((l) => (
-            <Text key={l} style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 17, color: ink[700] }}>{l}</Text>
+          {event.note.map((l, i) => (
+            <Text key={`${i}-${l}`} style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 17, color: ink[700] }}>{l}</Text>
           ))}
         </View>
       ) : null}
