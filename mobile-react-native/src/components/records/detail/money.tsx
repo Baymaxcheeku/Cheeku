@@ -18,6 +18,7 @@ import { recordsOfType } from "@/lib/records/record-actions";
 import type { RecordDetail } from "@/lib/records/types";
 import { brand, hue, ink, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
+import { Icon3D } from "@/components/ui/icon3d";
 
 import { Card, Eyebrow, FactList, MoneyLine, PaymentBadge, Perforation, Section } from "./parts";
 import { Tap } from "@/components/ui/tap";
@@ -44,11 +45,11 @@ function AmountHero({ total, status, caption, tint }: { total: number; status: B
       <View style={{ flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between" }}>
         <View style={{ flex: 1 }}>
           <Eyebrow>Total</Eyebrow>
-          <Text style={{ fontFamily: font.bold, fontSize: 34, letterSpacing: -1, color: ink[900], marginTop: 4, fontVariant: ["tabular-nums"] }}>{rupees(total)}</Text>
+          <Text style={{ fontFamily: font.semibold, fontSize: 40, letterSpacing: -1.4, color: ink[900], marginTop: 4, fontVariant: ["tabular-nums"] }}>{rupees(total)}</Text>
           {caption ? <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 2 }}>{caption}</Text> : null}
         </View>
-        <View style={{ width: 44, height: 44, borderRadius: 16, backgroundColor: `${tint}14`, alignItems: "center", justifyContent: "center" }}>
-          <Wallet size={20} color={tint} />
+        <View style={{ width: 52, height: 52, borderRadius: 16, backgroundColor: surface.tint, alignItems: "center", justifyContent: "center" }}>
+          <Icon3D name="report" size={34} />
         </View>
       </View>
       <View style={{ marginTop: 12 }}>

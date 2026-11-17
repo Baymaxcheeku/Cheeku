@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { Platform, Text, View, type ViewStyle } from "react-native";
 import { Pressable } from "@/components/ui/pressable";
 
-import { Glass } from "@/components/ui/glass";
+import { glassCard } from "@/components/today/palette";
 import { clearRecordReminder, hasRecordReminder, setRecordReminder, type RecordReminder } from "@/lib/notifications/push";
 import {
   courseStatus,
@@ -30,19 +30,16 @@ import { font } from "@/theme/type";
  * genuinely about health and uses the caution hue.
  */
 
+/** The one card every record page is built from: white glass, the same as Home (redesign, 17 Nov 2026). */
 export function Card({ children, style, padded = true }: { children: React.ReactNode; style?: ViewStyle; padded?: boolean }) {
-  return (
-    <Glass strong className="rounded-xl" style={[padded ? { padding: 16 } : { overflow: "hidden" }, style]}>
-      {children}
-    </Glass>
-  );
+  return <View style={[glassCard("#ffffff", "#0f1030"), { borderRadius: 24, shadowOpacity: 0.05 }, padded ? { padding: 16 } : { overflow: "hidden" }, style]}>{children}</View>;
 }
 
 export function Section({ title, right, children, style }: { title: string; right?: React.ReactNode; children: React.ReactNode; style?: ViewStyle }) {
   return (
-    <View style={[{ marginTop: 22 }, style]}>
-      <View style={{ flexDirection: "row", alignItems: "baseline", justifyContent: "space-between", marginBottom: 10 }}>
-        <Text accessibilityRole="header" style={{ fontFamily: font.semibold, fontSize: 17, letterSpacing: -0.3, color: ink[900] }}>
+    <View style={[{ marginTop: 28 }, style]}>
+      <View style={{ flexDirection: "row", alignItems: "baseline", justifyContent: "space-between", marginBottom: 12 }}>
+        <Text accessibilityRole="header" style={{ fontFamily: font.semibold, fontSize: 20, letterSpacing: -0.4, color: ink[900] }}>
           {title}
         </Text>
         {right}
@@ -72,13 +69,13 @@ export function FactGrid({ facts, tint = brand[600] }: { facts: Fact[]; tint?: s
       {rows.map((row, r) => (
         <View key={r} style={{ flexDirection: "row", gap: 8 }}>
           {row.map((f) => (
-            <Glass key={f.label} strong className="rounded-lg" style={{ flex: 1, padding: 12 }}>
+            <View key={f.label} style={[glassCard("#ffffff", "#0f1030"), { flex: 1, padding: 14, borderRadius: 20, shadowOpacity: 0.04 }]}>
               {f.icon ? <f.icon size={15} color={tint} /> : null}
               <Text style={{ fontFamily: font.regular, fontSize: 12, color: ink[500], marginTop: f.icon ? 6 : 0 }}>{f.label}</Text>
               <Text selectable style={{ fontFamily: font.semibold, fontSize: 13, lineHeight: 18, color: ink[900], marginTop: 2 }}>
                 {f.value}
               </Text>
-            </Glass>
+            </View>
           ))}
           {row.length === 1 ? <View style={{ flex: 1 }} /> : null}
         </View>

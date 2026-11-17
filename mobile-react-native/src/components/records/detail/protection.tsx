@@ -20,6 +20,8 @@ import {
 import { Linking, Text, View } from "react-native";
 
 import { Avatar } from "@/components/ui/avatar";
+import { Icon3D } from "@/components/ui/icon3d";
+import { PILLAR_TONE } from "@/components/today/palette";
 import { Gradient, glassShadow } from "@/components/ui/glass";
 import { PillButton } from "@/components/ui/screen";
 import { useFamily } from "@/lib/profiles/family";
@@ -52,23 +54,21 @@ import { Tap } from "@/components/ui/tap";
  * page puts the conclusion first, in its own card, and the findings after.
  */
 export function ScanBody({ details }: { record: RecordDetail; details: ScanDetails }) {
-  const Icon = details.modality === "xray" ? Bone : details.modality === "ecg" || details.modality === "echo" ? HeartPulse : ScanLine;
   return (
     <View>
-      <View style={[glassShadow, { marginTop: 12, borderRadius: 24, overflow: "hidden", padding: 16 }]}>
-        <Gradient from={surface.line} to="#ffffff" glow="#ffffff" />
+      <Card style={{ marginTop: 12 }}>
         <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
-          <View style={{ width: 52, height: 52, borderRadius: 16, backgroundColor: "#fff", alignItems: "center", justifyContent: "center" }}>
-            <Icon size={24} color={hue.indigo.fg} />
+          <View style={{ width: 48, height: 48, borderRadius: 16, backgroundColor: surface.tint, alignItems: "center", justifyContent: "center" }}>
+            {details.modality === "ecg" || details.modality === "echo" ? <Icon3D name="heart" size={32} /> : <Icon3D name="monitor" size={32} />}
           </View>
           <View style={{ flex: 1 }}>
-            <Eyebrow color={hue.indigo.fg}>{MODALITY_LABEL[details.modality]}</Eyebrow>
+            <Eyebrow>{MODALITY_LABEL[details.modality]}</Eyebrow>
             <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900], marginTop: 2 }}>{details.bodyPart}</Text>
           </View>
-          <Chip text={details.contrast ? "With contrast" : "Plain"} bg="#fff" fg={hue.indigo.fg} />
+          <Chip text={details.contrast ? "With contrast" : "Plain"} bg={surface.tint} fg={ink[700]} />
         </View>
         {details.technique ? <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[500], marginTop: 12 }}>{details.technique}</Text> : null}
-      </View>
+      </Card>
 
       {details.impression.length ? (
         <Section title="Conclusion">
@@ -246,40 +246,43 @@ export function InsuranceBody({ record, details }: { record: RecordDetail; detai
 
   return (
     <View>
-      {/* The policy, as the e-card people keep in their wallet. */}
-      <View style={[glassShadow, { marginTop: 12, borderRadius: 24, overflow: "hidden", padding: 18 }]}>
-        <Gradient from={hue.ocean.fg} to="#2c2c33" angle="diagonal" />
-        <View style={{ flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between", gap: 10 }}>
-          <View style={{ flex: 1 }}>
-            <Text style={{ fontFamily: font.medium, fontSize: 12, color: "rgba(255,255,255,0.75)" }}>{POLICY_TYPE[details.policyType]}</Text>
-            <Text style={{ fontFamily: font.semibold, fontSize: 17, lineHeight: 23, color: "#fff", marginTop: 4 }}>{details.insurer}</Text>
-            {details.plan ? <Text style={{ fontFamily: font.regular, fontSize: 13, color: "rgba(255,255,255,0.8)", marginTop: 1 }}>{details.plan}</Text> : null}
+      {/* The policy, light (no more black card): the shield, the insurer, the sum insured big. */}
+      <Card style={{ marginTop: 12, borderRadius: 28, padding: 18 }}>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+          <View style={{ width: 52, height: 52, borderRadius: 16, backgroundColor: surface.tint, alignItems: "center", justifyContent: "center" }}>
+            <Icon3D name="shield" size={36} />
           </View>
-          <View style={{ paddingHorizontal: 10, paddingVertical: 5, borderRadius: 999, backgroundColor: statusChip.bg }}>
-            <Text style={{ fontFamily: font.semibold, fontSize: 12, color: "#fff" }}>{statusChip.text}</Text>
+          <View style={{ flex: 1, minWidth: 0 }}>
+            <Text numberOfLines={2} style={{ fontFamily: font.semibold, fontSize: 17, lineHeight: 22, color: ink[900] }}>{details.insurer}</Text>
+            <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 2 }}>{[POLICY_TYPE[details.policyType], details.plan].filter(Boolean).join(" · ")}</Text>
           </View>
-        </View>
-        <Text style={{ fontFamily: font.bold, fontSize: 28, letterSpacing: -0.8, color: "#fff", marginTop: 18 }}>{rupeesShort(details.sumInsured)}</Text>
-        <Text style={{ fontFamily: font.regular, fontSize: 13, color: "rgba(255,255,255,0.75)" }}>Sum insured</Text>
-        <View style={{ flexDirection: "row", gap: 16, marginTop: 18 }}>
-          <View style={{ flex: 1.4 }}>
-            <Text style={{ fontFamily: font.regular, fontSize: 12, color: "rgba(255,255,255,0.7)" }}>Policy number</Text>
-            <Text selectable numberOfLines={1} adjustsFontSizeToFit style={{ fontFamily: font.semibold, fontSize: 13, color: "#fff", marginTop: 2 }}>{details.policyNo}</Text>
-          </View>
-          <View style={{ flex: 1 }}>
-            <Text style={{ fontFamily: font.regular, fontSize: 12, color: "rgba(255,255,255,0.7)" }}>Valid till</Text>
-            <Text style={{ fontFamily: font.semibold, fontSize: 13, color: "#fff", marginTop: 2 }}>{details.end ? shortDate(details.end) : "Not stated"}</Text>
+          <View style={{ paddingHorizontal: 10, paddingVertical: 5, borderRadius: 999, backgroundColor: cover.status === "active" ? PILLAR_TONE.move.bg : cover.status === "expired" ? surface.tint : PILLAR_TONE.eat.bg }}>
+            <Text style={{ fontFamily: font.semibold, fontSize: 12, color: cover.status === "active" ? PILLAR_TONE.move.deep : cover.status === "expired" ? ink[500] : PILLAR_TONE.eat.deep }}>{statusChip.text}</Text>
           </View>
         </View>
-      </View>
+        <Text style={{ marginTop: 18 }}>
+          <Text style={{ fontFamily: font.semibold, fontSize: 40, letterSpacing: -1.4, color: ink[900] }}>{rupeesShort(details.sumInsured)}</Text>
+          <Text style={{ fontFamily: font.medium, fontSize: 15, color: ink[500] }}>{"  sum insured"}</Text>
+        </Text>
+        <View style={{ flexDirection: "row", gap: 8, marginTop: 14 }}>
+          <View style={{ flex: 1.4, padding: 12, borderRadius: 16, backgroundColor: surface.tint }}>
+            <Text style={{ fontFamily: font.medium, fontSize: 12, color: ink[500] }}>Policy number</Text>
+            <Text selectable numberOfLines={1} adjustsFontSizeToFit style={{ fontFamily: font.semibold, fontSize: 14, color: ink[900], marginTop: 2 }}>{details.policyNo}</Text>
+          </View>
+          <View style={{ flex: 1, padding: 12, borderRadius: 16, backgroundColor: surface.tint }}>
+            <Text style={{ fontFamily: font.medium, fontSize: 12, color: ink[500] }}>Valid till</Text>
+            <Text style={{ fontFamily: font.semibold, fontSize: 14, color: ink[900], marginTop: 2 }}>{details.end ? shortDate(details.end) : "Not stated"}</Text>
+          </View>
+        </View>
+      </Card>
 
       <Section title="Cover left this year">
         <Card style={{ gap: 12 }}>
           <View style={{ flexDirection: "row", gap: 12 }}>
-            <Stat value={rupeesShort(used.remaining)} label="Available" tint={hue.ocean.fg} />
+            <Stat value={rupeesShort(used.remaining)} label="Available" tint={brand[600]} />
             <Stat value={rupeesShort(details.claimed)} label="Claimed" />
           </View>
-          <Meter share={used.share} color={hue.ocean.fg} />
+          <Meter share={used.share} color={brand[500]} />
           <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[500] }}>
             {details.claimed > 0 ? `${Math.round(used.share * 100)}% of the cover used across ${details.claims.length} claim${details.claims.length === 1 ? "" : "s"}.` : "No claims made on this policy yet."}
           </Text>

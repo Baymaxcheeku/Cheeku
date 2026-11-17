@@ -8,6 +8,9 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { FileChip } from "@/components/records/chrome";
 import { OriginalToggle } from "@/components/records/original-toggle";
 import { TYPE_STYLE } from "@/components/records/record-card";
+import { Icon3D } from "@/components/ui/icon3d";
+import { TYPE_3D } from "@/components/records/type-3d";
+
 import { DischargeBody, MedicationBody, PrescriptionBody } from "@/components/records/detail/care";
 import { LabBody } from "@/components/records/detail/lab";
 import { BillBody, BookingInvoiceBody, ConsultationInvoiceBody } from "@/components/records/detail/money";
@@ -191,44 +194,43 @@ export default function RecordDetailScreen() {
         }
       />
       <ScrollView className="flex-1" contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 8, paddingBottom: insets.bottom + 28 }} showsVerticalScrollIndicator={false}>
-        {/* The record, as a pastel hero in its type's own colour. */}
-        <View className="overflow-hidden rounded-2xl p-4" style={glassShadow}>
-          <Gradient from={type.wash} to="#ffffff" glow="#ffffff" />
-          <View className="flex-row items-center gap-3">
-            <FileChip mimeType={rec.mimeType} docType={rec.docType} />
+        {/* The record: its 3D object, the title big, when and where, and whose file it is in (tap to move). */}
+        <Card style={{ borderRadius: 28, padding: 18 }}>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 14 }}>
+            <View style={{ width: 64, height: 64, borderRadius: 20, backgroundColor: surface.tint, alignItems: "center", justifyContent: "center" }}>
+              <Icon3D name={TYPE_3D[rec.docType] ?? "folder"} size={44} />
+            </View>
             <View className="min-w-0 flex-1">
-              <Text numberOfLines={2} style={{ fontFamily: font.semibold, fontSize: 17, lineHeight: 23, letterSpacing: -0.3, color: ink[900] }}>
+              <Text numberOfLines={3} style={{ fontFamily: font.semibold, fontSize: 20, lineHeight: 25, letterSpacing: -0.4, color: ink[900] }}>
                 {rec.title}
               </Text>
-              <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 3 }}>
+              <Text numberOfLines={2} style={{ fontFamily: font.regular, fontSize: 14, lineHeight: 19, color: ink[500], marginTop: 4 }}>
                 {formatEventDate(rec.eventDate)}
                 {rec.facility ? ` · ${rec.facility}` : ""}
               </Text>
             </View>
           </View>
-          <View style={{ flexDirection: "row", gap: 8, marginTop: 12 }}>
-            <Glass className="flex-row items-center gap-1.5 rounded-pill px-3 py-1.5">
-              <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: rec.status === "filed" ? brand[600] : ink[300] }} />
-              <Text style={{ fontFamily: font.semibold, fontSize: 12, color: rec.status === "filed" ? brand[700] : ink[700] }}>
-                {rec.status === "filed" ? "Filed" : "Waiting for your check"}
-              </Text>
-            </Glass>
-            <Tap accessibilityRole="button" accessibilityLabel={`${isPrimary ? "In your file" : `In ${first}'s file`}. Move it to someone else`} onPress={() => { setSheetError(null); setSheet("move"); }}>
-              <Glass className="flex-row items-center gap-1.5 rounded-pill py-1 pl-1 pr-3">
-                {member ? <Avatar svg={member.avatar} photo={member.photo} image={member.avatarImage} background={member.avatarBackground} size={22} /> : null}
-                <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 12, color: ink[700], marginLeft: member ? 0 : 8 }}>
-                  {isPrimary ? "In your file" : `In ${first}'s file`}
-                </Text>
-              </Glass>
-            </Tap>
-          </View>
-        </View>
+          <Tap
+            accessibilityRole="button"
+            accessibilityLabel={`${isPrimary ? "In your file" : `In ${first}'s file`}. Move it to someone else`}
+            onPress={() => { setSheetError(null); setSheet("move"); }}
+            scale={0.98}
+            style={{ flexDirection: "row", alignItems: "center", gap: 10, marginTop: 16, paddingTop: 14, borderTopWidth: 1, borderTopColor: surface.line }}
+          >
+            {member ? <Avatar svg={member.avatar} photo={member.photo} image={member.avatarImage} background={member.avatarBackground} size={28} /> : null}
+            <Text numberOfLines={1} style={{ flex: 1, fontFamily: font.medium, fontSize: 14, color: ink[700] }}>
+              {isPrimary ? "In your file" : `In ${first}'s file`}
+              {rec.status === "filed" ? "" : " · waiting for your check"}
+            </Text>
+            <Text style={{ fontFamily: font.semibold, fontSize: 13, color: brand[600] }}>Move</Text>
+          </Tap>
+        </Card>
 
         {rec.status === "needs_review" ? (
           <Card style={{ marginTop: 12 }}>
             <View className="flex-row items-start gap-3">
-              <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: brand[50], alignItems: "center", justifyContent: "center" }}>
-                <BadgeCheck size={19} color={ink[900]} />
+              <View style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: surface.tint, alignItems: "center", justifyContent: "center" }}>
+                <Icon3D name="report" size={30} />
               </View>
               <View className="flex-1">
                 <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>Did I read this right?</Text>
@@ -249,14 +251,14 @@ export default function RecordDetailScreen() {
 
         {/* The original. */}
         {source ? (
-          <Glass strong className="mt-5 flex-row items-center gap-3 rounded-xl p-4">
-            <BadgeCheck size={18} color={ink[900]} />
+          <Card style={{ marginTop: 20, flexDirection: "row", alignItems: "center", gap: 12 }}>
+            <Icon3D name="shield" size={28} />
             <Text style={{ flex: 1, fontFamily: font.regular, fontSize: 13, lineHeight: 19, color: ink[700] }}>
               {source === "lab_partner"
                 ? `Sent straight from ${(rec.extraction as { partner?: string }).partner ?? "the lab"}, so there is no scanned page. Every value is exactly as the lab reported it.`
                 : "Cheeku filed this from your booking, so there's no paper copy. It updates by itself if the booking changes."}
             </Text>
-          </Glass>
+          </Card>
         ) : (
           <View style={{ marginTop: 8 }}>
             <OriginalToggle url={query.data?.url ?? null} rawText={rec.rawText} fileLabel={rec.title} confidence={rec.confidence} />

@@ -36,6 +36,7 @@ import { addMedicinesToMember, medicinesAlreadyListed } from "@/lib/records/reco
 import type { RecordDetail } from "@/lib/records/types";
 import { brand, hue, ink, semantic, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
+import { Icon3D } from "@/components/ui/icon3d";
 
 import { Bullets, Card, ChipRow, Eyebrow, FactGrid, MedicineList, ReminderButton, reminderAt, Section } from "./parts";
 import { ScorecardEntry } from "./scorecard-entry";
@@ -68,8 +69,8 @@ export function PrescriptionBody({ record, details, isPrimary }: { record: Recor
       {/* The doctor, as a card you could hand to a receptionist. */}
       <Card style={{ marginTop: 12 }}>
         <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
-          <View style={{ width: 48, height: 48, borderRadius: 16, backgroundColor: hue.teal.bg, alignItems: "center", justifyContent: "center" }}>
-            <Stethoscope size={22} color={hue.teal.fg} />
+          <View style={{ width: 52, height: 52, borderRadius: 16, backgroundColor: surface.tint, alignItems: "center", justifyContent: "center" }}>
+            <Icon3D name="doctor" size={36} />
           </View>
           <View style={{ flex: 1 }}>
             <Text selectable style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>{d.name}</Text>
@@ -168,8 +169,8 @@ function FollowUp({ record, date, with: withWhom, isPrimary }: { record: RecordD
     <Section title="Follow-up">
       <Card style={{ gap: 12 }}>
         <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
-          <View style={{ width: 44, height: 44, borderRadius: 16, backgroundColor: brand[50], alignItems: "center", justifyContent: "center" }}>
-            <CalendarCheck size={20} color={ink[900]} />
+          <View style={{ width: 48, height: 48, borderRadius: 16, backgroundColor: surface.tint, alignItems: "center", justifyContent: "center" }}>
+            <Icon3D name="calendar-check" size={32} />
           </View>
           <View style={{ flex: 1 }}>
             <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{shortDate(date)}</Text>

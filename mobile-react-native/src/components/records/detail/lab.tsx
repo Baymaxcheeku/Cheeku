@@ -2,11 +2,11 @@ import { useQuery } from "@tanstack/react-query";
 import { BadgeCheck, CalendarClock, FlaskConical, Hash, Stethoscope, TestTube, TrendingDown, TrendingUp } from "lucide-react-native";
 import { Text, View } from "react-native";
 
-import { GaugeLegend, HealthGauge } from "@/components/records/health-gauge";
 import { formatValue } from "@/lib/records/insight";
 import { parseRange, rangePosition, shortDate, trend, type LabDetails } from "@/lib/records/details";
 import { previousValues } from "@/lib/records/record-actions";
 import { FLAG_LABEL, SEVERITY_LABEL, type EntityFlag, type RecordDetail, type RecordEntity, type Severity } from "@/lib/records/types";
+import { PILLAR_TONE } from "@/components/today/palette";
 import { brand, ink, semantic, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
 
@@ -61,35 +61,35 @@ export function LabBody({ record, details }: { record: RecordDetail; details: La
 
   return (
     <View>
-      {/* How it reads, with the gauge. */}
-      <Card style={{ marginTop: 12 }}>
-        <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>How this report reads</Text>
-        <View style={{ flexDirection: "row", alignItems: "stretch", gap: 12, marginTop: 8 }}>
-          <View style={{ flex: 1, alignSelf: "center" }}>
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-              <View style={{ width: 24, height: 24, borderRadius: 999, backgroundColor: tint.bg, alignItems: "center", justifyContent: "center" }}>
-                <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: tint.dot }} />
-              </View>
-              <Text style={{ fontFamily: font.bold, fontSize: 17, color: ink[900] }}>{SEVERITY_LABEL[record.severity]}</Text>
-            </View>
-            <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[500], marginTop: 6 }}>{SEVERITY_BLURB[record.severity]}</Text>
-          </View>
-          <View style={{ width: 132, alignItems: "center", justifyContent: "center", paddingLeft: 12, borderLeftWidth: 1, borderLeftColor: surface.line }}>
-            <HealthGauge severity={record.severity} />
-            <GaugeLegend severity={record.severity} />
-          </View>
+      {/* How it reads: the count that matters, big, and one bar with a segment per value. No gauge. */}
+      <Card style={{ marginTop: 12, borderRadius: 28, padding: 18 }}>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+          <View style={{ width: 8, height: 8, borderRadius: 999, backgroundColor: tint.dot }} />
+          <Text style={{ fontFamily: font.semibold, fontSize: 14, color: ink[700] }}>{SEVERITY_LABEL[record.severity]}</Text>
         </View>
         {measured.length ? (
-          <View style={{ flexDirection: "row", gap: 8, marginTop: 14 }}>
-            <Tally n={measured.length} label="measured" />
-            <Tally n={flagged} label="outside range" tone={flagged ? semantic.dangerText : ink[900]} />
-            <Tally n={measured.length - flagged} label="in range" />
-          </View>
+          <>
+            <Text style={{ marginTop: 8 }}>
+              <Text style={{ fontFamily: font.semibold, fontSize: 52, lineHeight: 58, letterSpacing: -2, color: flagged ? NEEDS.deep : ink[900] }}>{flagged}</Text>
+              <Text style={{ fontFamily: font.medium, fontSize: 17, color: ink[500] }}>{` of ${measured.length} outside the printed range`}</Text>
+            </Text>
+            <View style={{ flexDirection: "row", gap: 3, marginTop: 14 }} accessibilityLabel={`${flagged} of ${measured.length} values outside range`}>
+              {measured.map((e) => {
+                const out = e.flag === "high" || e.flag === "low";
+                return <View key={e.id} style={{ flex: 1, height: 10, borderRadius: 999, backgroundColor: out ? NEEDS.accent : GOOD.accent }} />;
+              })}
+            </View>
+            <View style={{ flexDirection: "row", gap: 16, marginTop: 10 }}>
+              <Legend color={NEEDS.accent} text={`${flagged} outside`} />
+              <Legend color={GOOD.accent} text={`${measured.length - flagged} in range`} />
+            </View>
+          </>
         ) : null}
+        <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[500], marginTop: 12 }}>{SEVERITY_BLURB[record.severity]}</Text>
       </Card>
 
       {groups.map((g) => (
-        <Section key={g.name} title={g.name} right={g === groups[0] && flagged ? <Text style={{ fontFamily: font.semibold, fontSize: 13, color: semantic.dangerText }}>{flagged} flagged</Text> : undefined}>
+        <Section key={g.name} title={g.name} right={g === groups[0] && flagged ? <Text style={{ fontFamily: font.semibold, fontSize: 14, color: NEEDS.deep }}>{flagged} flagged</Text> : undefined}>
           <Card padded={false}>
             {g.items.map((e, i) => (
               <View key={e.id} style={{ borderTopWidth: i ? 1 : 0, borderTopColor: surface.line }}>
@@ -130,6 +130,18 @@ export function LabBody({ record, details }: { record: RecordDetail; details: La
           </Card>
         </Section>
       ) : null}
+    </View>
+  );
+}
+
+const NEEDS = PILLAR_TONE.eat; // coral
+const GOOD = PILLAR_TONE.move; // mint
+
+function Legend({ color, text }: { color: string; text: string }) {
+  return (
+    <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+      <View style={{ width: 8, height: 8, borderRadius: 999, backgroundColor: color }} />
+      <Text style={{ fontFamily: font.medium, fontSize: 12, color: ink[500] }}>{text}</Text>
     </View>
   );
 }
