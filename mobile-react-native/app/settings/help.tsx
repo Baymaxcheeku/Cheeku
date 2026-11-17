@@ -33,6 +33,7 @@ import { submitSupportTicket } from "@/lib/settings/actions";
 import { SUPPORT_CATEGORIES } from "@/lib/settings/schemas";
 import { brand, ink, lilac, semantic, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
+import { IconArt } from "@/components/ui/icon-art";
 
 /*
  * HELP CENTRE. Rebuilt 2026-10 from a five-question list into somewhere you
@@ -215,7 +216,7 @@ export default function Help() {
 
   if (ticketId) {
     return (
-      <SettingsScreen title="Help & support" eyebrow="Answers, guides and our team" icon={CircleHelp} bare>
+      <SettingsScreen title="Help & support" eyebrow="Answers, guides and our team" art="headset" icon={CircleHelp} bare>
         <Reveal style={{ alignItems: "center", paddingHorizontal: 32, marginTop: 40 }}>
           <MascotFigure size={120} moment="present" move="sway" hop />
           <Text style={{ fontFamily: font.semibold, fontSize: 24, letterSpacing: -0.6, color: ink[900], marginTop: 18 }}>Got it, thank you</Text>
@@ -414,8 +415,8 @@ function TopicTile({ icon: Icon, title, note, selected, onPress }: { icon: Lucid
         backgroundColor: selected ? brand[600] : "#fff",
       }]}
     >
-      <View style={{ width: 38, height: 38, borderRadius: 12, alignItems: "center", justifyContent: "center", backgroundColor: selected ? "rgba(255,255,255,0.18)" : brand[50] }}>
-        <Icon size={18} color={selected ? "#fff" : brand[600]} />
+      <View style={{ width: 46, height: 46, borderRadius: 14, alignItems: "center", justifyContent: "center", backgroundColor: selected ? "#fff" : surface.tint }}>
+        <IconArt icon={Icon} size={32} />
       </View>
       <Text style={{ fontFamily: font.semibold, fontSize: 15, color: selected ? "#fff" : ink[900], marginTop: 10 }}>{brandify(title, { onDark: selected })}</Text>
       <Text style={{ fontFamily: font.regular, fontSize: 12, color: selected ? "rgba(255,255,255,0.8)" : ink[500], marginTop: 2 }}>{note}</Text>
@@ -430,7 +431,7 @@ function ContactTile({ icon: Icon, title, note, onPress }: { icon: LucideIcon; t
       onPress={onPress}
       style={({ pressed }) => [glassShadow, { flex: 1, padding: 14, borderRadius: 24, backgroundColor: pressed ? brand[50] : "#fff", gap: 8 }]}
     >
-      <Icon size={19} color={ink[900]} />
+      <IconArt icon={Icon} size={32} />
       <View>
         <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{brandify(title)}</Text>
         <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 12, color: ink[500], marginTop: 2 }}>{note}</Text>

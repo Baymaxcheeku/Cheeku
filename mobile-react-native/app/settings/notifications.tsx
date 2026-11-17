@@ -33,6 +33,8 @@ import type { NotificationPrefs } from "@/lib/settings/schemas";
 import { brand, hue, ink, lilac } from "@/theme/tokens";
 import { font } from "@/theme/type";
 import { ListSkeleton } from "@/components/ui/skeleton";
+import { Icon3D } from "@/components/ui/icon3d";
+import { IconArt } from "@/components/ui/icon-art";
 
 type Key = keyof NotificationPrefs;
 
@@ -192,7 +194,7 @@ export default function NotificationSettings() {
   const status = permission.data;
 
   return (
-    <SettingsScreen title="Notifications" eyebrow="What reaches your phone" icon={Bell}>
+    <SettingsScreen title="Notifications" eyebrow="What reaches your phone" art="bell" icon={Bell}>
       {family.isPending ? (
         <View className="px-5">
           <ListSkeleton rows={6} />
@@ -207,7 +209,7 @@ export default function NotificationSettings() {
                   className="h-11 w-11 items-center justify-center rounded-lg"
                   style={{ backgroundColor: status === "granted" ? brand[50] : hue.slate.bg }}
                 >
-                  {status === "granted" ? <BellRing size={20} color={ink[900]} /> : <BellOff size={20} color={ink[500]} />}
+                  {status === "granted" ? <Icon3D name="bell" size={32} /> : <BellOff size={20} color={ink[500]} />}
                 </View>
                 <View className="flex-1">
                   <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>
@@ -258,8 +260,8 @@ export default function NotificationSettings() {
                     className="flex-row items-center gap-3 px-4 py-3.5"
                     style={i > 0 ? { borderTopWidth: 1, borderTopColor: "rgba(15,16,48,0.06)" } : undefined}
                   >
-                    <View className="h-10 w-10 items-center justify-center rounded-md" style={{ backgroundColor: row.tint }}>
-                      <row.icon size={18} color={row.fg} />
+                    <View style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: row.tint, alignItems: "center", justifyContent: "center" }}>
+                      <IconArt icon={row.icon} size={30} color={row.fg} />
                     </View>
                     <View className="min-w-0 flex-1">
                       <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{row.title}</Text>

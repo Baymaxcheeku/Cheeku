@@ -14,6 +14,8 @@ import { planFor } from "@/lib/billing/plans";
 import { familyMode, listMembers, useFamily } from "@/lib/profiles/family";
 import { brand, ink, lilac } from "@/theme/tokens";
 import { font } from "@/theme/type";
+import { PILLAR_TONE, glassCard } from "@/components/today/palette";
+import { Icon3D } from "@/components/ui/icon3d";
 import { Bone, ListSkeleton } from "@/components/ui/skeleton";
 
 /*
@@ -56,11 +58,10 @@ export default function Family() {
         />
 
         {/* Seats. */}
-        <View style={[glassShadow, { marginTop: 18, borderRadius: 24, overflow: "hidden", padding: 16 }]}>
-          <Gradient from={lilac.violet} to={lilac.mist} glow="#ffffff" />
+        <View style={[glassCard(PILLAR_TONE.sleep.glass), { marginTop: 18, borderRadius: 24, padding: 16 }]}>
           <View className="flex-row items-center justify-between">
             <View className="flex-row items-center gap-2">
-              <Users size={16} color={brand[700]} />
+              <Icon3D name="family" size={30} />
               <Text style={{ fontFamily: font.semibold, fontSize: 15, color: brand[700] }}>{planFor(tier).name}</Text>
             </View>
             {/* No seat count until the members are in: "0 of 1" while loading was wrong. */}
@@ -77,7 +78,7 @@ export default function Family() {
               <Bone h={8} r={4} />
             ) : (
               Array.from({ length: Math.max(seats, 1) }, (_, i) => (
-                <View key={i} style={{ flex: 1, height: 8, borderRadius: 4, backgroundColor: i < reachable ? brand[600] : "rgba(74,42,222,0.14)" }} />
+                <View key={i} style={{ flex: 1, height: 8, borderRadius: 4, backgroundColor: i < reachable ? brand[600] : "rgba(255,255,255,0.9)" }} />
               ))
             )}
           </View>

@@ -12,9 +12,10 @@ import { Reveal } from "@/components/ui/reveal";
 import { optimisticQueries } from "@/lib/optimistic";
 import { activeProfile } from "@/lib/profiles/context";
 import { ageFrom, checkMemberHealth, EMPTY_HEALTH, loadMemberHealth, saveMemberHealth, type MemberHealth } from "@/lib/profiles/health";
-import { brand, ink, semantic } from "@/theme/tokens";
+import { brand, ink, surface, semantic } from "@/theme/tokens";
 import { font } from "@/theme/type";
 import { FormSkeleton } from "@/components/ui/skeleton";
+import { IconArt } from "@/components/ui/icon-art";
 
 /*
  * Health profile, for whoever is being viewed.
@@ -85,7 +86,7 @@ export default function HealthProfile() {
 
   if (context.isPending) {
     return (
-      <SettingsScreen title="Health profile" eyebrow="Conditions, allergies and medicines" icon={HeartPulse}>
+      <SettingsScreen title="Health profile" eyebrow="Conditions, allergies and medicines" art="heart" icon={HeartPulse}>
         <View className="px-5">
           <FormSkeleton fields={5} />
         </View>
@@ -129,8 +130,8 @@ export default function HealthProfile() {
         >
           <View style={{ flexDirection: "row", gap: 8, marginTop: 16 }}>
             {stats.map((st) => (
-              <View key={st.one} style={{ flex: 1, padding: 12, borderRadius: 16, backgroundColor: "rgba(255,255,255,0.85)" }}>
-                <st.icon size={16} color={ink[900]} />
+              <View key={st.one} style={{ flex: 1, padding: 12, borderRadius: 18, backgroundColor: surface.tint }}>
+                <IconArt icon={st.icon} size={30} />
                 <Text style={{ fontFamily: font.semibold, fontSize: 20, letterSpacing: -0.4, color: ink[900], marginTop: 6 }}>{st.n}</Text>
                 <Text style={{ fontFamily: font.regular, fontSize: 12, color: ink[500] }}>{st.n === 1 ? st.one : st.many}</Text>
               </View>

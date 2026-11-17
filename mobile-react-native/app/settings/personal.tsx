@@ -122,7 +122,7 @@ export default function PersonalInfo() {
 
   if (context.isPending) {
     return (
-      <SettingsScreen title="Personal information" eyebrow="Name, date of birth and contact" icon={UserCog}>
+      <SettingsScreen title="Personal information" eyebrow="Name, date of birth and contact" art="people" icon={UserCog}>
         <View className="px-5">
           <FormSkeleton fields={5} />
         </View>

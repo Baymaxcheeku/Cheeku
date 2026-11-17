@@ -4,9 +4,11 @@ import { ActivityIndicator, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Tap } from "@/components/ui/tap";
-import { Glass, GlassCircle, glass, glassShadow } from "@/components/ui/glass";
+import { GlassCircle } from "@/components/ui/glass";
+import { SkyWash } from "@/components/home/front";
+import { glassCard } from "@/components/today/palette";
+import { Icon3D, type Icon3DName } from "@/components/ui/icon3d";
 import { RevealScroll } from "@/components/ui/reveal";
-import { Backdrop } from "@/components/ui/screen";
 import { brand, ink } from "@/theme/tokens";
 import { font } from "@/theme/type";
 import { brandify } from "@/components/ui/brand";
@@ -24,6 +26,7 @@ export function SettingsScreen({
   title,
   eyebrow,
   icon: Icon,
+  art,
   children,
   footer,
   bare = false,
@@ -31,6 +34,8 @@ export function SettingsScreen({
   title: string;
   eyebrow: string;
   icon: LucideIcon;
+  /** Cheeku's 3D object for this page. Falls back to the line icon. */
+  art?: Icon3DName;
   children: React.ReactNode;
   /** Pinned below the scroll area, for save buttons that must stay reachable. */
   footer?: React.ReactNode;
@@ -50,7 +55,7 @@ export function SettingsScreen({
 
   return (
     <View className="flex-1 bg-canvas">
-      <Backdrop height={380} />
+      <SkyWash top={0} />
       <View className="flex-row items-center px-4 pb-1" style={{ paddingTop: insets.top + 6 }}>
         <GlassCircle label="Go back" onPress={() => goBack(router, "/settings")}>
           <ChevronLeft size={21} color={ink[900]} />
@@ -66,17 +71,17 @@ export function SettingsScreen({
         <View
           accessibilityRole="header"
           accessibilityLabel={`${title}. ${eyebrow}`}
-          className="flex-row items-center gap-3.5 px-5 pt-3"
+          className="flex-row items-start gap-3 px-5 pt-2"
           style={bare ? { height: 0, opacity: 0, overflow: "hidden" } : undefined}
         >
-          <Glass strong className="h-14 w-14 items-center justify-center rounded-lg">
-            <Icon size={23} color={ink[900]} strokeWidth={1.8} />
-          </Glass>
           <View className="min-w-0 flex-1">
-            <Text style={{ fontFamily: font.semibold, fontSize: 24, lineHeight: 31, letterSpacing: -0.7, color: ink[900] }}>
+            <Text style={{ fontFamily: font.semibold, fontSize: 30, lineHeight: 36, letterSpacing: -0.9, color: ink[900] }}>
               {brandify(title)}
             </Text>
-            <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 19, color: ink[500], marginTop: 2 }}>{brandify(eyebrow)}</Text>
+            <Text style={{ fontFamily: font.regular, fontSize: 15, lineHeight: 21, color: ink[500], marginTop: 4 }}>{brandify(eyebrow)}</Text>
+          </View>
+          <View style={{ width: 64, height: 64, borderRadius: 22, backgroundColor: "#fff", alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: "rgba(15,16,48,0.05)" }}>
+            {art ? <Icon3D name={art} size={46} /> : <Icon size={26} color={brand[600]} strokeWidth={1.8} />}
           </View>
         </View>
 
@@ -98,11 +103,11 @@ export function SettingsScreen({
 /** A titled block. Matches the grouping on the settings hub. */
 export function Section({ label, children }: { label?: string; children: React.ReactNode }) {
   return (
-    <View className="mt-6">
+    <View style={{ marginTop: 28 }}>
       {label ? (
-        <Text style={{ paddingHorizontal: 20, fontFamily: font.semibold, fontSize: 15, color: ink[700] }}>{label}</Text>
+        <Text style={{ paddingHorizontal: 20, fontFamily: font.semibold, fontSize: 20, letterSpacing: -0.4, color: ink[900] }}>{label}</Text>
       ) : null}
-      <View style={label ? { marginTop: 10 } : undefined}>{children}</View>
+      <View style={label ? { marginTop: 12 } : undefined}>{children}</View>
     </View>
   );
 }
@@ -112,14 +117,12 @@ export function Panel({ children, padded = true }: { children: React.ReactNode; 
   return (
     <View
       style={[
-        glassShadow,
+        glassCard("#ffffff", "#0f1030"),
         {
           marginHorizontal: 20,
           overflow: "hidden",
           borderRadius: 24,
-          backgroundColor: glass.fillStrong,
-          borderWidth: 1,
-          borderColor: glass.rim,
+          shadowOpacity: 0.05,
           padding: padded ? 16 : 0,
         },
       ]}

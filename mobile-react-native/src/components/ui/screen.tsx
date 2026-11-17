@@ -1,3 +1,4 @@
+import { SkyWash } from "@/components/ui/sky-wash";
 import { useRouter } from "expo-router";
 import { FaceArt } from "@/components/ui/face-art";
 import { ChevronLeft } from "lucide-react-native";
@@ -29,7 +30,7 @@ import { goBack } from "@/lib/nav/go-back";
  * need no change.
  */
 export function Backdrop(_: { height?: number }) {
-  return null;
+  return <SkyWash top={0} />;
 }
 
 /**

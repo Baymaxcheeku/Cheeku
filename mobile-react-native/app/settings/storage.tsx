@@ -14,6 +14,8 @@ import { brand, ink, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
 import { Tap } from "@/components/ui/tap";
 import { LinesSkeleton } from "@/components/ui/skeleton";
+import { Icon3D } from "@/components/ui/icon3d";
+import { IconArt } from "@/components/ui/icon-art";
 
 /**
  * Storage and cache: what this app keeps on the phone, and the controls.
@@ -61,7 +63,7 @@ export default function StorageSettings() {
   const total = (usage.data?.offline ?? 0) + (usage.data?.temporary ?? 0);
 
   return (
-    <SettingsScreen title="Storage & cache" eyebrow="What stays on this phone, and your controls" icon={HardDrive}>
+    <SettingsScreen title="Storage & cache" eyebrow="What stays on this phone, and your controls" art="cloud" icon={HardDrive}>
       {/* --------------------------------------------------- on this phone -- */}
       <Section>
         <Panel>
@@ -84,7 +86,7 @@ export default function StorageSettings() {
             disabled={busy}
             onPress={() => void clear()}
             className="mt-4 h-12 flex-row items-center justify-center gap-2 rounded-pill"
-            style={{ backgroundColor: ink[900], opacity: busy ? 0.6 : 1 }}
+            style={{ backgroundColor: brand[600], opacity: busy ? 0.6 : 1 }}
           >
             {busy ? <ActivityIndicator color="#fff" /> : <Eraser size={16} color="#fff" />}
             <Text style={{ fontFamily: font.semibold, fontSize: 15, color: "#fff" }}>Clear cache</Text>
@@ -104,8 +106,8 @@ export default function StorageSettings() {
       <Section label="Offline reading">
         <Panel>
           <View className="flex-row items-center gap-3">
-            <View className="h-9 w-9 items-center justify-center rounded-tile" style={{ backgroundColor: brand[50] }}>
-              <WifiOff size={17} color={ink[900]} />
+            <View style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: surface.tint, alignItems: "center", justifyContent: "center" }}>
+              <Icon3D name="cloud-sync" size={30} />
             </View>
             <View className="min-w-0 flex-1">
               <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>Keep records readable offline</Text>
@@ -182,7 +184,7 @@ function UsageRow({ label, value }: { label: string; value: string }) {
 function Fact({ icon: Icon, title, body }: { icon: typeof Cookie; title: string; body: string }) {
   return (
     <View className="flex-row gap-3">
-      <Icon size={17} color={brand[500]} style={{ marginTop: 2 }} />
+      <IconArt icon={Icon} size={28} />
       <View className="min-w-0 flex-1">
         <Text style={{ fontFamily: font.semibold, fontSize: 13, color: ink[900] }}>{title}</Text>
         <Text style={{ fontFamily: font.regular, fontSize: 12, lineHeight: 17, color: ink[500], marginTop: 2 }}>{body}</Text>

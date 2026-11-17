@@ -47,6 +47,9 @@ import { Avatar } from "@/components/ui/avatar";
 import { Glass, Gradient, glass, glassShadow } from "@/components/ui/glass";
 import { Backdrop } from "@/components/ui/screen";
 import { font } from "@/theme/type";
+import { SkyWash } from "@/components/home/front";
+import { PILLAR_TONE, glassCard } from "@/components/today/palette";
+import { Icon3D, type Icon3DName } from "@/components/ui/icon3d";
 import { ConfirmSheet } from "@/components/ui/confirm-sheet";
 import { logActivity } from "@/lib/privacy/activity";
 import { signOutAndWipe } from "@/lib/privacy/local-data";
@@ -144,13 +147,13 @@ export default function Settings() {
 
   return (
     <View className="flex-1 bg-canvas">
-    <Backdrop height={460} />
+    <SkyWash top={0} />
     <ScrollView
       className="flex-1"
       contentContainerStyle={{ paddingTop: insets.top + 12, paddingBottom: 24 }}
       showsVerticalScrollIndicator={false}
     >
-      <Text accessibilityRole="header" style={{ paddingHorizontal: 20, fontFamily: font.semibold, fontSize: 28, letterSpacing: -0.8, color: ink[900] }}>
+      <Text accessibilityRole="header" style={{ paddingHorizontal: 20, fontFamily: font.semibold, fontSize: 30, letterSpacing: -0.9, color: ink[900] }}>
         Profile
       </Text>
 
@@ -165,12 +168,11 @@ export default function Settings() {
        * sits behind the card so only his head and shoulders ever show.
        */}
       <View className="mx-5 mt-4">
-      <View className="overflow-hidden rounded-2xl p-4" style={glassShadow}>
-        <Gradient from="#ffffff" to={lilac.base} glow="#ffffff" />
+      <View style={[glassCard("#ffffff", "#0f1030"), { borderRadius: 28, padding: 16, shadowOpacity: 0.05 }]}>
         <View className="flex-row items-center gap-3.5">
-          <Avatar svg={profile.avatar} photo={profile.photo} image={profile.avatarImage} background={profile.avatarBackground ?? undefined} size={68} />
+          <Avatar svg={profile.avatar} photo={profile.photo} image={profile.avatarImage} background={profile.avatarBackground ?? undefined} size={72} />
           <View className="min-w-0 flex-1">
-            <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 20, letterSpacing: -0.4, color: ink[900] }}>
+            <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 22, letterSpacing: -0.5, color: ink[900] }}>
               {profile.name}
             </Text>
             <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 2 }}>
@@ -184,25 +186,20 @@ export default function Settings() {
           accessibilityRole="button"
           accessibilityLabel={`${plan.name}. Opens your subscription`}
           onPress={() => router.push("/settings/subscription")}
-          style={[
-            glassShadow,
-            {
-              marginTop: 14,
-              flexDirection: "row",
-              alignItems: "center",
-              gap: 12,
-              padding: 10,
-              paddingRight: 14,
-              borderRadius: 24,
-              backgroundColor: glass.fillStrong,
-              borderWidth: 1,
-              borderColor: glass.rim,
-            },
-          ]}
+          style={{
+            marginTop: 14,
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 12,
+            padding: 10,
+            paddingRight: 14,
+            borderRadius: 20,
+            backgroundColor: PILLAR_TONE.sleep.bg,
+          }}
           scale={0.98}
         >
-          <View className="h-10 w-10 items-center justify-center rounded-pill" style={{ backgroundColor: ink[900] }}>
-            <Crown size={17} color="#fff" />
+          <View style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: "#fff", alignItems: "center", justifyContent: "center" }}>
+            <Icon3D name="trophy" size={32} />
           </View>
           <View className="min-w-0 flex-1">
             <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{plan.name}</Text>
@@ -213,15 +210,15 @@ export default function Settings() {
             </Text>
           </View>
           <Text style={{ fontFamily: font.semibold, fontSize: 13, color: brand[600] }}>{canUpgrade ? "Upgrade" : "Manage"}</Text>
-          <ChevronRight size={15} color={ink[900]} />
+          <ChevronRight size={15} color={brand[600]} />
         </Tap>
       </View>
       </View>
 
       {/* Your care: the two places people come back to, as tiles. */}
       <View className="mx-5 mt-4 flex-row gap-3">
-        <CareTile icon={CalendarDays} title="Appointments" line="Visits and video calls" tint={lilac.base} fg={brand[600]} href="/appointments" />
-        <CareTile icon={FolderHeart} title="Health file" line="Everything filed" tint={hue.blue.bg} fg={hue.blue.fg} href="/health-file" />
+        <CareTile art="calendar-check" title="Appointments" line="Visits and video calls" tint={PILLAR_TONE.sleep.glass} href="/appointments" />
+        <CareTile art="folder" title="Health file" line="Everything filed" tint={PILLAR_TONE.check.glass} href="/health-file" />
       </View>
 
       {/*
@@ -245,42 +242,39 @@ export default function Settings() {
        * grouping does the work the colour is not allowed to.
        */}
       <Group label="Account">
-        <Row icon={UserCog} title="Personal information" body="Name, date of birth and contact" href="/settings/personal" />
-        <Row icon={HeartPulse} title="Health profile" body="Conditions, allergies and medicines" href="/settings/health" />
-        <Row icon={ShieldPlus} title="Insurance" body="Your family's cover and what it includes" href="/insurance" />
-        {extensions().map((e) => (e.profileRow ? <Row key={e.id} icon={e.profileRow.icon as never} title={e.profileRow.title} body={e.profileRow.body} href={e.profileRow.href as never} /> : null))}
+        <Row art="people" icon={UserCog} title="Personal information" body="Name, date of birth and contact" href="/settings/personal" />
+        <Row art="heart" icon={HeartPulse} title="Health profile" body="Conditions, allergies and medicines" href="/settings/health" />
+        <Row art="shield" icon={ShieldPlus} title="Insurance" body="Your family's cover and what it includes" href="/insurance" />
+        {extensions().map((e) => (e.profileRow ? <Row key={e.id} art={e.id.includes("wear") ? "watch" : undefined} icon={e.profileRow.icon as never} title={e.profileRow.title} body={e.profileRow.body} href={e.profileRow.href as never} /> : null))}
         <LocationRow />
-        <Row icon={ShieldCheck} title="Security" body="App lock, password and sign-ins" href="/settings/security" />
-        <Row icon={LockKeyhole} title="Privacy & consent" body="Your choices, documents and rights" href="/settings/privacy" />
-        <Row icon={Crown} title="Subscription" body="Your plan, seats and billing" href="/settings/subscription" />
+        <Row art="shield-check" icon={ShieldCheck} title="Security" body="App lock, password and sign-ins" href="/settings/security" />
+        <Row art="lock" icon={LockKeyhole} title="Privacy & consent" body="Your choices, documents and rights" href="/settings/privacy" />
+        <Row art="trophy" icon={Crown} title="Subscription" body="Your plan, seats and billing" href="/settings/subscription" />
       </Group>
 
       <Group label="Preferences">
         {/* The settings, not the inbox: the inbox has the bell on Home, and a link at the foot of this page. */}
-        <Row icon={Bell} title="Notifications" body="Reminders, nudges and alerts" href="/settings/notifications" />
-        <Row icon={Globe} title="Language" body="English" href="/settings/language" />
-        <Row icon={HardDrive} title="Storage & cache" body="Offline copies and what's on this phone" href="/settings/storage" />
+        <Row art="bell" icon={Bell} title="Notifications" body="Reminders, nudges and alerts" href="/settings/notifications" />
+        <Row art="signpost" icon={Globe} title="Language" body="English" href="/settings/language" />
+        <Row art="cloud" icon={HardDrive} title="Storage & cache" body="Offline copies and what's on this phone" href="/settings/storage" />
       </Group>
 
       <Group label="Support">
-        <Row icon={CircleHelp} title="Help & support" body="Guides, FAQs and reporting an issue" href="/settings/help" />
-        <Row icon={Info} title="About Cheeku AI" body="Version and information" href="/settings/about" />
+        <Row art="headset" icon={CircleHelp} title="Help & support" body="Guides, FAQs and reporting an issue" href="/settings/help" />
+        <Row art="plant" icon={Info} title="About Cheeku AI" body="Version and information" href="/settings/about" />
       </Group>
 
       <AccountData onDeleted={signOut} />
 
-      <Glass strong className="mx-5 mt-6 overflow-hidden rounded-xl">
-        <Tap
-          accessibilityRole="button"
-          onPress={() => setSignOutOpen(true)}
-          className="flex-row items-center gap-3.5 px-4 py-3.5"
-        >
-          <View className="h-10 w-10 items-center justify-center rounded-md" style={{ backgroundColor: surface.canvas }}>
-            <LogOut size={18} color={ink[500]} />
-          </View>
-          <Text style={{ flex: 1, fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>Sign out</Text>
-        </Tap>
-      </Glass>
+      <Tap
+        accessibilityRole="button"
+        onPress={() => setSignOutOpen(true)}
+        scale={0.98}
+        style={{ marginHorizontal: 20, marginTop: 24, height: 52, borderRadius: 999, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, backgroundColor: "#fff", borderWidth: 1, borderColor: surface.line }}
+      >
+        <LogOut size={17} color={PILLAR_TONE.eat.deep} />
+        <Text style={{ fontFamily: font.semibold, fontSize: 15, color: PILLAR_TONE.eat.deep }}>Sign out</Text>
+      </Tap>
 
       {/*
        * Plain text in the page margin, not a tinted card. As a card it was the
@@ -353,24 +347,23 @@ function FamilySection({
    */
   return (
     <View className="mt-6">
-      <Text style={{ paddingHorizontal: 20, fontFamily: font.semibold, fontSize: 15, color: ink[700] }}>Family</Text>
+      <Text style={{ paddingHorizontal: 20, fontFamily: font.semibold, fontSize: 20, letterSpacing: -0.4, color: ink[900] }}>Family</Text>
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={canAdd ? "Manage family" : "Add your family with the Family plan"}
         onPress={onOpen}
         style={({ pressed }) => [
-          glassShadow,
+          glassCard("#ffffff", "#0f1030"),
           {
             marginHorizontal: 20,
-            marginTop: 10,
+            marginTop: 12,
             flexDirection: "row",
             alignItems: "center",
             gap: 12,
             padding: 14,
             borderRadius: 24,
-            backgroundColor: pressed ? "#ffffff" : glass.fillStrong,
-            borderWidth: 1,
-            borderColor: glass.rim,
+            shadowOpacity: 0.05,
+            transform: [{ scale: pressed ? 0.98 : 1 }],
           },
         ]}
       >
@@ -451,23 +444,19 @@ function AccountData({ onDeleted }: { onDeleted: () => void }) {
 
   return (
     <>
-      <View className="mt-6">
-        <Text className="px-5 text-xs font-bold text-ink-300">
+      <View style={{ marginTop: 28 }}>
+        <Text style={{ paddingHorizontal: 20, fontFamily: font.semibold, fontSize: 20, letterSpacing: -0.4, color: ink[900] }}>
           Your data
         </Text>
-        <View className="mx-5 mt-2 overflow-hidden rounded-card bg-surface" style={shadow.e1}>
+        <View style={[glassCard("#ffffff", "#0f1030"), { marginHorizontal: 20, marginTop: 12, borderRadius: 24, overflow: "hidden", shadowOpacity: 0.05 }]}>
           <Tap
             accessibilityRole="button"
             disabled={busy !== null}
             onPress={() => void runExport()}
-            className="flex-row items-center gap-3.5 px-3.5 py-3"
+            className="flex-row items-center gap-3.5 px-4 py-3"
           >
-            <View className="h-9 w-9 items-center justify-center rounded-tile bg-brand-50">
-              {busy === "export" ? (
-                <ActivityIndicator size="small" color={ink[900]} />
-              ) : (
-                <Download size={17} color={ink[900]} />
-              )}
+            <View style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: surface.tint, alignItems: "center", justifyContent: "center" }}>
+              {busy === "export" ? <ActivityIndicator size="small" color={brand[600]} /> : <Icon3D name="cloud-sync" size={30} />}
             </View>
             <View className="min-w-0 flex-1">
               <Text className="text-base font-semibold text-ink-900">Export my data</Text>
@@ -486,14 +475,11 @@ function AccountData({ onDeleted }: { onDeleted: () => void }) {
               setMessage(null);
               setConfirmOpen(true);
             }}
-            className="flex-row items-center gap-3.5 px-3.5 py-3"
+            className="flex-row items-center gap-3.5 px-4 py-3"
             style={{ borderTopWidth: 1, borderTopColor: surface.line }}
           >
-            <View
-              className="h-9 w-9 items-center justify-center rounded-tile"
-              style={{ backgroundColor: semantic.dangerBg }}
-            >
-              <Trash2 size={17} color={semantic.danger} />
+            <View style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: semantic.dangerBg, alignItems: "center", justifyContent: "center" }}>
+              <Trash2 size={18} color={semantic.danger} />
             </View>
             <View className="min-w-0 flex-1">
               <Text className="text-base font-semibold" style={{ color: semantic.dangerText }}>
@@ -590,22 +576,24 @@ function AccountData({ onDeleted }: { onDeleted: () => void }) {
 
 function Group({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <View className="mt-6">
-      <Text style={{ paddingHorizontal: 20, fontFamily: font.semibold, fontSize: 15, color: ink[700] }}>{label}</Text>
-      <Glass strong className="mx-5 mt-2.5 overflow-hidden rounded-xl">
+    <View style={{ marginTop: 28 }}>
+      <Text style={{ paddingHorizontal: 20, fontFamily: font.semibold, fontSize: 20, letterSpacing: -0.4, color: ink[900] }}>{label}</Text>
+      <View style={[glassCard("#ffffff", "#0f1030"), { marginHorizontal: 20, marginTop: 12, borderRadius: 24, overflow: "hidden", shadowOpacity: 0.05 }]}>
         {children}
-      </Glass>
+      </View>
     </View>
   );
 }
 
 function Row({
   icon: Icon,
+  art,
   title,
   body,
   href,
 }: {
   icon: LucideIcon;
+  art?: Icon3DName;
   title: string;
   body: string;
   href: string;
@@ -616,11 +604,11 @@ function Row({
       accessibilityRole="button"
       accessibilityLabel={`${title}. ${body}`}
       onPress={() => router.push(href as never)}
-      className="flex-row items-center gap-3.5 px-4 py-3.5"
+      className="flex-row items-center gap-3.5 px-4 py-3"
       style={{ borderBottomWidth: 1, borderBottomColor: "rgba(15,16,48,0.05)" }}
     >
-      <View className="h-10 w-10 items-center justify-center rounded-md" style={{ backgroundColor: brand[50] }}>
-        <Icon size={18} color={ink[900]} strokeWidth={1.9} />
+      <View style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: surface.tint, alignItems: "center", justifyContent: "center" }}>
+        {art ? <Icon3D name={art} size={30} /> : <Icon size={19} color={brand[600]} strokeWidth={1.9} />}
       </View>
       <View className="min-w-0 flex-1">
         <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{brandify(title)}</Text>
@@ -637,23 +625,21 @@ function Row({
 function LocationRow() {
   const near = useNearbyPlace(useFamily().data?.access.all.find((m) => m.isPrimary)?.id);
   const body = near.place ? `${near.place.label} · ${freshness(near.updatedAt)}` : near.locating ? "Finding you" : "Not set: tap to share or pick a place";
-  return <Row icon={MapPin} title="Location" body={body} href="/settings/location" />;
+  return <Row art="pin" icon={MapPin} title="Location" body={body} href="/settings/location" />;
 }
 
 /** A quick tile for the places people return to. */
 function CareTile({
-  icon: Icon,
+  art,
   title,
   line,
   tint,
-  fg,
   href,
 }: {
-  icon: LucideIcon;
+  art: Icon3DName;
   title: string;
   line: string;
   tint: string;
-  fg: string;
   href: string;
 }) {
   const router = useRouter();
@@ -662,16 +648,12 @@ function CareTile({
       accessibilityRole="button"
       accessibilityLabel={`${title}. ${line}`}
       onPress={() => router.push(href as never)}
-      style={{ flex: 1 }}
+      scale={0.97}
+      style={[glassCard(tint), { flex: 1, borderRadius: 24, padding: 14 }]}
     >
-      <View className="overflow-hidden rounded-xl p-3.5" style={glassShadow}>
-        <Gradient from={tint} to="#ffffff" />
-        <View className="h-11 w-11 items-center justify-center rounded-lg bg-white">
-          <Icon size={20} color={fg} strokeWidth={1.8} />
-        </View>
-        <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900], marginTop: 12 }}>{title}</Text>
-        <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 1 }}>{line}</Text>
-      </View>
+      <Icon3D name={art} size={48} />
+      <Text style={{ fontFamily: font.semibold, fontSize: 16, letterSpacing: -0.2, color: ink[900], marginTop: 12 }}>{title}</Text>
+      <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 1 }}>{line}</Text>
     </Tap>
   );
 }

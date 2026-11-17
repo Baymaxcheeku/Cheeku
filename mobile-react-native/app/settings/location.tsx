@@ -49,7 +49,7 @@ export default function LocationSettings() {
   }
 
   return (
-    <SettingsScreen title="Location" eyebrow="Care near you, and addresses filled in" icon={MapPin}>
+    <SettingsScreen title="Location" eyebrow="Care near you, and addresses filled in" art="pin" icon={MapPin}>
       <Section>
         <Panel>
           <View style={{ flexDirection: "row", gap: 14, alignItems: "center" }}>

@@ -29,7 +29,7 @@ const COMING_SOON = [
 
 export default function Language() {
   return (
-    <SettingsScreen title="Language" eyebrow="Choose your preferred language" icon={Globe}>
+    <SettingsScreen title="Language" eyebrow="Choose your preferred language" art="signpost" icon={Globe}>
       <View className="mt-4">
         <Panel>
           <Text className="text-lg font-bold leading-[21px] text-ink-900">

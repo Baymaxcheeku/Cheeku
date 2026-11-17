@@ -29,6 +29,7 @@ import { brand, ink, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
 import { Tap } from "@/components/ui/tap";
 import { LinesSkeleton } from "@/components/ui/skeleton";
+import { IconArt } from "@/components/ui/icon-art";
 
 /**
  * Security: who can open this app, and what has happened on the account.
@@ -149,7 +150,7 @@ export default function Security() {
   const delay = state.data?.delay ?? 0;
 
   return (
-    <SettingsScreen title="Security" eyebrow="Who can open this app, and what has happened on your account" icon={ShieldCheck}>
+    <SettingsScreen title="Security" eyebrow="Who can open this app, and what has happened on your account" art="shield-check" icon={ShieldCheck}>
       {/* ------------------------------------------------------ app lock -- */}
       <Section label="App lock">
         <Panel padded={false}>
@@ -353,8 +354,8 @@ function EmptyLine({ text }: { text: string }) {
 
 function IconTile({ icon: Icon }: { icon: LucideIcon }) {
   return (
-    <View className="h-9 w-9 items-center justify-center rounded-tile" style={{ backgroundColor: brand[50] }}>
-      <Icon size={17} color={ink[900]} />
+    <View style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: surface.tint, alignItems: "center", justifyContent: "center" }}>
+      <IconArt icon={Icon} size={30} />
     </View>
   );
 }
@@ -395,7 +396,7 @@ function ActionRow({
 function Fact({ icon: Icon, title, body }: { icon: LucideIcon; title: string; body: string }) {
   return (
     <View className="flex-row gap-3 rounded-card bg-surface p-3.5" style={{ borderWidth: 1, borderColor: surface.line }}>
-      <Icon size={17} color={brand[500]} style={{ marginTop: 1 }} />
+      <IconArt icon={Icon} size={28} />
       <View className="min-w-0 flex-1">
         <Text style={{ fontFamily: font.semibold, fontSize: 13, color: ink[900] }}>{title}</Text>
         <Text style={{ fontFamily: font.regular, fontSize: 12, lineHeight: 17, color: ink[500], marginTop: 3 }}>{body}</Text>

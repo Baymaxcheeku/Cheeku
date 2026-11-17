@@ -37,6 +37,7 @@ import { castFaces } from "@/lib/profiles/avatar";
 import { brand, ink, lilac, semantic, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
 import { goBack } from "@/lib/nav/go-back";
+import { IconArt } from "@/components/ui/icon-art";
 
 /*
  * ABOUT CHEEKU. The product's case for itself, told as a short story:
@@ -367,8 +368,8 @@ function Level({ tier, icon: Icon, title, text }: (typeof LEVELS)[number]) {
 function Feature({ icon: Icon, title, text }: { icon: LucideIcon; title: string; text: string }) {
   return (
     <View style={[glassShadow, { flex: 1, borderRadius: 24, backgroundColor: "#fff", padding: 14, gap: 8 }]}>
-      <View style={{ width: 38, height: 38, borderRadius: 12, backgroundColor: brand[50], alignItems: "center", justifyContent: "center" }}>
-        <Icon size={18} color={ink[900]} />
+      <View style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: surface.tint, alignItems: "center", justifyContent: "center" }}>
+        <IconArt icon={Icon} size={30} />
       </View>
       <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{title}</Text>
       <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[700] }}>{text}</Text>
@@ -388,8 +389,8 @@ function Tick({ text }: { text: string }) {
 function Trust({ icon: Icon, title, text }: { icon: LucideIcon; title: string; text: string }) {
   return (
     <View style={[glassShadow, { flex: 1, alignItems: "center", borderRadius: 24, backgroundColor: "#fff", paddingVertical: 16, paddingHorizontal: 8, gap: 6 }]}>
-      <View style={{ width: 40, height: 40, borderRadius: 999, backgroundColor: brand[50], alignItems: "center", justifyContent: "center" }}>
-        <Icon size={18} color={ink[900]} />
+      <View style={{ width: 46, height: 46, borderRadius: 999, backgroundColor: surface.tint, alignItems: "center", justifyContent: "center" }}>
+        <IconArt icon={Icon} size={30} />
       </View>
       <Text style={{ fontFamily: font.semibold, fontSize: 13, color: ink[900] }}>{title}</Text>
       <Text style={{ fontFamily: font.regular, fontSize: 12, color: ink[500], textAlign: "center" }}>{text}</Text>

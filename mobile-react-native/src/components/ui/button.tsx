@@ -3,7 +3,7 @@ import { Pressable } from "@/components/ui/pressable";
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 
 import { EASE_OUT, useReducedMotion } from "@/components/ui/motion";
-import { ink, surface } from "@/theme/tokens";
+import { brand, ink, surface } from "@/theme/tokens";
 
 /*
  * The primary action. Ported from the web `Button`.
@@ -54,7 +54,7 @@ export function Button({
           flexDirection: "row",
           gap: 8,
           opacity: off ? 0.6 : 1,
-          backgroundColor: primary ? ink[900] : "#ffffff",
+          backgroundColor: primary ? brand[600] : "#ffffff",
           borderWidth: primary ? 0 : 1,
           borderColor: surface.line,
         }}

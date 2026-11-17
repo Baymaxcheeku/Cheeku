@@ -34,6 +34,7 @@ import { brand, ink, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
 import { Tap } from "@/components/ui/tap";
 import { LinesSkeleton } from "@/components/ui/skeleton";
+import { IconArt } from "@/components/ui/icon-art";
 
 const DOC_ICON: Record<LegalKind, LucideIcon> = { terms: ScrollText, privacy: ShieldCheck, health_consent: FileText, storage: Cookie };
 
@@ -149,7 +150,7 @@ export default function PrivacySettings() {
   }
 
   return (
-    <SettingsScreen title="Privacy & consent" eyebrow="What you agreed to, your choices and your rights" icon={LockKeyhole}>
+    <SettingsScreen title="Privacy & consent" eyebrow="What you agreed to, your choices and your rights" art="lock" icon={LockKeyhole}>
       {/* ---------------------------------------------------------- status -- */}
       <Section>
         <Panel>
@@ -374,8 +375,8 @@ function groupHistory(rows: HistoryRow[]) {
 function StatusLine({ icon: Icon, title, body }: { icon: LucideIcon; title: string; body: string }) {
   return (
     <View className="flex-row gap-3">
-      <View className="h-10 w-10 items-center justify-center rounded-md" style={{ backgroundColor: brand[50] }}>
-        <Icon size={19} color={ink[900]} />
+      <View style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: surface.tint, alignItems: "center", justifyContent: "center" }}>
+        <IconArt icon={Icon} size={30} />
       </View>
       <View className="min-w-0 flex-1">
         <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{title}</Text>
@@ -408,8 +409,8 @@ function LinkRow({
       className="flex-row items-center gap-3 px-4 py-3"
       style={first ? undefined : { borderTopWidth: 1, borderTopColor: surface.line }}
     >
-      <View className="h-9 w-9 items-center justify-center rounded-tile" style={{ backgroundColor: brand[50] }}>
-        <Icon size={16} color={ink[900]} />
+      <View style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: surface.tint, alignItems: "center", justifyContent: "center" }}>
+        <IconArt icon={Icon} size={30} />
       </View>
       <View className="min-w-0 flex-1">
         <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{title}</Text>
@@ -483,7 +484,7 @@ function RequestSheet({ kind, onClose, onSent }: { kind: RequestKind | null; onC
             disabled={busy}
             onPress={() => void send()}
             className="mt-4 h-[52px] items-center justify-center rounded-pill"
-            style={{ backgroundColor: ink[900], opacity: busy ? 0.6 : 1 }}
+            style={{ backgroundColor: brand[600], opacity: busy ? 0.6 : 1 }}
           >
             {busy ? <ActivityIndicator color="#fff" /> : <Text style={{ fontFamily: font.semibold, fontSize: 15, color: "#fff" }}>Send request</Text>}
           </Tap>

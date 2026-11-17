@@ -389,7 +389,7 @@ export default function Profile() {
             accessibilityLabel={`${filled} of ${answers.length} fields filled. ${powerLine(filled, answers.length)}`}
           >
             <Boop trigger={filled}>
-              <View className="h-9 w-9 items-center justify-center rounded-pill" style={{ backgroundColor: ink[900] }}>
+              <View className="h-9 w-9 items-center justify-center rounded-pill" style={{ backgroundColor: brand[600] }}>
                 <Text style={{ fontFamily: font.bold, fontSize: 13, color: "#fff" }}>{filled}</Text>
               </View>
             </Boop>
@@ -400,7 +400,7 @@ export default function Profile() {
                   {filled} of {answers.length}
                 </Text>
               </View>
-              <FillBar value={filled / answers.length} color={ink[900]} track={brand[100]} height={6} />
+              <FillBar value={filled / answers.length} color={brand[600]} track={brand[100]} height={6} />
             </View>
           </View>
 

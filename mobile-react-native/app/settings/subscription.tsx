@@ -55,6 +55,8 @@ import { profileAccess, type ActiveProfile } from "@/lib/profiles/context";
 import { joinNames, planChange, refreshRoster } from "@/lib/profiles/family";
 import { brand, hue, ink, lilac, semantic, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
+import { Icon3D, type Icon3DName } from "@/components/ui/icon3d";
+import { glassCard } from "@/components/today/palette";
 import { DetailSkeleton } from "@/components/ui/skeleton";
 
 /*
@@ -88,6 +90,7 @@ const RANK: Record<Tier, number> = { free: 0, micro: 1, solo: 1, family: 2 };
 const CARDS: Tier[] = ["family", "solo", "micro", "free"];
 
 const ICON: Record<Tier, LucideIcon> = { free: UserRound, micro: Zap, solo: Crown, family: Users };
+const ART: Record<Tier, Icon3DName> = { free: "star", micro: "gift", solo: "trophy", family: "family" };
 
 /**
  * The comparison. Rows that are the same everywhere are there on purpose:
@@ -146,7 +149,7 @@ export default function Subscription() {
 
   if (context.isPending) {
     return (
-      <SettingsScreen title="Your plan" eyebrow="What you get and who it covers" icon={Crown}>
+      <SettingsScreen title="Your plan" eyebrow="What you get and who it covers" art="trophy" icon={Crown}>
         <View className="px-5">
           <DetailSkeleton hero={180} />
         </View>
@@ -193,14 +196,11 @@ export default function Subscription() {
     <SettingsScreen title="Your plan" eyebrow="What you get and who it covers" icon={Crown} bare>
       {/* -------------------------------------------------------- the hero -- */}
       <Reveal style={[glassShadow, { marginHorizontal: 20, marginTop: 4, borderRadius: 32, overflow: "hidden", padding: 20 }]}>
-        {paid ? <Gradient from={ink[900]} to={ink[900]} /> : <Gradient from={lilac.violet} to="#ffffff" glow="#ffffff" />}
+        {paid ? <Gradient from={brand[600]} to={brand[600]} /> : <Gradient from={lilac.violet} to="#ffffff" glow="#ffffff" />}
         <Eyebrow color={paid ? BRAND_ON_DARK : brand[600]}>You&apos;re on</Eyebrow>
         <View style={{ flexDirection: "row", alignItems: "center", gap: 10, marginTop: 6 }}>
-          <View style={{ width: 40, height: 40, borderRadius: 16, alignItems: "center", justifyContent: "center", backgroundColor: paid ? "rgba(255,255,255,0.16)" : "#fff" }}>
-            {(() => {
-              const Icon = ICON[tier];
-              return <Icon size={20} color={paid ? "#fff" : brand[600]} />;
-            })()}
+          <View style={{ width: 48, height: 48, borderRadius: 16, alignItems: "center", justifyContent: "center", backgroundColor: "#fff" }}>
+            <Icon3D name={ART[tier]} size={36} />
           </View>
           <Text style={{ flex: 1, fontFamily: font.semibold, fontSize: 28, letterSpacing: -0.9, color: paid ? "#fff" : ink[900] }}>{plan.name}</Text>
         </View>
@@ -248,7 +248,7 @@ export default function Subscription() {
         <Pressable
           accessibilityRole="button"
           onPress={next.go}
-          style={({ pressed }) => ({ marginTop: 16, height: 52, borderRadius: 999, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, backgroundColor: paid ? "#fff" : ink[900], opacity: pressed ? 0.88 : 1, transform: [{ scale: pressed ? 0.985 : 1 }] })}
+          style={({ pressed }) => ({ marginTop: 16, height: 52, borderRadius: 999, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, backgroundColor: paid ? "#fff" : brand[600], opacity: pressed ? 0.88 : 1, transform: [{ scale: pressed ? 0.985 : 1 }] })}
         >
           <next.icon size={17} color={paid ? brand[700] : "#fff"} />
           <Text style={{ fontFamily: font.semibold, fontSize: 15, color: paid ? brand[700] : "#fff" }}>{next.label}</Text>
@@ -257,7 +257,7 @@ export default function Subscription() {
 
       {/* --------------------------------------------------- what you get -- */}
       <Reveal style={{ marginHorizontal: 20, marginTop: 16 }}>
-        <View style={[glassShadow, { borderRadius: 24, backgroundColor: "#fff", padding: 18 }]}>
+        <View style={[glassCard("#ffffff", "#0f1030"), { borderRadius: 24, padding: 18, shadowOpacity: 0.05 }]}>
           <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>Included in your plan</Text>
           <View style={{ marginTop: 12, gap: 10 }}>
             {plan.features.map((f) => (
@@ -426,7 +426,6 @@ function PlanCard({ plan, current, from, onPress }: { plan: Plan; current: boole
   const up = RANK[plan.tier] > RANK[from] || (from === "free" && plan.tier !== "free") || (from === "micro" && plan.tier === "solo");
   const label = current ? "Your plan" : up ? `Choose ${plan.name.replace(" Plan", "")}` : `Switch to ${plan.name.replace(" Plan", "")}`;
   const featured = plan.tier === "family";
-  const Icon = ICON[plan.tier];
   const perDay = perDayLabel(plan);
   const perSeat = perSeatLabel(plan);
   const fg = featured ? "#fff" : ink[900];
@@ -442,16 +441,16 @@ function PlanCard({ plan, current, from, onPress }: { plan: Plan; current: boole
         padding: 18,
         borderRadius: 32,
         overflow: "hidden",
-        backgroundColor: featured ? ink[900] : "#fff",
+        backgroundColor: featured ? brand[600] : "#fff",
         borderWidth: current ? 2 : 0,
-        borderColor: featured ? BRAND_ON_DARK : brand[500],
+        borderColor: featured ? "#fff" : brand[500],
       }]}
       scale={0.98}
     >
-      {featured ? <Gradient from={ink[900]} to={ink[900]} /> : null}
+      
       <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
-        <View style={{ width: 40, height: 40, borderRadius: 16, alignItems: "center", justifyContent: "center", backgroundColor: featured ? "rgba(255,255,255,0.16)" : brand[50] }}>
-          <Icon size={19} color={featured ? "#fff" : brand[600]} />
+        <View style={{ width: 48, height: 48, borderRadius: 16, alignItems: "center", justifyContent: "center", backgroundColor: featured ? "#fff" : surface.tint }}>
+          <Icon3D name={ART[plan.tier]} size={36} />
         </View>
         {featured ? (
           <View style={{ paddingHorizontal: 10, height: 24, borderRadius: 999, justifyContent: "center", backgroundColor: "#fff" }}>

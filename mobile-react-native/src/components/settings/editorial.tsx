@@ -9,6 +9,7 @@ import { Spin } from "@/components/ui/reveal";
 import { brand, ink, lilac, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
 import { Tap } from "@/components/ui/tap";
+import { IconArt } from "@/components/ui/icon-art";
 
 /*
  * The type ramp and the question list shared by the long settings pages
@@ -103,8 +104,8 @@ export function PersonHero({
 export function Reason({ icon: Icon, lead, text }: { icon: LucideIcon; lead: string; text: string }) {
   return (
     <View style={{ flexDirection: "row", gap: 12, alignItems: "flex-start" }}>
-      <View style={{ width: 34, height: 34, borderRadius: 12, backgroundColor: brand[50], alignItems: "center", justifyContent: "center" }}>
-        <Icon size={16} color={ink[900]} />
+      <View style={{ width: 42, height: 42, borderRadius: 14, backgroundColor: surface.tint, alignItems: "center", justifyContent: "center" }}>
+        <IconArt icon={Icon} size={28} />
       </View>
       <View style={{ flex: 1 }}>
         <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{lead}</Text>
