@@ -1,18 +1,20 @@
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
-import { HeartHandshake, ShieldCheck, UserPlus } from "lucide-react-native";
+import { Plus, ShieldCheck, UserPlus } from "lucide-react-native";
 import { ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { MemberCareCard } from "@/components/care/family-care";
 import { Avatar } from "@/components/ui/avatar";
-import { Gradient, glassShadow } from "@/components/ui/glass";
+import { GLASS_SHEEN, PILLAR_TONE, glassCard } from "@/components/today/palette";
+import { Icon3D } from "@/components/ui/icon3d";
+import { Tap } from "@/components/ui/tap";
 import { StaggerItem } from "@/components/ui/motion";
 import { Backdrop, PillButton, ScreenHeader } from "@/components/ui/screen";
 import { ListSkeleton, ScreenSkeleton } from "@/components/ui/skeleton";
 import { useFamily } from "@/lib/profiles/family";
 import { supabase } from "@/lib/supabase/client";
-import { hue, ink, lilac } from "@/theme/tokens";
+import { brand, ink } from "@/theme/tokens";
 import { font } from "@/theme/type";
 
 /*
@@ -26,6 +28,9 @@ import { font } from "@/theme/type";
  *
  * The alerts themselves come from the server (migration 0038), which sees
  * ticks from every phone; each card keeps that member's plan current there.
+ *
+ * REDESIGN, 17 Nov 2026: a glass hero with the family as faces and one big
+ * number, then one breathable glass card per person (components/care).
  */
 
 async function memberPhones(): Promise<Record<string, string>> {
@@ -57,36 +62,50 @@ export default function FamilyCare() {
       <Backdrop />
       <ScreenHeader title="Family care" fallback="/home" />
       <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: insets.bottom + 40 }} showsVerticalScrollIndicator={false}>
+        {/* The family at a glance: who you look after, as faces and one big number. Flat glass, no gradient. */}
         <StaggerItem index={0}>
-          <View className="mt-3 overflow-hidden rounded-2xl p-4" style={glassShadow}>
-            <Gradient from={lilac.base} to={lilac.deep} glow="#ffffff" />
-            <View className="flex-row items-center gap-3">
-              <View className="h-11 w-11 items-center justify-center rounded-lg" style={{ backgroundColor: "#fff" }}>
-                <HeartHandshake size={20} color={hue.rose.fg} />
+          <View className="mt-3" style={[glassCard(PILLAR_TONE.sleep.glass), { borderRadius: 28, padding: 20 }]}>
+            <View pointerEvents="none" style={GLASS_SHEEN} />
+            <View className="flex-row items-start justify-between">
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontFamily: font.semibold, fontSize: 14, color: PILLAR_TONE.sleep.deep }}>{others.length ? "You look after" : "Look after your family"}</Text>
+                {others.length ? (
+                  <Text style={{ marginTop: 4 }}>
+                    <Text style={{ fontFamily: font.semibold, fontSize: 52, lineHeight: 58, letterSpacing: -2, color: ink[900] }}>{others.length}</Text>
+                    <Text style={{ fontFamily: font.medium, fontSize: 18, color: ink[500] }}>{others.length === 1 ? " person" : " people"}</Text>
+                  </Text>
+                ) : (
+                  <Text style={{ fontFamily: font.semibold, fontSize: 22, lineHeight: 28, letterSpacing: -0.5, color: ink[900], marginTop: 6 }}>Their doses, numbers and tests, in one place</Text>
+                )}
               </View>
-              <View className="min-w-0 flex-1">
-                <Text style={{ fontFamily: font.semibold, fontSize: 20, letterSpacing: -0.4, color: ink[900] }}>
-                  {others.length ? "How everyone's doing" : "Look after your family"}
-                </Text>
-                <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[700], marginTop: 2 }}>
-                  {others.length ? "Today's doses, their numbers and anything that needs a call." : "Add Papa or Ma and see their doses, numbers and tests here."}
-                </Text>
+              <View style={{ width: 56, height: 56, borderRadius: 999, backgroundColor: "#fff", alignItems: "center", justifyContent: "center" }}>
+                <Icon3D name="family" size={38} />
               </View>
             </View>
-            {others.length ? (
-              <View className="mt-3 flex-row">
-                {others.slice(0, 5).map((m, i) => (
-                  <View key={m.id} style={{ marginLeft: i === 0 ? 0 : -8 }}>
-                    <Avatar svg={m.avatar} photo={m.photo} image={m.avatarImage} background={m.avatarBackground} size={30} ring="#ffffff" />
-                  </View>
-                ))}
-              </View>
-            ) : null}
+            <View className="mt-4 flex-row items-center">
+              {others.slice(0, 5).map((m, i) => (
+                <View key={m.id} style={{ marginLeft: i === 0 ? 0 : -10 }}>
+                  <Avatar svg={m.avatar} photo={m.photo} image={m.avatarImage} background={m.avatarBackground} size={42} ring="#ffffff" />
+                </View>
+              ))}
+              <Tap
+                accessibilityRole="button"
+                accessibilityLabel="Add a family member"
+                onPress={() => router.push("/family")}
+                scale={0.94}
+                style={{ marginLeft: others.length ? -6 : 0, width: 46, height: 46, borderRadius: 999, borderWidth: 2, borderColor: "#fff", backgroundColor: brand[600], alignItems: "center", justifyContent: "center" }}
+              >
+                <Plus size={20} color="#fff" strokeWidth={2.4} />
+              </Tap>
+            </View>
+            <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[700], marginTop: 14 }}>
+              {others.length ? "Today's doses, their numbers and anything that needs a call." : "Add Papa or Ma to see their day here."}
+            </Text>
           </View>
         </StaggerItem>
 
         {others.length ? (
-          <View className="mt-4 gap-3">
+          <View className="mt-4 gap-4">
             {others.map((m, i) => (
               <StaggerItem key={m.id} index={i + 1}>
                 <MemberCareCard member={m} phone={phones.data?.[m.id] ?? null} />

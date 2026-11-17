@@ -296,8 +296,16 @@ export function TaskRow({ task, onExpand, onDone }: { task: PlanTask; onExpand: 
   return (
     <View className="flex-row items-center gap-3 py-2.5">
       <Tap accessibilityRole="button" accessibilityLabel={`${task.title}. Show details`} onPress={onExpand} scale={0.98} className="min-w-0 flex-1 flex-row items-center gap-3">
-        <View style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: done ? tone.accent : tone.bg, alignItems: "center", justifyContent: "center" }}>
-          {done ? <Check size={18} color="#fff" strokeWidth={3} /> : <Icon3D name={taskIcon3d(task)} size={28} />}
+        {/* The object stays when done, with a small tick on its corner, so the list still reads at a glance. */}
+        <View style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: tone.bg, alignItems: "center", justifyContent: "center" }}>
+          <View style={{ opacity: done ? 0.55 : 1 }}>
+            <Icon3D name={taskIcon3d(task)} size={28} />
+          </View>
+          {done ? (
+            <View style={{ position: "absolute", right: -4, bottom: -4, width: 20, height: 20, borderRadius: 999, backgroundColor: tone.accent, borderWidth: 2, borderColor: "#fff", alignItems: "center", justifyContent: "center" }}>
+              <Check size={10} color="#fff" strokeWidth={3.4} />
+            </View>
+          ) : null}
         </View>
         <View className="min-w-0 flex-1">
           <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 15, color: done ? ink[500] : ink[900] }}>
