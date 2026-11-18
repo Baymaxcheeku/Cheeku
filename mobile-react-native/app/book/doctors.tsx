@@ -17,6 +17,7 @@ import { doctorFace } from "@/lib/booking/faces";
 import { useRatings, type Rating } from "@/lib/labs/queries";
 import { brand, ink, lilac, surface } from "@/theme/tokens";
 import { SkyWash } from "@/components/home/front";
+import { SpecialistFallback } from "@/components/booking/specialist-fallback";
 import { PILLAR_TONE, glassCard } from "@/components/today/palette";
 import { Icon3D } from "@/components/ui/icon3d";
 import { font } from "@/theme/type";
@@ -39,7 +40,7 @@ export default function Doctors() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const still = useReducedMotion();
-  const { specialty, mode, intake, setMode } = useBookingDraft();
+  const { specialty, mode, intake, setMode, choose } = useBookingDraft();
   const ratings = useRatings("doctor");
 
   const sp = SPECIALTIES[specialty ?? "gp"];
@@ -138,7 +139,10 @@ export default function Doctors() {
               />
             </Animated.View>
           ))}
-          {list.length === 0 && !(LIVE && (live.loading || live.error || live.needsPlace)) ? (
+          {list.length === 0 && sp.id !== "gp" && !(LIVE && (live.loading || live.error || live.needsPlace)) ? (
+            <SpecialistFallback specialty={sp.id} mode={m} onGp={() => choose("gp", m)} onOtherMode={() => setMode(m === "online" ? "clinic" : "online")} />
+          ) : null}
+          {list.length === 0 && sp.id === "gp" && !(LIVE && (live.loading || live.error || live.needsPlace)) ? (
             <Glass strong className="items-center rounded-xl p-6">
               <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900], textAlign: "center" }}>
                 No {sp.plural.toLowerCase()} {m === "online" ? "online" : "with clinic slots"} right now

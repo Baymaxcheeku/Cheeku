@@ -22,6 +22,7 @@ import { shouldCaution } from "@/lib/safety/caution";
 import { brand, hue, ink, lilac, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
 import { SkyWash } from "@/components/home/front";
+import { SpecialistFallback, useSupply } from "@/components/booking/specialist-fallback";
 import { PILLAR_TONE, glassCard } from "@/components/today/palette";
 import { Icon3D } from "@/components/ui/icon3d";
 import { Brand } from "@/components/ui/brand";
@@ -159,8 +160,8 @@ export default function Consult() {
     say(
       [
         mode === "online"
-          ? `Lovely. Here are ${sp.plural.toLowerCase()} you can see on a video call. I'll send your note ahead.`
-          : `Lovely. Here are ${sp.plural.toLowerCase()} with clinics near you. I'll send your note ahead.`,
+          ? `Lovely. Let me see which ${sp.plural.toLowerCase()} are free on video. Your note goes ahead of you.`
+          : `Lovely. Let me see which ${sp.plural.toLowerCase()} have clinic slots near you. Your note goes ahead of you.`,
       ],
       "done",
     );
@@ -378,26 +379,19 @@ export default function Consult() {
 
           {!typing && step === "done" ? (
             <BubblePop from="right" style={{ marginTop: 4 }}>
-              <Tap
-                accessibilityRole="button"
-                onPress={() => router.push("/book/doctors")}
-                scale={0.98}
-              >
-                <View style={[glassCard(PILLAR_TONE.sleep.glass), { flexDirection: "row", alignItems: "center", gap: 12, borderRadius: 24, padding: 12, paddingRight: 14 }]}>
-                  <View style={{ width: 56, height: 56, borderRadius: 18, backgroundColor: "#fff", alignItems: "center", justifyContent: "center" }}>
-                    <Icon3D name="doctor" size={42} />
-                  </View>
-                  <View className="flex-1">
-                    <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>See available doctors</Text>
-                    <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 2 }}>
-                      Your note goes with the booking
-                    </Text>
-                  </View>
-                  <View className="h-10 w-10 items-center justify-center rounded-pill" style={{ backgroundColor: brand[600] }}>
-                    <ArrowRight size={18} color="#fff" />
-                  </View>
-                </View>
-              </Tap>
+              <DoneNext
+                specialty={draft.specialty ?? chosenSpecialty.current}
+                mode={draft.mode ?? "online"}
+                onSee={() => router.push("/book/doctors")}
+                onGp={() => {
+                  draft.choose("gp", draft.mode ?? "online");
+                  router.push("/book/doctors");
+                }}
+                onOtherMode={() => {
+                  draft.setMode(draft.mode === "clinic" ? "online" : "clinic");
+                  router.push("/book/doctors");
+                }}
+              />
             </BubblePop>
           ) : null}
 
@@ -540,6 +534,36 @@ function ModeCard({ icon, tint, title, body, onPress }: { icon: React.ReactNode;
         <View className="flex-1">
           <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>{title}</Text>
           <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[500], marginTop: 2 }}>{body}</Text>
+        </View>
+      </View>
+    </Tap>
+  );
+}
+
+/**
+ * The last step of the chat. Checks the partner has this department in this
+ * mode before sending the person to an empty list; if not, offers a GP (or
+ * the other way to meet) right here in the chat.
+ */
+function DoneNext({ specialty, mode, onSee, onGp, onOtherMode }: { specialty: SpecialtyId; mode: Mode; onSee: () => void; onGp: () => void; onOtherMode: () => void }) {
+  const supply = useSupply(specialty, mode);
+  if (specialty !== "gp" && !supply.loading && !supply.error && supply.count === 0) {
+    return <SpecialistFallback specialty={specialty} mode={mode} onGp={onGp} onOtherMode={onOtherMode} />;
+  }
+  return (
+    <Tap accessibilityRole="button" onPress={onSee} scale={0.98}>
+      <View style={[glassCard(PILLAR_TONE.sleep.glass), { flexDirection: "row", alignItems: "center", gap: 12, borderRadius: 24, padding: 12, paddingRight: 14 }]}>
+        <View style={{ width: 56, height: 56, borderRadius: 18, backgroundColor: "#fff", alignItems: "center", justifyContent: "center" }}>
+          <Icon3D name="doctor" size={42} />
+        </View>
+        <View className="flex-1">
+          <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>{supply.loading ? "Checking who's free" : "See available doctors"}</Text>
+          <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 2 }}>
+            {supply.count > 0 ? `${supply.count} ${supply.count === 1 ? "doctor" : "doctors"} · your note goes with the booking` : "Your note goes with the booking"}
+          </Text>
+        </View>
+        <View className="h-10 w-10 items-center justify-center rounded-pill" style={{ backgroundColor: brand[600] }}>
+          <ArrowRight size={18} color="#fff" />
         </View>
       </View>
     </Tap>

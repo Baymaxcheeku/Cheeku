@@ -35,6 +35,14 @@ export type LabOrderInput = {
   prescriptionDocumentId: string | null;
 };
 
+/**
+ * The partner's payment link on an order. Valid for 16 minutes from placing;
+ * an unpaid order is cancelled on their side after that.
+ */
+export type Payment = { required: boolean; link: string | null; dueAt: string | null; expired: boolean };
+/** What placing an order hands back when payment is switched on. */
+export type PaymentStart = { link: string; dueAt: string | null } | null;
+
 export type LabOrder = {
   bookingId: string;
   lsOrderId: number | null;
@@ -50,6 +58,7 @@ export type LabOrder = {
   reports: { link: string; type: "FULL" | "PARTIAL" }[];
   resultDocumentId: string | null;
   cancelReason: string | null;
+  payment?: Payment;
 };
 
 // -------------------------------------------------------------- pharmacy --
@@ -129,6 +138,7 @@ export type PharmaOrder = {
   placedAt: string;
   cancelReason: string | null;
   profileId: string;
+  payment?: Payment;
 };
 
 // ---------------------------------------------------------- consultations --
@@ -182,6 +192,7 @@ export type Consult = {
   appointment: string;
   prescriptionDocumentId: string | null;
   profileId: string;
+  payment?: Payment;
 };
 
 export type InstantStatus = { requestId: string; status: "BROADCASTING" | "CLAIMED" | "EXPIRED" | "CANCELED"; expiresAt: string | null; meetingLink: string | null; appointmentId: string | null };

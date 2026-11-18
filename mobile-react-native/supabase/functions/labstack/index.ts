@@ -22,7 +22,7 @@ import {
   type AddressParts,
 } from "./validate.ts";
 import {
-  consultOut, Fail, fileBase64, SERVICE_KEY, SUPABASE_URL, insert, itemOut, labOrderOut, ls, one, packOf, patch, pharmaOut, pickupOut, refreshConsult, refreshLab, refreshPharma, remove, rows, rpc,
+  COLLECT_PAYMENT, consultOut, Fail, fileBase64, partnerHost, savePayment, SERVICE_KEY, SUPABASE_URL, insert, itemOut, labOrderOut, ls, one, packOf, patch, pharmaOut, pickupOut, refreshConsult, refreshLab, refreshPharma, remove, rows, rpc,
   type ConsultRow, type LabRow, type PharmaRow,
 } from "./partner.ts";
 
@@ -190,11 +190,11 @@ const labs = {
       prescription_document_id: rx,
     });
     try {
-      const r = await ls<{ order: { orderId: number; orderStatus: string; labName: string | null; labLogo: string | null; labAddress: string | null; labLocality: string | null; labCity: string | null; lsLabId: number | null } }>(
+      const r = await ls<{ order: { orderId: number; orderStatus: string; labName: string | null; labLogo: string | null; labAddress: string | null; labLocality: string | null; labCity: string | null; lsLabId: number | null }; paymentLink?: string | null; paymentLinkExpiresAt?: string | null }>(
         "POST", "/api/v1.3/order/placeOrder", {
           body: {
             orderType, appointment, referenceId: row.id, testIds: t.testIds, packageIds: t.packageIds, ...(lsLabId ? { labId: lsLabId } : {}),
-            ...patient, ...address, ...(notes ? { notes } : {}), isPaymentRequired: false,
+            ...patient, ...address, ...(notes ? { notes } : {}), isPaymentRequired: COLLECT_PAYMENT,
           },
         },
       );
@@ -203,7 +203,9 @@ const labs = {
         ls_order_id: o.orderId, ls_status: o.orderStatus, ls_lab_id: o.lsLabId ?? lsLabId, lab_name: o.labName, lab_logo: imageUrl(o.labLogo),
         lab_address: [o.labAddress, o.labLocality, o.labCity].filter(Boolean).join(", ") || null,
       });
-      return { bookingId: row.id };
+      const payment = r.paymentLink ? { link: r.paymentLink, dueAt: r.paymentLinkExpiresAt ?? null } : null;
+      if (payment) await savePayment("lab_bookings", row.id, { payment_required: true, payment_link: payment.link, payment_due_at: payment.dueAt });
+      return { bookingId: row.id, payment };
     } catch (e) {
       await remove("lab_bookings", `id=eq.${row.id}`).catch(() => undefined);
       throw e;
@@ -359,9 +361,9 @@ const pharma = {
       status: "PENDING", prescription_document_ids: docs.map((d) => d.id),
     });
     try {
-      const r = await ls<{ order: { orderId: number; orderStatus: string; pharmacyName: string; shipmentSpeed: string | null; pharmaSuperOrderId: number | null; pickupLocation: Parameters<typeof pickupOut>[0]; price: { totalAmount: number; items: Parameters<typeof itemOut>[0][] } | null } }>(
+      const r = await ls<{ order: { orderId: number; orderStatus: string; pharmacyName: string; shipmentSpeed: string | null; pharmaSuperOrderId: number | null; pickupLocation: Parameters<typeof pickupOut>[0]; price: { totalAmount: number; items: Parameters<typeof itemOut>[0][] } | null; paymentLink?: string | null; paymentLinkExpiresAt?: string | null } }>(
         "POST", "/api/pharma/v1.0/order/placeOrder", {
-          body: { orderType, lsPharmacyId, drugs, referenceId: row.id, ...patient, altNumber: (patient as { altContact?: string }).altContact, ...address, shipmentSpeed: speedOf(q.speed), ...(notes ? { notes } : {}), isPaymentRequired: false, ...(documents.length ? { documents } : {}) },
+          body: { orderType, lsPharmacyId, drugs, referenceId: row.id, ...patient, altNumber: (patient as { altContact?: string }).altContact, ...address, shipmentSpeed: speedOf(q.speed), ...(notes ? { notes } : {}), isPaymentRequired: COLLECT_PAYMENT, ...(documents.length ? { documents } : {}) },
         },
       );
       const o = r.order;
@@ -369,7 +371,9 @@ const pharma = {
         ls_order_id: o.orderId, ls_super_order_id: o.pharmaSuperOrderId, status: o.orderStatus, pharmacy_name: o.pharmacyName, shipment_speed: o.shipmentSpeed,
         pickup: pickupOut(o.pickupLocation), items: (o.price?.items ?? []).map(itemOut), total: o.price?.totalAmount ?? 0,
       });
-      return { orderId: row.id };
+      const payment = o.paymentLink ? { link: o.paymentLink, dueAt: o.paymentLinkExpiresAt ?? null } : null;
+      if (payment) await savePayment("pharma_orders", row.id, { payment_required: true, payment_link: payment.link, payment_due_at: payment.dueAt });
+      return { orderId: row.id, payment };
     } catch (e) {
       await remove("pharma_orders", `id=eq.${row.id}`).catch(() => undefined);
       throw e;
@@ -470,12 +474,22 @@ const consult = {
     const couponCode = str(q.couponCode, 40);
     const referenceId = crypto.randomUUID();
 
-    const r = await ls<{ appointment: { appointmentId: number; appointmentStatus: string; providerName: string } }>("POST", "/api/v1.0/appointment/bookAppointment", {
-      body: {
-        lsProviderId, appointmentType, appointment, referenceId, meetingType, ...patient, ...address, ...(notes ? { notes } : {}), ...(couponCode ? { couponCode } : {}),
-        storeSuggestedTestIds: await suggestedLsIds(ids(q.suggestedTestIds, 6)), isPaymentRequired: false,
-      },
-    });
+    type Booked = { appointment: { appointmentId: number; appointmentStatus: string; providerName: string }; paymentLink?: string | null; paymentLinkExpiresAt?: string | null };
+    let r: Booked;
+    try {
+      r = await ls<Booked>("POST", "/api/v1.0/appointment/bookAppointment", {
+        body: {
+          lsProviderId, appointmentType, appointment, referenceId, meetingType, ...patient, ...address, ...(notes ? { notes } : {}), ...(couponCode ? { couponCode } : {}),
+          storeSuggestedTestIds: await suggestedLsIds(ids(q.suggestedTestIds, 6)), isPaymentRequired: COLLECT_PAYMENT,
+        },
+      });
+    } catch (e) {
+      // A few doctors can't take payment through the link; the partner refuses those bookings outright, nothing is held.
+      if (COLLECT_PAYMENT && e instanceof Fail && e.status === 400 && /payment/i.test(e.message)) {
+        throw new Fail("This doctor can't take online payment yet. Pick another doctor, or a general physician.", "unavailable", 400);
+      }
+      throw e;
+    }
     const a = r.appointment;
     const speciality = str(q.speciality, 80) || null;
     let row: ConsultRow;
@@ -501,7 +515,9 @@ const consult = {
       }))).catch(() => []);
       if (documents.length) await ls("POST", "/api/v1.0/appointment/uploadDocument", { body: { appointmentId: a.appointmentId, documents } }).catch(() => undefined);
     }
-    return { appointmentId: row.id };
+    const payment = r.paymentLink ? { link: r.paymentLink, dueAt: r.paymentLinkExpiresAt ?? null } : null;
+    if (payment) await savePayment("consult_appointments", row.id, { payment_required: true, payment_link: payment.link, payment_due_at: payment.dueAt });
+    return { appointmentId: row.id, payment };
   },
 
   async appointment(ctx: Ctx, q: In) {
@@ -592,6 +608,78 @@ const db_upsertInstant = (row: unknown) => upsert("instant_consults", row);
  *    price, so they can be booked live.
  * Returns what matched and what didn't, so the gaps can be fixed by hand.
  */
+/*
+ * THE OWNER'S HEALTH CHECK (admin.probe).
+ *
+ * Runs the same partner calls the app makes, one after another, and reports
+ * what came back: how many specialities and doctors per department, whether
+ * labs and pharmacies serve the pincode, whether medicine search answers.
+ * Each step is caught on its own, so one failure never hides the others.
+ * Run it from Edge Functions > labstack > Test with
+ *   {"op":"admin.probe","input":{"pincode":"560038"}}
+ * and the x-admin-token header. Nothing is booked, nothing personal is sent.
+ */
+async function probe(input: In) {
+  const pincode = str(input.pincode, 6) || "560038";
+  const out: Record<string, unknown> = { partner: partnerHost(), pincode };
+  const step = async (name: string, fn: () => Promise<unknown>) => {
+    try {
+      out[name] = { ok: true, ...((await fn()) as Record<string, unknown>) };
+    } catch (e) {
+      out[name] = { ok: false, error: e instanceof Fail ? `${e.status} ${e.message}` : e instanceof Error ? e.message : String(e) };
+    }
+  };
+  type Spec = { name: string; providerCount: number };
+  let specs: Spec[] = [];
+  await step("specialities", async () => {
+    const r = await ls<{ specialities: Spec[] }>("GET", "/api/v1.0/availability/getSpecialities", { query: { providerType: "Doctor" } });
+    specs = r.specialities ?? [];
+    return { count: specs.length, list: specs.map((x) => `${x.name} (${x.providerCount})`) };
+  });
+  const find = (re: RegExp) => specs.filter((x) => re.test(x.name)).sort((a, b) => b.providerCount - a.providerCount)[0]?.name ?? null;
+  const departments: [string, RegExp][] = [["generalPhysician", /general|physician|family|internal medicine/i], ["gastroenterology", /gastro|digest/i], ["dermatology", /derma|skin/i], ["paediatrics", /paediat|pediat|child/i]];
+  for (const [key, re] of departments) {
+    const name = find(re);
+    for (const type of ["ONLINE", "CENTER_VISIT"] as const) {
+      await step(`doctors_${key}_${type === "ONLINE" ? "online" : "clinic"}`, async () => {
+        if (!name) return { speciality: null, count: 0, note: "No matching speciality in the partner's list" };
+        const r = await ls<{ providers: { name: string }[] }>("GET", "/api/v1.0/availability/getProviders", {
+          query: { providerType: "Doctor", appointmentType: type, speciality: name, ...(type === "CENTER_VISIT" ? { pincode } : {}), perPage: 30 },
+        });
+        return { speciality: name, count: (r.providers ?? []).length, sample: (r.providers ?? []).slice(0, 3).map((p) => p.name) };
+      });
+    }
+  }
+  let firstTest: string | null = null;
+  await step("labTests", async () => {
+    const r = await ls<{ tests: { lsId: string; name: string }[] }>("GET", "/api/v1.3/network/getTests", { query: { pincode } });
+    firstTest = r.tests?.[0]?.lsId ?? null;
+    return { count: (r.tests ?? []).length, sample: (r.tests ?? []).slice(0, 3).map((t) => t.name) };
+  });
+  await step("labPackages", async () => {
+    const r = await ls<{ packages: { packageName: string }[] }>("GET", "/api/v1.3/network/getPackages", { query: { pincode } });
+    return { count: (r.packages ?? []).length };
+  });
+  await step("labServiceability", async () => {
+    if (!firstTest) return { count: 0, note: "No tests listed for this pincode" };
+    const r = await ls<{ labs: { labName: string; type: string[] }[] }>("GET", "/api/v1.3/availability/checkServiceability", { query: { pincode, testIds: firstTest } });
+    return { labs: (r.labs ?? []).map((l) => `${l.labName} (${l.type.join("/")})`) };
+  });
+  await step("medicineSearch", async () => {
+    const r = await ls<{ drugs: { name: string }[] }>("GET", "/api/pharma/v1.0/catalog/searchDrugs", { query: { query: "paracetamol", pageSize: 5 } });
+    return { count: (r.drugs ?? []).length, sample: (r.drugs ?? []).slice(0, 3).map((d) => d.name) };
+  });
+  for (const orderType of ["HOME_DELIVERY", "PICKUP"] as const) {
+    await step(`pharmacies_${orderType === "PICKUP" ? "pickup" : "delivery"}`, async () => {
+      const r = await ls<{ pharmacies: { name?: string; pharmacyName?: string }[] }>("GET", "/api/pharma/v1.0/network/checkServiceability", { query: { pincode, orderType } });
+      return { count: (r.pharmacies ?? []).length };
+    });
+  }
+  const failed = Object.entries(out).filter(([, v]) => (v as { ok?: boolean }).ok === false).map(([k]) => k);
+  out.summary = failed.length ? `${failed.length} step(s) failed: ${failed.join(", ")}` : "Every call answered. Counts of 0 mean the partner has no supply there, not a broken call.";
+  return out;
+}
+
 async function syncCatalogue(input: In) {
   const pincode = str(input.pincode, 6) || "560038";
   const norm = (x: string) => x.toLowerCase().replace(/\(.*?\)/g, " ").replace(/[^a-z0-9]+/g, " ").trim();
@@ -699,6 +787,14 @@ Deno.serve(async (req) => {
     } catch (e) {
       return json({ error: e instanceof Fail ? e.message : "Sync failed.", code: "failed" }, 500);
     }
+  }
+
+  // Owner-only health check: every partner call the app makes, with counts.
+  if (body?.op === "admin.probe") {
+    if (!isOwner(req, authorization)) {
+      return json({ error: "Not allowed. Add the header x-admin-token with the value of your LABSTACK_ADMIN_TOKEN secret.", code: "unauthorized" }, 403);
+    }
+    return json(await probe((body.input ?? {}) as In));
   }
 
   const uid = await caller(authorization);

@@ -20,6 +20,8 @@ import { useFamily } from "@/lib/profiles/family";
 import { brand, hue, ink, semantic, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
 import { Tap } from "@/components/ui/tap";
+import { openPayment } from "@/lib/partner/pay";
+import type { PaymentStart } from "@/lib/partner/types";
 
 /*
  * Book the collection (LabStack Labs: getSlots, then placeOrder).
@@ -128,8 +130,9 @@ export default function BookLab() {
     setBusy(true);
     setError(null);
     let bookingId: string;
+    let payment: PaymentStart | undefined;
     try {
-      ({ bookingId } = await labstack().labs.place({
+      ({ bookingId, payment } = await labstack().labs.place({
         profileId: who.id,
         tests: cart.tests,
         orderType: service,
@@ -161,6 +164,8 @@ export default function BookLab() {
     void qc.invalidateQueries({ queryKey: BOOKINGS_KEY });
     void qc.invalidateQueries({ queryKey: ["notifications"] });
     router.replace({ pathname: "/labs/booking/[id]", params: { id: res.id, fresh: "1" } });
+    // The partner's payment page opens over the booking; the booking screen checks again when it closes.
+    if (payment?.link) void openPayment(payment.link).then(() => qc.invalidateQueries({ queryKey: ["lab-order", res.id] }));
   }
 
   return (
