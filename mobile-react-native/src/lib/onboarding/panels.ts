@@ -64,7 +64,7 @@ export const PANELS: readonly Panel[] = [
     eyebrow: "Hi, I'm Cheeku",
     lead: "Googling at 2am?",
     accent: "Ask me instead.",
-    body: "Google shows the scariest answer first. I read your own reports and explain them in plain words, and tell you honestly when it's time to see a doctor.",
+    body: "I explain your reports in plain words, minus the panic.",
     cta: "Show me how",
   },
   {
@@ -72,7 +72,7 @@ export const PANELS: readonly Panel[] = [
     eyebrow: "Your health memory",
     lead: "“Reports laaye ho?”",
     accent: "Now it's always yes.",
-    body: "Reports in the almirah, prescriptions on WhatsApp, scans lost in email. Snap them once. I keep every value by person and date, and show the trend when the doctor asks.",
+    body: "Snap a report once. I'll remember every value and the trend.",
     cta: "Nice, what else?",
   },
   {
@@ -80,7 +80,7 @@ export const PANELS: readonly Panel[] = [
     eyebrow: "The whole family",
     lead: "Parents far away?",
     accent: "Stay close to their health.",
-    body: "Mummy-Papa's medicines, doses and due tests in one place. A gentle nudge when a tablet isn't ticked or a strip is running out. Each person's file stays private.",
+    body: "Their medicines and due tests, with a nudge when needed.",
     cta: "And when we need a doctor?",
   },
   {
@@ -88,7 +88,7 @@ export const PANELS: readonly Panel[] = [
     eyebrow: "Book care",
     lead: "No repeating your story.",
     accent: "No tests you don't need.",
-    body: "Your doctor gets your note and old reports before the call. Lab tests at home, medicines to your door, and every result filed back on its own.",
+    body: "Your doctor gets your history before you even say hello.",
     cta: "One last thing",
   },
   {
@@ -96,7 +96,7 @@ export const PANELS: readonly Panel[] = [
     eyebrow: "Every day",
     lead: "Sugar, BP in the family?",
     accent: "Get ahead of it.",
-    body: "A small plan each day, built from your own numbers. A walk after lunch, sleep on time, the test that's due. Little steps that add up.",
+    body: "Tiny daily steps, built from your own numbers.",
     cta: "Let's get started",
   },
 ];
