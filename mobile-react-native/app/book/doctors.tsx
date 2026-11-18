@@ -176,7 +176,8 @@ function DoctorCard({
 }) {
   // Partner doctors: times come on the next screen, the fee with the booking.
   const partner = lsIdOf(d.id) !== null;
-  const next = partner ? null : nextFree(d, mode);
+  const next = nextFree(d, mode);
+  const stars = rating ?? (d.live?.ratings ? { rating: d.live.rating ?? 0, reviews: d.live.ratings } : undefined);
   const fee = d.fee[mode];
 
   const where = mode === "clinic" ? [d.clinic.area, d.clinic.km ? `${d.clinic.km} km` : ""].filter(Boolean).join(" · ") : d.languages.slice(0, 2).join(", ");
@@ -192,9 +193,9 @@ function DoctorCard({
           ) : (
             <View style={{ flex: 1, backgroundColor: lilac.base }} />
           )}
-          {rating ? (
+          {stars ? (
             <View style={{ position: "absolute", left: 6, bottom: 6, flexDirection: "row", alignItems: "center", gap: 3, height: 24, paddingHorizontal: 8, borderRadius: 999, backgroundColor: "rgba(255,255,255,0.94)" }}>
-              <Text style={{ fontFamily: font.semibold, fontSize: 12, color: ink[900] }}>{rating.rating.toFixed(1)}</Text>
+              <Text style={{ fontFamily: font.semibold, fontSize: 12, color: ink[900] }}>{stars.rating.toFixed(1)}</Text>
               <Text style={{ fontFamily: font.regular, fontSize: 11, color: ink[500] }}>of 5</Text>
             </View>
           ) : null}
@@ -213,7 +214,7 @@ function DoctorCard({
           <View style={{ flexDirection: "row", alignItems: "center", gap: 6, alignSelf: "flex-start", height: 28, paddingHorizontal: 10, borderRadius: 999, backgroundColor: PILLAR_TONE.move.bg, marginTop: 8 }}>
             <Clock3 size={13} color={PILLAR_TONE.move.deep} />
             <Text numberOfLines={1} style={{ fontFamily: font.medium, fontSize: 12, color: PILLAR_TONE.move.deep }}>
-              {partner ? "See open times" : next ? `Next ${next}` : "Full for 3 days"}
+              {next ? `Next ${next}` : partner ? "See open times" : "Full for 3 days"}
             </Text>
           </View>
         </View>
@@ -222,7 +223,7 @@ function DoctorCard({
       <View style={{ flexDirection: "row", alignItems: "center", marginTop: 12, paddingTop: 12, paddingHorizontal: 4, borderTopWidth: 1, borderTopColor: surface.line }}>
         <View style={{ flex: 1 }}>
           <Text style={{ fontFamily: font.regular, fontSize: 12, color: ink[500] }}>{mode === "online" ? "Video consult" : "Clinic visit"}</Text>
-          <Text style={{ fontFamily: font.semibold, fontSize: 18, letterSpacing: -0.3, color: ink[900] }}>{fee ? `₹${fee}` : partner ? "Fee on booking" : "Free"}</Text>
+          <Text style={{ fontFamily: font.semibold, fontSize: 18, letterSpacing: -0.3, color: ink[900] }}>{fee ? `₹${fee}` : partner ? "Shown at booking" : "Free"}</Text>
         </View>
         <Tap
           accessibilityRole="button"

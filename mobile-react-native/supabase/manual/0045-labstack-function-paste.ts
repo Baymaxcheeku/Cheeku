@@ -922,6 +922,35 @@ async function consultRow(ctx: Ctx, v: unknown): Promise<ConsultRow> {
   return row;
 }
 
+/*
+ * A doctor's consultation price, slot length and next free time, per way of
+ * meeting, from the partner's "Consultation" procedure. One call for the whole
+ * list. Prices are the ones agreed for this store.
+ */
+type Priced = { price: number | null; durationMin: number | null; next: string | null };
+let consultProcedure: number | null | undefined;
+async function consultProcedureId(): Promise<number | null> {
+  if (consultProcedure !== undefined) return consultProcedure;
+  const r = await ls<{ procedures: { lsProcedureId: number; name: string }[] }>("GET", "/api/v1.0/availability/getProcedures", { query: { providerType: "Doctor", perPage: 200 } });
+  const list = r.procedures ?? [];
+  consultProcedure = (list.find((x) => /^consult/i.test(x.name)) ?? list.find((x) => /consult/i.test(x.name)))?.lsProcedureId ?? null;
+  return consultProcedure;
+}
+async function consultPrices(lsIds: number[]): Promise<Map<number, Partial<Record<string, Priced>>>> {
+  const out = new Map<number, Partial<Record<string, Priced>>>();
+  const procedureId = lsIds.length ? await consultProcedureId() : null;
+  if (!procedureId) return out;
+  const r = await ls<{ providers: { lsId: number; retailPrice: number | null; duration: number | null; appointmentType: string; nextAvailableSlot: string | null }[] }>(
+    "GET", "/api/v1.0/availability/getProcedure", { query: { procedureId, providerIds: lsIds.join(","), perPage: 200 } },
+  );
+  for (const p of r.providers ?? []) {
+    const cur = out.get(p.lsId) ?? {};
+    cur[p.appointmentType] = { price: typeof p.retailPrice === "number" ? p.retailPrice : null, durationMin: p.duration ?? null, next: p.nextAvailableSlot ?? null };
+    out.set(p.lsId, cur);
+  }
+  return out;
+}
+
 const consult = {
   async specialities() {
     const r = await ls<{ specialities: { name: string; providerCount: number }[] }>("GET", "/api/v1.0/availability/getSpecialities", { query: { providerType: "Doctor" } });
@@ -929,7 +958,7 @@ const consult = {
   },
 
   async providers(ctx: Ctx, q: In) {
-    type Providers = { providers: { lsId: number; name: string; gender: string | null; specialities: string[]; languagesKnown: string[] | null; yearsExperience: number | null; rating: number | null; totalRatings: number | null; supportedAppointmentTypes: string[]; profileUrl: string | null; locality: string | null; city: string | null; distance: number | null; followUpUntil: string | null }[] };
+    type Providers = { providers: { lsId: number; name: string; gender: string | null; specialities: string[]; subSpecialities: string[] | null; tags: { category: string; name: string }[] | null; languagesKnown: string[] | null; yearsExperience: number | null; rating: number | null; totalRatings: number | null; supportedAppointmentTypes: string[]; profileUrl: string | null; address: string | null; locality: string | null; city: string | null; distance: number | null; followUpDays: number | null; followUpUntil: string | null }[] };
     const query = { providerType: "Doctor", appointmentType: apptType(q.type), speciality: str(q.speciality, 80) || undefined, ...loc(q), perPage: 30 };
     /*
      * userUniqueId only adds follow-up windows for someone LabStack already
@@ -945,9 +974,18 @@ const consult = {
       if (!(ctx.holderId && e instanceof Fail && /no user found/i.test(e.message))) throw e;
       r = await ls<Providers>("GET", "/api/v1.0/availability/getProviders", { query });
     }
-    return (r.providers ?? []).map((p) => ({
-      lsId: p.lsId, name: p.name, gender: p.gender, specialities: p.specialities ?? [], languages: p.languagesKnown ?? [], years: p.yearsExperience, rating: p.rating, ratings: p.totalRatings ?? 0,
-      types: p.supportedAppointmentTypes ?? [], photo: imageUrl(p.profileUrl), place: [p.locality, p.city].filter(Boolean).join(", ") || null, distanceKm: p.distance ?? null, followUpUntil: p.followUpUntil,
+    const list = r.providers ?? [];
+    const priced = await consultPrices(list.map((p) => p.lsId)).catch(() => new Map<number, Partial<Record<string, Priced>>>());
+    return list.map((p) => ({
+      lsId: p.lsId, name: p.name, gender: p.gender, specialities: p.specialities ?? [], subSpecialities: p.subSpecialities ?? [],
+      tags: (p.tags ?? []).map((t) => ({ category: t.category, name: t.name })), languages: p.languagesKnown ?? [],
+      // 0 is what an empty profile sends; treat it as unknown rather than "0 years".
+      years: p.yearsExperience && p.yearsExperience > 0 ? p.yearsExperience : null,
+      rating: p.totalRatings ? p.rating : null, ratings: p.totalRatings ?? 0,
+      types: p.supportedAppointmentTypes ?? [], photo: imageUrl(p.profileUrl), place: [p.locality, p.city].filter(Boolean).join(", ") || null,
+      address: [p.address, p.locality, p.city].filter(Boolean).join(", ") || null,
+      distanceKm: typeof p.distance === "number" && p.distance > 0 ? p.distance : null, followUpDays: p.followUpDays ?? null, followUpUntil: p.followUpUntil,
+      prices: priced.get(p.lsId) ?? {},
     }));
   },
 
@@ -959,8 +997,18 @@ const consult = {
     const r = await ls<{ slots: { lsId: number; providerName: string; timing: { startTime: string; endTime: string }[] }[] }>("GET", "/api/v1.0/availability/getAppointmentSlots", {
       query: { providerType: "Doctor", appointmentType: apptType(q.type), date, providerIds: lsProviderId, ...loc(q) },
     });
+    /*
+     * The partner sends slot times as "HH:MM" on the asked date (IST), not as
+     * full timestamps. Reading them as dates made every one NaN, so the filter
+     * dropped them all and every doctor looked fully booked (found 2026-11-18).
+     */
+    const at = (hm: string) => (/^\d{2}:\d{2}$/.test(hm) ? `${date}T${hm}:00+05:30` : hm);
     const soon = Date.now() + 30 * 60_000;
-    return (r.slots ?? []).map((s) => ({ lsId: s.lsId, name: s.providerName, times: (s.timing ?? []).filter((t) => Date.parse(t.startTime) > soon).map((t) => ({ start: t.startTime, end: t.endTime })) }));
+    return (r.slots ?? []).map((s) => ({
+      lsId: s.lsId,
+      name: s.providerName,
+      times: (s.timing ?? []).map((t) => ({ start: at(t.startTime), end: at(t.endTime) })).filter((t) => Date.parse(t.start) > soon),
+    }));
   },
 
   async book(ctx: Ctx, q: In) {

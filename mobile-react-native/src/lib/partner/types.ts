@@ -161,6 +161,13 @@ export type Provider = {
   place: string | null;
   distanceKm: number | null;
   followUpUntil: string | null;
+  subSpecialities?: string[];
+  /** Partner profile tags, e.g. { category: "Education", name: "MBBS" }. */
+  tags?: { category: string; name: string }[];
+  address?: string | null;
+  followUpDays?: number | null;
+  /** Consultation price, slot length and next free time, per appointment type. */
+  prices?: Partial<Record<AppointmentType, { price: number | null; durationMin: number | null; next: string | null }>>;
 };
 
 export type ProviderSlots = { lsId: number; name: string; times: { start: string; end: string }[] }[];

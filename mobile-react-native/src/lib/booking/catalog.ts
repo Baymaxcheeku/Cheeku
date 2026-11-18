@@ -104,6 +104,17 @@ export type Doctor = {
   gender?: "MALE" | "FEMALE" | "OTHERS" | null;
   /** Partner doctors only: their profile photo (https), when the partner has one. */
   photo?: string | null;
+  /** Partner doctors only: everything else the partner told us, shown only when known. */
+  live?: {
+    next: Partial<Record<Mode, string>>;
+    durationMin: Partial<Record<Mode, number>>;
+    rating: number | null;
+    ratings: number;
+    followUpDays: number | null;
+    subSpecialities: string[];
+    tags: { category: string; name: string }[];
+    address: string | null;
+  };
 };
 
 const D = (d: Doctor) => d;
@@ -182,6 +193,8 @@ export function slotsFor(doctor: Doctor, mode: Mode, day: Date): Slot[] {
 
 /** The next free slot today or tomorrow, for the list's "Next available" chip. */
 export function nextFree(doctor: Doctor, mode: Mode): string | null {
+  // Partner doctors: only the partner's own next slot, never the sample schedule.
+  if (doctor.live || doctor.id.startsWith("ls-")) return whenLabel(doctor.live?.next[mode] ?? null);
   for (let offset = 0; offset < 3; offset++) {
     const day = addDays(new Date(), offset);
     const free = slotsFor(doctor, mode, day).find((s) => !s.taken);
@@ -191,6 +204,20 @@ export function nextFree(doctor: Doctor, mode: Mode): string | null {
     }
   }
   return null;
+}
+
+/** An ISO time as "Today, 11:15 am", "Tomorrow, 9 am" or "Fri, 4:30 pm" (India time). */
+export function whenLabel(iso: string | null): string | null {
+  if (!iso) return null;
+  const t = new Date(iso);
+  if (Number.isNaN(t.getTime()) || t.getTime() < Date.now()) return null;
+  const day = (d: Date) => d.toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" });
+  const today = day(new Date());
+  const tomorrow = day(new Date(Date.now() + 86_400_000));
+  const d = day(t);
+  const when = d === today ? "Today" : d === tomorrow ? "Tomorrow" : t.toLocaleDateString("en-IN", { weekday: "short", timeZone: "Asia/Kolkata" });
+  const time = t.toLocaleTimeString("en-IN", { hour: "numeric", minute: "2-digit", hour12: true, timeZone: "Asia/Kolkata" }).toLowerCase().replace(/\s+/g, " ").replace(":00", "");
+  return `${when}, ${time}`;
 }
 
 export function addDays(d: Date, n: number): Date {

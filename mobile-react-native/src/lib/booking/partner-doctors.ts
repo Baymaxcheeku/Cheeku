@@ -64,17 +64,34 @@ export function asDoctor(p: Provider): Doctor {
   const modes: Mode[] = [];
   if (p.types.includes("ONLINE")) modes.push("online");
   if (p.types.includes("CENTER_VISIT")) modes.push("clinic");
+  const typeOf = (m: Mode): "ONLINE" | "CENTER_VISIT" => (m === "online" ? "ONLINE" : "CENTER_VISIT");
+  const priced = (m: Mode) => p.prices?.[typeOf(m)];
+  const pick = <K extends "next" | "durationMin">(k: K) =>
+    Object.fromEntries(modes.map((m) => [m, priced(m)?.[k]]).filter(([, v]) => v !== null && v !== undefined)) as Partial<Record<Mode, NonNullable<NonNullable<ReturnType<typeof priced>>[K]>>>;
+  // Education tags read as qualifications ("MBBS, MD"); the specialities are already the department.
+  const degrees = (p.tags ?? []).filter((t) => /educat|qualif|degree/i.test(t.category)).map((t) => t.name);
   return {
     id: `ls-${p.lsId}`,
     name: p.name,
     specialty: departmentOf(p.specialities),
-    qualifications: p.specialities.join(", "),
+    qualifications: degrees.join(", "),
     years: p.years ?? 0,
     languages: p.languages,
-    fee: Object.fromEntries(modes.map((m) => [m, 0])) as Doctor["fee"],
+    // 0 means "price not known yet": the screens say "Fee shown at booking" for it.
+    fee: Object.fromEntries(modes.map((m) => [m, priced(m)?.price ?? 0])) as Doctor["fee"],
     clinic: { name: p.place ?? "Clinic", area: p.place ?? "", km: p.distanceKm ?? 0, opd: "" },
     gender: p.gender,
     photo: imageUrl(p.photo),
+    live: {
+      next: pick("next") as Partial<Record<Mode, string>>,
+      durationMin: pick("durationMin") as Partial<Record<Mode, number>>,
+      rating: p.rating,
+      ratings: p.ratings,
+      followUpDays: p.followUpDays ?? null,
+      subSpecialities: p.subSpecialities ?? [],
+      tags: (p.tags ?? []).filter((t) => !/educat|qualif|degree/i.test(t.category)),
+      address: p.address ?? null,
+    },
   };
 }
 

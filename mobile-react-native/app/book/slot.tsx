@@ -50,7 +50,16 @@ export default function SlotScreen() {
   const doctor = doctorById(id);
 
   const days = useMemo(() => Array.from({ length: 7 }, (_, i) => addDays(new Date(), i)), []);
-  const [dayIndex, setDayIndex] = useState(0);
+  // Open on the day of the doctor's next free slot, when the partner told us it.
+  const [dayIndex, setDayIndex] = useState(() => {
+    const d = doctorById(id);
+    const m: Mode = d && mode && d.fee[mode] !== undefined ? mode : d?.fee.online !== undefined ? "online" : "clinic";
+    const next = d?.live?.next[m];
+    if (!next) return 0;
+    const key = (x: Date) => x.toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" });
+    const at = days.findIndex((x) => key(x) === key(new Date(next)));
+    return at > 0 ? at : 0;
+  });
   const [slot, setSlot] = useState<Slot | null>(null);
   const [moveError, setMoveError] = useState<string | null>(null);
 
@@ -124,10 +133,10 @@ export default function SlotScreen() {
           <View className="min-w-0 flex-1 pb-1">
             <Text style={{ fontFamily: font.semibold, fontSize: 20, letterSpacing: -0.4, color: ink[900] }}>{doctor.name}</Text>
             <Text style={{ fontFamily: font.medium, fontSize: 13, color: brand[600], marginTop: 2 }}>
-              {SPECIALTIES[doctor.specialty].label} · {doctor.years} yrs
+              {SPECIALTIES[doctor.specialty].label}{doctor.years > 0 ? ` · ${doctor.years} yrs` : ""}
             </Text>
             <Text numberOfLines={2} style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 4 }}>
-              {doctor.qualifications} · Speaks {doctor.languages.join(", ")}
+              {[doctor.qualifications, doctor.languages.length ? `Speaks ${doctor.languages.join(", ")}` : ""].filter(Boolean).join(" · ")}
             </Text>
           </View>
         </View>
