@@ -31,13 +31,8 @@
  * props: each panel is laid out differently on purpose.
  */
 export type Panel = {
-  kind: "meet" | "memory" | "family" | "care";
-  /**
-   * One word for what the panel is about, above the headline.
-   *
-   * It gives the four screens a spine you can feel before reading a sentence,
-   * and it means the headline never has to do the job of a label.
-   */
+  kind: "meet" | "memory" | "family" | "care" | "plan";
+  /** One word for what the panel is about, above the headline. */
   eyebrow: string;
   lead: string;
   accent: string;
@@ -45,44 +40,63 @@ export type Panel = {
   cta: string;
 };
 
+/*
+ * REWRITTEN 2026-11-18: FIVE WORRIES, FIVE ANSWERS.
+ *
+ * Each panel opens on something an Indian family already feels, in the words
+ * they would use for it, and only then says what Cheeku does about it:
+ *
+ *   1. The 2am symptom search that makes everything sound fatal.
+ *   2. "Reports laaye ho?" and the frantic hunt through the almirah.
+ *   3. Parents in another city, and not knowing if Papa took his BP tablet.
+ *   4. The wrong doctor, the repeated story, the 40-test package.
+ *   5. Sugar and BP running in the family, and wanting to get ahead of it.
+ *
+ * The limits from the first version still hold: Cheeku explains, remembers,
+ * reminds and books. It never diagnoses, never says a result is fine, and
+ * every scene's answer is a read-back of what the lab or the person recorded.
+ * The one Hindi line is the doctor's own, quoted, because every family has
+ * heard it in exactly those words.
+ */
 export const PANELS: readonly Panel[] = [
   {
     kind: "meet",
     eyebrow: "Hi, I'm Cheeku",
-    lead: "Health doubts? Ask me.",
-    accent: "Even the awkward ones.",
-    body: "The things you Google at 2am, or forgot to ask the doctor. Ask in your own words and I'll explain in plain ones. No judgement, no appointment.",
+    lead: "Googling at 2am?",
+    accent: "Ask me instead.",
+    body: "I explain your reports in plain words, minus the panic.",
     cta: "Show me how",
   },
   {
     kind: "memory",
     eyebrow: "Your health memory",
-    lead: "No more digging for",
-    accent: "that one report.",
-    body: "Reports in the almirah, prescriptions on WhatsApp, scans lost in email. Give them to me once. I'll remember every line, and always show you where an answer came from.",
+    lead: "“Reports laaye ho?”",
+    accent: "Now it's always yes.",
+    body: "Snap a report once. I'll remember every value and the trend.",
     cta: "Nice, what else?",
   },
   {
     kind: "family",
     eyebrow: "The whole family",
-    lead: "Mummy, Papa, the kids and you.",
-    accent: "One app.",
-    body: "Switch between family members in a tap. Every person's history stays separate, private and never sold.",
+    lead: "Parents far away?",
+    accent: "Stay close to their health.",
+    body: "Their medicines and due tests, with a nudge when needed.",
     cta: "And when we need a doctor?",
   },
-  /*
-   * Panel 4, added 2026-10-05: the marketplace. Short on purpose; the picture
-   * names the services, so the words only have to say why booking here is
-   * different: it starts from your history. "No extra tests" is the line an
-   * Indian family hears loudest, after years of forty-test "full body
-   * packages". Cheeku never decides a test is needed on its own say-so.
-   */
   {
     kind: "care",
     eyebrow: "Book care",
-    lead: "The right care,",
-    accent: "picked for you.",
-    body: "Doctors, lab tests and medicines, booked around your health history. No extra tests, no running around.",
+    lead: "No repeating your story.",
+    accent: "No tests you don't need.",
+    body: "Your doctor gets your history before you even say hello.",
+    cta: "One last thing",
+  },
+  {
+    kind: "plan",
+    eyebrow: "Every day",
+    lead: "Sugar, BP in the family?",
+    accent: "Get ahead of it.",
+    body: "Tiny daily steps, built from your own numbers.",
     cta: "Let's get started",
   },
 ];

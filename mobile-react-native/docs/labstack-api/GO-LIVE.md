@@ -82,7 +82,36 @@ Rebuild or restart the app. The "Preview" notes disappear and every booking goes
 3. **Doctors**: in chat say "book a doctor for me". The card offers the pre-consultation (questions, note, then partner doctors and live times) and, for a GP on video, "Talk to a doctor in minutes". Book a video visit, open "Join", cancel. Then "Talk to a doctor now" and cancel the request.
 4. **Webhooks**: ask LabStack to fire `testWebhook` on a lab order and an appointment. Supabase, Table Editor, `partner_events` should get a row each.
 
+## 8. Health check: is every partner call answering? (1 minute)
+
+Do this whenever something looks empty (for example "0 doctors").
+
+1. **Edge Functions**, open `labstack`, then **Test**. Method **POST**.
+2. Request Body:
+   ```
+   {"op":"admin.probe","input":{"pincode":"560038"}}
+   ```
+3. Headers: `x-admin-token` = your `LABSTACK_ADMIN_TOKEN` password.
+4. **Send Request**. The answer lists, step by step:
+   - `partner.host`: which LabStack environment this deploy talks to (`integration.labstack.in` is the test sandbox, with very little real supply).
+   - `specialities`: every doctor department the partner has, with how many doctors.
+   - `doctors_*`: general physician, gastroenterology, dermatology and paediatrics, online and at a clinic.
+   - `labTests`, `labPackages`, `labServiceability`: whether labs serve the pincode.
+   - `medicineSearch`, `pharmacies_delivery`, `pharmacies_pickup`: whether medicines can be found and delivered.
+   - `summary`: any step that failed. A count of 0 with `ok: true` means the call works and the partner has no supply there.
+
+## 9. Payment through the partner's link (5 minutes)
+
+The partner takes the money. Each order gets a secure payment link that lives 16 minutes; unpaid orders are cancelled on their side. The app opens the link right after booking, shows "Pay to confirm" on the order until it's paid, and checks every few seconds while it waits.
+
+1. **SQL Editor**: run `supabase/manual/0046-step-1-of-1.sql`, then `supabase/manual/0046-check.sql` (3 rows, all "yes").
+2. **Edge Functions**, `labstack`: paste the new `supabase/manual/0045-labstack-function-paste.ts` over the old code and **Deploy**. (Same for `labstack-webhook` with its paste file.)
+3. **Secrets**: add `LABSTACK_PAYMENT` with the value `link`.
+
+Remove that secret (or set it to `off`) to go back to booking without payment.
+
 ## Still open
 
-- **Payment** (your decision tonight): pay after collection, the partner's 16-minute payment link, or our own gateway, and how our margin is settled against the wallet. Until decided, every order is placed with `isPaymentRequired: false`.
+- **Webhooks**: no webhook key yet, so the app does not wait for LabStack to call us. Instead it asks LabStack for the latest state whenever an order is open on screen (every 10 seconds while payment is pending, every minute otherwise). Lab reports are filed the next time the booking is opened. Once LabStack gives a key, add it as `LABSTACK_WEBHOOK_SECRET` (labs and pharmacy) and `LABSTACK_SIGNING_SECRET` (doctors) and updates arrive on their own.
+- **Margin**: with the partner's link, the customer pays the partner's price. Any Cheeku margin has to be agreed with LabStack (store discounts) rather than added on our side.
 - Production base URL (only the sandbox is documented).

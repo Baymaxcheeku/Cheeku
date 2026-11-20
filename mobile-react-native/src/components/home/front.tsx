@@ -1,10 +1,13 @@
 import { useRouter } from "expo-router";
 import { ArrowUp, Camera, Check, ChevronDown, ChevronRight, Flame, Lock, Mic, Plus } from "lucide-react-native";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import Animated, { cancelAnimation, Easing, interpolate, useAnimatedStyle, useSharedValue, withDelay, withRepeat, withSequence, withTiming } from "react-native-reanimated";
 import { ScrollView, Text, TextInput, View } from "react-native";
 import Svg, { Defs, LinearGradient, RadialGradient, Rect, Stop } from "react-native-svg";
 
 import { MascotBust } from "@/components/illustrations/sprout";
+import { Cheeku, type Moment } from "@/components/mascot/lottie";
+import { useReducedMotion } from "@/components/ui/motion";
 import { Avatar } from "@/components/ui/avatar";
 import { Icon3D, type Icon3DName } from "@/components/ui/icon3d";
 import { Tap } from "@/components/ui/tap";
@@ -100,6 +103,52 @@ export function FamilyRow({
 
 // ------------------------------------------------------------- Ask, hero --
 
+/*
+ * CHEEKU ON THE ASK CARD, ALIVE.
+ *
+ * He rises over the card's top edge and waves hello, then settles into his
+ * idle loop with a slow breathing bob. Every so often he ducks behind the
+ * card and pops back up, so the corner of the eye keeps finding him. Tapping
+ * him opens the chat, with a little hop. He sits behind the card, so only his
+ * head and shoulders ever show. Reduce motion: up and still.
+ */
+function HeroMascot({ onPress }: { onPress: () => void }) {
+  const still = useReducedMotion();
+  const [moment, setMoment] = useState<Moment>("hello");
+  const up = useSharedValue(still ? 1 : 0);
+  const bob = useSharedValue(0);
+
+  useEffect(() => {
+    if (still) {
+      up.value = 1;
+      return;
+    }
+    const rise = () => withTiming(1, { duration: 560, easing: Easing.out(Easing.back(1.6)) });
+    up.value = withDelay(350, rise());
+    bob.value = withDelay(1400, withRepeat(withTiming(1, { duration: 2600, easing: Easing.inOut(Easing.sin) }), -1, true));
+    const settle = setTimeout(() => setMoment("idle"), 4200);
+    const peek = setInterval(() => {
+      // Duck fast (ease-out), wait a beat, pop back with a little overshoot.
+      up.value = withSequence(withTiming(0.3, { duration: 280, easing: Easing.bezier(0.23, 1, 0.32, 1) }), withDelay(650, rise()));
+    }, 13000);
+    return () => {
+      clearTimeout(settle);
+      clearInterval(peek);
+      cancelAnimation(bob);
+    };
+  }, [still, up, bob]);
+
+  const motion = useAnimatedStyle(() => ({
+    transform: [{ translateY: interpolate(up.value, [0, 1], [72, 0]) - 5 * bob.value }, { rotate: `${interpolate(bob.value, [0, 1], [-1.5, 1.5])}deg` }],
+  }));
+
+  return (
+    <Animated.View pointerEvents="box-none" style={[{ position: "absolute", top: 0, right: 22 }, motion]}>
+      <Cheeku moment={moment} size={92} hop onPress={onPress} accessibilityLabel="Cheeku. Tap to ask" />
+    </Animated.View>
+  );
+}
+
 const SUGGESTIONS = ["What does my last report say?", "Book a blood test at home", "Is my BP normal for my age?"];
 
 /** The hero: one big place to ask, with Cheeku sitting on top of it. */
@@ -116,9 +165,7 @@ export function AskHero({ name, isSelf }: { name: string; isSelf: boolean }) {
   return (
     <View style={{ paddingTop: 58 }}>
       {/* Cheeku peeking over the card's top edge: the card is a conversation with him. */}
-      <View pointerEvents="none" style={{ position: "absolute", top: 0, right: 22 }}>
-        <MascotBust size={96} mood="happy" />
-      </View>
+      <HeroMascot onPress={() => ask("")} />
       <View style={[SOFT_SHADOW, { borderRadius: 28, backgroundColor: "#fff", padding: 18, paddingTop: 20 }]}>
 
         <Text style={{ fontFamily: font.semibold, fontSize: 20, letterSpacing: -0.4, color: ink[900] }}>

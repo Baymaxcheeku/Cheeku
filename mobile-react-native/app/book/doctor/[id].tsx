@@ -1,14 +1,13 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { FaceArt } from "@/components/ui/face-art";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { Building2, Clock3, GraduationCap, Languages, MapPin, MonitorPlay, PenLine, ShieldCheck } from "lucide-react-native";
+import { Check, PenLine } from "lucide-react-native";
 import { useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Tap } from "@/components/ui/tap";
-import { ReviewList, ReviewSheet, SampleNote, Stars } from "@/components/labs/parts";
-import { Glass, Gradient, glass, glassShadow } from "@/components/ui/glass";
+import { ReviewList, ReviewSheet, SampleNote } from "@/components/labs/parts";
 import { ScreenHeader } from "@/components/ui/screen";
 import { isUpcoming, useAppointmentList } from "@/lib/booking/appointments";
 import { doctorById, nextFree, SPECIALTIES, type Mode } from "@/lib/booking/catalog";
@@ -16,7 +15,10 @@ import { useBookingDraft } from "@/lib/booking/draft";
 import { doctorFace } from "@/lib/booking/faces";
 import { fetchReviews, postReview, useRatings } from "@/lib/labs/queries";
 import { useFamily } from "@/lib/profiles/family";
-import { brand, hue, ink, lilac } from "@/theme/tokens";
+import { brand, ink, surface } from "@/theme/tokens";
+import { SkyWash } from "@/components/ui/sky-wash";
+import { PILLAR_TONE, glassCard } from "@/components/today/palette";
+import { Icon3D, type Icon3DName } from "@/components/ui/icon3d";
 import { font } from "@/theme/type";
 import { LinesSkeleton } from "@/components/ui/skeleton";
 
@@ -72,105 +74,141 @@ export default function DoctorProfile() {
     router.push({ pathname: "/book/slot", params: { id: d.id } });
   }
 
+  const live = d.live;
+  const partner = d.id.startsWith("ls-");
+  const stars = rating ?? (live?.ratings ? { rating: live.rating ?? 0, reviews: live.ratings } : undefined);
+  const feeLabel = (m: Mode) => (d.fee[m] ? `₹${d.fee[m]}` : partner ? "Fee at booking" : "Free");
+  const clinicPlace = live?.address ?? ([d.clinic.name, d.clinic.area].filter((x, i, a) => x && a.indexOf(x) === i).join(", ") || null);
+
+  // Only what is known. An empty profile field is left out, never shown as "0 years".
+  const facts: { art: Icon3DName; label: string; value: string }[] = [];
+  if (d.years > 0) facts.push({ art: "trophy", label: "Experience", value: `${d.years} ${d.years === 1 ? "year" : "years"}` });
+  if (d.languages.length) facts.push({ art: "message", label: "Speaks", value: d.languages.join(", ") });
+  if (d.qualifications) facts.push({ art: "report", label: "Qualifications", value: d.qualifications });
+  if (live?.followUpDays) facts.push({ art: "calendar-check", label: "Follow-up", value: `Free for ${live.followUpDays} days` });
+  const durations = live ? Object.values(live.durationMin).filter(Boolean) : [];
+  if (durations.length) facts.push({ art: "clock", label: "Consultation", value: `${Math.min(...durations)} min` });
+
+  const about = [
+    `${d.name} is a ${sp.label.toLowerCase()}${d.years > 0 ? ` with ${d.years} years of practice` : ""}.`,
+    offered.length ? `Sees patients ${offered.map((m) => (m === "online" ? "on video" : `at a clinic${clinicPlace ? ` in ${d.clinic.area || clinicPlace}` : ""}`)).join(" and ")}${d.languages.length ? `, in ${d.languages.join(", ")}` : ""}.` : "",
+    `Your pre-consultation note and the reports you choose to share reach ${firstName} before you do.`,
+  ].filter(Boolean).join(" ");
+
   return (
     <View className="flex-1 bg-canvas">
-      <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + 110 }} showsVerticalScrollIndicator={false}>
-        <View style={{ height: insets.top + 300, marginHorizontal: 10, marginTop: 6, borderRadius: 32, overflow: "hidden", alignItems: "center", justifyContent: "flex-end" }}>
-          <Gradient from={lilac.base} to="#ffffff" angle="vertical" glow="#ffffff" />
-          {/* Lifted above the gradient: on web an absolutely placed layer
-              paints over plain siblings (the stacking bug in PROGRESS.md). */}
-          <View style={[glassShadow, { zIndex: 1, width: 210, height: 210, borderRadius: 32, overflow: "hidden", marginBottom: 24, borderWidth: 5, borderColor: "#fff", backgroundColor: face.background }]}>
-            <FaceArt face={face} size={210} />
+      <SkyWash top={0} />
+      <ScreenHeader fallback="/book/doctors" />
+      <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: insets.bottom + 110 }} showsVerticalScrollIndicator={false}>
+        {/* Who. */}
+        <View style={[glassCard("#ffffff", "#0f1030"), { borderRadius: 28, padding: 14, flexDirection: "row", gap: 14, shadowOpacity: 0.05 }]}>
+          <View style={{ width: 104, height: 120, borderRadius: 22, overflow: "hidden", alignItems: "center", justifyContent: "center", backgroundColor: face.background }}>
+            <FaceArt face={face} size={118} />
           </View>
-          <View style={{ position: "absolute", top: 0, left: 0, right: 0 }}>
-            <ScreenHeader fallback="/book/doctors" />
+          <View style={{ flex: 1, minWidth: 0, paddingTop: 4 }}>
+            <Text style={{ fontFamily: font.semibold, fontSize: 22, lineHeight: 27, letterSpacing: -0.5, color: ink[900] }}>{d.name}</Text>
+            <Text style={{ fontFamily: font.medium, fontSize: 14, color: brand[600], marginTop: 2 }}>{sp.label}</Text>
+            {live?.subSpecialities.length ? (
+              <Text numberOfLines={2} style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[500], marginTop: 2 }}>{live.subSpecialities.join(" · ")}</Text>
+            ) : null}
+            <View style={{ flex: 1 }} />
+            {stars ? (
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 6, alignSelf: "flex-start", height: 28, paddingHorizontal: 10, borderRadius: 999, backgroundColor: PILLAR_TONE.eat.bg, marginTop: 8 }}>
+                <Text style={{ fontFamily: font.semibold, fontSize: 13, color: PILLAR_TONE.eat.deep }}>{stars.rating.toFixed(1)} of 5</Text>
+                <Text style={{ fontFamily: font.regular, fontSize: 12, color: PILLAR_TONE.eat.deep }}>· {stars.reviews} {stars.reviews === 1 ? "rating" : "ratings"}</Text>
+              </View>
+            ) : (
+              <Text style={{ fontFamily: font.regular, fontSize: 12, color: ink[500], marginTop: 8 }}>New on Cheeku · no ratings yet</Text>
+            )}
           </View>
         </View>
 
-        <View style={{ paddingHorizontal: 20, paddingTop: 18 }}>
-          <View className="flex-row items-start justify-between gap-3">
-            <View style={{ flex: 1 }}>
-              <Text style={{ fontFamily: font.semibold, fontSize: 24, letterSpacing: -0.7, color: ink[900] }}>{d.name}</Text>
-              <Text style={{ fontFamily: font.medium, fontSize: 15, color: brand[600], marginTop: 2 }}>{sp.label}</Text>
-            </View>
-            {rating ? (
-              <View style={{ alignItems: "flex-end" }}>
-                <Text style={{ fontFamily: font.semibold, fontSize: 20, color: ink[900] }}>{rating.rating.toFixed(1)}</Text>
-                <Text style={{ fontFamily: font.regular, fontSize: 12, color: ink[500], marginTop: 2 }}>out of 5 · {rating.reviews} reviews</Text>
-              </View>
-            ) : null}
-          </View>
-
-          {/* Modes, like the reference's tier chips. */}
-          <View style={{ flexDirection: "row", gap: 10, marginTop: 18 }}>
-            {offered.map((m) => {
-              const on = m === mode;
-              const next = nextFree(d, m);
-              return (
-                <Tap scale={0.98} key={m} accessibilityRole="radio" accessibilityState={{ selected: on }} onPress={() => setMode(m)} style={[on ? null : glassShadow, { flex: 1, padding: 14, borderRadius: 24, backgroundColor: on ? brand[600] : glass.fillStrong, borderWidth: on ? 0 : 1, borderColor: glass.rim }]}>
-                  <View className="flex-row items-center gap-1.5">
-                    {m === "online" ? <MonitorPlay size={15} color={on ? "#fff" : brand[600]} /> : <Building2 size={15} color={on ? "#fff" : hue.orange.fg} />}
-                    <Text style={{ fontFamily: font.medium, fontSize: 13, color: on ? "rgba(255,255,255,0.8)" : ink[500] }}>{m === "online" ? "Video call" : "Clinic visit"}</Text>
-                  </View>
-                  <Text style={{ fontFamily: font.semibold, fontSize: 20, color: on ? "#fff" : ink[900], marginTop: 6 }}>{d.fee[m] ? `₹${d.fee[m]}` : "On booking"}</Text>
-                  <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 12, color: on ? "rgba(255,255,255,0.7)" : ink[500], marginTop: 2 }}>{next ? `Next ${next}` : "Fully booked"}</Text>
-                </Tap>
-              );
-            })}
-          </View>
-
-          <View style={{ flexDirection: "row", gap: 8, marginTop: 14 }}>
-            <Fact icon={<GraduationCap size={16} color={ink[900]} />} label="Experience" value={`${d.years} years`} />
-            <Fact icon={<Languages size={16} color={ink[900]} />} label="Speaks" value={d.languages.slice(0, 2).join(", ") + (d.languages.length > 2 ? ` +${d.languages.length - 2}` : "")} />
-            <Fact icon={<ShieldCheck size={16} color={ink[900]} />} label="Degree" value={d.qualifications.split(",")[0] ?? ""} />
-          </View>
-
-          <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900], marginTop: 26, marginBottom: 8 }}>About {firstName}</Text>
-          <Text style={{ fontFamily: font.regular, fontSize: 15, lineHeight: 22, color: ink[700] }}>
-            {d.name} is a {sp.label.toLowerCase()} with {d.years} years of practice ({d.qualifications}). Consults in {d.languages.join(", ")}
-            {d.fee.online !== undefined ? ", on video" : ""}
-            {d.fee.clinic !== undefined ? `${d.fee.online !== undefined ? " and" : ","} at ${d.clinic.name}` : ""}. Your pre-consultation note and the reports you choose to share reach {firstName} before you do.
-          </Text>
-
-          {d.fee.clinic !== undefined ? (
-            <Glass strong className="mt-4 gap-2 rounded-xl p-4">
-              <View className="flex-row items-center gap-2">
-                <MapPin size={16} color={hue.orange.fg} />
-                <Text style={{ flex: 1, fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{d.clinic.name}</Text>
-                <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[500] }}>{d.clinic.km} km</Text>
-              </View>
-              <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[700] }}>{d.clinic.area}</Text>
-              <View className="flex-row items-center gap-2">
-                <Clock3 size={14} color={ink[500]} />
-                <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[500] }}>OPD {d.clinic.opd}</Text>
-              </View>
-            </Glass>
-          ) : null}
-
-          <View className="flex-row items-center justify-between" style={{ marginTop: 26, marginBottom: 12 }}>
-            <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>What patients say</Text>
-            {canReview ? (
-              <Tap accessibilityRole="button" onPress={() => setWriting(true)} className="flex-row items-center gap-1.5" hitSlop={8}>
-                <PenLine size={15} color={brand[700]} />
-                <Text style={{ fontFamily: font.semibold, fontSize: 15, color: brand[700] }}>Write a review</Text>
+        {/* Ways to meet: price, next free time and length, straight from the partner. */}
+        <Text style={{ fontFamily: font.semibold, fontSize: 20, letterSpacing: -0.4, color: ink[900], marginTop: 26 }}>How to meet</Text>
+        <View style={{ flexDirection: "row", gap: 10, marginTop: 12 }}>
+          {offered.map((m) => {
+            const on = m === mode;
+            const next = nextFree(d, m);
+            const tone = m === "online" ? PILLAR_TONE.sleep : PILLAR_TONE.eat;
+            return (
+              <Tap scale={0.98} key={m} accessibilityRole="radio" accessibilityState={{ selected: on }} onPress={() => setMode(m)}
+                style={[on ? glassCard(tone.glass) : glassCard("#ffffff", "#0f1030"), { flex: 1, padding: 14, borderRadius: 24, borderWidth: 2, borderColor: on ? brand[600] : "transparent", shadowOpacity: 0.05 }]}>
+                <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+                  <Icon3D name={m === "online" ? "video" : "hospital"} size={34} />
+                  {on ? <View style={{ width: 22, height: 22, borderRadius: 999, backgroundColor: brand[600], alignItems: "center", justifyContent: "center" }}><Check size={13} color="#fff" strokeWidth={3} /></View> : null}
+                </View>
+                <Text style={{ fontFamily: font.medium, fontSize: 13, color: ink[500], marginTop: 10 }}>{m === "online" ? "Video call" : "Clinic visit"}</Text>
+                <Text style={{ fontFamily: font.semibold, fontSize: 20, letterSpacing: -0.3, color: ink[900], marginTop: 2 }}>{feeLabel(m)}</Text>
+                <Text numberOfLines={1} style={{ fontFamily: font.medium, fontSize: 12, color: next ? PILLAR_TONE.move.deep : ink[500], marginTop: 4 }}>{next ? `Next ${next}` : partner ? "See open times" : "Fully booked"}</Text>
               </Tap>
-            ) : null}
-          </View>
-          {reviews.isPending ? <LinesSkeleton lines={3} /> : <ReviewList reviews={reviews.data ?? []} empty="No reviews yet." />}
+            );
+          })}
+        </View>
 
-          <View style={{ marginTop: 18 }}>
-            <SampleNote text="Preview · a sample doctor. Nothing is booked for real yet." />
+        {facts.length ? (
+          <View style={[glassCard("#ffffff", "#0f1030"), { borderRadius: 24, marginTop: 14, overflow: "hidden", shadowOpacity: 0.05 }]}>
+            {facts.map((f, i) => (
+              <View key={f.label} style={{ flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 14, paddingVertical: 12, borderTopWidth: i ? 1 : 0, borderTopColor: surface.line }}>
+                <View style={{ width: 40, height: 40, borderRadius: 13, backgroundColor: surface.tint, alignItems: "center", justifyContent: "center" }}>
+                  <Icon3D name={f.art} size={28} />
+                </View>
+                <Text style={{ width: 104, fontFamily: font.regular, fontSize: 13, color: ink[500] }}>{f.label}</Text>
+                <Text style={{ flex: 1, fontFamily: font.semibold, fontSize: 14, lineHeight: 19, color: ink[900] }}>{f.value}</Text>
+              </View>
+            ))}
           </View>
+        ) : null}
+
+        {live?.tags.length ? (
+          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 14 }}>
+            {live.tags.map((t) => (
+              <View key={`${t.category}-${t.name}`} style={{ height: 32, paddingHorizontal: 12, borderRadius: 999, justifyContent: "center", backgroundColor: "#fff", borderWidth: 1, borderColor: surface.line }}>
+                <Text style={{ fontFamily: font.medium, fontSize: 13, color: ink[700] }}>{t.name}</Text>
+              </View>
+            ))}
+          </View>
+        ) : null}
+
+        <Text style={{ fontFamily: font.semibold, fontSize: 20, letterSpacing: -0.4, color: ink[900], marginTop: 26, marginBottom: 8 }}>About {firstName}</Text>
+        <Text style={{ fontFamily: font.regular, fontSize: 15, lineHeight: 22, color: ink[700] }}>{about}</Text>
+
+        {d.fee.clinic !== undefined && clinicPlace ? (
+          <View style={[glassCard("#ffffff", "#0f1030"), { marginTop: 16, borderRadius: 24, padding: 14, flexDirection: "row", gap: 12, alignItems: "center", shadowOpacity: 0.05 }]}>
+            <View style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: PILLAR_TONE.eat.bg, alignItems: "center", justifyContent: "center" }}>
+              <Icon3D name="pin" size={30} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{d.clinic.name && d.clinic.name !== "Clinic" ? d.clinic.name : "Clinic"}</Text>
+              <Text style={{ fontFamily: font.regular, fontSize: 13, lineHeight: 18, color: ink[500], marginTop: 1 }}>
+                {[live?.address ?? (d.clinic.area && d.clinic.area !== d.clinic.name ? d.clinic.area : null), d.clinic.km > 0 ? `${d.clinic.km} km away` : "", d.clinic.opd ? `OPD ${d.clinic.opd}` : ""].filter(Boolean).join(" · ")}
+              </Text>
+            </View>
+          </View>
+        ) : null}
+
+        <View className="flex-row items-center justify-between" style={{ marginTop: 26, marginBottom: 12 }}>
+          <Text style={{ fontFamily: font.semibold, fontSize: 20, letterSpacing: -0.4, color: ink[900] }}>What patients say</Text>
+          {canReview ? (
+            <Tap accessibilityRole="button" onPress={() => setWriting(true)} className="flex-row items-center gap-1.5" hitSlop={8}>
+              <PenLine size={15} color={brand[700]} />
+              <Text style={{ fontFamily: font.semibold, fontSize: 15, color: brand[700] }}>Write a review</Text>
+            </Tap>
+          ) : null}
+        </View>
+        {reviews.isPending ? <LinesSkeleton lines={3} /> : <ReviewList reviews={reviews.data ?? []} empty={stars && !rating ? `Rated ${stars.rating.toFixed(1)} by ${stars.reviews} patients on the partner network. No written reviews on Cheeku yet.` : "No reviews yet."} />}
+
+        <View style={{ marginTop: 18 }}>
+          <SampleNote text="Preview · a sample doctor. Nothing is booked for real yet." />
         </View>
       </ScrollView>
 
-      {/* Sticky, as in the reference: price, then Book. */}
       <View style={{ position: "absolute", left: 16, right: 16, bottom: insets.bottom + 12, flexDirection: "row", gap: 10 }}>
-        <View style={[glassShadow, { height: 58, paddingHorizontal: 22, borderRadius: 999, backgroundColor: "#fff", justifyContent: "center" }]}>
-          <Text style={{ fontFamily: font.semibold, fontSize: 17, color: ink[900] }}>{d.fee[mode] ? `₹${d.fee[mode]}` : "Fee on booking"}</Text>
+        <View style={[glassCard("#ffffff", "#0f1030"), { height: 58, paddingHorizontal: 20, borderRadius: 999, justifyContent: "center" }]}>
+          <Text style={{ fontFamily: font.regular, fontSize: 11, color: ink[500] }}>{mode === "online" ? "Video call" : "Clinic visit"}</Text>
+          <Text style={{ fontFamily: font.semibold, fontSize: 16, color: ink[900] }}>{feeLabel(mode)}</Text>
         </View>
-        <Tap accessibilityRole="button" onPress={book} style={[glassShadow, { flex: 1, height: 58, borderRadius: 999, backgroundColor: brand[600], alignItems: "center", justifyContent: "center" }]} scale={0.98}>
-          <Text style={{ fontFamily: font.semibold, fontSize: 17, color: "#fff" }}>{mode === "online" ? "Book a video slot" : "Book a clinic visit"}</Text>
+        <Tap accessibilityRole="button" onPress={book} style={{ flex: 1, height: 58, borderRadius: 999, backgroundColor: brand[600], alignItems: "center", justifyContent: "center" }} scale={0.98}>
+          <Text style={{ fontFamily: font.semibold, fontSize: 16, color: "#fff" }}>{mode === "online" ? "Pick a video slot" : "Pick a visit time"}</Text>
         </Tap>
       </View>
 
@@ -184,15 +222,5 @@ export default function DoctorProfile() {
         }}
       />
     </View>
-  );
-}
-
-function Fact({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
-  return (
-    <Glass strong className="flex-1 rounded-lg p-3">
-      {icon}
-      <Text style={{ fontFamily: font.regular, fontSize: 12, color: ink[500], marginTop: 6 }}>{label}</Text>
-      <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 13, color: ink[900], marginTop: 1 }}>{value}</Text>
-    </Glass>
   );
 }

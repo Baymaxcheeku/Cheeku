@@ -17,6 +17,7 @@ import {
   type LabSlots,
   type PharmaOrder,
   type PharmaOrderInput,
+  type PaymentStart,
   type PharmaOrderType,
   type Pharmacy,
   type Provider,
@@ -65,7 +66,7 @@ export type LabStack = {
   labs: {
     serviceable: (q: Loc & { service?: LabService; tests: string[] }) => Promise<{ lsLabId: number; labName: string; services: LabService[] }[]>;
     slots: (q: Loc & { date: string; service: LabService; lsLabId?: number | null; tests: string[]; fastingHours: number }) => Promise<LabSlots>;
-    place: (input: LabOrderInput) => Promise<{ bookingId: string }>;
+    place: (input: LabOrderInput) => Promise<{ bookingId: string; payment?: PaymentStart }>;
     order: (bookingId: string) => Promise<LabOrder>;
     reschedule: (bookingId: string, appointment: string) => Promise<void>;
     cancel: (bookingId: string, reason: string) => Promise<void>;
@@ -76,7 +77,7 @@ export type LabStack = {
     alternatives: (drugMasterId: string) => Promise<Drug[]>;
     pharmacies: (q: Loc & { orderType: PharmaOrderType }) => Promise<Pharmacy[]>;
     estimate: (q: Loc & { orderType: PharmaOrderType; lsPharmacyId: number; speed: ShipmentSpeed | null; lines: CartLine[]; address?: AddressParts }) => Promise<Estimate>;
-    place: (input: PharmaOrderInput) => Promise<{ orderId: string }>;
+    place: (input: PharmaOrderInput) => Promise<{ orderId: string; payment?: PaymentStart }>;
     order: (orderId: string) => Promise<PharmaOrder>;
     orders: () => Promise<PharmaOrder[]>;
     cancel: (orderId: string, reason: string) => Promise<void>;
@@ -85,7 +86,7 @@ export type LabStack = {
     specialities: () => Promise<Speciality[]>;
     providers: (q: Loc & { type: AppointmentType; speciality: string | null }) => Promise<Provider[]>;
     slots: (q: Loc & { type: AppointmentType; date: string; lsProviderId: number }) => Promise<ProviderSlots>;
-    book: (input: ConsultInput) => Promise<{ appointmentId: string }>;
+    book: (input: ConsultInput) => Promise<{ appointmentId: string; payment?: PaymentStart }>;
     appointment: (appointmentId: string) => Promise<Consult>;
     meetingLink: (appointmentId: string) => Promise<{ link: string; opensAt: string | null; closesAt: string | null }>;
     reschedule: (appointmentId: string, appointment: string) => Promise<void>;

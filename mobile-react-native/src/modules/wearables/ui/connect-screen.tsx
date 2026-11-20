@@ -18,6 +18,10 @@ import { needsDemo, OS } from "../runtime";
 import { STRAVA_GUIDE } from "../sources/strava";
 import { isConnected } from "../store";
 import type { Availability, SourceId } from "../types";
+import { SOURCE_ART } from "./parts";
+import { glassCard } from "@/components/today/palette";
+import { Icon3D } from "@/components/ui/icon3d";
+import { SkyWash } from "@/components/ui/sky-wash";
 
 /*
  * Connect a device. One row per source, each saying plainly what state it is
@@ -96,11 +100,12 @@ export function WearablesConnectScreen() {
 
   return (
     <View className="flex-1 bg-canvas">
+      <SkyWash top={0} />
       <ScreenHeader fallback="/wearables" />
       <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: insets.bottom + 32 }} showsVerticalScrollIndicator={false}>
         <PageTitle title="Connect a device" line="Pick where your steps, sleep and heart rate already live." />
 
-        <View style={{ marginTop: 18, borderRadius: 24, backgroundColor: "#fff", paddingHorizontal: 16 }}>
+        <View style={[glassCard("#ffffff", "#0f1030"), { marginTop: 18, borderRadius: 24, paddingHorizontal: 16, shadowOpacity: 0.05 }]}>
           {SOURCES.map((s, i) => (
             <Row key={s.id} info={s} first={i === 0} status={statusOf(connected(s.id), avail[s.id])} onPress={() => { setNote(null); setOpen(s); }} />
           ))}
@@ -111,7 +116,7 @@ export function WearablesConnectScreen() {
             <View style={{ marginTop: 26 }}>
               <SectionTitle>Just looking?</SectionTitle>
             </View>
-            <View style={{ marginTop: 12, borderRadius: 24, backgroundColor: "#fff", paddingHorizontal: 16 }}>
+            <View style={[glassCard("#ffffff", "#0f1030"), { marginTop: 12, borderRadius: 24, paddingHorizontal: 16, shadowOpacity: 0.05 }]}>
               <Row info={DEMO_SOURCE} first status={connected("demo") ? { label: "On", tone: "on" } : { label: "Try it", tone: "action" }} onPress={() => { setNote(null); setOpen(DEMO_SOURCE); }} />
             </View>
             <Text style={{ fontFamily: font.regular, fontSize: 12, lineHeight: 17, color: ink[500], marginTop: 10, paddingHorizontal: 4 }}>
@@ -123,7 +128,7 @@ export function WearablesConnectScreen() {
         <View style={{ marginTop: 26 }}>
           <SectionTitle>What Cheeku does with it</SectionTitle>
         </View>
-        <View style={{ marginTop: 12, borderRadius: 24, backgroundColor: "#fff", padding: 16, gap: 12 }}>
+        <View style={[glassCard("#ffffff", "#0f1030"), { marginTop: 12, borderRadius: 24, padding: 16, gap: 12, shadowOpacity: 0.05 }]}>
           {[
             ["Reads, never writes", "Cheeku can't add or change anything in your health app."],
             ["Keeps one summary a day", "A day's totals and averages. No minute-by-minute record, no location."],
@@ -153,7 +158,7 @@ export function WearablesConnectScreen() {
           <View style={{ backgroundColor: "#fff", borderTopLeftRadius: 32, borderTopRightRadius: 32, paddingHorizontal: 20, paddingTop: 30, paddingBottom: insets.bottom + 20 }}>
             <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
               <View style={{ width: 52, height: 52, borderRadius: 16, backgroundColor: surface.tint, alignItems: "center", justifyContent: "center" }}>
-                <open.icon size={24} color={ink[900]} strokeWidth={1.8} />
+                {SOURCE_ART[open.id] ? <Icon3D name={SOURCE_ART[open.id]!} size={36} /> : <open.icon size={24} color={brand[600]} strokeWidth={1.8} />}
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={{ fontFamily: font.semibold, fontSize: 20, letterSpacing: -0.3, color: ink[900] }}>{open.name}</Text>
@@ -228,7 +233,7 @@ function Row({ info, first, status, onPress }: { info: SourceInfo; first: boolea
   return (
     <Tap accessibilityRole="button" accessibilityLabel={`${info.name}. ${status.label}`} onPress={onPress} style={{ flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 14, borderTopWidth: first ? 0 : 1, borderTopColor: surface.line }}>
       <View style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: surface.tint, alignItems: "center", justifyContent: "center" }}>
-        <info.icon size={21} color={ink[900]} strokeWidth={1.8} />
+        {SOURCE_ART[info.id] ? <Icon3D name={SOURCE_ART[info.id]!} size={30} /> : <info.icon size={21} color={brand[600]} strokeWidth={1.8} />}
       </View>
       <View style={{ flex: 1, minWidth: 0 }}>
         <Text numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900] }}>{info.name}</Text>

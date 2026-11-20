@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
   Building2,
@@ -21,6 +22,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { BubblePop } from "@/components/onboarding/motion";
 import { ConfirmSheet } from "@/components/ui/confirm-sheet";
 import { ProblemSheet } from "@/components/partner/sheets";
+import { PaymentCard } from "@/components/partner/payment-card";
 import { Tap } from "@/components/ui/tap";
 import { labstack, LIVE } from "@/lib/partner/labstack";
 import { PartnerError } from "@/lib/partner/types";
@@ -65,6 +67,13 @@ export default function AppointmentDetail() {
   const [joinNote, setJoinNote] = useState<boolean | string>(false);
   const [joining, setJoining] = useState(false);
   const [problemOpen, setProblemOpen] = useState(false);
+  // Live bookings: the partner's state, mainly whether it is still waiting for payment.
+  const live = useQuery({
+    queryKey: ["consult", id],
+    queryFn: () => labstack().consult.appointment(id!),
+    enabled: LIVE && Boolean(id) && Boolean(lsIdOf(appt?.doctorId)),
+    refetchInterval: (q) => (q.state.data?.payment?.required && !q.state.data.payment.expired ? 10_000 : 120_000),
+  });
 
   /** The call room, from LabStack's authenticated meeting link; opened in the browser. */
   async function join() {
@@ -124,6 +133,11 @@ export default function AppointmentDetail() {
       <ScreenHeader title="Appointment" fallback="/appointments" />
 
       <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 8, paddingBottom: 24 }} showsVerticalScrollIndicator={false}>
+        {live.data?.payment?.required ? (
+          <View style={{ marginBottom: 14 }}>
+            <PaymentCard payment={live.data.payment} what="appointment" onReturn={() => void live.refetch()} onRebook={() => router.replace("/book/doctors")} />
+          </View>
+        ) : null}
         {/* Who and when. */}
         <View className="overflow-hidden rounded-2xl p-4">
           <Gradient from={online ? lilac.violet : hue.orange.bg} to={online ? lilac.mist : hue.orange.wash} glow="#ffffff" />

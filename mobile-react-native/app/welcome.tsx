@@ -3,24 +3,17 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { PanResponder, Text, useWindowDimensions, View } from "react-native";
 import Animated, { FadeIn, FadeInLeft, FadeInRight } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import {
-  ChevronLeft,
-  FileText,
-  FolderCheck,
-  Image as ImageIcon,
-  Mail,
-  MessageCircle,
-  Plus,
-  ShieldCheck,
-} from "lucide-react-native";
+import { Check, ChevronLeft } from "lucide-react-native";
 
 import { CastAvatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { MascotBust } from "@/components/illustrations/sprout";
 import { CtaLabel, ReassuranceStrip } from "@/components/onboarding/chrome";
-import { CareOrbit } from "@/components/onboarding/care-orbit";
 import { BubblePop, FillBar, TypingDots, useTypedReveal } from "@/components/onboarding/motion";
-import { PANELS } from "@/lib/onboarding/panels";
+import { PANELS, type Panel } from "@/lib/onboarding/panels";
+import { SkyWash } from "@/components/ui/sky-wash";
+import { PILLAR_TONE, glassCard } from "@/components/today/palette";
+import { Icon3D, type Icon3DName } from "@/components/ui/icon3d";
 import { castFaces } from "@/lib/profiles/avatar";
 import { brand, hue, ink, semantic, shadow, surface } from "@/theme/tokens";
 import { font, type } from "@/theme/type";
@@ -38,11 +31,12 @@ import { supabase } from "@/lib/supabase/client";
  * come from the journey palette so the carousel and the picker that follows
  * sign-up belong to the same world.
  */
-const CHAPTER: Record<"meet" | "memory" | "family" | "care", { bg: string; fg: string }> = {
-  meet: { bg: brand[50], fg: ink[900] },
-  memory: { bg: hue.blue.wash, fg: hue.blue.fg },
-  family: { bg: hue.rose.bg, fg: hue.rose.fg },
-  care: { bg: hue.ocean.bg, fg: ink[900] },
+const CHAPTER: Record<Panel["kind"], { bg: string; fg: string; art: Icon3DName }> = {
+  meet: { bg: PILLAR_TONE.sleep.bg, fg: PILLAR_TONE.sleep.deep, art: "chat" },
+  memory: { bg: PILLAR_TONE.check.bg, fg: PILLAR_TONE.check.deep, art: "folder" },
+  family: { bg: PILLAR_TONE.eat.bg, fg: PILLAR_TONE.eat.deep, art: "family" },
+  care: { bg: PILLAR_TONE.mind.bg, fg: PILLAR_TONE.mind.deep, art: "doctor" },
+  plan: { bg: PILLAR_TONE.move.bg, fg: PILLAR_TONE.move.deep, art: "shoe" },
 };
 
 /*
@@ -134,6 +128,7 @@ export default function Welcome() {
 
   return (
     <View className="flex-1 bg-canvas" style={{ paddingTop: insets.top }} {...swipe.panHandlers}>
+      <SkyWash top={0} />
       {/* Story rail. Each segment fills rather than switching on, so moving
           forward reads as progress made. Tappable, like a story. */}
       <View className="flex-row gap-1.5 px-5 pt-3">
@@ -145,7 +140,7 @@ export default function Welcome() {
             accessibilityLabel={`Go to screen ${i + 1} of ${PANELS.length}`}
             onPress={() => go(i)}
           >
-            <FillBar value={i <= index ? 1 : 0} color={ink[900]} track={brand[100]} height={5} />
+            <FillBar value={i <= index ? 1 : 0} color={brand[600]} track="rgba(255,255,255,0.8)" height={5} />
           </Tap>
         ))}
       </View>
@@ -185,17 +180,19 @@ export default function Welcome() {
           {panel.kind === "meet" ? <SceneMeet compact={compact} /> : null}
           {panel.kind === "memory" ? <SceneMemory compact={compact} /> : null}
           {panel.kind === "family" ? <SceneFamily faces={faces} compact={compact} /> : null}
-          {panel.kind === "care" ? <CareOrbit compact={compact} /> : null}
+          {panel.kind === "care" ? <SceneCare compact={compact} /> : null}
+          {panel.kind === "plan" ? <ScenePlan compact={compact} /> : null}
         </View>
 
         <View className="px-6 pt-4">
-          <View className="mb-3 self-start rounded-pill px-3 py-1.5" style={{ backgroundColor: chapter.bg }}>
-            <Text style={[type.eyebrow, { color: chapter.fg }]}>{panel.eyebrow}</Text>
+          <View className="mb-3 flex-row items-center self-start rounded-pill" style={{ backgroundColor: chapter.bg, height: 32, paddingLeft: 4, paddingRight: 12, gap: 6 }}>
+            <Icon3D name={chapter.art} size={24} />
+            <Text style={{ fontFamily: font.semibold, fontSize: 13, color: chapter.fg }}>{panel.eyebrow}</Text>
           </View>
-          <Text accessibilityRole="header" style={type.hero}>
-            {panel.lead} <Text style={{ color: ink[300] }}>{panel.accent}</Text>
+          <Text accessibilityRole="header" style={{ fontFamily: font.semibold, fontSize: compact ? 27 : 30, lineHeight: compact ? 32 : 36, letterSpacing: -0.9, color: ink[900] }}>
+            {panel.lead}{"\n"}<Text style={{ color: brand[600] }}>{panel.accent}</Text>
           </Text>
-          <Text style={[type.body, { marginTop: 12 }]}>{panel.body}</Text>
+          <Text style={{ fontFamily: font.regular, fontSize: 16, lineHeight: 23, color: ink[500], marginTop: 10 }}>{panel.body}</Text>
         </View>
       </Animated.View>
 
@@ -222,27 +219,34 @@ export default function Welcome() {
 /*
  * SCENES
  *
- * All three lay their content out in FLOW and centre it, rather than pinning
- * pieces to the top and bottom of the box. The box is flexible — it absorbs
- * whatever height the screen has spare — and absolutely positioned children in
- * a variable-height parent drift apart.
+ * One per worry, each its own composition, built from the app's own pieces:
+ * white glass cards, pastel tiles, Cheeku's 3D objects. Content is laid out in
+ * flow and centred, so the scene can take whatever height the screen spares.
+ *
+ * EVERY ANSWER ON THESE SCREENS IS ONE CHEEKU CAN HONESTLY GIVE: explaining a
+ * word, reading back what a lab printed, reminding, booking. Never "you're
+ * fine" or "you have X".
  */
 
-/*
- * Panel 1 — a conversation.
- *
- * The reader's questions arrive one by one as their own messages, then Cheeku
- * types and answers. It is the product demonstrated rather than described: you
- * ask like you would ask a friend, and something answers.
- *
- * EVERY QUESTION HERE IS ONE CHEEKU CAN HONESTLY TAKE. Each asks it to explain
- * a word, read something back, or help prepare — never to judge a result or
- * name a treatment. "Should I take this?" on this screen would be a promise
- * broken on the first real conversation. The reply promises only to explain.
- */
+const WHITE = glassCard("#ffffff", "#0f1030");
+
+function Chip({ art, tint, text, tilt = "0deg", delay }: { art: Icon3DName; tint: string; text: string; tilt?: string; delay: number }) {
+  return (
+    <BubblePop delay={delay}>
+      <View style={[WHITE, { flexDirection: "row", alignItems: "center", gap: 8, height: 44, paddingLeft: 6, paddingRight: 14, borderRadius: 999, shadowOpacity: 0.07, transform: [{ rotate: tilt }] }]}>
+        <View style={{ width: 32, height: 32, borderRadius: 999, backgroundColor: tint, alignItems: "center", justifyContent: "center" }}>
+          <Icon3D name={art} size={22} />
+        </View>
+        <Text style={{ fontFamily: font.semibold, fontSize: 13, color: ink[700] }}>{text}</Text>
+      </View>
+    </BubblePop>
+  );
+}
+
+/* 1 — the 2am search, asked here instead. */
 const QUESTIONS = [
-  "What does HbA1c actually mean?",
-  "Can you read Papa's blood report to me?",
+  "Fasting sugar 132. What does that mean?",
+  "Papa's report has 4 values in red. Explain?",
   "What should I ask the doctor tomorrow?",
 ] as const;
 
@@ -254,12 +258,9 @@ function SceneMeet({ compact }: { compact: boolean }) {
   return (
     <View className="flex-1 justify-center gap-2.5 px-6">
       {asked.map((q, i) => (
-        <BubblePop key={q} delay={0.25 + i * 0.5} from="right" style={{ alignSelf: "flex-end", maxWidth: "82%" }}>
-          <View
-            className="rounded-xl px-4 py-2.5"
-            style={[shadow.e1, { backgroundColor: surface.base, borderBottomRightRadius: 6 }]}
-          >
-            <Text style={{ fontFamily: font.medium, fontSize: 15, lineHeight: 19, color: ink[700] }}>{q}</Text>
+        <BubblePop key={q} delay={0.25 + i * 0.5} from="right" style={{ alignSelf: "flex-end", maxWidth: "84%" }}>
+          <View style={[WHITE, { borderRadius: 22, borderBottomRightRadius: 6, paddingHorizontal: 16, paddingVertical: 11, shadowOpacity: 0.06 }]}>
+            <Text style={{ fontFamily: font.medium, fontSize: 15, lineHeight: 20, color: ink[900] }}>{q}</Text>
           </View>
         </BubblePop>
       ))}
@@ -269,16 +270,10 @@ function SceneMeet({ compact }: { compact: boolean }) {
           <MascotBust size={compact ? 78 : 96} moment="wave" />
         </BubblePop>
         <BubblePop delay={replyAt - 0.9} from="left" style={{ flexShrink: 1, marginBottom: 10 }}>
-          <View
-            className="rounded-xl px-4 py-3"
-            style={[shadow.e2, { backgroundColor: ink[900], borderBottomLeftRadius: 6, minWidth: 64 }]}
-          >
+          <View style={{ borderRadius: 22, borderBottomLeftRadius: 6, paddingHorizontal: 16, paddingVertical: 12, backgroundColor: brand[600], minWidth: 64 }}>
             {replied ? (
-              <Animated.Text
-                entering={FadeIn.duration(220)}
-                style={{ fontFamily: font.semibold, fontSize: 15, lineHeight: 19, color: "#ffffff" }}
-              >
-                Ask away. I&apos;ll explain it simply, no judgement.
+              <Animated.Text entering={FadeIn.duration(220)} style={{ fontFamily: font.semibold, fontSize: 15, lineHeight: 20, color: "#ffffff" }}>
+                Let&apos;s go through it together. Plain words, no scary jargon.
               </Animated.Text>
             ) : (
               <TypingDots color="#ffffff" />
@@ -290,71 +285,47 @@ function SceneMeet({ compact }: { compact: boolean }) {
   );
 }
 
-/*
- * Panel 2 — from scattered paperwork to one answer.
- *
- * Top: where medical paper actually lives in an Indian household, tilted and
- * loose. Bottom: a question asked months later and answered from that paper,
- * with the source named. The date in the answer is the date on the report: that
- * is the proof, and the difference between this and a chatbot that sounds
- * confident.
- *
- * THE ANSWER READS BACK, IT DOES NOT INTERPRET. "Above the range her lab
- * printed" is the laboratory's own finding restated. Anything approaching
- * "she has hypothyroidism" would be this screen promising a diagnosis.
- */
-const SOURCES = [
-  { label: "WhatsApp forward", Icon: MessageCircle, tint: semantic.safeBg, fg: "#1f8a45", tilt: "-5deg" },
-  { label: "Email PDF", Icon: Mail, tint: hue.blue.wash, fg: hue.blue.fg, tilt: "3deg" },
-  { label: "Gallery photo", Icon: ImageIcon, tint: hue.orange.wash, fg: hue.orange.fg, tilt: "-2deg" },
+/* 2 — paperwork from everywhere, then the trend the doctor asked for. */
+const TSH = [
+  { when: "Mar '25", value: "4.1", high: false },
+  { when: "Sep '25", value: "5.3", high: true },
+  { when: "Mar '26", value: "6.2", high: true },
 ] as const;
 
 function SceneMemory({ compact }: { compact: boolean }) {
-  const sources = compact ? SOURCES.slice(0, 2) : SOURCES;
   return (
     <View className="flex-1 justify-center px-6">
-      <View className="flex-row flex-wrap items-start justify-center" style={{ gap: 8 }}>
-        {sources.map((s, i) => (
-          <BubblePop key={s.label} delay={0.15 + i * 0.18}>
-            {/* The tilt lives on the inner view: BubblePop owns its own
-                transform, and a rotate passed to it would be overwritten. */}
-            <View
-              className="flex-row items-center gap-2 rounded-pill bg-surface py-2 pl-2 pr-3.5"
-              style={[shadow.e1, { transform: [{ rotate: s.tilt }] }]}
-            >
-              <View className="h-7 w-7 items-center justify-center rounded-pill" style={{ backgroundColor: s.tint }}>
-                <s.Icon size={14} color={s.fg} />
-              </View>
-              <Text style={{ fontFamily: font.semibold, fontSize: 13, color: ink[700] }}>{s.label}</Text>
-            </View>
-          </BubblePop>
-        ))}
-      </View>
+      {/* Small screens skip the scattered paperwork and go straight to the answer. */}
+      {!compact ? (
+        <View style={{ flexDirection: "row", flexWrap: "wrap", justifyContent: "center", gap: 8 }}>
+          <Chip art="message" tint={PILLAR_TONE.move.bg} text="WhatsApp forward" tilt="-4deg" delay={0.15} />
+          <Chip art="report" tint={PILLAR_TONE.check.bg} text="Email PDF" tilt="3deg" delay={0.3} />
+          <Chip art="folder" tint={PILLAR_TONE.eat.bg} text="Almirah file" tilt="-2deg" delay={0.45} />
+        </View>
+      ) : null}
 
       <BubblePop delay={0.75} style={{ alignSelf: "center", marginVertical: compact ? 10 : 14 }}>
-        <View className="flex-row items-center gap-1.5 rounded-pill px-3 py-1.5" style={{ backgroundColor: brand[50] }}>
-          <FolderCheck size={13} color={ink[900]} />
-          <Text style={{ fontFamily: font.semibold, fontSize: 12, color: ink[700] }}>Saved to Mummy&apos;s file</Text>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 6, height: 30, paddingHorizontal: 12, borderRadius: 999, backgroundColor: brand[600] }}>
+          <Text style={{ fontFamily: font.semibold, fontSize: 12, color: "#fff" }}>Saved to Mummy&apos;s file</Text>
         </View>
       </BubblePop>
 
       <BubblePop delay={1.05} from="left">
-        <View className="rounded-xl bg-surface p-4" style={[shadow.e2, { borderWidth: 1, borderColor: surface.line }]}>
-          <Text style={{ fontFamily: font.medium, fontSize: 13, color: ink[500] }}>
-            When was Mummy&apos;s last thyroid test?
+        <View style={[WHITE, { borderRadius: 24, padding: 16, shadowOpacity: 0.07 }]}>
+          <Text style={{ fontFamily: font.medium, fontSize: 13, color: ink[500] }}>Doctor asked: Mummy&apos;s last thyroid tests?</Text>
+          <View style={{ flexDirection: "row", gap: 8, marginTop: 10 }}>
+            {TSH.map((t) => (
+              <View key={t.when} style={{ flex: 1, borderRadius: 14, paddingVertical: 10, alignItems: "center", backgroundColor: t.high ? PILLAR_TONE.eat.bg : surface.tint }}>
+                <Text style={{ fontFamily: font.semibold, fontSize: 20, letterSpacing: -0.4, color: t.high ? PILLAR_TONE.eat.deep : ink[900] }}>{t.value}</Text>
+                <Text style={{ fontFamily: font.regular, fontSize: 11, color: ink[500], marginTop: 1 }}>{t.when}</Text>
+              </View>
+            ))}
+          </View>
+          <Text style={{ fontFamily: font.regular, fontSize: 14, lineHeight: 19, color: ink[700], marginTop: 10 }}>
+            TSH in mIU/L. The last two are above the range her lab printed.
           </Text>
-          <Text style={{ fontFamily: font.regular, fontSize: 15, lineHeight: 21, color: ink[900], marginTop: 6 }}>
-            On <Text style={{ fontFamily: font.bold }}>14 March</Text>. Her TSH was{" "}
-            <Text style={{ fontFamily: font.bold }}>6.2 mIU/L</Text>, above the range her lab printed.
-          </Text>
-          <View
-            className="mt-3 flex-row items-center gap-1.5 self-start rounded-pill px-2.5 py-1"
-            style={{ backgroundColor: brand[50] }}
-          >
-            <FileText size={11} color={ink[900]} />
-            <Text style={{ fontFamily: font.bold, fontSize: 11, color: brand[700] }}>
-              From: Thyroid profile, 14 Mar
-            </Text>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 6, alignSelf: "flex-start", marginTop: 8, height: 24, paddingHorizontal: 10, borderRadius: 999, backgroundColor: brand[50] }}>
+            <Text style={{ fontFamily: font.semibold, fontSize: 11, color: brand[700] }}>From 3 reports, ready to show</Text>
           </View>
         </View>
       </BubblePop>
@@ -362,75 +333,155 @@ function SceneMemory({ compact }: { compact: boolean }) {
   );
 }
 
-/*
- * Panel 3 — the family, named the way families name themselves.
- *
- * Name tags say "Mummy", "Papa", "You" rather than first names: that is how a
- * household refers to each other's reports, and it lets the reader cast their
- * own family into the picture. The dashed "+" is the fourth seat, left open.
- */
+/* 3 — parents far away, and the nudge that closes the distance. */
 const FAMILY = ["Mummy", "You", "Papa"] as const;
 /** Which of `castFaces(3)` (mother, father, daughter) wears each name tag. */
 const FACE_FOR = [0, 2, 1] as const;
 
 function SceneFamily({ faces, compact }: { faces: readonly string[]; compact: boolean }) {
-  const big = compact ? 84 : 100;
-  const small = compact ? 66 : 78;
+  const big = compact ? 80 : 94;
+  const small = compact ? 64 : 74;
   return (
     <View className="flex-1 items-center justify-center px-6">
-      <BubblePop delay={0.7} style={{ alignSelf: "flex-end", marginBottom: 6 }}>
-        <View className="rounded-pill bg-surface px-3 py-1.5" style={shadow.e1}>
-          <Text style={{ fontFamily: font.semibold, fontSize: 12, color: ink[700] }}>Up to 4 people</Text>
-        </View>
-      </BubblePop>
-
-      <View className="flex-row items-end" style={{ gap: 6 }}>
+      <View className="flex-row items-end" style={{ gap: 8 }}>
         {FAMILY.map((name, i) => {
           const size = i === 1 ? big : small;
           return (
             <BubblePop key={name} delay={0.1 + i * 0.16} style={{ alignItems: "center" }}>
-              <View style={[shadow.e2, { borderRadius: 999, borderWidth: 3, borderColor: "#fff" }]}>
+              <View style={[shadow.e2, { borderRadius: 999, borderWidth: 3, borderColor: i === 1 ? brand[600] : "#fff" }]}>
                 <CastAvatar svg={faces[FACE_FOR[i] ?? 0] ?? ""} size={size} />
               </View>
-              <View
-                className="-mt-3 rounded-pill px-2.5 py-1"
-                style={[shadow.e1, { backgroundColor: i === 1 ? ink[900] : surface.base }]}
-              >
-                <Text
-                  style={{ fontFamily: font.bold, fontSize: 12, color: i === 1 ? "#ffffff" : ink[700] }}
-                >
-                  {name}
-                </Text>
+              <View className="-mt-3 rounded-pill px-2.5 py-1" style={[shadow.e1, { backgroundColor: i === 1 ? brand[600] : "#fff" }]}>
+                <Text style={{ fontFamily: font.bold, fontSize: 12, color: i === 1 ? "#ffffff" : ink[700] }}>{name}</Text>
               </View>
             </BubblePop>
           );
         })}
-        <BubblePop delay={0.62} style={{ alignItems: "center", marginBottom: 18 }}>
-          <View
-            accessibilityLabel="Add another family member"
-            className="items-center justify-center rounded-pill"
-            style={{
-              width: 44,
-              height: 44,
-              borderWidth: 2,
-              borderStyle: "dashed",
-              borderColor: brand[300],
-              backgroundColor: brand[50],
-            }}
-          >
-            <Plus size={18} color={ink[900]} />
-          </View>
-        </BubblePop>
       </View>
 
-      <BubblePop delay={0.9} style={{ marginTop: compact ? 14 : 20 }}>
-        <View className="flex-row items-center gap-2.5 rounded-pill bg-surface py-2.5 pl-2.5 pr-4" style={shadow.e2}>
-          <View className="h-8 w-8 items-center justify-center rounded-pill" style={{ backgroundColor: brand[50] }}>
-            <ShieldCheck size={16} color={ink[900]} />
+      <View style={{ alignSelf: "stretch", gap: 8, marginTop: compact ? 14 : 20 }}>
+        <BubblePop delay={0.7} from="right">
+          <View style={[glassCard(PILLAR_TONE.eat.glass), { flexDirection: "row", alignItems: "center", gap: 10, borderRadius: 20, padding: 10 }]}>
+            <View style={{ width: 40, height: 40, borderRadius: 13, backgroundColor: "#fff", alignItems: "center", justifyContent: "center" }}>
+              <Icon3D name="blister" size={28} />
+            </View>
+            <Text style={{ flex: 1, fontFamily: font.medium, fontSize: 14, lineHeight: 19, color: ink[900] }}>
+              Papa&apos;s BP tablet isn&apos;t ticked yet today
+            </Text>
           </View>
-          <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[700] }}>
-            <Text style={{ fontFamily: font.bold, color: ink[900] }}>Private by default.</Text> Never sold, never used for ads.
-          </Text>
+        </BubblePop>
+        {!compact ? (
+          <BubblePop delay={0.95} from="right">
+            <View style={[glassCard(PILLAR_TONE.check.glass), { flexDirection: "row", alignItems: "center", gap: 10, borderRadius: 20, padding: 10 }]}>
+              <View style={{ width: 40, height: 40, borderRadius: 13, backgroundColor: "#fff", alignItems: "center", justifyContent: "center" }}>
+                <Icon3D name="test-tube" size={28} />
+              </View>
+              <Text style={{ flex: 1, fontFamily: font.medium, fontSize: 14, lineHeight: 19, color: ink[900] }}>
+                Mummy&apos;s HbA1c is due in 6 days
+              </Text>
+            </View>
+          </BubblePop>
+        ) : null}
+      </View>
+    </View>
+  );
+}
+
+/* 4 — the doctor already knows; tests and medicines come home. */
+function SceneCare({ compact }: { compact: boolean }) {
+  return (
+    <View className="flex-1 justify-center gap-2.5 px-6">
+      <BubblePop delay={0.15}>
+        <View style={[WHITE, { borderRadius: 24, padding: 14, shadowOpacity: 0.07 }]}>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+            <View style={{ width: 52, height: 52, borderRadius: 16, backgroundColor: PILLAR_TONE.sleep.bg, alignItems: "center", justifyContent: "center" }}>
+              <Icon3D name="doctor" size={38} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontFamily: font.semibold, fontSize: 16, color: ink[900] }}>Video call with your doctor</Text>
+              <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 1 }}>Today, 7:30 pm</Text>
+            </View>
+          </View>
+          <BubblePop delay={0.6}>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginTop: 12, padding: 10, borderRadius: 16, backgroundColor: PILLAR_TONE.sleep.glass }}>
+              <Icon3D name="clipboard" size={24} />
+              <Text style={{ flex: 1, fontFamily: font.medium, fontSize: 13, lineHeight: 18, color: ink[900] }}>Already has your note and 3 old reports</Text>
+            </View>
+          </BubblePop>
+        </View>
+      </BubblePop>
+
+      <BubblePop delay={0.85} from="right">
+        <View style={[WHITE, { flexDirection: "row", alignItems: "center", gap: 12, borderRadius: 20, padding: 10, shadowOpacity: 0.06 }]}>
+          <View style={{ width: 42, height: 42, borderRadius: 13, backgroundColor: PILLAR_TONE.check.bg, alignItems: "center", justifyContent: "center" }}>
+            <Icon3D name="test-tube" size={28} />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={{ fontFamily: font.semibold, fontSize: 14, color: ink[900] }}>Blood test at home</Text>
+            <Text style={{ fontFamily: font.regular, fontSize: 12, color: ink[500] }}>Tomorrow, 7 am · result filed for you</Text>
+          </View>
+        </View>
+      </BubblePop>
+      {!compact ? (
+        <BubblePop delay={1.05} from="right">
+          <View style={[WHITE, { flexDirection: "row", alignItems: "center", gap: 12, borderRadius: 20, padding: 10, shadowOpacity: 0.06 }]}>
+            <View style={{ width: 42, height: 42, borderRadius: 13, backgroundColor: PILLAR_TONE.move.bg, alignItems: "center", justifyContent: "center" }}>
+              <Icon3D name="capsule" size={28} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontFamily: font.semibold, fontSize: 14, color: ink[900] }}>Medicines to your door</Text>
+              <Text style={{ fontFamily: font.regular, fontSize: 12, color: ink[500] }}>Arriving today</Text>
+            </View>
+          </View>
+        </BubblePop>
+      ) : null}
+    </View>
+  );
+}
+
+/* 5 — a small daily plan, from your own numbers. */
+const PLAN: { art: Icon3DName; text: string; done: boolean }[] = [
+  { art: "shoe", text: "10-minute walk after lunch", done: true },
+  { art: "food", text: "Half plate sabzi at dinner", done: true },
+  { art: "moon", text: "Lights off by 11 pm", done: false },
+  { art: "test-tube", text: "HbA1c due this month", done: false },
+];
+
+function ScenePlan({ compact }: { compact: boolean }) {
+  const rows = compact ? PLAN.slice(0, 3) : PLAN;
+  const done = rows.filter((r) => r.done).length;
+  return (
+    <View className="flex-1 justify-center px-6">
+      <BubblePop delay={0.1}>
+        <View style={[WHITE, { borderRadius: 26, padding: compact ? 12 : 16, shadowOpacity: 0.07 }]}>
+          <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+            <View>
+              <Text style={{ fontFamily: font.semibold, fontSize: 18, letterSpacing: -0.3, color: ink[900] }}>Today&apos;s plan</Text>
+              <Text style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 1 }}>{done} of {rows.length} done</Text>
+            </View>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 4, height: 30, paddingLeft: 4, paddingRight: 10, borderRadius: 999, backgroundColor: PILLAR_TONE.eat.bg }}>
+              <Icon3D name="trophy" size={22} />
+              <Text style={{ fontFamily: font.semibold, fontSize: 12, color: PILLAR_TONE.eat.deep }}>5-day streak</Text>
+            </View>
+          </View>
+          <View style={{ height: 6, borderRadius: 3, backgroundColor: PILLAR_TONE.move.track, marginTop: 12, overflow: "hidden" }}>
+            <View style={{ width: `${(done / rows.length) * 100}%`, height: 6, borderRadius: 3, backgroundColor: PILLAR_TONE.move.accent }} />
+          </View>
+          <View style={{ marginTop: 6 }}>
+            {rows.map((r, i) => (
+              <BubblePop key={r.text} delay={0.35 + i * 0.15} from="left">
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: compact ? 4 : 8 }}>
+                  <View style={{ width: 40, height: 40, borderRadius: 13, backgroundColor: surface.tint, alignItems: "center", justifyContent: "center" }}>
+                    <Icon3D name={r.art} size={28} />
+                  </View>
+                  <Text style={{ flex: 1, fontFamily: font.medium, fontSize: 14, color: r.done ? ink[500] : ink[900], textDecorationLine: r.done ? "line-through" : "none" }}>{r.text}</Text>
+                  <View style={{ width: 24, height: 24, borderRadius: 999, alignItems: "center", justifyContent: "center", backgroundColor: r.done ? PILLAR_TONE.move.accent : "transparent", borderWidth: r.done ? 0 : 2, borderColor: surface.line }}>
+                    {r.done ? <Check size={14} color="#fff" strokeWidth={3} /> : null}
+                  </View>
+                </View>
+              </BubblePop>
+            ))}
+          </View>
         </View>
       </BubblePop>
     </View>

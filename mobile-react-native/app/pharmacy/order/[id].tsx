@@ -18,6 +18,7 @@ import { rupees, SPEED_LABEL } from "@/lib/partner/pharmacy-cart";
 import { PartnerError, type PharmaStatus } from "@/lib/partner/types";
 import { brand, ink, semantic, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
+import { PaymentCard } from "@/components/partner/payment-card";
 
 /*
  * One medicine order, placed to delivered (LabStack getOrderDetails, kept
@@ -36,7 +37,8 @@ export default function PharmaOrderScreen() {
   const insets = useSafeAreaInsets();
   const qc = useQueryClient();
   const { id, fresh } = useLocalSearchParams<{ id: string; fresh?: string }>();
-  const order = useQuery({ queryKey: ["pharma-order", id], queryFn: () => labstack().pharma.order(id), refetchInterval: 60_000 });
+  const order = useQuery({ queryKey: ["pharma-order", id], queryFn: () => labstack().pharma.order(id), refetchInterval: (q) => (q.state.data?.payment?.required && !q.state.data.payment.expired ? 10_000 : 60_000) });
+  const owed = Boolean(order.data?.payment?.required);
   const [cancelOpen, setCancelOpen] = useState(false);
   const celebrated = useRef(false);
   useEffect(() => {
@@ -71,7 +73,12 @@ export default function PharmaOrderScreen() {
       <Backdrop />
       <ScreenHeader title={fresh ? undefined : "Medicine order"} fallback="/pharmacy/orders" />
       <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: insets.bottom + 30 }} refreshControl={<RefreshControl refreshing={order.isRefetching} onRefresh={() => void order.refetch()} tintColor={brand[600]} />}>
-        {fresh && !cancelled ? (
+        {owed ? (
+          <View style={{ marginBottom: 18 }}>
+            <PaymentCard payment={order.data?.payment} what="order" onReturn={() => void order.refetch()} />
+          </View>
+        ) : null}
+        {fresh && !cancelled && !owed ? (
           <View style={{ alignItems: "center", marginBottom: 18 }}>
             <Enter kind="pop" style={[glassShadow, { width: 76, height: 76, borderRadius: 999, backgroundColor: brand[600], alignItems: "center", justifyContent: "center" }]}>
               <Check size={36} color="#fff" strokeWidth={3} />

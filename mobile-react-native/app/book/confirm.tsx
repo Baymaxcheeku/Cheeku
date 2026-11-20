@@ -21,6 +21,8 @@ import { PartnerError } from "@/lib/partner/types";
 import { useFamily } from "@/lib/profiles/family";
 import { brand, ink, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
+import { openPayment } from "@/lib/partner/pay";
+import type { PaymentStart } from "@/lib/partner/types";
 
 /*
  * BOOK A DOCTOR, LAST STEP: CHECK AND CONFIRM (LabStack bookAppointment).
@@ -106,12 +108,13 @@ export default function ConfirmConsult() {
     setBusy(true);
     setError(null);
     let appointmentId: string;
+    let payment: PaymentStart | undefined;
     try {
       const note = intake ? [`About: ${intake.concern}`, intake.details ? `In their words: ${intake.details}` : "", `Since: ${intake.since}`, `Getting in the way: ${intake.impact}`, `Tried: ${intake.tried}`].filter(Boolean).join("\n") : "";
       if (LIVE) {
         const lsId = lsIdOf(doctor.id) ?? (ls ? Number(ls) : null);
         if (!lsId) throw new PartnerError("This doctor isn't on the live network. Pick one from the list again.", "invalid");
-        ({ appointmentId } = await labstack().consult.book({
+        ({ appointmentId, payment } = await labstack().consult.book({
           profileId: member!.id,
           lsProviderId: lsId,
           appointmentType: online ? "ONLINE" : "CENTER_VISIT",
@@ -143,6 +146,12 @@ export default function ConfirmConsult() {
         { kind: "doctor", title: `${doctor.name}, ${SPECIALTIES[doctor.specialty].label.toLowerCase()}`, when, where, route: `/appointments/${appointmentId}`, note: noteLines },
         `Booked ${doctor.name} for ${forName === "Me" ? "you" : forName}: ${when}, ${online ? "on a call" : `at ${doctor.clinic.name}`}. The doctor gets the pre-consultation note${sendTests && dueTests.length ? " and the tests that are due" : ""} before you meet.`,
       ).then(() => qc.invalidateQueries({ queryKey: threadKey(member.id) }));
+    }
+    if (payment?.link) {
+      // Held for 16 minutes until paid: the appointment screen shows the "Pay to confirm" card and checks again on return.
+      router.replace(`/appointments/${appointmentId}` as never);
+      void openPayment(payment.link).then(() => qc.invalidateQueries({ queryKey: ["consult", appointmentId] }));
+      return;
     }
     router.replace("/book/confirmed");
   }

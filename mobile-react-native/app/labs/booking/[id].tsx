@@ -22,6 +22,7 @@ import { brand, ink, semantic } from "@/theme/tokens";
 import { font } from "@/theme/type";
 import { Tap } from "@/components/ui/tap";
 import { DetailSkeleton, ScreenSkeleton } from "@/components/ui/skeleton";
+import { PaymentCard } from "@/components/partner/payment-card";
 
 /*
  * One lab booking, from "booked" to "report ready".
@@ -53,7 +54,8 @@ export default function LabBooking() {
   const [cancelOpen, setCancelOpen] = useState(false);
   const [moveOpen, setMoveOpen] = useState(false);
   const [problemOpen, setProblemOpen] = useState(false);
-  const order = useQuery({ queryKey: ["lab-order", id], queryFn: () => labstack().labs.order(id), enabled: Boolean(id), refetchInterval: 60_000 });
+  const order = useQuery({ queryKey: ["lab-order", id], queryFn: () => labstack().labs.order(id), enabled: Boolean(id), refetchInterval: (q) => (q.state.data?.payment?.required && !q.state.data.payment.expired ? 10_000 : 60_000) });
+  const owed = Boolean(order.data?.payment?.required);
   const [rating, setRating] = useState(false);
   const [stepping, setStepping] = useState(false);
 
@@ -121,7 +123,12 @@ export default function LabBooking() {
         refreshControl={<RefreshControl refreshing={bookings.isRefetching || order.isRefetching} onRefresh={() => void refresh()} tintColor={brand[600]} />}
         showsVerticalScrollIndicator={false}
       >
-        {fresh && !cancelled ? (
+        {owed ? (
+          <View style={{ marginTop: 4, marginBottom: 18 }}>
+            <PaymentCard payment={order.data?.payment} what="collection" onReturn={() => void order.refetch()} onRebook={() => router.replace("/labs")} />
+          </View>
+        ) : null}
+        {fresh && !cancelled && !owed ? (
           <View style={{ alignItems: "center", marginTop: 4, marginBottom: 18 }}>
             <Enter kind="pop" style={[glassShadow, { width: 76, height: 76, borderRadius: 999, backgroundColor: brand[600], alignItems: "center", justifyContent: "center" }]}>
               <Check size={36} color="#fff" strokeWidth={3} />

@@ -16,6 +16,7 @@ import { PartnerError } from "@/lib/partner/types";
 import { formatEventDate } from "@/lib/records/grouping";
 import { brand, ink, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
+import { openPayment } from "@/lib/partner/pay";
 
 /*
  * ORDER MEDICINES, STEP 3: CHECK AND PLACE.
@@ -60,7 +61,7 @@ export default function PharmacyReview() {
     setBusy(true);
     setError(null);
     try {
-      const { orderId } = await labstack().pharma.place({
+      const { orderId, payment } = await labstack().pharma.place({
         profileId: cart.profileId!,
         orderType: cart.orderType,
         lsPharmacyId: e.lsPharmacyId,
@@ -81,6 +82,7 @@ export default function PharmacyReview() {
       cart.clear();
       void qc.invalidateQueries({ queryKey: ["pharma-orders"] });
       router.replace({ pathname: "/pharmacy/order/[id]", params: { id: orderId, fresh: "1" } } as never);
+      if (payment?.link) void openPayment(payment.link).then(() => qc.invalidateQueries({ queryKey: ["pharma-order", orderId] }));
     } catch (err) {
       setError(err instanceof PartnerError ? err.message : "That didn't go through. Check your connection and try again.");
     } finally {
