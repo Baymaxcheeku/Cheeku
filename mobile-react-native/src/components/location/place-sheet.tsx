@@ -115,7 +115,7 @@ export function PlaceSheet({
           ) : null}
         </View>
 
-        <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 12, gap: 6 }}>
+        <ScrollView style={{ flexShrink: 1 }} keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 12, gap: 6 }}>
           {results.map((p) => (
             <Tap
               key={`${p.lat},${p.lng},${p.label}`}

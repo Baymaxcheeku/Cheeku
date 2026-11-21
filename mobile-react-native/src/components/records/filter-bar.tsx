@@ -263,7 +263,7 @@ function OptionSheet({
       >
         <Text className="mt-3 text-lg font-bold text-ink-900">{title}</Text>
 
-        <ScrollView className="mt-3 rounded-card bg-surface" style={shadow.e1}>
+        <ScrollView className="mt-3 rounded-card bg-surface" style={[shadow.e1, { flexShrink: 1 }]}>
           {options.map((option, i) => {
             const on = option.value === value;
             return (

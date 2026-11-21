@@ -157,7 +157,7 @@ export function Paywall({
         className="rounded-t-sheet bg-canvas"
         style={{ maxHeight: sheetMax92, paddingTop: 16, paddingBottom: insets.bottom + 12 }}
       >
-        <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+        <ScrollView style={{ flexShrink: 1 }} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
           {stage === "plans" ? (
             <PlanChooser
               reason={reason}

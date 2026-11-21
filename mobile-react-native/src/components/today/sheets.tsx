@@ -47,7 +47,7 @@ export function Sheet({ open, title, line, onClose, children, art, tone }: { ope
               <X size={17} color={ink[700]} />
             </Tap>
           </View>
-          <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 8, paddingBottom: 6 }} showsVerticalScrollIndicator={false}>
+          <ScrollView style={{ flexShrink: 1 }} keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 8, paddingBottom: 6 }} showsVerticalScrollIndicator={false}>
             {children}
           </ScrollView>
         </View>

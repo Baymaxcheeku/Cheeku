@@ -57,7 +57,7 @@ export function OptionsSheet({
             </Text>
           ) : null}
         </View>
-        <ScrollView contentContainerStyle={{ paddingHorizontal: 12, paddingTop: 10 }} showsVerticalScrollIndicator={false}>
+        <ScrollView style={{ flexShrink: 1 }} contentContainerStyle={{ paddingHorizontal: 12, paddingTop: 10 }} showsVerticalScrollIndicator={false}>
           {options.map((o) => {
             const busy = busyKey === o.key;
             const color = o.destructive ? semantic.dangerText : ink[900];

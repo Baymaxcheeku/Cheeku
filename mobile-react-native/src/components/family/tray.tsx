@@ -139,7 +139,7 @@ export function FamilyTray({
           </Tap>
         </View>
 
-        <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 18, paddingBottom: 6, gap: 12 }} showsVerticalScrollIndicator={false}>
+        <ScrollView style={{ flexShrink: 1 }} contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 18, paddingBottom: 6, gap: 12 }} showsVerticalScrollIndicator={false}>
           {chunk(tiles, 2).map((row, r) => (
             <View key={r} style={{ flexDirection: "row", gap: 12 }}>
               {/* No entrance stagger: the tray opens many times a day, and the

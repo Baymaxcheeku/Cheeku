@@ -48,9 +48,23 @@ function rubberband(overshoot: number, dimension: number): number {
 }
 
 /**
- * A sheet's height cap in points. Percentages no longer work inside a sheet:
+ * A sheet's height cap in points. A ScrollView inside a capped sheet needs
+ * `flexShrink: 1`: without it iOS sizes the list to its full content, the
+ * bottom (often the Save button) hangs off screen and the list won't scroll
+ * (the meal sheet, 20 Nov). Percentages no longer work inside a sheet:
  * its box is sized by its content, so "86%" had nothing to be 86% of.
  */
+/*
+ * How many sheets are on screen. iOS can show only one of our Modals at a
+ * time from the root: a second one asked for while one is up never appears,
+ * and whatever waits on it hangs. The permission explainer reads this to
+ * step aside for the system dialog when a sheet is already open.
+ */
+let openSheets = 0;
+export function anySheetOpen(): boolean {
+  return openSheets > 0;
+}
+
 export function useSheetMax(fraction: number): number {
   return Math.round(useWindowDimensions().height * fraction);
 }
@@ -82,6 +96,14 @@ export function Sheet({
   useEffect(() => {
     if (open) setMounted(true);
   }, [open]);
+
+  useEffect(() => {
+    if (!mounted) return;
+    openSheets += 1;
+    return () => {
+      openSheets = Math.max(0, openSheets - 1);
+    };
+  }, [mounted]);
 
   /*
    * Enter once the sheet has been measured; leave whenever `open` drops.
