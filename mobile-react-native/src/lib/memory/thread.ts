@@ -63,7 +63,8 @@ export type TurnMemory = {
  * is coming or a doctor has the note.
  */
 export type BookedEvent = {
-  kind: "lab" | "doctor" | "service" | "fitness" | "medicine";
+  /** A booking, a record filed from "+" ("record"), or a meal logged from a photo ("meal"). */
+  kind: "lab" | "doctor" | "service" | "fitness" | "medicine" | "record" | "meal";
   title: string;
   /** "Tue, 8 Oct · 6-8 am" */
   when: string;
@@ -116,7 +117,7 @@ export function toTurnMemory(plan: TurnPlan): TurnMemory {
 }
 
 /** The stored half of a "Booked" entry: nothing but the event. */
-export function eventMemory(event: BookedEvent, clock = ""): TurnMemory {
+export function eventMemory(event: BookedEvent, clock = "", followUps: string[] = []): TurnMemory {
   return {
     v: 1,
     tier: null,
@@ -131,7 +132,7 @@ export function eventMemory(event: BookedEvent, clock = ""): TurnMemory {
     notes: [],
     usedFactIds: [],
     basis: "rules",
-    followUps: [],
+    followUps: followUps.slice(0, 3),
     careOffer: false,
     hardStop: null,
     clock,

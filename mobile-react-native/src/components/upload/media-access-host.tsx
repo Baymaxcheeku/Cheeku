@@ -4,7 +4,7 @@ import { Text, View } from "react-native";
 import { Icon3D } from "@/components/ui/icon3d";
 import { PillButton } from "@/components/ui/screen";
 import { Sheet } from "@/components/ui/sheet";
-import { allowMediaAccess, declineMediaAccess, useMediaAccess } from "@/lib/upload/media-access";
+import { allowMediaAccess, declineMediaAccess, mediaSheetGone, useMediaAccess } from "@/lib/upload/media-access";
 import { brand, ink, surface } from "@/theme/tokens";
 import { font } from "@/theme/type";
 
@@ -28,7 +28,7 @@ export function MediaAccessHost() {
   const busy = useMediaAccess((s) => s.busy);
   const copy = COPY[kind ?? "photos"];
   return (
-    <Sheet open={kind !== null} onClose={declineMediaAccess} dismissible={!busy}>
+    <Sheet open={kind !== null} onClose={declineMediaAccess} dismissible={!busy} onGone={mediaSheetGone}>
       <View style={{ alignItems: "center", paddingTop: 6 }}>
         <View style={{ width: 88, height: 88, borderRadius: 28, backgroundColor: surface.tint, alignItems: "center", justifyContent: "center" }}>
           <Icon3D name={kind === "camera" ? "monitor" : "folder"} size={58} />

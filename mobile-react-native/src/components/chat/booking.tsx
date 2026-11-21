@@ -299,7 +299,8 @@ function SoonCard({ booking }: { booking: Booking }) {
 
 /** A booking made somewhere in the app, filed in this person's thread. */
 export function BookedCard({ event, onOpen }: { event: BookedEvent; onOpen?: (route: string) => void }) {
-  const Icon = event.kind === "lab" ? FlaskConical : event.kind === "service" ? CalendarCheck2 : event.kind === "fitness" ? Dumbbell : event.kind === "medicine" ? Pill : Stethoscope;
+  const art: Icon3DName = event.kind === "lab" ? "test-tube" : event.kind === "service" ? "calendar-check" : event.kind === "fitness" ? "dumbbell" : event.kind === "medicine" ? "capsule" : event.kind === "record" ? "report" : event.kind === "meal" ? "food" : "doctor";
+  const verb = event.kind === "record" ? "Filed" : event.kind === "meal" ? "Logged" : "Booked";
   return (
     <Pressable
       accessibilityRole="button"
@@ -308,13 +309,12 @@ export function BookedCard({ event, onOpen }: { event: BookedEvent; onOpen?: (ro
       style={({ pressed }) => [glassShadow, { borderRadius: 24, backgroundColor: pressed ? brand[50] : "#fff", borderWidth: 1, borderColor: glass.rim, padding: 14, gap: 10 }]}
     >
       <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
-        <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: brand[600], alignItems: "center", justifyContent: "center" }}>
-          <Icon size={18} color="#fff" />
+        <View style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: surface.tint, alignItems: "center", justifyContent: "center" }}>
+          <Icon3D name={art} size={30} />
         </View>
         <View style={{ flex: 1, minWidth: 0 }}>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
-            <CalendarCheck2 size={12} color={ink[900]} />
-            <Text style={{ fontFamily: font.medium, fontSize: 12, color: ink[500] }}>Booked</Text>
+            <Text style={{ fontFamily: font.semibold, fontSize: 12, color: brand[600] }}>{verb}</Text>
           </View>
           <Text numberOfLines={2} style={{ fontFamily: font.semibold, fontSize: 15, color: ink[900], marginTop: 1 }}>{event.title}</Text>
           <Text numberOfLines={1} style={{ fontFamily: font.regular, fontSize: 13, color: ink[500], marginTop: 1 }}>{event.when} · {event.where}</Text>

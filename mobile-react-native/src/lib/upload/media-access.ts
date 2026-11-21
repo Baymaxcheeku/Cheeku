@@ -87,12 +87,28 @@ async function request(kind: MediaKind): Promise<boolean> {
  * the picker never answers: the chat froze right after "Allow" (owner,
  * 20 Nov). So the caller hears back only once the sheet is truly gone.
  */
-const SHEET_GONE_MS = Platform.OS === "ios" ? 480 : 260;
+let waiting: { ok: boolean; resolve: (ok: boolean) => void; timer: ReturnType<typeof setTimeout> } | null = null;
+
+function release() {
+  if (!waiting) return;
+  const w = waiting;
+  waiting = null;
+  clearTimeout(w.timer);
+  // A breath after the Modal is gone, so the picker presents cleanly.
+  setTimeout(() => w.resolve(w.ok), Platform.OS === "ios" ? 120 : 0);
+}
+
+/** The explainer sheet's Modal is gone (MediaAccessHost's onGone). */
+export function mediaSheetGone() {
+  release();
+}
 
 function finish(ok: boolean) {
   const { resolve } = useMediaAccess.getState();
   useMediaAccess.setState({ kind: null, resolve: null, busy: false });
-  if (resolve) setTimeout(() => resolve(ok), SHEET_GONE_MS);
+  if (!resolve) return;
+  // Wait for the sheet to report it is gone; never longer than 1.2 s.
+  waiting = { ok, resolve, timer: setTimeout(release, 1200) };
 }
 
 /** "Allow": the system dialog now, after the person chose to see it. */

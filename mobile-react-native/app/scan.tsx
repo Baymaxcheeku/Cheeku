@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import * as DocumentPicker from "expo-document-picker";
 import * as ImagePicker from "expo-image-picker";
@@ -49,8 +49,12 @@ import { useFamily } from "@/lib/profiles/family";
 import { feel } from "@/lib/feel";
 import { LinesSkeleton, ListSkeleton, ScreenSkeleton } from "@/components/ui/skeleton";
 import { ensureMediaAccess } from "@/lib/upload/media-access";
+import { recordBooking, threadKey } from "@/lib/memory/store";
+import { addDailyLog } from "@/lib/home/logs";
+import { MEALS } from "@/lib/home/catalog";
+import { mealSlotNow, plateTagsFrom } from "@/lib/records/reader";
 
-type Phase = "pick" | "working" | "confirm" | "error";
+type Phase = "pick" | "working" | "confirm" | "error" | "notRecord";
 
 /*
  * The five steps the frame shows. They are labels over one real request, and
@@ -138,6 +142,10 @@ export default function Scan() {
   const [prepared, setPrepared] = useState<Prepared | null>(null);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  // The picked photo, for logging it as a meal when it turns out to be one.
+  const [pickedUri, setPickedUri] = useState<string | null>(null);
+  const [mealBusy, setMealBusy] = useState(false);
+  const qc = useQueryClient();
 
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -173,9 +181,18 @@ export default function Scan() {
   useEffect(() => {
     if (autoOpened.current || !source || !profileId || phase !== "pick") return;
     autoOpened.current = true;
-    if (source === "photo") void takePhoto();
-    else if (source === "library") void pickFromLibrary();
-    else if (source === "file") void pickFile();
+    /*
+     * Wait for the screen to finish sliding in. iOS won't present the
+     * permission sheet or the camera over a screen still in its transition,
+     * and then nothing answers: the upload froze right after "Allow"
+     * (owner, 21 Nov).
+     */
+    const t = setTimeout(() => {
+      if (source === "photo") void takePhoto();
+      else if (source === "library") void pickFromLibrary();
+      else if (source === "file") void pickFile();
+    }, 450);
+    return () => clearTimeout(t);
     // takePhoto/pickFromLibrary/pickFile are stable for this screen's lifetime.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [source, profileId, phase]);
@@ -191,6 +208,7 @@ export default function Scan() {
   }, [phase, settleStep]);
 
   async function handle(picked: PickedFile) {
+    setPickedUri(picked.mimeType.startsWith("image/") ? picked.uri : null);
     setPhase("working");
     setStepIndex(0);
     setSettleStep(1);
@@ -218,9 +236,11 @@ export default function Scan() {
     setSettleStep(STEPS.length);
     feel.tap();
     // Let the last steps land before the check screen, so it does not flicker.
+    // A meal, or a picture that isn't health paperwork, isn't filed as a record by default.
+    const kind = result.prepared.read?.kind;
     setTimeout(() => {
       setPrepared(result.prepared);
-      setPhase("confirm");
+      setPhase(kind === "meal" || kind === "not_health" ? "notRecord" : "confirm");
     }, 700);
   }
 
@@ -238,7 +258,74 @@ export default function Scan() {
     }
     feel.success();
     clearShared();
+    // Cheeku says it in the chat too, with the next questions ready to tap.
+    void tellChat(prepared, confirmed, result.documentId);
     router.replace(`/records/${result.documentId}`);
+  }
+
+  async function tellChat(p: Prepared, e: typeof p.extraction, documentId: string) {
+    const who = (context.data?.allowed ?? []).find((m) => m.id === p.profileId);
+    const first = who?.name.split(" ")[0] ?? "them";
+    const flagged = e.values.filter((v) => v.flag === "high" || v.flag === "low");
+    const meds = Array.isArray((e.details as { medicines?: unknown[] }).medicines) ? ((e.details as { medicines: { name: string }[] }).medicines) : [];
+    const date = e.eventDate ? new Date(`${e.eventDate}T00:00:00`).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "No date on it";
+    const lines: string[] = [`Filed ${e.title} in ${who?.isPrimary === false ? `${first}'s` : "your"} health file.`];
+    if (e.values.length) {
+      lines.push(
+        flagged.length
+          ? `I read ${e.values.length} values. ${flagged.length} ${flagged.length === 1 ? "is" : "are"} outside the range the lab printed: ${flagged.slice(0, 3).map((v) => v.label).join(", ")}${flagged.length > 3 ? " and more" : ""}.`
+          : `I read ${e.values.length} values, all within the range the lab printed.`,
+      );
+    }
+    if (meds.length) lines.push(`${meds.length} ${meds.length === 1 ? "medicine" : "medicines"} on it: ${meds.slice(0, 3).map((m) => m.name).join(", ")}${meds.length > 3 ? " and more" : ""}.`);
+    const followUps =
+      e.docType === "lab_report"
+        ? ["Explain this report simply", flagged.length ? `What should I do about ${flagged[0]!.label}?` : "What changed since last time?"]
+        : e.docType === "prescription"
+          ? ["How do I take these medicines?", "Do any of these clash with what I take?"]
+          : ["What does this mean for me?"];
+    await recordBooking(
+      p.profileId,
+      { kind: "record", title: e.title, when: date, where: e.facility ?? DOC_TYPE_LABEL[e.docType], route: `/records/${documentId}` },
+      lines.join(" "),
+      followUps,
+    );
+    void qc.invalidateQueries({ queryKey: threadKey(p.profileId) });
+  }
+
+  /** A meal photo: log it on Today's plan for the meal of the day, and tell the chat. */
+  async function logAsMeal() {
+    if (!prepared) return;
+    const read = prepared.read;
+    setMealBusy(true);
+    const slot = mealSlotNow();
+    const task = MEALS.find((m) => m.key === `meal:${slot}`) ?? MEALS[0]!;
+    const tags = plateTagsFrom(read?.foods ?? []);
+    const r = await addDailyLog(qc, { profileId: prepared.profileId, task, tags, photoUri: pickedUri, complete: true });
+    setMealBusy(false);
+    if (!r.ok) {
+      setSaveError(r.message);
+      return;
+    }
+    await discardUpload(prepared);
+    feel.success();
+    void recordBooking(
+      prepared.profileId,
+      { kind: "meal", title: read?.title ?? task.title, when: "Today", where: task.title, route: "/today" },
+      `Logged ${task.title.toLowerCase()} on today's plan${read?.foods.length ? `: ${read.foods.slice(0, 5).join(", ")}` : ""}.`,
+      ["How was this meal for my sugar?", "What could I add for more protein?"],
+    ).then(() => qc.invalidateQueries({ queryKey: threadKey(prepared.profileId) }));
+    clearShared();
+    router.replace("/today");
+  }
+
+  /** Not a record: ask Cheeku about it instead, with what the reader saw. */
+  async function askInstead() {
+    const read = prepared?.read;
+    if (prepared) await discardUpload(prepared);
+    clearShared();
+    const q = read?.kind === "meal" ? `I just ate this: ${read.foods.join(", ") || read.title}. Is it a good choice for me?` : `I uploaded a photo: ${read?.summary || "it isn't a health record"}. Can you help with it?`;
+    router.replace({ pathname: "/ask", params: { q, t: String(Date.now()) } });
   }
 
   async function discard() {
@@ -323,6 +410,43 @@ export default function Scan() {
         <ListSkeleton rows={3} />
         <LinesSkeleton lines={3} style={{ marginTop: 18 }} />
       </ScreenSkeleton>
+    );
+  }
+
+  if (phase === "notRecord" && prepared) {
+    const read = prepared.read;
+    const meal = read?.kind === "meal";
+    return (
+      <View className="flex-1 bg-canvas px-5" style={{ paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24 }}>
+        <SkyWash top={-40} />
+        <View style={{ flex: 1, justifyContent: "center" }}>
+          <View style={{ alignSelf: "center", width: 120, height: 120, borderRadius: 38, backgroundColor: meal ? "#ffebe5" : surface.tint, alignItems: "center", justifyContent: "center" }}>
+            <Icon3D name={meal ? "food" : "chat"} size={88} />
+          </View>
+          <Text style={{ fontFamily: font.semibold, fontSize: 28, lineHeight: 33, letterSpacing: -0.8, color: ink[900], textAlign: "center", marginTop: 18 }}>
+            {meal ? "Looks like a meal" : "This isn't a health record"}
+          </Text>
+          <Text style={{ fontFamily: font.regular, fontSize: 16, lineHeight: 22, color: ink[500], textAlign: "center", marginTop: 8, paddingHorizontal: 12 }}>
+            {meal
+              ? read?.foods.length ? `I can see ${read.foods.slice(0, 5).join(", ")}. Log it on today's plan?` : "Log it on today's plan instead of the health file?"
+              : read?.summary || "Records are reports, prescriptions, bills and scans. You can still ask me about it."}
+          </Text>
+          {saveError ? <Text style={{ fontFamily: font.medium, fontSize: 14, color: semantic.dangerText, textAlign: "center", marginTop: 12 }}>{saveError}</Text> : null}
+        </View>
+        <View style={{ gap: 10 }}>
+          {meal ? (
+            <PillButton tone="brand" loading={mealBusy} onPress={() => void logAsMeal()}>
+              {`Log as ${MEALS.find((m) => m.key === `meal:${mealSlotNow()}`)?.title.toLowerCase() ?? "a meal"}`}
+            </PillButton>
+          ) : null}
+          <PillButton tone={meal ? "light" : "brand"} onPress={() => void askInstead()}>
+            Ask Cheeku about it
+          </PillButton>
+          <Tap accessibilityRole="button" onPress={() => setPhase("confirm")} hitSlop={8} style={{ alignSelf: "center", paddingVertical: 8 }}>
+            <Text style={{ fontFamily: font.semibold, fontSize: 14, color: ink[500] }}>File it as a record anyway</Text>
+          </Tap>
+        </View>
+      </View>
     );
   }
 

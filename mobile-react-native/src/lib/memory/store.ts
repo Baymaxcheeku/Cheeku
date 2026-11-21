@@ -275,7 +275,7 @@ export async function sendTurn(args: {
  * charged against the free allowance (0022 counts only the person's own).
  * Best effort: the booking itself already succeeded.
  */
-export async function recordBooking(profileId: string, event: BookedEvent, text: string): Promise<boolean> {
+export async function recordBooking(profileId: string, event: BookedEvent, text: string, followUps: string[] = []): Promise<boolean> {
   try {
     const {
       data: { session },
@@ -292,7 +292,7 @@ export async function recordBooking(profileId: string, event: BookedEvent, text:
       conversationId = data.id as string;
     }
     const row = { conversation_id: conversationId, user_id: userId, role: "assistant", content: text, citations: [], safety_status: "clear" };
-    let { error } = await supabase.from("messages").insert({ ...row, tier: null, memory: eventMemory(event), model_id: BOOKING_REPLY });
+    let { error } = await supabase.from("messages").insert({ ...row, tier: null, memory: eventMemory(event, "", followUps), model_id: BOOKING_REPLY });
     if (error && missing(error.message)) ({ error } = await supabase.from("messages").insert(row));
     return !error;
   } catch {

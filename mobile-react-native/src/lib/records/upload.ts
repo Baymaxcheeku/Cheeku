@@ -2,11 +2,12 @@ import { randomUUID } from "expo-crypto";
 import { File } from "expo-file-system";
 
 import { CONSENT_PAUSED, reportIfConsentRefused } from "@/lib/legal/consent";
-import { extractFromFile, routeFor, type Extraction } from "@/lib/ai/mock/extract";
+import { routeFor, type Extraction } from "@/lib/ai/mock/extract";
 import { selectableProfiles } from "@/lib/profiles/context";
 import { supabase } from "@/lib/supabase/client";
 
 import { entityRows } from "./reading";
+import { blankExtraction, docTypeOf, readUpload, toExtraction, type ReadResult } from "./reader";
 import type { DocType } from "./types";
 
 /*
@@ -68,6 +69,12 @@ export type Prepared = {
   mimeType: string;
   /** What the reader made of it; the confirm step may correct it before filing. */
   extraction: Extraction;
+  /**
+   * What the file is, from the reader. "meal" and "not_health" are not filed
+   * as records: the screen offers to log the meal or ask Cheeku instead.
+   * Null when the reader couldn't be reached.
+   */
+  read: ReadResult | null;
 };
 
 export type PrepareResult = { ok: true; prepared: Prepared } | { ok: false; message: string };
@@ -142,8 +149,11 @@ export async function prepareUpload(
     return { ok: false, message: "The upload did not complete. Please try again." };
   }
 
-  const extraction = extractFromFile(picked.name, size, docType);
-  return { ok: true, prepared: { path, profileId, userId: user.id, mimeType: picked.mimeType, extraction } };
+  // The real reader (lib/records/reader.ts). Never sample data: unread, the record is blank for review.
+  const read = await readUpload(path, picked.mimeType, docType);
+  const type = docType ?? (read ? docTypeOf(read.kind) : null) ?? "other";
+  const extraction = read ? toExtraction(read, type) : blankExtraction(type);
+  return { ok: true, prepared: { path, profileId, userId: user.id, mimeType: picked.mimeType, extraction, read } };
 }
 
 /** Removes an uploaded file that was never filed. Best effort. */

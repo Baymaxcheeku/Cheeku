@@ -54,7 +54,7 @@ export function readImage(v: unknown): GeminiImage | null {
 }
 
 /** The generateContent body for one turn. Pure, so it can be tested. */
-export function geminiBody(system: string, user: string, schema: unknown, thinking = "low", image: GeminiImage | null = null): Record<string, unknown> {
+export function geminiBody(system: string, user: string, schema: unknown, thinking = "low", image: GeminiImage | null = null, maxTokens = 2048): Record<string, unknown> {
   return {
     systemInstruction: { parts: [{ text: system }] },
     contents: [{ role: "user", parts: [{ text: user }, ...(image ? [{ inlineData: { mimeType: image.mimeType, data: image.data } }] : [])] }],
@@ -62,7 +62,7 @@ export function geminiBody(system: string, user: string, schema: unknown, thinki
       responseMimeType: "application/json",
       responseJsonSchema: schema,
       temperature: 0.4,
-      maxOutputTokens: 2048,
+      maxOutputTokens: maxTokens,
       thinkingConfig: { thinkingLevel: thinking },
     },
   };
@@ -105,9 +105,10 @@ export async function askGemini(
   schema: unknown,
   budgetMs = 24_000,
   image: GeminiImage | null = null,
+  maxTokens = 2048,
 ): Promise<GeminiResult> {
   const models = [...new Set(cfg.models.map((m) => m.trim()).filter(Boolean))];
-  const body = JSON.stringify(geminiBody(system, user, schema, cfg.thinking || "low", image));
+  const body = JSON.stringify(geminiBody(system, user, schema, cfg.thinking || "low", image, maxTokens));
   const deadline = Date.now() + budgetMs;
   let last: GeminiResult = { ok: false, error: "model_unreachable" };
 

@@ -49,6 +49,7 @@
 
 import { askGemini, MAX_IMAGE_CHARS, readImage } from "./gemini.ts";
 import { REPLY_SCHEMA, renderRequest, SYSTEM_PROMPT } from "./prompt.ts";
+import { READ_MAX_BYTES, READ_MIME, READ_PROMPT, READ_SCHEMA, safePath, shapeRead, toBase64 } from "./read.ts";
 
 const TIERS = ["reassure", "monitor", "contact_today", "go_now"];
 
@@ -111,6 +112,10 @@ Deno.serve(async (req) => {
   } catch {
     return json({ error: "bad_request" }, 400);
   }
+  // Reading an uploaded record (read.ts). Not metered as a chat: filing a
+  // report must never spend someone's questions for the day.
+  if (body.op === "read") return await readDocument(req, body, geminiKey);
+
   if (typeof body.question !== "string" || !body.memory || typeof body.memory !== "object") return json({ error: "bad_request" }, 400);
   if ((body.question as string).length > 2000) return json({ error: "too_long" }, 413);
   // A photo that is not one we forward is refused before the meter, so it costs no chat.
@@ -162,3 +167,50 @@ Deno.serve(async (req) => {
     clearTimeout(timer);
   }
 });
+
+/** The "+" upload's reader: fetch the caller's own file back, have Gemini say what it is and read it. */
+async function readDocument(req: Request, body: Record<string, unknown>, geminiKey: string | undefined): Promise<Response> {
+  if (!geminiKey) return json({ error: "reader_not_configured" }, 503);
+  const authorization = req.headers.get("authorization");
+  if (!authorization) return json({ error: "signed_out" }, 401);
+  const path = safePath(body.path);
+  if (!path) return json({ error: "bad_path" }, 400);
+  const base = Deno.env.get("SUPABASE_URL");
+  const anon = Deno.env.get("SUPABASE_ANON_KEY");
+  if (!base || !anon) return json({ error: "reader_not_configured" }, 503);
+
+  // As the caller: storage's own rules decide whether they may read this file.
+  let file: Response;
+  try {
+    file = await fetch(`${base}/storage/v1/object/authenticated/documents/${path.split("/").map(encodeURIComponent).join("/")}`, {
+      headers: { apikey: anon, authorization },
+      signal: AbortSignal.timeout(15_000),
+    });
+  } catch {
+    return json({ error: "file_unreachable" }, 504);
+  }
+  if (!file.ok) return json({ error: "file_not_found" }, 404);
+  const mime = (file.headers.get("content-type") ?? "").split(";")[0].trim().toLowerCase();
+  const hinted = typeof body.mimeType === "string" ? body.mimeType.toLowerCase() : "";
+  const mimeType = READ_MIME.has(mime) ? mime : READ_MIME.has(hinted) ? hinted : "";
+  if (!mimeType) return json({ error: "unsupported_file" }, 415);
+  const bytes = new Uint8Array(await file.arrayBuffer());
+  if (!bytes.length || bytes.length > READ_MAX_BYTES) return json({ error: "file_too_large" }, 413);
+
+  const hint = typeof body.hint === "string" && /^[a-z_]{2,30}$/.test(body.hint) ? body.hint : null;
+  const got = await askGemini(
+    {
+      key: geminiKey,
+      models: [Deno.env.get("GEMINI_READ_MODEL") || "gemini-3.5-flash", Deno.env.get("GEMINI_FALLBACK_MODEL") || "gemini-3.5-flash-lite"],
+      thinking: "low",
+    },
+    READ_PROMPT,
+    hint ? `The person said this is a ${hint.replace(/_/g, " ")}. Check that against the file; if it is not, say what it really is.` : "Read this file.",
+    READ_SCHEMA,
+    40_000,
+    { mimeType, data: toBase64(bytes) },
+    8192,
+  );
+  if (!got.ok) return json({ error: got.error }, got.error === "model_unreachable" ? 504 : 502);
+  return json({ ...shapeRead(got.reply), modelId: `gemini:${got.model}` });
+}

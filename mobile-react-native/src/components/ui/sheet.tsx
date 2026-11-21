@@ -75,6 +75,7 @@ export function Sheet({
   children,
   label = "Close",
   dismissible = true,
+  onGone,
 }: {
   open: boolean;
   onClose: () => void;
@@ -83,10 +84,14 @@ export function Sheet({
   label?: string;
   /** False while something is in flight that must not be abandoned. */
   dismissible?: boolean;
+  /** Called once the sheet's Modal is really gone (iOS: after it dismissed). */
+  onGone?: () => void;
 }) {
   const still = useReducedMotion();
   const { height: screen } = useWindowDimensions();
   const [mounted, setMounted] = useState(open);
+  // The Modal's own visibility: dropped first, so iOS dismisses it and says so (onDismiss), then the sheet unmounts.
+  const [visible, setVisible] = useState(open);
   const [height, setHeight] = useState(0);
 
   const y = useSharedValue(screen);
@@ -94,7 +99,10 @@ export function Sheet({
   const start = useSharedValue(0);
 
   useEffect(() => {
-    if (open) setMounted(true);
+    if (open) {
+      setMounted(true);
+      setVisible(true);
+    }
   }, [open]);
 
   useEffect(() => {
@@ -139,8 +147,24 @@ export function Sheet({
     shown.set(withTiming(0, { duration: 180, easing: EASE_OUT }));
     if (still) y.set(withTiming(0, { duration: 180 }));
     else y.set(withTiming(height || screen, { duration: 220, easing: EASE_SHEET }));
-    const t = setTimeout(() => setMounted(false), still ? 200 : 240);
-    return () => clearTimeout(t);
+    let gone: ReturnType<typeof setTimeout> | undefined;
+    const t = setTimeout(() => {
+      setVisible(false);
+      if (Platform.OS === "ios") {
+        // onDismiss normally unmounts; this is the backstop if it never comes.
+        gone = setTimeout(() => {
+          setMounted(false);
+          onGone?.();
+        }, 600);
+      } else {
+        setMounted(false);
+        onGone?.();
+      }
+    }, still ? 200 : 240);
+    return () => {
+      clearTimeout(t);
+      if (gone) clearTimeout(gone);
+    };
   }, [open, mounted, height, still, screen, shown, y]);
 
   const pan = usePanGesture({
@@ -185,7 +209,18 @@ export function Sheet({
   if (!mounted) return null;
 
   return (
-    <Modal visible transparent animationType="none" statusBarTranslucent onRequestClose={dismissible ? onClose : () => undefined}>
+    <Modal
+      visible={visible}
+      transparent
+      animationType="none"
+      statusBarTranslucent
+      onRequestClose={dismissible ? onClose : () => undefined}
+      onDismiss={() => {
+        if (open) return;
+        setMounted(false);
+        onGone?.();
+      }}
+    >
       <Animated.View style={[StyleSheet.absoluteFill, { backgroundColor: "rgba(15,16,48,0.4)" }, backdrop]}>
         <Pressable accessibilityLabel={label} accessibilityRole="button" onPress={dismissible ? onClose : undefined} style={{ flex: 1 }} />
       </Animated.View>
